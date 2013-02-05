@@ -1,14 +1,14 @@
 package VersionControl;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Scanner;
+
 /*
  MrBarsack
  TerasologyLauncher
  Check the number of the latest build.
  */
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.Scanner;
 
 public class VersionChecker {
 
