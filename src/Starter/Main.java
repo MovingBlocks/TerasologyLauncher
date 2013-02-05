@@ -6,8 +6,8 @@ package Starter;
  */
 
 import GUI.Launch;
-import VersionsKontrolle.Changelog;
-import VersionsKontrolle.Version;
+import VersionControl.Changelog;
+import VersionControl.Version;
 
 import java.io.IOException;
 

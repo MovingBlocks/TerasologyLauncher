@@ -1,4 +1,4 @@
-package VersionsKontrolle;
+package VersionControl;
 
 import java.io.*;
 

@@ -11,8 +11,8 @@ import Download.Zip;
 import Starter.Main;
 import Starter.StarterCreater;
 import Starter.Terasology;
-import VersionsKontrolle.Version;
-import VersionsKontrolle.VersionChecker;
+import VersionControl.Version;
+import VersionControl.VersionChecker;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

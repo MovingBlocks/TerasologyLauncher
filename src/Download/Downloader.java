@@ -7,8 +7,8 @@ package Download;
  */
 
 import Starter.Main;
-import VersionsKontrolle.Version;
-import VersionsKontrolle.VersionChecker;
+import VersionControl.Version;
+import VersionControl.VersionChecker;
 
 import java.io.*;
 import java.net.URL;
