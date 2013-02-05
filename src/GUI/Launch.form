@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="GUI.Launch">
+  <grid id="27dc6" binding="Panel" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="5" left="5" bottom="5" right="5"/>
+    <constraints>
+      <xy x="20" y="20" width="514" height="400"/>
+    </constraints>
+    <properties>
+      <background color="-16724941"/>
+      <foreground color="-13421824"/>
+    </properties>
+    <clientProperties>
+      <html.disable class="java.lang.Boolean" value="false"/>
+    </clientProperties>
+    <border type="none">
+      <font size="12"/>
+      <title-color color="-16777216"/>
+    </border>
+    <children>
+      <component id="ea6ee" class="javax.swing.JButton" binding="Starter">
+        <constraints>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <background color="-13369498"/>
+          <text value="Start"/>
+        </properties>
+      </component>
+      <vspacer id="4d13f">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+      <component id="b22be" class="javax.swing.JProgressBar" binding="progressBar1" default-binding="true">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <background color="-3342388"/>
+        </properties>
+      </component>
+      <component id="21b29" class="javax.swing.JList" binding="list1" default-binding="true">
+        <constraints>
+          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="2" hsize-policy="2" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="40"/>
+          </grid>
+        </constraints>
+        <properties>
+          <background color="-3342388"/>
+        </properties>
+      </component>
+      <scrollpane id="21086">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="2a5a4" class="javax.swing.JTextArea" binding="changelogTextArea" default-binding="true">
+            <constraints/>
+            <properties>
+              <background color="-3342388"/>
+              <editable value="false"/>
+              <enabled value="true"/>
+              <font size="18"/>
+              <lineWrap value="true"/>
+              <rows value="0"/>
+              <text value="Changelog:"/>
+              <wrapStyleWord value="true"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
+    </children>
+  </grid>
+</form>
