@@ -22,7 +22,6 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 public class Launch {
    private JPanel Panel;
@@ -50,7 +49,7 @@ public class Launch {
                         public void run() {
 
                             try {
-                               if(Version.checkVersionFromLocal() != VersionChecker.checkVersionFromSite(new URL("http://updater.movingblocks.net/unstable.ver")))
+                               if(Version.checkVersionFromLocal() != VersionChecker.checkVersionNightly())
                                {
                                 if(Version.checkVersionFromLocal() != 0)
                                 {

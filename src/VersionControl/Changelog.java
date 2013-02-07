@@ -44,11 +44,6 @@ public class Changelog {
                 str.append("-").append(nodeList.item(a).getLastChild().getTextContent()).append(System.lineSeparator());
              }
 
-             try {
-                 Main.launcher.getChangelogTextArea().setText("Changelog Build " + VersionChecker.checkVersionFromSite(new URL("http://updater.movingblocks.net/unstable.ver")) + ":" + System.lineSeparator() + str.toString());
-             } catch (IOException e) {
-                 e.printStackTrace();
-             }
+              Main.launcher.getChangelogTextArea().setText("Changelog Build " + VersionChecker.checkVersionNightly() + ":" + System.lineSeparator() + str.toString());
          }
-
 }

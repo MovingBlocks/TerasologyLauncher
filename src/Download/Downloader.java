@@ -17,7 +17,7 @@ import java.net.URL;
 public class Downloader {
     public static void downloadNightlyBuild() throws IOException {
         byte[] buffer = new byte[2048];
-        int version = VersionChecker.checkVersionFromSite(new URL("http://updater.movingblocks.net/unstable.ver"));
+        int version = VersionChecker.checkVersionNightly();
         float sizeOfUpdate = getSizeOfUpdate(version);
 
         URL url = new URL("http://jenkins.movingblocks.net/job/Terasology/"+version+"/artifact/build/distributions/Terasology.zip");
