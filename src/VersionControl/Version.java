@@ -10,8 +10,6 @@ public class Version {
         File file = new File("Settings.txt");
         FileWriter writer = new FileWriter(file,false);
 
-        FileReader fr = new FileReader(file);
-
         writer.write(0);
         writer.flush();
         writer.close();
