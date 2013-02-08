@@ -16,7 +16,7 @@ public class Main {
     public static void main(String[] args)
     {
         launcher = new Launch();
-        Changelog.setLatestChangelog();
+        Changelog.setChangelog();
         launcher.createLauncher();
         try {
             Version.firstTime();

@@ -17,13 +17,13 @@ public class Terasology {
             {
                 Desktop.getDesktop().open(new File("download/startscript.bat"));
             }
-            else if (os.contains("nux"))
-            {
-                Desktop.getDesktop().open(new File("download/run_linux.sh"));
-            }
             else if (os.contains("mac"))
             {
                 Desktop.getDesktop().open(new File("download/run_macosx.command"));
+            }
+            else
+            {
+                Desktop.getDesktop().open(new File("download/run_linux.sh"));
             }
 
 
