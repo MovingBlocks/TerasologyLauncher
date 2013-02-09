@@ -1,7 +1,5 @@
 package Starter;
 
-import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
@@ -15,15 +13,15 @@ public class Terasology {
 
             if(os.contains("win"))
             {
-                Desktop.getDesktop().open(new File("download/startscript.bat"));
+                new ProcessBuilder("download/startscript.bat").start();
             }
             else if (os.contains("mac"))
             {
-                Desktop.getDesktop().open(new File("download/run_macosx.command"));
+                new ProcessBuilder("download/run_macosx.command");
             }
             else
             {
-                Desktop.getDesktop().open(new File("download/run_linux.sh"));
+                new ProcessBuilder("download/run_linux.sh");
             }
 
 

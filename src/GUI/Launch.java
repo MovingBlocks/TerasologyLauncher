@@ -103,7 +103,7 @@ public class Launch {
                 er.printStackTrace();
             }
 
-            JFrame frame = new JFrame("Terasology Launcher 0.1");
+            JFrame frame = new JFrame("Terasology Launcher 0.3");
 
             frame.setContentPane(panel);
 

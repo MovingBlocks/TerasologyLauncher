@@ -82,6 +82,8 @@ public class newUpdate extends JDialog {
     }
 
     private void onCancel() {
+        StarterCreater.createStarterWindows();
+        Terasology.startTerasology();
         this.dispose();
     }
 

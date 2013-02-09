@@ -64,7 +64,7 @@ public class Changelog {
 
                     for(int a = Version.checkVersionFromLocal(); a < VersionChecker.checkVersionNightly(); a++)
                     {
-                     str.append(getChangelog(a));
+                     str.append(getChangelog(VersionChecker.checkVersionNightly() - (a - Version.checkVersionFromLocal())));
                     }
                     Main.launcher.getChangelogTextArea().setText(str.toString());
                 }
