@@ -40,10 +40,10 @@ public class Changelog {
 
              StringBuilder str = new StringBuilder();
 
-             str.append("Build: " + build + System.lineSeparator());
+             str.append("Build: ").append(build).append(System.lineSeparator());
              for(int a = 0; a < nodeList.getLength(); a++)
              {
-                str.append("-").append(nodeList.item(a).getLastChild().getTextContent()).append(System.lineSeparator());
+                str.append('-').append(nodeList.item(a).getLastChild().getTextContent()).append(System.lineSeparator());
              }
              str.append(System.lineSeparator());
               return str.toString();
@@ -58,9 +58,9 @@ public class Changelog {
                 }
                 else if(Version.checkVersionFromLocal() != 0)
                 {
-                    StringBuilder str = new StringBuilder();
+                    StringBuilder str = new StringBuilder("Changes since last update:");
 
-                    str.append("Changes since last update:" + System.lineSeparator());
+                    str.append(System.lineSeparator());
 
                     for(int a = Version.checkVersionFromLocal(); a < VersionChecker.checkVersionNightly(); a++)
                     {

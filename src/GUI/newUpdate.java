@@ -33,7 +33,7 @@ public class newUpdate extends JDialog {
 
         contentPane.setBorder(javax.swing.BorderFactory.createMatteBorder(10, 10, 10, 10, new ImageIcon(img)));
 
-        this.setName("New update!");
+        setName("New update!");
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -63,7 +63,7 @@ public class newUpdate extends JDialog {
     }
 
     private void onOK() {
-        this.dispose();
+        dispose();
             Thread download = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -84,7 +84,7 @@ public class newUpdate extends JDialog {
     private void onCancel() {
         StarterCreater.createStarterWindows();
         Terasology.startTerasology();
-        this.dispose();
+        dispose();
     }
 
     public static void openDialog() {

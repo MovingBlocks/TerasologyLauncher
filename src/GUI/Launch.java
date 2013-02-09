@@ -29,6 +29,7 @@ public class Launch {
    private JProgressBar progressBar1;
    private JTextArea changelogTextArea;
    private JList list1;
+    private JButton settingsButton;
 
     public JTextArea getChangelogTextArea() {
         return changelogTextArea;
