@@ -91,7 +91,7 @@ public class newUpdate extends JDialog {
         newUpdate dialog = new newUpdate();
         dialog.pack();
         dialog.setTitle("New update!");
-        dialog.setLocationRelativeTo(Main.launcher.getChangelogTextArea());
+        dialog.setLocationRelativeTo(Main.launcher.getPanel());
         dialog.setVisible(true);
     }
 }

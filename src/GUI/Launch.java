@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class Launch {
-   private JPanel Panel;
+    private JPanel Panel;
    private JButton Starter;
    private JProgressBar progressBar1;
    private JTextArea changelogTextArea;
@@ -34,6 +34,9 @@ public class Launch {
         return changelogTextArea;
     }
 
+    public JPanel getPanel() {
+        return Panel;
+    }
 
     public JProgressBar getProgressBar1 ()
     {
