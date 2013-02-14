@@ -1,35 +1,31 @@
-package Download;
- /*
- MrBarsack
- TerasologyLauncher
- Extract the build-zip.
- */
+package org.terasologyLauncher.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class Zip {
+/**
+ * @author MrBarsack
+ * @author Skaldarnar
+ */
+public class ZIPUnpacker {
 
-    public static void extractArchive(File archive, File destDir) throws Exception {
-        if (!destDir.exists()) {
-            destDir.mkdir();
-        }
+    public static void extractArchive(File archive) throws IOException {
+        extractArchive(archive, archive.getParentFile());
+    }
 
+    public static void extractArchive(File archive, File destDir) throws IOException {
+        if (archive==null) throw new IllegalArgumentException("No null allowed");
         ZipFile zipFile = new ZipFile(archive);
         Enumeration entries = zipFile.entries();
 
-        byte[] buffer = new byte[2048];
-        int len;
-        while (entries.hasMoreElements()) {
+        byte[] buffer = new byte[8192];
+        int length;
+
+        while (entries.hasMoreElements()){
             ZipEntry entry = (ZipEntry) entries.nextElement();
-
             String entryFileName = entry.getName();
-
             File dir = buildDirectoryHierarchyFor(entryFileName, destDir);
             if (!dir.exists()) {
                 dir.mkdirs();
@@ -42,8 +38,8 @@ public class Zip {
                 BufferedInputStream bis = new BufferedInputStream(zipFile
                         .getInputStream(entry));
 
-                while ((len = bis.read(buffer)) > 0) {
-                    bos.write(buffer, 0, len);
+                while ((length = bis.read(buffer)) > 0) {
+                    bos.write(buffer, 0, length);
                 }
 
                 bos.flush();

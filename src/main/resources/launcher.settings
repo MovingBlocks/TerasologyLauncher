@@ -1,0 +1,7 @@
+buildType               : 0
+
+stableBuildVersion      : Latest
+nightlyBuildVersion     : Latest
+
+maxMemory               : 0
+initialMemory           : -1
