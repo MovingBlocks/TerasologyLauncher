@@ -1,0 +1,15 @@
+/out
+
+.DS_Store
+/TerasologyLauncher.iml
+/TerasologyLauncher.ipr
+/TerasologyLauncher.iws
+/.idea
+
+*~
+
+# Ignore error logs
+*.log
+
+#Ignore linux directory files
+*.directory
