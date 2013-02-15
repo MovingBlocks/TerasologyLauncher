@@ -1,0 +1,17 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+
+ext {
+    mainClassName = 'org.terasologyLauncher.Main'
+    jarFileName = 'TerasologyLauncher.jar'
+}
+
+sourceCompatibility = 1.6
+
+jar {
+    archiveName = jarFileName
+    manifest {
+        attributes("Main-Class": mainClassName)
+    }
+}

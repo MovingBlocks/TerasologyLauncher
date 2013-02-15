@@ -8,8 +8,6 @@ import org.terasologyLauncher.util.TerasologyDirectories;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -86,13 +84,10 @@ public class TerasologyLauncher {
     public static String getLauncherBuild() {
         String build = "0";
         try {
-            URL version = TerasologyLauncher.class.getResource("/version");
-            FileReader reader = new FileReader(new File(version.toURI()));
-            BufferedReader br = new BufferedReader(reader);
+            InputStream version = TerasologyLauncher.class.getResourceAsStream("/version");
+            BufferedReader br = new BufferedReader(new InputStreamReader(version));
             build = br.readLine();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
