@@ -69,7 +69,7 @@ public class GameDownloader extends SwingWorker<Void, Void> {
         File file = null;
         try {
             url = new URL(urlBuilder.toString());
-            long dataSize = url.openConnection().getContentLengthLong() / 1024 / 1024;
+            long dataSize = url.openConnection().getContentLength() / 1024 / 1024;
 
             InputStream in = null;
             OutputStream out = null;
