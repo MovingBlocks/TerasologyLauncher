@@ -1,4 +1,4 @@
-package org.terasologyLauncher;
+package org.terasologylauncher;
 
 public enum BuildType {
     STABLE(0),

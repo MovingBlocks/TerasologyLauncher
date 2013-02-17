@@ -1,4 +1,4 @@
-package org.terasologyLauncher.updater;
+package org.terasologylauncher.updater;
 
 /**
  * Created with IntelliJ IDEA.

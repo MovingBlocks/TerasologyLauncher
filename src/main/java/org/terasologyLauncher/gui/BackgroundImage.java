@@ -1,4 +1,4 @@
-package org.terasologyLauncher.gui;
+package org.terasologylauncher.gui;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

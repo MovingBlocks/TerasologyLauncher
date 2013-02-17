@@ -24,7 +24,7 @@
  * License and see <http://www.spout.org/SpoutDevLicenseV1.txt> for the full license,
  * including the MIT license.
  */
-package org.terasologyLauncher.util;
+package org.terasologylauncher.util;
 
 public enum OperatingSystem {
     UNIX("Unix"),

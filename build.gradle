@@ -22,7 +22,7 @@ apply plugin: 'eclipse'
 //}
 
 ext {
-    mainClassName = 'org.terasologyLauncher.Main'
+    mainClassName = 'org.terasologylauncher.Main'
     jarFileName = 'TerasologyLauncher.jar'
 }
 

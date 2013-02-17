@@ -1,6 +1,6 @@
-package org.terasologyLauncher;
+package org.terasologylauncher;
 
-import org.terasologyLauncher.updater.GameData;
+import org.terasologylauncher.updater.GameData;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
