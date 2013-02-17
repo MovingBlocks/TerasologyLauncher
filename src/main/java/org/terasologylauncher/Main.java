@@ -1,9 +1,9 @@
 /**
  * This file is part of the official Terasology launcher.
  */
-package org.terasologyLauncher;
+package org.terasologylauncher;
 
-import org.terasologyLauncher.launcher.TerasologyLauncher;
+import org.terasologylauncher.launcher.TerasologyLauncher;
 
 /**
  * @author MrBarsack

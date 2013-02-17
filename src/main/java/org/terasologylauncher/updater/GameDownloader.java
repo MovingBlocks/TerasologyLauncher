@@ -1,9 +1,9 @@
-package org.terasologyLauncher.updater;
+package org.terasologylauncher.updater;
 
-import org.terasologyLauncher.Settings;
-import org.terasologyLauncher.gui.LauncherFrame;
-import org.terasologyLauncher.util.Utils;
-import org.terasologyLauncher.util.ZIPUnpacker;
+import org.terasologylauncher.Settings;
+import org.terasologylauncher.gui.LauncherFrame;
+import org.terasologylauncher.util.Utils;
+import org.terasologylauncher.util.ZIPUnpacker;
 
 import javax.swing.*;
 import java.beans.PropertyChangeEvent;

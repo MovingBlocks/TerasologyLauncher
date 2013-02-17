@@ -1,9 +1,9 @@
-package org.terasologyLauncher.launcher;
+package org.terasologylauncher.launcher;
 
-import org.terasologyLauncher.Settings;
-import org.terasologyLauncher.gui.LauncherFrame;
-import org.terasologyLauncher.updater.GameData;
-import org.terasologyLauncher.util.TerasologyDirectories;
+import org.terasologylauncher.Settings;
+import org.terasologylauncher.gui.LauncherFrame;
+import org.terasologylauncher.updater.GameData;
+import org.terasologylauncher.util.TerasologyDirectories;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,7 +1,7 @@
-package org.terasologyLauncher.updater;
+package org.terasologylauncher.updater;
 
-import org.terasologyLauncher.BuildType;
-import org.terasologyLauncher.util.Utils;
+import org.terasologylauncher.BuildType;
+import org.terasologylauncher.util.Utils;
 
 import java.io.*;
 import java.net.MalformedURLException;
