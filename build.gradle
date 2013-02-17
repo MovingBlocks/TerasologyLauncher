@@ -1,6 +1,25 @@
+/*
+ * This is a Gradle build file:
+ * - Gradle Homepage: http://gradle.org/
+ * - Gradle Documentation: http://gradle.org/documentation
+ * - View tasks for this project: $ gradlew tasks
+ */
+
 apply plugin: 'java'
+apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
+
+/*
+ * Update Gradle Wrapper:
+ * 1. Uncomment 'wrapper' task
+ * 2. Change 'gradleVersion'
+ * 3. Run "gradlew wrapper"
+ * 4. Comment 'wrapper' task
+ */
+//task wrapper(type: Wrapper) {
+//    gradleVersion = '1.4'
+//}
 
 ext {
     mainClassName = 'org.terasologyLauncher.Main'
