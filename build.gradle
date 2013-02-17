@@ -26,6 +26,14 @@ ext {
     jarFileName = 'TerasologyLauncher.jar'
 }
 
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.10'
+}
+
 sourceCompatibility = 1.6
 
 jar {
@@ -33,4 +41,12 @@ jar {
     manifest {
         attributes("Main-Class": mainClassName)
     }
+}
+
+test {
+    // ignoreFailures: Specifies whether the build should break when the verifications performed by this task fail.
+    ignoreFailures = true
+    // showStandardStreams: makes the standard streams (err and out) visible at console when running tests
+    testLogging.showStandardStreams = true
+    jvmArgs '-Xms512m', '-Xmx1024m', '-XX:MaxPermSize=128m'
 }
