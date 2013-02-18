@@ -1,4 +1,4 @@
-package org.terasologyLauncher.util;
+package org.terasologylauncher.util;
 
 /*
  * This file is part of Spoutcraft.

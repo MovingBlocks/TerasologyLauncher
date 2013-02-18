@@ -1,9 +1,9 @@
-package org.terasologyLauncher.starter;
+package org.terasologylauncher.starter;
 
-import org.terasologyLauncher.Settings;
-import org.terasologyLauncher.updater.GameData;
-import org.terasologyLauncher.util.OperatingSystem;
-import org.terasologyLauncher.util.Utils;
+import org.terasologylauncher.Settings;
+import org.terasologylauncher.updater.GameData;
+import org.terasologylauncher.util.OperatingSystem;
+import org.terasologylauncher.util.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;

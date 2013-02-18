@@ -1,8 +1,8 @@
-package org.terasologyLauncher;
+package org.terasologylauncher;
 
-import org.terasologyLauncher.launcher.TerasologyLauncher;
-import org.terasologyLauncher.util.Memory;
-import org.terasologyLauncher.util.TerasologyDirectories;
+import org.terasologylauncher.launcher.TerasologyLauncher;
+import org.terasologylauncher.util.Memory;
+import org.terasologylauncher.util.TerasologyDirectories;
 
 import java.io.*;
 import java.util.ArrayList;

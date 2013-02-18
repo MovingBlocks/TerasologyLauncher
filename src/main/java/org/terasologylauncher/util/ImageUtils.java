@@ -1,4 +1,4 @@
-package org.terasologyLauncher.util;
+package org.terasologylauncher.util;
 
 import java.awt.image.BufferedImage;
 

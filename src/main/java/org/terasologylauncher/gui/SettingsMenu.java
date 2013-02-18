@@ -1,9 +1,9 @@
-package org.terasologyLauncher.gui;
+package org.terasologylauncher.gui;
 
-import org.terasologyLauncher.BuildType;
-import org.terasologyLauncher.Settings;
-import org.terasologyLauncher.Versions;
-import org.terasologyLauncher.util.Memory;
+import org.terasologylauncher.BuildType;
+import org.terasologylauncher.Settings;
+import org.terasologylauncher.Versions;
+import org.terasologylauncher.util.Memory;
 
 import javax.swing.*;
 import java.awt.*;
