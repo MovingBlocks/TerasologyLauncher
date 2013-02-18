@@ -13,6 +13,7 @@ public class TerasologyDirectories {
 
     private static final File savedWorldsDir = new File(Utils.getWorkingDirectory(), "SAVED_WORLDS");
     private static final File screenshotsDir = new File(Utils.getWorkingDirectory(), "screens");
+    private static final File modsDir        = new File(Utils.getWorkingDirectory(), "mods");
 
     public static final File getBackupDir() {
         return backupDir;
@@ -28,5 +29,9 @@ public class TerasologyDirectories {
 
     public static final File getScreenshotsDir() {
         return screenshotsDir;
+    }
+
+    public static final File getModsDir() {
+        return modsDir;
     }
 }

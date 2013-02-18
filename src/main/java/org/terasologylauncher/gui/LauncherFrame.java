@@ -2,7 +2,7 @@ package org.terasologylauncher.gui;
 
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Settings;
-import org.terasologylauncher.starter.TerasologyStarter;
+import org.terasologylauncher.launcher.TerasologyStarter;
 import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.updater.GameDownloader;
 import org.terasologylauncher.util.TerasologyDirectories;
@@ -304,6 +304,9 @@ public class LauncherFrame extends JFrame implements ActionListener {
             return false;
         }
         if (f.getAbsolutePath().equals(TerasologyDirectories.getBackupDir().getAbsolutePath())) {
+            return false;
+        }
+        if (f.getAbsoluteFile().equals(TerasologyDirectories.getModsDir().getAbsolutePath())) {
             return false;
         }
         return true;

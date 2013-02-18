@@ -1,4 +1,4 @@
-package org.terasologylauncher.starter;
+package org.terasologylauncher.launcher;
 
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.updater.GameData;
@@ -32,9 +32,9 @@ public class TerasologyStarter {
     private static boolean startLinux(){
         List<String> parameters = new ArrayList<String>();
         parameters.add("java");
+        parameters.addAll(Settings.createParameters());
         parameters.add("-jar");
         parameters.add(GameData.getGameJar().getName());
-        parameters.addAll(Settings.createParameters());
         ProcessBuilder pb = new ProcessBuilder(parameters);
         pb.directory(Utils.getWorkingDirectory());
         try {
@@ -49,9 +49,9 @@ public class TerasologyStarter {
     private static boolean startMac(){
         List<String> parameters = new ArrayList<String>();
         parameters.add("java");
+        parameters.addAll(Settings.createParameters());
         parameters.add("-jar");
         parameters.add(GameData.getGameJar().getName());
-        parameters.addAll(Settings.createParameters());
         ProcessBuilder pb = new ProcessBuilder(parameters);
         pb.directory(Utils.getWorkingDirectory());
         try {
@@ -66,9 +66,9 @@ public class TerasologyStarter {
     private static boolean startWindows(){
         List<String> parameters = new ArrayList<String>();
         parameters.add("java");
+        parameters.addAll(Settings.createParameters());
         parameters.add("-jar");
         parameters.add(GameData.getGameJar().getName());
-        parameters.addAll(Settings.createParameters());
         ProcessBuilder pb = new ProcessBuilder(parameters);
         pb.directory(Utils.getWorkingDirectory());
         try {
