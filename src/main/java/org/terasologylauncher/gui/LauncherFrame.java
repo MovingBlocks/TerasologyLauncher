@@ -2,7 +2,7 @@ package org.terasologylauncher.gui;
 
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Settings;
-import org.terasologylauncher.starter.TerasologyStarter;
+import org.terasologylauncher.launcher.TerasologyStarter;
 import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.updater.GameDownloader;
 import org.terasologylauncher.util.TerasologyDirectories;
@@ -16,6 +16,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.net.URL;
+import java.util.logging.Logger;
 
 /**
  * @author Skaldarnar
@@ -294,16 +295,21 @@ public class LauncherFrame extends JFrame implements ActionListener {
      * @return true if the file can be deleted
      */
     private boolean canBeDeleted(File f) {
-        if (f.getAbsolutePath().equals(TerasologyDirectories.getLauncherDir().getAbsolutePath())) {
+        Logger.getAnonymousLogger().info(f.getName());
+        String fileName = f.getName();
+        if (fileName.equals(TerasologyDirectories.LAUNCHER_DIR_NAME)) {
             return false;
         }
-        if (f.getAbsolutePath().equals(TerasologyDirectories.getSavedWorldsDir().getAbsolutePath())) {
+        if (fileName.equals(TerasologyDirectories.SAVED_WORLDS_DIR_NAME)) {
             return false;
         }
-        if (f.getAbsolutePath().equals(TerasologyDirectories.getScreenshotsDir().getAbsolutePath())) {
+        if (fileName.equals(TerasologyDirectories.SCREENSHOTS_DIR_NAME)) {
             return false;
         }
-        if (f.getAbsolutePath().equals(TerasologyDirectories.getBackupDir().getAbsolutePath())) {
+        if (f.getAbsolutePath().equals(TerasologyDirectories.BACKUP_DIR_NAME)) {
+            return false;
+        }
+        if (f.getName().equals(TerasologyDirectories.MODS_DIR_NAME)) {
             return false;
         }
         return true;
