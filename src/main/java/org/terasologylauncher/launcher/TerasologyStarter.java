@@ -24,7 +24,7 @@ public class TerasologyStarter {
         } else if (os.isUnix()) {
             return startLinux();
         } else {
-            System.out.println("Unknown operationg system - cannot start game!");
+            System.out.println("Unknown operating system - cannot start game!");
         }
         return false;
     }

@@ -140,12 +140,10 @@ public class Settings {
     public static List<String> createParameters() {
         List<String> parameters = new ArrayList<String>();
         // add maximal RAM parameter
-        parameters.add("-Xmx");
-        parameters.add(Memory.getMemoryFromId(getMaximalMemory()).getMemoryMB()+"m");
+        parameters.add("-Xmx"+Memory.getMemoryFromId(getMaximalMemory()).getMemoryMB()+"m");
         // add initial RAM parameter
         if (getInitialMemory() >= 0){
-            parameters.add("-Xms");
-            parameters.add(Memory.getMemoryFromId(getInitialMemory()).getMemoryMB()+"m");
+            parameters.add("-Xms"+Memory.getMemoryFromId(getInitialMemory()).getMemoryMB()+"m");
         }
         return parameters;
     }
