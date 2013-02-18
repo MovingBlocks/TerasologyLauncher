@@ -9,6 +9,7 @@ apply plugin: 'java'
 apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
+apply plugin: 'application'
 
 /*
  * Update Gradle Wrapper:
@@ -21,11 +22,6 @@ apply plugin: 'eclipse'
 //    gradleVersion = '1.4'
 //}
 
-ext {
-    mainClassName = 'org.terasologylauncher.Main'
-    jarFileName = 'TerasologyLauncher.jar'
-}
-
 repositories {
     mavenCentral()
 }
@@ -36,12 +32,7 @@ dependencies {
 
 sourceCompatibility = 1.6
 
-jar {
-    archiveName = jarFileName
-    manifest {
-        attributes("Main-Class": mainClassName)
-    }
-}
+mainClassName = "org.terasologylauncher.Main"
 
 test {
     // ignoreFailures: Specifies whether the build should break when the verifications performed by this task fail.
