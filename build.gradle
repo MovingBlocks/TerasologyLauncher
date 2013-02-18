@@ -10,6 +10,7 @@ apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'application'
+apply plugin: 'checkstyle'
 
 /*
  * Update Gradle Wrapper:
@@ -40,4 +41,9 @@ test {
     // showStandardStreams: makes the standard streams (err and out) visible at console when running tests
     testLogging.showStandardStreams = true
     jvmArgs '-Xms512m', '-Xmx1024m', '-XX:MaxPermSize=128m'
+}
+
+checkstyle {
+    ignoreFailures = true
+    configProperties.samedir = checkstyle.configFile.parentFile
 }
