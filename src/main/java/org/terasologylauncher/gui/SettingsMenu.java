@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2013 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.terasologylauncher.gui;
 
 import org.terasologylauncher.BuildType;
@@ -140,43 +156,43 @@ public class SettingsMenu extends JDialog implements ActionListener {
         gameSettingsTab.setLayout(gameTabLayout);
 
         gameTabLayout.setHorizontalGroup(
-                gameTabLayout.createParallelGroup()
-                        .addGroup(gameTabLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(gameTabLayout.createParallelGroup()
-                                        .addComponent(buildTypeLabel)
-                                        .addComponent(buildVersionLabel)
-                                        .addComponent(maxMemLabel)
-                                        .addComponent(initialMemLabel))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(gameTabLayout.createParallelGroup()
-                                        .addComponent(buildType)
-                                        .addComponent(buildVersion)
-                                        .addComponent(maxMem)
-                                        .addComponent(initialMem))
-                                .addContainerGap())
+            gameTabLayout.createParallelGroup()
+                .addGroup(gameTabLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(gameTabLayout.createParallelGroup()
+                        .addComponent(buildTypeLabel)
+                        .addComponent(buildVersionLabel)
+                        .addComponent(maxMemLabel)
+                        .addComponent(initialMemLabel))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(gameTabLayout.createParallelGroup()
+                        .addComponent(buildType)
+                        .addComponent(buildVersion)
+                        .addComponent(maxMem)
+                        .addComponent(initialMem))
+                    .addContainerGap())
         );
 
         gameTabLayout.setVerticalGroup(
-                gameTabLayout.createParallelGroup()
-                        .addGroup(gameTabLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(buildTypeLabel)
-                                        .addComponent(buildType, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(buildVersionLabel)
-                                        .addComponent(buildVersion, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(maxMemLabel)
-                                        .addComponent(maxMem, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(initialMemLabel)
-                                        .addComponent(initialMem, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap())
+            gameTabLayout.createParallelGroup()
+                .addGroup(gameTabLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(buildTypeLabel)
+                        .addComponent(buildType, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(buildVersionLabel)
+                        .addComponent(buildVersion, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(maxMemLabel)
+                        .addComponent(maxMem, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(initialMemLabel)
+                        .addComponent(initialMem, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addContainerGap())
         );
 
         mainSettings.addTab("Game", gameSettingsTab);
@@ -212,41 +228,41 @@ public class SettingsMenu extends JDialog implements ActionListener {
         directoriesTab.setLayout(directoriesTabLayout);
 
         directoriesTabLayout.setHorizontalGroup(
-                directoriesTabLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(directoriesTabLayout.createParallelGroup()
-                                .addComponent(logDirLabel)
-                                .addComponent(modsDirLabel)
-                                .addComponent(savedWorldsDirLabel)
-                                .addComponent(screenShotDirLabel))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(directoriesTabLayout.createParallelGroup()
-                                .addComponent(openLogDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                                .addComponent(openModsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                                .addComponent(openSavedWorldsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                                .addComponent(openScreenShotsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE))
-                        .addContainerGap()
+            directoriesTabLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(directoriesTabLayout.createParallelGroup()
+                    .addComponent(logDirLabel)
+                    .addComponent(modsDirLabel)
+                    .addComponent(savedWorldsDirLabel)
+                    .addComponent(screenShotDirLabel))
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(directoriesTabLayout.createParallelGroup()
+                    .addComponent(openLogDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
+                    .addComponent(openModsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
+                    .addComponent(openSavedWorldsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
+                    .addComponent(openScreenShotsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE))
+                .addContainerGap()
         );
 
         directoriesTabLayout.setVerticalGroup(
-                directoriesTabLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(directoriesTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(logDirLabel)
-                                .addComponent(openLogDir))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(directoriesTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(modsDirLabel)
-                                .addComponent(openModsDir))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(directoriesTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(savedWorldsDirLabel)
-                                .addComponent(openSavedWorldsDir))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(directoriesTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(screenShotDirLabel)
-                                .addComponent(openScreenShotsDir))
-                        .addContainerGap()
+            directoriesTabLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(directoriesTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                    .addComponent(logDirLabel)
+                    .addComponent(openLogDir))
+                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(directoriesTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                    .addComponent(modsDirLabel)
+                    .addComponent(openModsDir))
+                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(directoriesTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                    .addComponent(savedWorldsDirLabel)
+                    .addComponent(openSavedWorldsDir))
+                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(directoriesTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                    .addComponent(screenShotDirLabel)
+                    .addComponent(openScreenShotsDir))
+                .addContainerGap()
         );
 
         mainSettings.addTab("Directories", directoriesTab);
@@ -267,27 +283,27 @@ public class SettingsMenu extends JDialog implements ActionListener {
         GroupLayout contentPaneLayout = new GroupLayout(contentPane);
         contentPane.setLayout(contentPaneLayout);
         contentPaneLayout.setHorizontalGroup(
-                contentPaneLayout.createParallelGroup()
-                        .addComponent(mainSettings, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
-                        .addGroup(contentPaneLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(resetButton)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(cancelButton)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(saveButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
-                                .addContainerGap())
+            contentPaneLayout.createParallelGroup()
+                .addComponent(mainSettings, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
+                .addGroup(contentPaneLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(resetButton)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(cancelButton)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(saveButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
+                    .addContainerGap())
         );
         contentPaneLayout.setVerticalGroup(
-                contentPaneLayout.createParallelGroup()
-                        .addGroup(contentPaneLayout.createSequentialGroup()
-                                .addComponent(mainSettings, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(resetButton)
-                                        .addComponent(cancelButton)
-                                        .addComponent(saveButton))
-                                .addContainerGap())
+            contentPaneLayout.createParallelGroup()
+                .addGroup(contentPaneLayout.createSequentialGroup()
+                    .addComponent(mainSettings, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(resetButton)
+                        .addComponent(cancelButton)
+                        .addComponent(saveButton))
+                    .addContainerGap())
         );
         pack();
         setLocationRelativeTo(getOwner());
@@ -350,7 +366,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         // fill in the combo box entries
         for (Memory m : Memory.MEMORY_OPTIONS) {
             if (max >= m.getMemoryMB()) {
-                maxMem.addItem(m.getDescription());
+                maxMem.addItem(m.getLabel());
             }
         }
 
@@ -372,7 +388,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         initialMemory.addItem("None");
         for (Memory m : Memory.MEMORY_OPTIONS) {
             if (currentMemSetting >= m.getMemoryMB()) {
-                initialMemory.addItem(m.getDescription());
+                initialMemory.addItem(m.getLabel());
             }
         }
         int memoryOptionID = Settings.getInitialMemory();
@@ -440,7 +456,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         initialMem.addItem("None");
         for (Memory m : Memory.MEMORY_OPTIONS) {
             if (currentMemSetting >= m.getMemoryMB()) {
-                initialMem.addItem(m.getDescription());
+                initialMem.addItem(m.getLabel());
             }
         }
 

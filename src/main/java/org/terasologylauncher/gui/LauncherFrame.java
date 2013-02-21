@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2013 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.terasologylauncher.gui;
 
 import org.terasologylauncher.BuildType;
@@ -109,10 +125,10 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
         updatePanel = new TransparentPanel(0.5f);
         updatePanel.setBounds(
-                (FRAME_WIDTH - INFO_PANEL_WIDTH) / 2,
-                (FRAME_HEIGHT - INFO_PANEL_HEIGHT) / 2,
-                INFO_PANEL_WIDTH,
-                INFO_PANEL_HEIGHT);
+            (FRAME_WIDTH - INFO_PANEL_WIDTH) / 2,
+            (FRAME_HEIGHT - INFO_PANEL_HEIGHT) / 2,
+            INFO_PANEL_WIDTH,
+            INFO_PANEL_HEIGHT);
 
         infoTextPane = new JTextPane();
         infoTextPane.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -124,18 +140,18 @@ public class LauncherFrame extends JFrame implements ActionListener {
         infoTextPane.setForeground(Color.WHITE);
 
         infoTextPane.setText("Lorem ipsum dolor sit amet, \n " +
-                "consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore " +
-                "\n magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores " +
-                "\n et ea rebum. " +
-                "\n Stet clita kasd gubergren, " +
-                "\n no sea takimata sanctus est Lorem ipsum dolor sit amet. " +
-                "\n Lorem ipsum dolor " +
-                "sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore " +
-                "\n \n \n magna aliquyam erat, sed diam voluptua. " +
-                "\n At vero eos et accusam et justo duo dolores et ea rebum. " +
-                "\n Stet clita kasd gubergren, " +
-                "\n no sea takimata sanctus est " +
-                "\n Lorem ipsum dolor sit amet.");
+            "consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore " +
+            "\n magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores " +
+            "\n et ea rebum. " +
+            "\n Stet clita kasd gubergren, " +
+            "\n no sea takimata sanctus est Lorem ipsum dolor sit amet. " +
+            "\n Lorem ipsum dolor " +
+            "sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore " +
+            "\n \n \n magna aliquyam erat, sed diam voluptua. " +
+            "\n At vero eos et accusam et justo duo dolores et ea rebum. " +
+            "\n Stet clita kasd gubergren, " +
+            "\n no sea takimata sanctus est " +
+            "\n Lorem ipsum dolor sit amet.");
 
         //infoTextPane.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, updatePanelWidth - 16, updatePanelHeight - 16);
         JScrollPane sp = new JScrollPane();
@@ -350,7 +366,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
                 int installedVersion = GameData.getInstalledBuildVersion();
                 int upstreamVersion = GameData.getUpStreamVersion(installedType);
                 int selectedVersion = Settings.getBuildVersion(installedType).equals("Latest") ? upstreamVersion
-                        : Integer.parseInt(Settings.getBuildVersion(installedType));
+                    : Integer.parseInt(Settings.getBuildVersion(installedType));
 
                 if (installedVersion == selectedVersion) {
                     // game can be started
