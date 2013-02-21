@@ -1,8 +1,13 @@
 package org.terasologylauncher.gui;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.plaf.basic.BasicScrollBarUI;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 public class TSScrollBarUI extends BasicScrollBarUI {
 
@@ -22,7 +27,7 @@ public class TSScrollBarUI extends BasicScrollBarUI {
 
     protected JButton createZeroButton() {
         JButton button = new JButton("zero button");
-        Dimension zeroDim = new Dimension(0,0);
+        Dimension zeroDim = new Dimension(0, 0);
         button.setPreferredSize(zeroDim);
         button.setMinimumSize(zeroDim);
         button.setMaximumSize(zeroDim);

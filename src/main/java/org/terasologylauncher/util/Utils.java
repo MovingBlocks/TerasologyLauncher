@@ -1,22 +1,20 @@
 package org.terasologylauncher.util;
 
-import java.io.*;
+import java.io.File;
 
-/**
- * @author Skaldarnar
- */
+/** @author Skaldarnar */
 public class Utils {
     private static File workDir = null;
 
     public static File getWorkingDirectory() {
         if (workDir == null) {
-            workDir = getWorkingDirectory("terasology"); 
+            workDir = getWorkingDirectory("terasology");
         }
         return workDir;
     }
 
     private static File getWorkingDirectory(String applicationName) {
-        String userHome = System.getProperty("user.home",".");
+        String userHome = System.getProperty("user.home", ".");
         File workingDirectory;
 
         OperatingSystem os = OperatingSystem.getOS();

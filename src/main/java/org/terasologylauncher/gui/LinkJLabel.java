@@ -1,23 +1,22 @@
 package org.terasologylauncher.gui;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLabel;
+import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-/**
- * @author Skaldarnar
- */
+/** @author Skaldarnar */
 public class LinkJLabel extends JLabel implements MouseListener {
 
     private static final long CLICK_DELAY = 200L;
     private long lastClicked = System.currentTimeMillis();
 
-    private static Color HOVER_COLOR = Color.DARK_GRAY;
-    private static Color STANDARD_COLOR = Color.LIGHT_GRAY;
+    private static final Color HOVER_COLOR = Color.DARK_GRAY;
+    private static final Color STANDARD_COLOR = Color.LIGHT_GRAY;
 
     private String url;
 
@@ -30,7 +29,7 @@ public class LinkJLabel extends JLabel implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (lastClicked + CLICK_DELAY > System.currentTimeMillis()){
+        if (lastClicked + CLICK_DELAY > System.currentTimeMillis()) {
             return;
         }
         lastClicked = System.currentTimeMillis();

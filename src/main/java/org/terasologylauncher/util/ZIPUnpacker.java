@@ -1,6 +1,10 @@
 package org.terasologylauncher.util;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -16,14 +20,16 @@ public class ZIPUnpacker {
     }
 
     public static void extractArchive(File archive, File destDir) throws IOException {
-        if (archive==null) throw new IllegalArgumentException("No null allowed");
+        if (archive == null) {
+            throw new IllegalArgumentException("No null allowed");
+        }
         ZipFile zipFile = new ZipFile(archive);
         Enumeration entries = zipFile.entries();
 
-        byte[] buffer = new byte[8192];
+        byte[] buffer = new byte[ 8192 ];
         int length;
 
-        while (entries.hasMoreElements()){
+        while (entries.hasMoreElements()) {
             ZipEntry entry = (ZipEntry) entries.nextElement();
             String entryFileName = entry.getName();
             File dir = buildDirectoryHierarchyFor(entryFileName, destDir);

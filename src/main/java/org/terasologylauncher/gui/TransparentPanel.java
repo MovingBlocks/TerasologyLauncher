@@ -1,7 +1,10 @@
 package org.terasologylauncher.gui;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JPanel;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 public class TransparentPanel extends JPanel {
 

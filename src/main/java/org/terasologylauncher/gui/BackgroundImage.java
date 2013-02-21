@@ -1,15 +1,15 @@
 package org.terasologylauncher.gui;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * @author Skaldarnar
- */
+/** @author Skaldarnar */
 public class BackgroundImage extends JLabel {
 
     public BackgroundImage(int width, int height) {

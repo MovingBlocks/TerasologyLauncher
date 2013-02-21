@@ -9,7 +9,12 @@ import org.terasologylauncher.util.TerasologyDirectories;
 import org.terasologylauncher.util.Utils;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -18,22 +23,20 @@ import java.io.File;
 import java.net.URL;
 import java.util.logging.Logger;
 
-/**
- * @author Skaldarnar
- */
+/** @author Skaldarnar */
 public class LauncherFrame extends JFrame implements ActionListener {
-    public static final URL icon = LauncherFrame.class.getResource("/icon.png");
+    public static final URL ICON = LauncherFrame.class.getResource("/icon.png");
 
-    private static final int FRAME_WIDTH    = 880;
-    private static final int FRAME_HEIGHT   = 520;
+    private static final int FRAME_WIDTH = 880;
+    private static final int FRAME_HEIGHT = 520;
 
-    private static final int INFO_PANEL_WIDTH   = 600;
-    private static final int INFO_PANEL_HEIGHT  = 300;
+    private static final int INFO_PANEL_WIDTH = 600;
+    private static final int INFO_PANEL_HEIGHT = 300;
 
     private static final String SETTINGS_ACTION = "settings";
-    private static final String CANCEL_ACTION   = "cancel";
+    private static final String CANCEL_ACTION = "cancel";
 
-    private static final String START_ACTION    = "start";
+    private static final String START_ACTION = "start";
     private static final String DOWNLOAD_ACTION = "download";
 
     private JButton start;
@@ -62,7 +65,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
     public LauncherFrame() {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Terasology Launcher");
-        setIconImage(Toolkit.getDefaultToolkit().getImage(icon));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(ICON));
 
         initComponents();
 
@@ -70,9 +73,9 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds((dim.width - FRAME_WIDTH) / 2, (dim.height - FRAME_HEIGHT) / 2, FRAME_WIDTH, FRAME_HEIGHT);
-        setSize(FRAME_WIDTH,FRAME_HEIGHT);
+        setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setResizable(false);
-        getContentPane().add(new BackgroundImage(FRAME_WIDTH,FRAME_HEIGHT));
+        getContentPane().add(new BackgroundImage(FRAME_WIDTH, FRAME_HEIGHT));
     }
 
     private void initComponents() {
@@ -90,7 +93,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
         // Options Button
         settings = new TSButton("Settings");
-        settings.setBounds(FRAME_WIDTH - 96 - 16 - xShift, FRAME_HEIGHT - 70 - 2*40 + yShift, 96, 32);
+        settings.setBounds(FRAME_WIDTH - 96 - 16 - xShift, FRAME_HEIGHT - 70 - 2 * 40 + yShift, 96, 32);
         settings.setActionCommand(SETTINGS_ACTION);
         settings.addActionListener(this);
 
@@ -102,7 +105,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
         // Transparent top panel and content/update panel
         topPanel = new TransparentPanel(0.5f);
-        topPanel.setBounds(0,0,FRAME_WIDTH, 96);
+        topPanel.setBounds(0, 0, FRAME_WIDTH, 96);
 
         updatePanel = new TransparentPanel(0.5f);
         updatePanel.setBounds(
@@ -143,7 +146,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
         sp.getVerticalScrollBar().setBorder(BorderFactory.createEmptyBorder());
         sp.setBorder(BorderFactory.createEmptyBorder());
         sp.setOpaque(false);
-        sp.setPreferredSize(new Dimension(INFO_PANEL_WIDTH-16, INFO_PANEL_HEIGHT-16));
+        sp.setPreferredSize(new Dimension(INFO_PANEL_WIDTH - 16, INFO_PANEL_HEIGHT - 16));
         sp.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, INFO_PANEL_WIDTH - 16, INFO_PANEL_HEIGHT - 16);
 
         // Terasology logo
@@ -164,7 +167,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
         // Mods
         mods = new LinkJLabel("Mods", "http://www.terasologymods.net");
         mods.setFont(mods.getFont().deriveFont(24f));
-        mods.setBounds(FRAME_WIDTH-96-16-xShift, 36, 96, 32);
+        mods.setBounds(FRAME_WIDTH - 96 - 16 - xShift, 36, 96, 32);
 
         // Progress Bar
         progressBar = new JProgressBar();
@@ -229,14 +232,14 @@ public class LauncherFrame extends JFrame implements ActionListener {
         contentPane.add(updatePanel);
     }
 
-    public JProgressBar getProgressBar(){
+    public JProgressBar getProgressBar() {
         return progressBar;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
-            action(e.getActionCommand(), (JComponent)e.getSource());
+            action(e.getActionCommand(), (JComponent) e.getSource());
         }
     }
 
@@ -257,7 +260,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
             this.dispose();
             System.exit(0);
         } else if (command.equals(START_ACTION)) {
-            if (TerasologyStarter.startGame()){
+            if (TerasologyStarter.startGame()) {
                 System.exit(0);
             } else {
                 JOptionPane.showMessageDialog(null, "Could not start the game!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -272,13 +275,13 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Clean up the installation directory, that means delete all files and folders except of the files kept by
-     * <tt>canBeDeleted</tt> method.
+     * Clean up the installation directory, that means delete all files and folders except of the files kept by <tt>canBeDeleted</tt>
+     * method.
      */
     private void cleanUp() {
-        for (File f : Utils.getWorkingDirectory().listFiles()){
-            if (canBeDeleted(f)){
-                if (f.isDirectory()){
+        for (File f : Utils.getWorkingDirectory().listFiles()) {
+            if (canBeDeleted(f)) {
+                if (f.isDirectory()) {
                     deleteDirectory(f);
                 } else {
                     f.delete();
@@ -288,10 +291,10 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Check if the file can be deleted on clean up action. The only files/directories kept are "SAVED_WORLDS",
-     * "screens" and "launcher".
+     * Check if the file can be deleted on clean up action. The only files/directories kept are "SAVED_WORLDS", "screens" and "launcher".
      *
      * @param f the file to check
+     *
      * @return true if the file can be deleted
      */
     private boolean canBeDeleted(File f) {
@@ -317,10 +320,11 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
     /**
      * recursively deletes the directory and all of its content.
+     *
      * @param f
      */
     private void deleteDirectory(File f) {
-        for (File sub : f.listFiles()){
+        for (File sub : f.listFiles()) {
             if (sub.isFile()) {
                 sub.delete();
             } else {
@@ -331,8 +335,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Updates the start button with regard to the selected settings, the internet connection and the installed game.
-     * Changes the button text and action command ("start" or "download").
+     * Updates the start button with regard to the selected settings, the internet connection and the installed game. Changes the button
+     * text and action command ("start" or "download").
      */
     public void updateStartButton() {
         if (GameData.checkInternetConnection()) {
@@ -344,7 +348,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
                 // check if update is possible
                 // therefore, get the installed version no. and the upstream version number
                 int installedVersion = GameData.getInstalledBuildVersion();
-                int upstreamVersion  = GameData.getUpStreamVersion(installedType);
+                int upstreamVersion = GameData.getUpStreamVersion(installedType);
                 int selectedVersion = Settings.getBuildVersion(installedType).equals("Latest") ? upstreamVersion
                         : Integer.parseInt(Settings.getBuildVersion(installedType));
 
@@ -354,7 +358,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
                     start.setActionCommand(START_ACTION);
                 } else {
                     // differentiate between up- and downgrade
-                    if (installedVersion < selectedVersion){
+                    if (installedVersion < selectedVersion) {
                         start.setText("Update");
                         start.setActionCommand(DOWNLOAD_ACTION);
                     } else {
@@ -368,7 +372,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
                 start.setActionCommand(DOWNLOAD_ACTION);
             }
         } else {
-            if (GameData.isGameInstalled()){
+            if (GameData.isGameInstalled()) {
                 // installed game can be started
                 start.setText("Start");
                 start.setActionCommand(START_ACTION);

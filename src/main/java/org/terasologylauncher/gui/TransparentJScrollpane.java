@@ -1,7 +1,8 @@
 package org.terasologylauncher.gui;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JScrollPane;
+import java.awt.Component;
+import java.awt.Graphics;
 
 public class TransparentJScrollpane extends JScrollPane {
 

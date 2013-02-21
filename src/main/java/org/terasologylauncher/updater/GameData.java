@@ -3,34 +3,39 @@ package org.terasologylauncher.updater;
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.util.Utils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Scanner;
 
 /**
- * The GameData class provides access to information on the installed game version and type, if an internet
- * connection is available and whether the game could be updated to a newer version.
+ * The GameData class provides access to information on the installed game version and type, if an internet connection is available and
+ * whether the game could be updated to a newer version.
  */
 public class GameData {
-    private static final String UPDATER_URL = "http://updater.movingblocks.net/";
-    private static final String STABLE_VER = "stable.ver";
-    private static final String UNSTABLE_VER = "unstable.ver";
+    public static final String JENKINS = "http://jenkins.movingblocks.net/job/";
+    public static final String STABLE_JOB_NAME = "TerasologyStable";
+    public static final String NIGHTLY_JOB_NAME = "Terasology";
+    public static final String LAST_SUCCESSFUL_BUILD_NUMBER = "lastSuccessfulBuild/buildNumber";
 
     private static File gameJar;
 
-    private static int upstreamVersionStable  = -1;
+    private static int upstreamVersionStable = -1;
     private static int upstreamVersionNightly = -1;
 
     private static BuildType installedBuildType;
     private static int installedBuildVersion = -1;
 
-    public static boolean isGameInstalled(){
+    public static boolean isGameInstalled() {
         return getGameJar().exists();
     }
 
-    public static File getGameJar(){
+    public static File getGameJar() {
         if (gameJar == null) {
             gameJar = new File(Utils.getWorkingDirectory(), "Terasology.jar");
         }
@@ -39,19 +44,21 @@ public class GameData {
 
     public static int getUpStreamNightlyVersion() {
         if (upstreamVersionNightly == -1) {
-            URL url = null;
+            URL url;
             try {
-                url = new URL(UPDATER_URL+UNSTABLE_VER);
+                url = new URL(new StringBuilder().append(JENKINS).append(NIGHTLY_JOB_NAME).append("/").append(LAST_SUCCESSFUL_BUILD_NUMBER).toString());
                 BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
                 upstreamVersionNightly = Integer.parseInt(in.readLine());
-
                 try {
                     in.close();
-                } catch (Exception ignored) { }
+                } catch (Exception e) {
+                    // Ignore
+                    // TODO logger.debug("Closing {} failed", in, e);
+                }
             } catch (MalformedURLException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
         }
         return upstreamVersionNightly;
@@ -59,15 +66,17 @@ public class GameData {
 
     public static int getUpStreamStableVersion() {
         if (upstreamVersionStable == -1) {
-            URL url = null;
+            URL url;
             try {
-                url = new URL(UPDATER_URL+STABLE_VER);
+                url = new URL(new StringBuilder().append(JENKINS).append(STABLE_JOB_NAME).append("/").append(LAST_SUCCESSFUL_BUILD_NUMBER)
+                        .toString());
                 BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
                 upstreamVersionStable = Integer.parseInt(in.readLine());
                 try {
                     in.close();
-                } catch (Exception e){
-
+                } catch (Exception e) {
+                    // Ignore
+                    // TODO logger.debug("Closing {} failed", in, e);
                 }
             } catch (MalformedURLException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -88,7 +97,7 @@ public class GameData {
         return -1;
     }
 
-    public  static boolean checkInternetConnection(){
+    public static boolean checkInternetConnection() {
         //TODO: test jenkins and terasologymods.net
         try {
             final URL testURL = new URL("http://www.google.com");
@@ -99,7 +108,7 @@ public class GameData {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
-
+            // TODO logger.info("No internet connection.", e);
         }
         return false;
     }
@@ -121,18 +130,18 @@ public class GameData {
     private static void readVersionFile() {
         try {
             File installedVersionFile = new File(Utils.getWorkingDirectory(), "VERSION");
-            if (installedVersionFile.isFile()){
+            if (installedVersionFile.isFile()) {
                 Scanner scanner = new Scanner(installedVersionFile);
                 while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
                     if (line.contains("Build number:")) {
-                        installedBuildVersion = Integer.parseInt(line.split(":")[1].trim());
+                        installedBuildVersion = Integer.parseInt(line.split(":")[ 1 ].trim());
                     } else if (line.contains("GIT branch:")) {
-                        String branch = line.split(":")[1].trim();
+                        String branch = line.split(":")[ 1 ].trim();
                         if (branch.equals("develop")) {
                             installedBuildType = BuildType.NIGHTLY;
                         } else {
-                         installedBuildType = BuildType.STABLE;
+                            installedBuildType = BuildType.STABLE;
                         }
                     }
                 }
@@ -142,7 +151,7 @@ public class GameData {
         }
     }
 
-    public static void forceReReadVersionFile(){
+    public static void forceReReadVersionFile() {
         readVersionFile();
     }
 }

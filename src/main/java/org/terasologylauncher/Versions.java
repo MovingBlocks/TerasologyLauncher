@@ -2,15 +2,10 @@ package org.terasologylauncher;
 
 import org.terasologylauncher.updater.GameData;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author Skaldarnar
- */
+/** @author Skaldarnar */
 public class Versions {
     private static final String UPDATER_URL = "http://updater.movingblocks.net/";
     private static final String STABLE_VER = "stable.ver";
@@ -38,17 +33,19 @@ public class Versions {
         if (nightlyVersions == null) {
             nightlyVersions = new ArrayList<String>();
             nightlyVersions.add("Latest");
-
+            // TODO: Check for internet connection before?
             try {
                 int latestVersionNumber = GameData.getUpStreamNightlyVersion();
                 // for nightly builds, go 8 versions back for the list
                 String currentSetting = Settings.getBuildVersion(BuildType.NIGHTLY);
                 int buildVersionSetting = currentSetting.equals("Latest") ? latestVersionNumber : Integer.parseInt(currentSetting);
                 int minVersionNumber = Math.min(latestVersionNumber - 8, buildVersionSetting);
-                for (int i = latestVersionNumber-1; i >= minVersionNumber; i--){
+                for (int i = latestVersionNumber - 1; i >= minVersionNumber; i--) {
                     nightlyVersions.add(String.valueOf(i));
                 }
-            } catch (Exception ignored) { }
+            } catch (Exception e) {
+                // TODO logger.error("Retrieving latest nightly version build number failed.", e);
+            }
         }
         return nightlyVersions;
     }
@@ -57,24 +54,19 @@ public class Versions {
         if (stableVersions == null) {
             stableVersions = new ArrayList<String>();
             stableVersions.add("Latest");
-
+            // TODO: Check for internet connection before?
             try {
-                URL url = new URL(UPDATER_URL+STABLE_VER);
-                BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-                int latestVersionNumber = Integer.parseInt(in.readLine());
-
-                try {
-                    in.close();
-                } catch (Exception ignored) { }
-
+                int latestVersionNumber = GameData.getUpStreamStableVersion();
                 // for stable builds, go at least 4 versions back for the list
                 String currentSetting = Settings.getBuildVersion(BuildType.STABLE);
                 int buildVersionSetting = currentSetting.equals("Latest") ? latestVersionNumber : Integer.parseInt(currentSetting);
                 int minVersionNumber = Math.min(latestVersionNumber - 4, buildVersionSetting);
-                for (int i = latestVersionNumber-1; i >= minVersionNumber; i--){
+                for (int i = latestVersionNumber - 1; i >= minVersionNumber; i--) {
                     stableVersions.add(String.valueOf(i));
                 }
-            } catch (Exception ignored) { }
+            } catch (Exception e) {
+                // TODO logger.error("Retrieving latest stable version build number failed.", e);
+            }
         }
         return stableVersions;
     }

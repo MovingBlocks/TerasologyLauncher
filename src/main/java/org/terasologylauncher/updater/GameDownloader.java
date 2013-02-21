@@ -5,10 +5,15 @@ import org.terasologylauncher.gui.LauncherFrame;
 import org.terasologylauncher.util.Utils;
 import org.terasologylauncher.util.ZIPUnpacker;
 
-import javax.swing.*;
+import javax.swing.JProgressBar;
+import javax.swing.SwingWorker;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -18,10 +23,7 @@ import java.net.URL;
  */
 public class GameDownloader extends SwingWorker<Void, Void> {
 
-    public static final String STABLE_REPO     = "TerasologyStable";
-    public static final String NIGHTLY_REPO    = "Terasology";
-
-    public static final String ZIP_FILE        = "Terasology.zip";
+    public static final String ZIP_FILE = "Terasology.zip";
 
     private final JProgressBar progressBar;
     private final LauncherFrame frame;
@@ -47,17 +49,17 @@ public class GameDownloader extends SwingWorker<Void, Void> {
     protected Void doInBackground() {
         // get the selected settings for the download
         StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append("http://jenkins.movingblocks.net/job/");
+        urlBuilder.append(GameData.JENKINS);
         switch (Settings.getBuildType()) {
             case STABLE:
-                urlBuilder.append(STABLE_REPO);
+                urlBuilder.append(GameData.STABLE_JOB_NAME);
                 break;
             case NIGHTLY:
-                urlBuilder.append(NIGHTLY_REPO);
+                urlBuilder.append(GameData.NIGHTLY_JOB_NAME);
                 break;
         }
         urlBuilder.append("/");
-        if (Settings.getBuildVersion(Settings.getBuildType()).equals("Latest")){
+        if (Settings.getBuildVersion(Settings.getBuildType()).equals("Latest")) {
             urlBuilder.append(GameData.getUpStreamVersion(Settings.getBuildType()));
         } else {
             urlBuilder.append(Settings.getBuildVersion(Settings.getBuildType()));
@@ -81,17 +83,17 @@ public class GameDownloader extends SwingWorker<Void, Void> {
                 in = url.openConnection().getInputStream();
                 out = new FileOutputStream(file);
 
-                byte[] buffer = new byte[2048];
+                byte[] buffer = new byte[ 2048 ];
 
                 for (int n; (n = in.read(buffer)) != -1; out.write(buffer, 0, n)) {
-                    long fileSizeMB = file.length()  / 1024 / 1024;
-                    float percentage = fileSizeMB / (float)dataSize;
+                    long fileSizeMB = file.length() / 1024 / 1024;
+                    float percentage = fileSizeMB / (float) dataSize;
                     percentage *= 100;
 
                     setProgress((int) percentage);
                 }
             } finally {
-                if (in != null){
+                if (in != null) {
                     in.close();
                 }
                 if (out != null) {
@@ -130,7 +132,7 @@ public class GameDownloader extends SwingWorker<Void, Void> {
         GameData.forceReReadVersionFile();
         frame.updateStartButton();
 
-        if (zip != null){
+        if (zip != null) {
             zip.delete();
         }
         progressBar.setVisible(false);
