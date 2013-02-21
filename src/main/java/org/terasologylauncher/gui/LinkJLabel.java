@@ -1,23 +1,38 @@
+/*
+ * Copyright (c) 2013 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.terasologylauncher.gui;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLabel;
+import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-/**
- * @author Skaldarnar
- */
+/** @author Skaldarnar */
 public class LinkJLabel extends JLabel implements MouseListener {
 
     private static final long CLICK_DELAY = 200L;
     private long lastClicked = System.currentTimeMillis();
 
-    private static Color HOVER_COLOR = Color.DARK_GRAY;
-    private static Color STANDARD_COLOR = Color.LIGHT_GRAY;
+    private static final Color HOVER_COLOR = Color.DARK_GRAY;
+    private static final Color STANDARD_COLOR = Color.LIGHT_GRAY;
 
     private String url;
 
@@ -30,7 +45,7 @@ public class LinkJLabel extends JLabel implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (lastClicked + CLICK_DELAY > System.currentTimeMillis()){
+        if (lastClicked + CLICK_DELAY > System.currentTimeMillis()) {
             return;
         }
         lastClicked = System.currentTimeMillis();

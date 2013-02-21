@@ -1,18 +1,37 @@
+/*
+ * Copyright (c) 2013 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.terasologylauncher.gui;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 /**
- * Created with IntelliJ IDEA.
- * User: tobias
- * Date: 11.02.13
- * Time: 17:11
- * To change this template use File | Settings | File Templates.
+ * Custom JButton using the style/layout from the Terasology main menu.
+ *
+ * @author Skaldarnar
  */
 public class TSButton extends JButton implements MouseListener {
 
@@ -34,25 +53,25 @@ public class TSButton extends JButton implements MouseListener {
             pressedImg = ImageIO.read(TSButton.class.getResourceAsStream("/button_pressed.png"));
         } catch (Exception e) {
             e.printStackTrace();
-            normalImg = new BufferedImage(256,30,BufferedImage.TYPE_INT_RGB);
-            hoveredImg = new BufferedImage(256,30,BufferedImage.TYPE_INT_RGB);
-            pressedImg = new BufferedImage(256,30,BufferedImage.TYPE_INT_RGB);
+            normalImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);
+            hoveredImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);
+            pressedImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);
         }
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        Graphics2D g2d = (Graphics2D)g;
+        Graphics2D g2d = (Graphics2D) g;
         Color old = g2d.getColor();
 
         if (pressed) {
-            pressedImg.getScaledInstance(getWidth(),getHeight(),Image.SCALE_SMOOTH);
+            pressedImg.getScaledInstance(getWidth(), getHeight(), Image.SCALE_SMOOTH);
             g2d.drawImage(pressedImg, 0, 0, this);
         } else if (hovered) {
-            hoveredImg.getScaledInstance(getWidth(),getHeight(),Image.SCALE_SMOOTH);
+            hoveredImg.getScaledInstance(getWidth(), getHeight(), Image.SCALE_SMOOTH);
             g2d.drawImage(hoveredImg, 0, 0, this);
         } else {
-            normalImg.getScaledInstance(getWidth(),getHeight(),Image.SCALE_SMOOTH);
+            normalImg.getScaledInstance(getWidth(), getHeight(), Image.SCALE_SMOOTH);
             g2d.drawImage(normalImg, 0, 0, this);
         }
 
@@ -62,7 +81,7 @@ public class TSButton extends JButton implements MouseListener {
 
         g2d.setFont(getFont().deriveFont(16f));
         int width = g2d.getFontMetrics().stringWidth(getText());
-        g2d.drawString(getText(), (getWidth() - width) / 2, (getHeight() / 2) + (getFont().getSize()/2) - 2);
+        g2d.drawString(getText(), (getWidth() - width) / 2, (getHeight() / 2) + (getFont().getSize() / 2) - 2);
 
         g2d.setColor(old);
     }

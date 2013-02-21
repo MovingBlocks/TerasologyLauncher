@@ -1,20 +1,40 @@
+/*
+ * Copyright (c) 2013 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.terasologylauncher;
 
 import org.terasologylauncher.launcher.TerasologyLauncher;
 import org.terasologylauncher.util.Memory;
 import org.terasologylauncher.util.TerasologyDirectories;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 /**
- * Created with IntelliJ IDEA.
- * User: tobias
- * Date: 12.02.13
- * Time: 21:08
- * To change this template use File | Settings | File Templates.
+ * Provides access to launcher settings.
+ *
+ * @author Skaldarnar
  */
 public class Settings {
     public static final String SETTINGS_FILE_NAME = "launcher.settings";
@@ -36,7 +56,7 @@ public class Settings {
         File settingsFile = new File(TerasologyDirectories.getLauncherDir(), SETTINGS_FILE_NAME);
         Properties defaultProperties = new Properties();
         // if the file does not exist, copy default file from launcher
-        if (!settingsFile.exists()){
+        if (!settingsFile.exists()) {
             try {
                 InputStream input = TerasologyLauncher.class.getResourceAsStream("/launcher.settings");
                 if (input != null) {
@@ -47,29 +67,37 @@ public class Settings {
                         settingsFile.getParentFile().mkdirs();
                         out = new FileOutputStream(settingsFile);
                         defaultProperties.store(out, "Default settings!");
-                    } catch (Exception e) {
-
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        // TODO logger.warning("Setting up settings file failed.", e);
                     } finally {
+                        // JAVA 7: Cleanup here
                         try {
                             input.close();
-                        } catch (Exception ignored) { }
+                        } catch (Exception ignored) {
+                        }
                         try {
                             if (out != null) {
                                 out.close();
                             }
-                        } catch (Exception ignored) { }
+                        } catch (Exception ignored) {
+                        }
                     }
-
                 }
-            } catch (Exception e) { }
+            } catch (IOException e) {
+                e.printStackTrace();
+                // TODO logger.error("Could not load settings.", e);
+            }
         } else {
             try {
                 InputStream inputStream = new FileInputStream(settingsFile);
                 defaultProperties.load(inputStream);
                 try {
                     inputStream.close();
-                } catch (Exception ignored) { }
-            } catch (Exception e) { }
+                } catch (Exception ignored) {
+                }
+            } catch (Exception e) {
+            }
         }
         return defaultProperties;
     }
@@ -81,7 +109,8 @@ public class Settings {
             properties.store(output, "Terasology Launcher settings");
             try {
                 output.close();
-            } catch (Exception ignored) { }
+            } catch (Exception ignored) {
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } catch (IOException e) {
@@ -91,7 +120,7 @@ public class Settings {
 
     /*============================== Settings access ================================*/
 
-    public static synchronized void setBuildType(BuildType type){
+    public static synchronized void setBuildType(BuildType type) {
         properties.setProperty("buildType", String.valueOf(type.type()));
     }
 
@@ -101,14 +130,14 @@ public class Settings {
     }
 
     /**
-     * Sets the build version property, depending on the build version. The key for stable build is
-     * <code>stableBuildVersion</code>, the key for nightly build is <code>nightlyBuildVersion</code>
+     * Sets the build version property, depending on the build version. The key for stable build is <code>stableBuildVersion</code>, the key
+     * for nightly build is <code>nightlyBuildVersion</code>
      *
      * @param version the version number
-     * @param type the build type of the game
+     * @param type    the build type of the game
      */
-    public static synchronized void setBuildVersion(String version, BuildType type){
-        properties.setProperty(type.toString()+"BuildVersion", version);
+    public static synchronized void setBuildVersion(String version, BuildType type) {
+        properties.setProperty(type.toString() + "BuildVersion", version);
     }
 
     public static synchronized String getBuildVersion(BuildType type) {
@@ -119,9 +148,7 @@ public class Settings {
         properties.setProperty("maxMemory", String.valueOf(memoryID));
     }
 
-    /**
-     * @return the option id of the memory object.
-     */
+    /** @return the option id of the memory object. */
     public static synchronized int getMaximalMemory() {
         return Integer.parseInt(properties.getProperty("maxMemory"));
     }
@@ -130,9 +157,7 @@ public class Settings {
         properties.setProperty("initialMemory", String.valueOf(memoryID));
     }
 
-    /**
-     * @return the option id of the memory object or -1 for "None".
-     */
+    /** @return the option id of the memory object or -1 for "None". */
     public static synchronized int getInitialMemory() {
         return Integer.parseInt(properties.getProperty("initialMemory"));
     }
@@ -140,10 +165,10 @@ public class Settings {
     public static List<String> createParameters() {
         List<String> parameters = new ArrayList<String>();
         // add maximal RAM parameter
-        parameters.add("-Xmx"+Memory.getMemoryFromId(getMaximalMemory()).getMemoryMB()+"m");
+        parameters.add("-Xmx" + Memory.getMemoryFromId(getMaximalMemory()).getMemoryMB() + "m");
         // add initial RAM parameter
-        if (getInitialMemory() >= 0){
-            parameters.add("-Xms"+Memory.getMemoryFromId(getInitialMemory()).getMemoryMB()+"m");
+        if (getInitialMemory() >= 0) {
+            parameters.add("-Xms" + Memory.getMemoryFromId(getInitialMemory()).getMemoryMB() + "m");
         }
         return parameters;
     }
