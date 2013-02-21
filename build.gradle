@@ -23,6 +23,13 @@ apply plugin: 'checkstyle'
 //    gradleVersion = '1.4'
 //}
 
+ext {
+    startDateTimeString = new Date().format("yyyy-MM-dd_HH-mm-ss")
+    env = System.getenv() // read environment variables, including variables passed by jenking continuous integration server
+    versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasologylauncher/version')
+    versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
+}
+
 repositories {
     mavenCentral()
 }
@@ -47,3 +54,24 @@ checkstyle {
     ignoreFailures = true
     configProperties.samedir = checkstyle.configFile.parentFile
 }
+
+task createVersionInfoFile {
+    inputs.property('dateTime', startDateTimeString)
+    onlyIf { env.BUILD_URL != null }
+    doLast {
+        versionInfoFileDir.mkdirs()
+        ant.propertyfile (file: versionInfoFile) {
+            ant.entry(key:'buildNumber',value:env.BUILD_NUMBER)
+            ant.entry(key:'buildId',value:env.BUILD_ID)
+            ant.entry(key:'buildTag',value:env.BUILD_TAG)
+            ant.entry(key:'buildUrl',value:env.BUILD_URL)
+            ant.entry(key:'gitBranch',value:env.GIT_BRANCH)
+            ant.entry(key:'gitCommit',value:env.GIT_COMMIT)
+            ant.entry(key:'dateTime',value:startDateTimeString)
+        }
+    }
+}
+createVersionInfoFile.dependsOn processResources
+jar.dependsOn createVersionInfoFile
+distZip.dependsOn createVersionInfoFile
+distTar.dependsOn createVersionInfoFile
