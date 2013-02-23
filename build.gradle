@@ -23,6 +23,8 @@ apply plugin: 'checkstyle'
 //    gradleVersion = '1.4'
 //}
 
+import org.apache.tools.ant.filters.FixCrLfFilter;
+
 ext {
     startDateTimeString = new Date().format("yyyy-MM-dd_HH-mm-ss")
     env = System.getenv() // read environment variables, including variables passed by jenking continuous integration server
@@ -75,3 +77,23 @@ createVersionInfoFile.dependsOn processResources
 jar.dependsOn createVersionInfoFile
 distZip.dependsOn createVersionInfoFile
 distTar.dependsOn createVersionInfoFile
+
+jar {
+    manifest {
+        attributes("Main-Class": mainClassName, "Implementation-Title": project.name, "Implementation-Version": env.BUILD_NUMBER + " " + env.GIT_BRANCH + " " + env.BUILD_ID)
+    }
+}
+
+applicationDistribution.from ('README.md') {
+    filter(FixCrLfFilter, eol:FixCrLfFilter.CrLf.newInstance("crlf"))
+    rename('README.md', 'README')
+}
+
+applicationDistribution.from ('LICENSE') {
+    filter(FixCrLfFilter, eol:FixCrLfFilter.CrLf.newInstance("crlf"))
+}
+
+applicationDistribution.from ('NOTICE') {
+    filter(FixCrLfFilter, eol:FixCrLfFilter.CrLf.newInstance("crlf"))
+}
+
