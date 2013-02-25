@@ -41,7 +41,7 @@ import java.net.URL;
 
 /** @author Skaldarnar */
 public class SettingsMenu extends JDialog implements ActionListener {
-    public static final URL ICON = LauncherFrame.class.getResource("/icon.png");
+    public static final URL ICON = LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png");
 
     private static final String SAVE_ACTION = "save";
     private static final String CANCEL_ACTION = "cancel";

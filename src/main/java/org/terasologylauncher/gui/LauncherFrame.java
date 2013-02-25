@@ -41,7 +41,7 @@ import java.util.logging.Logger;
 
 /** @author Skaldarnar */
 public class LauncherFrame extends JFrame implements ActionListener {
-    public static final URL ICON = LauncherFrame.class.getResource("/icon.png");
+    public static final URL ICON = LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png");
 
     private static final int FRAME_WIDTH = 880;
     private static final int FRAME_HEIGHT = 520;
@@ -168,7 +168,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
         // Terasology logo
         JLabel logo = new JLabel();
         logo.setBounds(8, 0, 400, 96);
-        logo.setIcon(new ImageIcon(LauncherFrame.class.getResource("/logo.png")));
+        logo.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/logo.png")));
 
         // Forums link
         forums = new LinkJLabel("Forums", "http://forum.movingblocks.net");
@@ -193,32 +193,32 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
         // Social media
         github = new LinkJButton("https://github.com/Movingblocks/Terasology");
-        github.setIcon(new ImageIcon(LauncherFrame.class.getResource("/github.png")));
-        github.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/github_hover.png")));
+        github.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/github.png")));
+        github.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/github_hover.png")));
         github.setBounds(8 + xShift, FRAME_HEIGHT - 70 + yShift, 32, 32);
         github.setBorder(null);
 
         youtube = new LinkJButton("http://www.youtube.com/user/blockmaniaTV");
-        youtube.setIcon(new ImageIcon(LauncherFrame.class.getResource("/youtube.png")));
-        youtube.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/youtube_hover.png")));
+        youtube.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/youtube.png")));
+        youtube.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/youtube_hover.png")));
         youtube.setBounds(8 + 38 + xShift, FRAME_HEIGHT - 70 + yShift, 32, 32);
         youtube.setBorder(null);
 
         gplus = new LinkJButton("https://plus.google.com/b/103835217961917018533/103835217961917018533");
-        gplus.setIcon(new ImageIcon(LauncherFrame.class.getResource("/gplus.png")));
-        gplus.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/gplus_hover.png")));
+        gplus.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/gplus.png")));
+        gplus.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/gplus_hover.png")));
         gplus.setBounds(8 + 38 * 2 + xShift, FRAME_HEIGHT - 70 + yShift, 32, 32);
         gplus.setBorder(null);
 
         facebook = new LinkJButton("https://www.facebook.com/Terasology");
-        facebook.setIcon(new ImageIcon(LauncherFrame.class.getResource("/facebook.png")));
-        facebook.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/facebook_hover.png")));
+        facebook.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/facebook.png")));
+        facebook.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/facebook_hover.png")));
         facebook.setBounds(8 + 38 * 3 + xShift, FRAME_HEIGHT - 70 + yShift, 32, 32);
         facebook.setBorder(null);
 
         twitter = new LinkJButton("https://twitter.com/Terasology");
-        twitter.setIcon(new ImageIcon(LauncherFrame.class.getResource("/twitter.png")));
-        twitter.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/twitter_hover.png")));
+        twitter.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/twitter.png")));
+        twitter.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/twitter_hover.png")));
         twitter.setBounds(8 + 38 * 4 + xShift, FRAME_HEIGHT - 70 + yShift, 32, 32);
         twitter.setBorder(null);
 
