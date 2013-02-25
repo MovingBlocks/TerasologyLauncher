@@ -20,6 +20,7 @@ import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
 import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.util.TerasologyDirectories;
+import org.terasologylauncher.version.TerasologyLauncherVersion;
 
 import javax.swing.JOptionPane;
 import java.awt.Frame;
@@ -42,7 +43,7 @@ public class TerasologyLauncher {
         //TODO: Init logger
 
         //TODO: check for launcher update
-        int launcherBuild = parseInt(getLauncherBuild(), -1);       // local launcher build
+        System.out.println("Launcher build number: " + TerasologyLauncherVersion.getInstance().getBuildNumber());
 
         System.out.println("Checking for launcher update took " + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
@@ -91,25 +92,4 @@ public class TerasologyLauncher {
         System.out.println("Startup took " + (System.currentTimeMillis() - startUpTime) + " ms");
     }
 
-    private static int parseInt(String s, int defaultValue) {
-        try {
-            return Integer.parseInt(s);
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
-    }
-
-    public static String getLauncherBuild() {
-        String build = "0";
-        try {
-            InputStream version = TerasologyLauncher.class.getResourceAsStream("/version");
-            BufferedReader br = new BufferedReader(new InputStreamReader(version));
-            build = br.readLine();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return build;
-    }
 }
