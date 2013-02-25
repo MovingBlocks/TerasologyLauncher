@@ -48,9 +48,9 @@ public class TSButton extends JButton implements MouseListener {
         addMouseListener(this);
 
         try {
-            normalImg = ImageIO.read(TSButton.class.getResourceAsStream("/button.png"));
-            hoveredImg = ImageIO.read(TSButton.class.getResourceAsStream("/button_hovered.png"));
-            pressedImg = ImageIO.read(TSButton.class.getResourceAsStream("/button_pressed.png"));
+            normalImg = ImageIO.read(TSButton.class.getResourceAsStream("/org/terasologylauncher/images/button.png"));
+            hoveredImg = ImageIO.read(TSButton.class.getResourceAsStream("/org/terasologylauncher/images/button_hovered.png"));
+            pressedImg = ImageIO.read(TSButton.class.getResourceAsStream("/org/terasologylauncher/images/button_pressed.png"));
         } catch (Exception e) {
             e.printStackTrace();
             normalImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);

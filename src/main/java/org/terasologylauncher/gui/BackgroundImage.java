@@ -41,7 +41,7 @@ public class BackgroundImage extends JLabel {
         BufferedImage bg;
 
         try {
-            stream = BackgroundImage.class.getResourceAsStream("/background.png");
+            stream = BackgroundImage.class.getResourceAsStream("/org/terasologylauncher/images/background.png");
             bg = ImageIO.read(stream);
             //TODO: Apply blur filter
         } catch (IOException e) {
