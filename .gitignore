@@ -1,10 +1,11 @@
+#Output directories (Idea, Maven, Gradle, Eclipse)
 /out
 /target
 /build
 /bin
 
-.DS_Store
-/TerasologyLauncher.iml
+#Config files and directories
+*.iml
 /TerasologyLauncher.ipr
 /TerasologyLauncher.iws
 /.idea
