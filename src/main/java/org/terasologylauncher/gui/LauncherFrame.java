@@ -24,7 +24,17 @@ import org.terasologylauncher.updater.GameDownloader;
 import org.terasologylauncher.util.TerasologyDirectories;
 import org.terasologylauncher.util.Utils;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -337,17 +347,17 @@ public class LauncherFrame extends JFrame implements ActionListener {
     /**
      * recursively deletes the directory and all of its content.
      *
-     * @param f
+     * @param directory directory
      */
-    private void deleteDirectory(File f) {
-        for (File sub : f.listFiles()) {
+    private void deleteDirectory(File directory) {
+        for (File sub : directory.listFiles()) {
             if (sub.isFile()) {
                 sub.delete();
             } else {
                 deleteDirectory(sub);
             }
         }
-        f.delete();
+        directory.delete();
     }
 
     /**
