@@ -16,6 +16,8 @@
 
 package org.terasologylauncher.updater;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.util.Utils;
 
@@ -36,6 +38,9 @@ import java.util.Scanner;
  * @author Skaldarnar
  */
 public class GameData {
+
+    private static final Logger logger = LoggerFactory.getLogger(GameData.class);
+
     public static final String JENKINS = "http://jenkins.movingblocks.net/job/";
     public static final String STABLE_JOB_NAME = "TerasologyStable";
     public static final String NIGHTLY_JOB_NAME = "Terasology";
@@ -70,13 +75,12 @@ public class GameData {
                 try {
                     in.close();
                 } catch (Exception e) {
-                    // Ignore
-                    // TODO logger.debug("Closing {} failed", in, e);
+                    logger.info("Closing failed", e);
                 }
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                logger.error("Could not read nightly version!", e);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Could not read nightly version!", e);
             }
         }
         return upstreamVersionNightly;
@@ -92,13 +96,12 @@ public class GameData {
                 try {
                     in.close();
                 } catch (Exception e) {
-                    // Ignore
-                    // TODO logger.debug("Closing {} failed", in, e);
+                    logger.info("Closing failed", e);
                 }
             } catch (MalformedURLException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                logger.error("Could not read stable version!", e);
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                logger.error("Could not read stable version!", e);
             }
         }
         return upstreamVersionStable;
@@ -123,9 +126,9 @@ public class GameData {
             connection.getInputStream();
             return true;
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            logger.error("Could not check internet connection!", e);
         } catch (IOException e) {
-            // TODO logger.info("No internet connection.", e);
+            logger.info("No internet connection.", e);
         }
         return false;
     }
@@ -145,6 +148,7 @@ public class GameData {
     }
 
     private static void readVersionFile() {
+        // TODO Wrong version file. This is the human readable file. Replace with "versionInfo.properties"
         try {
             File installedVersionFile = new File(Utils.getWorkingDirectory(), "VERSION");
             if (installedVersionFile.isFile()) {
@@ -164,7 +168,7 @@ public class GameData {
                 }
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.error("Could not read version file!", e);
         }
     }
 

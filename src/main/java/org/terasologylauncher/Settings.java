@@ -16,6 +16,8 @@
 
 package org.terasologylauncher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasologylauncher.launcher.TerasologyLauncher;
 import org.terasologylauncher.util.Memory;
 import org.terasologylauncher.util.TerasologyDirectories;
@@ -37,6 +39,9 @@ import java.util.Properties;
  * @author Skaldarnar
  */
 public class Settings {
+
+    private static final Logger logger = LoggerFactory.getLogger(Settings.class);
+
     public static final String SETTINGS_FILE_NAME = "launcher.settings";
 
     private static Properties properties;
@@ -64,29 +69,30 @@ public class Settings {
 
                     FileOutputStream out = null;
                     try {
+                        // TODO handle "false" result of mkdirs()
                         settingsFile.getParentFile().mkdirs();
                         out = new FileOutputStream(settingsFile);
                         defaultProperties.store(out, "Default settings!");
                     } catch (IOException e) {
-                        e.printStackTrace();
-                        // TODO logger.warning("Setting up settings file failed.", e);
+                        logger.warn("Setting up settings file failed.", e);
                     } finally {
                         // JAVA 7: Cleanup here
                         try {
                             input.close();
                         } catch (Exception ignored) {
+                            logger.info("Could not close settings file.", ignored);
                         }
                         try {
                             if (out != null) {
                                 out.close();
                             }
                         } catch (Exception ignored) {
+                            logger.info("Could not close settings file.", ignored);
                         }
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-                // TODO logger.error("Could not load settings.", e);
+                logger.error("Could not load settings.", e);
             }
         } else {
             try {
@@ -95,9 +101,10 @@ public class Settings {
                 try {
                     inputStream.close();
                 } catch (Exception ignored) {
+                    logger.info("Could not close settings file.", ignored);
                 }
             } catch (Exception e) {
-                System.out.println("Can't load setting!");
+                logger.info("Can't load setting!", e);
             }
         }
         return defaultProperties;
@@ -111,11 +118,12 @@ public class Settings {
             try {
                 output.close();
             } catch (Exception ignored) {
+                logger.info("Could not close settings file.", ignored);
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.error("Could not store settings.", e);
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.error("Could not store settings.", e);
         }
     }
 
