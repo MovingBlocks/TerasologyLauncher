@@ -24,11 +24,6 @@ import org.terasologylauncher.version.TerasologyLauncherVersion;
 
 import javax.swing.JOptionPane;
 import java.awt.Frame;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Properties;
 
 /** @author Skaldarnar */
@@ -48,8 +43,7 @@ public class TerasologyLauncher {
         System.out.println("Checking for launcher update took " + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
-        TerasologyDirectories dirs = new TerasologyDirectories();
-        dirs.getLauncherDir().mkdirs();
+        TerasologyDirectories.getLauncherDir().mkdirs();
 
         System.out.println("Setting up directories took " + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();

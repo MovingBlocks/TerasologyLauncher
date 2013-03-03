@@ -53,9 +53,9 @@ public final class Memory {
     public static final Memory DEFAULT_MEM = MEMORY_OPTIONS[ 0 ];
     public static final int MAX_32_BIT_MEMORY = 512;
 
-    private int memory;
-    private String label;
-    private int optNo;
+    private final int memory;
+    private final String label;
+    private final int optNo;
 
     private Memory(int memory, String label, int optNo) {
         this.memory = memory;

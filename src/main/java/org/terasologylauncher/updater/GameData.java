@@ -64,7 +64,7 @@ public class GameData {
         if (upstreamVersionNightly == -1) {
             URL url;
             try {
-                url = new URL(new StringBuilder().append(JENKINS).append(NIGHTLY_JOB_NAME).append("/").append(LAST_SUCCESSFUL_BUILD_NUMBER).toString());
+                url = new URL(JENKINS + NIGHTLY_JOB_NAME + "/" + LAST_SUCCESSFUL_BUILD_NUMBER);
                 BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
                 upstreamVersionNightly = Integer.parseInt(in.readLine());
                 try {
@@ -86,8 +86,7 @@ public class GameData {
         if (upstreamVersionStable == -1) {
             URL url;
             try {
-                url = new URL(new StringBuilder().append(JENKINS).append(STABLE_JOB_NAME).append("/").append(LAST_SUCCESSFUL_BUILD_NUMBER)
-                    .toString());
+                url = new URL(JENKINS + STABLE_JOB_NAME + "/" + LAST_SUCCESSFUL_BUILD_NUMBER);
                 BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
                 upstreamVersionStable = Integer.parseInt(in.readLine());
                 try {

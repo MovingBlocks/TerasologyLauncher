@@ -97,6 +97,7 @@ public class Settings {
                 } catch (Exception ignored) {
                 }
             } catch (Exception e) {
+                System.out.println("Can't load setting!");
             }
         }
         return defaultProperties;
