@@ -347,17 +347,17 @@ public class LauncherFrame extends JFrame implements ActionListener {
     /**
      * recursively deletes the directory and all of its content.
      *
-     * @param f
+     * @param directory directory
      */
-    private void deleteDirectory(File f) {
-        for (File sub : f.listFiles()) {
+    private void deleteDirectory(File directory) {
+        for (File sub : directory.listFiles()) {
             if (sub.isFile()) {
                 sub.delete();
             } else {
                 deleteDirectory(sub);
             }
         }
-        f.delete();
+        directory.delete();
     }
 
     /**

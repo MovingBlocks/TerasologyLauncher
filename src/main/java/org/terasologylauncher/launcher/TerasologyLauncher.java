@@ -43,8 +43,7 @@ public class TerasologyLauncher {
         System.out.println("Checking for launcher update took " + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
-        TerasologyDirectories dirs = new TerasologyDirectories();
-        dirs.getLauncherDir().mkdirs();
+        TerasologyDirectories.getLauncherDir().mkdirs();
 
         System.out.println("Setting up directories took " + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
