@@ -16,6 +16,8 @@
 
 package org.terasologylauncher.updater;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
 import org.terasologylauncher.util.Utils;
@@ -38,6 +40,8 @@ import java.net.URL;
  * @author Skaldarnar
  */
 public class GameDownloader extends SwingWorker<Void, Void> {
+
+    private static final Logger logger = LoggerFactory.getLogger(GameDownloader.class);
 
     public static final String ZIP_FILE = "Terasology.zip";
 
@@ -118,16 +122,16 @@ public class GameDownloader extends SwingWorker<Void, Void> {
             }
 
         } catch (MalformedURLException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.error("Could not download game!", e);
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.error("Could not download game!", e);
         }
         return null;
     }
 
     @Override
     protected void done() {
-        System.out.println("Download is done");
+        logger.debug("Download is done");
         // unzip downloaded file
         progressBar.setValue(100);
         progressBar.setString("Extracting zip …");
@@ -139,7 +143,7 @@ public class GameDownloader extends SwingWorker<Void, Void> {
             ZIPUnpacker.extractArchive(zip);
 
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.error("Could not unzip game!", e);
         }
 
         progressBar.setString("Updating game info …");

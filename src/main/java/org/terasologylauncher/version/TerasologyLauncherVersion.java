@@ -16,12 +16,17 @@
 
 package org.terasologylauncher.version;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 /** @author Mathias Kalb */
 public final class TerasologyLauncherVersion {
+
+    private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncherVersion.class);
 
     private static TerasologyLauncherVersion instance;
 
@@ -53,7 +58,7 @@ public final class TerasologyLauncherVersion {
             try {
                 properties.load(inStream);
             } catch (final IOException e) {
-                // TODO logger.error("Loading {} failed", VERSION_INFO_FILE, e);
+                logger.error("Loading file failed", e);
             } finally {
                 // JAVA7 : cleanup
                 try {
@@ -61,7 +66,7 @@ public final class TerasologyLauncherVersion {
                         inStream.close();
                     }
                 } catch (final IOException e) {
-                    // TODO logger.error("Closing {} failed", VERSION_INFO_FILE, e);
+                    logger.info("Closing file failed", e);
                 }
             }
         }

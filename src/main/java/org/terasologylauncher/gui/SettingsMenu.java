@@ -16,6 +16,8 @@
 
 package org.terasologylauncher.gui;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.Versions;
@@ -41,6 +43,9 @@ import java.net.URL;
 
 /** @author Skaldarnar */
 public class SettingsMenu extends JDialog implements ActionListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(SettingsMenu.class);
+
     public static final URL ICON = LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png");
 
     private static final String SAVE_ACTION = "save";
@@ -323,8 +328,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private void populateVersions(JComboBox buildVersion) {
         BuildType currentType = Settings.getBuildType();
 
-        System.out.println(Settings.getBuildVersion(BuildType.STABLE));
-        System.out.println(Settings.getBuildVersion(BuildType.NIGHTLY));
+        logger.debug(Settings.getBuildVersion(BuildType.STABLE));
+        logger.debug(Settings.getBuildVersion(BuildType.NIGHTLY));
 
         // init versions
         Versions.getVersions(BuildType.STABLE);
@@ -358,9 +363,9 @@ public class SettingsMenu extends JDialog implements ActionListener {
         // limit max memory for 32bit JVM
         if (!bit64) {
             max = Math.min(Memory.MAX_32_BIT_MEMORY, max);
-            System.out.println("Maximal usable memory for 32 bit JVM: " + max);
+            logger.debug("Maximal usable memory for 32 bit JVM: {}", max);
         } else {
-            System.out.println("Maximal usable memory for 64 bit JVM: " + max);
+            logger.debug("Maximal usable memory for 64 bit JVM: {}", max);
         }
 
         // fill in the combo box entries

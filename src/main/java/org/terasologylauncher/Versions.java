@@ -16,6 +16,8 @@
 
 package org.terasologylauncher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasologylauncher.updater.GameData;
 
 import java.util.ArrayList;
@@ -23,6 +25,9 @@ import java.util.List;
 
 /** @author Skaldarnar */
 public class Versions {
+
+    private static final Logger logger = LoggerFactory.getLogger(Versions.class);
+
     private static final String UPDATER_URL = "http://updater.movingblocks.net/";
     private static final String STABLE_VER = "stable.ver";
     private static final String UNSTABLE_VER = "unstable.ver";
@@ -60,7 +65,7 @@ public class Versions {
                     nightlyVersions.add(String.valueOf(i));
                 }
             } catch (Exception e) {
-                // TODO logger.error("Retrieving latest nightly version build number failed.", e);
+                logger.error("Retrieving latest nightly version build number failed.", e);
             }
         }
         return nightlyVersions;
@@ -81,7 +86,7 @@ public class Versions {
                     stableVersions.add(String.valueOf(i));
                 }
             } catch (Exception e) {
-                // TODO logger.error("Retrieving latest stable version build number failed.", e);
+                logger.error("Retrieving latest stable version build number failed.", e);
             }
         }
         return stableVersions;
