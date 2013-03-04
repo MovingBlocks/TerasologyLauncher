@@ -16,6 +16,8 @@
 
 package org.terasologylauncher.launcher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
 import org.terasologylauncher.updater.GameData;
@@ -29,23 +31,23 @@ import java.util.Properties;
 /** @author Skaldarnar */
 public class TerasologyLauncher {
 
+    private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncher.class);
+
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
         final long startUpTime = start;
 
         //TODO: Add splash screen
 
-        //TODO: Init logger
-
         //TODO: check for launcher update
-        System.out.println("Launcher build number: " + TerasologyLauncherVersion.getInstance().getBuildNumber());
+        logger.debug("Launcher build number: {}", TerasologyLauncherVersion.getInstance().getBuildNumber());
 
-        System.out.println("Checking for launcher update took " + (System.currentTimeMillis() - start) + "ms");
+        logger.debug("Checking for launcher update took {}", (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
         TerasologyDirectories.getLauncherDir().mkdirs();
 
-        System.out.println("Setting up directories took " + (System.currentTimeMillis() - start) + "ms");
+        logger.debug("Setting up directories took {}", (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
         if (Settings.getProperties() == null) {
@@ -56,7 +58,7 @@ public class TerasologyLauncher {
             Settings.setProperties(properties);
         }
 
-        System.out.println("Reading settings/properties took " + (System.currentTimeMillis() - start) + "ms");
+        logger.debug("Reading settings/properties took {}", (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
         if (!GameData.checkInternetConnection()) {
@@ -64,7 +66,7 @@ public class TerasologyLauncher {
                 "No internet connection!", JOptionPane.WARNING_MESSAGE);
         }
 
-        System.out.println("Checking internet connection took " + (System.currentTimeMillis() - start) + "ms");
+        logger.debug("Checking internet connection took {}", (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
         //TODO: Add Debug console
@@ -72,7 +74,7 @@ public class TerasologyLauncher {
         // Setup launcher frame and display
         Frame frame = new LauncherFrame();
 
-        System.out.println("Creating window took " + (System.currentTimeMillis() - start) + "ms");
+        logger.debug("Creating window took {}", (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
         //TODO: Check for game update
@@ -80,10 +82,10 @@ public class TerasologyLauncher {
         //TODO: dispose splash screen
         frame.setVisible(true);
 
-        System.out.println("Setting visible took " + (System.currentTimeMillis() - start) + "ms");
+        logger.debug("Setting visible took {}", (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
-        System.out.println("Startup took " + (System.currentTimeMillis() - startUpTime) + " ms");
+        logger.debug("Startup took {}", (System.currentTimeMillis() - startUpTime) + " ms");
     }
 
 }

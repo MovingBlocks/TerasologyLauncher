@@ -16,6 +16,8 @@
 
 package org.terasologylauncher.launcher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.util.OperatingSystem;
@@ -31,6 +33,8 @@ import java.util.List;
  */
 public class TerasologyStarter {
 
+    private static final Logger logger = LoggerFactory.getLogger(TerasologyStarter.class);
+
     public static boolean startGame() {
         OperatingSystem os = OperatingSystem.getOS();
         if (os.isWindows()) {
@@ -40,7 +44,7 @@ public class TerasologyStarter {
         } else if (os.isUnix()) {
             return startLinux();
         } else {
-            System.out.println("Unknown operating system - cannot start game!");
+            logger.error("Unknown operating system - cannot start game! {}", os);
         }
         return false;
     }
@@ -56,7 +60,7 @@ public class TerasologyStarter {
         try {
             pb.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Could not start game!", e);
             return false;
         }
         return true;
@@ -73,7 +77,7 @@ public class TerasologyStarter {
         try {
             pb.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Could not start game!", e);
             return false;
         }
         return true;
@@ -90,7 +94,7 @@ public class TerasologyStarter {
         try {
             pb.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Could not start game!", e);
             return false;
         }
         return true;
