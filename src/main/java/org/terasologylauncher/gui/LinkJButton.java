@@ -16,6 +16,9 @@
 
 package org.terasologylauncher.gui;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.Desktop;
@@ -30,6 +33,8 @@ import java.net.URISyntaxException;
  * @author Skaldarnar
  */
 public class LinkJButton extends JButton {
+
+    private static final Logger logger = LoggerFactory.getLogger(LinkJButton.class);
 
     private final String url;
     private ImageIcon hoverIcon;
@@ -49,7 +54,7 @@ public class LinkJButton extends JButton {
                 uri = new java.net.URI(url);
                 browse(uri);
             } catch (URISyntaxException e1) {
-                e1.printStackTrace();
+                logger.error("Button failed!", e1);
             }
         }
 
@@ -59,7 +64,7 @@ public class LinkJButton extends JButton {
                 try {
                     desktop.browse(uri);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("Button failed!", e);
                 }
             }
         }
