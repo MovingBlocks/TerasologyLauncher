@@ -16,6 +16,9 @@
 
 package org.terasologylauncher.gui;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.JLabel;
 import java.awt.Color;
 import java.awt.Desktop;
@@ -27,6 +30,8 @@ import java.net.URISyntaxException;
 
 /** @author Skaldarnar */
 public class LinkJLabel extends JLabel implements MouseListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(LinkJLabel.class);
 
     private static final long CLICK_DELAY = 200L;
     private long lastClicked = System.currentTimeMillis();
@@ -53,7 +58,7 @@ public class LinkJLabel extends JLabel implements MouseListener {
             URI uri = new URI(url);
             browse(uri);
         } catch (URISyntaxException e1) {
-            e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.error("Link failed!", e1);
         }
     }
 
@@ -63,7 +68,7 @@ public class LinkJLabel extends JLabel implements MouseListener {
             try {
                 desktop.browse(uri);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Link failed!", e);
             }
         }
     }

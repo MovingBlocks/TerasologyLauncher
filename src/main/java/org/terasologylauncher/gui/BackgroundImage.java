@@ -16,6 +16,9 @@
 
 package org.terasologylauncher.gui;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -32,6 +35,8 @@ import java.io.InputStream;
  */
 public class BackgroundImage extends JLabel {
 
+    private static final Logger logger = LoggerFactory.getLogger(BackgroundImage.class);
+
     public BackgroundImage(int width, int height) {
         setVerticalAlignment(SwingConstants.CENTER);
         setHorizontalAlignment(SwingConstants.CENTER);
@@ -45,7 +50,7 @@ public class BackgroundImage extends JLabel {
             bg = ImageIO.read(stream);
             //TODO: Apply blur filter
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Could not read background image.", e);
             bg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         }
 

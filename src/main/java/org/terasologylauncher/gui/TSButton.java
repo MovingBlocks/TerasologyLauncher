@@ -16,6 +16,9 @@
 
 package org.terasologylauncher.gui;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -35,6 +38,8 @@ import java.awt.image.BufferedImage;
  */
 public class TSButton extends JButton implements MouseListener {
 
+    private static final Logger logger = LoggerFactory.getLogger(TSButton.class);
+
     private BufferedImage normalImg;
     private BufferedImage hoveredImg;
     private BufferedImage pressedImg;
@@ -52,7 +57,7 @@ public class TSButton extends JButton implements MouseListener {
             hoveredImg = ImageIO.read(TSButton.class.getResourceAsStream("/org/terasologylauncher/images/button_hovered.png"));
             pressedImg = ImageIO.read(TSButton.class.getResourceAsStream("/org/terasologylauncher/images/button_pressed.png"));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Read button images failed!", e);
             normalImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);
             hoveredImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);
             pressedImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);
