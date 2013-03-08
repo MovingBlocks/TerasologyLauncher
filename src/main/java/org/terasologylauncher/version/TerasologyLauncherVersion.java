@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-/** @author Mathias Kalb */
+/**
+ * @author Mathias Kalb
+ */
 public final class TerasologyLauncherVersion {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncherVersion.class);

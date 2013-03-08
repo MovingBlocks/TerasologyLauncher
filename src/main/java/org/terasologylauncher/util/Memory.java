@@ -28,6 +28,7 @@
 package org.terasologylauncher.util;
 
 public final class Memory {
+
     public static final Memory[] MEMORY_OPTIONS = {
         (new Memory(256, "256 MB", 0)),
         (new Memory(512, "512 MB", 1)),
@@ -50,7 +51,7 @@ public final class Memory {
         (new Memory(15360, "15 GB", 18)),
         (new Memory(16384, "16 GB", 19)),
     };
-    public static final Memory DEFAULT_MEM = MEMORY_OPTIONS[ 0 ];
+    public static final Memory DEFAULT_MEM = MEMORY_OPTIONS[0];
     public static final int MAX_32_BIT_MEMORY = 512;
 
     private final int memory;
@@ -86,7 +87,7 @@ public final class Memory {
 
     public static int getMemoryIndexFromId(int id) {
         for (int i = 0; i < MEMORY_OPTIONS.length; i++) {
-            if (MEMORY_OPTIONS[ i ].optNo == id) {
+            if (MEMORY_OPTIONS[i].optNo == id) {
                 return i;
             }
         }

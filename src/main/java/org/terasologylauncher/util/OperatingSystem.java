@@ -16,6 +16,7 @@
 package org.terasologylauncher.util;
 
 public enum OperatingSystem {
+
     UNIX("Unix"),
     LINUX("Linux"),
     SOLARIS("Solaris"),
@@ -43,7 +44,8 @@ public enum OperatingSystem {
     }
 
     public boolean isWindows() {
-        return this == WINDOWS_XP || this == WINDOWS_VISTA || this == WINDOWS_7 || this == WINDOWS_8 || this == WINDOWS_UNKNOWN;
+        return this == WINDOWS_XP || this == WINDOWS_VISTA || this == WINDOWS_7 || this == WINDOWS_8
+            || this == WINDOWS_UNKNOWN;
     }
 
     public static OperatingSystem getOS() {

@@ -17,6 +17,7 @@
 package org.terasologylauncher;
 
 public enum BuildType {
+
     STABLE(0),
     NIGHTLY(1);
 

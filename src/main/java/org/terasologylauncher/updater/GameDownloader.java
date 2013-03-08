@@ -39,11 +39,11 @@ import java.net.URL;
  * @author MrBarsack
  * @author Skaldarnar
  */
-public class GameDownloader extends SwingWorker<Void, Void> {
-
-    private static final Logger logger = LoggerFactory.getLogger(GameDownloader.class);
+public final class GameDownloader extends SwingWorker<Void, Void> {
 
     public static final String ZIP_FILE = "Terasology.zip";
+
+    private static final Logger logger = LoggerFactory.getLogger(GameDownloader.class);
 
     private final JProgressBar progressBar;
     private final LauncherFrame frame;
@@ -103,7 +103,7 @@ public class GameDownloader extends SwingWorker<Void, Void> {
                 in = url.openConnection().getInputStream();
                 out = new FileOutputStream(file);
 
-                byte[] buffer = new byte[ 2048 ];
+                byte[] buffer = new byte[2048];
 
                 for (int n; (n = in.read(buffer)) != -1; out.write(buffer, 0, n)) {
                     long fileSizeMB = file.length() / 1024 / 1024;

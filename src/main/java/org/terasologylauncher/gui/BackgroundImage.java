@@ -37,7 +37,7 @@ public class BackgroundImage extends JLabel {
 
     private static final Logger logger = LoggerFactory.getLogger(BackgroundImage.class);
 
-    public BackgroundImage(int width, int height) {
+    public BackgroundImage(final int width, final int height) {
         setVerticalAlignment(SwingConstants.CENTER);
         setHorizontalAlignment(SwingConstants.CENTER);
         setBounds(0, 0, width, height);

@@ -44,8 +44,8 @@ public class TSButton extends JButton implements MouseListener {
     private BufferedImage hoveredImg;
     private BufferedImage pressedImg;
 
-    private boolean pressed = false;
-    private boolean hovered = false;
+    private boolean pressed;
+    private boolean hovered;
 
     public TSButton(String text) {
         super(text);
