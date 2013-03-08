@@ -38,13 +38,16 @@ import java.util.Properties;
  *
  * @author Skaldarnar
  */
-public class Settings {
-
-    private static final Logger logger = LoggerFactory.getLogger(Settings.class);
+public final class Settings {
 
     public static final String SETTINGS_FILE_NAME = "launcher.settings";
 
+    private static final Logger logger = LoggerFactory.getLogger(Settings.class);
+
     private static Properties properties;
+
+    private Settings() {
+    }
 
     public static void setProperties(Properties properties) {
         if (Settings.properties != null) {
@@ -139,8 +142,9 @@ public class Settings {
     }
 
     /**
-     * Sets the build version property, depending on the build version. The key for stable build is <code>stableBuildVersion</code>, the key
-     * for nightly build is <code>nightlyBuildVersion</code>
+     * Sets the build version property, depending on the build version.
+     * The key for stable build is <code>stableBuildVersion</code>,
+     * the key for nightly build is <code>nightlyBuildVersion</code>.
      *
      * @param version the version number
      * @param type    the build type of the game
@@ -157,7 +161,9 @@ public class Settings {
         properties.setProperty("maxMemory", String.valueOf(memoryID));
     }
 
-    /** @return the option id of the memory object. */
+    /**
+     * @return the option id of the memory object.
+     */
     public static synchronized int getMaximalMemory() {
         return Integer.parseInt(properties.getProperty("maxMemory"));
     }
@@ -166,7 +172,9 @@ public class Settings {
         properties.setProperty("initialMemory", String.valueOf(memoryID));
     }
 
-    /** @return the option id of the memory object or -1 for "None". */
+    /**
+     * @return the option id of the memory object or -1 for "None".
+     */
     public static synchronized int getInitialMemory() {
         return Integer.parseInt(properties.getProperty("initialMemory"));
     }

@@ -49,8 +49,11 @@ import java.io.File;
 import java.net.URL;
 import java.util.logging.Logger;
 
-/** @author Skaldarnar */
+/**
+ * @author Skaldarnar
+ */
 public class LauncherFrame extends JFrame implements ActionListener {
+
     public static final URL ICON = LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png");
 
     private static final int FRAME_WIDTH = 880;
@@ -317,10 +320,10 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Check if the file can be deleted on clean up action. The only files/directories kept are "SAVED_WORLDS", "screens" and "launcher".
+     * Check if the file can be deleted on clean up action.
+     * The only files/directories kept are "SAVED_WORLDS", "screens" and "launcher".
      *
      * @param f the file to check
-     *
      * @return true if the file can be deleted
      */
     private boolean canBeDeleted(File f) {
@@ -361,8 +364,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Updates the start button with regard to the selected settings, the internet connection and the installed game. Changes the button
-     * text and action command ("start" or "download").
+     * Updates the start button with regard to the selected settings, the internet connection and the installed game.
+     * Changes the button text and action command ("start" or "download").
      */
     public void updateStartButton() {
         if (GameData.checkInternetConnection()) {

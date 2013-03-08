@@ -24,6 +24,7 @@ import java.io.File;
  * @author Skaldarnar
  */
 public final class TerasologyDirectories {
+
     public static final String BACKUP_DIR_NAME = "backups";
     public static final String LAUNCHER_DIR_NAME = "launcher";
     public static final String SAVED_WORLDS_DIR_NAME = "SAVED_WORLDS";
@@ -37,6 +38,9 @@ public final class TerasologyDirectories {
     private static final File SAVED_WORLDS_DIR = new File(Utils.getWorkingDirectory(), SAVED_WORLDS_DIR_NAME);
     private static final File SCREENSHOTS_DIR = new File(Utils.getWorkingDirectory(), SCREENSHOTS_DIR_NAME);
     private static final File MODS_DIR = new File(Utils.getWorkingDirectory(), MODS_DIR_NAME);
+
+    private TerasologyDirectories() {
+    }
 
     public static File getBackupDir() {
         return BACKUP_DIR;

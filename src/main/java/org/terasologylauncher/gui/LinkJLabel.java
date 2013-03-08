@@ -28,16 +28,18 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-/** @author Skaldarnar */
+/**
+ * @author Skaldarnar
+ */
 public class LinkJLabel extends JLabel implements MouseListener {
 
     private static final Logger logger = LoggerFactory.getLogger(LinkJLabel.class);
 
     private static final long CLICK_DELAY = 200L;
-    private long lastClicked = System.currentTimeMillis();
-
     private static final Color HOVER_COLOR = Color.DARK_GRAY;
     private static final Color STANDARD_COLOR = Color.LIGHT_GRAY;
+
+    private long lastClicked = System.currentTimeMillis();
 
     private String url;
 
