@@ -31,9 +31,12 @@ import java.util.List;
  * @author MrBarsack
  * @author Skaldarnar
  */
-public class TerasologyStarter {
+public final class TerasologyStarter {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyStarter.class);
+
+    private TerasologyStarter() {
+    }
 
     public static boolean startGame() {
         OperatingSystem os = OperatingSystem.getOS();

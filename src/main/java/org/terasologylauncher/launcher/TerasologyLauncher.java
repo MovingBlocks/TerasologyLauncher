@@ -28,10 +28,15 @@ import javax.swing.JOptionPane;
 import java.awt.Frame;
 import java.util.Properties;
 
-/** @author Skaldarnar */
-public class TerasologyLauncher {
+/**
+ * @author Skaldarnar
+ */
+public final class TerasologyLauncher {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncher.class);
+
+    private TerasologyLauncher() {
+    }
 
     public static void main(String[] args) {
         long start = System.currentTimeMillis();

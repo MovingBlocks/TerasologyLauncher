@@ -29,7 +29,10 @@ import java.util.zip.ZipFile;
  * @author MrBarsack
  * @author Skaldarnar
  */
-public class ZIPUnpacker {
+public final class ZIPUnpacker {
+
+    private ZIPUnpacker() {
+    }
 
     public static void extractArchive(File archive) throws IOException {
         extractArchive(archive, archive.getParentFile());
@@ -42,7 +45,7 @@ public class ZIPUnpacker {
         ZipFile zipFile = new ZipFile(archive);
         Enumeration entries = zipFile.entries();
 
-        byte[] buffer = new byte[ 8192 ];
+        byte[] buffer = new byte[8192];
         int length;
 
         while (entries.hasMoreElements()) {

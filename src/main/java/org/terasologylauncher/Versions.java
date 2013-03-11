@@ -23,8 +23,10 @@ import org.terasologylauncher.updater.GameData;
 import java.util.ArrayList;
 import java.util.List;
 
-/** @author Skaldarnar */
-public class Versions {
+/**
+ * @author Skaldarnar
+ */
+public final class Versions {
 
     private static final Logger logger = LoggerFactory.getLogger(Versions.class);
 
@@ -32,8 +34,11 @@ public class Versions {
     private static final String STABLE_VER = "stable.ver";
     private static final String UNSTABLE_VER = "unstable.ver";
 
-    private static List<String> stableVersions = null;
-    private static List<String> nightlyVersions = null;
+    private static List<String> stableVersions;
+    private static List<String> nightlyVersions;
+
+    private Versions() {
+    }
 
     public static List<String> getVersions(BuildType buildType) {
         if (!GameData.checkInternetConnection()) {

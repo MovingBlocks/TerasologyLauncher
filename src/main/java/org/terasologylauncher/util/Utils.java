@@ -18,10 +18,16 @@ package org.terasologylauncher.util;
 
 import java.io.File;
 
-/** @author Skaldarnar */
-public class Utils {
+/**
+ * @author Skaldarnar
+ */
+public final class Utils {
+
     // TODO: collaborate with TerasologyDirectories!
-    private static File workDir = null;
+    private static File workDir;
+
+    private Utils() {
+    }
 
     public static File getWorkingDirectory() {
         if (workDir == null) {

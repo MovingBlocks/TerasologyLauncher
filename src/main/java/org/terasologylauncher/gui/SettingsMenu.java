@@ -41,12 +41,14 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.net.URL;
 
-/** @author Skaldarnar */
+/**
+ * @author Skaldarnar
+ */
 public class SettingsMenu extends JDialog implements ActionListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(SettingsMenu.class);
-
     public static final URL ICON = LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png");
+
+    private static final Logger logger = LoggerFactory.getLogger(SettingsMenu.class);
 
     private static final String SAVE_ACTION = "save";
     private static final String CANCEL_ACTION = "cancel";
@@ -60,8 +62,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private static final String OPEN_SCREENS_DIR_ACTION = "openScreens";
 
     /* To save the selected index when switching between different build types. */
-    private int stableVersionIdx = 0;
-    private int nightlyVersionIdx = 0;
+    private int stableVersionIdx;
+    private int nightlyVersionIdx;
 
     private JTabbedPane mainSettings;
 
@@ -380,14 +382,14 @@ public class SettingsMenu extends JDialog implements ActionListener {
             maxMem.setSelectedIndex(Memory.getMemoryIndexFromId(memoryOptionID));
         } catch (IllegalArgumentException e) {
             maxMem.removeAllItems();
-            maxMem.addItem(String.valueOf(Memory.MEMORY_OPTIONS[ 0 ]));
+            maxMem.addItem(String.valueOf(Memory.MEMORY_OPTIONS[0]));
             Settings.setMaximalMemory(0); // 0 == 256 MB
             maxMem.setSelectedIndex(0); // 1st element
         }
     }
 
     private void populateInitialMemory(JComboBox initialMemory) {
-        int currentMemSetting = Memory.MEMORY_OPTIONS[ maxMem.getSelectedIndex() ].getMemoryMB();
+        int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
 
         initialMem.removeAllItems();
         initialMemory.addItem("None");
@@ -437,10 +439,10 @@ public class SettingsMenu extends JDialog implements ActionListener {
             Settings.setBuildVersion(String.valueOf(buildVersion.getSelectedItem()), selectedType);
 
             // save ram settings
-            Settings.setMaximalMemory(Memory.MEMORY_OPTIONS[ maxMem.getSelectedIndex() ].getSettingsId());
+            Settings.setMaximalMemory(Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getSettingsId());
             int selectedInitMem = initialMem.getSelectedIndex();
             if (selectedInitMem > 0) {
-                Settings.setInitialMemory(Memory.MEMORY_OPTIONS[ initialMem.getSelectedIndex() - 1 ].getSettingsId());
+                Settings.setInitialMemory(Memory.MEMORY_OPTIONS[initialMem.getSelectedIndex() - 1].getSettingsId());
             } else {
                 Settings.setInitialMemory(-1);
             }
@@ -456,7 +458,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private void updateInitMemBox(JComboBox initialMem) {
         int currentIdx = initialMem.getSelectedIndex();
 
-        int currentMemSetting = Memory.MEMORY_OPTIONS[ maxMem.getSelectedIndex() ].getMemoryMB();
+        int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
         initialMem.removeAllItems();
         initialMem.addItem("None");
         for (Memory m : Memory.MEMORY_OPTIONS) {

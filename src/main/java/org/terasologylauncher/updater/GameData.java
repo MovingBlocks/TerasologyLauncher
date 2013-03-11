@@ -32,19 +32,19 @@ import java.net.URLConnection;
 import java.util.Scanner;
 
 /**
- * The GameData class provides access to information on the installed game version and type, if an internet connection is available and
- * whether the game could be updated to a newer version.
+ * The GameData class provides access to information on the installed game version and type, if an internet connection
+ * is available and whether the game could be updated to a newer version.
  *
  * @author Skaldarnar
  */
-public class GameData {
-
-    private static final Logger logger = LoggerFactory.getLogger(GameData.class);
+public final class GameData {
 
     public static final String JENKINS = "http://jenkins.movingblocks.net/job/";
     public static final String STABLE_JOB_NAME = "TerasologyStable";
     public static final String NIGHTLY_JOB_NAME = "Terasology";
     public static final String LAST_SUCCESSFUL_BUILD_NUMBER = "lastSuccessfulBuild/buildNumber";
+
+    private static final Logger logger = LoggerFactory.getLogger(GameData.class);
 
     private static File gameJar;
 
@@ -53,6 +53,9 @@ public class GameData {
 
     private static BuildType installedBuildType;
     private static int installedBuildVersion = -1;
+
+    private GameData() {
+    }
 
     public static boolean isGameInstalled() {
         return getGameJar().exists();
@@ -156,9 +159,9 @@ public class GameData {
                 while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
                     if (line.contains("Build number:")) {
-                        installedBuildVersion = Integer.parseInt(line.split(":")[ 1 ].trim());
+                        installedBuildVersion = Integer.parseInt(line.split(":")[1].trim());
                     } else if (line.contains("GIT branch:")) {
-                        String branch = line.split(":")[ 1 ].trim();
+                        String branch = line.split(":")[1].trim();
                         if (branch.equals("develop")) {
                             installedBuildType = BuildType.NIGHTLY;
                         } else {

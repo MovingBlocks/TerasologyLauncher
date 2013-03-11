@@ -28,7 +28,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 /**
- * Extends the standard JButton with linking capabilities, opening a browser with a specific URL (if supported by the system).
+ * Extends the standard JButton with linking capabilities,
+ * opening a browser with a specific URL (if supported by the system).
  *
  * @author Skaldarnar
  */
