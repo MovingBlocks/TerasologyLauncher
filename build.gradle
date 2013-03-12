@@ -85,7 +85,8 @@ jar {
     exclude "logback.xml"
     rename('logback_jar.xml', 'logback.xml')
     manifest {
-        attributes("Main-Class": mainClassName, "Implementation-Title": project.name, "Implementation-Version": env.BUILD_NUMBER + " " + env.GIT_BRANCH + " " + env.BUILD_ID)
+        def manifestClasspath = configurations.runtime.collect { it.getName() }.join(" ")
+        attributes("Main-Class": mainClassName, "Class-Path" : manifestClasspath, "Implementation-Title": project.name, "Implementation-Version": env.BUILD_NUMBER + " " + env.GIT_BRANCH + " " + env.BUILD_ID)
     }
 }
 
