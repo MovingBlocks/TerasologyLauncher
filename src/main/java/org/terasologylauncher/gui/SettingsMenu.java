@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.Versions;
+import org.terasologylauncher.util.BundleUtil;
 import org.terasologylauncher.util.Memory;
 
 import javax.swing.GroupLayout;
@@ -91,7 +92,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     public SettingsMenu() {
         initComponents();
 
-        setTitle("Settings");
+        setTitle(BundleUtil.getLabel("settings_title"));
         setResizable(false);
         setIconImage(Toolkit.getDefaultToolkit().getImage(ICON));
 
@@ -143,20 +144,20 @@ public class SettingsMenu extends JDialog implements ActionListener {
         /*================= Game Settings =================*/
         gameSettingsTab.setFont(settingsFont);
 
-        buildTypeLabel.setText("Build Type");
+        buildTypeLabel.setText(BundleUtil.getLabel("settings_game_buildType"));
         buildTypeLabel.setFont(settingsFont);
         buildType.setFont(settingsFont);
 
-        buildVersionLabel.setText("Build version:");
+        buildVersionLabel.setText(BundleUtil.getLabel("settings_game_buildVersion"));
         buildVersionLabel.setFont(settingsFont);
         buildVersion.setFont(settingsFont);
 
-        maxMemLabel.setText("Max. Memory:");
+        maxMemLabel.setText(BundleUtil.getLabel("settings_game_maxMemory"));
         maxMemLabel.setFont(settingsFont);
         maxMem.setFont(settingsFont);
         maxMem.addActionListener(this);
 
-        initialMemLabel.setText("Initial Memory:");
+        initialMemLabel.setText(BundleUtil.getLabel("settings_game_initialMemory"));
         initialMemLabel.setFont(settingsFont);
         initialMem.setFont(settingsFont);
 
@@ -203,32 +204,32 @@ public class SettingsMenu extends JDialog implements ActionListener {
                     .addContainerGap())
         );
 
-        mainSettings.addTab("Game", gameSettingsTab);
+        mainSettings.addTab(BundleUtil.getLabel("settings_game_title"), gameSettingsTab);
 
         /*================= Directory Settings =================*/
         directoriesTab.setFont(settingsFont);
 
-        final JLabel logDirLabel = new JLabel("Logs:");
+        final JLabel logDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_logs"));
         openLogDir.setFont(settingsFont);
-        openLogDir.setText("Open");
+        openLogDir.setText(BundleUtil.getLabel("settings_directories_open"));
         openLogDir.addActionListener(this);
         openLogDir.setActionCommand(OPEN_LOG_DIR_ACTION);
 
-        final JLabel savedWorldsDirLabel = new JLabel("Saved Worlds:");
+        final JLabel savedWorldsDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_savedWorlds"));
         openSavedWorldsDir.setFont(settingsFont);
-        openSavedWorldsDir.setText("Open");
+        openSavedWorldsDir.setText(BundleUtil.getLabel("settings_directories_open"));
         openSavedWorldsDir.addActionListener(this);
         openSavedWorldsDir.setActionCommand(OPEN_SAVED_DIR_ACTION);
 
-        final JLabel screenShotDirLabel = new JLabel("Screen Shots:");
+        final JLabel screenShotDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_screenShots"));
         openScreenShotsDir.setFont(settingsFont);
-        openScreenShotsDir.setText("Open");
+        openScreenShotsDir.setText(BundleUtil.getLabel("settings_directories_open"));
         openScreenShotsDir.addActionListener(this);
         openScreenShotsDir.setActionCommand(OPEN_SCREENS_DIR_ACTION);
 
-        final JLabel modsDirLabel = new JLabel("Mods:");
+        final JLabel modsDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_mods"));
         openModsDir.setFont(settingsFont);
-        openModsDir.setText("Open");
+        openModsDir.setText(BundleUtil.getLabel("settings_directories_open"));
         openModsDir.addActionListener(this);
         openModsDir.setActionCommand(OPEN_MOD_DIR_ACTION);
 
@@ -273,18 +274,18 @@ public class SettingsMenu extends JDialog implements ActionListener {
                 .addContainerGap()
         );
 
-        mainSettings.addTab("Directories", directoriesTab);
+        mainSettings.addTab(BundleUtil.getLabel("settings_directories_title"), directoriesTab);
 
         /*================== OK, Cancel, Reset ==================*/
-        resetButton.setText("Reset");
+        resetButton.setText(BundleUtil.getLabel("settings_reset"));
         resetButton.addActionListener(this);
         resetButton.setActionCommand(RESET_ACTION);
 
-        cancelButton.setText("Cancel");
+        cancelButton.setText(BundleUtil.getLabel("settings_cancel"));
         cancelButton.addActionListener(this);
         cancelButton.setActionCommand(CANCEL_ACTION);
 
-        saveButton.setText("Save");
+        saveButton.setText(BundleUtil.getLabel("settings_save"));
         saveButton.addActionListener(this);
         saveButton.setActionCommand(SAVE_ACTION);
 
@@ -319,8 +320,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private BuildType populateBuildType(final JComboBox buildType, int selection) {
-        buildType.addItem("Stable");
-        buildType.addItem("Nightly");
+        buildType.addItem(BundleUtil.getLabel("settings_game_buildType_stable"));
+        buildType.addItem(BundleUtil.getLabel("settings_game_buildType_nightly"));
         if ((selection > (buildType.getItemCount() - 1)) || (selection < 0)) {
             selection = 0;
         }
@@ -393,7 +394,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
 
         initialMem.removeAllItems();
-        initialMemory.addItem("None");
+        initialMemory.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
         for (final Memory m : Memory.MEMORY_OPTIONS) {
             if (currentMemSetting >= m.getMemoryMB()) {
                 initialMemory.addItem(m.getLabel());
@@ -408,7 +409,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
             initialMemory.setSelectedIndex(Memory.getMemoryIndexFromId(memoryOptionID) + 1);
         } catch (IllegalArgumentException e) {
             initialMemory.removeAllItems();
-            initialMemory.addItem("None");
+            initialMemory.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
             Settings.setInitialMemory(-1);
             initialMemory.setSelectedIndex(0);
         }
@@ -461,7 +462,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
 
         final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
         initialMem.removeAllItems();
-        initialMem.addItem("None");
+        initialMem.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
         for (final Memory m : Memory.MEMORY_OPTIONS) {
             if (currentMemSetting >= m.getMemoryMB()) {
                 initialMem.addItem(m.getLabel());

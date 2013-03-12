@@ -21,6 +21,7 @@ import org.terasologylauncher.Settings;
 import org.terasologylauncher.launcher.TerasologyStarter;
 import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.updater.GameDownloader;
+import org.terasologylauncher.util.BundleUtil;
 import org.terasologylauncher.util.TerasologyDirectories;
 import org.terasologylauncher.util.Utils;
 
@@ -95,7 +96,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
     public LauncherFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle("Terasology Launcher");
+        setTitle(BundleUtil.getLabel("launcher_title"));
         setIconImage(Toolkit.getDefaultToolkit().getImage(ICON));
 
         initComponents();
@@ -117,19 +118,19 @@ public class LauncherFrame extends JFrame implements ActionListener {
         }
 
         // Setup start button
-        start = new TSButton("Start");
+        start = new TSButton(BundleUtil.getLabel("launcher_start"));
         start.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - 40) + yShift, 96, 32);
         start.setActionCommand(START_ACTION);
         start.addActionListener(this);
 
         // Options Button
-        settings = new TSButton("Settings");
+        settings = new TSButton(BundleUtil.getLabel("launcher_settings"));
         settings.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - (2 * 40)) + yShift, 96, 32);
         settings.setActionCommand(SETTINGS_ACTION);
         settings.addActionListener(this);
 
         // Cancel button
-        cancel = new TSButton("Cancel");
+        cancel = new TSButton(BundleUtil.getLabel("launcher_cancel"));
         cancel.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70) + yShift, 96, 32);
         cancel.setActionCommand(CANCEL_ACTION);
         cancel.addActionListener(this);
@@ -154,6 +155,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
         infoTextPane.setForeground(Color.WHITE);
 
+        // TODO BundleUtil
         infoTextPane.setText("Lorem ipsum dolor sit amet, \n " +
             "consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore " +
             "\n magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores " +
@@ -186,17 +188,17 @@ public class LauncherFrame extends JFrame implements ActionListener {
         logo.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/logo.png")));
 
         // Forums link
-        forums = new LinkJLabel("Forums", "http://forum.movingblocks.net");
+        forums = new LinkJLabel(BundleUtil.getLabel("launcher_forum"), "http://forum.movingblocks.net");
         forums.setFont(forums.getFont().deriveFont(24f));
         forums.setBounds(480, 36, 96, 32);
 
         // Issues link
-        issues = new LinkJLabel("Issues", "https://github.com/Movingblocks/Terasology/issues");
+        issues = new LinkJLabel(BundleUtil.getLabel("launcher_issues"), "https://github.com/Movingblocks/Terasology/issues");
         issues.setFont(issues.getFont().deriveFont(24f));
         issues.setBounds(640, 36, 96, 32);
 
         // Mods
-        mods = new LinkJLabel("Mods", "http://www.terasologymods.net");
+        mods = new LinkJLabel(BundleUtil.getLabel("launcher_mods"), "http://www.terasologymods.net");
         mods.setFont(mods.getFont().deriveFont(24f));
         mods.setBounds(FRAME_WIDTH - 96 - 16 - xShift, 36, 96, 32);
 
@@ -294,7 +296,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
             if (TerasologyStarter.startGame()) {
                 System.exit(0);
             } else {
-                JOptionPane.showMessageDialog(null, "Could not start the game!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, BundleUtil.getLabel("message_error_gameStart"), BundleUtil.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
             }
         } else if (command.equals(DOWNLOAD_ACTION)) {
             // cleanup the directories (keep savedWorlds and screen shots)
@@ -385,27 +387,27 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
                 if (installedVersion == selectedVersion) {
                     // game can be started
-                    start.setText("Start");
+                    start.setText(BundleUtil.getLabel("launcher_start"));
                     start.setActionCommand(START_ACTION);
                 } else {
                     // differentiate between up- and downgrade
                     if (installedVersion < selectedVersion) {
-                        start.setText("Update");
+                        start.setText(BundleUtil.getLabel("launcher_update"));
                         start.setActionCommand(DOWNLOAD_ACTION);
                     } else {
-                        start.setText("Downgrade");
+                        start.setText(BundleUtil.getLabel("launcher_downgrade"));
                         start.setActionCommand(DOWNLOAD_ACTION);
                     }
                 }
             } else {
                 // download other build type
-                start.setText("Download");
+                start.setText(BundleUtil.getLabel("launcher_download"));
                 start.setActionCommand(DOWNLOAD_ACTION);
             }
         } else {
             if (GameData.isGameInstalled()) {
                 // installed game can be started
-                start.setText("Start");
+                start.setText(BundleUtil.getLabel("launcher_start"));
                 start.setActionCommand(START_ACTION);
             } else {
                 // no game installed, and no way to download it...
