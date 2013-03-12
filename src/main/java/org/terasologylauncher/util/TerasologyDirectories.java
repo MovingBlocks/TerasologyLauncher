@@ -31,7 +31,6 @@ public final class TerasologyDirectories {
     public static final String SCREENSHOTS_DIR_NAME = "screens";
     public static final String MODS_DIR_NAME = "mods";
 
-
     private static final File BACKUP_DIR = new File(Utils.getWorkingDirectory(), BACKUP_DIR_NAME);
     private static final File LAUNCHER_DIR = new File(Utils.getWorkingDirectory(), LAUNCHER_DIR_NAME);
 

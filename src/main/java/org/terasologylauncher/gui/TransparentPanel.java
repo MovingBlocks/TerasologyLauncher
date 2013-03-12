@@ -29,22 +29,24 @@ import java.awt.Graphics2D;
  */
 public class TransparentPanel extends JPanel {
 
+    private static final long serialVersionUID = 1L;
+
     private float transparency = 1f;
 
-    public TransparentPanel(float transparency) {
+    public TransparentPanel(final float transparency) {
         this(transparency, Color.BLACK);
     }
 
-    public TransparentPanel(float transparency, Color color) {
+    public TransparentPanel(final float transparency, final Color color) {
         this.transparency = transparency;
-        this.setBorder(null);
-        this.setOpaque(true);
-        this.setBackground(color);
+        setBorder(null);
+        setOpaque(true);
+        setBackground(color);
     }
 
     @Override
-    public void paint(Graphics g) {
-        Graphics2D copy = (Graphics2D) g.create();
+    public void paint(final Graphics g) {
+        final Graphics2D copy = (Graphics2D) g.create();
         copy.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, transparency));
         super.paint(copy);
         copy.dispose();

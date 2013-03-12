@@ -56,6 +56,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
     public static final URL ICON = LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png");
 
+    private static final long serialVersionUID = 1L;
+
     private static final int FRAME_WIDTH = 880;
     private static final int FRAME_HEIGHT = 520;
 
@@ -92,7 +94,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
     private SettingsMenu settingsMenu;
 
     public LauncherFrame() {
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Terasology Launcher");
         setIconImage(Toolkit.getDefaultToolkit().getImage(ICON));
 
@@ -100,7 +102,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
         updateStartButton();
 
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        final Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds((dim.width - FRAME_WIDTH) / 2, (dim.height - FRAME_HEIGHT) / 2, FRAME_WIDTH, FRAME_HEIGHT);
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setResizable(false);
@@ -108,27 +110,27 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     private void initComponents() {
-        int xShift = 0;
+        final int xShift = 0;
         int yShift = 0;
-        if (this.isUndecorated()) {
+        if (isUndecorated()) {
             yShift += 30;
         }
 
         // Setup start button
         start = new TSButton("Start");
-        start.setBounds(FRAME_WIDTH - 96 - 16 - xShift, FRAME_HEIGHT - 70 - 40 + yShift, 96, 32);
+        start.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - 40) + yShift, 96, 32);
         start.setActionCommand(START_ACTION);
         start.addActionListener(this);
 
         // Options Button
         settings = new TSButton("Settings");
-        settings.setBounds(FRAME_WIDTH - 96 - 16 - xShift, FRAME_HEIGHT - 70 - 2 * 40 + yShift, 96, 32);
+        settings.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - (2 * 40)) + yShift, 96, 32);
         settings.setActionCommand(SETTINGS_ACTION);
         settings.addActionListener(this);
 
         // Cancel button
         cancel = new TSButton("Cancel");
-        cancel.setBounds(FRAME_WIDTH - 96 - 16 - xShift, FRAME_HEIGHT - 70 + yShift, 96, 32);
+        cancel.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70) + yShift, 96, 32);
         cancel.setActionCommand(CANCEL_ACTION);
         cancel.addActionListener(this);
 
@@ -167,7 +169,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
             "\n Lorem ipsum dolor sit amet.");
 
         //infoTextPane.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, updatePanelWidth - 16, updatePanelHeight - 16);
-        JScrollPane sp = new JScrollPane();
+        final JScrollPane sp = new JScrollPane();
         sp.getViewport().add(infoTextPane);
         sp.getVerticalScrollBar().setOpaque(false);
         sp.getVerticalScrollBar().setUI(new TSScrollBarUI());
@@ -179,7 +181,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
         sp.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, INFO_PANEL_WIDTH - 16, INFO_PANEL_HEIGHT - 16);
 
         // Terasology logo
-        JLabel logo = new JLabel();
+        final JLabel logo = new JLabel();
         logo.setBounds(8, 0, 400, 96);
         logo.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/logo.png")));
 
@@ -200,7 +202,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
         // Progress Bar
         progressBar = new JProgressBar();
-        progressBar.setBounds((FRAME_WIDTH / 2) - 200, FRAME_HEIGHT - 70 + yShift, 400, 23);
+        progressBar.setBounds((FRAME_WIDTH / 2) - 200, (FRAME_HEIGHT - 70) + yShift, 400, 23);
         progressBar.setVisible(false);
         progressBar.setStringPainted(true);
 
@@ -208,34 +210,34 @@ public class LauncherFrame extends JFrame implements ActionListener {
         github = new LinkJButton("https://github.com/Movingblocks/Terasology");
         github.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/github.png")));
         github.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/github_hover.png")));
-        github.setBounds(8 + xShift, FRAME_HEIGHT - 70 + yShift, 32, 32);
+        github.setBounds(8 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         github.setBorder(null);
 
         youtube = new LinkJButton("http://www.youtube.com/user/blockmaniaTV");
         youtube.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/youtube.png")));
         youtube.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/youtube_hover.png")));
-        youtube.setBounds(8 + 38 + xShift, FRAME_HEIGHT - 70 + yShift, 32, 32);
+        youtube.setBounds(8 + 38 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         youtube.setBorder(null);
 
         gplus = new LinkJButton("https://plus.google.com/b/103835217961917018533/103835217961917018533");
         gplus.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/gplus.png")));
         gplus.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/gplus_hover.png")));
-        gplus.setBounds(8 + 38 * 2 + xShift, FRAME_HEIGHT - 70 + yShift, 32, 32);
+        gplus.setBounds(8 + (38 * 2) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         gplus.setBorder(null);
 
         facebook = new LinkJButton("https://www.facebook.com/Terasology");
         facebook.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/facebook.png")));
         facebook.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/facebook_hover.png")));
-        facebook.setBounds(8 + 38 * 3 + xShift, FRAME_HEIGHT - 70 + yShift, 32, 32);
+        facebook.setBounds(8 + (38 * 3) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         facebook.setBorder(null);
 
         twitter = new LinkJButton("https://twitter.com/Terasology");
         twitter.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/twitter.png")));
         twitter.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/twitter_hover.png")));
-        twitter.setBounds(8 + 38 * 4 + xShift, FRAME_HEIGHT - 70 + yShift, 32, 32);
+        twitter.setBounds(8 + (38 * 4) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         twitter.setBorder(null);
 
-        Container contentPane = getContentPane();
+        final Container contentPane = getContentPane();
         contentPane.setLayout(null);
 
         contentPane.add(logo);
@@ -266,27 +268,27 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(final ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
             action(e.getActionCommand(), (JComponent) e.getSource());
         }
     }
 
-    private void action(String command, Component component) {
+    private void action(final String command, final Component component) {
         if (command.equals(SETTINGS_ACTION)) {
-            if (settingsMenu == null || !settingsMenu.isVisible()) {
+            if ((settingsMenu == null) || !settingsMenu.isVisible()) {
                 settingsMenu = new SettingsMenu();
                 settingsMenu.setModal(true);
                 settingsMenu.setVisible(true);
                 settingsMenu.addWindowListener(new WindowAdapter() {
                     @Override
-                    public void windowClosed(WindowEvent e) {
+                    public void windowClosed(final WindowEvent e) {
                         updateStartButton();
                     }
                 });
             }
         } else if (command.equals(CANCEL_ACTION)) {
-            this.dispose();
+            dispose();
             System.exit(0);
         } else if (command.equals(START_ACTION)) {
             if (TerasologyStarter.startGame()) {
@@ -304,11 +306,11 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Clean up the installation directory, that means delete all files and folders except of the files kept by <tt>canBeDeleted</tt>
-     * method.
+     * Clean up the installation directory, that means delete all files and folders except of the files kept by
+     * <tt>canBeDeleted</tt> method.
      */
     private void cleanUp() {
-        for (File f : Utils.getWorkingDirectory().listFiles()) {
+        for (final File f : Utils.getWorkingDirectory().listFiles()) {
             if (canBeDeleted(f)) {
                 if (f.isDirectory()) {
                     deleteDirectory(f);
@@ -326,9 +328,9 @@ public class LauncherFrame extends JFrame implements ActionListener {
      * @param f the file to check
      * @return true if the file can be deleted
      */
-    private boolean canBeDeleted(File f) {
+    private boolean canBeDeleted(final File f) {
         Logger.getAnonymousLogger().info(f.getName());
-        String fileName = f.getName();
+        final String fileName = f.getName();
         if (fileName.equals(TerasologyDirectories.LAUNCHER_DIR_NAME)) {
             return false;
         }
@@ -352,8 +354,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
      *
      * @param directory directory
      */
-    private void deleteDirectory(File directory) {
-        for (File sub : directory.listFiles()) {
+    private void deleteDirectory(final File directory) {
+        for (final File sub : directory.listFiles()) {
             if (sub.isFile()) {
                 sub.delete();
             } else {
@@ -370,15 +372,15 @@ public class LauncherFrame extends JFrame implements ActionListener {
     public void updateStartButton() {
         if (GameData.checkInternetConnection()) {
             // get the selected build type
-            BuildType selectedType = Settings.getBuildType();
+            final BuildType selectedType = Settings.getBuildType();
             // get the installed build type
-            BuildType installedType = GameData.getInstalledBuildType();
+            final BuildType installedType = GameData.getInstalledBuildType();
             if (selectedType == installedType) {
                 // check if update is possible
                 // therefore, get the installed version no. and the upstream version number
-                int installedVersion = GameData.getInstalledBuildVersion();
-                int upstreamVersion = GameData.getUpStreamVersion(installedType);
-                int selectedVersion = Settings.getBuildVersion(installedType).equals("Latest") ? upstreamVersion
+                final int installedVersion = GameData.getInstalledBuildVersion();
+                final int upstreamVersion = GameData.getUpStreamVersion(installedType);
+                final int selectedVersion = Settings.getBuildVersion(installedType).equals("Latest") ? upstreamVersion
                     : Integer.parseInt(Settings.getBuildVersion(installedType));
 
                 if (installedVersion == selectedVersion) {

@@ -36,15 +36,15 @@ public final class Utils {
         return workDir;
     }
 
-    private static File getWorkingDirectory(String applicationName) {
-        String userHome = System.getProperty("user.home", ".");
+    private static File getWorkingDirectory(final String applicationName) {
+        final String userHome = System.getProperty("user.home", ".");
         File workingDirectory;
 
-        OperatingSystem os = OperatingSystem.getOS();
+        final OperatingSystem os = OperatingSystem.getOS();
         if (os.isUnix()) {
             workingDirectory = new File(userHome, '.' + applicationName + '/');
         } else if (os.isWindows()) {
-            String applicationData = System.getenv("APPDATA");
+            final String applicationData = System.getenv("APPDATA");
             if (applicationData != null) {
                 workingDirectory = new File(applicationData, "." + applicationName + '/');
             } else {

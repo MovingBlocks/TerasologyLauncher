@@ -56,7 +56,7 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         progressBar.setString("Starting Download");
         addPropertyChangeListener(new PropertyChangeListener() {
             @Override
-            public void propertyChange(PropertyChangeEvent evt) {
+            public void propertyChange(final PropertyChangeEvent evt) {
                 if ("progress".equals(evt.getPropertyName())) {
                     progressBar.setString(null);
                     progressBar.setValue((Integer) evt.getNewValue());
@@ -68,7 +68,7 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
     @Override
     protected Void doInBackground() {
         // get the selected settings for the download
-        StringBuilder urlBuilder = new StringBuilder();
+        final StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(GameData.JENKINS);
         switch (Settings.getBuildType()) {
             case STABLE:
@@ -91,7 +91,7 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         File file = null;
         try {
             url = new URL(urlBuilder.toString());
-            long dataSize = url.openConnection().getContentLength() / 1024 / 1024;
+            final long dataSize = url.openConnection().getContentLength() / 1024 / 1024;
 
             InputStream in = null;
             OutputStream out = null;
@@ -103,10 +103,10 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
                 in = url.openConnection().getInputStream();
                 out = new FileOutputStream(file);
 
-                byte[] buffer = new byte[2048];
+                final byte[] buffer = new byte[2048];
 
                 for (int n; (n = in.read(buffer)) != -1; out.write(buffer, 0, n)) {
-                    long fileSizeMB = file.length() / 1024 / 1024;
+                    final long fileSizeMB = file.length() / 1024 / 1024;
                     float percentage = fileSizeMB / (float) dataSize;
                     percentage *= 100;
 

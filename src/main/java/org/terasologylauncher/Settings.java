@@ -49,7 +49,7 @@ public final class Settings {
     private Settings() {
     }
 
-    public static void setProperties(Properties properties) {
+    public static void setProperties(final Properties properties) {
         if (Settings.properties != null) {
             throw new IllegalArgumentException("Settings already set!");
         }
@@ -61,12 +61,12 @@ public final class Settings {
     }
 
     public static Properties setUpSettings() {
-        File settingsFile = new File(TerasologyDirectories.getLauncherDir(), SETTINGS_FILE_NAME);
-        Properties defaultProperties = new Properties();
+        final File settingsFile = new File(TerasologyDirectories.getLauncherDir(), SETTINGS_FILE_NAME);
+        final Properties defaultProperties = new Properties();
         // if the file does not exist, copy default file from launcher
         if (!settingsFile.exists()) {
             try {
-                InputStream input = TerasologyLauncher.class.getResourceAsStream("/launcher.settings");
+                final InputStream input = TerasologyLauncher.class.getResourceAsStream("/launcher.settings");
                 if (input != null) {
                     defaultProperties.load(input);
 
@@ -99,7 +99,7 @@ public final class Settings {
             }
         } else {
             try {
-                InputStream inputStream = new FileInputStream(settingsFile);
+                final InputStream inputStream = new FileInputStream(settingsFile);
                 defaultProperties.load(inputStream);
                 try {
                     inputStream.close();
@@ -114,9 +114,9 @@ public final class Settings {
     }
 
     public static void storeSettings() {
-        File settingsFile = new File(TerasologyDirectories.getLauncherDir(), SETTINGS_FILE_NAME);
+        final File settingsFile = new File(TerasologyDirectories.getLauncherDir(), SETTINGS_FILE_NAME);
         try {
-            OutputStream output = new FileOutputStream(settingsFile);
+            final OutputStream output = new FileOutputStream(settingsFile);
             properties.store(output, "Terasology Launcher settings");
             try {
                 output.close();
@@ -132,12 +132,12 @@ public final class Settings {
 
     /*============================== Settings access ================================*/
 
-    public static synchronized void setBuildType(BuildType type) {
+    public static synchronized void setBuildType(final BuildType type) {
         properties.setProperty("buildType", String.valueOf(type.type()));
     }
 
     public static synchronized BuildType getBuildType() {
-        int buildType = Integer.parseInt(properties.getProperty("buildType"));
+        final int buildType = Integer.parseInt(properties.getProperty("buildType"));
         return BuildType.getType(buildType);
     }
 
@@ -149,15 +149,15 @@ public final class Settings {
      * @param version the version number
      * @param type    the build type of the game
      */
-    public static synchronized void setBuildVersion(String version, BuildType type) {
+    public static synchronized void setBuildVersion(final String version, final BuildType type) {
         properties.setProperty(type.toString() + "BuildVersion", version);
     }
 
-    public static synchronized String getBuildVersion(BuildType type) {
+    public static synchronized String getBuildVersion(final BuildType type) {
         return properties.getProperty(type.toString() + "BuildVersion");
     }
 
-    public static synchronized void setMaximalMemory(int memoryID) {
+    public static synchronized void setMaximalMemory(final int memoryID) {
         properties.setProperty("maxMemory", String.valueOf(memoryID));
     }
 
@@ -168,7 +168,7 @@ public final class Settings {
         return Integer.parseInt(properties.getProperty("maxMemory"));
     }
 
-    public static synchronized void setInitialMemory(int memoryID) {
+    public static synchronized void setInitialMemory(final int memoryID) {
         properties.setProperty("initialMemory", String.valueOf(memoryID));
     }
 
@@ -180,7 +180,7 @@ public final class Settings {
     }
 
     public static List<String> createParameters() {
-        List<String> parameters = new ArrayList<String>();
+        final List<String> parameters = new ArrayList<String>();
         // add maximal RAM parameter
         parameters.add("-Xmx" + Memory.getMemoryFromId(getMaximalMemory()).getMemoryMB() + "m");
         // add initial RAM parameter

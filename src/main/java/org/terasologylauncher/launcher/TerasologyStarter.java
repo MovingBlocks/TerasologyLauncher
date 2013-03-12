@@ -39,7 +39,7 @@ public final class TerasologyStarter {
     }
 
     public static boolean startGame() {
-        OperatingSystem os = OperatingSystem.getOS();
+        final OperatingSystem os = OperatingSystem.getOS();
         if (os.isWindows()) {
             return startWindows();
         } else if (os.isMac()) {
@@ -53,12 +53,12 @@ public final class TerasologyStarter {
     }
 
     private static boolean startLinux() {
-        List<String> parameters = new ArrayList<String>();
+        final List<String> parameters = new ArrayList<String>();
         parameters.add("java");
         parameters.addAll(Settings.createParameters());
         parameters.add("-jar");
         parameters.add(GameData.getGameJar().getName());
-        ProcessBuilder pb = new ProcessBuilder(parameters);
+        final ProcessBuilder pb = new ProcessBuilder(parameters);
         pb.directory(Utils.getWorkingDirectory());
         try {
             pb.start();
@@ -70,12 +70,12 @@ public final class TerasologyStarter {
     }
 
     private static boolean startMac() {
-        List<String> parameters = new ArrayList<String>();
+        final List<String> parameters = new ArrayList<String>();
         parameters.add("java");
         parameters.addAll(Settings.createParameters());
         parameters.add("-jar");
         parameters.add(GameData.getGameJar().getName());
-        ProcessBuilder pb = new ProcessBuilder(parameters);
+        final ProcessBuilder pb = new ProcessBuilder(parameters);
         pb.directory(Utils.getWorkingDirectory());
         try {
             pb.start();
@@ -87,12 +87,12 @@ public final class TerasologyStarter {
     }
 
     private static boolean startWindows() {
-        List<String> parameters = new ArrayList<String>();
+        final List<String> parameters = new ArrayList<String>();
         parameters.add("java");
         parameters.addAll(Settings.createParameters());
         parameters.add("-jar");
         parameters.add(GameData.getGameJar().getName());
-        ProcessBuilder pb = new ProcessBuilder(parameters);
+        final ProcessBuilder pb = new ProcessBuilder(parameters);
         pb.directory(Utils.getWorkingDirectory());
         try {
             pb.start();

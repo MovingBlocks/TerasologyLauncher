@@ -48,6 +48,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
 
     public static final URL ICON = LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png");
 
+    private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(SettingsMenu.class);
 
     private static final String SAVE_ACTION = "save";
@@ -68,9 +69,9 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private JTabbedPane mainSettings;
 
     private JPanel gameSettingsTab;
-    private JLabel buildTypeLabel;      // build type: nightly or stable
+    private JLabel buildTypeLabel; // build type: nightly or stable
     private JComboBox buildType;
-    private JLabel buildVersionLabel;   // build version: version number (e.g. stable #22)
+    private JLabel buildVersionLabel; // build version: version number (e.g. stable #22)
     private JComboBox buildVersion;
     private JLabel maxMemLabel;
     private JComboBox maxMem;
@@ -136,8 +137,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
         resetButton = new JButton();
         cancelButton = new JButton();
 
-        Container contentPane = getContentPane();
-        Font settingsFont = new Font("Arial", Font.PLAIN, 12);
+        final Container contentPane = getContentPane();
+        final Font settingsFont = new Font("Arial", Font.PLAIN, 12);
 
         /*================= Game Settings =================*/
         gameSettingsTab.setFont(settingsFont);
@@ -159,7 +160,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         initialMemLabel.setFont(settingsFont);
         initialMem.setFont(settingsFont);
 
-        GroupLayout gameTabLayout = new GroupLayout(gameSettingsTab);
+        final GroupLayout gameTabLayout = new GroupLayout(gameSettingsTab);
         gameSettingsTab.setLayout(gameTabLayout);
 
         gameTabLayout.setHorizontalGroup(
@@ -207,31 +208,31 @@ public class SettingsMenu extends JDialog implements ActionListener {
         /*================= Directory Settings =================*/
         directoriesTab.setFont(settingsFont);
 
-        JLabel logDirLabel = new JLabel("Logs:");
+        final JLabel logDirLabel = new JLabel("Logs:");
         openLogDir.setFont(settingsFont);
         openLogDir.setText("Open");
         openLogDir.addActionListener(this);
         openLogDir.setActionCommand(OPEN_LOG_DIR_ACTION);
 
-        JLabel savedWorldsDirLabel = new JLabel("Saved Worlds:");
+        final JLabel savedWorldsDirLabel = new JLabel("Saved Worlds:");
         openSavedWorldsDir.setFont(settingsFont);
         openSavedWorldsDir.setText("Open");
         openSavedWorldsDir.addActionListener(this);
         openSavedWorldsDir.setActionCommand(OPEN_SAVED_DIR_ACTION);
 
-        JLabel screenShotDirLabel = new JLabel("Screen Shots:");
+        final JLabel screenShotDirLabel = new JLabel("Screen Shots:");
         openScreenShotsDir.setFont(settingsFont);
         openScreenShotsDir.setText("Open");
         openScreenShotsDir.addActionListener(this);
         openScreenShotsDir.setActionCommand(OPEN_SCREENS_DIR_ACTION);
 
-        JLabel modsDirLabel = new JLabel("Mods:");
+        final JLabel modsDirLabel = new JLabel("Mods:");
         openModsDir.setFont(settingsFont);
         openModsDir.setText("Open");
         openModsDir.addActionListener(this);
         openModsDir.setActionCommand(OPEN_MOD_DIR_ACTION);
 
-        GroupLayout directoriesTabLayout = new GroupLayout(directoriesTab);
+        final GroupLayout directoriesTabLayout = new GroupLayout(directoriesTab);
         directoriesTab.setLayout(directoriesTabLayout);
 
         directoriesTabLayout.setHorizontalGroup(
@@ -287,7 +288,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         saveButton.addActionListener(this);
         saveButton.setActionCommand(SAVE_ACTION);
 
-        GroupLayout contentPaneLayout = new GroupLayout(contentPane);
+        final GroupLayout contentPaneLayout = new GroupLayout(contentPane);
         contentPane.setLayout(contentPaneLayout);
         contentPaneLayout.setHorizontalGroup(
             contentPaneLayout.createParallelGroup()
@@ -317,18 +318,18 @@ public class SettingsMenu extends JDialog implements ActionListener {
 
     }
 
-    private BuildType populateBuildType(JComboBox buildType, int selection) {
+    private BuildType populateBuildType(final JComboBox buildType, int selection) {
         buildType.addItem("Stable");
         buildType.addItem("Nightly");
-        if (selection > buildType.getItemCount() - 1 || selection < 0) {
+        if ((selection > (buildType.getItemCount() - 1)) || (selection < 0)) {
             selection = 0;
         }
         buildType.setSelectedIndex(selection);
         return BuildType.getType(selection);
     }
 
-    private void populateVersions(JComboBox buildVersion) {
-        BuildType currentType = Settings.getBuildType();
+    private void populateVersions(final JComboBox buildVersion) {
+        final BuildType currentType = Settings.getBuildType();
 
         logger.debug(Settings.getBuildVersion(BuildType.STABLE));
         logger.debug(Settings.getBuildVersion(BuildType.NIGHTLY));
@@ -338,7 +339,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         Versions.getVersions(BuildType.NIGHTLY);
 
         // load new version list
-        for (String version : Versions.getVersions(currentType)) {
+        for (final String version : Versions.getVersions(currentType)) {
             buildVersion.addItem(version);
         }
         for (int i = 0; i < buildVersion.getItemCount(); i++) {
@@ -348,10 +349,10 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
-    private void populateMaxMemory(JComboBox maxMem) {
+    private void populateMaxMemory(final JComboBox maxMem) {
         long max = 512;
 
-        OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
+        final OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
         if (osBean instanceof com.sun.management.OperatingSystemMXBean) {
             max = ((com.sun.management.OperatingSystemMXBean) osBean).getTotalPhysicalMemorySize() / 1024 / 1024;
         }
@@ -359,8 +360,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
         max = Math.max(max, 512);
 
         // detect 32 or 64 bit OS
-        String arch = System.getProperty("os.arch");
-        boolean bit64 = arch.contains("64");
+        final String arch = System.getProperty("os.arch");
+        final boolean bit64 = arch.contains("64");
 
         // limit max memory for 32bit JVM
         if (!bit64) {
@@ -371,13 +372,13 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
 
         // fill in the combo box entries
-        for (Memory m : Memory.MEMORY_OPTIONS) {
+        for (final Memory m : Memory.MEMORY_OPTIONS) {
             if (max >= m.getMemoryMB()) {
                 maxMem.addItem(m.getLabel());
             }
         }
 
-        int memoryOptionID = Settings.getMaximalMemory();
+        final int memoryOptionID = Settings.getMaximalMemory();
         try {
             maxMem.setSelectedIndex(Memory.getMemoryIndexFromId(memoryOptionID));
         } catch (IllegalArgumentException e) {
@@ -388,17 +389,17 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
-    private void populateInitialMemory(JComboBox initialMemory) {
-        int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
+    private void populateInitialMemory(final JComboBox initialMemory) {
+        final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
 
         initialMem.removeAllItems();
         initialMemory.addItem("None");
-        for (Memory m : Memory.MEMORY_OPTIONS) {
+        for (final Memory m : Memory.MEMORY_OPTIONS) {
             if (currentMemSetting >= m.getMemoryMB()) {
                 initialMemory.addItem(m.getLabel());
             }
         }
-        int memoryOptionID = Settings.getInitialMemory();
+        final int memoryOptionID = Settings.getInitialMemory();
         if (memoryOptionID == -1) {
             initialMemory.setSelectedIndex(0);
             return;
@@ -414,33 +415,33 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(final ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
             action(e.getActionCommand(), (JComponent) e.getSource());
         }
     }
 
-    private void action(String actionCommand, JComponent source) {
+    private void action(final String actionCommand, final JComponent source) {
         if (source == maxMem) {
             updateInitMemBox(initialMem);
         }
         if (actionCommand.equals(BUILD_TYPE_ACTION)) {
             updateVersionBox(buildVersion);
         } else if (actionCommand.equals(CANCEL_ACTION)) {
-            this.dispose();
-            this.setVisible(false);
-            this.setAlwaysOnTop(false);
+            dispose();
+            setVisible(false);
+            setAlwaysOnTop(false);
         } else if (actionCommand.equals(RESET_ACTION)) {
             //TODO: reload settings from saved file
         } else if (actionCommand.equals(SAVE_ACTION)) {
             // save build type and version
-            BuildType selectedType = BuildType.getType(buildType.getSelectedIndex());
+            final BuildType selectedType = BuildType.getType(buildType.getSelectedIndex());
             Settings.setBuildType(selectedType);
             Settings.setBuildVersion(String.valueOf(buildVersion.getSelectedItem()), selectedType);
 
             // save ram settings
             Settings.setMaximalMemory(Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getSettingsId());
-            int selectedInitMem = initialMem.getSelectedIndex();
+            final int selectedInitMem = initialMem.getSelectedIndex();
             if (selectedInitMem > 0) {
                 Settings.setInitialMemory(Memory.MEMORY_OPTIONS[initialMem.getSelectedIndex() - 1].getSettingsId());
             } else {
@@ -449,19 +450,19 @@ public class SettingsMenu extends JDialog implements ActionListener {
 
             // store changed settings
             Settings.storeSettings();
-            this.dispose();
-            this.setVisible(false);
-            this.setAlwaysOnTop(false);
+            dispose();
+            setVisible(false);
+            setAlwaysOnTop(false);
         }
     }
 
-    private void updateInitMemBox(JComboBox initialMem) {
-        int currentIdx = initialMem.getSelectedIndex();
+    private void updateInitMemBox(final JComboBox initialMem) {
+        final int currentIdx = initialMem.getSelectedIndex();
 
-        int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
+        final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
         initialMem.removeAllItems();
         initialMem.addItem("None");
-        for (Memory m : Memory.MEMORY_OPTIONS) {
+        for (final Memory m : Memory.MEMORY_OPTIONS) {
             if (currentMemSetting >= m.getMemoryMB()) {
                 initialMem.addItem(m.getLabel());
             }
@@ -474,8 +475,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
-    private void updateVersionBox(JComboBox buildVersion) {
-        BuildType currentType = BuildType.getType(buildType.getSelectedIndex());
+    private void updateVersionBox(final JComboBox buildVersion) {
+        final BuildType currentType = BuildType.getType(buildType.getSelectedIndex());
         switch (currentType) {
             case STABLE:
                 Settings.setBuildVersion(String.valueOf(buildVersion.getSelectedItem()), BuildType.NIGHTLY);
@@ -486,7 +487,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
 
         buildVersion.removeAllItems();
-        for (String v : Versions.getVersions(currentType)) {
+        for (final String v : Versions.getVersions(currentType)) {
             buildVersion.addItem(v);
         }
         for (int i = 0; i < buildVersion.getItemCount(); i++) {

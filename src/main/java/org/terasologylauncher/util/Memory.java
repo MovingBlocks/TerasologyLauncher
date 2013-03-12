@@ -58,7 +58,7 @@ public final class Memory {
     private final String label;
     private final int optNo;
 
-    private Memory(int memory, String label, int optNo) {
+    private Memory(final int memory, final String label, final int optNo) {
         this.memory = memory;
         this.label = label;
         this.optNo = optNo;
@@ -76,8 +76,8 @@ public final class Memory {
         return optNo;
     }
 
-    public static Memory getMemoryFromId(int id) {
-        for (Memory m : MEMORY_OPTIONS) {
+    public static Memory getMemoryFromId(final int id) {
+        for (final Memory m : MEMORY_OPTIONS) {
             if (m.getSettingsId() == id) {
                 return m;
             }
@@ -85,7 +85,7 @@ public final class Memory {
         return DEFAULT_MEM;
     }
 
-    public static int getMemoryIndexFromId(int id) {
+    public static int getMemoryIndexFromId(final int id) {
         for (int i = 0; i < MEMORY_OPTIONS.length; i++) {
             if (MEMORY_OPTIONS[i].optNo == id) {
                 return i;
@@ -94,4 +94,3 @@ public final class Memory {
         return id;
     }
 }
-
