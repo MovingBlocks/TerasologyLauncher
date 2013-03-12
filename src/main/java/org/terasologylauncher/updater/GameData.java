@@ -168,8 +168,8 @@ public final class GameData {
                             installedBuildType = BuildType.STABLE;
                         }
                     }
-                    scanner.close();
                 }
+                scanner.close();
             }
         } catch (FileNotFoundException e) {
             logger.error("Could not read version file!", e);
