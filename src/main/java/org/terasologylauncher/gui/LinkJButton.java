@@ -35,21 +35,22 @@ import java.net.URISyntaxException;
  */
 public class LinkJButton extends JButton {
 
+    private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(LinkJButton.class);
 
     private final String url;
     private ImageIcon hoverIcon;
 
-    public LinkJButton(String url) {
+    public LinkJButton(final String url) {
         this.url = url;
-        this.addActionListener(new ButtonClickHandler());
+        addActionListener(new ButtonClickHandler());
         setBorder(null);
         setOpaque(false);
     }
 
     private class ButtonClickHandler implements ActionListener {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(final ActionEvent e) {
             java.net.URI uri = null;
             try {
                 uri = new java.net.URI(url);
@@ -59,9 +60,9 @@ public class LinkJButton extends JButton {
             }
         }
 
-        private void browse(java.net.URI uri) {
-            Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-            if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+        private void browse(final java.net.URI uri) {
+            final Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+            if ((desktop != null) && desktop.isSupported(Desktop.Action.BROWSE)) {
                 try {
                     desktop.browse(uri);
                 } catch (IOException e) {

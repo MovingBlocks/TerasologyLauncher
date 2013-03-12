@@ -30,6 +30,7 @@ public final class Versions {
 
     private static final Logger logger = LoggerFactory.getLogger(Versions.class);
 
+    // TODO not used!
     private static final String UPDATER_URL = "http://updater.movingblocks.net/";
     private static final String STABLE_VER = "stable.ver";
     private static final String UNSTABLE_VER = "unstable.ver";
@@ -40,9 +41,9 @@ public final class Versions {
     private Versions() {
     }
 
-    public static List<String> getVersions(BuildType buildType) {
+    public static List<String> getVersions(final BuildType buildType) {
         if (!GameData.checkInternetConnection()) {
-            List<String> list = new ArrayList<String>();
+            final List<String> list = new ArrayList<String>();
             list.add("Latest");
             return list;
         }
@@ -52,7 +53,7 @@ public final class Versions {
             case NIGHTLY:
                 return getNightlyVersionsList();
         }
-        return null;    // TODO: do something useful here!
+        return null; // TODO: do something useful here!
     }
 
     private static List<String> getNightlyVersionsList() {
@@ -61,11 +62,11 @@ public final class Versions {
             nightlyVersions.add("Latest");
             // TODO: Check for internet connection before?
             try {
-                int latestVersionNumber = GameData.getUpStreamNightlyVersion();
+                final int latestVersionNumber = GameData.getUpStreamNightlyVersion();
                 // for nightly builds, go 8 versions back for the list
-                String currentSetting = Settings.getBuildVersion(BuildType.NIGHTLY);
-                int buildVersionSetting = currentSetting.equals("Latest") ? latestVersionNumber : Integer.parseInt(currentSetting);
-                int minVersionNumber = Math.min(latestVersionNumber - 8, buildVersionSetting);
+                final String currentSetting = Settings.getBuildVersion(BuildType.NIGHTLY);
+                final int buildVersionSetting = currentSetting.equals("Latest") ? latestVersionNumber : Integer.parseInt(currentSetting);
+                final int minVersionNumber = Math.min(latestVersionNumber - 8, buildVersionSetting);
                 for (int i = latestVersionNumber - 1; i >= minVersionNumber; i--) {
                     nightlyVersions.add(String.valueOf(i));
                 }
@@ -82,11 +83,11 @@ public final class Versions {
             stableVersions.add("Latest");
             // TODO: Check for internet connection before?
             try {
-                int latestVersionNumber = GameData.getUpStreamStableVersion();
+                final int latestVersionNumber = GameData.getUpStreamStableVersion();
                 // for stable builds, go at least 4 versions back for the list
-                String currentSetting = Settings.getBuildVersion(BuildType.STABLE);
-                int buildVersionSetting = currentSetting.equals("Latest") ? latestVersionNumber : Integer.parseInt(currentSetting);
-                int minVersionNumber = Math.min(latestVersionNumber - 4, buildVersionSetting);
+                final String currentSetting = Settings.getBuildVersion(BuildType.STABLE);
+                final int buildVersionSetting = currentSetting.equals("Latest") ? latestVersionNumber : Integer.parseInt(currentSetting);
+                final int minVersionNumber = Math.min(latestVersionNumber - 4, buildVersionSetting);
                 for (int i = latestVersionNumber - 1; i >= minVersionNumber; i--) {
                     stableVersions.add(String.valueOf(i));
                 }

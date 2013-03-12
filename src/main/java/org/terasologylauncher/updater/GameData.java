@@ -73,7 +73,7 @@ public final class GameData {
             URL url;
             try {
                 url = new URL(JENKINS + NIGHTLY_JOB_NAME + "/" + LAST_SUCCESSFUL_BUILD_NUMBER);
-                BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+                final BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
                 upstreamVersionNightly = Integer.parseInt(in.readLine());
                 try {
                     in.close();
@@ -94,7 +94,7 @@ public final class GameData {
             URL url;
             try {
                 url = new URL(JENKINS + STABLE_JOB_NAME + "/" + LAST_SUCCESSFUL_BUILD_NUMBER);
-                BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+                final BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
                 upstreamVersionStable = Integer.parseInt(in.readLine());
                 try {
                     in.close();
@@ -110,7 +110,7 @@ public final class GameData {
         return upstreamVersionStable;
     }
 
-    public static int getUpStreamVersion(BuildType type) {
+    public static int getUpStreamVersion(final BuildType type) {
         switch (type) {
             case STABLE:
                 return getUpStreamStableVersion();
@@ -153,21 +153,22 @@ public final class GameData {
     private static void readVersionFile() {
         // TODO Wrong version file. This is the human readable file. Replace with "versionInfo.properties"
         try {
-            File installedVersionFile = new File(Utils.getWorkingDirectory(), "VERSION");
+            final File installedVersionFile = new File(Utils.getWorkingDirectory(), "VERSION");
             if (installedVersionFile.isFile()) {
-                Scanner scanner = new Scanner(installedVersionFile);
+                final Scanner scanner = new Scanner(installedVersionFile);
                 while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
+                    final String line = scanner.nextLine();
                     if (line.contains("Build number:")) {
                         installedBuildVersion = Integer.parseInt(line.split(":")[1].trim());
                     } else if (line.contains("GIT branch:")) {
-                        String branch = line.split(":")[1].trim();
+                        final String branch = line.split(":")[1].trim();
                         if (branch.equals("develop")) {
                             installedBuildType = BuildType.NIGHTLY;
                         } else {
                             installedBuildType = BuildType.STABLE;
                         }
                     }
+                    scanner.close();
                 }
             }
         } catch (FileNotFoundException e) {

@@ -38,6 +38,7 @@ import java.awt.image.BufferedImage;
  */
 public class TSButton extends JButton implements MouseListener {
 
+    private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(TSButton.class);
 
     private BufferedImage normalImg;
@@ -47,7 +48,7 @@ public class TSButton extends JButton implements MouseListener {
     private boolean pressed;
     private boolean hovered;
 
-    public TSButton(String text) {
+    public TSButton(final String text) {
         super(text);
         setBorder(BorderFactory.createEmptyBorder());
         addMouseListener(this);
@@ -65,9 +66,9 @@ public class TSButton extends JButton implements MouseListener {
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
-        Color old = g2d.getColor();
+    protected void paintComponent(final Graphics g) {
+        final Graphics2D g2d = (Graphics2D) g;
+        final Color old = g2d.getColor();
 
         if (pressed) {
             pressedImg.getScaledInstance(getWidth(), getHeight(), Image.SCALE_SMOOTH);
@@ -85,34 +86,34 @@ public class TSButton extends JButton implements MouseListener {
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         g2d.setFont(getFont().deriveFont(16f));
-        int width = g2d.getFontMetrics().stringWidth(getText());
-        g2d.drawString(getText(), (getWidth() - width) / 2, (getHeight() / 2) + (getFont().getSize() / 2) - 2);
+        final int width = g2d.getFontMetrics().stringWidth(getText());
+        g2d.drawString(getText(), (getWidth() - width) / 2, ((getHeight() / 2) + (getFont().getSize() / 2)) - 2);
 
         g2d.setColor(old);
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(final MouseEvent e) {
 
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(final MouseEvent e) {
         pressed = true;
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(final MouseEvent e) {
         pressed = false;
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
+    public void mouseEntered(final MouseEvent e) {
         hovered = true;
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseExited(final MouseEvent e) {
         hovered = false;
     }
 }
