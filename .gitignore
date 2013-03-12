@@ -1,24 +1,27 @@
-#Output directories (Idea, Maven, Gradle, Eclipse)
-/out
-/target
-/build
-/bin
+# Gradle
+/.gradle/
+/build/
 
-#Config files and directories
-*.iml
+# IntelliJ IDEA
+/out/
+/TerasologyLauncher.iml
 /TerasologyLauncher.ipr
 /TerasologyLauncher.iws
-/.idea
+
+# Eclipse
+/.checkstyle
 /.classpath
 /.project
-/.settings
-/.checkstyle
-/.gradle
+/.settings/
+/bin/
 
-*~
-
-# Ignore error logs
-*.log
-
-#Ignore linux directory files
+# OS generated files
 *.directory
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
