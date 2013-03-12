@@ -34,34 +34,33 @@ public final class ZIPUnpacker {
     private ZIPUnpacker() {
     }
 
-    public static void extractArchive(File archive) throws IOException {
+    public static void extractArchive(final File archive) throws IOException {
         extractArchive(archive, archive.getParentFile());
     }
 
-    public static void extractArchive(File archive, File destDir) throws IOException {
+    public static void extractArchive(final File archive, final File destDir) throws IOException {
         if (archive == null) {
             throw new IllegalArgumentException("No null allowed");
         }
-        ZipFile zipFile = new ZipFile(archive);
-        Enumeration entries = zipFile.entries();
+        final ZipFile zipFile = new ZipFile(archive);
+        final Enumeration<? extends ZipEntry> entries = zipFile.entries();
 
-        byte[] buffer = new byte[8192];
+        final byte[] buffer = new byte[8192];
         int length;
 
         while (entries.hasMoreElements()) {
-            ZipEntry entry = (ZipEntry) entries.nextElement();
-            String entryFileName = entry.getName();
-            File dir = buildDirectoryHierarchyFor(entryFileName, destDir);
+            final ZipEntry entry = entries.nextElement();
+            final String entryFileName = entry.getName();
+            final File dir = buildDirectoryHierarchyFor(entryFileName, destDir);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
 
             if (!entry.isDirectory()) {
-                BufferedOutputStream bos = new BufferedOutputStream(
-                    new FileOutputStream(new File(destDir, entryFileName)));
+                final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(destDir,
+                    entryFileName)));
 
-                BufferedInputStream bis = new BufferedInputStream(zipFile
-                    .getInputStream(entry));
+                final BufferedInputStream bis = new BufferedInputStream(zipFile.getInputStream(entry));
 
                 while ((length = bis.read(buffer)) > 0) {
                     bos.write(buffer, 0, length);
@@ -75,9 +74,9 @@ public final class ZIPUnpacker {
         zipFile.close();
     }
 
-    private static File buildDirectoryHierarchyFor(String entryName, File destDir) {
-        int lastIndex = entryName.lastIndexOf('/');
-        String internalPathToEntry = entryName.substring(0, lastIndex + 1);
+    private static File buildDirectoryHierarchyFor(final String entryName, final File destDir) {
+        final int lastIndex = entryName.lastIndexOf('/');
+        final String internalPathToEntry = entryName.substring(0, lastIndex + 1);
         return new File(destDir, internalPathToEntry);
     }
 }

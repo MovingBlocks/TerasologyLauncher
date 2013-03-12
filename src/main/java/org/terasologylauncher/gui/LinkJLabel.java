@@ -33,6 +33,7 @@ import java.net.URISyntaxException;
  */
 public class LinkJLabel extends JLabel implements MouseListener {
 
+    private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(LinkJLabel.class);
 
     private static final long CLICK_DELAY = 200L;
@@ -41,9 +42,9 @@ public class LinkJLabel extends JLabel implements MouseListener {
 
     private long lastClicked = System.currentTimeMillis();
 
-    private String url;
+    private final String url;
 
-    public LinkJLabel(String text, String url) {
+    public LinkJLabel(final String text, final String url) {
         super(text);
         setForeground(STANDARD_COLOR);
         this.url = url;
@@ -51,22 +52,22 @@ public class LinkJLabel extends JLabel implements MouseListener {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-        if (lastClicked + CLICK_DELAY > System.currentTimeMillis()) {
+    public void mouseClicked(final MouseEvent e) {
+        if ((lastClicked + CLICK_DELAY) > System.currentTimeMillis()) {
             return;
         }
         lastClicked = System.currentTimeMillis();
         try {
-            URI uri = new URI(url);
+            final URI uri = new URI(url);
             browse(uri);
         } catch (URISyntaxException e1) {
             logger.error("Link failed!", e1);
         }
     }
 
-    private void browse(URI uri) {
-        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+    private void browse(final URI uri) {
+        final Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+        if ((desktop != null) && desktop.isSupported(Desktop.Action.BROWSE)) {
             try {
                 desktop.browse(uri);
             } catch (IOException e) {
@@ -76,20 +77,20 @@ public class LinkJLabel extends JLabel implements MouseListener {
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(final MouseEvent e) {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(final MouseEvent e) {
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
+    public void mouseEntered(final MouseEvent e) {
         setForeground(HOVER_COLOR);
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseExited(final MouseEvent e) {
         setForeground(STANDARD_COLOR);
     }
 }

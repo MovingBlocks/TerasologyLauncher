@@ -23,7 +23,7 @@ public enum BuildType {
 
     private final int type;
 
-    private BuildType(int type) {
+    private BuildType(final int type) {
         this.type = type;
     }
 
@@ -31,8 +31,8 @@ public enum BuildType {
         return type;
     }
 
-    public static BuildType getType(int type) {
-        for (BuildType t : values()) {
+    public static BuildType getType(final int type) {
+        for (final BuildType t : values()) {
             if (t.type == type) {
                 return t;
             }

@@ -38,7 +38,7 @@ public final class TerasologyLauncher {
     private TerasologyLauncher() {
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         long start = System.currentTimeMillis();
         final long startUpTime = start;
 
@@ -56,7 +56,7 @@ public final class TerasologyLauncher {
         start = System.currentTimeMillis();
 
         if (Settings.getProperties() == null) {
-            Properties properties = Settings.setUpSettings();
+            final Properties properties = Settings.setUpSettings();
             if (properties == null) {
                 throw new NullPointerException("Could not initialize the settings file!");
             }
@@ -77,7 +77,7 @@ public final class TerasologyLauncher {
         //TODO: Add Debug console
 
         // Setup launcher frame and display
-        Frame frame = new LauncherFrame();
+        final Frame frame = new LauncherFrame();
 
         logger.debug("Creating window took {}", (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();

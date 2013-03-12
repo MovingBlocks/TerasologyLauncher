@@ -31,27 +31,27 @@ public enum OperatingSystem {
 
     private final String identifier;
 
-    OperatingSystem(String system) {
-        this.identifier = system.toLowerCase();
+    OperatingSystem(final String system) {
+        identifier = system.toLowerCase();
     }
 
     public boolean isUnix() {
-        return this == UNIX || this == LINUX || this == SOLARIS;
+        return (this == UNIX) || (this == LINUX) || (this == SOLARIS);
     }
 
     public boolean isMac() {
-        return this == MAC_OSX || this == MAC;
+        return (this == MAC_OSX) || (this == MAC);
     }
 
     public boolean isWindows() {
-        return this == WINDOWS_XP || this == WINDOWS_VISTA || this == WINDOWS_7 || this == WINDOWS_8
-            || this == WINDOWS_UNKNOWN;
+        return (this == WINDOWS_XP) || (this == WINDOWS_VISTA) || (this == WINDOWS_7) || (this == WINDOWS_8)
+            || (this == WINDOWS_UNKNOWN);
     }
 
     public static OperatingSystem getOS() {
         OperatingSystem best = UNKNOWN;
         final String os = System.getProperty("os.name").toLowerCase();
-        for (OperatingSystem system : values()) {
+        for (final OperatingSystem system : values()) {
             if (os.contains(system.identifier)) {
                 if (system.identifier.length() > best.identifier.length()) {
                     best = system;
