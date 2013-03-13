@@ -18,6 +18,7 @@ package org.terasologylauncher.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasologylauncher.Languages;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -34,11 +35,11 @@ public final class BundleUtil {
     }
 
     public static String getLabel(final String key) {
-        return ResourceBundle.getBundle(LABELS_BUNDLE).getString(key);
+        return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.currentLocale).getString(key);
     }
 
     public static URI getURI(final String key) {
-        String uriStr = ResourceBundle.getBundle(URI_BUNDLE).getString(key);
+        String uriStr = ResourceBundle.getBundle(URI_BUNDLE, Languages.currentLocale).getString(key);
         try {
             return new URI(uriStr);
         } catch (URISyntaxException e) {

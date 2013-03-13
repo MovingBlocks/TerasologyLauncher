@@ -54,7 +54,6 @@ public final class Settings {
             loadSettings();
         } else {
             loadDefaultSettings();
-            storeSettings();
         }
     }
 
@@ -153,5 +152,13 @@ public final class Settings {
      */
     public static synchronized int getInitialMemory() {
         return Integer.parseInt(properties.getProperty("initialMemory"));
+    }
+
+    public static synchronized void setLocaleString(String localeString) {
+        properties.setProperty("locale", localeString);
+    }
+
+    public static synchronized String getLocaleString() {
+        return properties.getProperty("locale");
     }
 }

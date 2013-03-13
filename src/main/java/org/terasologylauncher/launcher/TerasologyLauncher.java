@@ -18,6 +18,7 @@ package org.terasologylauncher.launcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasologylauncher.Languages;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
 import org.terasologylauncher.updater.GameData;
@@ -56,6 +57,8 @@ public final class TerasologyLauncher {
             start = System.currentTimeMillis();
 
             Settings.init();
+            Languages.init();
+            Settings.storeSettings();
 
             logger.debug("Reading settings/properties took {}", (System.currentTimeMillis() - start) + "ms");
             start = System.currentTimeMillis();
