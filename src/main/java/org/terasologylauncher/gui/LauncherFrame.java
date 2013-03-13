@@ -188,17 +188,17 @@ public class LauncherFrame extends JFrame implements ActionListener {
         logo.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/logo.png")));
 
         // Forums link
-        forums = new LinkJLabel(BundleUtil.getLabel("launcher_forum"), "http://forum.movingblocks.net");
+        forums = new LinkJLabel(BundleUtil.getLabel("launcher_forum"), BundleUtil.getURI("terasology_forum"));
         forums.setFont(forums.getFont().deriveFont(24f));
         forums.setBounds(480, 36, 96, 32);
 
         // Issues link
-        issues = new LinkJLabel(BundleUtil.getLabel("launcher_issues"), "https://github.com/Movingblocks/Terasology/issues");
+        issues = new LinkJLabel(BundleUtil.getLabel("launcher_issues"), BundleUtil.getURI("terasology_github_issues"));
         issues.setFont(issues.getFont().deriveFont(24f));
         issues.setBounds(640, 36, 96, 32);
 
         // Mods
-        mods = new LinkJLabel(BundleUtil.getLabel("launcher_mods"), "http://www.terasologymods.net");
+        mods = new LinkJLabel(BundleUtil.getLabel("launcher_mods"), BundleUtil.getURI("terasology_mods"));
         mods.setFont(mods.getFont().deriveFont(24f));
         mods.setBounds(FRAME_WIDTH - 96 - 16 - xShift, 36, 96, 32);
 
@@ -209,31 +209,31 @@ public class LauncherFrame extends JFrame implements ActionListener {
         progressBar.setStringPainted(true);
 
         // Social media
-        github = new LinkJButton("https://github.com/Movingblocks/Terasology");
+        github = new LinkJButton(BundleUtil.getURI("terasology_github"));
         github.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/github.png")));
         github.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/github_hover.png")));
         github.setBounds(8 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         github.setBorder(null);
 
-        youtube = new LinkJButton("http://www.youtube.com/user/blockmaniaTV");
+        youtube = new LinkJButton(BundleUtil.getURI("terasology_youtube"));
         youtube.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/youtube.png")));
         youtube.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/youtube_hover.png")));
         youtube.setBounds(8 + 38 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         youtube.setBorder(null);
 
-        gplus = new LinkJButton("https://plus.google.com/b/103835217961917018533/103835217961917018533");
+        gplus = new LinkJButton(BundleUtil.getURI("terasology_gplus"));
         gplus.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/gplus.png")));
         gplus.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/gplus_hover.png")));
         gplus.setBounds(8 + (38 * 2) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         gplus.setBorder(null);
 
-        facebook = new LinkJButton("https://www.facebook.com/Terasology");
+        facebook = new LinkJButton(BundleUtil.getURI("terasology_facebook"));
         facebook.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/facebook.png")));
         facebook.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/facebook_hover.png")));
         facebook.setBounds(8 + (38 * 3) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         facebook.setBorder(null);
 
-        twitter = new LinkJButton("https://twitter.com/Terasology");
+        twitter = new LinkJButton(BundleUtil.getURI("terasology_twitter"));
         twitter.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/twitter.png")));
         twitter.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/twitter_hover.png")));
         twitter.setBounds(8 + (38 * 4) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
