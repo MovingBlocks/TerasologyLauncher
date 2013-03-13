@@ -19,18 +19,14 @@ package org.terasologylauncher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.launcher.TerasologyLauncher;
-import org.terasologylauncher.util.Memory;
 import org.terasologylauncher.util.TerasologyDirectories;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -40,93 +36,73 @@ import java.util.Properties;
  */
 public final class Settings {
 
-    public static final String SETTINGS_FILE_NAME = "launcher.settings";
-
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);
 
+    private static final String SETTINGS_FILE_NAME = "settings.properties";
+    private static final String DEFAULT_SETTINGS_FILE_NAME = "/settings.properties";
+
+    private static File settingsFile;
     private static Properties properties;
 
     private Settings() {
     }
 
-    public static void setProperties(final Properties properties) {
-        if (Settings.properties != null) {
-            throw new IllegalArgumentException("Settings already set!");
-        }
-        Settings.properties = properties;
-    }
-
-    public static synchronized Properties getProperties() {
-        return properties;
-    }
-
-    public static Properties setUpSettings() {
-        final File settingsFile = new File(TerasologyDirectories.getLauncherDir(), SETTINGS_FILE_NAME);
-        final Properties defaultProperties = new Properties();
-        // if the file does not exist, copy default file from launcher
-        if (!settingsFile.exists()) {
-            try {
-                final InputStream input = TerasologyLauncher.class.getResourceAsStream("/launcher.settings");
-                if (input != null) {
-                    defaultProperties.load(input);
-
-                    FileOutputStream out = null;
-                    try {
-                        // TODO handle "false" result of mkdirs()
-                        settingsFile.getParentFile().mkdirs();
-                        out = new FileOutputStream(settingsFile);
-                        defaultProperties.store(out, "Default settings!");
-                    } catch (IOException e) {
-                        logger.warn("Setting up settings file failed.", e);
-                    } finally {
-                        // JAVA 7: Cleanup here
-                        try {
-                            input.close();
-                        } catch (Exception ignored) {
-                            logger.info("Could not close settings file.", ignored);
-                        }
-                        try {
-                            if (out != null) {
-                                out.close();
-                            }
-                        } catch (Exception ignored) {
-                            logger.info("Could not close settings file.", ignored);
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                logger.error("Could not load settings.", e);
-            }
+    public static void init() throws IOException {
+        properties = new Properties();
+        settingsFile = new File(TerasologyDirectories.getLauncherDir(), SETTINGS_FILE_NAME);
+        if (settingsFile.exists()) {
+            loadSettings();
         } else {
-            try {
-                final InputStream inputStream = new FileInputStream(settingsFile);
-                defaultProperties.load(inputStream);
-                try {
-                    inputStream.close();
-                } catch (Exception ignored) {
-                    logger.info("Could not close settings file.", ignored);
-                }
-            } catch (Exception e) {
-                logger.info("Can't load setting!", e);
-            }
+            loadDefaultSettings();
+            storeSettings();
         }
-        return defaultProperties;
     }
 
-    public static void storeSettings() {
-        final File settingsFile = new File(TerasologyDirectories.getLauncherDir(), SETTINGS_FILE_NAME);
+    private static void loadDefaultSettings() throws IOException {
+        logger.debug("Load default settings");
+
+        final InputStream inputStream = TerasologyLauncher.class.getResourceAsStream(DEFAULT_SETTINGS_FILE_NAME);
         try {
-            final OutputStream output = new FileOutputStream(settingsFile);
-            properties.store(output, "Terasology Launcher settings");
+            properties.load(inputStream);
+        } finally {
             try {
-                output.close();
-            } catch (Exception ignored) {
-                logger.info("Could not close settings file.", ignored);
+                inputStream.close();
+            } catch (IOException e) {
+                logger.info("The InputStream could not be closed.", e);
             }
-        } catch (FileNotFoundException e) {
-            logger.error("Could not store settings.", e);
-        } catch (IOException e) {
-            logger.error("Could not store settings.", e);
+        }
+    }
+
+    private static void loadSettings() throws IOException {
+        logger.debug("Load settings from {}", settingsFile);
+
+        final InputStream inputStream = new FileInputStream(settingsFile);
+        try {
+            properties.load(inputStream);
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                logger.info("The InputStream could not be closed. " + settingsFile, e);
+            }
+        }
+    }
+
+    public static void storeSettings() throws IOException {
+        logger.debug("Store settings into {}", settingsFile);
+
+        if (!settingsFile.getParentFile().exists() && !settingsFile.getParentFile().mkdirs()) {
+            throw new IOException("The directory could not be created. " + settingsFile);
+        }
+        final OutputStream outputStream = new FileOutputStream(settingsFile);
+        try {
+            properties.store(outputStream, "Terasology Launcher - Settings");
+        } finally {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                logger.info("The OutputStream could not be closed. " + settingsFile, e);
+            }
         }
     }
 
@@ -177,16 +153,5 @@ public final class Settings {
      */
     public static synchronized int getInitialMemory() {
         return Integer.parseInt(properties.getProperty("initialMemory"));
-    }
-
-    public static List<String> createParameters() {
-        final List<String> parameters = new ArrayList<String>();
-        // add maximal RAM parameter
-        parameters.add("-Xmx" + Memory.getMemoryFromId(getMaximalMemory()).getMemoryMB() + "m");
-        // add initial RAM parameter
-        if (getInitialMemory() >= 0) {
-            parameters.add("-Xms" + Memory.getMemoryFromId(getInitialMemory()).getMemoryMB() + "m");
-        }
-        return parameters;
     }
 }

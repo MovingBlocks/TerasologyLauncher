@@ -38,6 +38,7 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 
@@ -429,7 +430,12 @@ public class SettingsMenu extends JDialog implements ActionListener {
             }
 
             // store changed settings
-            Settings.storeSettings();
+            try {
+                Settings.storeSettings();
+            } catch (IOException e) {
+                logger.error("Could not store settings!", e);
+                // TODO Show error message dialog
+            }
             dispose();
             setVisible(false);
             setAlwaysOnTop(false);
