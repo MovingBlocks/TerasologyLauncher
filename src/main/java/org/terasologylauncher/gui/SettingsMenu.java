@@ -88,6 +88,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         JTabbedPane mainSettings = new JTabbedPane();
         mainSettings.addTab(BundleUtil.getLabel("settings_game_title"), createGameSettingsTab(settingsFont));
         mainSettings.addTab(BundleUtil.getLabel("settings_directories_title"), createDirectoriesTab(settingsFont));
+        mainSettings.addTab(BundleUtil.getLabel("settings_language_title"), createLanguageTab(settingsFont));
 
         /*================== OK, Cancel, Reset ==================*/
         JButton resetButton = new JButton();
@@ -289,6 +290,15 @@ public class SettingsMenu extends JDialog implements ActionListener {
                 .addContainerGap()
         );
         return directoriesTab;
+    }
+
+    private JPanel createLanguageTab(final Font settingsFont) {
+        JPanel languageTab = new JPanel();
+        languageTab.setFont(settingsFont);
+
+        // TODO Implement language comboBox
+
+        return languageTab;
     }
 
     private BuildType populateBuildType(final int selection) {
