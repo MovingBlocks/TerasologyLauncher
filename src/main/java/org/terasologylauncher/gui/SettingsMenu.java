@@ -40,14 +40,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
-import java.net.URL;
 
 /**
  * @author Skaldarnar
  */
 public class SettingsMenu extends JDialog implements ActionListener {
-
-    public static final URL ICON = LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png");
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(SettingsMenu.class);
@@ -57,108 +54,121 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private static final String RESET_ACTION = "reset";
 
     private static final String BUILD_TYPE_ACTION = "buildType";
+    private static final String MAX_MEM_ACTION = "maxMem";
 
     private static final String OPEN_LOG_DIR_ACTION = "openLogs";
     private static final String OPEN_MOD_DIR_ACTION = "openMods";
     private static final String OPEN_SAVED_DIR_ACTION = "openSaved";
     private static final String OPEN_SCREENS_DIR_ACTION = "openScreens";
 
-    /* To save the selected index when switching between different build types. */
-    private int stableVersionIdx;
-    private int nightlyVersionIdx;
-
-    private JTabbedPane mainSettings;
-
-    private JPanel gameSettingsTab;
-    private JLabel buildTypeLabel; // build type: nightly or stable
     private JComboBox buildType;
-    private JLabel buildVersionLabel; // build version: version number (e.g. stable #22)
     private JComboBox buildVersion;
-    private JLabel maxMemLabel;
     private JComboBox maxMem;
-    private JLabel initialMemLabel;
     private JComboBox initialMem;
 
-    private JPanel directoriesTab;
-    private JButton openLogDir;
-    private JButton openSavedWorldsDir;
-    private JButton openModsDir;
-    private JButton openScreenShotsDir;
-
-    private JButton resetButton;
-    private JButton cancelButton;
-    private JButton saveButton;
-
     public SettingsMenu() {
-        initComponents();
-
         setTitle(BundleUtil.getLabel("settings_title"));
         setResizable(false);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(ICON));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png")));
 
-        Settings.setBuildType(populateBuildType(buildType, Settings.getBuildType().type()));
-        buildType.setActionCommand(BUILD_TYPE_ACTION);
-        buildType.addActionListener(this);
+        initComponents();
 
-        populateVersions(buildVersion);
-        populateMaxMemory(maxMem);
-        populateInitialMemory(initialMem);
+        // TODO Why "setBuildType"?
+        Settings.setBuildType(populateBuildType(Settings.getBuildType().type()));
 
-        resetButton.setActionCommand(RESET_ACTION);
-        resetButton.addActionListener(this);
-
-        cancelButton.setActionCommand(CANCEL_ACTION);
-        cancelButton.addActionListener(this);
-
-        saveButton.setActionCommand(SAVE_ACTION);
-        saveButton.addActionListener(this);
-
+        populateVersions();
+        populateMaxMemory();
+        populateInitialMemory();
     }
 
     private void initComponents() {
-        mainSettings = new JTabbedPane();
-
-        gameSettingsTab = new JPanel();
-        buildTypeLabel = new JLabel();
-        buildType = new JComboBox();
-        buildVersionLabel = new JLabel();
-        buildVersion = new JComboBox();
-        maxMemLabel = new JLabel();
-        maxMem = new JComboBox();
-        initialMemLabel = new JLabel();
-        initialMem = new JComboBox();
-
-        directoriesTab = new JPanel();
-        openLogDir = new JButton();
-        openSavedWorldsDir = new JButton();
-        openScreenShotsDir = new JButton();
-        openModsDir = new JButton();
-
-        saveButton = new JButton();
-        resetButton = new JButton();
-        cancelButton = new JButton();
-
-        final Container contentPane = getContentPane();
+        // TODO Check if font "Arial" is available on all OS
         final Font settingsFont = new Font("Arial", Font.PLAIN, 12);
 
-        /*================= Game Settings =================*/
+        JTabbedPane mainSettings = new JTabbedPane();
+        mainSettings.addTab(BundleUtil.getLabel("settings_game_title"), createGameSettingsTab(settingsFont));
+        mainSettings.addTab(BundleUtil.getLabel("settings_directories_title"), createDirectoriesTab(settingsFont));
+
+        /*================== OK, Cancel, Reset ==================*/
+        JButton resetButton = new JButton();
+        resetButton.setActionCommand(RESET_ACTION);
+        resetButton.addActionListener(this);
+        resetButton.setText(BundleUtil.getLabel("settings_reset"));
+
+        JButton cancelButton = new JButton();
+        cancelButton.setActionCommand(CANCEL_ACTION);
+        cancelButton.addActionListener(this);
+        cancelButton.setText(BundleUtil.getLabel("settings_cancel"));
+
+        JButton saveButton = new JButton();
+        saveButton.setActionCommand(SAVE_ACTION);
+        saveButton.addActionListener(this);
+        saveButton.setText(BundleUtil.getLabel("settings_save"));
+
+        final Container contentPane = getContentPane();
+        final GroupLayout contentPaneLayout = new GroupLayout(contentPane);
+        contentPane.setLayout(contentPaneLayout);
+        contentPaneLayout.setHorizontalGroup(
+            contentPaneLayout.createParallelGroup()
+                .addComponent(mainSettings, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
+                .addGroup(contentPaneLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(resetButton)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(cancelButton)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(saveButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
+                    .addContainerGap())
+        );
+        contentPaneLayout.setVerticalGroup(
+            contentPaneLayout.createParallelGroup()
+                .addGroup(contentPaneLayout.createSequentialGroup()
+                    .addComponent(mainSettings, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(resetButton)
+                        .addComponent(cancelButton)
+                        .addComponent(saveButton))
+                    .addContainerGap())
+        );
+        pack();
+        setLocationRelativeTo(getOwner());
+    }
+
+    private JPanel createGameSettingsTab(final Font settingsFont) {
+        JPanel gameSettingsTab = new JPanel();
         gameSettingsTab.setFont(settingsFont);
 
+        JLabel buildTypeLabel = new JLabel();
         buildTypeLabel.setText(BundleUtil.getLabel("settings_game_buildType"));
         buildTypeLabel.setFont(settingsFont);
-        buildType.setFont(settingsFont);
 
+        buildType = new JComboBox();
+        buildType.setFont(settingsFont);
+        buildType.addActionListener(this);
+        buildType.setActionCommand(BUILD_TYPE_ACTION);
+
+        JLabel buildVersionLabel = new JLabel();
         buildVersionLabel.setText(BundleUtil.getLabel("settings_game_buildVersion"));
         buildVersionLabel.setFont(settingsFont);
+
+        buildVersion = new JComboBox();
         buildVersion.setFont(settingsFont);
 
+        JLabel maxMemLabel = new JLabel();
         maxMemLabel.setText(BundleUtil.getLabel("settings_game_maxMemory"));
         maxMemLabel.setFont(settingsFont);
+
+        maxMem = new JComboBox();
         maxMem.setFont(settingsFont);
         maxMem.addActionListener(this);
+        maxMem.setActionCommand(MAX_MEM_ACTION);
 
+        JLabel initialMemLabel = new JLabel();
         initialMemLabel.setText(BundleUtil.getLabel("settings_game_initialMemory"));
         initialMemLabel.setFont(settingsFont);
+
+        initialMem = new JComboBox();
         initialMem.setFont(settingsFont);
 
         final GroupLayout gameTabLayout = new GroupLayout(gameSettingsTab);
@@ -203,31 +213,36 @@ public class SettingsMenu extends JDialog implements ActionListener {
                         .addComponent(initialMem, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap())
         );
+        return gameSettingsTab;
+    }
 
-        mainSettings.addTab(BundleUtil.getLabel("settings_game_title"), gameSettingsTab);
-
-        /*================= Directory Settings =================*/
+    private JPanel createDirectoriesTab(final Font settingsFont) {
+        JPanel directoriesTab = new JPanel();
         directoriesTab.setFont(settingsFont);
 
         final JLabel logDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_logs"));
+        JButton openLogDir = new JButton();
         openLogDir.setFont(settingsFont);
         openLogDir.setText(BundleUtil.getLabel("settings_directories_open"));
         openLogDir.addActionListener(this);
         openLogDir.setActionCommand(OPEN_LOG_DIR_ACTION);
 
         final JLabel savedWorldsDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_savedWorlds"));
+        JButton openSavedWorldsDir = new JButton();
         openSavedWorldsDir.setFont(settingsFont);
         openSavedWorldsDir.setText(BundleUtil.getLabel("settings_directories_open"));
         openSavedWorldsDir.addActionListener(this);
         openSavedWorldsDir.setActionCommand(OPEN_SAVED_DIR_ACTION);
 
         final JLabel screenShotDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_screenShots"));
+        JButton openScreenShotsDir = new JButton();
         openScreenShotsDir.setFont(settingsFont);
         openScreenShotsDir.setText(BundleUtil.getLabel("settings_directories_open"));
         openScreenShotsDir.addActionListener(this);
         openScreenShotsDir.setActionCommand(OPEN_SCREENS_DIR_ACTION);
 
         final JLabel modsDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_mods"));
+        JButton openModsDir = new JButton();
         openModsDir.setFont(settingsFont);
         openModsDir.setText(BundleUtil.getLabel("settings_directories_open"));
         openModsDir.addActionListener(this);
@@ -273,67 +288,22 @@ public class SettingsMenu extends JDialog implements ActionListener {
                     .addComponent(openScreenShotsDir))
                 .addContainerGap()
         );
-
-        mainSettings.addTab(BundleUtil.getLabel("settings_directories_title"), directoriesTab);
-
-        /*================== OK, Cancel, Reset ==================*/
-        resetButton.setText(BundleUtil.getLabel("settings_reset"));
-        resetButton.addActionListener(this);
-        resetButton.setActionCommand(RESET_ACTION);
-
-        cancelButton.setText(BundleUtil.getLabel("settings_cancel"));
-        cancelButton.addActionListener(this);
-        cancelButton.setActionCommand(CANCEL_ACTION);
-
-        saveButton.setText(BundleUtil.getLabel("settings_save"));
-        saveButton.addActionListener(this);
-        saveButton.setActionCommand(SAVE_ACTION);
-
-        final GroupLayout contentPaneLayout = new GroupLayout(contentPane);
-        contentPane.setLayout(contentPaneLayout);
-        contentPaneLayout.setHorizontalGroup(
-            contentPaneLayout.createParallelGroup()
-                .addComponent(mainSettings, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
-                .addGroup(contentPaneLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(resetButton)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addComponent(cancelButton)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addComponent(saveButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
-                    .addContainerGap())
-        );
-        contentPaneLayout.setVerticalGroup(
-            contentPaneLayout.createParallelGroup()
-                .addGroup(contentPaneLayout.createSequentialGroup()
-                    .addComponent(mainSettings, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(resetButton)
-                        .addComponent(cancelButton)
-                        .addComponent(saveButton))
-                    .addContainerGap())
-        );
-        pack();
-        setLocationRelativeTo(getOwner());
-
+        return directoriesTab;
     }
 
-    private BuildType populateBuildType(final JComboBox buildType, int selection) {
+    private BuildType populateBuildType(final int selection) {
         buildType.addItem(BundleUtil.getLabel("settings_game_buildType_stable"));
         buildType.addItem(BundleUtil.getLabel("settings_game_buildType_nightly"));
-        if ((selection > (buildType.getItemCount() - 1)) || (selection < 0)) {
-            selection = 0;
+        int newSelection = selection;
+        if ((newSelection > (buildType.getItemCount() - 1)) || (newSelection < 0)) {
+            newSelection = 0;
         }
-        buildType.setSelectedIndex(selection);
-        return BuildType.getType(selection);
+        buildType.setSelectedIndex(newSelection);
+        return BuildType.getType(newSelection);
     }
 
-    private void populateVersions(final JComboBox buildVersion) {
+    private void populateVersions() {
         final BuildType currentType = Settings.getBuildType();
-
-        logger.debug(Settings.getBuildVersion(BuildType.STABLE));
-        logger.debug(Settings.getBuildVersion(BuildType.NIGHTLY));
 
         // init versions
         Versions.getVersions(BuildType.STABLE);
@@ -350,7 +320,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
-    private void populateMaxMemory(final JComboBox maxMem) {
+    private void populateMaxMemory() {
         long max = 512;
 
         final OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
@@ -390,28 +360,28 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
-    private void populateInitialMemory(final JComboBox initialMemory) {
+    private void populateInitialMemory() {
         final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
 
         initialMem.removeAllItems();
-        initialMemory.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
+        initialMem.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
         for (final Memory m : Memory.MEMORY_OPTIONS) {
             if (currentMemSetting >= m.getMemoryMB()) {
-                initialMemory.addItem(m.getLabel());
+                initialMem.addItem(m.getLabel());
             }
         }
         final int memoryOptionID = Settings.getInitialMemory();
         if (memoryOptionID == -1) {
-            initialMemory.setSelectedIndex(0);
+            initialMem.setSelectedIndex(0);
             return;
         }
         try {
-            initialMemory.setSelectedIndex(Memory.getMemoryIndexFromId(memoryOptionID) + 1);
+            initialMem.setSelectedIndex(Memory.getMemoryIndexFromId(memoryOptionID) + 1);
         } catch (IllegalArgumentException e) {
-            initialMemory.removeAllItems();
-            initialMemory.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
+            initialMem.removeAllItems();
+            initialMem.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
             Settings.setInitialMemory(-1);
-            initialMemory.setSelectedIndex(0);
+            initialMem.setSelectedIndex(0);
         }
     }
 
@@ -423,11 +393,10 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void action(final String actionCommand, final JComponent source) {
-        if (source == maxMem) {
-            updateInitMemBox(initialMem);
-        }
         if (actionCommand.equals(BUILD_TYPE_ACTION)) {
-            updateVersionBox(buildVersion);
+            updateVersionBox();
+        } else if (actionCommand.equals(MAX_MEM_ACTION)) {
+            updateInitMemBox();
         } else if (actionCommand.equals(CANCEL_ACTION)) {
             dispose();
             setVisible(false);
@@ -455,9 +424,10 @@ public class SettingsMenu extends JDialog implements ActionListener {
             setVisible(false);
             setAlwaysOnTop(false);
         }
+        // TODO Implement OPEN_*_DIR_ACTION
     }
 
-    private void updateInitMemBox(final JComboBox initialMem) {
+    private void updateInitMemBox() {
         final int currentIdx = initialMem.getSelectedIndex();
 
         final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
@@ -476,7 +446,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
-    private void updateVersionBox(final JComboBox buildVersion) {
+    private void updateVersionBox() {
         final BuildType currentType = BuildType.getType(buildType.getSelectedIndex());
         switch (currentType) {
             case STABLE:
