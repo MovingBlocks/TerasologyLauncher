@@ -19,13 +19,12 @@ package org.terasologylauncher.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.URI;
 
 /**
  * Extends the standard JButton with linking capabilities,
@@ -38,11 +37,10 @@ public class LinkJButton extends JButton {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(LinkJButton.class);
 
-    private final String url;
-    private ImageIcon hoverIcon;
+    private final URI uri;
 
-    public LinkJButton(final String url) {
-        this.url = url;
+    public LinkJButton(final URI uri) {
+        this.uri = uri;
         addActionListener(new ButtonClickHandler());
         setBorder(null);
         setOpaque(false);
@@ -51,22 +49,18 @@ public class LinkJButton extends JButton {
     private class ButtonClickHandler implements ActionListener {
         @Override
         public void actionPerformed(final ActionEvent e) {
-            java.net.URI uri = null;
-            try {
-                uri = new java.net.URI(url);
-                browse(uri);
-            } catch (URISyntaxException e1) {
-                logger.error("Button failed!", e1);
-            }
-        }
-
-        private void browse(final java.net.URI uri) {
-            final Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-            if ((desktop != null) && desktop.isSupported(Desktop.Action.BROWSE)) {
-                try {
-                    desktop.browse(uri);
-                } catch (IOException e) {
-                    logger.error("Button failed!", e);
+            if (uri != null && Desktop.isDesktopSupported()) {
+                final Desktop desktop = Desktop.getDesktop();
+                if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                    try {
+                        desktop.browse(uri);
+                    } catch (IOException ex) {
+                        logger.error("Can't browse URI! " + uri, ex);
+                    } catch (SecurityException ex) {
+                        logger.error("Can't browse URI! " + uri, ex);
+                    } catch (IllegalArgumentException ex) {
+                        logger.error("Can't browse URI! " + uri, ex);
+                    }
                 }
             }
         }

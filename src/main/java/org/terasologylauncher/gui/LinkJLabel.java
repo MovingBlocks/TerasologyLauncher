@@ -26,7 +26,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * @author Skaldarnar
@@ -40,15 +39,16 @@ public class LinkJLabel extends JLabel implements MouseListener {
     private static final Color HOVER_COLOR = Color.DARK_GRAY;
     private static final Color STANDARD_COLOR = Color.LIGHT_GRAY;
 
-    private long lastClicked = System.currentTimeMillis();
+    private long lastClicked;
 
-    private final String url;
+    private final URI uri;
 
-    public LinkJLabel(final String text, final String url) {
+    public LinkJLabel(final String text, final URI uri) {
         super(text);
+        this.uri = uri;
         setForeground(STANDARD_COLOR);
-        this.url = url;
         super.addMouseListener(this);
+        lastClicked = 0;
     }
 
     @Override
@@ -57,21 +57,19 @@ public class LinkJLabel extends JLabel implements MouseListener {
             return;
         }
         lastClicked = System.currentTimeMillis();
-        try {
-            final URI uri = new URI(url);
-            browse(uri);
-        } catch (URISyntaxException e1) {
-            logger.error("Link failed!", e1);
-        }
-    }
 
-    private void browse(final URI uri) {
-        final Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-        if ((desktop != null) && desktop.isSupported(Desktop.Action.BROWSE)) {
-            try {
-                desktop.browse(uri);
-            } catch (IOException e) {
-                logger.error("Link failed!", e);
+        if (uri != null && Desktop.isDesktopSupported()) {
+            final Desktop desktop = Desktop.getDesktop();
+            if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                try {
+                    desktop.browse(uri);
+                } catch (IOException ex) {
+                    logger.error("Can't browse URI! " + uri, ex);
+                } catch (SecurityException ex) {
+                    logger.error("Can't browse URI! " + uri, ex);
+                } catch (IllegalArgumentException ex) {
+                    logger.error("Can't browse URI! " + uri, ex);
+                }
             }
         }
     }
