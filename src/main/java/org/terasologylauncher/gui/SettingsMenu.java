@@ -19,8 +19,10 @@ package org.terasologylauncher.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
+import org.terasologylauncher.Languages;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.Versions;
+import org.terasologylauncher.util.BundleUtil;
 import org.terasologylauncher.util.Memory;
 
 import javax.swing.GroupLayout;
@@ -37,16 +39,15 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
-import java.net.URL;
+import java.util.Locale;
 
 /**
  * @author Skaldarnar
  */
 public class SettingsMenu extends JDialog implements ActionListener {
-
-    public static final URL ICON = LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png");
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(SettingsMenu.class);
@@ -56,108 +57,124 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private static final String RESET_ACTION = "reset";
 
     private static final String BUILD_TYPE_ACTION = "buildType";
+    private static final String MAX_MEM_ACTION = "maxMem";
 
     private static final String OPEN_LOG_DIR_ACTION = "openLogs";
     private static final String OPEN_MOD_DIR_ACTION = "openMods";
     private static final String OPEN_SAVED_DIR_ACTION = "openSaved";
     private static final String OPEN_SCREENS_DIR_ACTION = "openScreens";
 
-    /* To save the selected index when switching between different build types. */
-    private int stableVersionIdx;
-    private int nightlyVersionIdx;
-
-    private JTabbedPane mainSettings;
-
-    private JPanel gameSettingsTab;
-    private JLabel buildTypeLabel; // build type: nightly or stable
     private JComboBox buildType;
-    private JLabel buildVersionLabel; // build version: version number (e.g. stable #22)
     private JComboBox buildVersion;
-    private JLabel maxMemLabel;
     private JComboBox maxMem;
-    private JLabel initialMemLabel;
     private JComboBox initialMem;
-
-    private JPanel directoriesTab;
-    private JButton openLogDir;
-    private JButton openSavedWorldsDir;
-    private JButton openModsDir;
-    private JButton openScreenShotsDir;
-
-    private JButton resetButton;
-    private JButton cancelButton;
-    private JButton saveButton;
+    private JComboBox language;
 
     public SettingsMenu() {
+        setTitle(BundleUtil.getLabel("settings_title"));
+        setResizable(false);
+        setIconImage(Toolkit.getDefaultToolkit().getImage(LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png")));
+
         initComponents();
 
-        setTitle("Settings");
-        setResizable(false);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(ICON));
+        // TODO Why "setBuildType"?
+        Settings.setBuildType(populateBuildType(Settings.getBuildType().type()));
 
-        Settings.setBuildType(populateBuildType(buildType, Settings.getBuildType().type()));
-        buildType.setActionCommand(BUILD_TYPE_ACTION);
-        buildType.addActionListener(this);
-
-        populateVersions(buildVersion);
-        populateMaxMemory(maxMem);
-        populateInitialMemory(initialMem);
-
-        resetButton.setActionCommand(RESET_ACTION);
-        resetButton.addActionListener(this);
-
-        cancelButton.setActionCommand(CANCEL_ACTION);
-        cancelButton.addActionListener(this);
-
-        saveButton.setActionCommand(SAVE_ACTION);
-        saveButton.addActionListener(this);
-
+        populateVersions();
+        populateMaxMemory();
+        populateInitialMemory();
+        populateLanguage();
     }
 
     private void initComponents() {
-        mainSettings = new JTabbedPane();
-
-        gameSettingsTab = new JPanel();
-        buildTypeLabel = new JLabel();
-        buildType = new JComboBox();
-        buildVersionLabel = new JLabel();
-        buildVersion = new JComboBox();
-        maxMemLabel = new JLabel();
-        maxMem = new JComboBox();
-        initialMemLabel = new JLabel();
-        initialMem = new JComboBox();
-
-        directoriesTab = new JPanel();
-        openLogDir = new JButton();
-        openSavedWorldsDir = new JButton();
-        openScreenShotsDir = new JButton();
-        openModsDir = new JButton();
-
-        saveButton = new JButton();
-        resetButton = new JButton();
-        cancelButton = new JButton();
-
-        final Container contentPane = getContentPane();
+        // TODO Check if font "Arial" is available on all OS
         final Font settingsFont = new Font("Arial", Font.PLAIN, 12);
 
-        /*================= Game Settings =================*/
+        JTabbedPane mainSettings = new JTabbedPane();
+        mainSettings.addTab(BundleUtil.getLabel("settings_game_title"), createGameSettingsTab(settingsFont));
+        mainSettings.addTab(BundleUtil.getLabel("settings_directories_title"), createDirectoriesTab(settingsFont));
+        mainSettings.addTab(BundleUtil.getLabel("settings_language_title"), createLanguageTab(settingsFont));
+
+        /*================== OK, Cancel, Reset ==================*/
+        JButton resetButton = new JButton();
+        resetButton.setActionCommand(RESET_ACTION);
+        resetButton.addActionListener(this);
+        resetButton.setText(BundleUtil.getLabel("settings_reset"));
+
+        JButton cancelButton = new JButton();
+        cancelButton.setActionCommand(CANCEL_ACTION);
+        cancelButton.addActionListener(this);
+        cancelButton.setText(BundleUtil.getLabel("settings_cancel"));
+
+        JButton saveButton = new JButton();
+        saveButton.setActionCommand(SAVE_ACTION);
+        saveButton.addActionListener(this);
+        saveButton.setText(BundleUtil.getLabel("settings_save"));
+
+        final Container contentPane = getContentPane();
+        final GroupLayout contentPaneLayout = new GroupLayout(contentPane);
+        contentPane.setLayout(contentPaneLayout);
+        contentPaneLayout.setHorizontalGroup(
+            contentPaneLayout.createParallelGroup()
+                .addComponent(mainSettings, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
+                .addGroup(contentPaneLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(resetButton)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(cancelButton)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(saveButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
+                    .addContainerGap())
+        );
+        contentPaneLayout.setVerticalGroup(
+            contentPaneLayout.createParallelGroup()
+                .addGroup(contentPaneLayout.createSequentialGroup()
+                    .addComponent(mainSettings, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(resetButton)
+                        .addComponent(cancelButton)
+                        .addComponent(saveButton))
+                    .addContainerGap())
+        );
+        pack();
+        setLocationRelativeTo(getOwner());
+    }
+
+    private JPanel createGameSettingsTab(final Font settingsFont) {
+        JPanel gameSettingsTab = new JPanel();
         gameSettingsTab.setFont(settingsFont);
 
-        buildTypeLabel.setText("Build Type");
+        JLabel buildTypeLabel = new JLabel();
+        buildTypeLabel.setText(BundleUtil.getLabel("settings_game_buildType"));
         buildTypeLabel.setFont(settingsFont);
-        buildType.setFont(settingsFont);
 
-        buildVersionLabel.setText("Build version:");
+        buildType = new JComboBox();
+        buildType.setFont(settingsFont);
+        buildType.addActionListener(this);
+        buildType.setActionCommand(BUILD_TYPE_ACTION);
+
+        JLabel buildVersionLabel = new JLabel();
+        buildVersionLabel.setText(BundleUtil.getLabel("settings_game_buildVersion"));
         buildVersionLabel.setFont(settingsFont);
+
+        buildVersion = new JComboBox();
         buildVersion.setFont(settingsFont);
 
-        maxMemLabel.setText("Max. Memory:");
+        JLabel maxMemLabel = new JLabel();
+        maxMemLabel.setText(BundleUtil.getLabel("settings_game_maxMemory"));
         maxMemLabel.setFont(settingsFont);
+
+        maxMem = new JComboBox();
         maxMem.setFont(settingsFont);
         maxMem.addActionListener(this);
+        maxMem.setActionCommand(MAX_MEM_ACTION);
 
-        initialMemLabel.setText("Initial Memory:");
+        JLabel initialMemLabel = new JLabel();
+        initialMemLabel.setText(BundleUtil.getLabel("settings_game_initialMemory"));
         initialMemLabel.setFont(settingsFont);
+
+        initialMem = new JComboBox();
         initialMem.setFont(settingsFont);
 
         final GroupLayout gameTabLayout = new GroupLayout(gameSettingsTab);
@@ -202,33 +219,38 @@ public class SettingsMenu extends JDialog implements ActionListener {
                         .addComponent(initialMem, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap())
         );
+        return gameSettingsTab;
+    }
 
-        mainSettings.addTab("Game", gameSettingsTab);
-
-        /*================= Directory Settings =================*/
+    private JPanel createDirectoriesTab(final Font settingsFont) {
+        JPanel directoriesTab = new JPanel();
         directoriesTab.setFont(settingsFont);
 
-        final JLabel logDirLabel = new JLabel("Logs:");
+        final JLabel logDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_logs"));
+        JButton openLogDir = new JButton();
         openLogDir.setFont(settingsFont);
-        openLogDir.setText("Open");
+        openLogDir.setText(BundleUtil.getLabel("settings_directories_open"));
         openLogDir.addActionListener(this);
         openLogDir.setActionCommand(OPEN_LOG_DIR_ACTION);
 
-        final JLabel savedWorldsDirLabel = new JLabel("Saved Worlds:");
+        final JLabel savedWorldsDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_savedWorlds"));
+        JButton openSavedWorldsDir = new JButton();
         openSavedWorldsDir.setFont(settingsFont);
-        openSavedWorldsDir.setText("Open");
+        openSavedWorldsDir.setText(BundleUtil.getLabel("settings_directories_open"));
         openSavedWorldsDir.addActionListener(this);
         openSavedWorldsDir.setActionCommand(OPEN_SAVED_DIR_ACTION);
 
-        final JLabel screenShotDirLabel = new JLabel("Screen Shots:");
+        final JLabel screenShotDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_screenShots"));
+        JButton openScreenShotsDir = new JButton();
         openScreenShotsDir.setFont(settingsFont);
-        openScreenShotsDir.setText("Open");
+        openScreenShotsDir.setText(BundleUtil.getLabel("settings_directories_open"));
         openScreenShotsDir.addActionListener(this);
         openScreenShotsDir.setActionCommand(OPEN_SCREENS_DIR_ACTION);
 
-        final JLabel modsDirLabel = new JLabel("Mods:");
+        final JLabel modsDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_mods"));
+        JButton openModsDir = new JButton();
         openModsDir.setFont(settingsFont);
-        openModsDir.setText("Open");
+        openModsDir.setText(BundleUtil.getLabel("settings_directories_open"));
         openModsDir.addActionListener(this);
         openModsDir.setActionCommand(OPEN_MOD_DIR_ACTION);
 
@@ -272,67 +294,61 @@ public class SettingsMenu extends JDialog implements ActionListener {
                     .addComponent(openScreenShotsDir))
                 .addContainerGap()
         );
+        return directoriesTab;
+    }
 
-        mainSettings.addTab("Directories", directoriesTab);
+    private JPanel createLanguageTab(final Font settingsFont) {
+        JPanel languageTab = new JPanel();
+        languageTab.setFont(settingsFont);
 
-        /*================== OK, Cancel, Reset ==================*/
-        resetButton.setText("Reset");
-        resetButton.addActionListener(this);
-        resetButton.setActionCommand(RESET_ACTION);
+        JLabel languageLabel = new JLabel();
+        languageLabel.setText(BundleUtil.getLabel("settings_language_chooseLanguage"));
+        languageLabel.setFont(settingsFont);
 
-        cancelButton.setText("Cancel");
-        cancelButton.addActionListener(this);
-        cancelButton.setActionCommand(CANCEL_ACTION);
+        language = new JComboBox();
+        language.setFont(settingsFont);
 
-        saveButton.setText("Save");
-        saveButton.addActionListener(this);
-        saveButton.setActionCommand(SAVE_ACTION);
+        final GroupLayout languageTabLayout = new GroupLayout(languageTab);
+        languageTab.setLayout(languageTabLayout);
 
-        final GroupLayout contentPaneLayout = new GroupLayout(contentPane);
-        contentPane.setLayout(contentPaneLayout);
-        contentPaneLayout.setHorizontalGroup(
-            contentPaneLayout.createParallelGroup()
-                .addComponent(mainSettings, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
-                .addGroup(contentPaneLayout.createSequentialGroup()
+        languageTabLayout.setHorizontalGroup(
+            languageTabLayout.createParallelGroup()
+                .addGroup(languageTabLayout.createSequentialGroup()
                     .addContainerGap()
-                    .addComponent(resetButton)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addComponent(cancelButton)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addComponent(saveButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
-                    .addContainerGap())
-        );
-        contentPaneLayout.setVerticalGroup(
-            contentPaneLayout.createParallelGroup()
-                .addGroup(contentPaneLayout.createSequentialGroup()
-                    .addComponent(mainSettings, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
+                    .addGroup(languageTabLayout.createParallelGroup()
+                        .addComponent(languageLabel))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(resetButton)
-                        .addComponent(cancelButton)
-                        .addComponent(saveButton))
+                    .addGroup(languageTabLayout.createParallelGroup()
+                        .addComponent(language))
                     .addContainerGap())
         );
-        pack();
-        setLocationRelativeTo(getOwner());
 
+        languageTabLayout.setVerticalGroup(
+            languageTabLayout.createParallelGroup()
+                .addGroup(languageTabLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(languageTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(languageLabel)
+                        .addComponent(language, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addContainerGap())
+        );
+
+        return languageTab;
     }
 
-    private BuildType populateBuildType(final JComboBox buildType, int selection) {
-        buildType.addItem("Stable");
-        buildType.addItem("Nightly");
-        if ((selection > (buildType.getItemCount() - 1)) || (selection < 0)) {
-            selection = 0;
+    private BuildType populateBuildType(final int selection) {
+        buildType.addItem(BundleUtil.getLabel("settings_game_buildType_stable"));
+        buildType.addItem(BundleUtil.getLabel("settings_game_buildType_nightly"));
+        int newSelection = selection;
+        if ((newSelection > (buildType.getItemCount() - 1)) || (newSelection < 0)) {
+            newSelection = 0;
         }
-        buildType.setSelectedIndex(selection);
-        return BuildType.getType(selection);
+        buildType.setSelectedIndex(newSelection);
+        return BuildType.getType(newSelection);
     }
 
-    private void populateVersions(final JComboBox buildVersion) {
+    private void populateVersions() {
         final BuildType currentType = Settings.getBuildType();
-
-        logger.debug(Settings.getBuildVersion(BuildType.STABLE));
-        logger.debug(Settings.getBuildVersion(BuildType.NIGHTLY));
 
         // init versions
         Versions.getVersions(BuildType.STABLE);
@@ -349,7 +365,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
-    private void populateMaxMemory(final JComboBox maxMem) {
+    private void populateMaxMemory() {
         long max = 512;
 
         final OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
@@ -389,28 +405,39 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
-    private void populateInitialMemory(final JComboBox initialMemory) {
+    private void populateInitialMemory() {
         final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
 
         initialMem.removeAllItems();
-        initialMemory.addItem("None");
+        initialMem.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
         for (final Memory m : Memory.MEMORY_OPTIONS) {
             if (currentMemSetting >= m.getMemoryMB()) {
-                initialMemory.addItem(m.getLabel());
+                initialMem.addItem(m.getLabel());
             }
         }
         final int memoryOptionID = Settings.getInitialMemory();
         if (memoryOptionID == -1) {
-            initialMemory.setSelectedIndex(0);
+            initialMem.setSelectedIndex(0);
             return;
         }
         try {
-            initialMemory.setSelectedIndex(Memory.getMemoryIndexFromId(memoryOptionID) + 1);
+            initialMem.setSelectedIndex(Memory.getMemoryIndexFromId(memoryOptionID) + 1);
         } catch (IllegalArgumentException e) {
-            initialMemory.removeAllItems();
-            initialMemory.addItem("None");
+            initialMem.removeAllItems();
+            initialMem.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
             Settings.setInitialMemory(-1);
-            initialMemory.setSelectedIndex(0);
+            initialMem.setSelectedIndex(0);
+        }
+    }
+
+    private void populateLanguage() {
+        for (Locale locale : Languages.SUPPORTED_LOCALES) {
+            final String item = BundleUtil.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale));
+            language.addItem(item);
+
+            if (Languages.getCurrentLocale().equals(locale)) {
+                language.setSelectedItem(item);
+            }
         }
     }
 
@@ -422,11 +449,10 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void action(final String actionCommand, final JComponent source) {
-        if (source == maxMem) {
-            updateInitMemBox(initialMem);
-        }
         if (actionCommand.equals(BUILD_TYPE_ACTION)) {
-            updateVersionBox(buildVersion);
+            updateVersionBox();
+        } else if (actionCommand.equals(MAX_MEM_ACTION)) {
+            updateInitMemBox();
         } else if (actionCommand.equals(CANCEL_ACTION)) {
             dispose();
             setVisible(false);
@@ -448,20 +474,29 @@ public class SettingsMenu extends JDialog implements ActionListener {
                 Settings.setInitialMemory(-1);
             }
 
+            // save language settings
+            Languages.update(Languages.SUPPORTED_LOCALES.get(language.getSelectedIndex()));
+
             // store changed settings
-            Settings.storeSettings();
+            try {
+                Settings.storeSettings();
+            } catch (IOException e) {
+                logger.error("Could not store settings!", e);
+                // TODO Show error message dialog
+            }
             dispose();
             setVisible(false);
             setAlwaysOnTop(false);
         }
+        // TODO Implement OPEN_*_DIR_ACTION
     }
 
-    private void updateInitMemBox(final JComboBox initialMem) {
+    private void updateInitMemBox() {
         final int currentIdx = initialMem.getSelectedIndex();
 
         final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
         initialMem.removeAllItems();
-        initialMem.addItem("None");
+        initialMem.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
         for (final Memory m : Memory.MEMORY_OPTIONS) {
             if (currentMemSetting >= m.getMemoryMB()) {
                 initialMem.addItem(m.getLabel());
@@ -475,7 +510,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
-    private void updateVersionBox(final JComboBox buildVersion) {
+    private void updateVersionBox() {
         final BuildType currentType = BuildType.getType(buildType.getSelectedIndex());
         switch (currentType) {
             case STABLE:

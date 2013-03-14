@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.updater.GameData;
+import org.terasologylauncher.util.Memory;
 import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.util.Utils;
 
@@ -55,7 +56,7 @@ public final class TerasologyStarter {
     private static boolean startLinux() {
         final List<String> parameters = new ArrayList<String>();
         parameters.add("java");
-        parameters.addAll(Settings.createParameters());
+        parameters.addAll(createParameters());
         parameters.add("-jar");
         parameters.add(GameData.getGameJar().getName());
         final ProcessBuilder pb = new ProcessBuilder(parameters);
@@ -72,7 +73,7 @@ public final class TerasologyStarter {
     private static boolean startMac() {
         final List<String> parameters = new ArrayList<String>();
         parameters.add("java");
-        parameters.addAll(Settings.createParameters());
+        parameters.addAll(createParameters());
         parameters.add("-jar");
         parameters.add(GameData.getGameJar().getName());
         final ProcessBuilder pb = new ProcessBuilder(parameters);
@@ -89,7 +90,7 @@ public final class TerasologyStarter {
     private static boolean startWindows() {
         final List<String> parameters = new ArrayList<String>();
         parameters.add("java");
-        parameters.addAll(Settings.createParameters());
+        parameters.addAll(createParameters());
         parameters.add("-jar");
         parameters.add(GameData.getGameJar().getName());
         final ProcessBuilder pb = new ProcessBuilder(parameters);
@@ -101,5 +102,16 @@ public final class TerasologyStarter {
             return false;
         }
         return true;
+    }
+
+    private static List<String> createParameters() {
+        final List<String> parameters = new ArrayList<String>();
+        // add maximal RAM parameter
+        parameters.add("-Xmx" + Memory.getMemoryFromId(Settings.getMaximalMemory()).getMemoryMB() + "m");
+        // add initial RAM parameter
+        if (Settings.getInitialMemory() >= 0) {
+            parameters.add("-Xms" + Memory.getMemoryFromId(Settings.getInitialMemory()).getMemoryMB() + "m");
+        }
+        return parameters;
     }
 }
