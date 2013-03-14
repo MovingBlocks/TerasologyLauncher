@@ -35,11 +35,11 @@ public final class BundleUtil {
     }
 
     public static String getLabel(final String key) {
-        return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.currentLocale).getString(key);
+        return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.getCurrentLocale()).getString(key);
     }
 
     public static URI getURI(final String key) {
-        String uriStr = ResourceBundle.getBundle(URI_BUNDLE, Languages.currentLocale).getString(key);
+        String uriStr = ResourceBundle.getBundle(URI_BUNDLE, Languages.getCurrentLocale()).getString(key);
         try {
             return new URI(uriStr);
         } catch (URISyntaxException e) {

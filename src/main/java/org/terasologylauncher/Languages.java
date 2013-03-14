@@ -18,23 +18,31 @@ package org.terasologylauncher;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public final class Languages {
 
     public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
     public static final List<Locale> SUPPORTED_LOCALES;
+    public static final Map<Locale, String> SETTINGS_LABEL_KEYS;
 
     static {
         final List<Locale> supportedLocales = new ArrayList<Locale>(2);
         supportedLocales.add(Locale.ENGLISH);
         supportedLocales.add(Locale.GERMAN);
 
+        final Map<Locale, String> settingsLabelKey = new HashMap<Locale, String>();
+        settingsLabelKey.put(Locale.ENGLISH, "settings_language_en");
+        settingsLabelKey.put(Locale.GERMAN, "settings_language_de");
+
         SUPPORTED_LOCALES = Collections.unmodifiableList(supportedLocales);
+        SETTINGS_LABEL_KEYS = Collections.unmodifiableMap(settingsLabelKey);
     }
 
-    public static Locale currentLocale = DEFAULT_LOCALE;
+    private static Locale currentLocale = DEFAULT_LOCALE;
 
     private Languages() {
     }
@@ -65,5 +73,16 @@ public final class Languages {
 
         currentLocale = newLocale;
         Settings.setLocaleString(currentLocale.toString());
+    }
+
+    public static void update(Locale newLocale) {
+        if (SUPPORTED_LOCALES.contains(newLocale)) {
+            currentLocale = newLocale;
+            Settings.setLocaleString(currentLocale.toString());
+        }
+    }
+
+    public static Locale getCurrentLocale() {
+        return currentLocale;
     }
 }

@@ -19,6 +19,7 @@ package org.terasologylauncher.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
+import org.terasologylauncher.Languages;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.Versions;
 import org.terasologylauncher.util.BundleUtil;
@@ -41,6 +42,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
+import java.util.Locale;
 
 /**
  * @author Skaldarnar
@@ -66,6 +68,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private JComboBox buildVersion;
     private JComboBox maxMem;
     private JComboBox initialMem;
+    private JComboBox language;
 
     public SettingsMenu() {
         setTitle(BundleUtil.getLabel("settings_title"));
@@ -80,6 +83,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         populateVersions();
         populateMaxMemory();
         populateInitialMemory();
+        populateLanguage();
     }
 
     private void initComponents() {
@@ -297,7 +301,37 @@ public class SettingsMenu extends JDialog implements ActionListener {
         JPanel languageTab = new JPanel();
         languageTab.setFont(settingsFont);
 
-        // TODO Implement language comboBox
+        JLabel languageLabel = new JLabel();
+        languageLabel.setText(BundleUtil.getLabel("settings_language_chooseLanguage"));
+        languageLabel.setFont(settingsFont);
+
+        language = new JComboBox();
+        language.setFont(settingsFont);
+
+        final GroupLayout languageTabLayout = new GroupLayout(languageTab);
+        languageTab.setLayout(languageTabLayout);
+
+        languageTabLayout.setHorizontalGroup(
+            languageTabLayout.createParallelGroup()
+                .addGroup(languageTabLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(languageTabLayout.createParallelGroup()
+                        .addComponent(languageLabel))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(languageTabLayout.createParallelGroup()
+                        .addComponent(language))
+                    .addContainerGap())
+        );
+
+        languageTabLayout.setVerticalGroup(
+            languageTabLayout.createParallelGroup()
+                .addGroup(languageTabLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(languageTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(languageLabel)
+                        .addComponent(language, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addContainerGap())
+        );
 
         return languageTab;
     }
@@ -396,6 +430,17 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
+    private void populateLanguage() {
+        for (Locale locale : Languages.SUPPORTED_LOCALES) {
+            final String item = BundleUtil.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale));
+            language.addItem(item);
+
+            if (Languages.getCurrentLocale().equals(locale)) {
+                language.setSelectedItem(item);
+            }
+        }
+    }
+
     @Override
     public void actionPerformed(final ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
@@ -428,6 +473,9 @@ public class SettingsMenu extends JDialog implements ActionListener {
             } else {
                 Settings.setInitialMemory(-1);
             }
+
+            // save language settings
+            Languages.update(Languages.SUPPORTED_LOCALES.get(language.getSelectedIndex()));
 
             // store changed settings
             try {
