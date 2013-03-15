@@ -17,10 +17,9 @@
 package org.terasologylauncher.util;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
- * This class collects references to important working directories, like game backups and launcher directory.
- *
  * @author Skaldarnar
  */
 public final class TerasologyDirectories {
@@ -31,33 +30,44 @@ public final class TerasologyDirectories {
     public static final String SCREENSHOTS_DIR_NAME = "screens";
     public static final String MODS_DIR_NAME = "mods";
 
-    private static final File BACKUP_DIR = new File(Utils.getWorkingDirectory(), BACKUP_DIR_NAME);
-    private static final File LAUNCHER_DIR = new File(Utils.getWorkingDirectory(), LAUNCHER_DIR_NAME);
-
-    private static final File SAVED_WORLDS_DIR = new File(Utils.getWorkingDirectory(), SAVED_WORLDS_DIR_NAME);
-    private static final File SCREENSHOTS_DIR = new File(Utils.getWorkingDirectory(), SCREENSHOTS_DIR_NAME);
-    private static final File MODS_DIR = new File(Utils.getWorkingDirectory(), MODS_DIR_NAME);
+    private static final String APPLICATION_DIR_NAME = "terasology";
 
     private TerasologyDirectories() {
     }
 
-    public static File getBackupDir() {
-        return BACKUP_DIR;
+    public static void checkDirectory(File directory) throws IOException {
+        if (!directory.exists() && !directory.mkdirs()) {
+            throw new IOException("Can not create directory! " + directory);
+        }
+
+        if (!directory.isDirectory()) {
+            throw new IOException("Directory is not a directory! " + directory);
+        }
+
+        if (!directory.canRead() || !directory.canWrite() || !directory.canExecute()) {
+            throw new IOException("Can not read/write/execute directory! " + directory);
+        }
     }
 
-    public static File getLauncherDir() {
-        return LAUNCHER_DIR;
-    }
+    public static File getApplicationDirectory(final OperatingSystem os) {
+        final String userHome = System.getProperty("user.home", ".");
+        File applicationDirectory;
 
-    public static File getSavedWorldsDir() {
-        return SAVED_WORLDS_DIR;
-    }
+        if (os.isUnix()) {
+            applicationDirectory = new File(userHome, '.' + APPLICATION_DIR_NAME + '/');
+        } else if (os.isWindows()) {
+            final String applicationData = System.getenv("APPDATA");
+            if (applicationData != null) {
+                applicationDirectory = new File(applicationData, "." + APPLICATION_DIR_NAME + '/');
+            } else {
+                applicationDirectory = new File(userHome, '.' + APPLICATION_DIR_NAME + '/');
+            }
+        } else if (os.isMac()) {
+            applicationDirectory = new File(userHome, "Library/Application Support/" + APPLICATION_DIR_NAME);
+        } else {
+            applicationDirectory = new File(userHome, APPLICATION_DIR_NAME + '/');
+        }
 
-    public static File getScreenshotsDir() {
-        return SCREENSHOTS_DIR;
-    }
-
-    public static File getModsDir() {
-        return MODS_DIR;
+        return applicationDirectory;
     }
 }

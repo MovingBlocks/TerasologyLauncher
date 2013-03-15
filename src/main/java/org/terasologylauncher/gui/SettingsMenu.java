@@ -56,7 +56,6 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private static final String CANCEL_ACTION = "cancel";
     private static final String RESET_ACTION = "reset";
 
-    private static final String BUILD_TYPE_ACTION = "buildType";
     private static final String MAX_MEM_ACTION = "maxMem";
 
     private static final String OPEN_LOG_DIR_ACTION = "openLogs";
@@ -64,23 +63,26 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private static final String OPEN_SAVED_DIR_ACTION = "openSaved";
     private static final String OPEN_SCREENS_DIR_ACTION = "openScreens";
 
-    private JComboBox buildType;
-    private JComboBox buildVersion;
-    private JComboBox maxMem;
-    private JComboBox initialMem;
-    private JComboBox language;
+    private JComboBox buildTypeBox;
+    private JComboBox buildVersionStableBox;
+    private JComboBox buildVersionNightlyBox;
+    private JComboBox maxMemBox;
+    private JComboBox initialMemBox;
+    private JComboBox languageBox;
 
-    public SettingsMenu() {
+    private final Settings settings;
+
+    public SettingsMenu(Settings settings) {
+        this.settings = settings;
         setTitle(BundleUtil.getLabel("settings_title"));
         setResizable(false);
         setIconImage(Toolkit.getDefaultToolkit().getImage(LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png")));
 
         initComponents();
 
-        // TODO Why "setBuildType"?
-        Settings.setBuildType(populateBuildType(Settings.getBuildType().type()));
-
-        populateVersions();
+        populateBuildType();
+        populateVersions(buildVersionStableBox, BuildType.STABLE);
+        populateVersions(buildVersionNightlyBox, BuildType.NIGHTLY);
         populateMaxMemory();
         populateInitialMemory();
         populateLanguage();
@@ -149,33 +151,38 @@ public class SettingsMenu extends JDialog implements ActionListener {
         buildTypeLabel.setText(BundleUtil.getLabel("settings_game_buildType"));
         buildTypeLabel.setFont(settingsFont);
 
-        buildType = new JComboBox();
-        buildType.setFont(settingsFont);
-        buildType.addActionListener(this);
-        buildType.setActionCommand(BUILD_TYPE_ACTION);
+        buildTypeBox = new JComboBox();
+        buildTypeBox.setFont(settingsFont);
 
-        JLabel buildVersionLabel = new JLabel();
-        buildVersionLabel.setText(BundleUtil.getLabel("settings_game_buildVersion"));
-        buildVersionLabel.setFont(settingsFont);
+        JLabel buildVersionStableLabel = new JLabel();
+        buildVersionStableLabel.setText(BundleUtil.getLabel("settings_game_buildVersion_stable"));
+        buildVersionStableLabel.setFont(settingsFont);
 
-        buildVersion = new JComboBox();
-        buildVersion.setFont(settingsFont);
+        buildVersionStableBox = new JComboBox();
+        buildVersionStableBox.setFont(settingsFont);
+
+        JLabel buildVersionNightlyLabel = new JLabel();
+        buildVersionNightlyLabel.setText(BundleUtil.getLabel("settings_game_buildVersion_nightly"));
+        buildVersionNightlyLabel.setFont(settingsFont);
+
+        buildVersionNightlyBox = new JComboBox();
+        buildVersionNightlyBox.setFont(settingsFont);
 
         JLabel maxMemLabel = new JLabel();
         maxMemLabel.setText(BundleUtil.getLabel("settings_game_maxMemory"));
         maxMemLabel.setFont(settingsFont);
 
-        maxMem = new JComboBox();
-        maxMem.setFont(settingsFont);
-        maxMem.addActionListener(this);
-        maxMem.setActionCommand(MAX_MEM_ACTION);
+        maxMemBox = new JComboBox();
+        maxMemBox.setFont(settingsFont);
+        maxMemBox.addActionListener(this);
+        maxMemBox.setActionCommand(MAX_MEM_ACTION);
 
         JLabel initialMemLabel = new JLabel();
         initialMemLabel.setText(BundleUtil.getLabel("settings_game_initialMemory"));
         initialMemLabel.setFont(settingsFont);
 
-        initialMem = new JComboBox();
-        initialMem.setFont(settingsFont);
+        initialMemBox = new JComboBox();
+        initialMemBox.setFont(settingsFont);
 
         final GroupLayout gameTabLayout = new GroupLayout(gameSettingsTab);
         gameSettingsTab.setLayout(gameTabLayout);
@@ -186,15 +193,17 @@ public class SettingsMenu extends JDialog implements ActionListener {
                     .addContainerGap()
                     .addGroup(gameTabLayout.createParallelGroup()
                         .addComponent(buildTypeLabel)
-                        .addComponent(buildVersionLabel)
+                        .addComponent(buildVersionStableLabel)
+                        .addComponent(buildVersionNightlyLabel)
                         .addComponent(maxMemLabel)
                         .addComponent(initialMemLabel))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup()
-                        .addComponent(buildType)
-                        .addComponent(buildVersion)
-                        .addComponent(maxMem)
-                        .addComponent(initialMem))
+                        .addComponent(buildTypeBox)
+                        .addComponent(buildVersionStableBox)
+                        .addComponent(buildVersionNightlyBox)
+                        .addComponent(maxMemBox)
+                        .addComponent(initialMemBox))
                     .addContainerGap())
         );
 
@@ -204,19 +213,23 @@ public class SettingsMenu extends JDialog implements ActionListener {
                     .addContainerGap()
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(buildTypeLabel)
-                        .addComponent(buildType, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(buildTypeBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(buildVersionLabel)
-                        .addComponent(buildVersion, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(buildVersionStableLabel)
+                        .addComponent(buildVersionStableBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(buildVersionNightlyLabel)
+                        .addComponent(buildVersionNightlyBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(maxMemLabel)
-                        .addComponent(maxMem, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(maxMemBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(initialMemLabel)
-                        .addComponent(initialMem, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(initialMemBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap())
         );
         return gameSettingsTab;
@@ -305,8 +318,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
         languageLabel.setText(BundleUtil.getLabel("settings_language_chooseLanguage"));
         languageLabel.setFont(settingsFont);
 
-        language = new JComboBox();
-        language.setFont(settingsFont);
+        languageBox = new JComboBox();
+        languageBox.setFont(settingsFont);
 
         final GroupLayout languageTabLayout = new GroupLayout(languageTab);
         languageTab.setLayout(languageTabLayout);
@@ -319,7 +332,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
                         .addComponent(languageLabel))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(languageTabLayout.createParallelGroup()
-                        .addComponent(language))
+                        .addComponent(languageBox))
                     .addContainerGap())
         );
 
@@ -329,38 +342,37 @@ public class SettingsMenu extends JDialog implements ActionListener {
                     .addContainerGap()
                     .addGroup(languageTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(languageLabel)
-                        .addComponent(language, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(languageBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap())
         );
 
         return languageTab;
     }
 
-    private BuildType populateBuildType(final int selection) {
-        buildType.addItem(BundleUtil.getLabel("settings_game_buildType_stable"));
-        buildType.addItem(BundleUtil.getLabel("settings_game_buildType_nightly"));
-        int newSelection = selection;
-        if ((newSelection > (buildType.getItemCount() - 1)) || (newSelection < 0)) {
-            newSelection = 0;
+    private void populateBuildType() {
+        buildTypeBox.addItem(BundleUtil.getLabel("settings_game_buildType_stable"));
+        buildTypeBox.addItem(BundleUtil.getLabel("settings_game_buildType_nightly"));
+
+        if (settings.getBuildType() == BuildType.STABLE) {
+            buildTypeBox.setSelectedIndex(0);
+        } else {
+            buildTypeBox.setSelectedIndex(1);
         }
-        buildType.setSelectedIndex(newSelection);
-        return BuildType.getType(newSelection);
     }
 
-    private void populateVersions() {
-        final BuildType currentType = Settings.getBuildType();
+    private void populateVersions(final JComboBox buildVersionBox, final BuildType buildType) {
+        final int buildVersion = settings.getBuildVersion(buildType);
 
-        // init versions
-        Versions.getVersions(BuildType.STABLE);
-        Versions.getVersions(BuildType.NIGHTLY);
-
-        // load new version list
-        for (final String version : Versions.getVersions(currentType)) {
-            buildVersion.addItem(version);
-        }
-        for (int i = 0; i < buildVersion.getItemCount(); i++) {
-            if (String.valueOf(buildVersion.getItemAt(i)).equals(Settings.getBuildVersion(currentType))) {
-                buildVersion.setSelectedIndex(i);
+        for (final Integer version : Versions.getVersions(settings, buildType)) {
+            String item;
+            if (version == Settings.BUILD_VERSION_LATEST) {
+                item = BundleUtil.getLabel("settings_game_buildVersion_latest");
+            } else {
+                item = String.valueOf(version);
+            }
+            buildVersionBox.addItem(item);
+            if (version == buildVersion) {
+                buildVersionBox.setSelectedItem(item);
             }
         }
     }
@@ -389,54 +401,50 @@ public class SettingsMenu extends JDialog implements ActionListener {
 
         // fill in the combo box entries
         for (final Memory m : Memory.MEMORY_OPTIONS) {
-            if (max >= m.getMemoryMB()) {
-                maxMem.addItem(m.getLabel());
+            if (m.getMemoryMB() <= max) {
+                maxMemBox.addItem(m.getLabel());
             }
         }
 
-        final int memoryOptionID = Settings.getMaximalMemory();
-        try {
-            maxMem.setSelectedIndex(Memory.getMemoryIndexFromId(memoryOptionID));
-        } catch (IllegalArgumentException e) {
-            maxMem.removeAllItems();
-            maxMem.addItem(String.valueOf(Memory.MEMORY_OPTIONS[0]));
-            Settings.setMaximalMemory(0); // 0 == 256 MB
-            maxMem.setSelectedIndex(0); // 1st element
+        final int memoryOptionID = settings.getMaximalMemory();
+        final int index = Memory.getMemoryIndexFromId(memoryOptionID);
+        if (index < maxMemBox.getItemCount()) {
+            maxMemBox.setSelectedIndex(index);
+        } else {
+            maxMemBox.setSelectedIndex(maxMemBox.getItemCount() - 1);
         }
     }
 
     private void populateInitialMemory() {
-        final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
+        final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getMemoryMB();
 
-        initialMem.removeAllItems();
-        initialMem.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
+        initialMemBox.removeAllItems();
+        initialMemBox.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
         for (final Memory m : Memory.MEMORY_OPTIONS) {
-            if (currentMemSetting >= m.getMemoryMB()) {
-                initialMem.addItem(m.getLabel());
+            if (m.getMemoryMB() <= currentMemSetting) {
+                initialMemBox.addItem(m.getLabel());
             }
         }
-        final int memoryOptionID = Settings.getInitialMemory();
+        final int memoryOptionID = settings.getInitialMemory();
         if (memoryOptionID == -1) {
-            initialMem.setSelectedIndex(0);
-            return;
-        }
-        try {
-            initialMem.setSelectedIndex(Memory.getMemoryIndexFromId(memoryOptionID) + 1);
-        } catch (IllegalArgumentException e) {
-            initialMem.removeAllItems();
-            initialMem.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
-            Settings.setInitialMemory(-1);
-            initialMem.setSelectedIndex(0);
+            initialMemBox.setSelectedIndex(0);
+        } else {
+            final int index = Memory.getMemoryIndexFromId(memoryOptionID);
+            if (index + 1 < initialMemBox.getItemCount()) {
+                initialMemBox.setSelectedIndex(index + 1);
+            } else {
+                initialMemBox.setSelectedIndex(initialMemBox.getItemCount() - 1);
+            }
         }
     }
 
     private void populateLanguage() {
         for (Locale locale : Languages.SUPPORTED_LOCALES) {
             final String item = BundleUtil.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale));
-            language.addItem(item);
+            languageBox.addItem(item);
 
             if (Languages.getCurrentLocale().equals(locale)) {
-                language.setSelectedItem(item);
+                languageBox.setSelectedItem(item);
             }
         }
     }
@@ -444,14 +452,12 @@ public class SettingsMenu extends JDialog implements ActionListener {
     @Override
     public void actionPerformed(final ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
-            action(e.getActionCommand(), (JComponent) e.getSource());
+            actionPerformed(e.getActionCommand());
         }
     }
 
-    private void action(final String actionCommand, final JComponent source) {
-        if (actionCommand.equals(BUILD_TYPE_ACTION)) {
-            updateVersionBox();
-        } else if (actionCommand.equals(MAX_MEM_ACTION)) {
+    private void actionPerformed(final String actionCommand) {
+        if (actionCommand.equals(MAX_MEM_ACTION)) {
             updateInitMemBox();
         } else if (actionCommand.equals(CANCEL_ACTION)) {
             dispose();
@@ -461,25 +467,40 @@ public class SettingsMenu extends JDialog implements ActionListener {
             //TODO: reload settings from saved file
         } else if (actionCommand.equals(SAVE_ACTION)) {
             // save build type and version
-            final BuildType selectedType = BuildType.getType(buildType.getSelectedIndex());
-            Settings.setBuildType(selectedType);
-            Settings.setBuildVersion(String.valueOf(buildVersion.getSelectedItem()), selectedType);
-
-            // save ram settings
-            Settings.setMaximalMemory(Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getSettingsId());
-            final int selectedInitMem = initialMem.getSelectedIndex();
-            if (selectedInitMem > 0) {
-                Settings.setInitialMemory(Memory.MEMORY_OPTIONS[initialMem.getSelectedIndex() - 1].getSettingsId());
+            final BuildType selectedType;
+            if (buildTypeBox.getSelectedIndex() == 0) {
+                selectedType = BuildType.STABLE;
             } else {
-                Settings.setInitialMemory(-1);
+                selectedType = BuildType.NIGHTLY;
+            }
+            settings.setBuildType(selectedType);
+            if (buildVersionStableBox.getSelectedIndex() == 0) {
+                settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.STABLE);
+            } else {
+                settings.setBuildVersion(Integer.parseInt((String) buildVersionStableBox.getSelectedItem()), BuildType.STABLE);
+            }
+            if (buildVersionNightlyBox.getSelectedIndex() == 0) {
+                settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.NIGHTLY);
+            } else {
+                settings.setBuildVersion(Integer.parseInt((String) buildVersionNightlyBox.getSelectedItem()), BuildType.NIGHTLY);
             }
 
-            // save language settings
-            Languages.update(Languages.SUPPORTED_LOCALES.get(language.getSelectedIndex()));
+            // save ram settings
+            settings.setMaximalMemory(Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getSettingsId());
+            final int selectedInitMem = initialMemBox.getSelectedIndex();
+            if (selectedInitMem > 0) {
+                settings.setInitialMemory(Memory.MEMORY_OPTIONS[initialMemBox.getSelectedIndex() - 1].getSettingsId());
+            } else {
+                settings.setInitialMemory(Settings.INITIAL_MEMORY_NONE);
+            }
+
+            // save languageBox settings
+            Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectedIndex()));
+            settings.setLocale(Languages.getCurrentLocale());
 
             // store changed settings
             try {
-                Settings.storeSettings();
+                settings.store();
             } catch (IOException e) {
                 logger.error("Could not store settings!", e);
                 // TODO Show error message dialog
@@ -492,44 +513,21 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void updateInitMemBox() {
-        final int currentIdx = initialMem.getSelectedIndex();
+        final int currentIdx = initialMemBox.getSelectedIndex();
 
-        final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMem.getSelectedIndex()].getMemoryMB();
-        initialMem.removeAllItems();
-        initialMem.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
+        final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getMemoryMB();
+        initialMemBox.removeAllItems();
+        initialMemBox.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
         for (final Memory m : Memory.MEMORY_OPTIONS) {
-            if (currentMemSetting >= m.getMemoryMB()) {
-                initialMem.addItem(m.getLabel());
+            if (m.getMemoryMB() <= currentMemSetting) {
+                initialMemBox.addItem(m.getLabel());
             }
         }
 
-        if (currentIdx >= initialMem.getItemCount()) {
-            initialMem.setSelectedIndex(initialMem.getItemCount() - 1);
+        if (currentIdx >= initialMemBox.getItemCount()) {
+            initialMemBox.setSelectedIndex(initialMemBox.getItemCount() - 1);
         } else {
-            initialMem.setSelectedIndex(currentIdx);
-        }
-    }
-
-    private void updateVersionBox() {
-        final BuildType currentType = BuildType.getType(buildType.getSelectedIndex());
-        switch (currentType) {
-            case STABLE:
-                Settings.setBuildVersion(String.valueOf(buildVersion.getSelectedItem()), BuildType.NIGHTLY);
-                break;
-            case NIGHTLY:
-                Settings.setBuildVersion(String.valueOf(buildVersion.getSelectedItem()), BuildType.STABLE);
-                break;
-        }
-
-        buildVersion.removeAllItems();
-        for (final String v : Versions.getVersions(currentType)) {
-            buildVersion.addItem(v);
-        }
-        for (int i = 0; i < buildVersion.getItemCount(); i++) {
-            if (String.valueOf(buildVersion.getItemAt(i)).equals(Settings.getBuildVersion(currentType))) {
-                buildVersion.setSelectedIndex(i);
-                break;
-            }
+            initialMemBox.setSelectedIndex(currentIdx);
         }
     }
 }

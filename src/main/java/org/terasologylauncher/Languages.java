@@ -47,38 +47,29 @@ public final class Languages {
     private Languages() {
     }
 
-    public static void init() {
-        Locale newLocale = null;
-
-        String localeString = Settings.getLocaleString();
+    public static void init(String localeString) {
         for (Locale locale : SUPPORTED_LOCALES) {
             if (locale.toString().equals(localeString)) {
-                newLocale = locale;
+                currentLocale = locale;
                 break;
             }
         }
-        if (newLocale == null) {
-            final Locale defaultLocale = Locale.getDefault();
-            for (Locale locale : SUPPORTED_LOCALES) {
-                // TODO Support Country and Variant
-                if (locale.getLanguage().equals(defaultLocale.getLanguage())) {
-                    newLocale = locale;
-                    break;
-                }
+    }
+
+    public static void init() {
+        final Locale defaultLocale = Locale.getDefault();
+        for (Locale locale : SUPPORTED_LOCALES) {
+            // TODO Support Country and Variant
+            if (locale.getLanguage().equals(defaultLocale.getLanguage())) {
+                currentLocale = locale;
+                break;
             }
         }
-        if (newLocale == null) {
-            newLocale = DEFAULT_LOCALE;
-        }
-
-        currentLocale = newLocale;
-        Settings.setLocaleString(currentLocale.toString());
     }
 
     public static void update(Locale newLocale) {
         if (SUPPORTED_LOCALES.contains(newLocale)) {
             currentLocale = newLocale;
-            Settings.setLocaleString(currentLocale.toString());
         }
     }
 
