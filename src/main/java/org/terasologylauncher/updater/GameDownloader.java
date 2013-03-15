@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
-import org.terasologylauncher.util.Utils;
 import org.terasologylauncher.util.ZIPUnpacker;
 
 import javax.swing.JProgressBar;
@@ -48,12 +47,18 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
     private final JProgressBar progressBar;
     private final LauncherFrame frame;
 
-    public GameDownloader(final JProgressBar progressBar, final LauncherFrame frame) {
+    private final Settings settings;
+    private final File terasologyDirectory;
+
+    public GameDownloader(final JProgressBar progressBar, final LauncherFrame frame, final Settings settings,
+                          final File terasologyDirectory) {
         this.progressBar = progressBar;
         this.frame = frame;
+        this.settings = settings;
+        this.terasologyDirectory = terasologyDirectory;
         progressBar.setVisible(true);
         progressBar.setValue(0);
-        progressBar.setString("Starting Download");
+        progressBar.setString("Starting Download"); // TODO Use BundleUtil.getLabel
         addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent evt) {
@@ -70,7 +75,7 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         // get the selected settings for the download
         final StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(GameData.JENKINS);
-        switch (Settings.getBuildType()) {
+        switch (settings.getBuildType()) {
             case STABLE:
                 urlBuilder.append(GameData.STABLE_JOB_NAME);
                 break;
@@ -79,10 +84,10 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
                 break;
         }
         urlBuilder.append("/");
-        if (Settings.getBuildVersion(Settings.getBuildType()).equals("Latest")) {
-            urlBuilder.append(GameData.getUpStreamVersion(Settings.getBuildType()));
+        if (settings.isBuildVersionLatest(settings.getBuildType())) {
+            urlBuilder.append(GameData.getUpStreamVersion(settings.getBuildType()));
         } else {
-            urlBuilder.append(Settings.getBuildVersion(Settings.getBuildType()));
+            urlBuilder.append(settings.getBuildVersion(settings.getBuildType()));
         }
         urlBuilder.append("/artifact/build/distributions/").append(ZIP_FILE);
 
@@ -98,7 +103,7 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
 
             try {
 
-                file = new File(Utils.getWorkingDirectory(), ZIP_FILE);
+                file = new File(terasologyDirectory, ZIP_FILE);
 
                 in = url.openConnection().getInputStream();
                 out = new FileOutputStream(file);
@@ -134,22 +139,22 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         logger.debug("Download is done");
         // unzip downloaded file
         progressBar.setValue(100);
-        progressBar.setString("Extracting zip …");
+        progressBar.setString("Extracting zip …"); // TODO Use BundleUtil.getLabel
         progressBar.setStringPainted(true);
 
         File zip = null;
         try {
-            zip = new File(Utils.getWorkingDirectory(), ZIP_FILE);
+            zip = new File(terasologyDirectory, ZIP_FILE);
             ZIPUnpacker.extractArchive(zip);
 
         } catch (IOException e) {
             logger.error("Could not unzip game!", e);
         }
 
-        progressBar.setString("Updating game info …");
+        progressBar.setString("Updating game info …"); // TODO Use BundleUtil.getLabel
         progressBar.setStringPainted(true);
 
-        GameData.forceReReadVersionFile();
+        GameData.forceReReadVersionFile(terasologyDirectory);
         frame.updateStartButton();
 
         if (zip != null) {
