@@ -22,8 +22,8 @@ import org.terasologylauncher.launcher.TerasologyStarter;
 import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.updater.GameDownloader;
 import org.terasologylauncher.util.BundleUtil;
+import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.util.TerasologyDirectories;
-import org.terasologylauncher.util.Utils;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -71,9 +71,9 @@ public class LauncherFrame extends JFrame implements ActionListener {
     private static final String START_ACTION = "start";
     private static final String DOWNLOAD_ACTION = "download";
 
-    private JButton start;
-    private JButton settings;
-    private JButton cancel;
+    private JButton startButton;
+    private JButton settingsButton;
+    private JButton cancelButton;
 
     private JButton facebook;
     private JButton github;
@@ -94,7 +94,15 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
     private SettingsMenu settingsMenu;
 
-    public LauncherFrame() {
+    private final File terasologyDirectory;
+    private final OperatingSystem os;
+    private final Settings settings;
+
+    public LauncherFrame(final File terasologyDirectory, final OperatingSystem os, final Settings settings) {
+        this.terasologyDirectory = terasologyDirectory;
+        this.os = os;
+        this.settings = settings;
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle(BundleUtil.getLabel("launcher_title"));
         setIconImage(Toolkit.getDefaultToolkit().getImage(ICON));
@@ -118,22 +126,22 @@ public class LauncherFrame extends JFrame implements ActionListener {
         }
 
         // Setup start button
-        start = new TSButton(BundleUtil.getLabel("launcher_start"));
-        start.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - 40) + yShift, 96, 32);
-        start.setActionCommand(START_ACTION);
-        start.addActionListener(this);
+        startButton = new TSButton(BundleUtil.getLabel("launcher_start"));
+        startButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - 40) + yShift, 96, 32);
+        startButton.setActionCommand(START_ACTION);
+        startButton.addActionListener(this);
 
         // Options Button
-        settings = new TSButton(BundleUtil.getLabel("launcher_settings"));
-        settings.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - (2 * 40)) + yShift, 96, 32);
-        settings.setActionCommand(SETTINGS_ACTION);
-        settings.addActionListener(this);
+        settingsButton = new TSButton(BundleUtil.getLabel("launcher_settings"));
+        settingsButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - (2 * 40)) + yShift, 96, 32);
+        settingsButton.setActionCommand(SETTINGS_ACTION);
+        settingsButton.addActionListener(this);
 
         // Cancel button
-        cancel = new TSButton(BundleUtil.getLabel("launcher_cancel"));
-        cancel.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70) + yShift, 96, 32);
-        cancel.setActionCommand(CANCEL_ACTION);
-        cancel.addActionListener(this);
+        cancelButton = new TSButton(BundleUtil.getLabel("launcher_cancel"));
+        cancelButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70) + yShift, 96, 32);
+        cancelButton.setActionCommand(CANCEL_ACTION);
+        cancelButton.addActionListener(this);
 
         // Transparent top panel and content/update panel
         topPanel = new TransparentPanel(0.5f);
@@ -247,9 +255,9 @@ public class LauncherFrame extends JFrame implements ActionListener {
         contentPane.add(issues);
         contentPane.add(mods);
 
-        contentPane.add(start);
-        contentPane.add(settings);
-        contentPane.add(cancel);
+        contentPane.add(startButton);
+        contentPane.add(settingsButton);
+        contentPane.add(cancelButton);
 
         contentPane.add(github);
         contentPane.add(twitter);
@@ -279,13 +287,14 @@ public class LauncherFrame extends JFrame implements ActionListener {
     private void action(final String command, final Component component) {
         if (command.equals(SETTINGS_ACTION)) {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-                settingsMenu = new SettingsMenu();
+                settingsMenu = new SettingsMenu(settings);
                 settingsMenu.setModal(true);
                 settingsMenu.setVisible(true);
                 settingsMenu.addWindowListener(new WindowAdapter() {
                     @Override
                     public void windowClosed(final WindowEvent e) {
                         updateStartButton();
+                        // TODO Update all labels (language change)
                     }
                 });
             }
@@ -293,7 +302,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
             dispose();
             System.exit(0);
         } else if (command.equals(START_ACTION)) {
-            if (TerasologyStarter.startGame()) {
+            final TerasologyStarter terasologyStarter = new TerasologyStarter(terasologyDirectory, os, settings.getMaximalMemory(), settings.getInitialMemory());
+            if (terasologyStarter.startGame()) {
                 System.exit(0);
             } else {
                 JOptionPane.showMessageDialog(null, BundleUtil.getLabel("message_error_gameStart"), BundleUtil.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
@@ -302,7 +312,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
             // cleanup the directories (keep savedWorlds and screen shots)
             cleanUp();
             // start a thread with the download
-            final GameDownloader downloader = new GameDownloader(progressBar, this);
+            final GameDownloader downloader = new GameDownloader(progressBar, this, settings, terasologyDirectory);
             downloader.execute();
         }
     }
@@ -312,7 +322,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
      * <tt>canBeDeleted</tt> method.
      */
     private void cleanUp() {
-        for (final File f : Utils.getWorkingDirectory().listFiles()) {
+        for (final File f : terasologyDirectory.listFiles()) {
             if (canBeDeleted(f)) {
                 if (f.isDirectory()) {
                     deleteDirectory(f);
@@ -354,17 +364,17 @@ public class LauncherFrame extends JFrame implements ActionListener {
     /**
      * recursively deletes the directory and all of its content.
      *
-     * @param directory directory
+     * @param delDirectory directory
      */
-    private void deleteDirectory(final File directory) {
-        for (final File sub : directory.listFiles()) {
+    private void deleteDirectory(final File delDirectory) {
+        for (final File sub : delDirectory.listFiles()) {
             if (sub.isFile()) {
                 sub.delete();
             } else {
                 deleteDirectory(sub);
             }
         }
-        directory.delete();
+        delDirectory.delete();
     }
 
     /**
@@ -374,44 +384,47 @@ public class LauncherFrame extends JFrame implements ActionListener {
     public void updateStartButton() {
         if (GameData.checkInternetConnection()) {
             // get the selected build type
-            final BuildType selectedType = Settings.getBuildType();
+            final BuildType selectedType = settings.getBuildType();
             // get the installed build type
-            final BuildType installedType = GameData.getInstalledBuildType();
+            final BuildType installedType = GameData.getInstalledBuildType(terasologyDirectory);
             if (selectedType == installedType) {
                 // check if update is possible
                 // therefore, get the installed version no. and the upstream version number
-                final int installedVersion = GameData.getInstalledBuildVersion();
+                final int installedVersion = GameData.getInstalledBuildVersion(terasologyDirectory);
                 final int upstreamVersion = GameData.getUpStreamVersion(installedType);
-                final int selectedVersion = Settings.getBuildVersion(installedType).equals("Latest") ? upstreamVersion
-                    : Integer.parseInt(Settings.getBuildVersion(installedType));
-
+                final int selectedVersion;
+                if (settings.isBuildVersionLatest(installedType)) {
+                    selectedVersion = upstreamVersion;
+                } else {
+                    selectedVersion = settings.getBuildVersion(installedType);
+                }
                 if (installedVersion == selectedVersion) {
                     // game can be started
-                    start.setText(BundleUtil.getLabel("launcher_start"));
-                    start.setActionCommand(START_ACTION);
+                    startButton.setText(BundleUtil.getLabel("launcher_start"));
+                    startButton.setActionCommand(START_ACTION);
                 } else {
                     // differentiate between up- and downgrade
                     if (installedVersion < selectedVersion) {
-                        start.setText(BundleUtil.getLabel("launcher_update"));
-                        start.setActionCommand(DOWNLOAD_ACTION);
+                        startButton.setText(BundleUtil.getLabel("launcher_update"));
+                        startButton.setActionCommand(DOWNLOAD_ACTION);
                     } else {
-                        start.setText(BundleUtil.getLabel("launcher_downgrade"));
-                        start.setActionCommand(DOWNLOAD_ACTION);
+                        startButton.setText(BundleUtil.getLabel("launcher_downgrade"));
+                        startButton.setActionCommand(DOWNLOAD_ACTION);
                     }
                 }
             } else {
                 // download other build type
-                start.setText(BundleUtil.getLabel("launcher_download"));
-                start.setActionCommand(DOWNLOAD_ACTION);
+                startButton.setText(BundleUtil.getLabel("launcher_download"));
+                startButton.setActionCommand(DOWNLOAD_ACTION);
             }
         } else {
-            if (GameData.isGameInstalled()) {
+            if (GameData.isGameInstalled(terasologyDirectory)) {
                 // installed game can be started
-                start.setText(BundleUtil.getLabel("launcher_start"));
-                start.setActionCommand(START_ACTION);
+                startButton.setText(BundleUtil.getLabel("launcher_start"));
+                startButton.setActionCommand(START_ACTION);
             } else {
                 // no game installed, and no way to download it...
-                start.setEnabled(false);
+                startButton.setEnabled(false);
             }
         }
     }

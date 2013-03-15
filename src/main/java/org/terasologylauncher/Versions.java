@@ -30,45 +30,44 @@ public final class Versions {
 
     private static final Logger logger = LoggerFactory.getLogger(Versions.class);
 
-    // TODO not used!
-    private static final String UPDATER_URL = "http://updater.movingblocks.net/";
-    private static final String STABLE_VER = "stable.ver";
-    private static final String UNSTABLE_VER = "unstable.ver";
-
-    private static List<String> stableVersions;
-    private static List<String> nightlyVersions;
+    private static List<Integer> stableVersions;
+    private static List<Integer> nightlyVersions;
 
     private Versions() {
     }
 
-    public static List<String> getVersions(final BuildType buildType) {
+    public static List<Integer> getVersions(final Settings settings, final BuildType buildType) {
         if (!GameData.checkInternetConnection()) {
-            final List<String> list = new ArrayList<String>();
-            list.add("Latest");
+            final List<Integer> list = new ArrayList<Integer>();
+            list.add(Settings.BUILD_VERSION_LATEST);
             return list;
         }
         switch (buildType) {
             case STABLE:
-                return getStableVersionsList();
+                return getStableVersionsList(settings);
             case NIGHTLY:
-                return getNightlyVersionsList();
+                return getNightlyVersionsList(settings);
         }
         return null; // TODO: do something useful here!
     }
 
-    private static List<String> getNightlyVersionsList() {
+    private static List<Integer> getNightlyVersionsList(final Settings settings) {
         if (nightlyVersions == null) {
-            nightlyVersions = new ArrayList<String>();
-            nightlyVersions.add("Latest");
+            nightlyVersions = new ArrayList<Integer>();
+            nightlyVersions.add(Settings.BUILD_VERSION_LATEST);
             // TODO: Check for internet connection before?
             try {
                 final int latestVersionNumber = GameData.getUpStreamNightlyVersion();
                 // for nightly builds, go 8 versions back for the list
-                final String currentSetting = Settings.getBuildVersion(BuildType.NIGHTLY);
-                final int buildVersionSetting = currentSetting.equals("Latest") ? latestVersionNumber : Integer.parseInt(currentSetting);
+                final int buildVersionSetting;
+                if (settings.isBuildVersionLatest(BuildType.NIGHTLY)) {
+                    buildVersionSetting = latestVersionNumber;
+                } else {
+                    buildVersionSetting = settings.getBuildVersion(BuildType.NIGHTLY);
+                }
                 final int minVersionNumber = Math.min(latestVersionNumber - 8, buildVersionSetting);
                 for (int i = latestVersionNumber - 1; i >= minVersionNumber; i--) {
-                    nightlyVersions.add(String.valueOf(i));
+                    nightlyVersions.add(i);
                 }
             } catch (Exception e) {
                 logger.error("Retrieving latest nightly version build number failed.", e);
@@ -77,19 +76,23 @@ public final class Versions {
         return nightlyVersions;
     }
 
-    private static List<String> getStableVersionsList() {
+    private static List<Integer> getStableVersionsList(final Settings settings) {
         if (stableVersions == null) {
-            stableVersions = new ArrayList<String>();
-            stableVersions.add("Latest");
+            stableVersions = new ArrayList<Integer>();
+            stableVersions.add(Settings.BUILD_VERSION_LATEST);
             // TODO: Check for internet connection before?
             try {
                 final int latestVersionNumber = GameData.getUpStreamStableVersion();
                 // for stable builds, go at least 4 versions back for the list
-                final String currentSetting = Settings.getBuildVersion(BuildType.STABLE);
-                final int buildVersionSetting = currentSetting.equals("Latest") ? latestVersionNumber : Integer.parseInt(currentSetting);
+                final int buildVersionSetting;
+                if (settings.isBuildVersionLatest(BuildType.STABLE)) {
+                    buildVersionSetting = latestVersionNumber;
+                } else {
+                    buildVersionSetting = settings.getBuildVersion(BuildType.STABLE);
+                }
                 final int minVersionNumber = Math.min(latestVersionNumber - 4, buildVersionSetting);
                 for (int i = latestVersionNumber - 1; i >= minVersionNumber; i--) {
-                    stableVersions.add(String.valueOf(i));
+                    stableVersions.add(i);
                 }
             } catch (Exception e) {
                 logger.error("Retrieving latest stable version build number failed.", e);

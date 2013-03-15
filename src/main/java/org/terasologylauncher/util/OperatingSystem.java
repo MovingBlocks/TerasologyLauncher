@@ -31,7 +31,7 @@ public enum OperatingSystem {
 
     private final String identifier;
 
-    OperatingSystem(final String system) {
+    private OperatingSystem(final String system) {
         identifier = system.toLowerCase();
     }
 

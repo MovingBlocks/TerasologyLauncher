@@ -18,8 +18,6 @@ package org.terasologylauncher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasologylauncher.launcher.TerasologyLauncher;
-import org.terasologylauncher.util.TerasologyDirectories;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Locale;
 import java.util.Properties;
 
 /**
@@ -36,58 +35,41 @@ import java.util.Properties;
  */
 public final class Settings {
 
+    public static final BuildType BUILD_TYPE_DEFAULT = BuildType.STABLE;
+    public static final int BUILD_VERSION_LATEST = -1;
+    public static final int MAX_MEMORY_DEFAULT = 0;
+    public static final int INITIAL_MEMORY_NONE = -1;
+
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);
 
     private static final String SETTINGS_FILE_NAME = "settings.properties";
-    private static final String DEFAULT_SETTINGS_FILE_NAME = "/settings.properties";
 
-    private static File settingsFile;
-    private static Properties properties;
+    private final File settingsFile;
+    private final Properties properties;
 
-    private Settings() {
-    }
-
-    public static void init() throws IOException {
+    public Settings(final File directory) {
         properties = new Properties();
-        settingsFile = new File(TerasologyDirectories.getLauncherDir(), SETTINGS_FILE_NAME);
+        settingsFile = new File(directory, SETTINGS_FILE_NAME);
+    }
+
+    public synchronized void load() throws IOException {
         if (settingsFile.exists()) {
-            loadSettings();
-        } else {
-            loadDefaultSettings();
-        }
-    }
+            logger.debug("Load settings from {}", settingsFile);
 
-    private static void loadDefaultSettings() throws IOException {
-        logger.debug("Load default settings");
-
-        final InputStream inputStream = TerasologyLauncher.class.getResourceAsStream(DEFAULT_SETTINGS_FILE_NAME);
-        try {
-            properties.load(inputStream);
-        } finally {
+            final InputStream inputStream = new FileInputStream(settingsFile);
             try {
-                inputStream.close();
-            } catch (IOException e) {
-                logger.info("The InputStream could not be closed.", e);
+                properties.load(inputStream);
+            } finally {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    logger.info("The InputStream could not be closed. " + settingsFile, e);
+                }
             }
         }
     }
 
-    private static void loadSettings() throws IOException {
-        logger.debug("Load settings from {}", settingsFile);
-
-        final InputStream inputStream = new FileInputStream(settingsFile);
-        try {
-            properties.load(inputStream);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                logger.info("The InputStream could not be closed. " + settingsFile, e);
-            }
-        }
-    }
-
-    public static void storeSettings() throws IOException {
+    public synchronized void store() throws IOException {
         logger.debug("Store settings into {}", settingsFile);
 
         if (!settingsFile.getParentFile().exists() && !settingsFile.getParentFile().mkdirs()) {
@@ -105,60 +87,119 @@ public final class Settings {
         }
     }
 
-    /*============================== Settings access ================================*/
+    public synchronized void init() {
+        // locale
+        final String localeStr = properties.getProperty("locale");
+        if (localeStr != null) {
+            Languages.init(localeStr);
+        }
+        properties.setProperty("locale", Languages.getCurrentLocale().toString());
 
-    public static synchronized void setBuildType(final BuildType type) {
-        properties.setProperty("buildType", String.valueOf(type.type()));
+        // buildType
+        final String buildTypeStr = properties.getProperty("buildType");
+        BuildType buildType = BUILD_TYPE_DEFAULT;
+        if (buildTypeStr != null) {
+            try {
+                buildType = BuildType.valueOf(buildTypeStr);
+            } catch (IllegalArgumentException e) {
+                logger.debug("Illegal BuildType! " + buildTypeStr, e);
+            }
+        }
+        properties.setProperty("buildType", buildType.name());
+
+        // buildVersion
+        final BuildType[] buildTypes = BuildType.values();
+        for (BuildType b : buildTypes) {
+            final String key = "buildVersion_" + b.name();
+            final String buildVersionStr = properties.getProperty(key);
+            int buildVersion = BUILD_VERSION_LATEST;
+            if (buildVersionStr != null) {
+                try {
+                    buildVersion = Integer.parseInt(buildVersionStr);
+                } catch (NumberFormatException e) {
+                    logger.debug("Illegal BuildVersion! " + buildVersionStr, e);
+                }
+            }
+            properties.setProperty(key, String.valueOf(buildVersion));
+        }
+
+        // maxMemory
+        final String maxMemoryStr = properties.getProperty("maxMemory");
+        int maxMemory = MAX_MEMORY_DEFAULT;
+        try {
+            maxMemory = Integer.parseInt(maxMemoryStr);
+        } catch (NumberFormatException e) {
+            logger.debug("Illegal MaxMemory! " + maxMemoryStr, e);
+        }
+        properties.setProperty("maxMemory", String.valueOf(maxMemory));
+
+        // initialMemory
+        final String initialMemoryStr = properties.getProperty("initialMemory");
+        int initialMemory = INITIAL_MEMORY_NONE;
+        try {
+            initialMemory = Integer.parseInt(initialMemoryStr);
+        } catch (NumberFormatException e) {
+            logger.debug("Illegal InitialMemory! " + initialMemoryStr, e);
+        }
+        properties.setProperty("initialMemory", String.valueOf(initialMemory));
     }
 
-    public static synchronized BuildType getBuildType() {
-        final int buildType = Integer.parseInt(properties.getProperty("buildType"));
-        return BuildType.getType(buildType);
+    /*============================== Settings access ================================*/
+
+    public synchronized void setLocale(Locale locale) {
+        properties.setProperty("locale", locale.toString());
+    }
+
+    public synchronized void setBuildType(final BuildType buildType) {
+        properties.setProperty("buildType", buildType.name());
+    }
+
+    public synchronized BuildType getBuildType() {
+        return BuildType.valueOf(properties.getProperty("buildType"));
     }
 
     /**
      * Sets the build version property, depending on the build version.
-     * The key for stable build is <code>stableBuildVersion</code>,
-     * the key for nightly build is <code>nightlyBuildVersion</code>.
      *
-     * @param version the version number
-     * @param type    the build type of the game
+     * @param version   the version number; -1 for the "Latest"
+     * @param buildType the build type of the game
      */
-    public static synchronized void setBuildVersion(final String version, final BuildType type) {
-        properties.setProperty(type.toString() + "BuildVersion", version);
+    public synchronized void setBuildVersion(final int version, final BuildType buildType) {
+        properties.setProperty("buildVersion_" + buildType.name(), String.valueOf(version));
     }
 
-    public static synchronized String getBuildVersion(final BuildType type) {
-        return properties.getProperty(type.toString() + "BuildVersion");
+    public synchronized int getBuildVersion(final BuildType buildType) {
+        return Integer.parseInt(properties.getProperty("buildVersion_" + buildType.name()));
     }
 
-    public static synchronized void setMaximalMemory(final int memoryID) {
-        properties.setProperty("maxMemory", String.valueOf(memoryID));
+    public synchronized boolean isBuildVersionLatest(final BuildType buildType) {
+        return BUILD_VERSION_LATEST == getBuildVersion(buildType);
+    }
+
+    public synchronized void setMaximalMemory(final int maxMemory) {
+        properties.setProperty("maxMemory", String.valueOf(maxMemory));
     }
 
     /**
      * @return the option id of the memory object.
      */
-    public static synchronized int getMaximalMemory() {
+    public synchronized int getMaximalMemory() {
         return Integer.parseInt(properties.getProperty("maxMemory"));
     }
 
-    public static synchronized void setInitialMemory(final int memoryID) {
-        properties.setProperty("initialMemory", String.valueOf(memoryID));
+    public synchronized void setInitialMemory(final int initialMemory) {
+        properties.setProperty("initialMemory", String.valueOf(initialMemory));
     }
 
     /**
      * @return the option id of the memory object or -1 for "None".
      */
-    public static synchronized int getInitialMemory() {
+    public synchronized int getInitialMemory() {
         return Integer.parseInt(properties.getProperty("initialMemory"));
     }
 
-    public static synchronized void setLocaleString(String localeString) {
-        properties.setProperty("locale", localeString);
-    }
-
-    public static synchronized String getLocaleString() {
-        return properties.getProperty("locale");
+    @Override
+    public String toString() {
+        return this.getClass().getName() + "[" + properties.toString() + "]";
     }
 }
