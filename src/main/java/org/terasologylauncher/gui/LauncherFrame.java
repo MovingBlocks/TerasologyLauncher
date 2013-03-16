@@ -22,20 +22,10 @@ import org.terasologylauncher.launcher.TerasologyStarter;
 import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.updater.GameDownloader;
 import org.terasologylauncher.util.BundleUtil;
-import org.terasologylauncher.util.OperatingSystem;
-import org.terasologylauncher.util.TerasologyDirectories;
+import org.terasologylauncher.util.DirectoryUtils;
+import org.terasologylauncher.util.OSUtils;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
+import javax.swing.*;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -50,9 +40,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.logging.Logger;
 
-/**
- * @author Skaldarnar
- */
+/** @author Skaldarnar */
 public class LauncherFrame extends JFrame implements ActionListener {
 
     public static final URL ICON = LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png");
@@ -95,10 +83,10 @@ public class LauncherFrame extends JFrame implements ActionListener {
     private SettingsMenu settingsMenu;
 
     private final File terasologyDirectory;
-    private final OperatingSystem os;
+    private final OSUtils os;
     private final Settings settings;
 
-    public LauncherFrame(final File terasologyDirectory, final OperatingSystem os, final Settings settings) {
+    public LauncherFrame(final File terasologyDirectory, final OSUtils os, final Settings settings) {
         this.terasologyDirectory = terasologyDirectory;
         this.os = os;
         this.settings = settings;
@@ -318,8 +306,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Clean up the installation directory, that means delete all files and folders except of the files kept by
-     * <tt>canBeDeleted</tt> method.
+     * Clean up the installation directory, that means delete all files and folders except of the files kept by <tt>canBeDeleted</tt>
+     * method.
      */
     private void cleanUp() {
         for (final File f : terasologyDirectory.listFiles()) {
@@ -334,28 +322,28 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Check if the file can be deleted on clean up action.
-     * The only files/directories kept are "SAVED_WORLDS", "screens" and "launcher".
+     * Check if the file can be deleted on clean up action. The only files/directories kept are "SAVED_WORLDS", "screens" and "launcher".
      *
      * @param f the file to check
+     *
      * @return true if the file can be deleted
      */
     private boolean canBeDeleted(final File f) {
         Logger.getAnonymousLogger().info(f.getName());
         final String fileName = f.getName();
-        if (fileName.equals(TerasologyDirectories.LAUNCHER_DIR_NAME)) {
+        if (fileName.equals(DirectoryUtils.LAUNCHER_DIR_NAME)) {
             return false;
         }
-        if (fileName.equals(TerasologyDirectories.SAVED_WORLDS_DIR_NAME)) {
+        if (fileName.equals(DirectoryUtils.SAVED_WORLDS_DIR_NAME)) {
             return false;
         }
-        if (fileName.equals(TerasologyDirectories.SCREENSHOTS_DIR_NAME)) {
+        if (fileName.equals(DirectoryUtils.SCREENSHOTS_DIR_NAME)) {
             return false;
         }
-        if (f.getAbsolutePath().equals(TerasologyDirectories.BACKUP_DIR_NAME)) {
+        if (f.getAbsolutePath().equals(DirectoryUtils.BACKUP_DIR_NAME)) {
             return false;
         }
-        if (f.getName().equals(TerasologyDirectories.MODS_DIR_NAME)) {
+        if (f.getName().equals(DirectoryUtils.MODS_DIR_NAME)) {
             return false;
         }
         return true;
@@ -378,8 +366,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Updates the start button with regard to the selected settings, the internet connection and the installed game.
-     * Changes the button text and action command ("start" or "download").
+     * Updates the start button with regard to the selected settings, the internet connection and the installed game. Changes the button
+     * text and action command ("start" or "download").
      */
     public void updateStartButton() {
         if (GameData.checkInternetConnection()) {

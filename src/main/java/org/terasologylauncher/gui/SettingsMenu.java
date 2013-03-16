@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Languages;
 import org.terasologylauncher.Settings;
-import org.terasologylauncher.Versions;
 import org.terasologylauncher.util.BundleUtil;
 import org.terasologylauncher.util.Memory;
+import org.terasologylauncher.version.TerasologyGameVersion;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -44,9 +44,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.util.Locale;
 
-/**
- * @author Skaldarnar
- */
+/** @author Skaldarnar */
 public class SettingsMenu extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
@@ -363,7 +361,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private void populateVersions(final JComboBox buildVersionBox, final BuildType buildType) {
         final int buildVersion = settings.getBuildVersion(buildType);
 
-        for (final Integer version : Versions.getVersions(settings, buildType)) {
+        for (final Integer version : TerasologyGameVersion.getVersions(settings, buildType)) {
             String item;
             if (version == Settings.BUILD_VERSION_LATEST) {
                 item = BundleUtil.getLabel("settings_game_buildVersion_latest");
@@ -416,7 +414,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void populateInitialMemory() {
-        final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getMemoryMB();
+        final int currentMemSetting = Memory.MEMORY_OPTIONS[ maxMemBox.getSelectedIndex() ].getMemoryMB();
 
         initialMemBox.removeAllItems();
         initialMemBox.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
@@ -486,10 +484,10 @@ public class SettingsMenu extends JDialog implements ActionListener {
             }
 
             // save ram settings
-            settings.setMaximalMemory(Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getSettingsId());
+            settings.setMaximalMemory(Memory.MEMORY_OPTIONS[ maxMemBox.getSelectedIndex() ].getSettingsId());
             final int selectedInitMem = initialMemBox.getSelectedIndex();
             if (selectedInitMem > 0) {
-                settings.setInitialMemory(Memory.MEMORY_OPTIONS[initialMemBox.getSelectedIndex() - 1].getSettingsId());
+                settings.setInitialMemory(Memory.MEMORY_OPTIONS[ initialMemBox.getSelectedIndex() - 1 ].getSettingsId());
             } else {
                 settings.setInitialMemory(Settings.INITIAL_MEMORY_NONE);
             }
@@ -515,7 +513,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private void updateInitMemBox() {
         final int currentIdx = initialMemBox.getSelectedIndex();
 
-        final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getMemoryMB();
+        final int currentMemSetting = Memory.MEMORY_OPTIONS[ maxMemBox.getSelectedIndex() ].getMemoryMB();
         initialMemBox.removeAllItems();
         initialMemBox.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
         for (final Memory m : Memory.MEMORY_OPTIONS) {

@@ -19,9 +19,7 @@ package org.terasologylauncher.util;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * @author Skaldarnar
- */
+/** @author Skaldarnar */
 public final class DirectoryUtils {
 
     public static final String BACKUP_DIR_NAME = "backups";

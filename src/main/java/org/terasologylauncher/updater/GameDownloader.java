@@ -108,9 +108,11 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
                 in = url.openConnection().getInputStream();
                 out = new FileOutputStream(file);
 
-                final byte[] buffer = new byte[2048];
+                final byte[] buffer = new byte[ 2048 ];
 
-                for (int n; (n = in.read(buffer)) != -1; out.write(buffer, 0, n)) {
+                int n;
+                while ((n = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, n);
                     final long fileSizeMB = file.length() / 1024 / 1024;
                     float percentage = fileSizeMB / (float) dataSize;
                     percentage *= 100;
