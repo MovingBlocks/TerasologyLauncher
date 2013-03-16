@@ -18,30 +18,7 @@ package org.terasologylauncher;
 
 public enum BuildType {
 
-    STABLE(0),
-    NIGHTLY(1);
+    STABLE,
+    NIGHTLY;
 
-    private final int type;
-
-    private BuildType(final int type) {
-        this.type = type;
-    }
-
-    public int type() {
-        return type;
-    }
-
-    public static BuildType getType(final int type) {
-        for (final BuildType t : values()) {
-            if (t.type == type) {
-                return t;
-            }
-        }
-        throw new IllegalArgumentException("Unknown build type: " + type);
-    }
-
-    @Override
-    public String toString() {
-        return name().toLowerCase();
-    }
 }

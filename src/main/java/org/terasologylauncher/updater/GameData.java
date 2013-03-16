@@ -19,7 +19,6 @@ package org.terasologylauncher.updater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
-import org.terasologylauncher.util.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -57,13 +56,13 @@ public final class GameData {
     private GameData() {
     }
 
-    public static boolean isGameInstalled() {
-        return getGameJar().exists();
+    public static boolean isGameInstalled(final File terasologyDirectory) {
+        return getGameJar(terasologyDirectory).exists();
     }
 
-    public static File getGameJar() {
+    public static File getGameJar(final File terasologyDirectory) {
         if (gameJar == null) {
-            gameJar = new File(Utils.getWorkingDirectory(), "Terasology.jar");
+            gameJar = new File(terasologyDirectory, "Terasology.jar");
         }
         return gameJar;
     }
@@ -136,24 +135,24 @@ public final class GameData {
         return false;
     }
 
-    public static BuildType getInstalledBuildType() {
+    public static BuildType getInstalledBuildType(final File terasologyDirectory) {
         if (installedBuildType == null) {
-            readVersionFile();
+            readVersionFile(terasologyDirectory);
         }
         return installedBuildType;
     }
 
-    public static int getInstalledBuildVersion() {
+    public static int getInstalledBuildVersion(final File terasologyDirectory) {
         if (installedBuildVersion == -1) {
-            readVersionFile();
+            readVersionFile(terasologyDirectory);
         }
         return installedBuildVersion;
     }
 
-    private static void readVersionFile() {
+    private static void readVersionFile(final File terasologyDirectory) {
         // TODO Wrong version file. This is the human readable file. Replace with "versionInfo.properties"
         try {
-            final File installedVersionFile = new File(Utils.getWorkingDirectory(), "VERSION");
+            final File installedVersionFile = new File(terasologyDirectory, "VERSION");
             if (installedVersionFile.isFile()) {
                 final Scanner scanner = new Scanner(installedVersionFile);
                 while (scanner.hasNextLine()) {
@@ -176,7 +175,7 @@ public final class GameData {
         }
     }
 
-    public static void forceReReadVersionFile() {
-        readVersionFile();
+    public static void forceReReadVersionFile(final File terasologyDirectory) {
+        readVersionFile(terasologyDirectory);
     }
 }
