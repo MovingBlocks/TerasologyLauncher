@@ -21,16 +21,19 @@ import org.slf4j.LoggerFactory;
 import org.terasologylauncher.Languages;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
+import org.terasologylauncher.gui.SplashScreen;
 import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.util.TerasologyDirectories;
 import org.terasologylauncher.version.TerasologyLauncherVersion;
 
+import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import java.awt.Frame;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 
-/**
- * @author Skaldarnar
- */
+/** @author Skaldarnar */
 public final class TerasologyLauncher {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncher.class);
@@ -43,7 +46,18 @@ public final class TerasologyLauncher {
             long start = System.currentTimeMillis();
             final long startUpTime = start;
 
-            //TODO: Add splash screen
+            // Show splash screen
+            InputStream stream = null;
+            BufferedImage bg;
+            try {
+                stream = TerasologyLauncher.class.getResourceAsStream("/org/terasologylauncher/images/splash.png");
+                bg = ImageIO.read(stream);
+            } catch (IOException e) {
+                logger.error("Could not read splash image.", e);
+                bg = new BufferedImage(600, 200, BufferedImage.TYPE_INT_ARGB);
+            }
+            final SplashScreen splash = new SplashScreen(bg);
+            splash.setVisible(true);
 
             //TODO: check for launcher update
             logger.debug("Launcher build number: {}", TerasologyLauncherVersion.getInstance().getBuildNumber());
@@ -81,11 +95,13 @@ public final class TerasologyLauncher {
 
             //TODO: Check for game update
 
-            //TODO: dispose splash screen
             frame.setVisible(true);
 
+            // dispose splash screen
+            splash.setVisible(false);
+            splash.dispose();
+
             logger.debug("Setting visible took {}", (System.currentTimeMillis() - start) + "ms");
-            start = System.currentTimeMillis();
 
             logger.debug("Startup took {}", (System.currentTimeMillis() - startUpTime) + " ms");
         } catch (Exception e) {

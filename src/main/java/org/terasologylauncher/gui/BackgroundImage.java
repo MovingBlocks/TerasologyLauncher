@@ -38,6 +38,12 @@ public class BackgroundImage extends JLabel {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(BackgroundImage.class);
 
+    /**
+     * Uses a default image as background. The default image is located in images/background.png.
+     *
+     * @param width  - the background width
+     * @param height - the background height
+     */
     public BackgroundImage(final int width, final int height) {
         setVerticalAlignment(SwingConstants.CENTER);
         setHorizontalAlignment(SwingConstants.CENTER);
@@ -56,6 +62,16 @@ public class BackgroundImage extends JLabel {
         }
 
         setIcon(new ImageIcon(bg.getScaledInstance(width, height, Image.SCALE_SMOOTH)));
+        setVerticalAlignment(SwingConstants.TOP);
+        setHorizontalAlignment(SwingConstants.LEFT);
+    }
+
+    public BackgroundImage(final int width, final int height, final Image image) {
+        setVerticalAlignment(SwingConstants.CENTER);
+        setHorizontalAlignment(SwingConstants.CENTER);
+        setBounds(0, 0, width, height);
+
+        setIcon(new ImageIcon(image.getScaledInstance(width, height, Image.SCALE_SMOOTH)));
         setVerticalAlignment(SwingConstants.TOP);
         setHorizontalAlignment(SwingConstants.LEFT);
     }
