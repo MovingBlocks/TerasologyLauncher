@@ -30,7 +30,6 @@ public class DownloadUtils {
      *
      * @param downloadURL - remote location of file to download
      * @param file        - where to store downloaded file
-     *
      * @throws IOException
      */
     public static void downloadToFile(URL downloadURL, File file) throws IOException {
