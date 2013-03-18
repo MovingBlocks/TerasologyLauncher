@@ -23,7 +23,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 
-public class DownloadUtils {
+public final class DownloadUtils {
+
+    private DownloadUtils() {
+    }
 
     /**
      * Download the file from the given URL and store it to the specified file.

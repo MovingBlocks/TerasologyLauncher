@@ -178,7 +178,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
             "\n no sea takimata sanctus est " +
             "\n Lorem ipsum dolor sit amet.");
 
-        //infoTextPane.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, updatePanelWidth - 16, updatePanelHeight - 16);
+        //infoTextPane.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, updatePanelWidth - 16,
+        // updatePanelHeight - 16);
         final JScrollPane sp = new JScrollPane();
         sp.getViewport().add(infoTextPane);
         sp.getVerticalScrollBar().setOpaque(false);
@@ -302,11 +303,13 @@ public class LauncherFrame extends JFrame implements ActionListener {
             dispose();
             System.exit(0);
         } else if (command.equals(START_ACTION)) {
-            final TerasologyStarter terasologyStarter = new TerasologyStarter(terasologyDirectory, os, settings.getMaximalMemory(), settings.getInitialMemory());
+            final TerasologyStarter terasologyStarter = new TerasologyStarter(terasologyDirectory, os,
+                settings.getMaximalMemory(), settings.getInitialMemory());
             if (terasologyStarter.startGame()) {
                 System.exit(0);
             } else {
-                JOptionPane.showMessageDialog(null, BundleUtil.getLabel("message_error_gameStart"), BundleUtil.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, BundleUtil.getLabel("message_error_gameStart"),
+                    BundleUtil.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
             }
         } else if (command.equals(DOWNLOAD_ACTION)) {
             // cleanup the directories (keep savedWorlds and screen shots)
