@@ -32,9 +32,12 @@ import java.util.zip.ZipInputStream;
  * @author MrBarsack
  * @author Skaldarnar
  */
-public class FileUtils {
+public final class FileUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
+
+    private FileUtils() {
+    }
 
     /**
      * Deletes the specified file or directory (directories are removed recursively).
