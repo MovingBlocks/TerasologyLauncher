@@ -31,8 +31,8 @@ import java.net.URLConnection;
 import java.util.Scanner;
 
 /**
- * The GameData class provides access to information on the installed game version and type, if an internet connection is available and
- * whether the game could be updated to a newer version.
+ * The GameData class provides access to information on the installed game version and type, if an internet connection
+ * is available and whether the game could be updated to a newer version.
  *
  * @author Skaldarnar
  */
@@ -158,9 +158,9 @@ public final class GameData {
                 while (scanner.hasNextLine()) {
                     final String line = scanner.nextLine();
                     if (line.contains("Build number:")) {
-                        installedBuildVersion = Integer.parseInt(line.split(":")[ 1 ].trim());
+                        installedBuildVersion = Integer.parseInt(line.split(":")[1].trim());
                     } else if (line.contains("GIT branch:")) {
-                        final String branch = line.split(":")[ 1 ].trim();
+                        final String branch = line.split(":")[1].trim();
                         if (branch.equals("develop")) {
                             installedBuildType = BuildType.NIGHTLY;
                         } else {

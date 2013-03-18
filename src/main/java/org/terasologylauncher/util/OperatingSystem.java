@@ -15,7 +15,7 @@
  */
 package org.terasologylauncher.util;
 
-public enum OSUtils {
+public enum OperatingSystem {
 
     UNIX("Unix"),
     LINUX("Linux"),
@@ -31,7 +31,7 @@ public enum OSUtils {
 
     private final String identifier;
 
-    private OSUtils(final String system) {
+    private OperatingSystem(final String system) {
         identifier = system.toLowerCase();
     }
 
@@ -48,10 +48,10 @@ public enum OSUtils {
             || (this == WINDOWS_UNKNOWN);
     }
 
-    public static OSUtils getOS() {
-        OSUtils best = UNKNOWN;
+    public static OperatingSystem getOS() {
+        OperatingSystem best = UNKNOWN;
         final String os = System.getProperty("os.name").toLowerCase();
-        for (final OSUtils system : values()) {
+        for (final OperatingSystem system : values()) {
             if (os.contains(system.identifier)) {
                 if (system.identifier.length() > best.identifier.length()) {
                     best = system;

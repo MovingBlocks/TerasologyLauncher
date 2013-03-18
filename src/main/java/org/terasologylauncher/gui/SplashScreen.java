@@ -25,7 +25,8 @@ import java.awt.Image;
 
 public class SplashScreen extends JWindow {
 
-    // TODO: Provide access to progress bar and info label
+    // TODO: progress bar?
+    private static final int INFO_LABEL_WIDTH = 400;
 
     private JLabel infoLabel;
 
@@ -36,7 +37,8 @@ public class SplashScreen extends JWindow {
 
         // Init the info label
         infoLabel = new JLabel();
-        infoLabel.setBounds((icon.getIconWidth() / 2) - 100, (icon.getIconHeight() / 2) + 32, 200, 32);
+        infoLabel.setBounds((icon.getIconWidth() / 2) - (INFO_LABEL_WIDTH / 2), (icon.getIconHeight() / 2) + 32,
+            INFO_LABEL_WIDTH, 32);
         infoLabel.setText("Starting Terasology Launcher");
         infoLabel.setForeground(Color.RED);
         infoLabel.setHorizontalTextPosition(JLabel.CENTER);

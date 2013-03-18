@@ -25,7 +25,7 @@ import org.terasologylauncher.gui.LauncherFrame;
 import org.terasologylauncher.gui.SplashScreen;
 import org.terasologylauncher.updater.LauncherUpdater;
 import org.terasologylauncher.util.DirectoryUtils;
-import org.terasologylauncher.util.OSUtils;
+import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyGameVersion;
 import org.terasologylauncher.version.TerasologyLauncherVersion;
 
@@ -37,7 +37,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-/** @author Skaldarnar */
+/**
+ * @author Skaldarnar
+ */
 public final class TerasologyLauncher {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncher.class);
@@ -47,22 +49,7 @@ public final class TerasologyLauncher {
 
     public static void main(final String[] args) {
         try {
-            final long startUpTime = System.currentTimeMillis();
             logger.debug("Starting TerasologyLauncher");
-
-            // Show splash screen
-            InputStream stream = null;
-            BufferedImage bg;
-            try {
-                stream = TerasologyLauncher.class.getResourceAsStream("/org/terasologylauncher/images/splash.png");
-                bg = ImageIO.read(stream);
-            } catch (IOException e) {
-                logger.error("Could not read splash image.", e);
-                bg = new BufferedImage(600, 200, BufferedImage.TYPE_INT_ARGB);
-            }
-            final SplashScreen splash = new SplashScreen(bg);
-            splash.getInfoLabel().setText("Starting TerasologyLauncher ...");
-            splash.setVisible(true);
 
             // TerasologyLauncherVersion
             logger.debug("TerasologyLauncherVersion {}", TerasologyLauncherVersion.getInstance().toString());
@@ -70,13 +57,13 @@ public final class TerasologyLauncher {
             // Language
             Languages.init();
             logger.debug("Language: {}", Languages.getCurrentLocale());
-            splash.getInfoLabel().setText("Setting language - [" + Languages.getCurrentLocale() + "]"); // TODO: i18n
+            //splash.getInfoLabel().setText("Setting language - [" + Languages.getCurrentLocale() + "]"); // TODO: i18n
 
             // OS
-            final OSUtils os = OSUtils.getOS();
+            final OperatingSystem os = OperatingSystem.getOS();
             logger.debug("OS: {}", os);
 
-            if (os == OSUtils.UNKNOWN) {
+            if (os == OperatingSystem.UNKNOWN) {
                 logger.error("Unknown/Unsupported operating system!");
                 // TODO Message and title
                 JOptionPane.showMessageDialog(null, "Message", "Title", JOptionPane.ERROR_MESSAGE);
@@ -84,7 +71,7 @@ public final class TerasologyLauncher {
             }
 
             // Application directory
-            splash.getInfoLabel().setText("Setting up application directory ...");   // TODO: i18n
+            //splash.getInfoLabel().setText("Setting up application directory ...");   // TODO: i18n
             final File applicationDir = DirectoryUtils.getApplicationDirectory(os);
             try {
                 DirectoryUtils.checkDirectory(applicationDir);
@@ -97,7 +84,7 @@ public final class TerasologyLauncher {
             logger.debug("Application directory: {}", applicationDir);
 
             // Launcher directory
-            splash.getInfoLabel().setText("Setting up launcher directory ...");   // TODO: i18n
+            //splash.getInfoLabel().setText("Setting up launcher directory ...");   // TODO: i18n
             final File launcherDir = new File(applicationDir, DirectoryUtils.LAUNCHER_DIR_NAME);
             try {
                 DirectoryUtils.checkDirectory(launcherDir);
@@ -108,6 +95,35 @@ public final class TerasologyLauncher {
                 System.exit(1);
             }
             logger.debug("Launcher directory: {}", launcherDir);
+
+            // Settings
+            //splash.getInfoLabel().setText("Loading settings ...");   // TODO: i18n
+            final Settings settings = new Settings(launcherDir);
+            try {
+                settings.load();
+                settings.init();
+                settings.store();
+            } catch (IOException e) {
+                logger.error("Can not load/init/store settings!", e);
+                // TODO Message and title
+                JOptionPane.showMessageDialog(null, "Message", "Title", JOptionPane.ERROR_MESSAGE);
+                System.exit(1);
+            }
+            logger.debug("Settings loaded " + settings);
+
+            // Show splash screen
+            InputStream stream;
+            BufferedImage bg;
+            try {
+                stream = TerasologyLauncher.class.getResourceAsStream("/org/terasologylauncher/images/splash.png");
+                bg = ImageIO.read(stream);
+            } catch (IOException e) {
+                logger.error("Could not read splash image.", e);
+                bg = new BufferedImage(600, 200, BufferedImage.TYPE_INT_ARGB);
+            }
+            final SplashScreen splash = new SplashScreen(bg);
+            splash.getInfoLabel().setText("Starting TerasologyLauncher ...");
+            splash.setVisible(true);
 
             // Launcher Update
             LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersion.getInstance().getBuildNumber());
@@ -130,21 +146,6 @@ public final class TerasologyLauncher {
                 }
             }
 
-            // Settings
-            splash.getInfoLabel().setText("Loading settings ...");   // TODO: i18n
-            final Settings settings = new Settings(launcherDir);
-            try {
-                settings.load();
-                settings.init();
-                settings.store();
-            } catch (IOException e) {
-                logger.error("Can not load/init/store settings!", e);
-                // TODO Message and title
-                JOptionPane.showMessageDialog(null, "Message", "Title", JOptionPane.ERROR_MESSAGE);
-                System.exit(1);
-            }
-            logger.debug("Settings loaded " + settings);
-
             //TODO: Add Debug console
 
             // load game versions
@@ -162,8 +163,6 @@ public final class TerasologyLauncher {
             // Dispose splash screen
             splash.setVisible(false);
             splash.dispose();
-
-            logger.debug("Startup took {}", (System.currentTimeMillis() - startUpTime) + " ms");
 
         } catch (Exception e) {
             logger.error("Starting Terasology Launcher failed!", e);

@@ -72,7 +72,7 @@ public class FileUtils {
     public static void extractZipTo(final File archive, File outputLocation) {
         logger.info("Extracting {}.", archive);
 
-        byte[] buffer = new byte[ 4096 ];
+        byte[] buffer = new byte[4096];
         ZipInputStream zis = null;
         ZipEntry ze = null;
 

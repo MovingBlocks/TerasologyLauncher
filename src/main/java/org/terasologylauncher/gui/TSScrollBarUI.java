@@ -26,8 +26,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- * Custom scroll bar style to fit into the launcher.
- * The scroll bar is a custom design with just a dark grey thumb element with rounded corners and no background.
+ * Custom scroll bar style to fit into the launcher. The scroll bar is a custom design with just a dark grey thumb
+ * element with rounded corners and no background.
  *
  * @author Skaldarnar
  */

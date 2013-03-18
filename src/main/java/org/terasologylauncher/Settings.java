@@ -180,7 +180,9 @@ public final class Settings {
         properties.setProperty("maxMemory", String.valueOf(maxMemory));
     }
 
-    /** @return the option id of the memory object. */
+    /**
+     * @return the option id of the memory object.
+     */
     public synchronized int getMaximalMemory() {
         return Integer.parseInt(properties.getProperty("maxMemory"));
     }
@@ -189,7 +191,9 @@ public final class Settings {
         properties.setProperty("initialMemory", String.valueOf(initialMemory));
     }
 
-    /** @return the option id of the memory object or -1 for "None". */
+    /**
+     * @return the option id of the memory object or -1 for "None".
+     */
     public synchronized int getInitialMemory() {
         return Integer.parseInt(properties.getProperty("initialMemory"));
     }

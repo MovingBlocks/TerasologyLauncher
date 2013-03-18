@@ -23,9 +23,19 @@ import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.updater.GameDownloader;
 import org.terasologylauncher.util.BundleUtil;
 import org.terasologylauncher.util.DirectoryUtils;
-import org.terasologylauncher.util.OSUtils;
+import org.terasologylauncher.util.OperatingSystem;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -40,7 +50,9 @@ import java.io.File;
 import java.net.URL;
 import java.util.logging.Logger;
 
-/** @author Skaldarnar */
+/**
+ * @author Skaldarnar
+ */
 public class LauncherFrame extends JFrame implements ActionListener {
 
     public static final URL ICON = LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png");
@@ -83,10 +95,10 @@ public class LauncherFrame extends JFrame implements ActionListener {
     private SettingsMenu settingsMenu;
 
     private final File terasologyDirectory;
-    private final OSUtils os;
+    private final OperatingSystem os;
     private final Settings settings;
 
-    public LauncherFrame(final File terasologyDirectory, final OSUtils os, final Settings settings) {
+    public LauncherFrame(final File terasologyDirectory, final OperatingSystem os, final Settings settings) {
         this.terasologyDirectory = terasologyDirectory;
         this.os = os;
         this.settings = settings;
@@ -306,8 +318,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Clean up the installation directory, that means delete all files and folders except of the files kept by <tt>canBeDeleted</tt>
-     * method.
+     * Clean up the installation directory, that means delete all files and folders except of the files kept by
+     * <tt>canBeDeleted</tt> method.
      */
     private void cleanUp() {
         for (final File f : terasologyDirectory.listFiles()) {
@@ -322,7 +334,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Check if the file can be deleted on clean up action. The only files/directories kept are "SAVED_WORLDS", "screens" and "launcher".
+     * Check if the file can be deleted on clean up action. The only files/directories kept are "SAVED_WORLDS",
+     * "screens" and "launcher".
      *
      * @param f the file to check
      *
@@ -366,8 +379,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Updates the start button with regard to the selected settings, the internet connection and the installed game. Changes the button
-     * text and action command ("start" or "download").
+     * Updates the start button with regard to the selected settings, the internet connection and the installed game.
+     * Changes the button text and action command ("start" or "download").
      */
     public void updateStartButton() {
         if (GameData.checkInternetConnection()) {

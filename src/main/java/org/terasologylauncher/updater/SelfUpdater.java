@@ -75,8 +75,8 @@ public class SelfUpdater {
     public static void main(String[] args) {
         logger.info("Running self updater.");
 
-        String launcherLocation = args[ 0 ];
-        String temporaryUpdatePath = args[ 1 ];
+        String launcherLocation = args[0];
+        String temporaryUpdatePath = args[1];
 
         File launcher = new File(launcherLocation);
         File updateFiles = new File(temporaryUpdatePath);

@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.util.Memory;
-import org.terasologylauncher.util.OSUtils;
+import org.terasologylauncher.util.OperatingSystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,11 +36,11 @@ public final class TerasologyStarter {
     private static final Logger logger = LoggerFactory.getLogger(TerasologyStarter.class);
 
     private final File terasologyDirectory;
-    private final OSUtils os;
+    private final OperatingSystem os;
     private final int maxMemory;
     private final int initialMemory;
 
-    public TerasologyStarter(final File terasologyDirectory, final OSUtils os, final int maxMemory,
+    public TerasologyStarter(final File terasologyDirectory, final OperatingSystem os, final int maxMemory,
                              final int initialMemory) {
         this.terasologyDirectory = terasologyDirectory;
         this.os = os;

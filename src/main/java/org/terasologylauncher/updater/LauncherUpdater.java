@@ -22,7 +22,7 @@ import org.terasologylauncher.gui.LauncherFrame;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.FileUtils;
-import org.terasologylauncher.util.OSUtils;
+import org.terasologylauncher.util.OperatingSystem;
 
 import javax.swing.JOptionPane;
 import java.io.BufferedReader;
@@ -49,7 +49,8 @@ public final class LauncherUpdater {
     /**
      * This method indicates if a new launcher version is available.
      * <p/>
-     * Compares the current launcher version number to the upstream version number if an internet connection is available.
+     * Compares the current launcher version number to the upstream version number if an internet connection is
+     * available.
      *
      * @return whether an update is available
      */
@@ -79,7 +80,7 @@ public final class LauncherUpdater {
 
     public void update() {
         // get temporary update path
-        final File temporaryUpdateDir = new File(DirectoryUtils.getApplicationDirectory(OSUtils.getOS()), DirectoryUtils.TMP);
+        final File temporaryUpdateDir = new File(DirectoryUtils.getApplicationDirectory(OperatingSystem.getOS()), DirectoryUtils.TMP);
         try {
             DirectoryUtils.checkDirectory(temporaryUpdateDir);
         } catch (IOException e) {

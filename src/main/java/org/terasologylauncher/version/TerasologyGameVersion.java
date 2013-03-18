@@ -25,7 +25,9 @@ import org.terasologylauncher.updater.GameData;
 import java.util.ArrayList;
 import java.util.List;
 
-/** @author Skaldarnar */
+/**
+ * @author Skaldarnar
+ */
 public final class TerasologyGameVersion {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersion.class);

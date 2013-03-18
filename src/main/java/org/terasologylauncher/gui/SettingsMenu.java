@@ -44,7 +44,9 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.util.Locale;
 
-/** @author Skaldarnar */
+/**
+ * @author Skaldarnar
+ */
 public class SettingsMenu extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
@@ -414,7 +416,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void populateInitialMemory() {
-        final int currentMemSetting = Memory.MEMORY_OPTIONS[ maxMemBox.getSelectedIndex() ].getMemoryMB();
+        final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getMemoryMB();
 
         initialMemBox.removeAllItems();
         initialMemBox.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
@@ -484,10 +486,10 @@ public class SettingsMenu extends JDialog implements ActionListener {
             }
 
             // save ram settings
-            settings.setMaximalMemory(Memory.MEMORY_OPTIONS[ maxMemBox.getSelectedIndex() ].getSettingsId());
+            settings.setMaximalMemory(Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getSettingsId());
             final int selectedInitMem = initialMemBox.getSelectedIndex();
             if (selectedInitMem > 0) {
-                settings.setInitialMemory(Memory.MEMORY_OPTIONS[ initialMemBox.getSelectedIndex() - 1 ].getSettingsId());
+                settings.setInitialMemory(Memory.MEMORY_OPTIONS[initialMemBox.getSelectedIndex() - 1].getSettingsId());
             } else {
                 settings.setInitialMemory(Settings.INITIAL_MEMORY_NONE);
             }
@@ -513,7 +515,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private void updateInitMemBox() {
         final int currentIdx = initialMemBox.getSelectedIndex();
 
-        final int currentMemSetting = Memory.MEMORY_OPTIONS[ maxMemBox.getSelectedIndex() ].getMemoryMB();
+        final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getMemoryMB();
         initialMemBox.removeAllItems();
         initialMemBox.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
         for (final Memory m : Memory.MEMORY_OPTIONS) {

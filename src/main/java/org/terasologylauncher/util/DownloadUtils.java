@@ -36,7 +36,7 @@ public class DownloadUtils {
     public static void downloadToFile(URL downloadURL, File file) throws IOException {
         InputStream in = downloadURL.openStream();
         OutputStream out = new FileOutputStream(file);
-        final byte[] buffer = new byte[ 2048 ];
+        final byte[] buffer = new byte[2048];
 
         int n;
         while ((n = in.read(buffer)) != -1) {
