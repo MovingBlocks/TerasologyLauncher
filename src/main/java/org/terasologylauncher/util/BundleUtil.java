@@ -20,6 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.Languages;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ResourceBundle;
@@ -30,6 +36,7 @@ public final class BundleUtil {
 
     private static final String LABELS_BUNDLE = "org.terasologylauncher.bundle.LabelsBundle";
     private static final String URI_BUNDLE = "org.terasologylauncher.bundle.URIBundle";
+    private static final String IMAGE_BUNDLE = "org.terasologylauncher.bundle.ImageBundle";
 
     private BundleUtil() {
     }
@@ -39,12 +46,27 @@ public final class BundleUtil {
     }
 
     public static URI getURI(final String key) {
-        String uriStr = ResourceBundle.getBundle(URI_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        final String uriStr = ResourceBundle.getBundle(URI_BUNDLE, Languages.getCurrentLocale()).getString(key);
         try {
             return new URI(uriStr);
         } catch (URISyntaxException e) {
             logger.error("Can not create the URI! " + uriStr, e);
         }
         return null;
+    }
+
+    public static ImageIcon getImageIcon(final String key) {
+        final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        return new ImageIcon(BundleUtil.class.getResource(imagePath));
+    }
+
+    public static Image getImage(final String key) {
+        final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        return Toolkit.getDefaultToolkit().getImage(BundleUtil.class.getResource(imagePath));
+    }
+
+    public static BufferedImage getBufferedImage(final String key) throws IOException {
+        final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        return ImageIO.read(BundleUtil.class.getResourceAsStream(imagePath));
     }
 }

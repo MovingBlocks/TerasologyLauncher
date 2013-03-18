@@ -32,9 +32,12 @@ import java.util.List;
  *
  * @author Skaldarnar
  */
-public class SelfUpdater {
+public final class SelfUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(SelfUpdater.class);
+
+    private SelfUpdater() {
+    }
 
     /**
      * Starts the update process after downloading the needed files.
@@ -51,7 +54,8 @@ public class SelfUpdater {
         arguments.add(javaPath);
         // Set the classpath
         arguments.add("-cp");
-        arguments.add("\"" + temporaryUpdateDir + separator + "TerasologyLauncher" + separator + "lib" + separator + "*" + "\"");
+        arguments.add("\"" + temporaryUpdateDir + separator + "TerasologyLauncher" + separator + "lib"
+            + separator + "*" + "\"");
         // Specify class with main method to run
         arguments.add(SelfUpdater.class.getCanonicalName());
         // Arguments for update locations

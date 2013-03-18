@@ -80,7 +80,8 @@ public final class LauncherUpdater {
 
     public void update() {
         // get temporary update path
-        final File temporaryUpdateDir = new File(DirectoryUtils.getApplicationDirectory(OperatingSystem.getOS()), DirectoryUtils.TMP);
+        final File temporaryUpdateDir = new File(DirectoryUtils.getApplicationDirectory(OperatingSystem.getOS()),
+            DirectoryUtils.TMP);
         try {
             DirectoryUtils.checkDirectory(temporaryUpdateDir);
         } catch (IOException e) {
@@ -93,7 +94,8 @@ public final class LauncherUpdater {
         // TODO: handle different executable types?
 
         // Get current launcher location
-        File launcherLocation = new File(LauncherFrame.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        File launcherLocation = new File(LauncherFrame.class.getProtectionDomain().getCodeSource().getLocation()
+            .getPath());
         // TODO: download new files, store to tmp path and run self updater
         try {
             // TODO: refactor all download urls to DownloadUtils class

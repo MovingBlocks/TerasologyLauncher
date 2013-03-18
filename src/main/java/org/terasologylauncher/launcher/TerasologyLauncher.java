@@ -24,18 +24,17 @@ import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
 import org.terasologylauncher.gui.SplashScreen;
 import org.terasologylauncher.updater.LauncherUpdater;
+import org.terasologylauncher.util.BundleUtil;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyGameVersion;
 import org.terasologylauncher.version.TerasologyLauncherVersion;
 
-import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * @author Skaldarnar
@@ -112,11 +111,9 @@ public final class TerasologyLauncher {
             logger.debug("Settings loaded " + settings);
 
             // Show splash screen
-            InputStream stream;
             BufferedImage bg;
             try {
-                stream = TerasologyLauncher.class.getResourceAsStream("/org/terasologylauncher/images/splash.png");
-                bg = ImageIO.read(stream);
+                bg = BundleUtil.getBufferedImage("splash");
             } catch (IOException e) {
                 logger.error("Could not read splash image.", e);
                 bg = new BufferedImage(600, 200, BufferedImage.TYPE_INT_ARGB);

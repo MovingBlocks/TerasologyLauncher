@@ -36,7 +36,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.LayoutStyle;
 import java.awt.Container;
 import java.awt.Font;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -76,7 +75,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         this.settings = settings;
         setTitle(BundleUtil.getLabel("settings_title"));
         setResizable(false);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png")));
+        setIconImage(BundleUtil.getImage("icon"));
 
         initComponents();
 
@@ -118,7 +117,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
         contentPane.setLayout(contentPaneLayout);
         contentPaneLayout.setHorizontalGroup(
             contentPaneLayout.createParallelGroup()
-                .addComponent(mainSettings, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(mainSettings, GroupLayout.Alignment.TRAILING,
+                    GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
                 .addGroup(contentPaneLayout.createSequentialGroup()
                     .addContainerGap()
                     .addComponent(resetButton)
@@ -213,23 +213,28 @@ public class SettingsMenu extends JDialog implements ActionListener {
                     .addContainerGap()
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(buildTypeLabel)
-                        .addComponent(buildTypeBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(buildTypeBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                            GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(buildVersionStableLabel)
-                        .addComponent(buildVersionStableBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(buildVersionStableBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                            GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(buildVersionNightlyLabel)
-                        .addComponent(buildVersionNightlyBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(buildVersionNightlyBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                            GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(maxMemLabel)
-                        .addComponent(maxMemBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(maxMemBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                            GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(initialMemLabel)
-                        .addComponent(initialMemBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(initialMemBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                            GroupLayout.PREFERRED_SIZE))
                     .addContainerGap())
         );
         return gameSettingsTab;
@@ -280,10 +285,14 @@ public class SettingsMenu extends JDialog implements ActionListener {
                     .addComponent(screenShotDirLabel))
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(directoriesTabLayout.createParallelGroup()
-                    .addComponent(openLogDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                    .addComponent(openModsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                    .addComponent(openSavedWorldsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                    .addComponent(openScreenShotsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE))
+                    .addComponent(openLogDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+                        GroupLayout.DEFAULT_SIZE)
+                    .addComponent(openModsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+                        GroupLayout.DEFAULT_SIZE)
+                    .addComponent(openSavedWorldsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+                        GroupLayout.DEFAULT_SIZE)
+                    .addComponent(openScreenShotsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+                        GroupLayout.DEFAULT_SIZE))
                 .addContainerGap()
         );
 
@@ -342,7 +351,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
                     .addContainerGap()
                     .addGroup(languageTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(languageLabel)
-                        .addComponent(languageBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(languageBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                            GroupLayout.PREFERRED_SIZE))
                     .addContainerGap())
         );
 
@@ -477,12 +487,14 @@ public class SettingsMenu extends JDialog implements ActionListener {
             if (buildVersionStableBox.getSelectedIndex() == 0) {
                 settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.STABLE);
             } else {
-                settings.setBuildVersion(Integer.parseInt((String) buildVersionStableBox.getSelectedItem()), BuildType.STABLE);
+                settings.setBuildVersion(Integer.parseInt((String) buildVersionStableBox.getSelectedItem()),
+                    BuildType.STABLE);
             }
             if (buildVersionNightlyBox.getSelectedIndex() == 0) {
                 settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.NIGHTLY);
             } else {
-                settings.setBuildVersion(Integer.parseInt((String) buildVersionNightlyBox.getSelectedItem()), BuildType.NIGHTLY);
+                settings.setBuildVersion(Integer.parseInt((String) buildVersionNightlyBox.getSelectedItem()),
+                    BuildType.NIGHTLY);
             }
 
             // save ram settings
