@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
-import org.terasologylauncher.util.ZIPUnpacker;
+import org.terasologylauncher.util.FileUtils;
 
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
@@ -110,7 +110,9 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
 
                 final byte[] buffer = new byte[2048];
 
-                for (int n; (n = in.read(buffer)) != -1; out.write(buffer, 0, n)) {
+                int n;
+                while ((n = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, n);
                     final long fileSizeMB = file.length() / 1024 / 1024;
                     float percentage = fileSizeMB / (float) dataSize;
                     percentage *= 100;
@@ -143,13 +145,8 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         progressBar.setStringPainted(true);
 
         File zip = null;
-        try {
-            zip = new File(terasologyDirectory, ZIP_FILE);
-            ZIPUnpacker.extractArchive(zip);
-
-        } catch (IOException e) {
-            logger.error("Could not unzip game!", e);
-        }
+        zip = new File(terasologyDirectory, ZIP_FILE);
+        FileUtils.extractZip(zip);
 
         progressBar.setString("Updating game info …"); // TODO Use BundleUtil.getLabel
         progressBar.setStringPainted(true);

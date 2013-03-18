@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package org.terasologylauncher;
+package org.terasologylauncher.version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasologylauncher.BuildType;
+import org.terasologylauncher.Settings;
 import org.terasologylauncher.updater.GameData;
 
 import java.util.ArrayList;
@@ -26,14 +28,14 @@ import java.util.List;
 /**
  * @author Skaldarnar
  */
-public final class Versions {
+public final class TerasologyGameVersion {
 
-    private static final Logger logger = LoggerFactory.getLogger(Versions.class);
+    private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersion.class);
 
     private static List<Integer> stableVersions;
     private static List<Integer> nightlyVersions;
 
-    private Versions() {
+    private TerasologyGameVersion() {
     }
 
     public static List<Integer> getVersions(final Settings settings, final BuildType buildType) {

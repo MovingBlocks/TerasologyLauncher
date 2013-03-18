@@ -31,6 +31,7 @@ import java.net.URI;
  * @author Skaldarnar
  */
 public class LinkJLabel extends JLabel implements MouseListener {
+    //This is a stupid comment
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(LinkJLabel.class);
