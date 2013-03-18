@@ -18,15 +18,14 @@ package org.terasologylauncher.gui;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasologylauncher.util.BundleUtil;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * A JLabel used as background image for launcher.
@@ -49,12 +48,10 @@ public class BackgroundImage extends JLabel {
         setHorizontalAlignment(SwingConstants.CENTER);
         setBounds(0, 0, width, height);
 
-        InputStream stream = null;
         BufferedImage bg;
 
         try {
-            stream = BackgroundImage.class.getResourceAsStream("/org/terasologylauncher/images/background.png");
-            bg = ImageIO.read(stream);
+            bg = BundleUtil.getBufferedImage("background");
             //TODO: Apply blur filter
         } catch (IOException e) {
             logger.error("Could not read background image.", e);

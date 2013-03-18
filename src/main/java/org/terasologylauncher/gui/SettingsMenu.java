@@ -36,7 +36,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.LayoutStyle;
 import java.awt.Container;
 import java.awt.Font;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -76,8 +75,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         this.settings = settings;
         setTitle(BundleUtil.getLabel("settings_title"));
         setResizable(false);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(LauncherFrame.class
-            .getResource("/org/terasologylauncher/images/icon.png")));
+        setIconImage(BundleUtil.getImage("icon"));
 
         initComponents();
 

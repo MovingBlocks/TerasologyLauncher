@@ -26,7 +26,6 @@ import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.OperatingSystem;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -47,15 +46,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.net.URL;
 import java.util.logging.Logger;
 
 /**
  * @author Skaldarnar
  */
 public class LauncherFrame extends JFrame implements ActionListener {
-
-    public static final URL ICON = LauncherFrame.class.getResource("/org/terasologylauncher/images/icon.png");
 
     private static final long serialVersionUID = 1L;
 
@@ -105,7 +101,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle(BundleUtil.getLabel("launcher_title"));
-        setIconImage(Toolkit.getDefaultToolkit().getImage(ICON));
+        setIconImage(BundleUtil.getImage("icon"));
 
         initComponents();
 
@@ -194,7 +190,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
         // Terasology logo
         final JLabel logo = new JLabel();
         logo.setBounds(8, 0, 400, 96);
-        logo.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/logo.png")));
+        logo.setIcon(BundleUtil.getImageIcon("logo"));
 
         // Forums link
         forums = new LinkJLabel(BundleUtil.getLabel("launcher_forum"), BundleUtil.getURI("terasology_forum"));
@@ -219,32 +215,32 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
         // Social media
         github = new LinkJButton(BundleUtil.getURI("terasology_github"));
-        github.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/github.png")));
-        github.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/github_hover.png")));
+        github.setIcon(BundleUtil.getImageIcon("github"));
+        github.setRolloverIcon(BundleUtil.getImageIcon("github_hover"));
         github.setBounds(8 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         github.setBorder(null);
 
         youtube = new LinkJButton(BundleUtil.getURI("terasology_youtube"));
-        youtube.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/youtube.png")));
-        youtube.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/youtube_hover.png")));
+        youtube.setIcon(BundleUtil.getImageIcon("youtube"));
+        youtube.setRolloverIcon(BundleUtil.getImageIcon("youtube_hover"));
         youtube.setBounds(8 + 38 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         youtube.setBorder(null);
 
         gplus = new LinkJButton(BundleUtil.getURI("terasology_gplus"));
-        gplus.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/gplus.png")));
-        gplus.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/gplus_hover.png")));
+        gplus.setIcon(BundleUtil.getImageIcon("gplus"));
+        gplus.setRolloverIcon(BundleUtil.getImageIcon("gplus_hover"));
         gplus.setBounds(8 + (38 * 2) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         gplus.setBorder(null);
 
         facebook = new LinkJButton(BundleUtil.getURI("terasology_facebook"));
-        facebook.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/facebook.png")));
-        facebook.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/facebook_hover.png")));
+        facebook.setIcon(BundleUtil.getImageIcon("facebook"));
+        facebook.setRolloverIcon(BundleUtil.getImageIcon("facebook_hover"));
         facebook.setBounds(8 + (38 * 3) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         facebook.setBorder(null);
 
         twitter = new LinkJButton(BundleUtil.getURI("terasology_twitter"));
-        twitter.setIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/twitter.png")));
-        twitter.setRolloverIcon(new ImageIcon(LauncherFrame.class.getResource("/org/terasologylauncher/images/twitter_hover.png")));
+        twitter.setIcon(BundleUtil.getImageIcon("twitter"));
+        twitter.setRolloverIcon(BundleUtil.getImageIcon("twitter_hover"));
         twitter.setBounds(8 + (38 * 4) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         twitter.setBorder(null);
 
