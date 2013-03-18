@@ -22,7 +22,7 @@ import java.io.IOException;
 /**
  * @author Skaldarnar
  */
-public final class TerasologyDirectories {
+public final class DirectoryUtils {
 
     public static final String BACKUP_DIR_NAME = "backups";
     public static final String LAUNCHER_DIR_NAME = "launcher";
@@ -30,9 +30,11 @@ public final class TerasologyDirectories {
     public static final String SCREENSHOTS_DIR_NAME = "screens";
     public static final String MODS_DIR_NAME = "mods";
 
+    public static final String TMP = "tmp";
+
     private static final String APPLICATION_DIR_NAME = "terasology";
 
-    private TerasologyDirectories() {
+    private DirectoryUtils() {
     }
 
     public static void checkDirectory(File directory) throws IOException {

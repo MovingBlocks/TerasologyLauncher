@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Languages;
 import org.terasologylauncher.Settings;
-import org.terasologylauncher.Versions;
 import org.terasologylauncher.util.BundleUtil;
 import org.terasologylauncher.util.Memory;
+import org.terasologylauncher.version.TerasologyGameVersion;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -363,7 +363,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private void populateVersions(final JComboBox buildVersionBox, final BuildType buildType) {
         final int buildVersion = settings.getBuildVersion(buildType);
 
-        for (final Integer version : Versions.getVersions(settings, buildType)) {
+        for (final Integer version : TerasologyGameVersion.getVersions(settings, buildType)) {
             String item;
             if (version == Settings.BUILD_VERSION_LATEST) {
                 item = BundleUtil.getLabel("settings_game_buildVersion_latest");

@@ -22,8 +22,8 @@ import org.terasologylauncher.launcher.TerasologyStarter;
 import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.updater.GameDownloader;
 import org.terasologylauncher.util.BundleUtil;
+import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.OperatingSystem;
-import org.terasologylauncher.util.TerasologyDirectories;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -334,28 +334,29 @@ public class LauncherFrame extends JFrame implements ActionListener {
     }
 
     /**
-     * Check if the file can be deleted on clean up action.
-     * The only files/directories kept are "SAVED_WORLDS", "screens" and "launcher".
+     * Check if the file can be deleted on clean up action. The only files/directories kept are "SAVED_WORLDS",
+     * "screens" and "launcher".
      *
      * @param f the file to check
+     *
      * @return true if the file can be deleted
      */
     private boolean canBeDeleted(final File f) {
         Logger.getAnonymousLogger().info(f.getName());
         final String fileName = f.getName();
-        if (fileName.equals(TerasologyDirectories.LAUNCHER_DIR_NAME)) {
+        if (fileName.equals(DirectoryUtils.LAUNCHER_DIR_NAME)) {
             return false;
         }
-        if (fileName.equals(TerasologyDirectories.SAVED_WORLDS_DIR_NAME)) {
+        if (fileName.equals(DirectoryUtils.SAVED_WORLDS_DIR_NAME)) {
             return false;
         }
-        if (fileName.equals(TerasologyDirectories.SCREENSHOTS_DIR_NAME)) {
+        if (fileName.equals(DirectoryUtils.SCREENSHOTS_DIR_NAME)) {
             return false;
         }
-        if (f.getAbsolutePath().equals(TerasologyDirectories.BACKUP_DIR_NAME)) {
+        if (f.getAbsolutePath().equals(DirectoryUtils.BACKUP_DIR_NAME)) {
             return false;
         }
-        if (f.getName().equals(TerasologyDirectories.MODS_DIR_NAME)) {
+        if (f.getName().equals(DirectoryUtils.MODS_DIR_NAME)) {
             return false;
         }
         return true;
