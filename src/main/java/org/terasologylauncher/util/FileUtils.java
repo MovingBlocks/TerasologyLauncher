@@ -40,9 +40,7 @@ public class FileUtils {
      * Deletes the specified file or directory (directories are removed recursively).
      *
      * @param file - file to delete
-     *
      * @return whether deletion was successful
-     *
      * @throws IOException
      */
     public static boolean delete(File file) throws IOException {
@@ -113,7 +111,6 @@ public class FileUtils {
      *
      * @param source      - the file to copy
      * @param destination - where to copy to
-     *
      * @throws IOException
      */
     public static void copyFile(File source, File destination) throws IOException {
@@ -146,7 +143,6 @@ public class FileUtils {
      *
      * @param source      - the folder to copy
      * @param destination - where to copy to
-     *
      * @throws IOException
      */
     public static void copyFolder(File source, File destination) throws IOException {
