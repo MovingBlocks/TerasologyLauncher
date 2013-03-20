@@ -37,15 +37,15 @@ public final class TerasologyStarter {
 
     private final File terasologyDirectory;
     private final OperatingSystem os;
-    private final int maxMemory;
-    private final int initialMemory;
+    private final int maxMemoryId;
+    private final int initialMemoryId;
 
-    public TerasologyStarter(final File terasologyDirectory, final OperatingSystem os, final int maxMemory,
-                             final int initialMemory) {
+    public TerasologyStarter(final File terasologyDirectory, final OperatingSystem os, final int maxMemoryId,
+                             final int initialMemoryId) {
         this.terasologyDirectory = terasologyDirectory;
         this.os = os;
-        this.maxMemory = maxMemory;
-        this.initialMemory = initialMemory;
+        this.maxMemoryId = maxMemoryId;
+        this.initialMemoryId = initialMemoryId;
     }
 
     public boolean startGame() {
@@ -115,10 +115,10 @@ public final class TerasologyStarter {
     private List<String> createParameters() {
         final List<String> parameters = new ArrayList<String>();
         // add maximal RAM parameter
-        parameters.add("-Xmx" + Memory.getMemoryFromId(maxMemory).getMemoryMB() + "m");
+        parameters.add("-Xmx" + Memory.getMemoryFromId(maxMemoryId).getMemoryMB() + "m");
         // add initial RAM parameter
-        if (initialMemory >= 0) {
-            parameters.add("-Xms" + Memory.getMemoryFromId(initialMemory).getMemoryMB() + "m");
+        if (initialMemoryId >= 0) {
+            parameters.add("-Xms" + Memory.getMemoryFromId(initialMemoryId).getMemoryMB() + "m");
         }
         return parameters;
     }

@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Languages;
 import org.terasologylauncher.Settings;
-import org.terasologylauncher.util.BundleUtil;
+import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.Memory;
 import org.terasologylauncher.version.TerasologyGameVersion;
 
@@ -70,12 +70,15 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private JComboBox languageBox;
 
     private final Settings settings;
+    private final TerasologyGameVersion gameVersion;
 
-    public SettingsMenu(Settings settings) {
+    public SettingsMenu(final Settings settings, final TerasologyGameVersion gameVersion) {
         this.settings = settings;
-        setTitle(BundleUtil.getLabel("settings_title"));
+        this.gameVersion = gameVersion;
+
+        setTitle(BundleUtils.getLabel("settings_title"));
         setResizable(false);
-        setIconImage(BundleUtil.getImage("icon"));
+        setIconImage(BundleUtils.getImage("icon"));
 
         initComponents();
 
@@ -92,25 +95,25 @@ public class SettingsMenu extends JDialog implements ActionListener {
         final Font settingsFont = new Font("Arial", Font.PLAIN, 12);
 
         JTabbedPane mainSettings = new JTabbedPane();
-        mainSettings.addTab(BundleUtil.getLabel("settings_game_title"), createGameSettingsTab(settingsFont));
-        mainSettings.addTab(BundleUtil.getLabel("settings_directories_title"), createDirectoriesTab(settingsFont));
-        mainSettings.addTab(BundleUtil.getLabel("settings_language_title"), createLanguageTab(settingsFont));
+        mainSettings.addTab(BundleUtils.getLabel("settings_game_title"), createGameSettingsTab(settingsFont));
+        mainSettings.addTab(BundleUtils.getLabel("settings_directories_title"), createDirectoriesTab(settingsFont));
+        mainSettings.addTab(BundleUtils.getLabel("settings_language_title"), createLanguageTab(settingsFont));
 
         /*================== OK, Cancel, Reset ==================*/
         JButton resetButton = new JButton();
         resetButton.setActionCommand(RESET_ACTION);
         resetButton.addActionListener(this);
-        resetButton.setText(BundleUtil.getLabel("settings_reset"));
+        resetButton.setText(BundleUtils.getLabel("settings_reset"));
 
         JButton cancelButton = new JButton();
         cancelButton.setActionCommand(CANCEL_ACTION);
         cancelButton.addActionListener(this);
-        cancelButton.setText(BundleUtil.getLabel("settings_cancel"));
+        cancelButton.setText(BundleUtils.getLabel("settings_cancel"));
 
         JButton saveButton = new JButton();
         saveButton.setActionCommand(SAVE_ACTION);
         saveButton.addActionListener(this);
-        saveButton.setText(BundleUtil.getLabel("settings_save"));
+        saveButton.setText(BundleUtils.getLabel("settings_save"));
 
         final Container contentPane = getContentPane();
         final GroupLayout contentPaneLayout = new GroupLayout(contentPane);
@@ -148,28 +151,28 @@ public class SettingsMenu extends JDialog implements ActionListener {
         gameSettingsTab.setFont(settingsFont);
 
         JLabel buildTypeLabel = new JLabel();
-        buildTypeLabel.setText(BundleUtil.getLabel("settings_game_buildType"));
+        buildTypeLabel.setText(BundleUtils.getLabel("settings_game_buildType"));
         buildTypeLabel.setFont(settingsFont);
 
         buildTypeBox = new JComboBox();
         buildTypeBox.setFont(settingsFont);
 
         JLabel buildVersionStableLabel = new JLabel();
-        buildVersionStableLabel.setText(BundleUtil.getLabel("settings_game_buildVersion_stable"));
+        buildVersionStableLabel.setText(BundleUtils.getLabel("settings_game_buildVersion_stable"));
         buildVersionStableLabel.setFont(settingsFont);
 
         buildVersionStableBox = new JComboBox();
         buildVersionStableBox.setFont(settingsFont);
 
         JLabel buildVersionNightlyLabel = new JLabel();
-        buildVersionNightlyLabel.setText(BundleUtil.getLabel("settings_game_buildVersion_nightly"));
+        buildVersionNightlyLabel.setText(BundleUtils.getLabel("settings_game_buildVersion_nightly"));
         buildVersionNightlyLabel.setFont(settingsFont);
 
         buildVersionNightlyBox = new JComboBox();
         buildVersionNightlyBox.setFont(settingsFont);
 
         JLabel maxMemLabel = new JLabel();
-        maxMemLabel.setText(BundleUtil.getLabel("settings_game_maxMemory"));
+        maxMemLabel.setText(BundleUtils.getLabel("settings_game_maxMemory"));
         maxMemLabel.setFont(settingsFont);
 
         maxMemBox = new JComboBox();
@@ -178,7 +181,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         maxMemBox.setActionCommand(MAX_MEM_ACTION);
 
         JLabel initialMemLabel = new JLabel();
-        initialMemLabel.setText(BundleUtil.getLabel("settings_game_initialMemory"));
+        initialMemLabel.setText(BundleUtils.getLabel("settings_game_initialMemory"));
         initialMemLabel.setFont(settingsFont);
 
         initialMemBox = new JComboBox();
@@ -244,31 +247,31 @@ public class SettingsMenu extends JDialog implements ActionListener {
         JPanel directoriesTab = new JPanel();
         directoriesTab.setFont(settingsFont);
 
-        final JLabel logDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_logs"));
+        final JLabel logDirLabel = new JLabel(BundleUtils.getLabel("settings_directories_logs"));
         JButton openLogDir = new JButton();
         openLogDir.setFont(settingsFont);
-        openLogDir.setText(BundleUtil.getLabel("settings_directories_open"));
+        openLogDir.setText(BundleUtils.getLabel("settings_directories_open"));
         openLogDir.addActionListener(this);
         openLogDir.setActionCommand(OPEN_LOG_DIR_ACTION);
 
-        final JLabel savedWorldsDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_savedWorlds"));
+        final JLabel savedWorldsDirLabel = new JLabel(BundleUtils.getLabel("settings_directories_savedWorlds"));
         JButton openSavedWorldsDir = new JButton();
         openSavedWorldsDir.setFont(settingsFont);
-        openSavedWorldsDir.setText(BundleUtil.getLabel("settings_directories_open"));
+        openSavedWorldsDir.setText(BundleUtils.getLabel("settings_directories_open"));
         openSavedWorldsDir.addActionListener(this);
         openSavedWorldsDir.setActionCommand(OPEN_SAVED_DIR_ACTION);
 
-        final JLabel screenShotDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_screenShots"));
+        final JLabel screenShotDirLabel = new JLabel(BundleUtils.getLabel("settings_directories_screenShots"));
         JButton openScreenShotsDir = new JButton();
         openScreenShotsDir.setFont(settingsFont);
-        openScreenShotsDir.setText(BundleUtil.getLabel("settings_directories_open"));
+        openScreenShotsDir.setText(BundleUtils.getLabel("settings_directories_open"));
         openScreenShotsDir.addActionListener(this);
         openScreenShotsDir.setActionCommand(OPEN_SCREENS_DIR_ACTION);
 
-        final JLabel modsDirLabel = new JLabel(BundleUtil.getLabel("settings_directories_mods"));
+        final JLabel modsDirLabel = new JLabel(BundleUtils.getLabel("settings_directories_mods"));
         JButton openModsDir = new JButton();
         openModsDir.setFont(settingsFont);
-        openModsDir.setText(BundleUtil.getLabel("settings_directories_open"));
+        openModsDir.setText(BundleUtils.getLabel("settings_directories_open"));
         openModsDir.addActionListener(this);
         openModsDir.setActionCommand(OPEN_MOD_DIR_ACTION);
 
@@ -324,7 +327,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         languageTab.setFont(settingsFont);
 
         JLabel languageLabel = new JLabel();
-        languageLabel.setText(BundleUtil.getLabel("settings_language_chooseLanguage"));
+        languageLabel.setText(BundleUtils.getLabel("settings_language_chooseLanguage"));
         languageLabel.setFont(settingsFont);
 
         languageBox = new JComboBox();
@@ -360,8 +363,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void populateBuildType() {
-        buildTypeBox.addItem(BundleUtil.getLabel("settings_game_buildType_stable"));
-        buildTypeBox.addItem(BundleUtil.getLabel("settings_game_buildType_nightly"));
+        buildTypeBox.addItem(BundleUtils.getLabel("settings_game_buildType_stable"));
+        buildTypeBox.addItem(BundleUtils.getLabel("settings_game_buildType_nightly"));
 
         if (settings.getBuildType() == BuildType.STABLE) {
             buildTypeBox.setSelectedIndex(0);
@@ -373,10 +376,10 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private void populateVersions(final JComboBox buildVersionBox, final BuildType buildType) {
         final int buildVersion = settings.getBuildVersion(buildType);
 
-        for (final Integer version : TerasologyGameVersion.getVersions(settings, buildType)) {
+        for (final Integer version : gameVersion.getVersions(buildType)) {
             String item;
             if (version == Settings.BUILD_VERSION_LATEST) {
-                item = BundleUtil.getLabel("settings_game_buildVersion_latest");
+                item = BundleUtils.getLabel("settings_game_buildVersion_latest");
             } else {
                 item = String.valueOf(version);
             }
@@ -429,7 +432,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getMemoryMB();
 
         initialMemBox.removeAllItems();
-        initialMemBox.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
+        initialMemBox.addItem(BundleUtils.getLabel("settings_game_initialMemory_none"));
         for (final Memory m : Memory.MEMORY_OPTIONS) {
             if (m.getMemoryMB() <= currentMemSetting) {
                 initialMemBox.addItem(m.getLabel());
@@ -450,7 +453,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
 
     private void populateLanguage() {
         for (Locale locale : Languages.SUPPORTED_LOCALES) {
-            final String item = BundleUtil.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale));
+            final String item = BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale));
             languageBox.addItem(item);
 
             if (Languages.getCurrentLocale().equals(locale)) {
@@ -529,7 +532,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
 
         final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getMemoryMB();
         initialMemBox.removeAllItems();
-        initialMemBox.addItem(BundleUtil.getLabel("settings_game_initialMemory_none"));
+        initialMemBox.addItem(BundleUtils.getLabel("settings_game_initialMemory_none"));
         for (final Memory m : Memory.MEMORY_OPTIONS) {
             if (m.getMemoryMB() <= currentMemSetting) {
                 initialMemBox.addItem(m.getLabel());

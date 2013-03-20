@@ -39,7 +39,6 @@ public class SplashScreen extends JWindow {
         infoLabel = new JLabel();
         infoLabel.setBounds((icon.getIconWidth() / 2) - (INFO_LABEL_WIDTH / 2), (icon.getIconHeight() / 2) + 32,
             INFO_LABEL_WIDTH, 32);
-        infoLabel.setText("Starting Terasology Launcher");
         infoLabel.setForeground(Color.RED);
         infoLabel.setHorizontalTextPosition(JLabel.CENTER);
 
