@@ -201,7 +201,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
         forums.setBounds(480, 36, 96, 32);
 
         // Issues link
-        issues = new LinkJLabel(BundleUtils.getLabel("launcher_issues"), BundleUtils.getURI("terasology_github_issues"));
+        issues = new LinkJLabel(BundleUtils.getLabel("launcher_issues"),
+            BundleUtils.getURI("terasology_github_issues"));
         issues.setFont(issues.getFont().deriveFont(24f));
         issues.setBounds(640, 36, 96, 32);
 
