@@ -63,7 +63,7 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         this.gameVersion = gameVersion;
         progressBar.setVisible(true);
         progressBar.setValue(0);
-        progressBar.setString("Starting Download"); // TODO Use BundleUtil.getLabel
+        progressBar.setString("Starting Download"); // TODO Use BundleUtils.getLabel
         addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent evt) {
@@ -140,14 +140,14 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         logger.debug("Download is done");
         // unzip downloaded file
         progressBar.setValue(100);
-        progressBar.setString("Extracting zip …"); // TODO Use BundleUtil.getLabel
+        progressBar.setString("Extracting zip …"); // TODO Use BundleUtils.getLabel
         progressBar.setStringPainted(true);
 
         File zip = null;
         zip = new File(terasologyDirectory, ZIP_FILE);
         FileUtils.extractZip(zip);
 
-        progressBar.setString("Updating game info …"); // TODO Use BundleUtil.getLabel
+        progressBar.setString("Updating game info …"); // TODO Use BundleUtils.getLabel
         progressBar.setStringPainted(true);
 
         GameData.forceReReadVersionFile(terasologyDirectory);

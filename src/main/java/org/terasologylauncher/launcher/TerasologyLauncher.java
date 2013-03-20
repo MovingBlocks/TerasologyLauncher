@@ -23,7 +23,7 @@ import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
 import org.terasologylauncher.gui.SplashScreen;
 import org.terasologylauncher.updater.LauncherUpdater;
-import org.terasologylauncher.util.BundleUtil;
+import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyGameVersion;
@@ -112,7 +112,7 @@ public final class TerasologyLauncher {
             // Show splash screen
             BufferedImage bg;
             try {
-                bg = BundleUtil.getBufferedImage("splash");
+                bg = BundleUtils.getBufferedImage("splash");
             } catch (IOException e) {
                 logger.error("Could not read splash image.", e);
                 bg = new BufferedImage(600, 200, BufferedImage.TYPE_INT_ARGB);
