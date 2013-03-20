@@ -30,15 +30,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ResourceBundle;
 
-public final class BundleUtil {
+public final class BundleUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(BundleUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(BundleUtils.class);
 
     private static final String LABELS_BUNDLE = "org.terasologylauncher.bundle.LabelsBundle";
     private static final String URI_BUNDLE = "org.terasologylauncher.bundle.URIBundle";
     private static final String IMAGE_BUNDLE = "org.terasologylauncher.bundle.ImageBundle";
 
-    private BundleUtil() {
+    private BundleUtils() {
     }
 
     public static String getLabel(final String key) {
@@ -57,16 +57,16 @@ public final class BundleUtil {
 
     public static ImageIcon getImageIcon(final String key) {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
-        return new ImageIcon(BundleUtil.class.getResource(imagePath));
+        return new ImageIcon(BundleUtils.class.getResource(imagePath));
     }
 
     public static Image getImage(final String key) {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
-        return Toolkit.getDefaultToolkit().getImage(BundleUtil.class.getResource(imagePath));
+        return Toolkit.getDefaultToolkit().getImage(BundleUtils.class.getResource(imagePath));
     }
 
     public static BufferedImage getBufferedImage(final String key) throws IOException {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
-        return ImageIO.read(BundleUtil.class.getResourceAsStream(imagePath));
+        return ImageIO.read(BundleUtils.class.getResourceAsStream(imagePath));
     }
 }
