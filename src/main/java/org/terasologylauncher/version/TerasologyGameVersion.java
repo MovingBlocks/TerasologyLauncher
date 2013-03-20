@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Settings;
-import org.terasologylauncher.updater.GameData;
+import org.terasologylauncher.util.DownloadUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,74 +32,78 @@ public final class TerasologyGameVersion {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersion.class);
 
-    private static List<Integer> stableVersions;
-    private static List<Integer> nightlyVersions;
+    private List<Integer> stableVersions;
+    private List<Integer> nightlyVersions;
+    private Integer stableVersion;
+    private Integer nightlyVersion;
 
-    private TerasologyGameVersion() {
+    public TerasologyGameVersion() {
     }
 
-    public static List<Integer> getVersions(final Settings settings, final BuildType buildType) {
-        if (!GameData.checkInternetConnection()) {
-            final List<Integer> list = new ArrayList<Integer>();
-            list.add(Settings.BUILD_VERSION_LATEST);
-            return list;
-        }
-        switch (buildType) {
-            case STABLE:
-                return getStableVersionsList(settings);
-            case NIGHTLY:
-                return getNightlyVersionsList(settings);
-        }
-        return null; // TODO: do something useful here!
+    public void loadVersions(final Settings settings) {
+        loadStable(settings);
+        loadNightly(settings);
     }
 
-    private static List<Integer> getNightlyVersionsList(final Settings settings) {
-        if (nightlyVersions == null) {
-            nightlyVersions = new ArrayList<Integer>();
-            nightlyVersions.add(Settings.BUILD_VERSION_LATEST);
-            // TODO: Check for internet connection before?
-            try {
-                final int latestVersionNumber = GameData.getUpStreamNightlyVersion();
-                // for nightly builds, go 8 versions back for the list
-                final int buildVersionSetting;
-                if (settings.isBuildVersionLatest(BuildType.NIGHTLY)) {
-                    buildVersionSetting = latestVersionNumber;
-                } else {
-                    buildVersionSetting = settings.getBuildVersion(BuildType.NIGHTLY);
-                }
-                final int minVersionNumber = Math.min(latestVersionNumber - 8, buildVersionSetting);
-                for (int i = latestVersionNumber - 1; i >= minVersionNumber; i--) {
-                    nightlyVersions.add(i);
-                }
-            } catch (Exception e) {
-                logger.error("Retrieving latest nightly version build number failed.", e);
-            }
+    public List<Integer> getVersions(final BuildType buildType) {
+        if (BuildType.STABLE == buildType) {
+            return stableVersions;
         }
         return nightlyVersions;
     }
 
-    private static List<Integer> getStableVersionsList(final Settings settings) {
-        if (stableVersions == null) {
-            stableVersions = new ArrayList<Integer>();
-            stableVersions.add(Settings.BUILD_VERSION_LATEST);
-            // TODO: Check for internet connection before?
-            try {
-                final int latestVersionNumber = GameData.getUpStreamStableVersion();
-                // for stable builds, go at least 4 versions back for the list
-                final int buildVersionSetting;
-                if (settings.isBuildVersionLatest(BuildType.STABLE)) {
-                    buildVersionSetting = latestVersionNumber;
-                } else {
-                    buildVersionSetting = settings.getBuildVersion(BuildType.STABLE);
-                }
-                final int minVersionNumber = Math.min(latestVersionNumber - 4, buildVersionSetting);
-                for (int i = latestVersionNumber - 1; i >= minVersionNumber; i--) {
-                    stableVersions.add(i);
-                }
-            } catch (Exception e) {
-                logger.error("Retrieving latest stable version build number failed.", e);
-            }
+    public Integer getVersion(final BuildType buildType) {
+        if (BuildType.STABLE == buildType) {
+            return stableVersion;
         }
-        return stableVersions;
+        return nightlyVersion;
+    }
+
+    private void loadStable(final Settings settings) {
+        stableVersions = new ArrayList<Integer>();
+        stableVersions.add(Settings.BUILD_VERSION_LATEST);
+        try {
+            stableVersion = DownloadUtils.loadVersion(DownloadUtils.TERASOLOGY_STABLE_JOB_NAME);
+            // for stable builds, go at least 4 versions back for the list
+            final int buildVersionSetting;
+            if (settings.isBuildVersionLatest(BuildType.STABLE)) {
+                buildVersionSetting = stableVersion;
+            } else {
+                buildVersionSetting = settings.getBuildVersion(BuildType.STABLE);
+            }
+            final int minVersionNumber = Math.min(stableVersion - 4, buildVersionSetting);
+            for (int i = stableVersion; i >= minVersionNumber; i--) {
+                stableVersions.add(i);
+            }
+        } catch (Exception e) {
+            logger.error("Retrieving latest stable version build number failed.", e);
+        }
+    }
+
+    private void loadNightly(final Settings settings) {
+        nightlyVersions = new ArrayList<Integer>();
+        nightlyVersions.add(Settings.BUILD_VERSION_LATEST);
+        try {
+            nightlyVersion = DownloadUtils.loadVersion(DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME);
+            // for nightly builds, go 8 versions back for the list
+            final int buildVersionSetting;
+            if (settings.isBuildVersionLatest(BuildType.NIGHTLY)) {
+                buildVersionSetting = nightlyVersion;
+            } else {
+                buildVersionSetting = settings.getBuildVersion(BuildType.NIGHTLY);
+            }
+            final int minVersionNumber = Math.min(nightlyVersion - 8, buildVersionSetting);
+            for (int i = nightlyVersion; i >= minVersionNumber; i--) {
+                nightlyVersions.add(i);
+            }
+        } catch (Exception e) {
+            logger.error("Retrieving latest nightly version build number failed.", e);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getName() + "[stableVersion=" + stableVersion + ", nightlyVersion="
+            + nightlyVersion + "]";
     }
 }

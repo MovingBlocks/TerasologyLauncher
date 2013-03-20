@@ -24,6 +24,7 @@ import org.terasologylauncher.updater.GameDownloader;
 import org.terasologylauncher.util.BundleUtil;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.OperatingSystem;
+import org.terasologylauncher.version.TerasologyGameVersion;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -46,7 +47,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.logging.Logger;
 
 /**
  * @author Skaldarnar
@@ -93,11 +93,14 @@ public class LauncherFrame extends JFrame implements ActionListener {
     private final File terasologyDirectory;
     private final OperatingSystem os;
     private final Settings settings;
+    private final TerasologyGameVersion gameVersion;
 
-    public LauncherFrame(final File terasologyDirectory, final OperatingSystem os, final Settings settings) {
+    public LauncherFrame(final File terasologyDirectory, final OperatingSystem os, final Settings settings,
+                         final TerasologyGameVersion gameVersion) {
         this.terasologyDirectory = terasologyDirectory;
         this.os = os;
         this.settings = settings;
+        this.gameVersion = gameVersion;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle(BundleUtil.getLabel("launcher_title"));
@@ -284,7 +287,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
     private void action(final String command, final Component component) {
         if (command.equals(SETTINGS_ACTION)) {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-                settingsMenu = new SettingsMenu(settings);
+                settingsMenu = new SettingsMenu(settings, gameVersion);
                 settingsMenu.setModal(true);
                 settingsMenu.setVisible(true);
                 settingsMenu.addWindowListener(new WindowAdapter() {
@@ -311,7 +314,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
             // cleanup the directories (keep savedWorlds and screen shots)
             cleanUp();
             // start a thread with the download
-            final GameDownloader downloader = new GameDownloader(progressBar, this, settings, terasologyDirectory);
+            final GameDownloader downloader = new GameDownloader(progressBar, this, settings, terasologyDirectory,
+                gameVersion);
             downloader.execute();
         }
     }
@@ -340,7 +344,6 @@ public class LauncherFrame extends JFrame implements ActionListener {
      * @return true if the file can be deleted
      */
     private boolean canBeDeleted(final File f) {
-        Logger.getAnonymousLogger().info(f.getName());
         final String fileName = f.getName();
         if (fileName.equals(DirectoryUtils.LAUNCHER_DIR_NAME)) {
             return false;
@@ -390,7 +393,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
                 // check if update is possible
                 // therefore, get the installed version no. and the upstream version number
                 final int installedVersion = GameData.getInstalledBuildVersion(terasologyDirectory);
-                final int upstreamVersion = GameData.getUpStreamVersion(installedType);
+                final int upstreamVersion = gameVersion.getVersion(installedType);
                 final int selectedVersion;
                 if (settings.isBuildVersionLatest(installedType)) {
                     selectedVersion = upstreamVersion;

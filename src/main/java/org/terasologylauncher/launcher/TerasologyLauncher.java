@@ -18,7 +18,6 @@ package org.terasologylauncher.launcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Languages;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
@@ -123,7 +122,8 @@ public final class TerasologyLauncher {
             splash.setVisible(true);
 
             // Launcher Update
-            LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersion.getInstance().getBuildNumber());
+            LauncherUpdater updater = new LauncherUpdater(applicationDir,
+                TerasologyLauncherVersion.getInstance().getBuildNumber());
             if (updater.updateAvailable()) {
                 logger.info("Launcher update available!");
                 splash.getInfoLabel().setText("Launcher update available!"); //TODO: i18n
@@ -145,13 +145,14 @@ public final class TerasologyLauncher {
 
             //TODO: Add Debug console
 
-            // load game versions
-            TerasologyGameVersion.getVersions(settings, BuildType.STABLE);
-            TerasologyGameVersion.getVersions(settings, BuildType.NIGHTLY);
+            // Game versions
+            final TerasologyGameVersion gameVersion = new TerasologyGameVersion();
+            gameVersion.loadVersions(settings);
+            logger.debug("Game versions loaded " + gameVersion);
 
             // LauncherFrame
             splash.getInfoLabel().setText("Creating launcher frame ...");   // TODO: i18n
-            final Frame frame = new LauncherFrame(applicationDir, os, settings);
+            final Frame frame = new LauncherFrame(applicationDir, os, settings, gameVersion);
 
             frame.setVisible(true);
             splash.getInfoLabel().setText("TerasologyLauncher started ...");   // TODO: i18n

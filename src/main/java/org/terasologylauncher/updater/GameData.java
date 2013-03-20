@@ -20,11 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -38,17 +36,9 @@ import java.util.Scanner;
  */
 public final class GameData {
 
-    public static final String JENKINS = "http://jenkins.movingblocks.net/job/";
-    public static final String STABLE_JOB_NAME = "TerasologyStable";
-    public static final String NIGHTLY_JOB_NAME = "Terasology";
-    public static final String LAST_SUCCESSFUL_BUILD_NUMBER = "lastSuccessfulBuild/buildNumber";
-
     private static final Logger logger = LoggerFactory.getLogger(GameData.class);
 
     private static File gameJar;
-
-    private static int upstreamVersionStable = -1;
-    private static int upstreamVersionNightly = -1;
 
     private static BuildType installedBuildType;
     private static int installedBuildVersion = -1;
@@ -65,58 +55,6 @@ public final class GameData {
             gameJar = new File(terasologyDirectory, "Terasology.jar");
         }
         return gameJar;
-    }
-
-    public static int getUpStreamNightlyVersion() {
-        if (upstreamVersionNightly == -1) {
-            URL url;
-            try {
-                url = new URL(JENKINS + NIGHTLY_JOB_NAME + "/" + LAST_SUCCESSFUL_BUILD_NUMBER);
-                final BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-                upstreamVersionNightly = Integer.parseInt(in.readLine());
-                try {
-                    in.close();
-                } catch (Exception e) {
-                    logger.info("Closing failed", e);
-                }
-            } catch (MalformedURLException e) {
-                logger.error("Could not read nightly version!", e);
-            } catch (IOException e) {
-                logger.error("Could not read nightly version!", e);
-            }
-        }
-        return upstreamVersionNightly;
-    }
-
-    public static int getUpStreamStableVersion() {
-        if (upstreamVersionStable == -1) {
-            URL url;
-            try {
-                url = new URL(JENKINS + STABLE_JOB_NAME + "/" + LAST_SUCCESSFUL_BUILD_NUMBER);
-                final BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-                upstreamVersionStable = Integer.parseInt(in.readLine());
-                try {
-                    in.close();
-                } catch (Exception e) {
-                    logger.info("Closing failed", e);
-                }
-            } catch (MalformedURLException e) {
-                logger.error("Could not read stable version!", e);
-            } catch (IOException e) {
-                logger.error("Could not read stable version!", e);
-            }
-        }
-        return upstreamVersionStable;
-    }
-
-    public static int getUpStreamVersion(final BuildType type) {
-        switch (type) {
-            case STABLE:
-                return getUpStreamStableVersion();
-            case NIGHTLY:
-                return getUpStreamNightlyVersion();
-        }
-        return -1;
     }
 
     public static boolean checkInternetConnection() {

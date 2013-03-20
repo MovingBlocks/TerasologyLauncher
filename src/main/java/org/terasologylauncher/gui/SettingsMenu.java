@@ -70,9 +70,12 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private JComboBox languageBox;
 
     private final Settings settings;
+    private final TerasologyGameVersion gameVersion;
 
-    public SettingsMenu(Settings settings) {
+    public SettingsMenu(final Settings settings, final TerasologyGameVersion gameVersion) {
         this.settings = settings;
+        this.gameVersion = gameVersion;
+
         setTitle(BundleUtil.getLabel("settings_title"));
         setResizable(false);
         setIconImage(BundleUtil.getImage("icon"));
@@ -373,7 +376,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private void populateVersions(final JComboBox buildVersionBox, final BuildType buildType) {
         final int buildVersion = settings.getBuildVersion(buildType);
 
-        for (final Integer version : TerasologyGameVersion.getVersions(settings, buildType)) {
+        for (final Integer version : gameVersion.getVersions(buildType)) {
             String item;
             if (version == Settings.BUILD_VERSION_LATEST) {
                 item = BundleUtil.getLabel("settings_game_buildVersion_latest");

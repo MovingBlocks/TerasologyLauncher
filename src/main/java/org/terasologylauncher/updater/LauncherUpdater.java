@@ -18,27 +18,26 @@ package org.terasologylauncher.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasologylauncher.gui.LauncherFrame;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.FileUtils;
-import org.terasologylauncher.util.OperatingSystem;
 
 import javax.swing.JOptionPane;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public final class LauncherUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
-    private final String currentVersion;
-    private String upstreamVersion;
 
-    public LauncherUpdater(String currentVersion) {
+    private final File applicationDir;
+    private final String currentVersion;
+    private Integer upstreamVersion;
+
+    public LauncherUpdater(final File applicationDir, final String currentVersion) {
+        this.applicationDir = applicationDir;
         if (currentVersion.equals("")) {
             this.currentVersion = "0";
         } else {
@@ -55,33 +54,19 @@ public final class LauncherUpdater {
      * @return whether an update is available
      */
     public boolean updateAvailable() {
-        URL url;
+        upstreamVersion = DownloadUtils.loadVersion(DownloadUtils.TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME);
+        logger.debug("Current Version: {}, Upstream Version: {}", currentVersion, upstreamVersion);
         try {
-            url = new URL("http://jenkins.movingblocks.net/job/TerasologyLauncher/lastSuccessfulBuild/buildNumber");
-            final BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-            upstreamVersion = in.readLine();
-            try {
-                in.close();
-            } catch (Exception e) {
-                logger.info("Closing reader failed", e);
-            }
-        } catch (MalformedURLException e) {
-            logger.error("Wrong/Malformed URL: {}", e);
-        } catch (IOException e) {
-            logger.error("IO exception reading upstream launcher version number: {}", e);
-        }
-        logger.debug("Current Version: {}, Upstream Verion: {}", currentVersion, upstreamVersion);
-        try {
-            return Integer.parseInt(currentVersion) < Integer.parseInt(upstreamVersion);
+            return Integer.parseInt(currentVersion) < upstreamVersion;
         } catch (NumberFormatException e) {
+            logger.error("Could not parse int! " + currentVersion, e);
             return false;
         }
     }
 
     public void update() {
         // get temporary update path
-        final File temporaryUpdateDir = new File(DirectoryUtils.getApplicationDirectory(OperatingSystem.getOS()),
-            DirectoryUtils.TMP);
+        final File temporaryUpdateDir = new File(applicationDir, DirectoryUtils.TMP);
         try {
             DirectoryUtils.checkDirectory(temporaryUpdateDir);
         } catch (IOException e) {
@@ -94,13 +79,13 @@ public final class LauncherUpdater {
         // TODO: handle different executable types?
 
         // Get current launcher location
-        File launcherLocation = new File(LauncherFrame.class.getProtectionDomain().getCodeSource().getLocation()
+        File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation()
             .getPath());
         // TODO: download new files, store to tmp path and run self updater
         try {
-            // TODO: refactor all download urls to DownloadUtils class
-            URL updateURL = new URL("http://jenkins.movingblocks" +
-                ".net/job/TerasologyLauncher/lastSuccessfulBuild/artifact/build/distributions/TerasologyLauncher.zip");
+            // TODO Switch to STABLE
+            URL updateURL = DownloadUtils.getLatestDownloadURL(DownloadUtils.TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME,
+                "TerasologyLauncher.zip");
 
             // download the latest zip file to tmp dir
 
@@ -113,9 +98,15 @@ public final class LauncherUpdater {
             // Start SelfUpdater
             SelfUpdater.runUpdate(temporaryUpdateDir, launcherLocation);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            logger.error("Launcher update failed!", e);
+            // TODO Message and title
+            JOptionPane.showMessageDialog(null, "Message", "Title", JOptionPane.ERROR_MESSAGE);
+            logger.error("Aborting update process!");
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Launcher update failed!", e);
+            // TODO Message and title
+            JOptionPane.showMessageDialog(null, "Message", "Title", JOptionPane.ERROR_MESSAGE);
+            logger.error("Aborting update process!");
         }
     }
 }

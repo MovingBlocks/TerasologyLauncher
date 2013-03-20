@@ -18,9 +18,12 @@ package org.terasologylauncher.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
+import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.FileUtils;
+import org.terasologylauncher.version.TerasologyGameVersion;
 
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
@@ -40,22 +43,24 @@ import java.net.URL;
  */
 public final class GameDownloader extends SwingWorker<Void, Void> {
 
-    public static final String ZIP_FILE = "Terasology.zip";
-
     private static final Logger logger = LoggerFactory.getLogger(GameDownloader.class);
+
+    private static final String ZIP_FILE = "Terasology.zip";
 
     private final JProgressBar progressBar;
     private final LauncherFrame frame;
 
     private final Settings settings;
     private final File terasologyDirectory;
+    private final TerasologyGameVersion gameVersion;
 
     public GameDownloader(final JProgressBar progressBar, final LauncherFrame frame, final Settings settings,
-                          final File terasologyDirectory) {
+                          final File terasologyDirectory, final TerasologyGameVersion gameVersion) {
         this.progressBar = progressBar;
         this.frame = frame;
         this.settings = settings;
         this.terasologyDirectory = terasologyDirectory;
+        this.gameVersion = gameVersion;
         progressBar.setVisible(true);
         progressBar.setValue(0);
         progressBar.setString("Starting Download"); // TODO Use BundleUtil.getLabel
@@ -72,30 +77,24 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
 
     @Override
     protected Void doInBackground() {
-        // get the selected settings for the download
-        final StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(GameData.JENKINS);
-        switch (settings.getBuildType()) {
-            case STABLE:
-                urlBuilder.append(GameData.STABLE_JOB_NAME);
-                break;
-            case NIGHTLY:
-                urlBuilder.append(GameData.NIGHTLY_JOB_NAME);
-                break;
-        }
-        urlBuilder.append("/");
-        if (settings.isBuildVersionLatest(settings.getBuildType())) {
-            urlBuilder.append(GameData.getUpStreamVersion(settings.getBuildType()));
+        final String jobName;
+        if (BuildType.STABLE == settings.getBuildType()) {
+            jobName = DownloadUtils.TERASOLOGY_STABLE_JOB_NAME;
         } else {
-            urlBuilder.append(settings.getBuildVersion(settings.getBuildType()));
+            jobName = DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME;
         }
-        urlBuilder.append("/artifact/build/distributions/").append(ZIP_FILE);
+        final Integer version;
+        if (settings.isBuildVersionLatest(settings.getBuildType())) {
+            version = gameVersion.getVersion(settings.getBuildType());
+        } else {
+            version = settings.getBuildVersion(settings.getBuildType());
+        }
 
         // try to do the download
         URL url = null;
         File file = null;
         try {
-            url = new URL(urlBuilder.toString());
+            url = DownloadUtils.getDownloadURL(jobName, version, ZIP_FILE);
             final long dataSize = url.openConnection().getContentLength() / 1024 / 1024;
 
             InputStream in = null;
