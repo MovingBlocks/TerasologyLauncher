@@ -18,6 +18,7 @@ package org.terasologylauncher.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.DownloadException;
 import org.terasologylauncher.util.DownloadUtils;
@@ -74,9 +75,11 @@ public final class LauncherUpdater {
         try {
             DirectoryUtils.checkDirectory(temporaryUpdateDir);
         } catch (IOException e) {
-            logger.error("Can not create or use temporary update directory! - {} ", temporaryUpdateDir, e);
-            // TODO Message and title
-            JOptionPane.showMessageDialog(null, "Message", "Title", JOptionPane.ERROR_MESSAGE);
+            logger.error("Cannot create or use temporary update directory! - {} ", temporaryUpdateDir, e);
+            JOptionPane.showMessageDialog(null,
+                BundleUtils.getLabel("update_launcher_tmpDir") + "\n" + temporaryUpdateDir,
+                BundleUtils.getLabel("message_error_title"),
+                JOptionPane.ERROR_MESSAGE);
             logger.error("Aborting update process!");
             return;
         }
@@ -85,7 +88,7 @@ public final class LauncherUpdater {
         // Get current launcher location
         File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation()
             .getPath());
-        // TODO: download new files, store to tmp path and run self updater
+
         try {
             // TODO Switch to TERASOLOGY_LAUNCHER_STABLE_JOB_NAME
             URL updateURL = DownloadUtils.getDownloadURL(DownloadUtils.TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME,
@@ -103,13 +106,17 @@ public final class LauncherUpdater {
             SelfUpdater.runUpdate(temporaryUpdateDir, launcherLocation);
         } catch (MalformedURLException e) {
             logger.error("Launcher update failed!", e);
-            // TODO Message and title
-            JOptionPane.showMessageDialog(null, "Message", "Title", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                BundleUtils.getLabel("update_launcher_updateFailed"),
+                BundleUtils.getLabel("message_error_title"),
+                JOptionPane.ERROR_MESSAGE);
             logger.error("Aborting update process!");
         } catch (IOException e) {
             logger.error("Launcher update failed!", e);
-            // TODO Message and title
-            JOptionPane.showMessageDialog(null, "Message", "Title", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                BundleUtils.getLabel("update_launcher_updateFailed"),
+                BundleUtils.getLabel("message_error_title"),
+                JOptionPane.ERROR_MESSAGE);
             logger.error("Aborting update process!");
         }
     }
