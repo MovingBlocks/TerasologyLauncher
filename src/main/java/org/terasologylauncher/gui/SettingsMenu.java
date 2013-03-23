@@ -61,6 +61,11 @@ public class SettingsMenu extends JDialog implements ActionListener {
 
     private static final String MAX_MEM_ACTION = "maxMem";
 
+    private static final String OPEN_LOG_DIR_ACTION = "openLogs";
+    private static final String OPEN_MOD_DIR_ACTION = "openMods";
+    private static final String OPEN_SAVED_DIR_ACTION = "openSaved";
+    private static final String OPEN_SCREENS_DIR_ACTION = "openScreens";
+
     private JComboBox buildTypeBox;
     private JComboBox buildVersionStableBox;
     private JComboBox buildVersionNightlyBox;
@@ -258,7 +263,6 @@ public class SettingsMenu extends JDialog implements ActionListener {
             }
         });
 
-
         final JLabel savedWorldsDirLabel = new JLabel(BundleUtils.getLabel("settings_directories_savedWorlds"));
         JButton openSavedWorldsDir = new JButton();
         openSavedWorldsDir.setFont(settingsFont);
@@ -403,20 +407,23 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void populateVersions(final JComboBox buildVersionBox, final BuildType buildType) {
-        final int buildVersion = settings.getBuildVersion(buildType);
-        buildVersionBox.removeAllItems();
+        if (gameVersion.isVersionsLoaded()) {
+            final int buildVersion = settings.getBuildVersion(buildType);
 
-        for (final Integer version : gameVersion.getVersions(buildType)) {
-            String item;
-            if (version == Settings.BUILD_VERSION_LATEST) {
-                item = BundleUtils.getLabel("settings_game_buildVersion_latest");
-            } else {
-                item = String.valueOf(version);
+            for (final Integer version : gameVersion.getVersions(buildType)) {
+                String item;
+                if (version == Settings.BUILD_VERSION_LATEST) {
+                    item = BundleUtils.getLabel("settings_game_buildVersion_latest");
+                } else {
+                    item = String.valueOf(version);
+                }
+                buildVersionBox.addItem(item);
+                if (version == buildVersion) {
+                    buildVersionBox.setSelectedItem(item);
+                }
             }
-            buildVersionBox.addItem(item);
-            if (version == buildVersion) {
-                buildVersionBox.setSelectedItem(item);
-            }
+        } else {
+            buildVersionBox.setEnabled(false);
         }
     }
 
@@ -533,17 +540,21 @@ public class SettingsMenu extends JDialog implements ActionListener {
                 selectedType = BuildType.NIGHTLY;
             }
             settings.setBuildType(selectedType);
-            if (buildVersionStableBox.getSelectedIndex() == 0) {
-                settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.STABLE);
-            } else {
-                settings.setBuildVersion(Integer.parseInt((String) buildVersionStableBox.getSelectedItem()),
-                    BuildType.STABLE);
+            if (buildVersionStableBox.isEnabled()) {
+                if (buildVersionStableBox.getSelectedIndex() == 0) {
+                    settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.STABLE);
+                } else {
+                    settings.setBuildVersion(Integer.parseInt((String) buildVersionStableBox.getSelectedItem()),
+                        BuildType.STABLE);
+                }
             }
-            if (buildVersionNightlyBox.getSelectedIndex() == 0) {
-                settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.NIGHTLY);
-            } else {
-                settings.setBuildVersion(Integer.parseInt((String) buildVersionNightlyBox.getSelectedItem()),
-                    BuildType.NIGHTLY);
+            if (buildVersionNightlyBox.isEnabled()) {
+                if (buildVersionNightlyBox.getSelectedIndex() == 0) {
+                    settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.NIGHTLY);
+                } else {
+                    settings.setBuildVersion(Integer.parseInt((String) buildVersionNightlyBox.getSelectedItem()),
+                        BuildType.NIGHTLY);
+                }
             }
 
             // save ram settings

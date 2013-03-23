@@ -404,7 +404,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
      * Changes the button text and action command ("start" or "download").
      */
     public void updateStartButton() {
-        if (GameData.checkInternetConnection()) {
+        if (gameVersion.isVersionsLoaded()) {
             // get the selected build type
             final BuildType selectedType = settings.getBuildType();
             // get the installed build type

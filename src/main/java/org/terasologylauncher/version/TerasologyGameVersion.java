@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Settings;
+import org.terasologylauncher.util.DownloadException;
 import org.terasologylauncher.util.DownloadUtils;
 
 import java.util.ArrayList;
@@ -45,6 +46,12 @@ public final class TerasologyGameVersion {
         loadNightly(settings);
     }
 
+    public boolean isVersionsLoaded() {
+        return (stableVersion != null) && (nightlyVersion != null)
+            && (stableVersions != null) && (nightlyVersions != null)
+            && !stableVersions.isEmpty() && !nightlyVersions.isEmpty();
+    }
+
     public List<Integer> getVersions(final BuildType buildType) {
         if (BuildType.STABLE == buildType) {
             return stableVersions;
@@ -60,10 +67,8 @@ public final class TerasologyGameVersion {
     }
 
     private void loadStable(final Settings settings) {
-        stableVersions = new ArrayList<Integer>();
-        stableVersions.add(Settings.BUILD_VERSION_LATEST);
         try {
-            stableVersion = DownloadUtils.loadVersion(DownloadUtils.TERASOLOGY_STABLE_JOB_NAME);
+            stableVersion = DownloadUtils.loadLatestSuccessfulVersion(DownloadUtils.TERASOLOGY_STABLE_JOB_NAME);
             // for stable builds, go at least 4 versions back for the list
             final int buildVersionSetting;
             if (settings.isBuildVersionLatest(BuildType.STABLE)) {
@@ -72,19 +77,19 @@ public final class TerasologyGameVersion {
                 buildVersionSetting = settings.getBuildVersion(BuildType.STABLE);
             }
             final int minVersionNumber = Math.min(stableVersion - 4, buildVersionSetting);
+            stableVersions = new ArrayList<Integer>();
+            stableVersions.add(Settings.BUILD_VERSION_LATEST);
             for (int i = stableVersion; i >= minVersionNumber; i--) {
                 stableVersions.add(i);
             }
-        } catch (Exception e) {
+        } catch (DownloadException e) {
             logger.error("Retrieving latest stable version build number failed.", e);
         }
     }
 
     private void loadNightly(final Settings settings) {
-        nightlyVersions = new ArrayList<Integer>();
-        nightlyVersions.add(Settings.BUILD_VERSION_LATEST);
         try {
-            nightlyVersion = DownloadUtils.loadVersion(DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME);
+            nightlyVersion = DownloadUtils.loadLatestSuccessfulVersion(DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME);
             // for nightly builds, go 8 versions back for the list
             final int buildVersionSetting;
             if (settings.isBuildVersionLatest(BuildType.NIGHTLY)) {
@@ -93,10 +98,12 @@ public final class TerasologyGameVersion {
                 buildVersionSetting = settings.getBuildVersion(BuildType.NIGHTLY);
             }
             final int minVersionNumber = Math.min(nightlyVersion - 8, buildVersionSetting);
+            nightlyVersions = new ArrayList<Integer>();
+            nightlyVersions.add(Settings.BUILD_VERSION_LATEST);
             for (int i = nightlyVersion; i >= minVersionNumber; i--) {
                 nightlyVersions.add(i);
             }
-        } catch (Exception e) {
+        } catch (DownloadException e) {
             logger.error("Retrieving latest nightly version build number failed.", e);
         }
     }
