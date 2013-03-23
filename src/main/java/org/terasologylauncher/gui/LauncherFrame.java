@@ -76,6 +76,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
     private JButton gplus;
     private JButton twitter;
     private JButton youtube;
+    private JButton reddit;
 
     private JProgressBar progressBar;
 
@@ -248,6 +249,12 @@ public class LauncherFrame extends JFrame implements ActionListener {
         twitter.setBounds(8 + (38 * 4) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         twitter.setBorder(null);
 
+        reddit = new LinkJButton(BundleUtils.getURI("terasology_reddit"));
+        reddit.setIcon(BundleUtils.getImageIcon("reddit"));
+        reddit.setRolloverIcon(BundleUtils.getImageIcon("reddit_hover"));
+        reddit.setBounds(8 + (38 * 5) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
+        reddit.setBorder(null);
+
         final Container contentPane = getContentPane();
         contentPane.setLayout(null);
 
@@ -265,6 +272,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
         contentPane.add(facebook);
         contentPane.add(gplus);
         contentPane.add(youtube);
+        contentPane.add(reddit);
 
         contentPane.add(progressBar);
 
@@ -342,6 +350,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
      * "screens" and "launcher".
      *
      * @param f the file to check
+     *
      * @return true if the file can be deleted
      */
     private boolean canBeDeleted(final File f) {

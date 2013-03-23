@@ -85,7 +85,11 @@ public class TSButton extends JButton implements MouseListener {
         g2d.setColor(Color.WHITE);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        g2d.setFont(getFont().deriveFont(16f));
+        float fontSize = 16f;
+        while (g2d.getFontMetrics().stringWidth(getText()) > getWidth() - 4) {
+            g2d.setFont(getFont().deriveFont(--fontSize));
+        }
+
         final int width = g2d.getFontMetrics().stringWidth(getText());
         g2d.drawString(getText(), (getWidth() - width) / 2, ((getHeight() / 2) + (getFont().getSize() / 2)) - 2);
 
