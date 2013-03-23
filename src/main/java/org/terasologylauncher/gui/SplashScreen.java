@@ -25,7 +25,7 @@ import java.awt.Image;
 
 public class SplashScreen extends JWindow {
 
-    // TODO: progress bar?
+    // TODO: progress bar
     private static final int INFO_LABEL_WIDTH = 400;
 
     private JLabel infoLabel;
