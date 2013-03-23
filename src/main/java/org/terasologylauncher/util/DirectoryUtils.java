@@ -28,8 +28,6 @@ import java.io.IOException;
  */
 public final class DirectoryUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(DirectoryUtils.class);
-
     public static final String BACKUP_DIR_NAME = "backups";
     public static final String LAUNCHER_DIR_NAME = "launcher";
     public static final String SAVED_WORLDS_DIR_NAME = "SAVED_WORLDS";
@@ -40,6 +38,7 @@ public final class DirectoryUtils {
     public static final String TMP = "tmp";
 
     private static final String APPLICATION_DIR_NAME = "terasology";
+    private static final Logger logger = LoggerFactory.getLogger(DirectoryUtils.class);
 
     private DirectoryUtils() {
     }
