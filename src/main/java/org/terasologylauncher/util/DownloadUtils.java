@@ -38,9 +38,10 @@ public final class DownloadUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
 
-    private static final String JENKINS = "http://jenkins.movingblocks.net/job/";
-    private static final String LAST_SUCCESSFUL_BUILD_NUMBER = "lastSuccessfulBuild/buildNumber";
-    private static final String LAST_SUCCESSFUL_BUILD = "lastSuccessfulBuild";
+    private static final String JENKINS_JOB_URL = "http://jenkins.movingblocks.net/job/";
+    private static final String LAST_STABLE_BUILD = "/lastStableBuild";
+    private static final String LAST_SUCCESSFUL_BUILD = "/lastSuccessfulBuild";
+    private static final String BUILD_NUMBER = "/buildNumber/";
     private static final String ARTIFACT = "/artifact/build/distributions/";
 
     private DownloadUtils() {
@@ -73,42 +74,45 @@ public final class DownloadUtils {
         }
     }
 
-    public static int loadVersion(final String jobName) {
-        int version = -1;
-        final URL url;
-        try {
-            url = new URL(JENKINS + jobName + "/" + LAST_SUCCESSFUL_BUILD_NUMBER);
-            final BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-            version = Integer.parseInt(in.readLine());
-            try {
-                in.close();
-            } catch (Exception e) {
-                logger.info("Closing failed", e);
-            }
-        } catch (MalformedURLException e) {
-            logger.error("Could not read version!", e);
-        } catch (IOException e) {
-            logger.error("Could not read version!", e);
-        }
-        return version;
+    public static int loadLatestStableVersion(final String jobName) throws DownloadException {
+        return loadVersion(jobName, LAST_STABLE_BUILD);
     }
 
-    public static URL getLatestDownloadURL(final String jobName, final String fileName) throws MalformedURLException {
-        final StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(JENKINS);
-        urlBuilder.append(jobName);
-        urlBuilder.append("/");
-        urlBuilder.append(LAST_SUCCESSFUL_BUILD);
-        urlBuilder.append(ARTIFACT);
-        urlBuilder.append(fileName);
+    public static int loadLatestSuccessfulVersion(final String jobName) throws DownloadException {
+        return loadVersion(jobName, LAST_SUCCESSFUL_BUILD);
+    }
 
-        return new URL(urlBuilder.toString());
+    private static int loadVersion(final String jobName, final String latestBuild) throws DownloadException {
+        int version = -1;
+        URL url = null;
+        BufferedReader reader = null;
+        try {
+            url = new URL(JENKINS_JOB_URL + jobName + latestBuild + BUILD_NUMBER);
+            reader = new BufferedReader(new InputStreamReader(url.openStream()));
+            version = Integer.parseInt(reader.readLine());
+        } catch (MalformedURLException e) {
+            throw new DownloadException("The version could not be loaded! " + url, e);
+        } catch (IOException e) {
+            throw new DownloadException("The version could not be loaded! " + url, e);
+        } catch (RuntimeException e) {
+            // NullPointerException, NumberFormatException
+            throw new DownloadException("The version could not be loaded! " + url, e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    logger.warn("Closing reader failed! " + url, e);
+                }
+            }
+        }
+        return version;
     }
 
     public static URL getDownloadURL(final String jobName, final Integer version, final String fileName)
         throws MalformedURLException {
         final StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(JENKINS);
+        urlBuilder.append(JENKINS_JOB_URL);
         urlBuilder.append(jobName);
         urlBuilder.append("/");
         urlBuilder.append(version);

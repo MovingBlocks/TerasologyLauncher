@@ -374,19 +374,23 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void populateVersions(final JComboBox buildVersionBox, final BuildType buildType) {
-        final int buildVersion = settings.getBuildVersion(buildType);
+        if (gameVersion.isVersionsLoaded()) {
+            final int buildVersion = settings.getBuildVersion(buildType);
 
-        for (final Integer version : gameVersion.getVersions(buildType)) {
-            String item;
-            if (version == Settings.BUILD_VERSION_LATEST) {
-                item = BundleUtils.getLabel("settings_game_buildVersion_latest");
-            } else {
-                item = String.valueOf(version);
+            for (final Integer version : gameVersion.getVersions(buildType)) {
+                String item;
+                if (version == Settings.BUILD_VERSION_LATEST) {
+                    item = BundleUtils.getLabel("settings_game_buildVersion_latest");
+                } else {
+                    item = String.valueOf(version);
+                }
+                buildVersionBox.addItem(item);
+                if (version == buildVersion) {
+                    buildVersionBox.setSelectedItem(item);
+                }
             }
-            buildVersionBox.addItem(item);
-            if (version == buildVersion) {
-                buildVersionBox.setSelectedItem(item);
-            }
+        } else {
+            buildVersionBox.setEnabled(false);
         }
     }
 
@@ -487,17 +491,21 @@ public class SettingsMenu extends JDialog implements ActionListener {
                 selectedType = BuildType.NIGHTLY;
             }
             settings.setBuildType(selectedType);
-            if (buildVersionStableBox.getSelectedIndex() == 0) {
-                settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.STABLE);
-            } else {
-                settings.setBuildVersion(Integer.parseInt((String) buildVersionStableBox.getSelectedItem()),
-                    BuildType.STABLE);
+            if (buildVersionStableBox.isEnabled()) {
+                if (buildVersionStableBox.getSelectedIndex() == 0) {
+                    settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.STABLE);
+                } else {
+                    settings.setBuildVersion(Integer.parseInt((String) buildVersionStableBox.getSelectedItem()),
+                        BuildType.STABLE);
+                }
             }
-            if (buildVersionNightlyBox.getSelectedIndex() == 0) {
-                settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.NIGHTLY);
-            } else {
-                settings.setBuildVersion(Integer.parseInt((String) buildVersionNightlyBox.getSelectedItem()),
-                    BuildType.NIGHTLY);
+            if (buildVersionNightlyBox.isEnabled()) {
+                if (buildVersionNightlyBox.getSelectedIndex() == 0) {
+                    settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.NIGHTLY);
+                } else {
+                    settings.setBuildVersion(Integer.parseInt((String) buildVersionNightlyBox.getSelectedItem()),
+                        BuildType.NIGHTLY);
+                }
             }
 
             // save ram settings
