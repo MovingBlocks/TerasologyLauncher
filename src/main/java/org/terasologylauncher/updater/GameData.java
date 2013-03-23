@@ -22,10 +22,6 @@ import org.terasologylauncher.BuildType;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Scanner;
 
 /**
@@ -55,22 +51,6 @@ public final class GameData {
             gameJar = new File(terasologyDirectory, "Terasology.jar");
         }
         return gameJar;
-    }
-
-    public static boolean checkInternetConnection() {
-        //TODO: test jenkins and terasologymods.net
-        try {
-            final URL testURL = new URL("http://www.google.com");
-            final URLConnection connection = testURL.openConnection();
-            connection.setConnectTimeout(5000);
-            connection.getInputStream();
-            return true;
-        } catch (MalformedURLException e) {
-            logger.error("Could not check internet connection!", e);
-        } catch (IOException e) {
-            logger.info("No internet connection.", e);
-        }
-        return false;
     }
 
     public static BuildType getInstalledBuildType(final File terasologyDirectory) {

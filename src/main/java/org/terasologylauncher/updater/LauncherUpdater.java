@@ -19,6 +19,7 @@ package org.terasologylauncher.updater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.util.DirectoryUtils;
+import org.terasologylauncher.util.DownloadException;
 import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.FileUtils;
 
@@ -54,14 +55,17 @@ public final class LauncherUpdater {
      * @return whether an update is available
      */
     public boolean updateAvailable() {
-        upstreamVersion = DownloadUtils.loadVersion(DownloadUtils.TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME);
-        logger.debug("Current Version: {}, Upstream Version: {}", currentVersion, upstreamVersion);
         try {
+            // TODO Switch to TERASOLOGY_LAUNCHER_STABLE_JOB_NAME
+            upstreamVersion = DownloadUtils.loadLatestStableVersion(DownloadUtils.TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME);
+            logger.debug("Current Version: {}, Upstream Version: {}", currentVersion, upstreamVersion);
             return Integer.parseInt(currentVersion) < upstreamVersion;
         } catch (NumberFormatException e) {
-            logger.error("Could not parse int! " + currentVersion, e);
-            return false;
+            logger.error("Could not parse current version! " + currentVersion, e);
+        } catch (DownloadException e) {
+            logger.error("Could not load latest stable version!", e);
         }
+        return false;
     }
 
     public void update() {
@@ -83,9 +87,9 @@ public final class LauncherUpdater {
             .getPath());
         // TODO: download new files, store to tmp path and run self updater
         try {
-            // TODO Switch to STABLE
-            URL updateURL = DownloadUtils.getLatestDownloadURL(DownloadUtils.TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME,
-                "TerasologyLauncher.zip");
+            // TODO Switch to TERASOLOGY_LAUNCHER_STABLE_JOB_NAME
+            URL updateURL = DownloadUtils.getDownloadURL(DownloadUtils.TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME,
+                upstreamVersion, "TerasologyLauncher.zip");
 
             // download the latest zip file to tmp dir
 
