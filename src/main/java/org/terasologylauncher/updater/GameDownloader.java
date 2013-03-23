@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
+import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.FileUtils;
 import org.terasologylauncher.version.TerasologyGameVersion;
@@ -63,7 +64,7 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         this.gameVersion = gameVersion;
         progressBar.setVisible(true);
         progressBar.setValue(0);
-        progressBar.setString("Starting Download"); // TODO Use BundleUtils.getLabel
+        progressBar.setString(BundleUtils.getLabel("update_game_startDownload"));
         addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent evt) {
@@ -91,8 +92,8 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         }
 
         // try to do the download
-        URL url = null;
-        File file = null;
+        URL url;
+        File file;
         try {
             url = DownloadUtils.getDownloadURL(jobName, version, ZIP_FILE);
             final long dataSize = url.openConnection().getContentLength() / 1024 / 1024;
@@ -140,22 +141,21 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         logger.debug("Download is done");
         // unzip downloaded file
         progressBar.setValue(100);
-        progressBar.setString("Extracting zip …"); // TODO Use BundleUtils.getLabel
+        progressBar.setString(BundleUtils.getLabel("update_game_extractZip"));
         progressBar.setStringPainted(true);
 
-        File zip = null;
+        File zip;
         zip = new File(terasologyDirectory, ZIP_FILE);
         FileUtils.extractZip(zip);
 
-        progressBar.setString("Updating game info …"); // TODO Use BundleUtils.getLabel
+        progressBar.setString(BundleUtils.getLabel("update_game_gameInfo"));
         progressBar.setStringPainted(true);
 
         GameData.forceReReadVersionFile(terasologyDirectory);
         frame.updateStartButton();
 
-        if (zip != null) {
-            zip.delete();
-        }
+        zip.delete();
+
         progressBar.setVisible(false);
     }
 }

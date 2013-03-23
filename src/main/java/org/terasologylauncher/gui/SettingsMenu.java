@@ -22,7 +22,9 @@ import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Languages;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.util.BundleUtils;
+import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.Memory;
+import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyGameVersion;
 
 import javax.swing.GroupLayout;
@@ -31,6 +33,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.LayoutStyle;
@@ -38,6 +41,7 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -91,8 +95,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void initComponents() {
-        // TODO Check if font "Arial" is available on all OS
-        final Font settingsFont = new Font("Arial", Font.PLAIN, 12);
+        final Font settingsFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
 
         JTabbedPane mainSettings = new JTabbedPane();
         mainSettings.addTab(BundleUtils.getLabel("settings_game_title"), createGameSettingsTab(settingsFont));
@@ -251,29 +254,53 @@ public class SettingsMenu extends JDialog implements ActionListener {
         JButton openLogDir = new JButton();
         openLogDir.setFont(settingsFont);
         openLogDir.setText(BundleUtils.getLabel("settings_directories_open"));
-        openLogDir.addActionListener(this);
-        openLogDir.setActionCommand(OPEN_LOG_DIR_ACTION);
+        openLogDir.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final File logDir = new File(DirectoryUtils.getApplicationDirectory(OperatingSystem.getOS()),
+                    DirectoryUtils.LOGS_DIR_NAME);
+                DirectoryUtils.showInFileManager(logDir);
+            }
+        });
 
         final JLabel savedWorldsDirLabel = new JLabel(BundleUtils.getLabel("settings_directories_savedWorlds"));
         JButton openSavedWorldsDir = new JButton();
         openSavedWorldsDir.setFont(settingsFont);
         openSavedWorldsDir.setText(BundleUtils.getLabel("settings_directories_open"));
-        openSavedWorldsDir.addActionListener(this);
-        openSavedWorldsDir.setActionCommand(OPEN_SAVED_DIR_ACTION);
+        openSavedWorldsDir.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final File savesDir = new File(DirectoryUtils.getApplicationDirectory(OperatingSystem.getOS()),
+                    DirectoryUtils.SAVED_WORLDS_DIR_NAME);
+                DirectoryUtils.showInFileManager(savesDir);
+            }
+        });
 
         final JLabel screenShotDirLabel = new JLabel(BundleUtils.getLabel("settings_directories_screenShots"));
         JButton openScreenShotsDir = new JButton();
         openScreenShotsDir.setFont(settingsFont);
         openScreenShotsDir.setText(BundleUtils.getLabel("settings_directories_open"));
-        openScreenShotsDir.addActionListener(this);
-        openScreenShotsDir.setActionCommand(OPEN_SCREENS_DIR_ACTION);
+        openScreenShotsDir.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final File screensDir = new File(DirectoryUtils.getApplicationDirectory(OperatingSystem.getOS()),
+                    DirectoryUtils.SCREENSHOTS_DIR_NAME);
+                DirectoryUtils.showInFileManager(screensDir);
+            }
+        });
 
         final JLabel modsDirLabel = new JLabel(BundleUtils.getLabel("settings_directories_mods"));
         JButton openModsDir = new JButton();
         openModsDir.setFont(settingsFont);
         openModsDir.setText(BundleUtils.getLabel("settings_directories_open"));
-        openModsDir.addActionListener(this);
-        openModsDir.setActionCommand(OPEN_MOD_DIR_ACTION);
+        openModsDir.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final File modsDir = new File(DirectoryUtils.getApplicationDirectory(OperatingSystem.getOS()),
+                    DirectoryUtils.MODS_DIR_NAME);
+                DirectoryUtils.showInFileManager(modsDir);
+            }
+        });
 
         final GroupLayout directoriesTabLayout = new GroupLayout(directoriesTab);
         directoriesTab.setLayout(directoriesTabLayout);
@@ -363,9 +390,15 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void populateBuildType() {
+        buildTypeBox.removeAllItems();
+
         buildTypeBox.addItem(BundleUtils.getLabel("settings_game_buildType_stable"));
         buildTypeBox.addItem(BundleUtils.getLabel("settings_game_buildType_nightly"));
 
+        updateBuildTypeSelection();
+    }
+
+    private void updateBuildTypeSelection() {
         if (settings.getBuildType() == BuildType.STABLE) {
             buildTypeBox.setSelectedIndex(0);
         } else {
@@ -417,19 +450,14 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
 
         // fill in the combo box entries
+        maxMemBox.removeAllItems();
         for (final Memory m : Memory.MEMORY_OPTIONS) {
             if (m.getMemoryMB() <= max) {
                 maxMemBox.addItem(m.getLabel());
             }
         }
 
-        final int memoryOptionID = settings.getMaximalMemory();
-        final int index = Memory.getMemoryIndexFromId(memoryOptionID);
-        if (index < maxMemBox.getItemCount()) {
-            maxMemBox.setSelectedIndex(index);
-        } else {
-            maxMemBox.setSelectedIndex(maxMemBox.getItemCount() - 1);
-        }
+        updateMaxMemSelection();
     }
 
     private void populateInitialMemory() {
@@ -442,6 +470,20 @@ public class SettingsMenu extends JDialog implements ActionListener {
                 initialMemBox.addItem(m.getLabel());
             }
         }
+        updateInitialMemSelection();
+    }
+
+    private void updateMaxMemSelection() {
+        final int memoryOptionID = settings.getMaximalMemory();
+        final int index = Memory.getMemoryIndexFromId(memoryOptionID);
+        if (index < maxMemBox.getItemCount()) {
+            maxMemBox.setSelectedIndex(index);
+        } else {
+            maxMemBox.setSelectedIndex(maxMemBox.getItemCount() - 1);
+        }
+    }
+
+    private void updateInitialMemSelection() {
         final int memoryOptionID = settings.getInitialMemory();
         if (memoryOptionID == -1) {
             initialMemBox.setSelectedIndex(0);
@@ -456,6 +498,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void populateLanguage() {
+        languageBox.removeAllItems();
         for (Locale locale : Languages.SUPPORTED_LOCALES) {
             final String item = BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale));
             languageBox.addItem(item);
@@ -481,7 +524,13 @@ public class SettingsMenu extends JDialog implements ActionListener {
             setVisible(false);
             setAlwaysOnTop(false);
         } else if (actionCommand.equals(RESET_ACTION)) {
-            //TODO: reload settings from saved file
+            // reload the right selections
+            updateBuildTypeSelection();
+            populateVersions(buildVersionStableBox, BuildType.STABLE);
+            populateVersions(buildVersionNightlyBox, BuildType.NIGHTLY);
+            updateMaxMemSelection();
+            updateInitialMemSelection();
+            populateLanguage();
         } else if (actionCommand.equals(SAVE_ACTION)) {
             // save build type and version
             final BuildType selectedType;
@@ -526,13 +575,13 @@ public class SettingsMenu extends JDialog implements ActionListener {
                 settings.store();
             } catch (IOException e) {
                 logger.error("Could not store settings!", e);
-                // TODO Show error message dialog
+                JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_storeSettings"),
+                    BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
             }
             dispose();
             setVisible(false);
             setAlwaysOnTop(false);
         }
-        // TODO Implement OPEN_*_DIR_ACTION
     }
 
     private void updateInitMemBox() {

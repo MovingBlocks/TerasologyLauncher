@@ -303,7 +303,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
                     @Override
                     public void windowClosed(final WindowEvent e) {
                         updateStartButton();
-                        // TODO Update all labels (language change)
+                        // Update all labels (language change)
+                        updateLabels();
                     }
                 });
             }
@@ -327,6 +328,15 @@ public class LauncherFrame extends JFrame implements ActionListener {
                 gameVersion);
             downloader.execute();
         }
+    }
+
+    private void updateLabels() {
+        forums.setText(BundleUtils.getLabel("launcher_forum"));
+        mods.setText(BundleUtils.getLabel("launcher_mods"));
+        issues.setText(BundleUtils.getLabel("launcher_issues"));
+
+        settingsButton.setText(BundleUtils.getLabel("launcher_settings"));
+        cancelButton.setText(BundleUtils.getLabel("launcher_cancel"));
     }
 
     /**

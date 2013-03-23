@@ -16,6 +16,10 @@
 
 package org.terasologylauncher.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 
@@ -29,10 +33,12 @@ public final class DirectoryUtils {
     public static final String SAVED_WORLDS_DIR_NAME = "SAVED_WORLDS";
     public static final String SCREENSHOTS_DIR_NAME = "screens";
     public static final String MODS_DIR_NAME = "mods";
+    public static final String LOGS_DIR_NAME = "logs";
 
     public static final String TMP = "tmp";
 
     private static final String APPLICATION_DIR_NAME = "terasology";
+    private static final Logger logger = LoggerFactory.getLogger(DirectoryUtils.class);
 
     private DirectoryUtils() {
     }
@@ -71,5 +77,15 @@ public final class DirectoryUtils {
         }
 
         return applicationDirectory;
+    }
+
+    public static void showInFileManager(final File file) {
+        if (Desktop.isDesktopSupported()) {
+            try {
+                Desktop.getDesktop().open(file);
+            } catch (IOException e) {
+                logger.error("Could not open file {} in file manager.", file, e);
+            }
+        }
     }
 }
