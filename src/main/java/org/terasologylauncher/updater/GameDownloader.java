@@ -156,6 +156,9 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
 
         zip.delete();
 
+        // play sound when finished
+        BundleUtils.playSound("downloadFinished");
+
         progressBar.setVisible(false);
     }
 }
