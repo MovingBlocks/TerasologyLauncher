@@ -36,14 +36,20 @@ public final class LauncherUpdater {
 
     private final File applicationDir;
     private final String currentVersion;
+    private final String jobName;
     private Integer upstreamVersion;
 
-    public LauncherUpdater(final File applicationDir, final String currentVersion) {
+    public LauncherUpdater(final File applicationDir, final String currentVersion, final String jobName) {
         this.applicationDir = applicationDir;
-        if (currentVersion.equals("")) {
+        if ((currentVersion == null) || (currentVersion.trim().length() == 0)) {
             this.currentVersion = "0";
         } else {
             this.currentVersion = currentVersion;
+        }
+        if ((jobName == null) || (jobName.trim().length() == 0)) {
+            this.jobName = DownloadUtils.TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME;
+        } else {
+            this.jobName = jobName;
         }
     }
 
@@ -57,8 +63,7 @@ public final class LauncherUpdater {
      */
     public boolean updateAvailable() {
         try {
-            // TODO Switch to TERASOLOGY_LAUNCHER_STABLE_JOB_NAME
-            upstreamVersion = DownloadUtils.loadLatestStableVersion(DownloadUtils.TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME);
+            upstreamVersion = DownloadUtils.loadLatestStableVersion(jobName);
             logger.debug("Current Version: {}, Upstream Version: {}", currentVersion, upstreamVersion);
             return Integer.parseInt(currentVersion) < upstreamVersion;
         } catch (NumberFormatException e) {
@@ -90,9 +95,7 @@ public final class LauncherUpdater {
             .getPath());
 
         try {
-            // TODO Switch to TERASOLOGY_LAUNCHER_STABLE_JOB_NAME
-            URL updateURL = DownloadUtils.getDownloadURL(DownloadUtils.TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME,
-                upstreamVersion, "TerasologyLauncher.zip");
+            URL updateURL = DownloadUtils.getDownloadURL(jobName, upstreamVersion, "TerasologyLauncher.zip");
 
             // download the latest zip file to tmp dir
 
