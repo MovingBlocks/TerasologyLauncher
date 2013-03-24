@@ -69,6 +69,7 @@ task createVersionInfoFile {
             ant.entry(key:'buildId',value:env.BUILD_ID)
             ant.entry(key:'buildTag',value:env.BUILD_TAG)
             ant.entry(key:'buildUrl',value:env.BUILD_URL)
+            ant.entry(key:'jobName',value:env.JOB_NAME)
             ant.entry(key:'gitBranch',value:env.GIT_BRANCH)
             ant.entry(key:'gitCommit',value:env.GIT_COMMIT)
             ant.entry(key:'dateTime',value:startDateTimeString)

@@ -38,6 +38,7 @@ public final class TerasologyLauncherVersion {
     private static final String BUILD_ID = "buildId";
     private static final String BUILD_TAG = "buildTag";
     private static final String BUILD_URL = "buildUrl";
+    private static final String JOB_NAME = "jobName";
     private static final String GIT_BRANCH = "gitBranch";
     private static final String GIT_COMMIT = "gitCommit";
     private static final String DATE_TIME = "dateTime";
@@ -48,6 +49,7 @@ public final class TerasologyLauncherVersion {
     private final String buildId;
     private final String buildTag;
     private final String buildUrl;
+    private final String jobName;
     private final String gitBranch;
     private final String gitCommit;
     private final String dateTime;
@@ -77,6 +79,7 @@ public final class TerasologyLauncherVersion {
         buildId = properties.getProperty(BUILD_ID, DEFAULT_VALUE);
         buildTag = properties.getProperty(BUILD_TAG, DEFAULT_VALUE);
         buildUrl = properties.getProperty(BUILD_URL, DEFAULT_VALUE);
+        jobName = properties.getProperty(JOB_NAME, DEFAULT_VALUE);
         gitBranch = properties.getProperty(GIT_BRANCH, DEFAULT_VALUE);
         gitCommit = properties.getProperty(GIT_COMMIT, DEFAULT_VALUE);
         dateTime = properties.getProperty(DATE_TIME, DEFAULT_VALUE);
@@ -98,6 +101,10 @@ public final class TerasologyLauncherVersion {
         toStringBuilder.append(BUILD_URL);
         toStringBuilder.append("=");
         toStringBuilder.append(buildUrl);
+        toStringBuilder.append(", ");
+        toStringBuilder.append(JOB_NAME);
+        toStringBuilder.append("=");
+        toStringBuilder.append(jobName);
         toStringBuilder.append(", ");
         toStringBuilder.append(GIT_BRANCH);
         toStringBuilder.append("=");
@@ -135,6 +142,10 @@ public final class TerasologyLauncherVersion {
 
     public String getBuildUrl() {
         return buildUrl;
+    }
+
+    public String getJobName() {
+        return jobName;
     }
 
     public String getGitBranch() {
