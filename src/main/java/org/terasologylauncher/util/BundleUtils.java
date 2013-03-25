@@ -21,11 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.terasologylauncher.Languages;
 
 import javax.imageio.ImageIO;
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -76,18 +74,8 @@ public final class BundleUtils {
         return ImageIO.read(BundleUtils.class.getResourceAsStream(imagePath));
     }
 
-    public static void playSound(final String key) {
+    public static AudioInputStream getSound(final String key) throws IOException, UnsupportedAudioFileException {
         final String audioPath = ResourceBundle.getBundle(AUDIO_BUNDLE, Languages.getCurrentLocale()).getString(key);
-
-        try {
-            AudioInputStream ais = AudioSystem.getAudioInputStream(BundleUtils.class.getResourceAsStream(audioPath));
-            AudioFormat format = ais.getFormat();
-            DataLine.Info info = new DataLine.Info(Clip.class, format);
-            Clip clip = (Clip) AudioSystem.getLine(info);
-            clip.open(ais);
-            clip.start();
-        } catch (Exception e) {
-            logger.error("Failed to play sound {}", key, e);
-        }
+        return AudioSystem.getAudioInputStream(BundleUtils.class.getResourceAsStream(audioPath));
     }
 }
