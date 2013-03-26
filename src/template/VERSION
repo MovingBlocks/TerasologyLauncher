@@ -1,13 +1,6 @@
 TerasologyLauncher - Version
 ============================
 
-Jenkins:
-  URL: ${buildUrl}
-  Build number: ${buildNumber}
-GIT branch: ${gitBranch}
+Version:    ${displayVersion}
 Created at: ${dateTime}
-
-https://github.com/MovingBlocks/TerasologyLauncher
-http://jenkins.movingblocks.net/job/TerasologyLauncher/
-http://forum.movingblocks.net/
-http://terasologyforum.de/
+Jenkins:    ${buildUrl}
