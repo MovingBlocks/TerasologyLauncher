@@ -30,6 +30,8 @@ ext {
     env = System.getenv() // read environment variables, including variables passed by jenking continuous integration server
     versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasologylauncher/version')
     versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
+    currentStableDisplayVersion = "0.1"
+    displayVersion = (env.JOB_NAME == 'TerasologyLauncherStable') ? currentStableDisplayVersion : ((env.JOB_NAME != null && env.BUILD_ID != null) ? currentStableDisplayVersion + ' (' + env.JOB_NAME + ', ' + env.BUILD_ID + ')' : currentStableDisplayVersion + ' (local development)')
 }
 
 repositories {
@@ -73,6 +75,7 @@ task createVersionInfoFile {
             ant.entry(key:'gitBranch',value:env.GIT_BRANCH)
             ant.entry(key:'gitCommit',value:env.GIT_COMMIT)
             ant.entry(key:'dateTime',value:startDateTimeString)
+            ant.entry(key:'displayVersion',value:displayVersion)
         }
     }
 }
@@ -87,7 +90,7 @@ jar {
     rename('logback_jar.xml', 'logback.xml')
     manifest {
         def manifestClasspath = configurations.runtime.collect { it.getName() }.join(" ")
-        attributes("Main-Class": mainClassName, "Class-Path" : manifestClasspath, "Implementation-Title": project.name, "Implementation-Version": env.BUILD_NUMBER + " " + env.GIT_BRANCH + " " + env.BUILD_ID)
+        attributes("Main-Class": mainClassName, "Class-Path" : manifestClasspath, "Implementation-Title": project.name, "Implementation-Version": displayVersion)
     }
 }
 
@@ -105,6 +108,6 @@ applicationDistribution.from ('NOTICE') {
 }
 
 applicationDistribution.from ('src/template/VERSION') {
-    expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: env.GIT_BRANCH, dateTime: startDateTimeString)
+    expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: env.GIT_BRANCH, dateTime: startDateTimeString, displayVersion: displayVersion)
     filter(FixCrLfFilter, eol:FixCrLfFilter.CrLf.newInstance("crlf"))
 }

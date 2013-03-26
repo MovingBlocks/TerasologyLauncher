@@ -42,6 +42,7 @@ public final class TerasologyLauncherVersion {
     private static final String GIT_BRANCH = "gitBranch";
     private static final String GIT_COMMIT = "gitCommit";
     private static final String DATE_TIME = "dateTime";
+    private static final String DISPLAY_VERSION = "displayVersion";
 
     private static final String DEFAULT_VALUE = "";
 
@@ -53,6 +54,7 @@ public final class TerasologyLauncherVersion {
     private final String gitBranch;
     private final String gitCommit;
     private final String dateTime;
+    private final String displayVersion;
     private final String toString;
 
     private TerasologyLauncherVersion() {
@@ -83,6 +85,7 @@ public final class TerasologyLauncherVersion {
         gitBranch = properties.getProperty(GIT_BRANCH, DEFAULT_VALUE);
         gitCommit = properties.getProperty(GIT_COMMIT, DEFAULT_VALUE);
         dateTime = properties.getProperty(DATE_TIME, DEFAULT_VALUE);
+        displayVersion = properties.getProperty(DISPLAY_VERSION, DEFAULT_VALUE);
 
         final StringBuilder toStringBuilder = new StringBuilder();
         toStringBuilder.append("[");
@@ -117,6 +120,10 @@ public final class TerasologyLauncherVersion {
         toStringBuilder.append(DATE_TIME);
         toStringBuilder.append("=");
         toStringBuilder.append(dateTime);
+        toStringBuilder.append(", ");
+        toStringBuilder.append(DISPLAY_VERSION);
+        toStringBuilder.append("=");
+        toStringBuilder.append(displayVersion);
         toStringBuilder.append("]");
         toString = toStringBuilder.toString();
     }
@@ -158,6 +165,10 @@ public final class TerasologyLauncherVersion {
 
     public String getDateTime() {
         return dateTime;
+    }
+
+    public String getDisplayVersion() {
+        return displayVersion;
     }
 
     @Override
