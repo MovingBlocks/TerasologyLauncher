@@ -360,7 +360,6 @@ public class LauncherFrame extends JFrame implements ActionListener {
      * "screens" and "launcher".
      *
      * @param f the file to check
-     *
      * @return true if the file can be deleted
      */
     private boolean canBeDeleted(final File f) {
