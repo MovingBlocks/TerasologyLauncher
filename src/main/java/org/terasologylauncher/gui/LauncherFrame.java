@@ -325,7 +325,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
             System.exit(0);
         } else if (command.equals(START_ACTION)) {
             final TerasologyStarter terasologyStarter = new TerasologyStarter(terasologyDirectory, os,
-                settings.getMaximalMemory(), settings.getInitialMemory());
+                settings.getMaxHeapSize(), settings.getInitialHeapSize());
             if (terasologyStarter.startGame()) {
                 System.exit(0);
             } else {
