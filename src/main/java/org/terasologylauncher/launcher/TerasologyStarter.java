@@ -19,7 +19,7 @@ package org.terasologylauncher.launcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.updater.GameData;
-import org.terasologylauncher.util.Memory;
+import org.terasologylauncher.util.JavaHeapSize;
 import org.terasologylauncher.util.OperatingSystem;
 
 import java.io.File;
@@ -37,15 +37,15 @@ public final class TerasologyStarter {
 
     private final File terasologyDirectory;
     private final OperatingSystem os;
-    private final int maxMemoryId;
-    private final int initialMemoryId;
+    private final JavaHeapSize maxHeapSize;
+    private final JavaHeapSize initialHeapSize;
 
-    public TerasologyStarter(final File terasologyDirectory, final OperatingSystem os, final int maxMemoryId,
-                             final int initialMemoryId) {
+    public TerasologyStarter(final File terasologyDirectory, final OperatingSystem os, final JavaHeapSize maxHeapSize,
+                             final JavaHeapSize initialHeapSize) {
         this.terasologyDirectory = terasologyDirectory;
         this.os = os;
-        this.maxMemoryId = maxMemoryId;
-        this.initialMemoryId = initialMemoryId;
+        this.maxHeapSize = maxHeapSize;
+        this.initialHeapSize = initialHeapSize;
     }
 
     public boolean startGame() {
@@ -114,11 +114,11 @@ public final class TerasologyStarter {
 
     private List<String> createParameters() {
         final List<String> parameters = new ArrayList<String>();
-        // add maximal RAM parameter
-        parameters.add("-Xmx" + Memory.getMemoryFromId(maxMemoryId).getMemoryMB() + "m");
-        // add initial RAM parameter
-        if (initialMemoryId >= 0) {
-            parameters.add("-Xms" + Memory.getMemoryFromId(initialMemoryId).getMemoryMB() + "m");
+        if (initialHeapSize.isUsed()) {
+            parameters.add("-Xms" + initialHeapSize.getSizeParameter());
+        }
+        if (maxHeapSize.isUsed()) {
+            parameters.add("-Xmx" + maxHeapSize.getSizeParameter());
         }
         return parameters;
     }

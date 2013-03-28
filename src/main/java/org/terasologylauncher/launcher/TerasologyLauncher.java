@@ -32,11 +32,9 @@ import org.terasologylauncher.version.TerasologyGameVersion;
 import org.terasologylauncher.version.TerasologyLauncherVersion;
 
 import javax.swing.BorderFactory;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
-import javax.swing.JTextPane;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Frame;
@@ -164,7 +162,7 @@ public final class TerasologyLauncher {
         }
     }
 
-    private static final void showUpdateDialog(final SplashScreen splash, final LauncherUpdater updater) {
+    private static void showUpdateDialog(final SplashScreen splash, final LauncherUpdater updater) {
         Object[] options = {BundleUtils.getLabel("main_yes"), BundleUtils.getLabel("main_no")};
 
         final JPanel msgPanel = new JPanel(new BorderLayout());
@@ -177,6 +175,7 @@ public final class TerasologyLauncher {
             builder.append("  ").append(BundleUtils.getLabel("message_update_current"));
             builder.append(TerasologyLauncherVersion.getInstance().getDisplayVersion()).append("\n");
             builder.append("  ").append(BundleUtils.getLabel("message_update_latest"));
+            // TODO mkalb: Replace with displayVersion and fix bug with missing job name
             builder.append(DownloadUtils.loadLatestSuccessfulVersion(TerasologyLauncherVersion.getInstance()
                 .getJobName()));
         } catch (DownloadException e) {
