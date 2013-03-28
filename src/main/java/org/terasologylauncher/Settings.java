@@ -18,6 +18,7 @@ package org.terasologylauncher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasologylauncher.util.JavaHeapSize;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,8 +38,8 @@ public final class Settings {
 
     public static final BuildType BUILD_TYPE_DEFAULT = BuildType.STABLE;
     public static final int BUILD_VERSION_LATEST = -1;
-    public static final int MAX_MEMORY_DEFAULT = 0;
-    public static final int INITIAL_MEMORY_NONE = -1;
+    public static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
+    public static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
 
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);
 
@@ -123,25 +124,29 @@ public final class Settings {
             properties.setProperty(key, String.valueOf(buildVersion));
         }
 
-        // maxMemory
-        final String maxMemoryStr = properties.getProperty("maxMemory");
-        int maxMemory = MAX_MEMORY_DEFAULT;
-        try {
-            maxMemory = Integer.parseInt(maxMemoryStr);
-        } catch (NumberFormatException e) {
-            logger.debug("Illegal MaxMemory! " + maxMemoryStr, e);
+        // max heap size
+        final String maxHeapSizeStr = properties.getProperty("maxHeapSize");
+        JavaHeapSize maxJavaHeapSize = MAX_HEAP_SIZE_DEFAULT;
+        if (maxHeapSizeStr != null) {
+            try {
+                maxJavaHeapSize = JavaHeapSize.valueOf(maxHeapSizeStr);
+            } catch (IllegalArgumentException e) {
+                logger.debug("Illegal JavaHeapSize! " + maxHeapSizeStr, e);
+            }
         }
-        properties.setProperty("maxMemory", String.valueOf(maxMemory));
+        properties.setProperty("maxHeapSize", maxJavaHeapSize.name());
 
-        // initialMemory
-        final String initialMemoryStr = properties.getProperty("initialMemory");
-        int initialMemory = INITIAL_MEMORY_NONE;
-        try {
-            initialMemory = Integer.parseInt(initialMemoryStr);
-        } catch (NumberFormatException e) {
-            logger.debug("Illegal InitialMemory! " + initialMemoryStr, e);
+        // initial heap size
+        final String initialHeapSizeStr = properties.getProperty("initialHeapSize");
+        JavaHeapSize initialJavaHeapSize = INITIAL_HEAP_SIZE_DEFAULT;
+        if (initialHeapSizeStr != null) {
+            try {
+                initialJavaHeapSize = JavaHeapSize.valueOf(initialHeapSizeStr);
+            } catch (IllegalArgumentException e) {
+                logger.debug("Illegal JavaHeapSize! " + initialHeapSizeStr, e);
+            }
         }
-        properties.setProperty("initialMemory", String.valueOf(initialMemory));
+        properties.setProperty("initialHeapSize", initialJavaHeapSize.name());
     }
 
     /*============================== Settings access ================================*/
@@ -176,26 +181,20 @@ public final class Settings {
         return BUILD_VERSION_LATEST == getBuildVersion(buildType);
     }
 
-    public synchronized void setMaximalMemory(final int maxMemory) {
-        properties.setProperty("maxMemory", String.valueOf(maxMemory));
+    public synchronized void setMaxHeapSize(final JavaHeapSize maxHeapSize) {
+        properties.setProperty("maxHeapSize", maxHeapSize.name());
     }
 
-    /**
-     * @return the option id of the memory object.
-     */
-    public synchronized int getMaximalMemory() {
-        return Integer.parseInt(properties.getProperty("maxMemory"));
+    public synchronized JavaHeapSize getMaxHeapSize() {
+        return JavaHeapSize.valueOf(properties.getProperty("maxHeapSize"));
     }
 
-    public synchronized void setInitialMemory(final int initialMemory) {
-        properties.setProperty("initialMemory", String.valueOf(initialMemory));
+    public synchronized void setInitialHeapSize(final JavaHeapSize initialHeapSize) {
+        properties.setProperty("initialHeapSize", initialHeapSize.name());
     }
 
-    /**
-     * @return the option id of the memory object or -1 for "None".
-     */
-    public synchronized int getInitialMemory() {
-        return Integer.parseInt(properties.getProperty("initialMemory"));
+    public synchronized JavaHeapSize getInitialHeapSize() {
+        return JavaHeapSize.valueOf(properties.getProperty("initialHeapSize"));
     }
 
     @Override
