@@ -61,11 +61,6 @@ public class SettingsMenu extends JDialog implements ActionListener {
 
     private static final String MAX_MEM_ACTION = "maxMem";
 
-    private static final String OPEN_LOG_DIR_ACTION = "openLogs";
-    private static final String OPEN_MOD_DIR_ACTION = "openMods";
-    private static final String OPEN_SAVED_DIR_ACTION = "openSaved";
-    private static final String OPEN_SCREENS_DIR_ACTION = "openScreens";
-
     private JComboBox buildTypeBox;
     private JComboBox buildVersionStableBox;
     private JComboBox buildVersionNightlyBox;
@@ -92,6 +87,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
         populateMaxMemory();
         populateInitialMemory();
         populateLanguage();
+
+        pack();
     }
 
     private void initComponents() {
