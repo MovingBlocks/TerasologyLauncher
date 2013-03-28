@@ -25,11 +25,20 @@ import org.terasologylauncher.gui.SplashScreen;
 import org.terasologylauncher.updater.LauncherUpdater;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
+import org.terasologylauncher.util.DownloadException;
+import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyGameVersion;
 import org.terasologylauncher.version.TerasologyLauncherVersion;
 
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
@@ -125,18 +134,8 @@ public final class TerasologyLauncher {
             if (updater.updateAvailable()) {
                 logger.info("Launcher update available!");
                 splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
-                int option = JOptionPane.showConfirmDialog(null,
-                    BundleUtils.getLabel("message_update_launcher"),
-                    BundleUtils.getLabel("message_update_launcher_title"),
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE);
 
-                splash.setVisible(true);
-
-                if (option == 0) {
-                    splash.getInfoLabel().setText("Updating the launcher ... please wait.");
-                    updater.update();
-                }
+                showUpdateDialog(splash, updater);
             }
 
             // Game versions
@@ -162,6 +161,51 @@ public final class TerasologyLauncher {
                 BundleUtils.getLabel("message_error_title"),
                 JOptionPane.ERROR_MESSAGE);
             System.exit(1);
+        }
+    }
+
+    private static final void showUpdateDialog(final SplashScreen splash, final LauncherUpdater updater) {
+        Object[] options = {BundleUtils.getLabel("main_yes"), BundleUtils.getLabel("main_no")};
+
+        final JPanel msgPanel = new JPanel(new BorderLayout());
+        final JTextArea msgLabel = new JTextArea(BundleUtils.getLabel("message_update_launcher"));
+        msgLabel.setBackground(msgPanel.getBackground());
+        msgLabel.setEditable(false);
+
+        final StringBuilder builder = new StringBuilder();
+        try {
+            builder.append("  ").append(BundleUtils.getLabel("message_update_current"));
+            builder.append(TerasologyLauncherVersion.getInstance().getDisplayVersion()).append("\n");
+            builder.append("  ").append(BundleUtils.getLabel("message_update_latest"));
+            builder.append(DownloadUtils.loadLatestSuccessfulVersion(TerasologyLauncherVersion.getInstance()
+                .getJobName()));
+        } catch (DownloadException e) {
+            logger.warn("Could not read upstream version.", e);
+        }
+
+        final JTextArea msgArea = new JTextArea();
+        msgArea.setText(builder.toString());
+        msgArea.setOpaque(false);
+        msgArea.setEditable(false);
+        msgArea.setBackground(msgPanel.getBackground());
+        msgArea.setCaretPosition(msgArea.getText().length());
+        msgArea.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+
+        msgPanel.add(msgLabel, BorderLayout.PAGE_START);
+        msgPanel.add(msgArea, BorderLayout.CENTER);
+
+        int option = JOptionPane.showOptionDialog(null,
+            msgPanel,
+            BundleUtils.getLabel("message_update_launcher_title"),
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+            null, options, options[0]);
+
+        splash.setVisible(true);
+
+        if (option == 0) {
+            splash.getInfoLabel().setText("Updating the launcher ... please wait.");
+            updater.update();
         }
     }
 

@@ -25,6 +25,7 @@ import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyGameVersion;
+import org.terasologylauncher.version.TerasologyLauncherVersion;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -83,6 +84,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
     private JLabel forums;
     private JLabel issues;
     private JLabel mods;
+
+    private JLabel version;
 
     private JPanel topPanel;
     private JPanel updatePanel;
@@ -196,6 +199,13 @@ public class LauncherFrame extends JFrame implements ActionListener {
         logo.setBounds(8, 0, 400, 96);
         logo.setIcon(BundleUtils.getImageIcon("logo"));
 
+        // Launcher version info label
+        version = new JLabel(TerasologyLauncherVersion.getInstance().getDisplayVersion());
+        version.setFont(version.getFont().deriveFont(12f));
+        version.setForeground(Color.WHITE);
+        version.setBounds(FRAME_WIDTH - 32 - 16 - xShift, 0, 32, 32);
+        version.setText(TerasologyLauncherVersion.getInstance().getDisplayVersion());
+
         // Forums link
         forums = new LinkJLabel(BundleUtils.getLabel("launcher_forum"), BundleUtils.getURI("terasology_forum"));
         forums.setFont(forums.getFont().deriveFont(24f));
@@ -262,6 +272,8 @@ public class LauncherFrame extends JFrame implements ActionListener {
         contentPane.add(forums);
         contentPane.add(issues);
         contentPane.add(mods);
+
+        contentPane.add(version);
 
         contentPane.add(startButton);
         contentPane.add(settingsButton);
