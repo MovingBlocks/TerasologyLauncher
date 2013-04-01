@@ -18,7 +18,7 @@ package org.terasologylauncher.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasologylauncher.version.TerasologyLauncherVersion;
+import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -115,13 +115,14 @@ public final class DownloadUtils {
         return version;
     }
 
-    public static TerasologyLauncherVersion loadTerasologyLauncherVersion(final String jobName, final Integer version)
+    public static TerasologyLauncherVersionInfo loadTerasologyLauncherVersionInfo(final String jobName,
+                                                                                  final Integer version)
         throws DownloadException {
         URL urlVersionInfo = null;
-        TerasologyLauncherVersion versionInfo = null;
+        TerasologyLauncherVersionInfo versionInfo = null;
         try {
             urlVersionInfo = DownloadUtils.getDownloadURL(jobName, version, FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
-            versionInfo = TerasologyLauncherVersion.loadFromInputStream(urlVersionInfo.openStream());
+            versionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
         } catch (MalformedURLException e) {
             throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
         } catch (IOException e) {

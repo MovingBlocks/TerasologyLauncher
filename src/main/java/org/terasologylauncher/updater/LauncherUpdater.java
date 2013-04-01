@@ -23,7 +23,7 @@ import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.DownloadException;
 import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.FileUtils;
-import org.terasologylauncher.version.TerasologyLauncherVersion;
+import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.JOptionPane;
 import java.io.File;
@@ -39,7 +39,7 @@ public final class LauncherUpdater {
     private final String currentVersion;
     private final String jobName;
     private Integer upstreamVersion;
-    private TerasologyLauncherVersion versionInfo;
+    private TerasologyLauncherVersionInfo versionInfo;
 
     public LauncherUpdater(final File applicationDir, final String currentVersion, final String jobName) {
         this.applicationDir = applicationDir;
@@ -72,7 +72,7 @@ public final class LauncherUpdater {
             logger.debug("Current Version: {}, Upstream Version: {}", currentVersion, upstreamVersion);
             if (Integer.parseInt(currentVersion) < upstreamVersion) {
                 updateAvailable = true;
-                versionInfo = DownloadUtils.loadTerasologyLauncherVersion(jobName, upstreamVersion);
+                versionInfo = DownloadUtils.loadTerasologyLauncherVersionInfo(jobName, upstreamVersion);
             }
         } catch (NumberFormatException e) {
             logger.error("Could not parse current version! " + currentVersion, e);
@@ -137,7 +137,7 @@ public final class LauncherUpdater {
         return upstreamVersion;
     }
 
-    public TerasologyLauncherVersion getVersionInfo() {
+    public TerasologyLauncherVersionInfo getVersionInfo() {
         return versionInfo;
     }
 }

@@ -26,11 +26,11 @@ import java.util.Properties;
 /**
  * @author Mathias Kalb
  */
-public final class TerasologyLauncherVersion {
+public final class TerasologyLauncherVersionInfo {
 
-    private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncherVersion.class);
+    private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncherVersionInfo.class);
 
-    private static TerasologyLauncherVersion instance;
+    private static TerasologyLauncherVersionInfo instance;
 
     private static final String VERSION_INFO_FILE = "versionInfo.properties";
 
@@ -57,7 +57,7 @@ public final class TerasologyLauncherVersion {
     private final String displayVersion;
     private final String toString;
 
-    private TerasologyLauncherVersion(final Properties versionInfoProperties) {
+    private TerasologyLauncherVersionInfo(final Properties versionInfoProperties) {
         final Properties properties;
         if (versionInfoProperties != null) {
             properties = versionInfoProperties;
@@ -136,15 +136,15 @@ public final class TerasologyLauncherVersion {
         return properties;
     }
 
-    public static TerasologyLauncherVersion getInstance() {
+    public static TerasologyLauncherVersionInfo getInstance() {
         if (instance == null) {
-            instance = new TerasologyLauncherVersion(null);
+            instance = new TerasologyLauncherVersionInfo(null);
         }
         return instance;
     }
 
-    public static TerasologyLauncherVersion loadFromInputStream(final InputStream inStream) {
-        return new TerasologyLauncherVersion(loadPropertiesFromInputStream(inStream));
+    public static TerasologyLauncherVersionInfo loadFromInputStream(final InputStream inStream) {
+        return new TerasologyLauncherVersionInfo(loadPropertiesFromInputStream(inStream));
     }
 
     public String getBuildNumber() {
