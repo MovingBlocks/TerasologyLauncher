@@ -25,11 +25,9 @@ import org.terasologylauncher.gui.SplashScreen;
 import org.terasologylauncher.updater.LauncherUpdater;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
-import org.terasologylauncher.util.DownloadException;
-import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyGameVersion;
-import org.terasologylauncher.version.TerasologyLauncherVersion;
+import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
@@ -60,8 +58,8 @@ public final class TerasologyLauncher {
             splash.setVisible(true);
             logger.debug("Show SplashScreen");
 
-            // TerasologyLauncherVersion
-            logger.debug("TerasologyLauncherVersion: {}", TerasologyLauncherVersion.getInstance().toString());
+            // TerasologyLauncherVersionInfo
+            logger.debug("TerasologyLauncherVersionInfo: {}", TerasologyLauncherVersionInfo.getInstance().toString());
 
             // Language
             Languages.init();
@@ -127,10 +125,11 @@ public final class TerasologyLauncher {
             // Launcher Update
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
             LauncherUpdater updater = new LauncherUpdater(applicationDir,
-                TerasologyLauncherVersion.getInstance().getBuildNumber(),
-                TerasologyLauncherVersion.getInstance().getJobName());
+                TerasologyLauncherVersionInfo.getInstance().getBuildNumber(),
+                TerasologyLauncherVersionInfo.getInstance().getJobName());
             if (updater.updateAvailable()) {
-                logger.info("Launcher update available!");
+                logger.info("Launcher update available! " + updater.getUpstreamVersion() + " "
+                    + updater.getVersionInfo());
                 splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
 
                 showUpdateDialog(splash, updater);
@@ -171,15 +170,16 @@ public final class TerasologyLauncher {
         msgLabel.setEditable(false);
 
         final StringBuilder builder = new StringBuilder();
-        try {
-            builder.append("  ").append(BundleUtils.getLabel("message_update_current"));
-            builder.append(TerasologyLauncherVersion.getInstance().getDisplayVersion()).append("\n");
-            builder.append("  ").append(BundleUtils.getLabel("message_update_latest"));
-            // TODO mkalb: Replace with displayVersion and fix bug with missing job name
-            builder.append(DownloadUtils.loadLatestSuccessfulVersion(TerasologyLauncherVersion.getInstance()
-                .getJobName()));
-        } catch (DownloadException e) {
-            logger.warn("Could not read upstream version.", e);
+        builder.append("  ");
+        builder.append(BundleUtils.getLabel("message_update_current"));
+        builder.append(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
+        builder.append("\n");
+        builder.append("  ");
+        builder.append(BundleUtils.getLabel("message_update_latest"));
+        if (updater.getVersionInfo() != null) {
+            builder.append(updater.getVersionInfo().getDisplayVersion());
+        } else if (updater.getUpstreamVersion() != null) {
+            builder.append(updater.getUpstreamVersion());
         }
 
         final JTextArea msgArea = new JTextArea();

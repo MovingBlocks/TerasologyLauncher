@@ -23,6 +23,7 @@ import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.DownloadException;
 import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.FileUtils;
+import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.JOptionPane;
 import java.io.File;
@@ -38,6 +39,7 @@ public final class LauncherUpdater {
     private final String currentVersion;
     private final String jobName;
     private Integer upstreamVersion;
+    private TerasologyLauncherVersionInfo versionInfo;
 
     public LauncherUpdater(final File applicationDir, final String currentVersion, final String jobName) {
         this.applicationDir = applicationDir;
@@ -62,16 +64,22 @@ public final class LauncherUpdater {
      * @return whether an update is available
      */
     public boolean updateAvailable() {
+        boolean updateAvailable = false;
+        upstreamVersion = null;
+        versionInfo = null;
         try {
             upstreamVersion = DownloadUtils.loadLatestStableVersion(jobName);
             logger.debug("Current Version: {}, Upstream Version: {}", currentVersion, upstreamVersion);
-            return Integer.parseInt(currentVersion) < upstreamVersion;
+            if (Integer.parseInt(currentVersion) < upstreamVersion) {
+                updateAvailable = true;
+                versionInfo = DownloadUtils.loadTerasologyLauncherVersionInfo(jobName, upstreamVersion);
+            }
         } catch (NumberFormatException e) {
             logger.error("Could not parse current version! " + currentVersion, e);
         } catch (DownloadException e) {
             logger.error("Could not load latest stable version!", e);
         }
-        return false;
+        return updateAvailable;
     }
 
     public void update() {
@@ -95,7 +103,8 @@ public final class LauncherUpdater {
             .getPath());
 
         try {
-            URL updateURL = DownloadUtils.getDownloadURL(jobName, upstreamVersion, "TerasologyLauncher.zip");
+            URL updateURL = DownloadUtils.getDownloadURL(jobName, upstreamVersion,
+                DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
 
             // download the latest zip file to tmp dir
 
@@ -122,5 +131,13 @@ public final class LauncherUpdater {
                 JOptionPane.ERROR_MESSAGE);
             logger.error("Aborting update process!");
         }
+    }
+
+    public Integer getUpstreamVersion() {
+        return upstreamVersion;
+    }
+
+    public TerasologyLauncherVersionInfo getVersionInfo() {
+        return versionInfo;
     }
 }
