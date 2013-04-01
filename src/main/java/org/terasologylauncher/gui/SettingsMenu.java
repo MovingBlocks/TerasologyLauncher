@@ -61,6 +61,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private static final String RESET_ACTION = "reset";
 
     private static final String MAX_HEAP_SIZE_ACTION = "maxHeapSize";
+    private static final String INITIAL_HEAP_SIZE_ACTION = "initialHeapSize";
 
     private JComboBox buildTypeBox;
     private JComboBox buildVersionStableBox;
@@ -186,6 +187,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
 
         initialHeapSizeBox = new JComboBox();
         initialHeapSizeBox.setFont(settingsFont);
+        initialHeapSizeBox.addActionListener(this);
+        initialHeapSizeBox.setActionCommand(INITIAL_HEAP_SIZE_ACTION);
 
         final GroupLayout gameTabLayout = new GroupLayout(gameSettingsTab);
         gameSettingsTab.setLayout(gameTabLayout);
@@ -460,6 +463,15 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
+    private void updateMaxHeapSizeBox() {
+        final JavaHeapSize initialHeapSize = (JavaHeapSize) initialHeapSizeBox.getSelectedItem();
+        final JavaHeapSize maxHeapSize = (JavaHeapSize) maxHeapSizeBox.getSelectedItem();
+
+        if ((initialHeapSize != null) && (maxHeapSize != null) && (maxHeapSize.compareTo(initialHeapSize) < 0)) {
+            maxHeapSizeBox.setSelectedItem(initialHeapSize);
+        }
+    }
+
     private void populateLanguage() {
         languageBox.removeAllItems();
         for (Locale locale : Languages.SUPPORTED_LOCALES) {
@@ -482,6 +494,8 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private void actionPerformed(final String actionCommand) {
         if (actionCommand.equals(MAX_HEAP_SIZE_ACTION)) {
             updateInitialHeapSizeBox();
+        } else if (actionCommand.equals(INITIAL_HEAP_SIZE_ACTION)) {
+            updateMaxHeapSizeBox();
         } else if (actionCommand.equals(CANCEL_ACTION)) {
             dispose();
             setVisible(false);
@@ -520,7 +534,6 @@ public class SettingsMenu extends JDialog implements ActionListener {
             }
 
             // save heap size settings
-            updateInitialHeapSizeBox();
             settings.setMaxHeapSize((JavaHeapSize) maxHeapSizeBox.getSelectedItem());
             settings.setInitialHeapSize((JavaHeapSize) initialHeapSizeBox.getSelectedItem());
 
