@@ -98,7 +98,7 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         URL url;
         File file;
         try {
-            url = DownloadUtils.getDownloadURL(jobName, version, ZIP_FILE);
+            url = DownloadUtils.getDownloadURL(jobName, version, DownloadUtils.FILE_TERASOLOGY_GAME_ZIP);
             final long dataSize = url.openConnection().getContentLength() / 1024 / 1024;
 
             InputStream in = null;
