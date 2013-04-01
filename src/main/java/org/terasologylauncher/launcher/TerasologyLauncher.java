@@ -25,8 +25,6 @@ import org.terasologylauncher.gui.SplashScreen;
 import org.terasologylauncher.updater.LauncherUpdater;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
-import org.terasologylauncher.util.DownloadException;
-import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyGameVersion;
 import org.terasologylauncher.version.TerasologyLauncherVersion;
@@ -130,7 +128,8 @@ public final class TerasologyLauncher {
                 TerasologyLauncherVersion.getInstance().getBuildNumber(),
                 TerasologyLauncherVersion.getInstance().getJobName());
             if (updater.updateAvailable()) {
-                logger.info("Launcher update available!");
+                logger.info("Launcher update available! " + updater.getUpstreamVersion() + " "
+                    + updater.getVersionInfo());
                 splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
 
                 showUpdateDialog(splash, updater);
@@ -171,15 +170,16 @@ public final class TerasologyLauncher {
         msgLabel.setEditable(false);
 
         final StringBuilder builder = new StringBuilder();
-        try {
-            builder.append("  ").append(BundleUtils.getLabel("message_update_current"));
-            builder.append(TerasologyLauncherVersion.getInstance().getDisplayVersion()).append("\n");
-            builder.append("  ").append(BundleUtils.getLabel("message_update_latest"));
-            // TODO mkalb: Replace with displayVersion and fix bug with missing job name
-            builder.append(DownloadUtils.loadLatestSuccessfulVersion(TerasologyLauncherVersion.getInstance()
-                .getJobName()));
-        } catch (DownloadException e) {
-            logger.warn("Could not read upstream version.", e);
+        builder.append("  ");
+        builder.append(BundleUtils.getLabel("message_update_current"));
+        builder.append(TerasologyLauncherVersion.getInstance().getDisplayVersion());
+        builder.append("\n");
+        builder.append("  ");
+        builder.append(BundleUtils.getLabel("message_update_latest"));
+        if (updater.getVersionInfo() != null) {
+            builder.append(updater.getVersionInfo().getDisplayVersion());
+        } else if (updater.getUpstreamVersion() != null) {
+            builder.append(updater.getUpstreamVersion());
         }
 
         final JTextArea msgArea = new JTextArea();

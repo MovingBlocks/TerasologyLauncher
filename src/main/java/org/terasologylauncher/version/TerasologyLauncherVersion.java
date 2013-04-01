@@ -57,24 +57,12 @@ public final class TerasologyLauncherVersion {
     private final String displayVersion;
     private final String toString;
 
-    private TerasologyLauncherVersion() {
-        final Properties properties = new Properties();
-        final InputStream inStream = this.getClass().getResourceAsStream(VERSION_INFO_FILE);
-        if (inStream != null) {
-            try {
-                properties.load(inStream);
-            } catch (final IOException e) {
-                logger.error("Loading file failed", e);
-            } finally {
-                // JAVA7 : cleanup
-                try {
-                    if (inStream != null) {
-                        inStream.close();
-                    }
-                } catch (final IOException e) {
-                    logger.info("Closing file failed", e);
-                }
-            }
+    private TerasologyLauncherVersion(final Properties versionInfoProperties) {
+        final Properties properties;
+        if (versionInfoProperties != null) {
+            properties = versionInfoProperties;
+        } else {
+            properties = loadPropertiesFromInputStream(this.getClass().getResourceAsStream(VERSION_INFO_FILE));
         }
 
         buildNumber = properties.getProperty(BUILD_NUMBER, DEFAULT_VALUE);
@@ -128,11 +116,35 @@ public final class TerasologyLauncherVersion {
         toString = toStringBuilder.toString();
     }
 
+    private static Properties loadPropertiesFromInputStream(final InputStream inStream) {
+        final Properties properties = new Properties();
+        if (inStream != null) {
+            try {
+                properties.load(inStream);
+            } catch (final IOException e) {
+                logger.error("Loading version info failed!", e);
+            } finally {
+                // JAVA7 : cleanup
+                try {
+                    inStream.close();
+                } catch (final IOException e) {
+                    logger.info("Closing InputStream failed!", e);
+                }
+            }
+        }
+
+        return properties;
+    }
+
     public static TerasologyLauncherVersion getInstance() {
         if (instance == null) {
-            instance = new TerasologyLauncherVersion();
+            instance = new TerasologyLauncherVersion(null);
         }
         return instance;
+    }
+
+    public static TerasologyLauncherVersion loadFromInputStream(final InputStream inStream) {
+        return new TerasologyLauncherVersion(loadPropertiesFromInputStream(inStream));
     }
 
     public String getBuildNumber() {
