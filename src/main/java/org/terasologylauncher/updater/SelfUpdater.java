@@ -45,7 +45,7 @@ public final class SelfUpdater {
      * @param temporaryUpdateDir - where the downloaded files are located
      * @param launcherFile       - where the launcher is located
      */
-    public static void runUpdate(File temporaryUpdateDir, File launcherFile) {
+    public static void runUpdate(final File temporaryUpdateDir, final File launcherFile) {
         List<String> arguments = new ArrayList<String>();
 
         String separator = System.getProperty("file.separator");
@@ -76,7 +76,7 @@ public final class SelfUpdater {
         System.exit(0);
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         logger.info("Running self updater.");
 
         String launcherLocation = args[0];

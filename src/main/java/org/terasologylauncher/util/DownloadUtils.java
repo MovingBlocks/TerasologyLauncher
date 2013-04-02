@@ -60,9 +60,9 @@ public final class DownloadUtils {
      * @param file        - where to store downloaded file
      * @throws IOException
      */
-    public static void downloadToFile(URL downloadURL, File file) throws IOException {
-        InputStream in = downloadURL.openStream();
-        OutputStream out = new FileOutputStream(file);
+    public static void downloadToFile(final URL downloadURL, final File file) throws IOException {
+        final InputStream in = downloadURL.openStream();
+        final OutputStream out = new FileOutputStream(file);
         final byte[] buffer = new byte[2048];
 
         int n;
@@ -72,12 +72,8 @@ public final class DownloadUtils {
 
         // TODO try/catch/finally and close
 
-        if (in != null) {
-            in.close();
-        }
-        if (out != null) {
-            out.close();
-        }
+        in.close();
+        out.close();
     }
 
     public static int loadLatestStableVersion(final String jobName) throws DownloadException {

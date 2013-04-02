@@ -68,7 +68,7 @@ public enum JavaHeapSize {
         return BundleUtils.getLabel(labelKey);
     }
 
-    public static final List<JavaHeapSize> getHeapSizes(final long totalPhysicalMemorySize, final boolean bit64) {
+    public static List<JavaHeapSize> getHeapSizes(final long totalPhysicalMemorySize, final boolean bit64) {
         final List<JavaHeapSize> heapSizes = new ArrayList<JavaHeapSize>();
 
         for (final JavaHeapSize heapSize : JavaHeapSize.values()) {
