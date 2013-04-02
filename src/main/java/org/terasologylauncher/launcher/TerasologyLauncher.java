@@ -124,7 +124,7 @@ public final class TerasologyLauncher {
 
             // Launcher Update
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
-            LauncherUpdater updater = new LauncherUpdater(applicationDir,
+            final LauncherUpdater updater = new LauncherUpdater(applicationDir,
                 TerasologyLauncherVersionInfo.getInstance().getBuildNumber(),
                 TerasologyLauncherVersionInfo.getInstance().getJobName());
             if (updater.updateAvailable()) {
@@ -162,7 +162,7 @@ public final class TerasologyLauncher {
     }
 
     private static void showUpdateDialog(final SplashScreen splash, final LauncherUpdater updater) {
-        Object[] options = {BundleUtils.getLabel("main_yes"), BundleUtils.getLabel("main_no")};
+        final Object[] options = {BundleUtils.getLabel("main_yes"), BundleUtils.getLabel("main_no")};
 
         final JPanel msgPanel = new JPanel(new BorderLayout());
         final JTextArea msgLabel = new JTextArea(BundleUtils.getLabel("message_update_launcher"));
@@ -193,7 +193,7 @@ public final class TerasologyLauncher {
         msgPanel.add(msgLabel, BorderLayout.PAGE_START);
         msgPanel.add(msgArea, BorderLayout.CENTER);
 
-        int option = JOptionPane.showOptionDialog(null,
+        final int option = JOptionPane.showOptionDialog(null,
             msgPanel,
             BundleUtils.getLabel("message_update_launcher_title"),
             JOptionPane.DEFAULT_OPTION,

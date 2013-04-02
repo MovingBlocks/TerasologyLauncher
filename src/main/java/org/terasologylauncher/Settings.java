@@ -151,7 +151,7 @@ public final class Settings {
 
     /*============================== Settings access ================================*/
 
-    public synchronized void setLocale(Locale locale) {
+    public synchronized void setLocale(final Locale locale) {
         properties.setProperty("locale", locale.toString());
     }
 

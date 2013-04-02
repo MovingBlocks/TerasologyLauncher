@@ -32,11 +32,11 @@ public final class AudioUtils {
     private AudioUtils() {
     }
 
-    public static void play(AudioInputStream audioStream) {
+    public static void play(final AudioInputStream audioStream) {
         try {
-            AudioFormat format = audioStream.getFormat();
-            DataLine.Info info = new DataLine.Info(Clip.class, format);
-            Clip clip = (Clip) AudioSystem.getLine(info);
+            final AudioFormat format = audioStream.getFormat();
+            final DataLine.Info info = new DataLine.Info(Clip.class, format);
+            final Clip clip = (Clip) AudioSystem.getLine(info);
             clip.open(audioStream);
             clip.start();
         } catch (Exception e) {

@@ -99,16 +99,16 @@ public final class LauncherUpdater {
         // TODO: handle different executable types?
 
         // Get current launcher location
-        File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation()
-            .getPath());
+        final File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource()
+            .getLocation().getPath());
 
         try {
-            URL updateURL = DownloadUtils.getDownloadURL(jobName, upstreamVersion,
+            final URL updateURL = DownloadUtils.getDownloadURL(jobName, upstreamVersion,
                 DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
 
             // download the latest zip file to tmp dir
 
-            File downloadedZipFile = new File(temporaryUpdateDir, "TerasologyLauncher.zip");
+            final File downloadedZipFile = new File(temporaryUpdateDir, "TerasologyLauncher.zip");
             DownloadUtils.downloadToFile(updateURL, downloadedZipFile);
 
             // Extract ZIP file

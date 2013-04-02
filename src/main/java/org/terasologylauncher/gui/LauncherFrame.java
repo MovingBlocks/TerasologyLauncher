@@ -38,7 +38,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -301,14 +300,14 @@ public class LauncherFrame extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(final ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
-            action(e.getActionCommand(), (JComponent) e.getSource());
+            action(e.getActionCommand());
         }
     }
 
-    private void action(final String command, final Component component) {
+    private void action(final String command) {
         if (command.equals(SETTINGS_ACTION)) {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-                settingsMenu = new SettingsMenu(settings, gameVersion);
+                settingsMenu = new SettingsMenu(terasologyDirectory, settings, gameVersion);
                 settingsMenu.setModal(true);
                 settingsMenu.setVisible(true);
                 settingsMenu.addWindowListener(new WindowAdapter() {

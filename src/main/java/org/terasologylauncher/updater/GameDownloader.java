@@ -53,7 +53,6 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
 
     private final JProgressBar progressBar;
     private final LauncherFrame frame;
-
     private final Settings settings;
     private final File terasologyDirectory;
     private final TerasologyGameVersion gameVersion;
