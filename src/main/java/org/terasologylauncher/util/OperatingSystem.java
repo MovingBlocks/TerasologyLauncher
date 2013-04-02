@@ -49,6 +49,9 @@ public enum OperatingSystem {
             || (this == WINDOWS_UNKNOWN);
     }
 
+    /**
+     * Should only be executed once at the start.
+     */
     public static OperatingSystem getOS() {
         OperatingSystem best = UNKNOWN;
         final String os = System.getProperty("os.name").toLowerCase();

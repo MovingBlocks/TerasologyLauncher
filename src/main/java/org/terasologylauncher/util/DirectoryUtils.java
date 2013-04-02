@@ -43,7 +43,7 @@ public final class DirectoryUtils {
     private DirectoryUtils() {
     }
 
-    public static void checkDirectory(File directory) throws IOException {
+    public static void checkDirectory(final File directory) throws IOException {
         if (!directory.exists() && !directory.mkdirs()) {
             throw new IOException("Can not create directory! " + directory);
         }
@@ -57,6 +57,9 @@ public final class DirectoryUtils {
         }
     }
 
+    /**
+     * Should only be executed once at the start.
+     */
     public static File getApplicationDirectory(final OperatingSystem os) {
         final String userHome = System.getProperty("user.home", ".");
         File applicationDirectory;

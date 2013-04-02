@@ -24,7 +24,6 @@ import org.terasologylauncher.Settings;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.JavaHeapSize;
-import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyGameVersion;
 
 import javax.swing.GroupLayout;
@@ -70,10 +69,13 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private JComboBox initialHeapSizeBox;
     private JComboBox languageBox;
 
+    private final File terasologyDirectory;
     private final Settings settings;
     private final TerasologyGameVersion gameVersion;
 
-    public SettingsMenu(final Settings settings, final TerasologyGameVersion gameVersion) {
+    public SettingsMenu(final File terasologyDirectory, final Settings settings,
+                        final TerasologyGameVersion gameVersion) {
+        this.terasologyDirectory = terasologyDirectory;
         this.settings = settings;
         this.gameVersion = gameVersion;
 
@@ -257,8 +259,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         openLogDir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final File logDir = new File(DirectoryUtils.getApplicationDirectory(OperatingSystem.getOS()),
-                    DirectoryUtils.LOGS_DIR_NAME);
+                final File logDir = new File(terasologyDirectory, DirectoryUtils.LOGS_DIR_NAME);
                 DirectoryUtils.showInFileManager(logDir);
             }
         });
@@ -270,8 +271,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         openSavedWorldsDir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final File savesDir = new File(DirectoryUtils.getApplicationDirectory(OperatingSystem.getOS()),
-                    DirectoryUtils.SAVED_WORLDS_DIR_NAME);
+                final File savesDir = new File(terasologyDirectory, DirectoryUtils.SAVED_WORLDS_DIR_NAME);
                 DirectoryUtils.showInFileManager(savesDir);
             }
         });
@@ -283,8 +283,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         openScreenShotsDir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final File screensDir = new File(DirectoryUtils.getApplicationDirectory(OperatingSystem.getOS()),
-                    DirectoryUtils.SCREENSHOTS_DIR_NAME);
+                final File screensDir = new File(terasologyDirectory, DirectoryUtils.SCREENSHOTS_DIR_NAME);
                 DirectoryUtils.showInFileManager(screensDir);
             }
         });
@@ -296,8 +295,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         openModsDir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final File modsDir = new File(DirectoryUtils.getApplicationDirectory(OperatingSystem.getOS()),
-                    DirectoryUtils.MODS_DIR_NAME);
+                final File modsDir = new File(terasologyDirectory, DirectoryUtils.MODS_DIR_NAME);
                 DirectoryUtils.showInFileManager(modsDir);
             }
         });
