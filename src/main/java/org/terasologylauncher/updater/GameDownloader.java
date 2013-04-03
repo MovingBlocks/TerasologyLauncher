@@ -21,14 +21,11 @@ import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
-import org.terasologylauncher.util.AudioUtils;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.FileUtils;
 import org.terasologylauncher.version.TerasologyGameVersion;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 import java.beans.PropertyChangeEvent;
@@ -157,17 +154,6 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         frame.updateStartButton();
 
         zip.delete();
-
-        // play sound when finished
-        AudioInputStream ais = null;
-        try {
-            ais = BundleUtils.getSound("downloadFinished");
-            AudioUtils.play(ais);
-        } catch (IOException e1) {
-            logger.error("Could not find/load audio file.", e1);
-        } catch (UnsupportedAudioFileException e1) {
-            logger.error("Audio file not supported." + ais, e1);
-        }
 
         progressBar.setVisible(false);
     }

@@ -21,9 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.terasologylauncher.Languages;
 
 import javax.imageio.ImageIO;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -40,7 +37,6 @@ public final class BundleUtils {
     private static final String LABELS_BUNDLE = "org.terasologylauncher.bundle.LabelsBundle";
     private static final String URI_BUNDLE = "org.terasologylauncher.bundle.URIBundle";
     private static final String IMAGE_BUNDLE = "org.terasologylauncher.bundle.ImageBundle";
-    private static final String AUDIO_BUNDLE = "org.terasologylauncher.bundle.AudioBundle";
 
     private BundleUtils() {
     }
@@ -72,10 +68,5 @@ public final class BundleUtils {
     public static BufferedImage getBufferedImage(final String key) throws IOException {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
         return ImageIO.read(BundleUtils.class.getResourceAsStream(imagePath));
-    }
-
-    public static AudioInputStream getSound(final String key) throws IOException, UnsupportedAudioFileException {
-        final String audioPath = ResourceBundle.getBundle(AUDIO_BUNDLE, Languages.getCurrentLocale()).getString(key);
-        return AudioSystem.getAudioInputStream(BundleUtils.class.getResourceAsStream(audioPath));
     }
 }
