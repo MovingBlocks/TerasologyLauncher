@@ -19,14 +19,13 @@ package org.terasologylauncher.updater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
+import org.terasologylauncher.util.DownloadUtils;
+import org.terasologylauncher.version.TerasologyGameVersionInfo;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
 
 /**
- * The GameData class provides access to information on the installed game version and type, if an internet connection
- * is available and whether the game could be updated to a newer version.
+ * The GameData class provides access to information on the installed game version and type.
  *
  * @author Skaldarnar
  */
@@ -34,10 +33,12 @@ public final class GameData {
 
     private static final Logger logger = LoggerFactory.getLogger(GameData.class);
 
-    private static File gameJar;
+    private static final String TERASOLOGY_JAR = "Terasology.jar";
 
+    private static File gameJar;
     private static BuildType installedBuildType;
     private static int installedBuildVersion = -1;
+    private static TerasologyGameVersionInfo versionInfo;
 
     private GameData() {
     }
@@ -48,48 +49,60 @@ public final class GameData {
 
     public static File getGameJar(final File terasologyDirectory) {
         if (gameJar == null) {
-            gameJar = new File(terasologyDirectory, "Terasology.jar");
+            gameJar = new File(terasologyDirectory, TERASOLOGY_JAR);
         }
         return gameJar;
     }
 
     public static BuildType getInstalledBuildType(final File terasologyDirectory) {
-        if (installedBuildType == null) {
+        if (versionInfo == null) {
             readVersionFile(terasologyDirectory);
         }
         return installedBuildType;
     }
 
     public static int getInstalledBuildVersion(final File terasologyDirectory) {
-        if (installedBuildVersion == -1) {
+        if (versionInfo == null) {
             readVersionFile(terasologyDirectory);
         }
         return installedBuildVersion;
     }
 
+    public static TerasologyGameVersionInfo getVersionInfo(final File terasologyDirectory) {
+        if (versionInfo == null) {
+            readVersionFile(terasologyDirectory);
+        }
+        return versionInfo;
+    }
+
     private static void readVersionFile(final File terasologyDirectory) {
-        // TODO Wrong version file. This is the human readable file. Replace with "versionInfo.properties"
-        try {
-            final File installedVersionFile = new File(terasologyDirectory, "VERSION");
-            if (installedVersionFile.isFile()) {
-                final Scanner scanner = new Scanner(installedVersionFile);
-                while (scanner.hasNextLine()) {
-                    final String line = scanner.nextLine();
-                    if (line.contains("Build number:")) {
-                        installedBuildVersion = Integer.parseInt(line.split(":")[1].trim());
-                    } else if (line.contains("GIT branch:")) {
-                        final String branch = line.split(":")[1].trim();
-                        if (branch.equals("develop")) {
-                            installedBuildType = BuildType.NIGHTLY;
-                        } else {
-                            installedBuildType = BuildType.STABLE;
-                        }
-                    }
-                }
-                scanner.close();
+        installedBuildType = null;
+        installedBuildVersion = -1;
+        versionInfo = TerasologyGameVersionInfo.loadFromJar(getGameJar(terasologyDirectory));
+
+        if ((versionInfo.getJobName() != null) && (versionInfo.getJobName().length() > 0)) {
+            if (versionInfo.getJobName().equals(DownloadUtils.TERASOLOGY_STABLE_JOB_NAME)) {
+                installedBuildType = BuildType.STABLE;
+            } else if (versionInfo.getJobName().equals(DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME)) {
+                installedBuildType = BuildType.NIGHTLY;
             }
-        } catch (FileNotFoundException e) {
-            logger.error("Could not read version file!", e);
+        }
+
+        if ((installedBuildType == null) && (versionInfo.getGitBranch() != null) &&
+            (versionInfo.getGitBranch().length() > 0)) {
+            if (versionInfo.getGitBranch().equals("master")) {
+                installedBuildType = BuildType.STABLE;
+            } else if (versionInfo.getGitBranch().equals("develop")) {
+                installedBuildType = BuildType.NIGHTLY;
+            }
+        }
+
+        if ((versionInfo.getBuildNumber() != null) && (versionInfo.getBuildNumber().length() > 0)) {
+            try {
+                installedBuildVersion = Integer.parseInt(versionInfo.getBuildNumber());
+            } catch (NumberFormatException e) {
+                logger.error("Could not parse build number! " + versionInfo.getBuildNumber(), e);
+            }
         }
     }
 
