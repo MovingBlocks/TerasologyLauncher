@@ -51,7 +51,7 @@ import java.io.File;
 /**
  * @author Skaldarnar
  */
-public class LauncherFrame extends JFrame implements ActionListener {
+public final class LauncherFrame extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 

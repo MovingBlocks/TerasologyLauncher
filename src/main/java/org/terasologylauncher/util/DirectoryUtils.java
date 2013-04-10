@@ -40,6 +40,8 @@ public final class DirectoryUtils {
     private static final String APPLICATION_DIR_NAME = "terasology";
     private static final Logger logger = LoggerFactory.getLogger(DirectoryUtils.class);
 
+    private static final String PROPERTY_USER_HOME = "user.home";
+
     private DirectoryUtils() {
     }
 
@@ -52,8 +54,8 @@ public final class DirectoryUtils {
             throw new IOException("Directory is not a directory! " + directory);
         }
 
-        if (!directory.canRead() || !directory.canWrite() || !directory.canExecute()) {
-            throw new IOException("Can not read/write/execute directory! " + directory);
+        if (!directory.canRead() || !directory.canWrite()) {
+            throw new IOException("Can not read from or write into directory! " + directory);
         }
     }
 
@@ -61,7 +63,7 @@ public final class DirectoryUtils {
      * Should only be executed once at the start.
      */
     public static File getApplicationDirectory(final OperatingSystem os) {
-        final String userHome = System.getProperty("user.home", ".");
+        final String userHome = System.getProperty(PROPERTY_USER_HOME, ".");
         File applicationDirectory;
 
         if (os.isUnix()) {
@@ -87,7 +89,7 @@ public final class DirectoryUtils {
             try {
                 Desktop.getDesktop().open(file);
             } catch (IOException e) {
-                logger.error("Could not open file {} in file manager.", file, e);
+                logger.error("Could not open file/directory '{}'.", file, e);
             }
         }
     }

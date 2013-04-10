@@ -56,7 +56,7 @@ public final class TerasologyStarter {
         } else if (os.isUnix()) {
             return startLinux();
         } else {
-            logger.error("Unknown operating system - cannot start game! {}", os);
+            logger.error("Unknown operating system '{}'. Cannot start game!", os);
         }
         return false;
     }
@@ -72,7 +72,7 @@ public final class TerasologyStarter {
         try {
             pb.start();
         } catch (IOException e) {
-            logger.error("Could not start game!", e);
+            logger.error("Could not start game with parameters '{}'!", parameters, e);
             return false;
         }
         return true;
@@ -89,7 +89,7 @@ public final class TerasologyStarter {
         try {
             pb.start();
         } catch (IOException e) {
-            logger.error("Could not start game!", e);
+            logger.error("Could not start game with parameters '{}'!", parameters, e);
             return false;
         }
         return true;
@@ -106,7 +106,7 @@ public final class TerasologyStarter {
         try {
             pb.start();
         } catch (IOException e) {
-            logger.error("Could not start game!", e);
+            logger.error("Could not start game with parameters '{}'!", parameters, e);
             return false;
         }
         return true;

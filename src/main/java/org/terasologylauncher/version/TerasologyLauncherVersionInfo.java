@@ -124,11 +124,10 @@ public final class TerasologyLauncherVersionInfo {
             } catch (final IOException e) {
                 logger.error("Loading version info failed!", e);
             } finally {
-                // JAVA7 : cleanup
                 try {
                     inStream.close();
                 } catch (final IOException e) {
-                    logger.info("Closing InputStream failed!", e);
+                    logger.warn("Closing InputStream failed!", e);
                 }
             }
         }
@@ -187,5 +186,4 @@ public final class TerasologyLauncherVersionInfo {
     public String toString() {
         return toString;
     }
-
 }
