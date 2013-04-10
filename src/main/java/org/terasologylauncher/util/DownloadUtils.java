@@ -20,13 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -39,6 +39,8 @@ public final class DownloadUtils {
 
     public static final String FILE_TERASOLOGY_GAME_ZIP = "distributions/Terasology.zip";
     public static final String FILE_TERASOLOGY_LAUNCHER_ZIP = "distributions/TerasologyLauncher.zip";
+    public static final String FILE_TERASOLOGY_GAME_VERSION_INFO =
+        "resources/main/org/terasology/version/versionInfo.properties";
     public static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO =
         "resources/main/org/terasologylauncher/version/versionInfo.properties";
 
@@ -58,22 +60,41 @@ public final class DownloadUtils {
      *
      * @param downloadURL - remote location of file to download
      * @param file        - where to store downloaded file
-     * @throws IOException
+     * @throws DownloadException
      */
-    public static void downloadToFile(final URL downloadURL, final File file) throws IOException {
-        final InputStream in = downloadURL.openStream();
-        final OutputStream out = new FileOutputStream(file);
-        final byte[] buffer = new byte[2048];
+    public static void downloadToFile(final URL downloadURL, final File file) throws DownloadException {
+        BufferedInputStream in = null;
+        BufferedOutputStream out = null;
+        try {
+            in = new BufferedInputStream(downloadURL.openStream());
+            out = new BufferedOutputStream(new FileOutputStream(file));
 
-        int n;
-        while ((n = in.read(buffer)) != -1) {
-            out.write(buffer, 0, n);
+            final byte[] buffer = new byte[2048];
+
+            int n;
+            while ((n = in.read(buffer)) != -1) {
+                out.write(buffer, 0, n);
+            }
+
+            out.flush();
+        } catch (IOException e) {
+            throw new DownloadException("Could not download file! URL='" + downloadURL + "', file='" + file + "'", e);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    logger.warn("Closing InputStream for '{}' failed!", downloadURL, e);
+                }
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    logger.warn("Closing OutputStream for '{}' failed!", file, e);
+                }
+            }
         }
-
-        // TODO try/catch/finally and close
-
-        in.close();
-        out.close();
     }
 
     public static int loadLatestStableVersion(final String jobName) throws DownloadException {
@@ -85,7 +106,7 @@ public final class DownloadUtils {
     }
 
     private static int loadVersion(final String jobName, final String latestBuild) throws DownloadException {
-        int version = -1;
+        int version;
         URL urlVersion = null;
         BufferedReader reader = null;
         try {
@@ -103,8 +124,8 @@ public final class DownloadUtils {
             if (reader != null) {
                 try {
                     reader.close();
-                } catch (Exception e) {
-                    logger.warn("Closing reader failed! " + urlVersion, e);
+                } catch (IOException e) {
+                    logger.warn("Closing reader for '{}' failed!", urlVersion, e);
                 }
             }
         }
@@ -115,7 +136,7 @@ public final class DownloadUtils {
                                                                                   final Integer version)
         throws DownloadException {
         URL urlVersionInfo = null;
-        TerasologyLauncherVersionInfo versionInfo = null;
+        TerasologyLauncherVersionInfo versionInfo;
         try {
             urlVersionInfo = DownloadUtils.getDownloadURL(jobName, version, FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
             versionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());

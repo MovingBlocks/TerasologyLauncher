@@ -74,7 +74,7 @@ public final class FileUtils {
 
         byte[] buffer = new byte[4096];
         ZipInputStream zis = null;
-        ZipEntry ze = null;
+        ZipEntry ze;
 
         try {
             if (!outputLocation.exists()) {

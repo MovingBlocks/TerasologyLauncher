@@ -31,7 +31,10 @@ import java.awt.Rectangle;
  *
  * @author Skaldarnar
  */
-public class TSScrollBarUI extends BasicScrollBarUI {
+public final class TSScrollBarUI extends BasicScrollBarUI {
+
+    public TSScrollBarUI() {
+    }
 
     @Override
     protected void paintThumb(final Graphics g, final JComponent c, final Rectangle thumbBounds) {
@@ -47,7 +50,7 @@ public class TSScrollBarUI extends BasicScrollBarUI {
         // paint nothing
     }
 
-    protected JButton createZeroButton() {
+    private JButton createZeroButton() {
         final JButton button = new JButton("zero button");
         final Dimension zeroDim = new Dimension(0, 0);
         button.setPreferredSize(zeroDim);

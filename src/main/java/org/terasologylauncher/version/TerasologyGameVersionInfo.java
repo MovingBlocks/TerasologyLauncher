@@ -121,13 +121,13 @@ public final class TerasologyGameVersionInfo {
                 }
             }
         } catch (IOException e) {
-            logger.error("Could not load TerasologyGameVersionInfo from JAR! " + terasologyGameJar, e);
+            logger.error("Could not load TerasologyGameVersionInfo from file '{}'!", terasologyGameJar, e);
         } finally {
             if (zipFile != null) {
                 try {
                     zipFile.close();
                 } catch (IOException e) {
-                    logger.info("Could not close ZipFile! " + zipFile, e);
+                    logger.warn("The file '{}' could not be closed.", zipFile, e);
                 }
             }
         }

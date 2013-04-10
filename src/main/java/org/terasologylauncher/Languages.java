@@ -16,6 +16,9 @@
 
 package org.terasologylauncher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,6 +47,8 @@ public final class Languages {
 
     private static Locale currentLocale = DEFAULT_LOCALE;
 
+    private static final Logger logger = LoggerFactory.getLogger(Languages.class);
+
     private Languages() {
     }
 
@@ -59,8 +64,11 @@ public final class Languages {
     public static void init() {
         final Locale defaultLocale = Locale.getDefault();
         for (Locale locale : SUPPORTED_LOCALES) {
-            // TODO Support Country and Variant
             if (locale.getLanguage().equals(defaultLocale.getLanguage())) {
+                if (!locale.equals(currentLocale)) {
+                    logger.debug("An appropriate locale has been found '{}'. " +
+                        "Change the current locale from '{}' to '{}'.", defaultLocale, currentLocale, locale);
+                }
                 currentLocale = locale;
                 break;
             }
@@ -70,6 +78,8 @@ public final class Languages {
     public static void update(final Locale newLocale) {
         if (SUPPORTED_LOCALES.contains(newLocale)) {
             currentLocale = newLocale;
+        } else {
+            logger.warn("Unsupported locale '{}'.", newLocale);
         }
     }
 

@@ -30,6 +30,8 @@ public enum OperatingSystem {
     MAC("Mac"),
     UNKNOWN("");
 
+    private static final String PROPERTY_OS_NAME = "os.name";
+
     private final String identifier;
 
     private OperatingSystem(final String system) {
@@ -54,7 +56,7 @@ public enum OperatingSystem {
      */
     public static OperatingSystem getOS() {
         OperatingSystem best = UNKNOWN;
-        final String os = System.getProperty("os.name").toLowerCase();
+        final String os = System.getProperty(PROPERTY_OS_NAME).toLowerCase();
         for (final OperatingSystem system : values()) {
             if (os.contains(system.identifier)) {
                 if (system.identifier.length() > best.identifier.length()) {
