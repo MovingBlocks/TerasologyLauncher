@@ -36,7 +36,7 @@ import java.awt.image.BufferedImage;
  *
  * @author Skaldarnar
  */
-public class TSButton extends JButton implements MouseListener {
+public final class TSButton extends JButton implements MouseListener {
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(TSButton.class);

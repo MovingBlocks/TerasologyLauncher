@@ -75,7 +75,7 @@ public final class LauncherUpdater {
                 versionInfo = DownloadUtils.loadTerasologyLauncherVersionInfo(jobName, upstreamVersion);
             }
         } catch (NumberFormatException e) {
-            logger.error("Could not parse current version! " + currentVersion, e);
+            logger.error("Could not parse current version '{}'!", currentVersion, e);
         } catch (DownloadException e) {
             logger.error("Could not load latest stable version!", e);
         }
@@ -88,7 +88,7 @@ public final class LauncherUpdater {
         try {
             DirectoryUtils.checkDirectory(temporaryUpdateDir);
         } catch (IOException e) {
-            logger.error("Cannot create or use temporary update directory! - {} ", temporaryUpdateDir, e);
+            logger.error("Cannot create or use temporary update directory '{}'!", temporaryUpdateDir, e);
             JOptionPane.showMessageDialog(null,
                 BundleUtils.getLabel("update_launcher_tmpDir") + "\n" + temporaryUpdateDir,
                 BundleUtils.getLabel("message_error_title"),
@@ -123,7 +123,7 @@ public final class LauncherUpdater {
                 BundleUtils.getLabel("message_error_title"),
                 JOptionPane.ERROR_MESSAGE);
             logger.error("Aborting update process!");
-        } catch (IOException e) {
+        } catch (DownloadException e) {
             logger.error("Launcher update failed!", e);
             JOptionPane.showMessageDialog(null,
                 BundleUtils.getLabel("update_launcher_updateFailed"),

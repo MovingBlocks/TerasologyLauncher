@@ -23,7 +23,7 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Image;
 
-public class SplashScreen extends JWindow {
+public final class SplashScreen extends JWindow {
 
     // TODO: progress bar
     private static final int INFO_LABEL_WIDTH = 400;

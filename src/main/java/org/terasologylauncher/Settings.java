@@ -45,6 +45,14 @@ public final class Settings {
 
     private static final String SETTINGS_FILE_NAME = "settings.properties";
 
+    private static final String COMMENT_SETTINGS = "Terasology Launcher - Settings";
+
+    private static final String PROPERTY_LOCALE = "locale";
+    private static final String PROPERTY_BUILD_TYPE = "buildType";
+    private static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
+    private static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
+    private static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
+
     private final File settingsFile;
     private final Properties properties;
 
@@ -55,8 +63,9 @@ public final class Settings {
 
     public synchronized void load() throws IOException {
         if (settingsFile.exists()) {
-            logger.debug("Load settings from {}", settingsFile);
+            logger.debug("Load the launcher settings from the file '{}'.", settingsFile);
 
+            // load settings
             final InputStream inputStream = new FileInputStream(settingsFile);
             try {
                 properties.load(inputStream);
@@ -64,117 +73,118 @@ public final class Settings {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    logger.info("The InputStream could not be closed. " + settingsFile, e);
+                    logger.warn("The file '{}' could not be closed.", settingsFile, e);
                 }
             }
         }
     }
 
     public synchronized void store() throws IOException {
-        logger.debug("Store settings into {}", settingsFile);
+        logger.debug("Store the launcher settings into the file '{}'.", settingsFile);
 
+        // create directory
         if (!settingsFile.getParentFile().exists() && !settingsFile.getParentFile().mkdirs()) {
-            throw new IOException("The directory could not be created. " + settingsFile);
+            throw new IOException("The directory could not be created. " + settingsFile.getParentFile());
         }
+
+        // store settings
         final OutputStream outputStream = new FileOutputStream(settingsFile);
         try {
-            properties.store(outputStream, "Terasology Launcher - Settings");
+            properties.store(outputStream, COMMENT_SETTINGS);
         } finally {
             try {
                 outputStream.close();
             } catch (IOException e) {
-                logger.info("The OutputStream could not be closed. " + settingsFile, e);
+                logger.warn("The file '{}' could not be closed.", settingsFile, e);
             }
         }
     }
 
     public synchronized void init() {
         // locale
-        final String localeStr = properties.getProperty("locale");
+        final String localeStr = properties.getProperty(PROPERTY_LOCALE);
         if (localeStr != null) {
             Languages.init(localeStr);
+
+            if (!Languages.getCurrentLocale().toString().equals(localeStr)) {
+                logger.info("Invalid value '{}' for the parameter '{}'!", localeStr, PROPERTY_LOCALE);
+            }
         }
-        properties.setProperty("locale", Languages.getCurrentLocale().toString());
+        properties.setProperty(PROPERTY_LOCALE, Languages.getCurrentLocale().toString());
 
         // buildType
-        final String buildTypeStr = properties.getProperty("buildType");
+        final String buildTypeStr = properties.getProperty(PROPERTY_BUILD_TYPE);
         BuildType buildType = BUILD_TYPE_DEFAULT;
         if (buildTypeStr != null) {
             try {
                 buildType = BuildType.valueOf(buildTypeStr);
             } catch (IllegalArgumentException e) {
-                logger.debug("Illegal BuildType! " + buildTypeStr, e);
+                logger.info("Invalid value '{}' for the parameter '{}'!", buildTypeStr, PROPERTY_BUILD_TYPE);
             }
         }
-        properties.setProperty("buildType", buildType.name());
+        properties.setProperty(PROPERTY_BUILD_TYPE, buildType.name());
 
         // buildVersion
         final BuildType[] buildTypes = BuildType.values();
         for (BuildType b : buildTypes) {
-            final String key = "buildVersion_" + b.name();
+            final String key = PROPERTY_PREFIX_BUILD_VERSION + b.name();
             final String buildVersionStr = properties.getProperty(key);
             int buildVersion = BUILD_VERSION_LATEST;
             if (buildVersionStr != null) {
                 try {
                     buildVersion = Integer.parseInt(buildVersionStr);
                 } catch (NumberFormatException e) {
-                    logger.debug("Illegal BuildVersion! " + buildVersionStr, e);
+                    logger.info("Invalid value '{}' for the parameter '{}'!", buildVersionStr, key);
                 }
             }
             properties.setProperty(key, String.valueOf(buildVersion));
         }
 
         // max heap size
-        final String maxHeapSizeStr = properties.getProperty("maxHeapSize");
+        final String maxHeapSizeStr = properties.getProperty(PROPERTY_MAX_HEAP_SIZE);
         JavaHeapSize maxJavaHeapSize = MAX_HEAP_SIZE_DEFAULT;
         if (maxHeapSizeStr != null) {
             try {
                 maxJavaHeapSize = JavaHeapSize.valueOf(maxHeapSizeStr);
             } catch (IllegalArgumentException e) {
-                logger.debug("Illegal JavaHeapSize! " + maxHeapSizeStr, e);
+                logger.info("Invalid value '{}' for the parameter '{}'!", maxHeapSizeStr,
+                    PROPERTY_MAX_HEAP_SIZE);
             }
         }
-        properties.setProperty("maxHeapSize", maxJavaHeapSize.name());
+        properties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxJavaHeapSize.name());
 
         // initial heap size
-        final String initialHeapSizeStr = properties.getProperty("initialHeapSize");
+        final String initialHeapSizeStr = properties.getProperty(PROPERTY_INITIAL_HEAP_SIZE);
         JavaHeapSize initialJavaHeapSize = INITIAL_HEAP_SIZE_DEFAULT;
         if (initialHeapSizeStr != null) {
             try {
                 initialJavaHeapSize = JavaHeapSize.valueOf(initialHeapSizeStr);
             } catch (IllegalArgumentException e) {
-                logger.debug("Illegal JavaHeapSize! " + initialHeapSizeStr, e);
+                logger.info("Invalid value '{}' for the parameter '{}'!", initialHeapSizeStr,
+                    PROPERTY_INITIAL_HEAP_SIZE);
             }
         }
-        properties.setProperty("initialHeapSize", initialJavaHeapSize.name());
+        properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialJavaHeapSize.name());
     }
 
-    /*============================== Settings access ================================*/
-
     public synchronized void setLocale(final Locale locale) {
-        properties.setProperty("locale", locale.toString());
+        properties.setProperty(PROPERTY_LOCALE, locale.toString());
     }
 
     public synchronized void setBuildType(final BuildType buildType) {
-        properties.setProperty("buildType", buildType.name());
+        properties.setProperty(PROPERTY_BUILD_TYPE, buildType.name());
     }
 
     public synchronized BuildType getBuildType() {
-        return BuildType.valueOf(properties.getProperty("buildType"));
+        return BuildType.valueOf(properties.getProperty(PROPERTY_BUILD_TYPE));
     }
 
-    /**
-     * Sets the build version property, depending on the build version.
-     *
-     * @param version   the version number; -1 for the "Latest"
-     * @param buildType the build type of the game
-     */
     public synchronized void setBuildVersion(final int version, final BuildType buildType) {
-        properties.setProperty("buildVersion_" + buildType.name(), String.valueOf(version));
+        properties.setProperty(PROPERTY_PREFIX_BUILD_VERSION + buildType.name(), String.valueOf(version));
     }
 
     public synchronized int getBuildVersion(final BuildType buildType) {
-        return Integer.parseInt(properties.getProperty("buildVersion_" + buildType.name()));
+        return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + buildType.name()));
     }
 
     public synchronized boolean isBuildVersionLatest(final BuildType buildType) {
@@ -182,19 +192,19 @@ public final class Settings {
     }
 
     public synchronized void setMaxHeapSize(final JavaHeapSize maxHeapSize) {
-        properties.setProperty("maxHeapSize", maxHeapSize.name());
+        properties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxHeapSize.name());
     }
 
     public synchronized JavaHeapSize getMaxHeapSize() {
-        return JavaHeapSize.valueOf(properties.getProperty("maxHeapSize"));
+        return JavaHeapSize.valueOf(properties.getProperty(PROPERTY_MAX_HEAP_SIZE));
     }
 
     public synchronized void setInitialHeapSize(final JavaHeapSize initialHeapSize) {
-        properties.setProperty("initialHeapSize", initialHeapSize.name());
+        properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialHeapSize.name());
     }
 
     public synchronized JavaHeapSize getInitialHeapSize() {
-        return JavaHeapSize.valueOf(properties.getProperty("initialHeapSize"));
+        return JavaHeapSize.valueOf(properties.getProperty(PROPERTY_INITIAL_HEAP_SIZE));
     }
 
     @Override

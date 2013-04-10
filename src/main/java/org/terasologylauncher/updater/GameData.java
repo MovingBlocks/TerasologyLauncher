@@ -101,7 +101,7 @@ public final class GameData {
             try {
                 installedBuildVersion = Integer.parseInt(versionInfo.getBuildNumber());
             } catch (NumberFormatException e) {
-                logger.error("Could not parse build number! " + versionInfo.getBuildNumber(), e);
+                logger.error("Could not parse build number '{}'!", versionInfo.getBuildNumber(), e);
             }
         }
     }

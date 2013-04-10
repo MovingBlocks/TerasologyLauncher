@@ -67,8 +67,6 @@ public final class TerasologyLauncher {
 
             // OS
             final OperatingSystem os = OperatingSystem.getOS();
-            logger.debug("OS: {}", os);
-
             if (os == OperatingSystem.UNKNOWN) {
                 logger.error("Unknown/Unsupported operating system!");
                 JOptionPane.showMessageDialog(null,
@@ -77,13 +75,14 @@ public final class TerasologyLauncher {
                     JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
+            logger.debug("Operating system: {}", os);
 
             // Application directory
             final File applicationDir = DirectoryUtils.getApplicationDirectory(os);
             try {
                 DirectoryUtils.checkDirectory(applicationDir);
             } catch (IOException e) {
-                logger.error("Cannot create or use application directory! " + applicationDir, e);
+                logger.error("Cannot create or use application directory '{}'!", applicationDir, e);
                 JOptionPane.showMessageDialog(null,
                     BundleUtils.getLabel("message_error_applicationDirectory") + "\n" + applicationDir,
                     BundleUtils.getLabel("message_error_title"),
@@ -97,7 +96,7 @@ public final class TerasologyLauncher {
             try {
                 DirectoryUtils.checkDirectory(launcherDir);
             } catch (IOException e) {
-                logger.error("Cannot create or use launcher directory! " + launcherDir, e);
+                logger.error("Cannot create or use launcher directory '{}'!", launcherDir, e);
                 JOptionPane.showMessageDialog(null,
                     BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDir,
                     BundleUtils.getLabel("message_error_title"),
@@ -120,7 +119,7 @@ public final class TerasologyLauncher {
                     JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
-            logger.debug("Settings loaded: {}", settings);
+            logger.debug("Settings: {}", settings);
 
             // Launcher Update
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
@@ -128,8 +127,7 @@ public final class TerasologyLauncher {
                 TerasologyLauncherVersionInfo.getInstance().getBuildNumber(),
                 TerasologyLauncherVersionInfo.getInstance().getJobName());
             if (updater.updateAvailable()) {
-                logger.info("Launcher update available! " + updater.getUpstreamVersion() + " "
-                    + updater.getVersionInfo());
+                logger.info("Launcher update available! {} {}", updater.getUpstreamVersion(), updater.getVersionInfo());
                 splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
 
                 showUpdateDialog(splash, updater);
@@ -139,7 +137,7 @@ public final class TerasologyLauncher {
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_loadGameVersions"));
             final TerasologyGameVersion gameVersion = new TerasologyGameVersion();
             gameVersion.loadVersions(settings);
-            logger.debug("Game versions loaded: {}", gameVersion);
+            logger.debug("Game versions: {}", gameVersion);
 
             // LauncherFrame
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_createFrame"));
