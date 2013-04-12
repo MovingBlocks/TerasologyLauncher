@@ -18,6 +18,8 @@ package org.terasologylauncher.gui;
 
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Settings;
+import org.terasologylauncher.changelog.Changelog;
+import org.terasologylauncher.changelog.ChangelogBuilder;
 import org.terasologylauncher.launcher.TerasologyStarter;
 import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.updater.GameDownloader;
@@ -26,6 +28,7 @@ import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyGameVersion;
 import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
+import org.w3c.dom.Document;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -165,20 +168,11 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
         infoTextPane.setForeground(Color.WHITE);
 
-        // TODO BundleUtils
-        infoTextPane.setText("Lorem ipsum dolor sit amet, \n " +
-            "consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore " +
-            "\n magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores " +
-            "\n et ea rebum. " +
-            "\n Stet clita kasd gubergren, " +
-            "\n no sea takimata sanctus est Lorem ipsum dolor sit amet. " +
-            "\n Lorem ipsum dolor " +
-            "sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore " +
-            "\n \n \n magna aliquyam erat, sed diam voluptua. " +
-            "\n At vero eos et accusam et justo duo dolores et ea rebum. " +
-            "\n Stet clita kasd gubergren, " +
-            "\n no sea takimata sanctus est " +
-            "\n Lorem ipsum dolor sit amet.");
+        Changelog changelog = new Changelog(settings.getBuildType());
+        Document document = changelog.getChangelog(settings.getBuildVersion(settings.getBuildType()));
+        ChangelogBuilder builder = new ChangelogBuilder();
+
+        infoTextPane.setText(builder.getChangelog(document, settings.getBuildVersion(settings.getBuildType())));
 
         //infoTextPane.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, updatePanelWidth - 16,
         // updatePanelHeight - 16);
@@ -348,6 +342,12 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
         settingsButton.setText(BundleUtils.getLabel("launcher_settings"));
         cancelButton.setText(BundleUtils.getLabel("launcher_cancel"));
+
+        Changelog changelog = new Changelog(settings.getBuildType());
+        Document document = changelog.getChangelog(settings.getBuildVersion(settings.getBuildType()));
+        ChangelogBuilder builder = new ChangelogBuilder();
+
+        infoTextPane.setText(builder.getChangelog(document, settings.getBuildVersion(settings.getBuildType())));
     }
 
     /**
