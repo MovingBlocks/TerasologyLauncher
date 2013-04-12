@@ -165,6 +165,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         infoTextPane.setEnabled(false);
         infoTextPane.setHighlighter(null);
         infoTextPane.setOpaque(false);
+        infoTextPane.setContentType("text/html");
 
         infoTextPane.setForeground(Color.WHITE);
 
