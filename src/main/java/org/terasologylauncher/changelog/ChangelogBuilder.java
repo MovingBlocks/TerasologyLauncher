@@ -22,26 +22,29 @@ import org.w3c.dom.NodeList;
 /**
  * @author MrBarsack
  */
+public final class ChangelogBuilder {
 
-public class ChangelogBuilder {
+    private ChangelogBuilder() {
+    }
 
+    public static String getChangelog(final Document changelog, final int version) {
+        final StringBuilder str = new StringBuilder("<b> Build:"); // TODO i18n
 
-    public String getChangelog(Document changelog, int build) {
-        NodeList nodeList = null;
+        // TODO Change version "-1" into "settings_game_buildVersion_latest"
+
+        str.append(version).append("</b> <br/>");
 
         if (changelog != null) {
-            nodeList = changelog.getElementsByTagName("msg");
+            NodeList nodeList = changelog.getElementsByTagName("msg");
+            if (nodeList != null) {
+                for (int a = 0; a < nodeList.getLength(); a++) {
+                    str.append('-').append(nodeList.item(a).getLastChild().getTextContent()).append("<br/>");
+                }
+            }
+        } else {
+            str.append(""); // TODO Show a message like "Can't load change log."
         }
 
-        StringBuilder str = new StringBuilder("<b> Build:");
-
-        str.append(build).append("</b> <br/>");
-
-        assert nodeList != null;
-
-        for (int a = 0; a < nodeList.getLength(); a++) {
-            str.append('-').append(nodeList.item(a).getLastChild().getTextContent()).append("<br/>");
-        }
         str.append("<br/>");
 
         return str.toString();

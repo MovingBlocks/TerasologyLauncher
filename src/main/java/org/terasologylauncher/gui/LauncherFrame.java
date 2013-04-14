@@ -169,11 +169,11 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
         infoTextPane.setForeground(Color.WHITE);
 
-        Changelog changelog = new Changelog(settings.getBuildType());
-        Document document = changelog.getChangelog(settings.getBuildVersion(settings.getBuildType()));
-        ChangelogBuilder builder = new ChangelogBuilder();
-
-        infoTextPane.setText(builder.getChangelog(document, settings.getBuildVersion(settings.getBuildType())));
+        Document document = Changelog.getChangelog(settings.getBuildType(),
+            settings.getBuildVersion(settings.getBuildType()));
+        infoTextPane.setText(ChangelogBuilder.getChangelog(document,
+            settings.getBuildVersion(settings.getBuildType())));
+        // TODO scroll infoTextPane to top
 
         //infoTextPane.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, updatePanelWidth - 16,
         // updatePanelHeight - 16);
@@ -305,6 +305,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 settingsMenu = new SettingsMenu(terasologyDirectory, settings, gameVersion);
                 settingsMenu.setModal(true);
                 settingsMenu.setVisible(true);
+                // TODO "windowClosed" is called twice
                 settingsMenu.addWindowListener(new WindowAdapter() {
                     @Override
                     public void windowClosed(final WindowEvent e) {
@@ -344,11 +345,12 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         settingsButton.setText(BundleUtils.getLabel("launcher_settings"));
         cancelButton.setText(BundleUtils.getLabel("launcher_cancel"));
 
-        Changelog changelog = new Changelog(settings.getBuildType());
-        Document document = changelog.getChangelog(settings.getBuildVersion(settings.getBuildType()));
-        ChangelogBuilder builder = new ChangelogBuilder();
-
-        infoTextPane.setText(builder.getChangelog(document, settings.getBuildVersion(settings.getBuildType())));
+        // TODO Refactor into own method
+        Document document = Changelog.getChangelog(settings.getBuildType(),
+            settings.getBuildVersion(settings.getBuildType()));
+        infoTextPane.setText(ChangelogBuilder.getChangelog(document,
+            settings.getBuildVersion(settings.getBuildType())));
+        // TODO scroll infoTextPane to top
     }
 
     /**

@@ -160,4 +160,16 @@ public final class DownloadUtils {
 
         return new URL(urlBuilder.toString());
     }
+
+    public static URL getURL(final String jobName, final Integer version, final String subPath)
+        throws MalformedURLException {
+        final StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(JENKINS_JOB_URL);
+        urlBuilder.append(jobName);
+        urlBuilder.append("/");
+        urlBuilder.append(version);
+        urlBuilder.append(subPath);
+
+        return new URL(urlBuilder.toString());
+    }
 }

@@ -19,6 +19,7 @@ package org.terasologylauncher.changelog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
+import org.terasologylauncher.util.DownloadUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -26,49 +27,46 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.net.URL;
 
 /**
  * @author MrBarsack
  */
-
-public class Changelog {
+public final class Changelog {
 
     private static final Logger logger = LoggerFactory.getLogger(Changelog.class);
 
-    private final BuildType buildType;
+    private static final String WRAPPER
+        = "/api/xml?xpath=//changeSet/item/msg[1]|//changeSet/item/author[1]/fullName&wrapper=msgs";
 
-    private final String NIGHTLY_URL = "http://jenkins.movingblocks.net/job/Terasology/";
-    private final String STABLE_URL = "http://jenkins.movingblocks.net/job/TerasologyStable/";
-
-    private final String WRAPPER = "/api/xml?xpath=//changeSet/item/msg[1]|//changeSet/item/author[1]/fullName&wrapper=msgs";
-
-
-    public Changelog(BuildType buildType) {
-        this.buildType = buildType;
+    private Changelog() {
     }
 
-    public Document getChangelog(int version) {
+    public static Document getChangelog(final BuildType buildType, final int version) {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = null;
+
+        // TODO Change version "-1" into "Latest..."
 
         logger.debug("Changelog: " + buildType + " " + version);
 
         try {
             builder = factory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // TODO Logging
         }
         try {
             if (buildType == BuildType.NIGHTLY) {
-                return builder.parse(new URL(NIGHTLY_URL + version + WRAPPER).openStream());
+                return builder.parse(DownloadUtils.getURL(DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME, version,
+                    WRAPPER).openStream());
             } else {
-                return builder.parse(new URL(STABLE_URL + version + WRAPPER).openStream());
+                return builder.parse(DownloadUtils.getURL(DownloadUtils.TERASOLOGY_STABLE_JOB_NAME, version,
+                    WRAPPER).openStream());
             }
+            // TODO close stream
         } catch (SAXException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // TODO Logging
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // TODO Logging
         }
         logger.error("Error while loading changelog.");
         return null;
