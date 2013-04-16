@@ -23,16 +23,16 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Image;
 
-public class SplashScreen extends JWindow {
+public final class SplashScreen extends JWindow {
 
     // TODO: progress bar
     private static final int INFO_LABEL_WIDTH = 400;
 
-    private JLabel infoLabel;
+    private final JLabel infoLabel;
 
     public SplashScreen(final Image image) {
-        ImageIcon icon = new ImageIcon(image);
-        Container contentPane = getContentPane();
+        final ImageIcon icon = new ImageIcon(image);
+        final Container contentPane = getContentPane();
         contentPane.setLayout(null);
 
         // Init the info label
@@ -45,7 +45,7 @@ public class SplashScreen extends JWindow {
         contentPane.add(infoLabel);
 
         // Draw the image
-        BackgroundImage background = new BackgroundImage(icon.getIconWidth(), icon.getIconHeight(), image);
+        final BackgroundImage background = new BackgroundImage(icon.getIconWidth(), icon.getIconHeight(), image);
         contentPane.add(background);
         this.setBackground(new Color(0, 0, 0, 0));
 

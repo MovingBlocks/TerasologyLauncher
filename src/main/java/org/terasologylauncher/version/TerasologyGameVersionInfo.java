@@ -19,20 +19,20 @@ package org.terasologylauncher.version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * @author Mathias Kalb
  */
-public final class TerasologyLauncherVersion {
+public final class TerasologyGameVersionInfo {
 
-    private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncherVersion.class);
+    private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersionInfo.class);
 
-    private static TerasologyLauncherVersion instance;
-
-    private static final String VERSION_INFO_FILE = "versionInfo.properties";
+    private static final String VERSION_INFO_FILE = "org/terasology/version/versionInfo.properties";
 
     private static final String BUILD_NUMBER = "buildNumber";
     private static final String BUILD_ID = "buildId";
@@ -57,26 +57,7 @@ public final class TerasologyLauncherVersion {
     private final String displayVersion;
     private final String toString;
 
-    private TerasologyLauncherVersion() {
-        final Properties properties = new Properties();
-        final InputStream inStream = this.getClass().getResourceAsStream(VERSION_INFO_FILE);
-        if (inStream != null) {
-            try {
-                properties.load(inStream);
-            } catch (final IOException e) {
-                logger.error("Loading file failed", e);
-            } finally {
-                // JAVA7 : cleanup
-                try {
-                    if (inStream != null) {
-                        inStream.close();
-                    }
-                } catch (final IOException e) {
-                    logger.info("Closing file failed", e);
-                }
-            }
-        }
-
+    private TerasologyGameVersionInfo(final Properties properties) {
         buildNumber = properties.getProperty(BUILD_NUMBER, DEFAULT_VALUE);
         buildId = properties.getProperty(BUILD_ID, DEFAULT_VALUE);
         buildTag = properties.getProperty(BUILD_TAG, DEFAULT_VALUE);
@@ -128,11 +109,30 @@ public final class TerasologyLauncherVersion {
         toString = toStringBuilder.toString();
     }
 
-    public static TerasologyLauncherVersion getInstance() {
-        if (instance == null) {
-            instance = new TerasologyLauncherVersion();
+    public static TerasologyGameVersionInfo loadFromJar(final File terasologyGameJar) {
+        final Properties properties = new Properties();
+        ZipFile zipFile = null;
+        try {
+            if (terasologyGameJar.exists() && terasologyGameJar.canRead()) {
+                zipFile = new ZipFile(terasologyGameJar);
+                final ZipEntry zipEntry = zipFile.getEntry(VERSION_INFO_FILE);
+                if (zipEntry != null) {
+                    properties.load(zipFile.getInputStream(zipEntry));
+                }
+            }
+        } catch (IOException e) {
+            logger.error("Could not load TerasologyGameVersionInfo from file '{}'!", terasologyGameJar, e);
+        } finally {
+            if (zipFile != null) {
+                try {
+                    zipFile.close();
+                } catch (IOException e) {
+                    logger.warn("The file '{}' could not be closed.", zipFile, e);
+                }
+            }
         }
-        return instance;
+
+        return new TerasologyGameVersionInfo(properties);
     }
 
     public String getBuildNumber() {

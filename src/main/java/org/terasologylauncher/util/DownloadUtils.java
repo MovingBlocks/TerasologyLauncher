@@ -18,14 +18,15 @@ package org.terasologylauncher.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -34,7 +35,14 @@ public final class DownloadUtils {
     public static final String TERASOLOGY_STABLE_JOB_NAME = "TerasologyStable";
     public static final String TERASOLOGY_NIGHTLY_JOB_NAME = "Terasology";
     public static final String TERASOLOGY_LAUNCHER_STABLE_JOB_NAME = "TerasologyLauncherStable";
-    public static final String TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME = "TerasologyLauncher";
+    public static final String TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME = "TerasologyLauncherNightly";
+
+    public static final String FILE_TERASOLOGY_GAME_ZIP = "distributions/Terasology.zip";
+    public static final String FILE_TERASOLOGY_LAUNCHER_ZIP = "distributions/TerasologyLauncher.zip";
+    public static final String FILE_TERASOLOGY_GAME_VERSION_INFO =
+        "resources/main/org/terasology/version/versionInfo.properties";
+    public static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO =
+        "resources/main/org/terasologylauncher/version/versionInfo.properties";
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
 
@@ -42,7 +50,7 @@ public final class DownloadUtils {
     private static final String LAST_STABLE_BUILD = "/lastStableBuild";
     private static final String LAST_SUCCESSFUL_BUILD = "/lastSuccessfulBuild";
     private static final String BUILD_NUMBER = "/buildNumber/";
-    private static final String ARTIFACT = "/artifact/build/distributions/";
+    private static final String ARTIFACT_BUILD = "/artifact/build/";
 
     private DownloadUtils() {
     }
@@ -52,25 +60,40 @@ public final class DownloadUtils {
      *
      * @param downloadURL - remote location of file to download
      * @param file        - where to store downloaded file
-     * @throws IOException
+     * @throws DownloadException
      */
-    public static void downloadToFile(URL downloadURL, File file) throws IOException {
-        InputStream in = downloadURL.openStream();
-        OutputStream out = new FileOutputStream(file);
-        final byte[] buffer = new byte[2048];
+    public static void downloadToFile(final URL downloadURL, final File file) throws DownloadException {
+        BufferedInputStream in = null;
+        BufferedOutputStream out = null;
+        try {
+            in = new BufferedInputStream(downloadURL.openStream());
+            out = new BufferedOutputStream(new FileOutputStream(file));
 
-        int n;
-        while ((n = in.read(buffer)) != -1) {
-            out.write(buffer, 0, n);
-        }
+            final byte[] buffer = new byte[2048];
 
-        // TODO try/catch/finally and close
+            int n;
+            while ((n = in.read(buffer)) != -1) {
+                out.write(buffer, 0, n);
+            }
 
-        if (in != null) {
-            in.close();
-        }
-        if (out != null) {
-            out.close();
+            out.flush();
+        } catch (IOException e) {
+            throw new DownloadException("Could not download file! URL='" + downloadURL + "', file='" + file + "'", e);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    logger.warn("Closing InputStream for '{}' failed!", downloadURL, e);
+                }
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    logger.warn("Closing OutputStream for '{}' failed!", file, e);
+                }
+            }
         }
     }
 
@@ -83,30 +106,46 @@ public final class DownloadUtils {
     }
 
     private static int loadVersion(final String jobName, final String latestBuild) throws DownloadException {
-        int version = -1;
-        URL url = null;
+        int version;
+        URL urlVersion = null;
         BufferedReader reader = null;
         try {
-            url = new URL(JENKINS_JOB_URL + jobName + latestBuild + BUILD_NUMBER);
-            reader = new BufferedReader(new InputStreamReader(url.openStream()));
+            urlVersion = new URL(JENKINS_JOB_URL + jobName + latestBuild + BUILD_NUMBER);
+            reader = new BufferedReader(new InputStreamReader(urlVersion.openStream()));
             version = Integer.parseInt(reader.readLine());
         } catch (MalformedURLException e) {
-            throw new DownloadException("The version could not be loaded! " + url, e);
+            throw new DownloadException("The version could not be loaded! " + jobName + " " + urlVersion, e);
         } catch (IOException e) {
-            throw new DownloadException("The version could not be loaded! " + url, e);
+            throw new DownloadException("The version could not be loaded! " + jobName + " " + urlVersion, e);
         } catch (RuntimeException e) {
             // NullPointerException, NumberFormatException
-            throw new DownloadException("The version could not be loaded! " + url, e);
+            throw new DownloadException("The version could not be loaded! " + jobName + " " + urlVersion, e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
-                } catch (Exception e) {
-                    logger.warn("Closing reader failed! " + url, e);
+                } catch (IOException e) {
+                    logger.warn("Closing reader for '{}' failed!", urlVersion, e);
                 }
             }
         }
         return version;
+    }
+
+    public static TerasologyLauncherVersionInfo loadTerasologyLauncherVersionInfo(final String jobName,
+                                                                                  final Integer version)
+        throws DownloadException {
+        URL urlVersionInfo = null;
+        TerasologyLauncherVersionInfo versionInfo;
+        try {
+            urlVersionInfo = DownloadUtils.getDownloadURL(jobName, version, FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
+            versionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
+        } catch (MalformedURLException e) {
+            throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
+        } catch (IOException e) {
+            throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
+        }
+        return versionInfo;
     }
 
     public static URL getDownloadURL(final String jobName, final Integer version, final String fileName)
@@ -116,8 +155,20 @@ public final class DownloadUtils {
         urlBuilder.append(jobName);
         urlBuilder.append("/");
         urlBuilder.append(version);
-        urlBuilder.append(ARTIFACT);
+        urlBuilder.append(ARTIFACT_BUILD);
         urlBuilder.append(fileName);
+
+        return new URL(urlBuilder.toString());
+    }
+
+    public static URL getURL(final String jobName, final Integer version, final String subPath)
+        throws MalformedURLException {
+        final StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(JENKINS_JOB_URL);
+        urlBuilder.append(jobName);
+        urlBuilder.append("/");
+        urlBuilder.append(version);
+        urlBuilder.append(subPath);
 
         return new URL(urlBuilder.toString());
     }

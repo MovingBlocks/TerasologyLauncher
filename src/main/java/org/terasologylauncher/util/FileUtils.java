@@ -44,9 +44,8 @@ public final class FileUtils {
      *
      * @param file - file to delete
      * @return whether deletion was successful
-     * @throws IOException
      */
-    public static boolean delete(File file) throws IOException {
+    public static boolean delete(final File file) {
         if (file.isDirectory()) {
             for (File child : file.listFiles()) {
                 delete(child);
@@ -70,12 +69,12 @@ public final class FileUtils {
      * @param archive        - the ZIP file to extract
      * @param outputLocation - where to extract to
      */
-    public static void extractZipTo(final File archive, File outputLocation) {
+    public static void extractZipTo(final File archive, final File outputLocation) {
         logger.info("Extracting {}.", archive);
 
         byte[] buffer = new byte[4096];
         ZipInputStream zis = null;
-        ZipEntry ze = null;
+        ZipEntry ze;
 
         try {
             if (!outputLocation.exists()) {
@@ -100,11 +99,13 @@ public final class FileUtils {
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         } finally {
-            try {
-                zis.closeEntry();
-                zis.close();
-            } catch (IOException ignored) {
-                logger.warn("Could not close zip input stream.", ignored);
+            if (zis != null) {
+                try {
+                    zis.closeEntry();
+                    zis.close();
+                } catch (IOException ignored) {
+                    logger.warn("Could not close zip input stream.", ignored);
+                }
             }
         }
     }
@@ -116,7 +117,7 @@ public final class FileUtils {
      * @param destination - where to copy to
      * @throws IOException
      */
-    public static void copyFile(File source, File destination) throws IOException {
+    public static void copyFile(final File source, final File destination) throws IOException {
         if (!source.exists()) {
             return;
         }
@@ -148,7 +149,7 @@ public final class FileUtils {
      * @param destination - where to copy to
      * @throws IOException
      */
-    public static void copyFolder(File source, File destination) throws IOException {
+    public static void copyFolder(final File source, final File destination) throws IOException {
         if (!source.exists()) {
             return;
         }

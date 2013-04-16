@@ -30,8 +30,7 @@ import java.net.URI;
 /**
  * @author Skaldarnar
  */
-public class LinkJLabel extends JLabel implements MouseListener {
-    //This is a stupid comment
+public final class LinkJLabel extends JLabel implements MouseListener {
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(LinkJLabel.class);
@@ -47,9 +46,9 @@ public class LinkJLabel extends JLabel implements MouseListener {
     public LinkJLabel(final String text, final URI uri) {
         super(text);
         this.uri = uri;
-        setForeground(STANDARD_COLOR);
-        super.addMouseListener(this);
         lastClicked = 0;
+        setForeground(STANDARD_COLOR);
+        addMouseListener(this);
     }
 
     @Override

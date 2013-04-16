@@ -23,6 +23,7 @@ import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.DownloadException;
 import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.FileUtils;
+import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.JOptionPane;
 import java.io.File;
@@ -39,6 +40,7 @@ public final class LauncherUpdater {
     private final String currentVersion;
     private final String jobName;
     private Integer upstreamVersion;
+    private TerasologyLauncherVersionInfo versionInfo;
 
     public LauncherUpdater(final File applicationDir, final String currentVersion, final String jobName) {
         this.applicationDir = applicationDir;
@@ -63,16 +65,22 @@ public final class LauncherUpdater {
      * @return whether an update is available
      */
     public boolean updateAvailable() {
+        boolean updateAvailable = false;
+        upstreamVersion = null;
+        versionInfo = null;
         try {
             upstreamVersion = DownloadUtils.loadLatestStableVersion(jobName);
             logger.debug("Current Version: {}, Upstream Version: {}", currentVersion, upstreamVersion);
-            return Integer.parseInt(currentVersion) < upstreamVersion;
+            if (Integer.parseInt(currentVersion) < upstreamVersion) {
+                updateAvailable = true;
+                versionInfo = DownloadUtils.loadTerasologyLauncherVersionInfo(jobName, upstreamVersion);
+            }
         } catch (NumberFormatException e) {
-            logger.error("Could not parse current version! " + currentVersion, e);
+            logger.error("Could not parse current version '{}'!", currentVersion, e);
         } catch (DownloadException e) {
             logger.error("Could not load latest stable version!", e);
         }
-        return false;
+        return updateAvailable;
     }
 
     public void update() {
@@ -81,7 +89,7 @@ public final class LauncherUpdater {
         try {
             DirectoryUtils.checkDirectory(temporaryUpdateDir);
         } catch (IOException e) {
-            logger.error("Cannot create or use temporary update directory! - {} ", temporaryUpdateDir, e);
+            logger.error("Cannot create or use temporary update directory '{}'!", temporaryUpdateDir, e);
             JOptionPane.showMessageDialog(null,
                 BundleUtils.getLabel("update_launcher_tmpDir") + "\n" + temporaryUpdateDir,
                 BundleUtils.getLabel("message_error_title"),
@@ -107,11 +115,12 @@ public final class LauncherUpdater {
         }
 
         try {
-            URL updateURL = DownloadUtils.getDownloadURL(jobName, upstreamVersion, "TerasologyLauncher.zip");
+            final URL updateURL = DownloadUtils.getDownloadURL(jobName, upstreamVersion,
+                DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
 
             // download the latest zip file to tmp dir
 
-            File downloadedZipFile = new File(temporaryUpdateDir, "TerasologyLauncher.zip");
+            final File downloadedZipFile = new File(temporaryUpdateDir, "TerasologyLauncher.zip");
             DownloadUtils.downloadToFile(updateURL, downloadedZipFile);
 
             // Extract ZIP file
@@ -126,7 +135,7 @@ public final class LauncherUpdater {
                 BundleUtils.getLabel("message_error_title"),
                 JOptionPane.ERROR_MESSAGE);
             logger.error("Aborting update process!");
-        } catch (IOException e) {
+        } catch (DownloadException e) {
             logger.error("Launcher update failed!", e);
             JOptionPane.showMessageDialog(null,
                 BundleUtils.getLabel("update_launcher_updateFailed"),
@@ -134,5 +143,13 @@ public final class LauncherUpdater {
                 JOptionPane.ERROR_MESSAGE);
             logger.error("Aborting update process!");
         }
+    }
+
+    public Integer getUpstreamVersion() {
+        return upstreamVersion;
+    }
+
+    public TerasologyLauncherVersionInfo getVersionInfo() {
+        return versionInfo;
     }
 }

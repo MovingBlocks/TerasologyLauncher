@@ -18,6 +18,7 @@ package org.terasologylauncher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasologylauncher.util.JavaHeapSize;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,12 +38,20 @@ public final class Settings {
 
     public static final BuildType BUILD_TYPE_DEFAULT = BuildType.STABLE;
     public static final int BUILD_VERSION_LATEST = -1;
-    public static final int MAX_MEMORY_DEFAULT = 0;
-    public static final int INITIAL_MEMORY_NONE = -1;
+    public static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
+    public static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
 
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);
 
     private static final String SETTINGS_FILE_NAME = "settings.properties";
+
+    private static final String COMMENT_SETTINGS = "Terasology Launcher - Settings";
+
+    private static final String PROPERTY_LOCALE = "locale";
+    private static final String PROPERTY_BUILD_TYPE = "buildType";
+    private static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
+    private static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
+    private static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
 
     private final File settingsFile;
     private final Properties properties;
@@ -54,8 +63,9 @@ public final class Settings {
 
     public synchronized void load() throws IOException {
         if (settingsFile.exists()) {
-            logger.debug("Load settings from {}", settingsFile);
+            logger.debug("Load the launcher settings from the file '{}'.", settingsFile);
 
+            // load settings
             final InputStream inputStream = new FileInputStream(settingsFile);
             try {
                 properties.load(inputStream);
@@ -63,139 +73,138 @@ public final class Settings {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    logger.info("The InputStream could not be closed. " + settingsFile, e);
+                    logger.warn("The file '{}' could not be closed.", settingsFile, e);
                 }
             }
         }
     }
 
     public synchronized void store() throws IOException {
-        logger.debug("Store settings into {}", settingsFile);
+        logger.debug("Store the launcher settings into the file '{}'.", settingsFile);
 
+        // create directory
         if (!settingsFile.getParentFile().exists() && !settingsFile.getParentFile().mkdirs()) {
-            throw new IOException("The directory could not be created. " + settingsFile);
+            throw new IOException("The directory could not be created. " + settingsFile.getParentFile());
         }
+
+        // store settings
         final OutputStream outputStream = new FileOutputStream(settingsFile);
         try {
-            properties.store(outputStream, "Terasology Launcher - Settings");
+            properties.store(outputStream, COMMENT_SETTINGS);
         } finally {
             try {
                 outputStream.close();
             } catch (IOException e) {
-                logger.info("The OutputStream could not be closed. " + settingsFile, e);
+                logger.warn("The file '{}' could not be closed.", settingsFile, e);
             }
         }
     }
 
     public synchronized void init() {
         // locale
-        final String localeStr = properties.getProperty("locale");
+        final String localeStr = properties.getProperty(PROPERTY_LOCALE);
         if (localeStr != null) {
             Languages.init(localeStr);
+
+            if (!Languages.getCurrentLocale().toString().equals(localeStr)) {
+                logger.info("Invalid value '{}' for the parameter '{}'!", localeStr, PROPERTY_LOCALE);
+            }
         }
-        properties.setProperty("locale", Languages.getCurrentLocale().toString());
+        properties.setProperty(PROPERTY_LOCALE, Languages.getCurrentLocale().toString());
 
         // buildType
-        final String buildTypeStr = properties.getProperty("buildType");
+        final String buildTypeStr = properties.getProperty(PROPERTY_BUILD_TYPE);
         BuildType buildType = BUILD_TYPE_DEFAULT;
         if (buildTypeStr != null) {
             try {
                 buildType = BuildType.valueOf(buildTypeStr);
             } catch (IllegalArgumentException e) {
-                logger.debug("Illegal BuildType! " + buildTypeStr, e);
+                logger.info("Invalid value '{}' for the parameter '{}'!", buildTypeStr, PROPERTY_BUILD_TYPE);
             }
         }
-        properties.setProperty("buildType", buildType.name());
+        properties.setProperty(PROPERTY_BUILD_TYPE, buildType.name());
 
         // buildVersion
         final BuildType[] buildTypes = BuildType.values();
         for (BuildType b : buildTypes) {
-            final String key = "buildVersion_" + b.name();
+            final String key = PROPERTY_PREFIX_BUILD_VERSION + b.name();
             final String buildVersionStr = properties.getProperty(key);
             int buildVersion = BUILD_VERSION_LATEST;
             if (buildVersionStr != null) {
                 try {
                     buildVersion = Integer.parseInt(buildVersionStr);
                 } catch (NumberFormatException e) {
-                    logger.debug("Illegal BuildVersion! " + buildVersionStr, e);
+                    logger.info("Invalid value '{}' for the parameter '{}'!", buildVersionStr, key);
                 }
             }
             properties.setProperty(key, String.valueOf(buildVersion));
         }
 
-        // maxMemory
-        final String maxMemoryStr = properties.getProperty("maxMemory");
-        int maxMemory = MAX_MEMORY_DEFAULT;
-        try {
-            maxMemory = Integer.parseInt(maxMemoryStr);
-        } catch (NumberFormatException e) {
-            logger.debug("Illegal MaxMemory! " + maxMemoryStr, e);
+        // max heap size
+        final String maxHeapSizeStr = properties.getProperty(PROPERTY_MAX_HEAP_SIZE);
+        JavaHeapSize maxJavaHeapSize = MAX_HEAP_SIZE_DEFAULT;
+        if (maxHeapSizeStr != null) {
+            try {
+                maxJavaHeapSize = JavaHeapSize.valueOf(maxHeapSizeStr);
+            } catch (IllegalArgumentException e) {
+                logger.info("Invalid value '{}' for the parameter '{}'!", maxHeapSizeStr,
+                    PROPERTY_MAX_HEAP_SIZE);
+            }
         }
-        properties.setProperty("maxMemory", String.valueOf(maxMemory));
+        properties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxJavaHeapSize.name());
 
-        // initialMemory
-        final String initialMemoryStr = properties.getProperty("initialMemory");
-        int initialMemory = INITIAL_MEMORY_NONE;
-        try {
-            initialMemory = Integer.parseInt(initialMemoryStr);
-        } catch (NumberFormatException e) {
-            logger.debug("Illegal InitialMemory! " + initialMemoryStr, e);
+        // initial heap size
+        final String initialHeapSizeStr = properties.getProperty(PROPERTY_INITIAL_HEAP_SIZE);
+        JavaHeapSize initialJavaHeapSize = INITIAL_HEAP_SIZE_DEFAULT;
+        if (initialHeapSizeStr != null) {
+            try {
+                initialJavaHeapSize = JavaHeapSize.valueOf(initialHeapSizeStr);
+            } catch (IllegalArgumentException e) {
+                logger.info("Invalid value '{}' for the parameter '{}'!", initialHeapSizeStr,
+                    PROPERTY_INITIAL_HEAP_SIZE);
+            }
         }
-        properties.setProperty("initialMemory", String.valueOf(initialMemory));
+        properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialJavaHeapSize.name());
     }
 
-    /*============================== Settings access ================================*/
-
-    public synchronized void setLocale(Locale locale) {
-        properties.setProperty("locale", locale.toString());
+    public synchronized void setLocale(final Locale locale) {
+        properties.setProperty(PROPERTY_LOCALE, locale.toString());
     }
 
     public synchronized void setBuildType(final BuildType buildType) {
-        properties.setProperty("buildType", buildType.name());
+        properties.setProperty(PROPERTY_BUILD_TYPE, buildType.name());
     }
 
     public synchronized BuildType getBuildType() {
-        return BuildType.valueOf(properties.getProperty("buildType"));
+        return BuildType.valueOf(properties.getProperty(PROPERTY_BUILD_TYPE));
     }
 
-    /**
-     * Sets the build version property, depending on the build version.
-     *
-     * @param version   the version number; -1 for the "Latest"
-     * @param buildType the build type of the game
-     */
     public synchronized void setBuildVersion(final int version, final BuildType buildType) {
-        properties.setProperty("buildVersion_" + buildType.name(), String.valueOf(version));
+        properties.setProperty(PROPERTY_PREFIX_BUILD_VERSION + buildType.name(), String.valueOf(version));
     }
 
     public synchronized int getBuildVersion(final BuildType buildType) {
-        return Integer.parseInt(properties.getProperty("buildVersion_" + buildType.name()));
+        return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + buildType.name()));
     }
 
     public synchronized boolean isBuildVersionLatest(final BuildType buildType) {
         return BUILD_VERSION_LATEST == getBuildVersion(buildType);
     }
 
-    public synchronized void setMaximalMemory(final int maxMemory) {
-        properties.setProperty("maxMemory", String.valueOf(maxMemory));
+    public synchronized void setMaxHeapSize(final JavaHeapSize maxHeapSize) {
+        properties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxHeapSize.name());
     }
 
-    /**
-     * @return the option id of the memory object.
-     */
-    public synchronized int getMaximalMemory() {
-        return Integer.parseInt(properties.getProperty("maxMemory"));
+    public synchronized JavaHeapSize getMaxHeapSize() {
+        return JavaHeapSize.valueOf(properties.getProperty(PROPERTY_MAX_HEAP_SIZE));
     }
 
-    public synchronized void setInitialMemory(final int initialMemory) {
-        properties.setProperty("initialMemory", String.valueOf(initialMemory));
+    public synchronized void setInitialHeapSize(final JavaHeapSize initialHeapSize) {
+        properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialHeapSize.name());
     }
 
-    /**
-     * @return the option id of the memory object or -1 for "None".
-     */
-    public synchronized int getInitialMemory() {
-        return Integer.parseInt(properties.getProperty("initialMemory"));
+    public synchronized JavaHeapSize getInitialHeapSize() {
+        return JavaHeapSize.valueOf(properties.getProperty(PROPERTY_INITIAL_HEAP_SIZE));
     }
 
     @Override

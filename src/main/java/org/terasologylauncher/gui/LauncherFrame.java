@@ -18,6 +18,8 @@ package org.terasologylauncher.gui;
 
 import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Settings;
+import org.terasologylauncher.changelog.Changelog;
+import org.terasologylauncher.changelog.ChangelogBuilder;
 import org.terasologylauncher.launcher.TerasologyStarter;
 import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.updater.GameDownloader;
@@ -25,7 +27,8 @@ import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyGameVersion;
-import org.terasologylauncher.version.TerasologyLauncherVersion;
+import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
+import org.w3c.dom.Document;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -38,7 +41,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -52,7 +54,7 @@ import java.io.File;
 /**
  * @author Skaldarnar
  */
-public class LauncherFrame extends JFrame implements ActionListener {
+public final class LauncherFrame extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -163,23 +165,15 @@ public class LauncherFrame extends JFrame implements ActionListener {
         infoTextPane.setEnabled(false);
         infoTextPane.setHighlighter(null);
         infoTextPane.setOpaque(false);
+        infoTextPane.setContentType("text/html");
 
         infoTextPane.setForeground(Color.WHITE);
 
-        // TODO BundleUtils
-        infoTextPane.setText("Lorem ipsum dolor sit amet, \n " +
-            "consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore " +
-            "\n magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores " +
-            "\n et ea rebum. " +
-            "\n Stet clita kasd gubergren, " +
-            "\n no sea takimata sanctus est Lorem ipsum dolor sit amet. " +
-            "\n Lorem ipsum dolor " +
-            "sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore " +
-            "\n \n \n magna aliquyam erat, sed diam voluptua. " +
-            "\n At vero eos et accusam et justo duo dolores et ea rebum. " +
-            "\n Stet clita kasd gubergren, " +
-            "\n no sea takimata sanctus est " +
-            "\n Lorem ipsum dolor sit amet.");
+        Document document = Changelog.getChangelog(settings.getBuildType(),
+            settings.getBuildVersion(settings.getBuildType()));
+        infoTextPane.setText(ChangelogBuilder.getChangelog(document,
+            settings.getBuildVersion(settings.getBuildType())));
+        // TODO scroll infoTextPane to top
 
         //infoTextPane.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, updatePanelWidth - 16,
         // updatePanelHeight - 16);
@@ -200,11 +194,11 @@ public class LauncherFrame extends JFrame implements ActionListener {
         logo.setIcon(BundleUtils.getImageIcon("logo"));
 
         // Launcher version info label
-        version = new JLabel(TerasologyLauncherVersion.getInstance().getDisplayVersion());
+        version = new JLabel(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
         version.setFont(version.getFont().deriveFont(12f));
         version.setForeground(Color.WHITE);
         version.setBounds(FRAME_WIDTH - 32 - 16 - xShift, 0, 32, 32);
-        version.setText(TerasologyLauncherVersion.getInstance().getDisplayVersion());
+        version.setText(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
 
         // Forums link
         forums = new LinkJLabel(BundleUtils.getLabel("launcher_forum"), BundleUtils.getURI("terasology_forum"));
@@ -301,16 +295,17 @@ public class LauncherFrame extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(final ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
-            action(e.getActionCommand(), (JComponent) e.getSource());
+            action(e.getActionCommand());
         }
     }
 
-    private void action(final String command, final Component component) {
+    private void action(final String command) {
         if (command.equals(SETTINGS_ACTION)) {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-                settingsMenu = new SettingsMenu(settings, gameVersion);
+                settingsMenu = new SettingsMenu(terasologyDirectory, settings, gameVersion);
                 settingsMenu.setModal(true);
                 settingsMenu.setVisible(true);
+                // TODO "windowClosed" is called twice
                 settingsMenu.addWindowListener(new WindowAdapter() {
                     @Override
                     public void windowClosed(final WindowEvent e) {
@@ -325,7 +320,7 @@ public class LauncherFrame extends JFrame implements ActionListener {
             System.exit(0);
         } else if (command.equals(START_ACTION)) {
             final TerasologyStarter terasologyStarter = new TerasologyStarter(terasologyDirectory, os,
-                settings.getMaximalMemory(), settings.getInitialMemory());
+                settings.getMaxHeapSize(), settings.getInitialHeapSize());
             if (terasologyStarter.startGame()) {
                 System.exit(0);
             } else {
@@ -349,6 +344,13 @@ public class LauncherFrame extends JFrame implements ActionListener {
 
         settingsButton.setText(BundleUtils.getLabel("launcher_settings"));
         cancelButton.setText(BundleUtils.getLabel("launcher_cancel"));
+
+        // TODO Refactor into own method
+        Document document = Changelog.getChangelog(settings.getBuildType(),
+            settings.getBuildVersion(settings.getBuildType()));
+        infoTextPane.setText(ChangelogBuilder.getChangelog(document,
+            settings.getBuildVersion(settings.getBuildType())));
+        // TODO scroll infoTextPane to top
     }
 
     /**

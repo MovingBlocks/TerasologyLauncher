@@ -23,7 +23,7 @@ import org.terasologylauncher.Languages;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
-import org.terasologylauncher.util.Memory;
+import org.terasologylauncher.util.JavaHeapSize;
 import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyGameVersion;
 
@@ -45,12 +45,13 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
+import java.util.List;
 import java.util.Locale;
 
 /**
  * @author Skaldarnar
  */
-public class SettingsMenu extends JDialog implements ActionListener {
+public final class SettingsMenu extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(SettingsMenu.class);
@@ -59,19 +60,23 @@ public class SettingsMenu extends JDialog implements ActionListener {
     private static final String CANCEL_ACTION = "cancel";
     private static final String RESET_ACTION = "reset";
 
-    private static final String MAX_MEM_ACTION = "maxMem";
+    private static final String MAX_HEAP_SIZE_ACTION = "maxHeapSize";
+    private static final String INITIAL_HEAP_SIZE_ACTION = "initialHeapSize";
 
     private JComboBox buildTypeBox;
     private JComboBox buildVersionStableBox;
     private JComboBox buildVersionNightlyBox;
-    private JComboBox maxMemBox;
-    private JComboBox initialMemBox;
+    private JComboBox maxHeapSizeBox;
+    private JComboBox initialHeapSizeBox;
     private JComboBox languageBox;
 
+    private final File terasologyDirectory;
     private final Settings settings;
     private final TerasologyGameVersion gameVersion;
 
-    public SettingsMenu(final Settings settings, final TerasologyGameVersion gameVersion) {
+    public SettingsMenu(final File terasologyDirectory, final Settings settings,
+                        final TerasologyGameVersion gameVersion) {
+        this.terasologyDirectory = terasologyDirectory;
         this.settings = settings;
         this.gameVersion = gameVersion;
 
@@ -84,8 +89,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         populateBuildType();
         populateVersions(buildVersionStableBox, BuildType.STABLE);
         populateVersions(buildVersionNightlyBox, BuildType.NIGHTLY);
-        populateMaxMemory();
-        populateInitialMemory();
+        populateHeapSize();
         populateLanguage();
 
         pack();
@@ -171,21 +175,23 @@ public class SettingsMenu extends JDialog implements ActionListener {
         buildVersionNightlyBox = new JComboBox();
         buildVersionNightlyBox.setFont(settingsFont);
 
-        JLabel maxMemLabel = new JLabel();
-        maxMemLabel.setText(BundleUtils.getLabel("settings_game_maxMemory"));
-        maxMemLabel.setFont(settingsFont);
+        JLabel maxHeapSizeLabel = new JLabel();
+        maxHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_maxHeapSize"));
+        maxHeapSizeLabel.setFont(settingsFont);
 
-        maxMemBox = new JComboBox();
-        maxMemBox.setFont(settingsFont);
-        maxMemBox.addActionListener(this);
-        maxMemBox.setActionCommand(MAX_MEM_ACTION);
+        maxHeapSizeBox = new JComboBox();
+        maxHeapSizeBox.setFont(settingsFont);
+        maxHeapSizeBox.addActionListener(this);
+        maxHeapSizeBox.setActionCommand(MAX_HEAP_SIZE_ACTION);
 
-        JLabel initialMemLabel = new JLabel();
-        initialMemLabel.setText(BundleUtils.getLabel("settings_game_initialMemory"));
-        initialMemLabel.setFont(settingsFont);
+        JLabel initialHeapSizeLabel = new JLabel();
+        initialHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_initialHeapSize"));
+        initialHeapSizeLabel.setFont(settingsFont);
 
-        initialMemBox = new JComboBox();
-        initialMemBox.setFont(settingsFont);
+        initialHeapSizeBox = new JComboBox();
+        initialHeapSizeBox.setFont(settingsFont);
+        initialHeapSizeBox.addActionListener(this);
+        initialHeapSizeBox.setActionCommand(INITIAL_HEAP_SIZE_ACTION);
 
         final GroupLayout gameTabLayout = new GroupLayout(gameSettingsTab);
         gameSettingsTab.setLayout(gameTabLayout);
@@ -198,15 +204,15 @@ public class SettingsMenu extends JDialog implements ActionListener {
                         .addComponent(buildTypeLabel)
                         .addComponent(buildVersionStableLabel)
                         .addComponent(buildVersionNightlyLabel)
-                        .addComponent(maxMemLabel)
-                        .addComponent(initialMemLabel))
+                        .addComponent(maxHeapSizeLabel)
+                        .addComponent(initialHeapSizeLabel))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup()
                         .addComponent(buildTypeBox)
                         .addComponent(buildVersionStableBox)
                         .addComponent(buildVersionNightlyBox)
-                        .addComponent(maxMemBox)
-                        .addComponent(initialMemBox))
+                        .addComponent(maxHeapSizeBox)
+                        .addComponent(initialHeapSizeBox))
                     .addContainerGap())
         );
 
@@ -230,13 +236,13 @@ public class SettingsMenu extends JDialog implements ActionListener {
                             GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(maxMemLabel)
-                        .addComponent(maxMemBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                        .addComponent(maxHeapSizeLabel)
+                        .addComponent(maxHeapSizeBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                             GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(initialMemLabel)
-                        .addComponent(initialMemBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                        .addComponent(initialHeapSizeLabel)
+                        .addComponent(initialHeapSizeBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                             GroupLayout.PREFERRED_SIZE))
                     .addContainerGap())
         );
@@ -355,7 +361,6 @@ public class SettingsMenu extends JDialog implements ActionListener {
                     .addComponent(openScreenShotsDir))
                 .addContainerGap()
         );
-
         return directoriesTab;
     }
 
@@ -437,7 +442,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
-    private void populateMaxMemory() {
+    private void populateHeapSize() {
         long max = 512;
 
         final OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
@@ -451,59 +456,34 @@ public class SettingsMenu extends JDialog implements ActionListener {
         final String arch = System.getProperty("os.arch");
         final boolean bit64 = arch.contains("64");
 
-        // limit max memory for 32bit JVM
-        if (!bit64) {
-            max = Math.min(Memory.MAX_32_BIT_MEMORY, max);
-            logger.debug("Maximal usable memory for 32 bit JVM: {}", max);
-        } else {
-            logger.debug("Maximal usable memory for 64 bit JVM: {}", max);
+        final List<JavaHeapSize> heapSizes = JavaHeapSize.getHeapSizes(max, bit64);
+        for (JavaHeapSize heapSize : heapSizes) {
+            maxHeapSizeBox.addItem(heapSize);
+            initialHeapSizeBox.addItem(heapSize);
         }
-
-        // fill in the combo box entries
-        maxMemBox.removeAllItems();
-        for (final Memory m : Memory.MEMORY_OPTIONS) {
-            if (m.getMemoryMB() <= max) {
-                maxMemBox.addItem(m.getLabel());
-            }
-        }
-
-        updateMaxMemSelection();
+        updateHeapSizeSelection();
     }
 
-    private void populateInitialMemory() {
-        final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getMemoryMB();
-
-        initialMemBox.removeAllItems();
-        initialMemBox.addItem(BundleUtils.getLabel("settings_game_initialMemory_none"));
-        for (final Memory m : Memory.MEMORY_OPTIONS) {
-            if (m.getMemoryMB() <= currentMemSetting) {
-                initialMemBox.addItem(m.getLabel());
-            }
-        }
-        updateInitialMemSelection();
+    private void updateHeapSizeSelection() {
+        maxHeapSizeBox.setSelectedItem(settings.getMaxHeapSize());
+        initialHeapSizeBox.setSelectedItem(settings.getInitialHeapSize());
     }
 
-    private void updateMaxMemSelection() {
-        final int memoryOptionID = settings.getMaximalMemory();
-        final int index = Memory.getMemoryIndexFromId(memoryOptionID);
-        if (index < maxMemBox.getItemCount()) {
-            maxMemBox.setSelectedIndex(index);
-        } else {
-            maxMemBox.setSelectedIndex(maxMemBox.getItemCount() - 1);
+    private void updateInitialHeapSizeBox() {
+        final JavaHeapSize initialHeapSize = (JavaHeapSize) initialHeapSizeBox.getSelectedItem();
+        final JavaHeapSize maxHeapSize = (JavaHeapSize) maxHeapSizeBox.getSelectedItem();
+
+        if ((initialHeapSize != null) && (maxHeapSize != null) && (maxHeapSize.compareTo(initialHeapSize) < 0)) {
+            initialHeapSizeBox.setSelectedItem(maxHeapSize);
         }
     }
 
-    private void updateInitialMemSelection() {
-        final int memoryOptionID = settings.getInitialMemory();
-        if (memoryOptionID == -1) {
-            initialMemBox.setSelectedIndex(0);
-        } else {
-            final int index = Memory.getMemoryIndexFromId(memoryOptionID);
-            if (index + 1 < initialMemBox.getItemCount()) {
-                initialMemBox.setSelectedIndex(index + 1);
-            } else {
-                initialMemBox.setSelectedIndex(initialMemBox.getItemCount() - 1);
-            }
+    private void updateMaxHeapSizeBox() {
+        final JavaHeapSize initialHeapSize = (JavaHeapSize) initialHeapSizeBox.getSelectedItem();
+        final JavaHeapSize maxHeapSize = (JavaHeapSize) maxHeapSizeBox.getSelectedItem();
+
+        if ((initialHeapSize != null) && (maxHeapSize != null) && (maxHeapSize.compareTo(initialHeapSize) < 0)) {
+            maxHeapSizeBox.setSelectedItem(initialHeapSize);
         }
     }
 
@@ -527,8 +507,10 @@ public class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void actionPerformed(final String actionCommand) {
-        if (actionCommand.equals(MAX_MEM_ACTION)) {
-            updateInitMemBox();
+        if (actionCommand.equals(MAX_HEAP_SIZE_ACTION)) {
+            updateInitialHeapSizeBox();
+        } else if (actionCommand.equals(INITIAL_HEAP_SIZE_ACTION)) {
+            updateMaxHeapSizeBox();
         } else if (actionCommand.equals(CANCEL_ACTION)) {
             dispose();
             setVisible(false);
@@ -538,8 +520,7 @@ public class SettingsMenu extends JDialog implements ActionListener {
             updateBuildTypeSelection();
             populateVersions(buildVersionStableBox, BuildType.STABLE);
             populateVersions(buildVersionNightlyBox, BuildType.NIGHTLY);
-            updateMaxMemSelection();
-            updateInitialMemSelection();
+            updateHeapSizeSelection();
             populateLanguage();
         } else if (actionCommand.equals(SAVE_ACTION)) {
             // save build type and version
@@ -567,14 +548,9 @@ public class SettingsMenu extends JDialog implements ActionListener {
                 }
             }
 
-            // save ram settings
-            settings.setMaximalMemory(Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getSettingsId());
-            final int selectedInitMem = initialMemBox.getSelectedIndex();
-            if (selectedInitMem > 0) {
-                settings.setInitialMemory(Memory.MEMORY_OPTIONS[initialMemBox.getSelectedIndex() - 1].getSettingsId());
-            } else {
-                settings.setInitialMemory(Settings.INITIAL_MEMORY_NONE);
-            }
+            // save heap size settings
+            settings.setMaxHeapSize((JavaHeapSize) maxHeapSizeBox.getSelectedItem());
+            settings.setInitialHeapSize((JavaHeapSize) initialHeapSizeBox.getSelectedItem());
 
             // save languageBox settings
             Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectedIndex()));
@@ -591,25 +567,6 @@ public class SettingsMenu extends JDialog implements ActionListener {
             dispose();
             setVisible(false);
             setAlwaysOnTop(false);
-        }
-    }
-
-    private void updateInitMemBox() {
-        final int currentIdx = initialMemBox.getSelectedIndex();
-
-        final int currentMemSetting = Memory.MEMORY_OPTIONS[maxMemBox.getSelectedIndex()].getMemoryMB();
-        initialMemBox.removeAllItems();
-        initialMemBox.addItem(BundleUtils.getLabel("settings_game_initialMemory_none"));
-        for (final Memory m : Memory.MEMORY_OPTIONS) {
-            if (m.getMemoryMB() <= currentMemSetting) {
-                initialMemBox.addItem(m.getLabel());
-            }
-        }
-
-        if (currentIdx >= initialMemBox.getItemCount()) {
-            initialMemBox.setSelectedIndex(initialMemBox.getItemCount() - 1);
-        } else {
-            initialMemBox.setSelectedIndex(currentIdx);
         }
     }
 }

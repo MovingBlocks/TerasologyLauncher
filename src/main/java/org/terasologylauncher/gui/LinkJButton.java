@@ -32,7 +32,7 @@ import java.net.URI;
  *
  * @author Skaldarnar
  */
-public class LinkJButton extends JButton {
+public final class LinkJButton extends JButton {
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(LinkJButton.class);
