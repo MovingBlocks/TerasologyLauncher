@@ -22,7 +22,6 @@ import org.terasologylauncher.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,10 +57,10 @@ public final class SelfUpdater {
         arguments.add("-cp");
         final File classpath = new File(new File(temporaryUpdateDir, "TerasologyLauncher"), "lib");
         final StringBuilder classpathBuilder = new StringBuilder();
-        for (File f: classpath.listFiles()){
+        for (File f : classpath.listFiles()) {
             classpathBuilder.append(f.toURI()).append(File.pathSeparator);
         }
-        classpathBuilder.deleteCharAt(classpathBuilder.length()-1);
+        classpathBuilder.deleteCharAt(classpathBuilder.length() - 1);
         arguments.add(classpathBuilder.toString());
         // Specify class with main method to run
         arguments.add(SelfUpdater.class.getCanonicalName());

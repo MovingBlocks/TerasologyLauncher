@@ -92,13 +92,16 @@ public final class LauncherUpdater {
         // TODO: handle different executable types?
 
         // Get current launcher location
-        File launcherLocation = null;
+        File launcherLocation;
         try {
             launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation()
                 .toURI());
         } catch (URISyntaxException e) {
-            logger.error("Launcher update failed! Could not retrieve current launcher directory.",e);
-            // TODO: show i18n error message
+            logger.error("Launcher update failed! Could not retrieve current launcher directory.", e);
+            JOptionPane.showMessageDialog(null,
+                BundleUtils.getLabel("update_launcher_updateFailed"),
+                BundleUtils.getLabel("message_error_title"),
+                JOptionPane.ERROR_MESSAGE);
             logger.error("Aborting update process!");
             return;
         }
