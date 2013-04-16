@@ -28,6 +28,7 @@ import javax.swing.JOptionPane;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 public final class LauncherUpdater {
@@ -91,8 +92,16 @@ public final class LauncherUpdater {
         // TODO: handle different executable types?
 
         // Get current launcher location
-        File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation()
-            .getPath());
+        File launcherLocation = null;
+        try {
+            launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation()
+                .toURI());
+        } catch (URISyntaxException e) {
+            logger.error("Launcher update failed! Could not retrieve current launcher directory.",e);
+            // TODO: show i18n error message
+            logger.error("Aborting update process!");
+            return;
+        }
 
         try {
             URL updateURL = DownloadUtils.getDownloadURL(jobName, upstreamVersion, "TerasologyLauncher.zip");

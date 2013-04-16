@@ -22,6 +22,7 @@ import org.terasologylauncher.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,14 +49,20 @@ public final class SelfUpdater {
     public static void runUpdate(File temporaryUpdateDir, File launcherFile) {
         List<String> arguments = new ArrayList<String>();
 
-        String separator = System.getProperty("file.separator");
-        String javaPath = System.getProperty("java.home") + separator + "bin" + separator + "java";
+        final String separator = File.separator;
+        final String javaBin = System.getProperty("java.home") + separator + "bin" + separator + "java";
 
-        arguments.add(javaPath);
-        // Set the classpath
+        // Set 'java' executable as programme to run
+        arguments.add(javaBin);
+        // Build and set the classpath
         arguments.add("-cp");
-        arguments.add("\"" + temporaryUpdateDir + separator + "TerasologyLauncher" + separator + "lib"
-            + separator + "*" + "\"");
+        final File classpath = new File(new File(temporaryUpdateDir, "TerasologyLauncher"), "lib");
+        final StringBuilder classpathBuilder = new StringBuilder();
+        for (File f: classpath.listFiles()){
+            classpathBuilder.append(f.toURI()).append(File.pathSeparator);
+        }
+        classpathBuilder.deleteCharAt(classpathBuilder.length()-1);
+        arguments.add(classpathBuilder.toString());
         // Specify class with main method to run
         arguments.add(SelfUpdater.class.getCanonicalName());
         // Arguments for update locations
