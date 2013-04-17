@@ -256,10 +256,13 @@ public final class SettingsMenu extends JDialog implements ActionListener {
         JButton openLogDir = new JButton();
         openLogDir.setFont(settingsFont);
         openLogDir.setText(BundleUtils.getLabel("settings_directories_open"));
+        final File logDir = new File(terasologyDirectory, DirectoryUtils.LOGS_DIR_NAME);
+        if (!logDir.exists()) {
+            openLogDir.setEnabled(false);
+        }
         openLogDir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final File logDir = new File(terasologyDirectory, DirectoryUtils.LOGS_DIR_NAME);
                 DirectoryUtils.showInFileManager(logDir);
             }
         });
@@ -268,10 +271,13 @@ public final class SettingsMenu extends JDialog implements ActionListener {
         JButton openSavedWorldsDir = new JButton();
         openSavedWorldsDir.setFont(settingsFont);
         openSavedWorldsDir.setText(BundleUtils.getLabel("settings_directories_open"));
+        final File savesDir = new File(terasologyDirectory, DirectoryUtils.SAVED_WORLDS_DIR_NAME);
+        if (!savesDir.exists()) {
+            openSavedWorldsDir.setEnabled(false);
+        }
         openSavedWorldsDir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final File savesDir = new File(terasologyDirectory, DirectoryUtils.SAVED_WORLDS_DIR_NAME);
                 DirectoryUtils.showInFileManager(savesDir);
             }
         });
@@ -280,10 +286,13 @@ public final class SettingsMenu extends JDialog implements ActionListener {
         JButton openScreenShotsDir = new JButton();
         openScreenShotsDir.setFont(settingsFont);
         openScreenShotsDir.setText(BundleUtils.getLabel("settings_directories_open"));
+        final File screensDir = new File(terasologyDirectory, DirectoryUtils.SCREENSHOTS_DIR_NAME);
+        if (!screensDir.exists()) {
+            openScreenShotsDir.setEnabled(false);
+        }
         openScreenShotsDir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final File screensDir = new File(terasologyDirectory, DirectoryUtils.SCREENSHOTS_DIR_NAME);
                 DirectoryUtils.showInFileManager(screensDir);
             }
         });
@@ -292,10 +301,13 @@ public final class SettingsMenu extends JDialog implements ActionListener {
         JButton openModsDir = new JButton();
         openModsDir.setFont(settingsFont);
         openModsDir.setText(BundleUtils.getLabel("settings_directories_open"));
+        final File modsDir = new File(terasologyDirectory, DirectoryUtils.MODS_DIR_NAME);
+        if (!modsDir.exists()) {
+            openModsDir.setEnabled(false);
+        }
         openModsDir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final File modsDir = new File(terasologyDirectory, DirectoryUtils.MODS_DIR_NAME);
                 DirectoryUtils.showInFileManager(modsDir);
             }
         });
