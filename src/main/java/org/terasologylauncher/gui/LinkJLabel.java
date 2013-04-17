@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.JLabel;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -49,6 +50,7 @@ public final class LinkJLabel extends JLabel implements MouseListener {
         lastClicked = 0;
         setForeground(STANDARD_COLOR);
         addMouseListener(this);
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
     @Override
