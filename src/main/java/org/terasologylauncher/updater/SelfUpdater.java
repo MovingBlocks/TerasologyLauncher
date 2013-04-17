@@ -46,7 +46,7 @@ public final class SelfUpdater {
      * @param temporaryUpdateDir - where the downloaded files are located
      * @param launcherFile       - where the launcher is located
      */
-    public static void runUpdate(final File temporaryUpdateDir, final File launcherFile) {
+    public static void runUpdate(final OperatingSystem os, final File temporaryUpdateDir, final File launcherFile) {
         List<String> arguments = new ArrayList<String>();
 
         final String separator = File.separator;
@@ -58,7 +58,6 @@ public final class SelfUpdater {
         arguments.add("-cp");
         final File classpath = new File(new File(temporaryUpdateDir, "TerasologyLauncher"), "lib");
 
-        final OperatingSystem os = OperatingSystem.getOS();
         if (os.isWindows()) {
             arguments.add("\"" + temporaryUpdateDir + separator + "TerasologyLauncher" + separator + "lib" + separator +
                 "*" + "\"");
