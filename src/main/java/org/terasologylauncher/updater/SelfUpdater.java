@@ -19,6 +19,7 @@ package org.terasologylauncher.updater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.util.FileUtils;
+import org.terasologylauncher.util.OperatingSystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,12 +57,20 @@ public final class SelfUpdater {
         // Build and set the classpath
         arguments.add("-cp");
         final File classpath = new File(new File(temporaryUpdateDir, "TerasologyLauncher"), "lib");
-        final StringBuilder classpathBuilder = new StringBuilder();
-        for (File f : classpath.listFiles()) {
-            classpathBuilder.append(f.toURI()).append(File.pathSeparator);
+
+        final OperatingSystem os = OperatingSystem.getOS();
+        if (os.isWindows()) {
+            arguments.add("\"" + temporaryUpdateDir + separator + "TerasologyLauncher" + separator + "lib" + separator +
+                "*" + "\"");
+        } else {
+            final StringBuilder classpathBuilder = new StringBuilder();
+            for (File f : classpath.listFiles()) {
+                classpathBuilder.append(f.toURI()).append(File.pathSeparator);
+            }
+            classpathBuilder.deleteCharAt(classpathBuilder.length() - 1);
+            arguments.add(classpathBuilder.toString());
         }
-        classpathBuilder.deleteCharAt(classpathBuilder.length() - 1);
-        arguments.add(classpathBuilder.toString());
+
         // Specify class with main method to run
         arguments.add(SelfUpdater.class.getCanonicalName());
         // Arguments for update locations
