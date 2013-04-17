@@ -19,6 +19,7 @@ package org.terasologylauncher.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.util.BundleUtils;
+import org.terasologylauncher.util.ImageUtils;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -26,6 +27,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -63,6 +65,19 @@ public final class TSButton extends JButton implements MouseListener {
             hoveredImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);
             pressedImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);
         }
+    }
+
+    @Override
+    public void setBounds(final int x, final int y, final int width, final int height) {
+        super.setBounds(x, y, width, height);
+        normalImg = ImageUtils.getScaledInstance(normalImg, width, height);
+        hoveredImg = ImageUtils.getScaledInstance(hoveredImg, width, height);
+        pressedImg = ImageUtils.getScaledInstance(pressedImg, width, height);
+    }
+
+    @Override
+    public void setBounds(final Rectangle r) {
+        this.setBounds(r.x, r.y, r.width, r.height);
     }
 
     @Override

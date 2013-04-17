@@ -16,11 +16,31 @@
 
 package org.terasologylauncher.util;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 
 public final class ImageUtils {
 
     private ImageUtils() {
+    }
+
+    /**
+     * Scales a BufferedImage to the preferred size.
+     *
+     * @param image  - the image to scale
+     * @param width  - the new width
+     * @param height - the new height
+     *
+     * @return the scaled BufferedImage
+     */
+    public static BufferedImage getScaledInstance(final BufferedImage image, final int width, final int height) {
+        BufferedImage scaled = new BufferedImage(width, height, image.getType());
+        Graphics2D g = scaled.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.drawImage(image, 0, 0, width, height, 0, 0, image.getWidth(), image.getHeight(), null);
+        g.dispose();
+        return scaled;
     }
 
     public static BufferedImage blur(final BufferedImage image, final int radius) {
