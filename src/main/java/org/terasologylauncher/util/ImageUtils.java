@@ -31,7 +31,6 @@ public final class ImageUtils {
      * @param image  - the image to scale
      * @param width  - the new width
      * @param height - the new height
-     *
      * @return the scaled BufferedImage
      */
     public static BufferedImage getScaledInstance(final BufferedImage image, final int width, final int height) {
