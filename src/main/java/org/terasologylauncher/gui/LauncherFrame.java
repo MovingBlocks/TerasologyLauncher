@@ -133,6 +133,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         // Setup start button
         startButton = new TSButton(BundleUtils.getLabel("launcher_start"));
         startButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - 40) + yShift, 96, 32);
+        startButton.setToolTipText(BundleUtils.getLabel("tooltip_download"));
         startButton.setActionCommand(START_ACTION);
         startButton.addActionListener(this);
 
@@ -189,30 +190,35 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         sp.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, INFO_PANEL_WIDTH - 16, INFO_PANEL_HEIGHT - 16);
 
         // Terasology logo
-        final JLabel logo = new JLabel();
+        final JLabel logo = new LinkJLabel(BundleUtils.getLabel("launcher_website"),
+            BundleUtils.getURI("terasology_website"));
         logo.setBounds(8, 0, 400, 96);
         logo.setIcon(BundleUtils.getImageIcon("logo"));
+        logo.setToolTipText(BundleUtils.getLabel("tooltip_website"));
 
         // Launcher version info label
         version = new JLabel(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
         version.setFont(version.getFont().deriveFont(12f));
         version.setForeground(Color.WHITE);
-        version.setBounds(FRAME_WIDTH - 32 - 16 - xShift, 0, 32, 32);
+        version.setBounds(FRAME_WIDTH - 64 - 16 - xShift, 0, 32, 32);
         version.setText(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
 
         // Forums link
         forums = new LinkJLabel(BundleUtils.getLabel("launcher_forum"), BundleUtils.getURI("terasology_forum"));
+        forums.setToolTipText(BundleUtils.getLabel("tooltip_forum"));
         forums.setFont(forums.getFont().deriveFont(24f));
         forums.setBounds(480, 36, 96, 32);
 
         // Issues link
         issues = new LinkJLabel(BundleUtils.getLabel("launcher_issues"),
             BundleUtils.getURI("terasology_github_issues"));
+        issues.setToolTipText(BundleUtils.getLabel("tooltip_github_issues"));
         issues.setFont(issues.getFont().deriveFont(24f));
         issues.setBounds(640, 36, 96, 32);
 
         // Mods
         mods = new LinkJLabel(BundleUtils.getLabel("launcher_mods"), BundleUtils.getURI("terasology_mods"));
+        mods.setToolTipText(BundleUtils.getLabel("tooltip_mods"));
         mods.setFont(mods.getFont().deriveFont(24f));
         mods.setBounds(FRAME_WIDTH - 96 - 16 - xShift, 36, 96, 32);
 
@@ -226,36 +232,42 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         github = new LinkJButton(BundleUtils.getURI("terasology_github"));
         github.setIcon(BundleUtils.getImageIcon("github"));
         github.setRolloverIcon(BundleUtils.getImageIcon("github_hover"));
+        github.setToolTipText(BundleUtils.getLabel("tooltip_github"));
         github.setBounds(8 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         github.setBorder(null);
 
         youtube = new LinkJButton(BundleUtils.getURI("terasology_youtube"));
         youtube.setIcon(BundleUtils.getImageIcon("youtube"));
         youtube.setRolloverIcon(BundleUtils.getImageIcon("youtube_hover"));
+        youtube.setToolTipText(BundleUtils.getLabel("tooltip_youtube"));
         youtube.setBounds(8 + 38 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         youtube.setBorder(null);
 
         gplus = new LinkJButton(BundleUtils.getURI("terasology_gplus"));
         gplus.setIcon(BundleUtils.getImageIcon("gplus"));
         gplus.setRolloverIcon(BundleUtils.getImageIcon("gplus_hover"));
+        gplus.setToolTipText(BundleUtils.getLabel("tooltip_gplus"));
         gplus.setBounds(8 + (38 * 2) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         gplus.setBorder(null);
 
         facebook = new LinkJButton(BundleUtils.getURI("terasology_facebook"));
         facebook.setIcon(BundleUtils.getImageIcon("facebook"));
         facebook.setRolloverIcon(BundleUtils.getImageIcon("facebook_hover"));
+        facebook.setToolTipText(BundleUtils.getLabel("tooltip_facebook"));
         facebook.setBounds(8 + (38 * 3) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         facebook.setBorder(null);
 
         twitter = new LinkJButton(BundleUtils.getURI("terasology_twitter"));
         twitter.setIcon(BundleUtils.getImageIcon("twitter"));
         twitter.setRolloverIcon(BundleUtils.getImageIcon("twitter_hover"));
+        twitter.setToolTipText(BundleUtils.getLabel("tooltip_twitter"));
         twitter.setBounds(8 + (38 * 4) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         twitter.setBorder(null);
 
         reddit = new LinkJButton(BundleUtils.getURI("terasology_reddit"));
         reddit.setIcon(BundleUtils.getImageIcon("reddit"));
         reddit.setRolloverIcon(BundleUtils.getImageIcon("reddit_hover"));
+        reddit.setToolTipText(BundleUtils.getLabel("tooltip_reddit"));
         reddit.setBounds(8 + (38 * 5) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         reddit.setBorder(null);
 
@@ -303,7 +315,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         if (command.equals(SETTINGS_ACTION)) {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
                 settingsMenu = new SettingsMenu(terasologyDirectory, settings, gameVersion);
-                settingsMenu.setModal(true);
                 settingsMenu.setVisible(true);
                 // TODO "windowClosed" is called twice
                 settingsMenu.addWindowListener(new WindowAdapter() {
@@ -350,7 +361,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             settings.getBuildVersion(settings.getBuildType()));
         infoTextPane.setText(ChangelogBuilder.getChangelog(document,
             settings.getBuildVersion(settings.getBuildType())));
-        // TODO scroll infoTextPane to top
+        // scroll infoTextPane to top
+        infoTextPane.setCaretPosition(0);
     }
 
     /**
@@ -374,6 +386,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
      * "screens" and "launcher".
      *
      * @param f the file to check
+     *
      * @return true if the file can be deleted
      */
     private boolean canBeDeleted(final File f) {
@@ -436,26 +449,49 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 if (installedVersion == selectedVersion) {
                     // game can be started
                     startButton.setText(BundleUtils.getLabel("launcher_start"));
+                    startButton.setToolTipText(BundleUtils.getLabel("tooltip_start"));
                     startButton.setActionCommand(START_ACTION);
                 } else {
+                    final StringBuilder builder = new StringBuilder();
                     // differentiate between up- and downgrade
                     if (installedVersion < selectedVersion) {
                         startButton.setText(BundleUtils.getLabel("launcher_update"));
                         startButton.setActionCommand(DOWNLOAD_ACTION);
+                        builder.append("<html>")
+                            .append(BundleUtils.getLabel("tooltip_update"))
+                            .append("<br>")
+                            .append(BundleUtils.getLabel("message_update_current"))
+                            .append(" ").append(installedVersion)
+                            .append("<br>")
+                            .append(BundleUtils.getLabel("tooltip_selectedVersion"))
+                            .append(" ").append(selectedVersion)
+                            .append("</html>");
                     } else {
                         startButton.setText(BundleUtils.getLabel("launcher_downgrade"));
                         startButton.setActionCommand(DOWNLOAD_ACTION);
+                        builder.append("<html>")
+                            .append(BundleUtils.getLabel("tooltip_downgrade"))
+                            .append("<br>")
+                            .append(BundleUtils.getLabel("message_update_current"))
+                            .append(" ").append(installedVersion)
+                            .append("<br>")
+                            .append(BundleUtils.getLabel("tooltip_selectedVersion"))
+                            .append(" ").append(selectedVersion)
+                            .append("</html>");
                     }
+                    startButton.setToolTipText(builder.toString());
                 }
             } else {
                 // download other build type
                 startButton.setText(BundleUtils.getLabel("launcher_download"));
+                startButton.setToolTipText(BundleUtils.getLabel("tooltip_download"));
                 startButton.setActionCommand(DOWNLOAD_ACTION);
             }
         } else {
             if (GameData.isGameInstalled(terasologyDirectory)) {
                 // installed game can be started
                 startButton.setText(BundleUtils.getLabel("launcher_start"));
+                startButton.setToolTipText(BundleUtils.getLabel("tooltip_start"));
                 startButton.setActionCommand(START_ACTION);
             } else {
                 // no game installed, and no way to download it...
