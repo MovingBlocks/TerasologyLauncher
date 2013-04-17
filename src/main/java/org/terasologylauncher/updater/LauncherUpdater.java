@@ -97,7 +97,6 @@ public final class LauncherUpdater {
             logger.error("Aborting update process!");
             return;
         }
-        // TODO: handle different executable types?
 
         // Get current launcher location
         File launcherLocation;
