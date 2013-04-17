@@ -23,6 +23,7 @@ import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.DownloadException;
 import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.FileUtils;
+import org.terasologylauncher.util.OperatingSystem;
 import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.JOptionPane;
@@ -36,13 +37,16 @@ public final class LauncherUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
 
+    private final OperatingSystem os;
     private final File applicationDir;
     private final String currentVersion;
     private final String jobName;
     private Integer upstreamVersion;
     private TerasologyLauncherVersionInfo versionInfo;
 
-    public LauncherUpdater(final File applicationDir, final String currentVersion, final String jobName) {
+    public LauncherUpdater(final OperatingSystem os, final File applicationDir, final String currentVersion,
+                           final String jobName) {
+        this.os = os;
         this.applicationDir = applicationDir;
         if ((currentVersion == null) || (currentVersion.trim().length() == 0)) {
             this.currentVersion = "0";
@@ -127,7 +131,7 @@ public final class LauncherUpdater {
             FileUtils.extractZip(downloadedZipFile);
 
             // Start SelfUpdater
-            SelfUpdater.runUpdate(temporaryUpdateDir, launcherLocation);
+            SelfUpdater.runUpdate(os, temporaryUpdateDir, launcherLocation);
         } catch (MalformedURLException e) {
             logger.error("Launcher update failed!", e);
             JOptionPane.showMessageDialog(null,
