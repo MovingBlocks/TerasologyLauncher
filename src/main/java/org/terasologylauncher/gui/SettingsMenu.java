@@ -31,6 +31,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -73,13 +74,14 @@ public final class SettingsMenu extends JDialog implements ActionListener {
     private final Settings settings;
     private final TerasologyGameVersion gameVersion;
 
-    public SettingsMenu(final File terasologyDirectory, final Settings settings,
+    public SettingsMenu(final JFrame parent, final File terasologyDirectory, final Settings settings,
                         final TerasologyGameVersion gameVersion) {
+        super(parent, BundleUtils.getLabel("settings_title"), true);
+
         this.terasologyDirectory = terasologyDirectory;
         this.settings = settings;
         this.gameVersion = gameVersion;
 
-        setTitle(BundleUtils.getLabel("settings_title"));
         setResizable(false);
         setIconImage(BundleUtils.getImage("icon"));
 
