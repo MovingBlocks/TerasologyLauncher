@@ -314,7 +314,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private void action(final String command) {
         if (command.equals(SETTINGS_ACTION)) {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-                settingsMenu = new SettingsMenu(terasologyDirectory, settings, gameVersion);
+                settingsMenu = new SettingsMenu(this, terasologyDirectory, settings, gameVersion);
                 settingsMenu.setVisible(true);
                 // TODO "windowClosed" is called twice
                 settingsMenu.addWindowListener(new WindowAdapter() {
@@ -386,7 +386,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
      * "screens" and "launcher".
      *
      * @param f the file to check
-     *
      * @return true if the file can be deleted
      */
     private boolean canBeDeleted(final File f) {
