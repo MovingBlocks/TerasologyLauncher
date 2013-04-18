@@ -19,12 +19,14 @@ package org.terasologylauncher.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.util.BundleUtils;
+import org.terasologylauncher.util.ImageUtils;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.awt.image.Kernel;
 import java.io.IOException;
 
 /**
@@ -52,7 +54,8 @@ public final class BackgroundImage extends JLabel {
 
         try {
             bg = BundleUtils.getBufferedImage("background");
-            //TODO: Apply blur filter
+            Kernel kernel = ImageUtils.buildKernel(8, 24f);
+            bg = ImageUtils.blur(bg, kernel);
         } catch (IOException e) {
             logger.error("Could not read background image.", e);
             bg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
