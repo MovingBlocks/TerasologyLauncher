@@ -29,16 +29,16 @@ import java.util.List;
 /**
  * @author Skaldarnar
  */
-public final class TerasologyGameVersion {
+public final class TerasologyGameVersions {
 
-    private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersion.class);
+    private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersions.class);
 
     private List<Integer> stableVersions;
     private List<Integer> nightlyVersions;
     private Integer stableVersion;
     private Integer nightlyVersion;
 
-    public TerasologyGameVersion() {
+    public TerasologyGameVersions() {
     }
 
     public void loadVersions(final Settings settings) {

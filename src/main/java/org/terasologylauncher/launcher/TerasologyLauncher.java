@@ -26,7 +26,7 @@ import org.terasologylauncher.updater.LauncherUpdater;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.OperatingSystem;
-import org.terasologylauncher.version.TerasologyGameVersion;
+import org.terasologylauncher.version.TerasologyGameVersions;
 import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.BorderFactory;
@@ -135,13 +135,13 @@ public final class TerasologyLauncher {
 
             // Game versions
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_loadGameVersions"));
-            final TerasologyGameVersion gameVersion = new TerasologyGameVersion();
-            gameVersion.loadVersions(settings);
-            logger.debug("Game versions: {}", gameVersion);
+            final TerasologyGameVersions gameVersions = new TerasologyGameVersions();
+            gameVersions.loadVersions(settings);
+            logger.debug("Game versions: {}", gameVersions);
 
             // LauncherFrame
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_createFrame"));
-            final Frame frame = new LauncherFrame(applicationDir, os, settings, gameVersion);
+            final Frame frame = new LauncherFrame(applicationDir, os, settings, gameVersions);
             frame.setVisible(true);
 
             // Dispose splash screen

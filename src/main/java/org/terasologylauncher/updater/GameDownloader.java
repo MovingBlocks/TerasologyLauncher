@@ -24,7 +24,7 @@ import org.terasologylauncher.gui.LauncherFrame;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.FileUtils;
-import org.terasologylauncher.version.TerasologyGameVersion;
+import org.terasologylauncher.version.TerasologyGameVersions;
 
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
@@ -52,15 +52,15 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
     private final LauncherFrame frame;
     private final Settings settings;
     private final File terasologyDirectory;
-    private final TerasologyGameVersion gameVersion;
+    private final TerasologyGameVersions gameVersions;
 
     public GameDownloader(final JProgressBar progressBar, final LauncherFrame frame, final Settings settings,
-                          final File terasologyDirectory, final TerasologyGameVersion gameVersion) {
+                          final File terasologyDirectory, final TerasologyGameVersions gameVersions) {
         this.progressBar = progressBar;
         this.frame = frame;
         this.settings = settings;
         this.terasologyDirectory = terasologyDirectory;
-        this.gameVersion = gameVersion;
+        this.gameVersions = gameVersions;
         progressBar.setVisible(true);
         progressBar.setValue(0);
         progressBar.setString(BundleUtils.getLabel("update_game_startDownload"));
@@ -85,7 +85,7 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         }
         final Integer version;
         if (settings.isBuildVersionLatest(settings.getBuildType())) {
-            version = gameVersion.getVersion(settings.getBuildType());
+            version = gameVersions.getVersion(settings.getBuildType());
         } else {
             version = settings.getBuildVersion(settings.getBuildType());
         }

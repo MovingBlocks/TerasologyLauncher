@@ -26,7 +26,7 @@ import org.terasologylauncher.updater.GameDownloader;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.OperatingSystem;
-import org.terasologylauncher.version.TerasologyGameVersion;
+import org.terasologylauncher.version.TerasologyGameVersions;
 import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
 import org.w3c.dom.Document;
 
@@ -99,14 +99,14 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private final File terasologyDirectory;
     private final OperatingSystem os;
     private final Settings settings;
-    private final TerasologyGameVersion gameVersion;
+    private final TerasologyGameVersions gameVersions;
 
     public LauncherFrame(final File terasologyDirectory, final OperatingSystem os, final Settings settings,
-                         final TerasologyGameVersion gameVersion) {
+                         final TerasologyGameVersions gameVersions) {
         this.terasologyDirectory = terasologyDirectory;
         this.os = os;
         this.settings = settings;
-        this.gameVersion = gameVersion;
+        this.gameVersions = gameVersions;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle(BundleUtils.getLabel("launcher_title"));
@@ -314,7 +314,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private void action(final String command) {
         if (command.equals(SETTINGS_ACTION)) {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-                settingsMenu = new SettingsMenu(this, terasologyDirectory, settings, gameVersion);
+                settingsMenu = new SettingsMenu(this, terasologyDirectory, settings, gameVersions);
                 settingsMenu.setVisible(true);
                 // TODO "windowClosed" is called twice
                 settingsMenu.addWindowListener(new WindowAdapter() {
@@ -343,7 +343,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             cleanUp();
             // start a thread with the download
             final GameDownloader downloader = new GameDownloader(progressBar, this, settings, terasologyDirectory,
-                gameVersion);
+                gameVersions);
             downloader.execute();
         }
     }
@@ -429,7 +429,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
      * Changes the button text and action command ("start" or "download").
      */
     public void updateStartButton() {
-        if (gameVersion.isVersionsLoaded()) {
+        if (gameVersions.isVersionsLoaded()) {
             // get the selected build type
             final BuildType selectedType = settings.getBuildType();
             // get the installed build type
@@ -438,7 +438,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 // check if update is possible
                 // therefore, get the installed version no. and the upstream version number
                 final int installedVersion = GameData.getInstalledBuildVersion(terasologyDirectory);
-                final int upstreamVersion = gameVersion.getVersion(installedType);
+                final int upstreamVersion = gameVersions.getVersion(installedType);
                 final int selectedVersion;
                 if (settings.isBuildVersionLatest(installedType)) {
                     selectedVersion = upstreamVersion;

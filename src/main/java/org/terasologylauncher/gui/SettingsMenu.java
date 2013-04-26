@@ -24,7 +24,7 @@ import org.terasologylauncher.Settings;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.JavaHeapSize;
-import org.terasologylauncher.version.TerasologyGameVersion;
+import org.terasologylauncher.version.TerasologyGameVersions;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -72,15 +72,15 @@ public final class SettingsMenu extends JDialog implements ActionListener {
 
     private final File terasologyDirectory;
     private final Settings settings;
-    private final TerasologyGameVersion gameVersion;
+    private final TerasologyGameVersions gameVersions;
 
     public SettingsMenu(final JFrame parent, final File terasologyDirectory, final Settings settings,
-                        final TerasologyGameVersion gameVersion) {
+                        final TerasologyGameVersions gameVersions) {
         super(parent, BundleUtils.getLabel("settings_title"), true);
 
         this.terasologyDirectory = terasologyDirectory;
         this.settings = settings;
-        this.gameVersion = gameVersion;
+        this.gameVersions = gameVersions;
 
         setResizable(false);
         setIconImage(BundleUtils.getImage("icon"));
@@ -419,10 +419,10 @@ public final class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void populateVersions(final JComboBox buildVersionBox, final BuildType buildType) {
-        if (gameVersion.isVersionsLoaded()) {
+        if (gameVersions.isVersionsLoaded()) {
             final int buildVersion = settings.getBuildVersion(buildType);
 
-            for (final Integer version : gameVersion.getVersions(buildType)) {
+            for (final Integer version : gameVersions.getVersions(buildType)) {
                 String item;
                 if (version == Settings.BUILD_VERSION_LATEST) {
                     item = BundleUtils.getLabel("settings_game_buildVersion_latest");
