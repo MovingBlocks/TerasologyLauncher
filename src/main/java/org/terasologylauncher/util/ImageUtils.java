@@ -77,7 +77,7 @@ public final class ImageUtils {
     }
 
     private static void convolve(final Kernel kernel, final int[] in, final int[] out, final int width,
-                                       final int height) {
+                                 final int height) {
         final float[] matrix = kernel.getKernelData(null);
         final int cols = kernel.getWidth();
         final int halfCols = cols / 2;
