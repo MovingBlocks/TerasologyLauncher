@@ -16,19 +16,15 @@
 
 package org.terasologylauncher.gui;
 
-import org.terasologylauncher.BuildType;
 import org.terasologylauncher.Settings;
-import org.terasologylauncher.changelog.Changelog;
-import org.terasologylauncher.changelog.ChangelogBuilder;
 import org.terasologylauncher.launcher.TerasologyStarter;
-import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.updater.GameDownloader;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.OperatingSystem;
+import org.terasologylauncher.version.TerasologyGameVersion;
 import org.terasologylauncher.version.TerasologyGameVersions;
 import org.terasologylauncher.version.TerasologyLauncherVersionInfo;
-import org.w3c.dom.Document;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -109,12 +105,12 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         this.gameVersions = gameVersions;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle(BundleUtils.getLabel("launcher_title"));
-        setIconImage(BundleUtils.getImage("icon"));
 
         initComponents();
 
         updateStartButton();
+        updateInfoTextPane();
+        updateLocale();
 
         final Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds((dim.width - FRAME_WIDTH) / 2, (dim.height - FRAME_HEIGHT) / 2, FRAME_WIDTH, FRAME_HEIGHT);
@@ -170,11 +166,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
         infoTextPane.setForeground(Color.WHITE);
 
-        Document document = Changelog.getChangelog(settings.getBuildType(),
-            settings.getBuildVersion(settings.getBuildType()));
-        infoTextPane.setText(ChangelogBuilder.getChangelog(document,
-            settings.getBuildVersion(settings.getBuildType())));
-        // TODO scroll infoTextPane to top
+        updateInfoTextPane();
 
         //infoTextPane.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, updatePanelWidth - 16,
         // updatePanelHeight - 16);
@@ -300,6 +292,35 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         contentPane.add(updatePanel);
     }
 
+    public void updateInfoTextPane() {
+        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+        final StringBuilder b = new StringBuilder();
+        // TODO add more informations and i18n
+        if (gameVersion.getBuildType() != null) {
+            b.append(gameVersion.getBuildType());
+            b.append("<br/>");
+        }
+        if (gameVersion.getBuildNumber() != null) {
+            b.append(gameVersion.getBuildNumber());
+            b.append("<br/>");
+        }
+        if (gameVersion.getChangeLog() != null) {
+            for (String msg : gameVersion.getChangeLog()) {
+                b.append("-");
+                // TODO escape HTML entities/special characters
+                b.append(msg);
+                b.append("<br/>");
+            }
+        }
+        infoTextPane.setText(b.toString());
+        infoTextPane.setCaretPosition(0);
+    }
+
+    private TerasologyGameVersion getSelectedGameVersion() {
+        return gameVersions.getGameVersionForBuildVersion(settings.getBuildType(),
+            settings.getBuildVersion(settings.getBuildType()));
+    }
+
     public JProgressBar getProgressBar() {
         return progressBar;
     }
@@ -321,8 +342,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                     @Override
                     public void windowClosed(final WindowEvent e) {
                         updateStartButton();
-                        // Update all labels (language change)
-                        updateLabels();
+                        updateInfoTextPane();
+                        updateLocale();
                     }
                 });
             }
@@ -330,7 +351,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             dispose();
             System.exit(0);
         } else if (command.equals(START_ACTION)) {
-            final TerasologyStarter terasologyStarter = new TerasologyStarter(terasologyDirectory, os,
+            final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+            final TerasologyStarter terasologyStarter = new TerasologyStarter(gameVersion, os,
                 settings.getMaxHeapSize(), settings.getInitialHeapSize());
             if (terasologyStarter.startGame()) {
                 System.exit(0);
@@ -342,27 +364,26 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             // cleanup the directories (keep savedWorlds and screen shots)
             cleanUp();
             // start a thread with the download
-            final GameDownloader downloader = new GameDownloader(progressBar, this, settings, terasologyDirectory,
-                gameVersions);
+            final GameDownloader downloader = new GameDownloader(progressBar, this, terasologyDirectory,
+                getSelectedGameVersion(), gameVersions);
             downloader.execute();
         }
     }
 
-    private void updateLabels() {
+    private void updateLocale() {
+        setTitle(BundleUtils.getLabel("launcher_title"));
+        setIconImage(BundleUtils.getImage("icon"));
+
         forums.setText(BundleUtils.getLabel("launcher_forum"));
         mods.setText(BundleUtils.getLabel("launcher_mods"));
         issues.setText(BundleUtils.getLabel("launcher_issues"));
 
         settingsButton.setText(BundleUtils.getLabel("launcher_settings"));
+        settingsButton.setToolTipText(BundleUtils.getLabel("tooltip_settings"));
         cancelButton.setText(BundleUtils.getLabel("launcher_cancel"));
+        cancelButton.setToolTipText(BundleUtils.getLabel("tooltip_cancel"));
 
-        // TODO Refactor into own method
-        Document document = Changelog.getChangelog(settings.getBuildType(),
-            settings.getBuildVersion(settings.getBuildType()));
-        infoTextPane.setText(ChangelogBuilder.getChangelog(document,
-            settings.getBuildVersion(settings.getBuildType())));
-        // scroll infoTextPane to top
-        infoTextPane.setCaretPosition(0);
+        // TODO Update URLs and tooltips
     }
 
     /**
@@ -424,78 +445,29 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         delDirectory.delete();
     }
 
-    /**
-     * Updates the start button with regard to the selected settings, the internet connection and the installed game.
-     * Changes the button text and action command ("start" or "download").
-     */
     public void updateStartButton() {
-        if (gameVersions.isVersionsLoaded()) {
-            // get the selected build type
-            final BuildType selectedType = settings.getBuildType();
-            // get the installed build type
-            final BuildType installedType = GameData.getInstalledBuildType(terasologyDirectory);
-            if (selectedType == installedType) {
-                // check if update is possible
-                // therefore, get the installed version no. and the upstream version number
-                final int installedVersion = GameData.getInstalledBuildVersion(terasologyDirectory);
-                final int upstreamVersion = gameVersions.getVersion(installedType);
-                final int selectedVersion;
-                if (settings.isBuildVersionLatest(installedType)) {
-                    selectedVersion = upstreamVersion;
-                } else {
-                    selectedVersion = settings.getBuildVersion(installedType);
-                }
-                if (installedVersion == selectedVersion) {
-                    // game can be started
-                    startButton.setText(BundleUtils.getLabel("launcher_start"));
-                    startButton.setToolTipText(BundleUtils.getLabel("tooltip_start"));
-                    startButton.setActionCommand(START_ACTION);
-                } else {
-                    final StringBuilder builder = new StringBuilder();
-                    // differentiate between up- and downgrade
-                    if (installedVersion < selectedVersion) {
-                        startButton.setText(BundleUtils.getLabel("launcher_update"));
-                        startButton.setActionCommand(DOWNLOAD_ACTION);
-                        builder.append("<html>")
-                            .append(BundleUtils.getLabel("tooltip_update"))
-                            .append("<br>")
-                            .append(BundleUtils.getLabel("message_update_current"))
-                            .append(" ").append(installedVersion)
-                            .append("<br>")
-                            .append(BundleUtils.getLabel("tooltip_selectedVersion"))
-                            .append(" ").append(selectedVersion)
-                            .append("</html>");
-                    } else {
-                        startButton.setText(BundleUtils.getLabel("launcher_downgrade"));
-                        startButton.setActionCommand(DOWNLOAD_ACTION);
-                        builder.append("<html>")
-                            .append(BundleUtils.getLabel("tooltip_downgrade"))
-                            .append("<br>")
-                            .append(BundleUtils.getLabel("message_update_current"))
-                            .append(" ").append(installedVersion)
-                            .append("<br>")
-                            .append(BundleUtils.getLabel("tooltip_selectedVersion"))
-                            .append(" ").append(selectedVersion)
-                            .append("</html>");
-                    }
-                    startButton.setToolTipText(builder.toString());
-                }
-            } else {
-                // download other build type
-                startButton.setText(BundleUtils.getLabel("launcher_download"));
-                startButton.setToolTipText(BundleUtils.getLabel("tooltip_download"));
-                startButton.setActionCommand(DOWNLOAD_ACTION);
-            }
+        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+        if (gameVersion.isInstalled()) {
+            // installed game can be started
+            startButton.setVisible(true);
+            startButton.setEnabled(true);
+            startButton.setText(BundleUtils.getLabel("launcher_start"));
+            startButton.setToolTipText(BundleUtils.getLabel("tooltip_start"));
+            startButton.setActionCommand(START_ACTION);
+        } else if (gameVersion.isSuccessful() && (gameVersion.getBuildNumber() != null)) {
+            // download is possible
+            startButton.setVisible(true);
+            startButton.setEnabled(true);
+            startButton.setText(BundleUtils.getLabel("launcher_download"));
+            startButton.setToolTipText(BundleUtils.getLabel("tooltip_download"));
+            startButton.setActionCommand(DOWNLOAD_ACTION);
         } else {
-            if (GameData.isGameInstalled(terasologyDirectory)) {
-                // installed game can be started
-                startButton.setText(BundleUtils.getLabel("launcher_start"));
-                startButton.setToolTipText(BundleUtils.getLabel("tooltip_start"));
-                startButton.setActionCommand(START_ACTION);
-            } else {
-                // no game installed, and no way to download it...
-                startButton.setEnabled(false);
-            }
+            // no game installed, and no way to download it...
+            startButton.setVisible(false);
+            startButton.setEnabled(false);
+            startButton.setText("");
+            startButton.setToolTipText("");
+            startButton.setActionCommand(null);
         }
     }
 }

@@ -135,8 +135,8 @@ public final class TerasologyLauncher {
 
             // Game versions
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_loadGameVersions"));
-            final TerasologyGameVersions gameVersions = new TerasologyGameVersions();
-            gameVersions.loadVersions(settings);
+            final TerasologyGameVersions gameVersions = new TerasologyGameVersions(settings);
+            gameVersions.loadGameVersions(applicationDir);
             logger.debug("Game versions: {}", gameVersions);
 
             // LauncherFrame
