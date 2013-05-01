@@ -30,8 +30,6 @@ public final class TerasologyLauncherVersionInfo {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncherVersionInfo.class);
 
-    private static TerasologyLauncherVersionInfo instance;
-
     private static final String VERSION_INFO_FILE = "versionInfo.properties";
 
     private static final String BUILD_NUMBER = "buildNumber";
@@ -45,6 +43,8 @@ public final class TerasologyLauncherVersionInfo {
     private static final String DISPLAY_VERSION = "displayVersion";
 
     private static final String DEFAULT_VALUE = "";
+
+    private static TerasologyLauncherVersionInfo instance;
 
     private final String buildNumber;
     private final String buildId;
@@ -116,6 +116,17 @@ public final class TerasologyLauncherVersionInfo {
         toString = toStringBuilder.toString();
     }
 
+    public static TerasologyLauncherVersionInfo getInstance() {
+        if (instance == null) {
+            instance = new TerasologyLauncherVersionInfo(null);
+        }
+        return instance;
+    }
+
+    public static TerasologyLauncherVersionInfo loadFromInputStream(final InputStream inStream) {
+        return new TerasologyLauncherVersionInfo(loadPropertiesFromInputStream(inStream));
+    }
+
     private static Properties loadPropertiesFromInputStream(final InputStream inStream) {
         final Properties properties = new Properties();
         if (inStream != null) {
@@ -133,17 +144,6 @@ public final class TerasologyLauncherVersionInfo {
         }
 
         return properties;
-    }
-
-    public static TerasologyLauncherVersionInfo getInstance() {
-        if (instance == null) {
-            instance = new TerasologyLauncherVersionInfo(null);
-        }
-        return instance;
-    }
-
-    public static TerasologyLauncherVersionInfo loadFromInputStream(final InputStream inStream) {
-        return new TerasologyLauncherVersionInfo(loadPropertiesFromInputStream(inStream));
     }
 
     public String getBuildNumber() {

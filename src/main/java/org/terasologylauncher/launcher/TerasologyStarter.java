@@ -18,11 +18,10 @@ package org.terasologylauncher.launcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasologylauncher.updater.GameData;
 import org.terasologylauncher.util.JavaHeapSize;
 import org.terasologylauncher.util.OperatingSystem;
+import org.terasologylauncher.version.TerasologyGameVersion;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,14 +34,14 @@ public final class TerasologyStarter {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyStarter.class);
 
-    private final File terasologyDirectory;
+    private final TerasologyGameVersion gameVersion;
     private final OperatingSystem os;
     private final JavaHeapSize maxHeapSize;
     private final JavaHeapSize initialHeapSize;
 
-    public TerasologyStarter(final File terasologyDirectory, final OperatingSystem os, final JavaHeapSize maxHeapSize,
-                             final JavaHeapSize initialHeapSize) {
-        this.terasologyDirectory = terasologyDirectory;
+    public TerasologyStarter(final TerasologyGameVersion gameVersion, final OperatingSystem os,
+                             final JavaHeapSize maxHeapSize, final JavaHeapSize initialHeapSize) {
+        this.gameVersion = gameVersion;
         this.os = os;
         this.maxHeapSize = maxHeapSize;
         this.initialHeapSize = initialHeapSize;
@@ -66,9 +65,9 @@ public final class TerasologyStarter {
         parameters.add("java");
         parameters.addAll(createParameters());
         parameters.add("-jar");
-        parameters.add(GameData.getGameJar(terasologyDirectory).getName());
+        parameters.add(gameVersion.getGameJar().getName());
         final ProcessBuilder pb = new ProcessBuilder(parameters);
-        pb.directory(terasologyDirectory);
+        pb.directory(gameVersion.getInstallationPath());
         try {
             pb.start();
         } catch (IOException e) {
@@ -83,9 +82,9 @@ public final class TerasologyStarter {
         parameters.add("java");
         parameters.addAll(createParameters());
         parameters.add("-jar");
-        parameters.add(GameData.getGameJar(terasologyDirectory).getName());
+        parameters.add(gameVersion.getGameJar().getName());
         final ProcessBuilder pb = new ProcessBuilder(parameters);
-        pb.directory(terasologyDirectory);
+        pb.directory(gameVersion.getInstallationPath());
         try {
             pb.start();
         } catch (IOException e) {
@@ -100,9 +99,9 @@ public final class TerasologyStarter {
         parameters.add("java");
         parameters.addAll(createParameters());
         parameters.add("-jar");
-        parameters.add(GameData.getGameJar(terasologyDirectory).getName());
+        parameters.add(gameVersion.getGameJar().getName());
         final ProcessBuilder pb = new ProcessBuilder(parameters);
-        pb.directory(terasologyDirectory);
+        pb.directory(gameVersion.getInstallationPath());
         try {
             pb.start();
         } catch (IOException e) {

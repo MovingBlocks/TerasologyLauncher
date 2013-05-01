@@ -19,6 +19,7 @@ package org.terasologylauncher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.util.JavaHeapSize;
+import org.terasologylauncher.version.TerasologyGameVersion;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,16 +37,15 @@ import java.util.Properties;
  */
 public final class Settings {
 
-    public static final BuildType BUILD_TYPE_DEFAULT = BuildType.STABLE;
-    public static final int BUILD_VERSION_LATEST = -1;
-    public static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
-    public static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
-
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);
 
     private static final String SETTINGS_FILE_NAME = "settings.properties";
 
     private static final String COMMENT_SETTINGS = "Terasology Launcher - Settings";
+
+    private static final BuildType BUILD_TYPE_DEFAULT = BuildType.STABLE;
+    private static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
+    private static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
 
     private static final String PROPERTY_LOCALE = "locale";
     private static final String PROPERTY_BUILD_TYPE = "buildType";
@@ -57,8 +57,8 @@ public final class Settings {
     private final Properties properties;
 
     public Settings(final File directory) {
-        properties = new Properties();
         settingsFile = new File(directory, SETTINGS_FILE_NAME);
+        properties = new Properties();
     }
 
     public synchronized void load() throws IOException {
@@ -129,7 +129,7 @@ public final class Settings {
         for (BuildType b : buildTypes) {
             final String key = PROPERTY_PREFIX_BUILD_VERSION + b.name();
             final String buildVersionStr = properties.getProperty(key);
-            int buildVersion = BUILD_VERSION_LATEST;
+            int buildVersion = TerasologyGameVersion.BUILD_VERSION_LATEST;
             if (buildVersionStr != null) {
                 try {
                     buildVersion = Integer.parseInt(buildVersionStr);
@@ -188,7 +188,7 @@ public final class Settings {
     }
 
     public synchronized boolean isBuildVersionLatest(final BuildType buildType) {
-        return BUILD_VERSION_LATEST == getBuildVersion(buildType);
+        return TerasologyGameVersion.BUILD_VERSION_LATEST == getBuildVersion(buildType);
     }
 
     public synchronized void setMaxHeapSize(final JavaHeapSize maxHeapSize) {
