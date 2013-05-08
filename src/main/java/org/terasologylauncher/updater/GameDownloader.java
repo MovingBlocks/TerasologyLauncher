@@ -19,12 +19,12 @@ package org.terasologylauncher.updater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
-import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DownloadUtils;
 import org.terasologylauncher.util.FileUtils;
 import org.terasologylauncher.version.TerasologyGameVersion;
+import org.terasologylauncher.version.TerasologyGameVersions;
 
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
@@ -50,17 +50,19 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
 
     private final JProgressBar progressBar;
     private final LauncherFrame frame;
-    private final Settings settings;
     private final File terasologyDirectory;
+    private final TerasologyGameVersions gameVersions;
     private final TerasologyGameVersion gameVersion;
 
-    public GameDownloader(final JProgressBar progressBar, final LauncherFrame frame, final Settings settings,
-                          final File terasologyDirectory, final TerasologyGameVersion gameVersion) {
+    public GameDownloader(final JProgressBar progressBar, final LauncherFrame frame,
+                          final File terasologyDirectory, final TerasologyGameVersion gameVersion,
+                          final TerasologyGameVersions gameVersions) {
         this.progressBar = progressBar;
         this.frame = frame;
-        this.settings = settings;
         this.terasologyDirectory = terasologyDirectory;
         this.gameVersion = gameVersion;
+        this.gameVersions = gameVersions;
+
         progressBar.setVisible(true);
         progressBar.setValue(0);
         progressBar.setString(BundleUtils.getLabel("update_game_startDownload"));
@@ -78,23 +80,18 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
     @Override
     protected Void doInBackground() {
         final String jobName;
-        if (BuildType.STABLE == settings.getBuildType()) {
+        if (BuildType.STABLE == gameVersion.getBuildType()) {
             jobName = DownloadUtils.TERASOLOGY_STABLE_JOB_NAME;
         } else {
             jobName = DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME;
         }
-        final Integer version;
-        if (settings.isBuildVersionLatest(settings.getBuildType())) {
-            version = gameVersion.getVersion(settings.getBuildType());
-        } else {
-            version = settings.getBuildVersion(settings.getBuildType());
-        }
+        final Integer buildNumber = gameVersion.getBuildNumber();
 
         // try to do the download
         URL url;
         File file;
         try {
-            url = DownloadUtils.getDownloadURL(jobName, version, DownloadUtils.FILE_TERASOLOGY_GAME_ZIP);
+            url = DownloadUtils.createFileDownloadURL(jobName, buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_ZIP);
             final long dataSize = url.openConnection().getContentLength() / 1024 / 1024;
 
             InputStream in = null;
@@ -126,7 +123,6 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
                     out.close();
                 }
             }
-
         } catch (MalformedURLException e) {
             logger.error("Could not download game!", e);
         } catch (IOException e) {
@@ -150,8 +146,9 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         progressBar.setString(BundleUtils.getLabel("update_game_gameInfo"));
         progressBar.setStringPainted(true);
 
-        GameData.forceReReadVersionFile(terasologyDirectory);
+        gameVersions.updateGameVersionsAfterInstallation(terasologyDirectory);
         frame.updateStartButton();
+        frame.updateInfoTextPane();
 
         zip.delete();
 

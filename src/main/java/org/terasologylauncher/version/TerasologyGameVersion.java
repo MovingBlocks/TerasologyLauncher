@@ -16,101 +16,117 @@
 
 package org.terasologylauncher.version;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.terasologylauncher.BuildType;
-import org.terasologylauncher.Settings;
-import org.terasologylauncher.util.DownloadException;
-import org.terasologylauncher.util.DownloadUtils;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
 
 /**
- * @author Skaldarnar
+ * @author Mathias Kalb
  */
 public final class TerasologyGameVersion {
 
-    private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersion.class);
+    public static final int BUILD_VERSION_LATEST = -1;
 
-    private List<Integer> stableVersions;
-    private List<Integer> nightlyVersions;
-    private Integer stableVersion;
-    private Integer nightlyVersion;
+    private Integer buildNumber;
+    private BuildType buildType;
+    private TerasologyGameVersionInfo gameVersionInfo;
+    private File installationPath;
+    private File gameJar;
+    private List<String> changeLog;
+    private boolean successful;
+
+    private boolean latest;
 
     public TerasologyGameVersion() {
     }
 
-    public void loadVersions(final Settings settings) {
-        loadStable(settings);
-        loadNightly(settings);
+    public void copyTo(final TerasologyGameVersion gameVersion) {
+        gameVersion.setBuildNumber(buildNumber);
+        gameVersion.setBuildType(buildType);
+        gameVersion.setGameVersionInfo(gameVersionInfo);
+        gameVersion.setInstallationPath(installationPath);
+        gameVersion.setGameJar(gameJar);
+        gameVersion.setChangeLog(changeLog);
+        gameVersion.setSuccessful(successful);
     }
 
-    public boolean isVersionsLoaded() {
-        return (stableVersion != null) && (nightlyVersion != null)
-            && (stableVersions != null) && (nightlyVersions != null)
-            && !stableVersions.isEmpty() && !nightlyVersions.isEmpty();
+    public boolean isInstalled() {
+        return (installationPath != null) && (gameJar != null);
     }
 
-    public List<Integer> getVersions(final BuildType buildType) {
-        if (BuildType.STABLE == buildType) {
-            return stableVersions;
+    public Integer getBuildVersion() {
+        if (latest) {
+            return BUILD_VERSION_LATEST;
         }
-        return nightlyVersions;
+        return buildNumber;
     }
 
-    public Integer getVersion(final BuildType buildType) {
-        if (BuildType.STABLE == buildType) {
-            return stableVersion;
-        }
-        return nightlyVersion;
+    public Integer getBuildNumber() {
+        return buildNumber;
     }
 
-    private void loadStable(final Settings settings) {
-        try {
-            stableVersion = DownloadUtils.loadLatestSuccessfulVersion(DownloadUtils.TERASOLOGY_STABLE_JOB_NAME);
-            // for stable builds, go at least 4 versions back for the list
-            final int buildVersionSetting;
-            if (settings.isBuildVersionLatest(BuildType.STABLE)) {
-                buildVersionSetting = stableVersion;
-            } else {
-                buildVersionSetting = settings.getBuildVersion(BuildType.STABLE);
-            }
-            final int minVersionNumber = Math.min(stableVersion - 4, buildVersionSetting);
-            stableVersions = new ArrayList<Integer>();
-            stableVersions.add(Settings.BUILD_VERSION_LATEST);
-            for (int i = stableVersion; i >= minVersionNumber; i--) {
-                stableVersions.add(i);
-            }
-        } catch (DownloadException e) {
-            logger.error("Retrieving latest stable version build number failed.", e);
-        }
+    void setBuildNumber(final Integer buildNumber) {
+        this.buildNumber = buildNumber;
     }
 
-    private void loadNightly(final Settings settings) {
-        try {
-            nightlyVersion = DownloadUtils.loadLatestSuccessfulVersion(DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME);
-            // for nightly builds, go 8 versions back for the list
-            final int buildVersionSetting;
-            if (settings.isBuildVersionLatest(BuildType.NIGHTLY)) {
-                buildVersionSetting = nightlyVersion;
-            } else {
-                buildVersionSetting = settings.getBuildVersion(BuildType.NIGHTLY);
-            }
-            final int minVersionNumber = Math.min(nightlyVersion - 8, buildVersionSetting);
-            nightlyVersions = new ArrayList<Integer>();
-            nightlyVersions.add(Settings.BUILD_VERSION_LATEST);
-            for (int i = nightlyVersion; i >= minVersionNumber; i--) {
-                nightlyVersions.add(i);
-            }
-        } catch (DownloadException e) {
-            logger.error("Retrieving latest nightly version build number failed.", e);
-        }
+    public BuildType getBuildType() {
+        return buildType;
     }
 
-    @Override
+    void setBuildType(final BuildType buildType) {
+        this.buildType = buildType;
+    }
+
+    public TerasologyGameVersionInfo getGameVersionInfo() {
+        return gameVersionInfo;
+    }
+
+    void setGameVersionInfo(final TerasologyGameVersionInfo gameVersionInfo) {
+        this.gameVersionInfo = gameVersionInfo;
+    }
+
+    public File getInstallationPath() {
+        return installationPath;
+    }
+
+    void setInstallationPath(final File installationPath) {
+        this.installationPath = installationPath;
+    }
+
+    public File getGameJar() {
+        return gameJar;
+    }
+
+    void setGameJar(final File gameJar) {
+        this.gameJar = gameJar;
+    }
+
+    public List<String> getChangeLog() {
+        return changeLog;
+    }
+
+    void setChangeLog(final List<String> changeLog) {
+        this.changeLog = changeLog;
+    }
+
+    public boolean isLatest() {
+        return latest;
+    }
+
+    void setLatest(final boolean latest) {
+        this.latest = latest;
+    }
+
+    public boolean isSuccessful() {
+        return successful;
+    }
+
+    void setSuccessful(final boolean successful) {
+        this.successful = successful;
+    }
+
     public String toString() {
-        return this.getClass().getName() + "[stableVersion=" + stableVersion + ", nightlyVersion="
-            + nightlyVersion + "]";
+        return this.getClass().getName() + "[" + buildType + ", " + buildNumber + "]";
     }
 }

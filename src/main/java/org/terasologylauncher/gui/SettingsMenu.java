@@ -25,6 +25,7 @@ import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
 import org.terasologylauncher.util.JavaHeapSize;
 import org.terasologylauncher.version.TerasologyGameVersion;
+import org.terasologylauncher.version.TerasologyGameVersions;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -72,15 +73,15 @@ public final class SettingsMenu extends JDialog implements ActionListener {
 
     private final File terasologyDirectory;
     private final Settings settings;
-    private final TerasologyGameVersion gameVersion;
+    private final TerasologyGameVersions gameVersions;
 
     public SettingsMenu(final JFrame parent, final File terasologyDirectory, final Settings settings,
-                        final TerasologyGameVersion gameVersion) {
+                        final TerasologyGameVersions gameVersions) {
         super(parent, BundleUtils.getLabel("settings_title"), true);
 
         this.terasologyDirectory = terasologyDirectory;
         this.settings = settings;
-        this.gameVersion = gameVersion;
+        this.gameVersions = gameVersions;
 
         setResizable(false);
         setIconImage(BundleUtils.getImage("icon"));
@@ -419,23 +420,14 @@ public final class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void populateVersions(final JComboBox buildVersionBox, final BuildType buildType) {
-        if (gameVersion.isVersionsLoaded()) {
-            final int buildVersion = settings.getBuildVersion(buildType);
+        final int buildVersion = settings.getBuildVersion(buildType);
 
-            for (final Integer version : gameVersion.getVersions(buildType)) {
-                String item;
-                if (version == Settings.BUILD_VERSION_LATEST) {
-                    item = BundleUtils.getLabel("settings_game_buildVersion_latest");
-                } else {
-                    item = String.valueOf(version);
-                }
-                buildVersionBox.addItem(item);
-                if (version == buildVersion) {
-                    buildVersionBox.setSelectedItem(item);
-                }
+        for (final TerasologyGameVersion version : gameVersions.getGameVersionList(buildType)) {
+            final VersionItem versionItem = new VersionItem(version);
+            buildVersionBox.addItem(versionItem);
+            if (versionItem.getVersion() == buildVersion) {
+                buildVersionBox.setSelectedItem(versionItem);
             }
-        } else {
-            buildVersionBox.setEnabled(false);
         }
     }
 
@@ -520,7 +512,7 @@ public final class SettingsMenu extends JDialog implements ActionListener {
             updateHeapSizeSelection();
             populateLanguage();
         } else if (actionCommand.equals(SAVE_ACTION)) {
-            // save build type and version
+            // save build type
             final BuildType selectedType;
             if (buildTypeBox.getSelectedIndex() == 0) {
                 selectedType = BuildType.STABLE;
@@ -528,22 +520,12 @@ public final class SettingsMenu extends JDialog implements ActionListener {
                 selectedType = BuildType.NIGHTLY;
             }
             settings.setBuildType(selectedType);
-            if (buildVersionStableBox.isEnabled()) {
-                if (buildVersionStableBox.getSelectedIndex() == 0) {
-                    settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.STABLE);
-                } else {
-                    settings.setBuildVersion(Integer.parseInt((String) buildVersionStableBox.getSelectedItem()),
-                        BuildType.STABLE);
-                }
-            }
-            if (buildVersionNightlyBox.isEnabled()) {
-                if (buildVersionNightlyBox.getSelectedIndex() == 0) {
-                    settings.setBuildVersion(Settings.BUILD_VERSION_LATEST, BuildType.NIGHTLY);
-                } else {
-                    settings.setBuildVersion(Integer.parseInt((String) buildVersionNightlyBox.getSelectedItem()),
-                        BuildType.NIGHTLY);
-                }
-            }
+
+            // save build version
+            VersionItem versionItemStable = (VersionItem) buildVersionStableBox.getSelectedItem();
+            settings.setBuildVersion(versionItemStable.getVersion(), BuildType.STABLE);
+            VersionItem versionItemNightly = (VersionItem) buildVersionNightlyBox.getSelectedItem();
+            settings.setBuildVersion(versionItemNightly.getVersion(), BuildType.NIGHTLY);
 
             // save heap size settings
             settings.setMaxHeapSize((JavaHeapSize) maxHeapSizeBox.getSelectedItem());

@@ -73,7 +73,7 @@ public final class LauncherUpdater {
         upstreamVersion = null;
         versionInfo = null;
         try {
-            upstreamVersion = DownloadUtils.loadLatestStableVersion(jobName);
+            upstreamVersion = DownloadUtils.loadLastStableBuildNumber(jobName);
             logger.debug("Current Version: {}, Upstream Version: {}", currentVersion, upstreamVersion);
             if (Integer.parseInt(currentVersion) < upstreamVersion) {
                 updateAvailable = true;
@@ -118,7 +118,7 @@ public final class LauncherUpdater {
         }
 
         try {
-            final URL updateURL = DownloadUtils.getDownloadURL(jobName, upstreamVersion,
+            final URL updateURL = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion,
                 DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
 
             // download the latest zip file to tmp dir

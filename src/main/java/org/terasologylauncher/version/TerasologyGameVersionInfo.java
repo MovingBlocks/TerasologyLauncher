@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -109,16 +110,43 @@ public final class TerasologyGameVersionInfo {
         toString = toStringBuilder.toString();
     }
 
+    public static TerasologyGameVersionInfo loadFromInputStream(final InputStream inStream) {
+        return new TerasologyGameVersionInfo(loadPropertiesFromInputStream(inStream));
+    }
+
+    private static Properties loadPropertiesFromInputStream(final InputStream inStream) {
+        final Properties properties = new Properties();
+        if (inStream != null) {
+            try {
+                properties.load(inStream);
+            } catch (final IOException e) {
+                logger.error("Loading version info failed!", e);
+            } finally {
+                try {
+                    inStream.close();
+                } catch (final IOException e) {
+                    logger.warn("Closing InputStream failed!", e);
+                }
+            }
+        }
+
+        return properties;
+    }
+
     public static TerasologyGameVersionInfo loadFromJar(final File terasologyGameJar) {
         final Properties properties = new Properties();
         ZipFile zipFile = null;
         try {
-            if (terasologyGameJar.exists() && terasologyGameJar.canRead()) {
+            if (terasologyGameJar.exists() && terasologyGameJar.isFile() && terasologyGameJar.canRead()) {
                 zipFile = new ZipFile(terasologyGameJar);
                 final ZipEntry zipEntry = zipFile.getEntry(VERSION_INFO_FILE);
                 if (zipEntry != null) {
                     properties.load(zipFile.getInputStream(zipEntry));
                 }
+            }
+
+            if (properties.isEmpty()) {
+                logger.warn("Could not load TerasologyGameVersionInfo from file '{}'!", terasologyGameJar);
             }
         } catch (IOException e) {
             logger.error("Could not load TerasologyGameVersionInfo from file '{}'!", terasologyGameJar, e);
@@ -175,5 +203,4 @@ public final class TerasologyGameVersionInfo {
     public String toString() {
         return toString;
     }
-
 }
