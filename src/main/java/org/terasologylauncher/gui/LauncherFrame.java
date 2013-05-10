@@ -32,7 +32,6 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -62,7 +61,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
     private static final String SETTINGS_ACTION = "settings";
     private static final String CANCEL_ACTION = "cancel";
-
     private static final String START_ACTION = "start";
     private static final String DOWNLOAD_ACTION = "download";
 
@@ -70,25 +68,21 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private JButton settingsButton;
     private JButton cancelButton;
 
-    private JButton facebook;
-    private JButton github;
-    private JButton gplus;
-    private JButton twitter;
-    private JButton youtube;
-    private JButton reddit;
+    private JTextPane infoTextPane;
+    private LinkJLabel logo;
+    private JLabel version;
+    private LinkJLabel forums;
+    private LinkJLabel issues;
+    private LinkJLabel mods;
 
     private JProgressBar progressBar;
 
-    private JLabel forums;
-    private JLabel issues;
-    private JLabel mods;
-
-    private JLabel version;
-
-    private JPanel topPanel;
-    private JPanel updatePanel;
-
-    private JTextPane infoTextPane;
+    private LinkJButton github;
+    private LinkJButton twitter;
+    private LinkJButton facebook;
+    private LinkJButton gplus;
+    private LinkJButton youtube;
+    private LinkJButton reddit;
 
     private SettingsMenu settingsMenu;
 
@@ -107,10 +101,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         initComponents();
-
-        updateStartButton();
-        updateInfoTextPane();
-        updateLocale();
+        updateGui();
 
         final Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds((dim.width - FRAME_WIDTH) / 2, (dim.height - FRAME_HEIGHT) / 2, FRAME_WIDTH, FRAME_HEIGHT);
@@ -129,7 +120,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         // Setup start button
         startButton = new TSButton(BundleUtils.getLabel("launcher_start"));
         startButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - 40) + yShift, 96, 32);
-        startButton.setToolTipText(BundleUtils.getLabel("tooltip_download"));
         startButton.setActionCommand(START_ACTION);
         startButton.addActionListener(this);
 
@@ -146,10 +136,10 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         cancelButton.addActionListener(this);
 
         // Transparent top panel and content/update panel
-        topPanel = new TransparentPanel(0.5f);
+        final TransparentPanel topPanel = new TransparentPanel(0.5f);
         topPanel.setBounds(0, 0, FRAME_WIDTH, 96);
 
-        updatePanel = new TransparentPanel(0.5f);
+        final TransparentPanel updatePanel = new TransparentPanel(0.5f);
         updatePanel.setBounds(
             (FRAME_WIDTH - INFO_PANEL_WIDTH) / 2,
             (FRAME_HEIGHT - INFO_PANEL_HEIGHT) / 2,
@@ -163,13 +153,10 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         infoTextPane.setHighlighter(null);
         infoTextPane.setOpaque(false);
         infoTextPane.setContentType("text/html");
-
         infoTextPane.setForeground(Color.WHITE);
-
-        updateInfoTextPane();
-
         //infoTextPane.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, updatePanelWidth - 16,
         // updatePanelHeight - 16);
+
         final JScrollPane sp = new JScrollPane();
         sp.getViewport().add(infoTextPane);
         sp.getVerticalScrollBar().setOpaque(false);
@@ -182,11 +169,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         sp.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, INFO_PANEL_WIDTH - 16, INFO_PANEL_HEIGHT - 16);
 
         // Terasology logo
-        final JLabel logo = new LinkJLabel(BundleUtils.getLabel("launcher_website"),
-            BundleUtils.getURI("terasology_website"));
+        logo = new LinkJLabel();
         logo.setBounds(8, 0, 400, 96);
-        logo.setIcon(BundleUtils.getImageIcon("logo"));
-        logo.setToolTipText(BundleUtils.getLabel("tooltip_website"));
 
         // Launcher version info label
         version = new JLabel(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
@@ -196,21 +180,17 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         version.setText(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
 
         // Forums link
-        forums = new LinkJLabel(BundleUtils.getLabel("launcher_forum"), BundleUtils.getURI("terasology_forum"));
-        forums.setToolTipText(BundleUtils.getLabel("tooltip_forum"));
+        forums = new LinkJLabel();
         forums.setFont(forums.getFont().deriveFont(24f));
         forums.setBounds(480, 36, 96, 32);
 
         // Issues link
-        issues = new LinkJLabel(BundleUtils.getLabel("launcher_issues"),
-            BundleUtils.getURI("terasology_github_issues"));
-        issues.setToolTipText(BundleUtils.getLabel("tooltip_github_issues"));
+        issues = new LinkJLabel();
         issues.setFont(issues.getFont().deriveFont(24f));
         issues.setBounds(640, 36, 96, 32);
 
         // Mods
-        mods = new LinkJLabel(BundleUtils.getLabel("launcher_mods"), BundleUtils.getURI("terasology_mods"));
-        mods.setToolTipText(BundleUtils.getLabel("tooltip_mods"));
+        mods = new LinkJLabel();
         mods.setFont(mods.getFont().deriveFont(24f));
         mods.setBounds(FRAME_WIDTH - 96 - 16 - xShift, 36, 96, 32);
 
@@ -221,45 +201,27 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         progressBar.setStringPainted(true);
 
         // Social media
-        github = new LinkJButton(BundleUtils.getURI("terasology_github"));
-        github.setIcon(BundleUtils.getImageIcon("github"));
-        github.setRolloverIcon(BundleUtils.getImageIcon("github_hover"));
-        github.setToolTipText(BundleUtils.getLabel("tooltip_github"));
+        github = new LinkJButton();
         github.setBounds(8 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         github.setBorder(null);
 
-        youtube = new LinkJButton(BundleUtils.getURI("terasology_youtube"));
-        youtube.setIcon(BundleUtils.getImageIcon("youtube"));
-        youtube.setRolloverIcon(BundleUtils.getImageIcon("youtube_hover"));
-        youtube.setToolTipText(BundleUtils.getLabel("tooltip_youtube"));
-        youtube.setBounds(8 + 38 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
-        youtube.setBorder(null);
-
-        gplus = new LinkJButton(BundleUtils.getURI("terasology_gplus"));
-        gplus.setIcon(BundleUtils.getImageIcon("gplus"));
-        gplus.setRolloverIcon(BundleUtils.getImageIcon("gplus_hover"));
-        gplus.setToolTipText(BundleUtils.getLabel("tooltip_gplus"));
-        gplus.setBounds(8 + (38 * 2) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
-        gplus.setBorder(null);
-
-        facebook = new LinkJButton(BundleUtils.getURI("terasology_facebook"));
-        facebook.setIcon(BundleUtils.getImageIcon("facebook"));
-        facebook.setRolloverIcon(BundleUtils.getImageIcon("facebook_hover"));
-        facebook.setToolTipText(BundleUtils.getLabel("tooltip_facebook"));
-        facebook.setBounds(8 + (38 * 3) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
-        facebook.setBorder(null);
-
-        twitter = new LinkJButton(BundleUtils.getURI("terasology_twitter"));
-        twitter.setIcon(BundleUtils.getImageIcon("twitter"));
-        twitter.setRolloverIcon(BundleUtils.getImageIcon("twitter_hover"));
-        twitter.setToolTipText(BundleUtils.getLabel("tooltip_twitter"));
+        twitter = new LinkJButton();
         twitter.setBounds(8 + (38 * 4) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         twitter.setBorder(null);
 
-        reddit = new LinkJButton(BundleUtils.getURI("terasology_reddit"));
-        reddit.setIcon(BundleUtils.getImageIcon("reddit"));
-        reddit.setRolloverIcon(BundleUtils.getImageIcon("reddit_hover"));
-        reddit.setToolTipText(BundleUtils.getLabel("tooltip_reddit"));
+        facebook = new LinkJButton();
+        facebook.setBounds(8 + (38 * 3) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
+        facebook.setBorder(null);
+
+        gplus = new LinkJButton();
+        gplus.setBounds(8 + (38 * 2) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
+        gplus.setBorder(null);
+
+        youtube = new LinkJButton();
+        youtube.setBounds(8 + 38 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
+        youtube.setBorder(null);
+
+        reddit = new LinkJButton();
         reddit.setBounds(8 + (38 * 5) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
         reddit.setBorder(null);
 
@@ -292,37 +254,10 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         contentPane.add(updatePanel);
     }
 
-    public void updateInfoTextPane() {
-        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-        final StringBuilder b = new StringBuilder();
-        // TODO add more informations and i18n
-        if (gameVersion.getBuildType() != null) {
-            b.append(gameVersion.getBuildType());
-            b.append("<br/>");
-        }
-        if (gameVersion.getBuildNumber() != null) {
-            b.append(gameVersion.getBuildNumber());
-            b.append("<br/>");
-        }
-        if (gameVersion.getChangeLog() != null) {
-            for (String msg : gameVersion.getChangeLog()) {
-                b.append("-");
-                // TODO escape HTML entities/special characters
-                b.append(msg);
-                b.append("<br/>");
-            }
-        }
-        infoTextPane.setText(b.toString());
-        infoTextPane.setCaretPosition(0);
-    }
 
     private TerasologyGameVersion getSelectedGameVersion() {
         return gameVersions.getGameVersionForBuildVersion(settings.getBuildType(),
             settings.getBuildVersion(settings.getBuildType()));
-    }
-
-    public JProgressBar getProgressBar() {
-        return progressBar;
     }
 
     @Override
@@ -337,13 +272,10 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
                 settingsMenu = new SettingsMenu(this, terasologyDirectory, settings, gameVersions);
                 settingsMenu.setVisible(true);
-                // TODO "windowClosed" is called twice
                 settingsMenu.addWindowListener(new WindowAdapter() {
                     @Override
                     public void windowClosed(final WindowEvent e) {
-                        updateStartButton();
-                        updateInfoTextPane();
-                        updateLocale();
+                        updateGui();
                     }
                 });
             }
@@ -368,22 +300,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 getSelectedGameVersion(), gameVersions);
             downloader.execute();
         }
-    }
-
-    private void updateLocale() {
-        setTitle(BundleUtils.getLabel("launcher_title"));
-        setIconImage(BundleUtils.getImage("icon"));
-
-        forums.setText(BundleUtils.getLabel("launcher_forum"));
-        mods.setText(BundleUtils.getLabel("launcher_mods"));
-        issues.setText(BundleUtils.getLabel("launcher_issues"));
-
-        settingsButton.setText(BundleUtils.getLabel("launcher_settings"));
-        settingsButton.setToolTipText(BundleUtils.getLabel("tooltip_settings"));
-        cancelButton.setText(BundleUtils.getLabel("launcher_cancel"));
-        cancelButton.setToolTipText(BundleUtils.getLabel("tooltip_cancel"));
-
-        // TODO Update URLs and tooltips
     }
 
     /**
@@ -445,7 +361,68 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         delDirectory.delete();
     }
 
-    public void updateStartButton() {
+    public void updateGui() {
+        updateLocale();
+        updateStartButton();
+        updateInfoTextPane();
+    }
+
+    private void updateLocale() {
+        setTitle(BundleUtils.getLabel("launcher_title"));
+        setIconImage(BundleUtils.getImage("icon"));
+
+        settingsButton.setText(BundleUtils.getLabel("launcher_settings"));
+        settingsButton.setToolTipText(BundleUtils.getLabel("tooltip_settings"));
+        cancelButton.setText(BundleUtils.getLabel("launcher_cancel"));
+        cancelButton.setToolTipText(BundleUtils.getLabel("tooltip_cancel"));
+
+        logo.setText(BundleUtils.getLabel("launcher_website"));
+        logo.setToolTipText(BundleUtils.getLabel("tooltip_website"));
+        logo.setIcon(BundleUtils.getImageIcon("logo"));
+        logo.setUri(BundleUtils.getURI("terasology_website"));
+        forums.setText(BundleUtils.getLabel("launcher_forum"));
+        forums.setToolTipText(BundleUtils.getLabel("tooltip_forum"));
+        forums.setUri(BundleUtils.getURI("terasology_forum"));
+        issues.setText(BundleUtils.getLabel("launcher_issues"));
+        issues.setToolTipText(BundleUtils.getLabel("tooltip_github_issues"));
+        issues.setUri(BundleUtils.getURI("terasology_github_issues"));
+        mods.setText(BundleUtils.getLabel("launcher_mods"));
+        mods.setToolTipText(BundleUtils.getLabel("tooltip_mods"));
+        mods.setUri(BundleUtils.getURI("terasology_mods"));
+
+        github.setToolTipText(BundleUtils.getLabel("tooltip_github"));
+        github.setUri(BundleUtils.getURI("terasology_github"));
+        github.setIcon(BundleUtils.getImageIcon("github"));
+        github.setRolloverIcon(BundleUtils.getImageIcon("github_hover"));
+
+        twitter.setToolTipText(BundleUtils.getLabel("tooltip_twitter"));
+        twitter.setUri(BundleUtils.getURI("terasology_twitter"));
+        twitter.setIcon(BundleUtils.getImageIcon("twitter"));
+        twitter.setRolloverIcon(BundleUtils.getImageIcon("twitter_hover"));
+
+        facebook.setToolTipText(BundleUtils.getLabel("tooltip_facebook"));
+        facebook.setUri(BundleUtils.getURI("terasology_facebook"));
+        facebook.setIcon(BundleUtils.getImageIcon("facebook"));
+        facebook.setRolloverIcon(BundleUtils.getImageIcon("facebook_hover"));
+
+        gplus.setToolTipText(BundleUtils.getLabel("tooltip_gplus"));
+        gplus.setUri(BundleUtils.getURI("terasology_gplus"));
+        gplus.setIcon(BundleUtils.getImageIcon("gplus"));
+        gplus.setRolloverIcon(BundleUtils.getImageIcon("gplus_hover"));
+
+        youtube.setToolTipText(BundleUtils.getLabel("tooltip_youtube"));
+        youtube.setUri(BundleUtils.getURI("terasology_youtube"));
+        youtube.setIcon(BundleUtils.getImageIcon("youtube"));
+        youtube.setRolloverIcon(BundleUtils.getImageIcon("youtube_hover"));
+
+        reddit.setToolTipText(BundleUtils.getLabel("tooltip_reddit"));
+        reddit.setUri(BundleUtils.getURI("terasology_reddit"));
+        reddit.setIcon(BundleUtils.getImageIcon("reddit"));
+        reddit.setRolloverIcon(BundleUtils.getImageIcon("reddit_hover"));
+    }
+
+
+    private void updateStartButton() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if (gameVersion.isInstalled()) {
             // installed game can be started
@@ -470,4 +447,29 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             startButton.setActionCommand(null);
         }
     }
+
+    private void updateInfoTextPane() {
+        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+        final StringBuilder b = new StringBuilder();
+        // TODO add more information, i18n and tooltip
+        if (gameVersion.getBuildType() != null) {
+            b.append(gameVersion.getBuildType());
+            b.append("<br/>");
+        }
+        if (gameVersion.getBuildNumber() != null) {
+            b.append(gameVersion.getBuildNumber());
+            b.append("<br/>");
+        }
+        if (gameVersion.getChangeLog() != null) {
+            for (String msg : gameVersion.getChangeLog()) {
+                b.append("-");
+                // TODO escape HTML entities/special characters
+                b.append(msg);
+                b.append("<br/>");
+            }
+        }
+        infoTextPane.setText(b.toString());
+        infoTextPane.setCaretPosition(0);
+    }
+
 }

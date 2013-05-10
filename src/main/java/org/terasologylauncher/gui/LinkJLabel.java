@@ -42,15 +42,21 @@ public final class LinkJLabel extends JLabel implements MouseListener {
 
     private long lastClicked;
 
-    private final URI uri;
+    private URI uri;
 
-    public LinkJLabel(final String text, final URI uri) {
-        super(text);
-        this.uri = uri;
+    public LinkJLabel() {
         lastClicked = 0;
         setForeground(STANDARD_COLOR);
         addMouseListener(this);
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+
+    public URI getUri() {
+        return uri;
+    }
+
+    public void setUri(final URI uri) {
+        this.uri = uri;
     }
 
     @Override
