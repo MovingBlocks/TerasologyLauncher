@@ -99,6 +99,11 @@ applicationDistribution.from ('README.md') {
     rename('README.md', 'README')
 }
 
+applicationDistribution.from ('CHANGELOG.md') {
+    filter(FixCrLfFilter, eol:FixCrLfFilter.CrLf.newInstance("crlf"))
+    rename('CHANGELOG.md', 'CHANGELOG')
+}
+
 applicationDistribution.from ('LICENSE') {
     filter(FixCrLfFilter, eol:FixCrLfFilter.CrLf.newInstance("crlf"))
 }
