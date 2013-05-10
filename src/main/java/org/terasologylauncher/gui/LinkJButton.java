@@ -35,15 +35,23 @@ import java.net.URI;
 public final class LinkJButton extends JButton {
 
     private static final long serialVersionUID = 1L;
+
     private static final Logger logger = LoggerFactory.getLogger(LinkJButton.class);
 
-    private final URI uri;
+    private URI uri;
 
-    public LinkJButton(final URI uri) {
-        this.uri = uri;
+    public LinkJButton() {
         addActionListener(new ButtonClickHandler());
         setBorder(null);
         setOpaque(false);
+    }
+
+    public URI getUri() {
+        return uri;
+    }
+
+    public void setUri(final URI uri) {
+        this.uri = uri;
     }
 
     private class ButtonClickHandler implements ActionListener {

@@ -147,8 +147,7 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         progressBar.setStringPainted(true);
 
         gameVersions.updateGameVersionsAfterInstallation(terasologyDirectory);
-        frame.updateStartButton();
-        frame.updateInfoTextPane();
+        frame.updateGui();
 
         zip.delete();
 
