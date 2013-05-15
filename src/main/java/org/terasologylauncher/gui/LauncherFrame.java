@@ -175,7 +175,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         final JLabel version = new JLabel(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
         version.setFont(version.getFont().deriveFont(12f));
         version.setForeground(Color.WHITE);
-        version.setBounds(FRAME_WIDTH - 200 - 16 - xShift, 0, 200, 32);
+        version.setBounds(FRAME_WIDTH - 400 - 16 - xShift, 0, 400, 32);
         version.setHorizontalAlignment(JLabel.RIGHT);
 
         // Forums link
