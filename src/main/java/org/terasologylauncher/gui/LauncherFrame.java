@@ -70,7 +70,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
     private JTextPane infoTextPane;
     private LinkJLabel logo;
-    private JLabel version;
     private LinkJLabel forums;
     private LinkJLabel issues;
     private LinkJLabel mods;
@@ -173,11 +172,11 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         logo.setBounds(8, 0, 400, 96);
 
         // Launcher version info label
-        version = new JLabel(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
+        final JLabel version = new JLabel(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
         version.setFont(version.getFont().deriveFont(12f));
         version.setForeground(Color.WHITE);
-        version.setBounds(FRAME_WIDTH - 64 - 16 - xShift, 0, 32, 32);
-        version.setText(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
+        version.setBounds(FRAME_WIDTH - 200 - 16 - xShift, 0, 200, 32);
+        version.setHorizontalAlignment(JLabel.RIGHT);
 
         // Forums link
         forums = new LinkJLabel();

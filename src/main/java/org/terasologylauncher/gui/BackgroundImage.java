@@ -34,7 +34,7 @@ import java.io.IOException;
  *
  * @author Skaldarnar
  */
-public final class BackgroundImage extends JLabel {
+final class BackgroundImage extends JLabel {
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(BackgroundImage.class);
