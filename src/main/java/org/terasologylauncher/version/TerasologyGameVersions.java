@@ -339,7 +339,7 @@ public final class TerasologyGameVersions {
         if (gameVersion != null) {
             final List<TerasologyGameVersion> gameVersionList = getGameVersionList(gameVersion.getBuildType());
             for (TerasologyGameVersion currentGameVersion : gameVersionList) {
-                if (gameVersion.getBuildNumber() == currentGameVersion.getBuildNumber()) {
+                if (gameVersion.getBuildNumber().equals(currentGameVersion.getBuildNumber())) {
                     if (gameVersion.getGameVersionInfo() != null) {
                         currentGameVersion.setGameVersionInfo(gameVersion.getGameVersionInfo());
                     }

@@ -46,12 +46,16 @@ public final class Settings {
     private static final BuildType BUILD_TYPE_DEFAULT = BuildType.STABLE;
     private static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     private static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
+    private static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
+    private static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
 
     private static final String PROPERTY_LOCALE = "locale";
     private static final String PROPERTY_BUILD_TYPE = "buildType";
     private static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
     private static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
     private static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
+    private static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
+    private static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
 
     private final File settingsFile;
     private final Properties properties;
@@ -165,6 +169,23 @@ public final class Settings {
             }
         }
         properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialJavaHeapSize.name());
+
+
+        // searchForLauncherUpdates
+        final String searchForLauncherUpdatesStr = properties.getProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES);
+        boolean searchForLauncherUpdates = SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT;
+        if (searchForLauncherUpdatesStr != null) {
+            searchForLauncherUpdates = Boolean.valueOf(searchForLauncherUpdatesStr);
+        }
+        properties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, Boolean.toString(searchForLauncherUpdates));
+
+        // closeLauncherAfterGameStart
+        final String closeLauncherAfterGameStartStr = properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START);
+        boolean closeLauncherAfterGameStart = CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT;
+        if (closeLauncherAfterGameStartStr != null) {
+            closeLauncherAfterGameStart = Boolean.valueOf(closeLauncherAfterGameStartStr);
+        }
+        properties.setProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START, Boolean.toString(closeLauncherAfterGameStart));
     }
 
     public synchronized void setLocale(final Locale locale) {
@@ -205,6 +226,22 @@ public final class Settings {
 
     public synchronized JavaHeapSize getInitialHeapSize() {
         return JavaHeapSize.valueOf(properties.getProperty(PROPERTY_INITIAL_HEAP_SIZE));
+    }
+
+    public synchronized void setSearchForLauncherUpdates(final boolean searchForLauncherUpdates) {
+        properties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, Boolean.toString(searchForLauncherUpdates));
+    }
+
+    public synchronized boolean isSearchForLauncherUpdates() {
+        return Boolean.valueOf(properties.getProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES));
+    }
+
+    public synchronized void setCloseLauncherAfterGameStart(final boolean closeLauncherAfterGameStart) {
+        properties.setProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START, Boolean.toString(closeLauncherAfterGameStart));
+    }
+
+    public synchronized boolean isCloseLauncherAfterGameStart() {
+        return Boolean.valueOf(properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START));
     }
 
     @Override

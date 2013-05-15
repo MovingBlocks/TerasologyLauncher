@@ -139,17 +139,15 @@ public final class GameDownloader extends SwingWorker<Void, Void> {
         progressBar.setString(BundleUtils.getLabel("update_game_extractZip"));
         progressBar.setStringPainted(true);
 
-        File zip;
-        zip = new File(terasologyDirectory, ZIP_FILE);
+        final File zip = new File(terasologyDirectory, ZIP_FILE);
         FileUtils.extractZip(zip);
+        zip.delete();
 
         progressBar.setString(BundleUtils.getLabel("update_game_gameInfo"));
         progressBar.setStringPainted(true);
 
         gameVersions.updateGameVersionsAfterInstallation(terasologyDirectory);
         frame.updateGui();
-
-        zip.delete();
 
         progressBar.setVisible(false);
     }
