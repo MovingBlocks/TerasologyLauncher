@@ -287,7 +287,10 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             final TerasologyStarter terasologyStarter = new TerasologyStarter(gameVersion, os,
                 settings.getMaxHeapSize(), settings.getInitialHeapSize());
             if (terasologyStarter.startGame()) {
-                System.exit(0);
+                // TODO Game doesn't start if launcher is not closed.
+                if (settings.isCloseLauncherAfterGameStart()) {
+                    System.exit(0);
+                }
             } else {
                 JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_gameStart"),
                     BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);

@@ -122,15 +122,18 @@ public final class TerasologyLauncher {
             logger.debug("Settings: {}", settings);
 
             // Launcher Update
-            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
-            final LauncherUpdater updater = new LauncherUpdater(os, applicationDir,
-                TerasologyLauncherVersionInfo.getInstance().getBuildNumber(),
-                TerasologyLauncherVersionInfo.getInstance().getJobName());
-            if (updater.updateAvailable()) {
-                logger.info("Launcher update available! {} {}", updater.getUpstreamVersion(), updater.getVersionInfo());
-                splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
+            if (settings.isSearchForLauncherUpdates()) {
+                splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
+                final LauncherUpdater updater = new LauncherUpdater(os, applicationDir,
+                    TerasologyLauncherVersionInfo.getInstance().getBuildNumber(),
+                    TerasologyLauncherVersionInfo.getInstance().getJobName());
+                if (updater.updateAvailable()) {
+                    logger.info("Launcher update available! {} {}", updater.getUpstreamVersion(),
+                        updater.getVersionInfo());
+                    splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
 
-                showUpdateDialog(splash, updater);
+                    showUpdateDialog(splash, updater);
+                }
             }
 
             // Game versions
