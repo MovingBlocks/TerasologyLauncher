@@ -208,10 +208,6 @@ public final class Settings {
         return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + buildType.name()));
     }
 
-    public synchronized boolean isBuildVersionLatest(final BuildType buildType) {
-        return TerasologyGameVersion.BUILD_VERSION_LATEST == getBuildVersion(buildType);
-    }
-
     public synchronized void setMaxHeapSize(final JavaHeapSize maxHeapSize) {
         properties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxHeapSize.name());
     }

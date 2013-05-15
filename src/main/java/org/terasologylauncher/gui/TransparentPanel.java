@@ -27,7 +27,7 @@ import java.awt.Graphics2D;
  *
  * @author Skaldarnar
  */
-public final class TransparentPanel extends JPanel {
+final class TransparentPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
 

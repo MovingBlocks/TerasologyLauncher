@@ -50,9 +50,9 @@ public final class DownloadUtils {
 
     public static final String FILE_TERASOLOGY_GAME_ZIP = "distributions/Terasology.zip";
     public static final String FILE_TERASOLOGY_LAUNCHER_ZIP = "distributions/TerasologyLauncher.zip";
-    public static final String FILE_TERASOLOGY_GAME_VERSION_INFO =
+    private static final String FILE_TERASOLOGY_GAME_VERSION_INFO =
         "resources/main/org/terasology/version/versionInfo.properties";
-    public static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO =
+    private static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO =
         "resources/main/org/terasologylauncher/version/versionInfo.properties";
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
