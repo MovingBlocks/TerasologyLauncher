@@ -127,6 +127,7 @@ public final class TerasologyGameVersion {
     }
 
     public String toString() {
-        return this.getClass().getName() + "[" + buildType + ", " + buildNumber + "]";
+        return this.getClass().getName() + "[" + buildType + ", " + buildNumber + ", latest=" + latest
+            + ", successful=" + successful + "]";
     }
 }

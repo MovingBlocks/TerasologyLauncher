@@ -22,7 +22,7 @@ import org.terasologylauncher.version.TerasologyGameVersion;
 /**
  * @author Mathias Kalb
  */
-public final class VersionItem {
+final class VersionItem {
 
     private final TerasologyGameVersion gameVersion;
 

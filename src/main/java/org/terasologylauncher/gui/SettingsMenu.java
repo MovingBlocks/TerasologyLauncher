@@ -53,7 +53,7 @@ import java.util.Locale;
 /**
  * @author Skaldarnar
  */
-public final class SettingsMenu extends JDialog implements ActionListener {
+final class SettingsMenu extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(SettingsMenu.class);

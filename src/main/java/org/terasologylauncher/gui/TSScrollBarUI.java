@@ -31,7 +31,7 @@ import java.awt.Rectangle;
  *
  * @author Skaldarnar
  */
-public final class TSScrollBarUI extends BasicScrollBarUI {
+final class TSScrollBarUI extends BasicScrollBarUI {
 
     public TSScrollBarUI() {
     }

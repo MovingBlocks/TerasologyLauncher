@@ -54,8 +54,6 @@ public final class TerasologyGameVersions {
     private List<TerasologyGameVersion> gameVersionListNightly;
     private SortedMap<Integer, TerasologyGameVersion> gameVersionMapStable;
     private SortedMap<Integer, TerasologyGameVersion> gameVersionMapNightly;
-    private Integer lastBuildNumberStable;
-    private Integer lastBuildNumberNightly;
 
     private final Settings settings;
 
@@ -81,13 +79,6 @@ public final class TerasologyGameVersions {
         return null;
     }
 
-    public Integer getLastBuildNumber(final BuildType buildType) {
-        if (BuildType.STABLE == buildType) {
-            return lastBuildNumberStable;
-        }
-        return lastBuildNumberNightly;
-    }
-
     public synchronized void loadGameVersions(final File applicationDir) {
         gameVersionMapStable = new TreeMap<Integer, TerasologyGameVersion>();
         gameVersionMapNightly = new TreeMap<Integer, TerasologyGameVersion>();
@@ -97,9 +88,9 @@ public final class TerasologyGameVersions {
         loadSettingsBuildNumber(buildNumbersStable, BuildType.STABLE, MIN_BUILD_NUMBER_STABLE);
         loadSettingsBuildNumber(buildNumbersNightly, BuildType.NIGHTLY, MIN_BUILD_NUMBER_NIGHTLY);
 
-        lastBuildNumberStable = loadLastSuccessfulBuildNumber(buildNumbersStable,
+        final Integer lastBuildNumberStable = loadLastSuccessfulBuildNumber(buildNumbersStable,
             DownloadUtils.TERASOLOGY_STABLE_JOB_NAME, MIN_BUILD_NUMBER_STABLE, PREV_BUILD_NUMBERS_STABLE);
-        lastBuildNumberNightly = loadLastSuccessfulBuildNumber(buildNumbersNightly,
+        final Integer lastBuildNumberNightly = loadLastSuccessfulBuildNumber(buildNumbersNightly,
             DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME, MIN_BUILD_NUMBER_NIGHTLY, PREV_BUILD_NUMBERS_NIGHTLY);
 
         loadInstalledGames(applicationDir, buildNumbersStable, buildNumbersNightly);
@@ -354,7 +345,7 @@ public final class TerasologyGameVersions {
 
     @Override
     public String toString() {
-        return this.getClass().getName() + "[lastBuildNumberStable=" + lastBuildNumberStable
-            + ", lastBuildNumberNightly=" + lastBuildNumberNightly + "]";
+        return this.getClass().getName() + "[gameVersionListStable=" + gameVersionListStable
+            + ", gameVersionListNightly=" + gameVersionListNightly + "]";
     }
 }
