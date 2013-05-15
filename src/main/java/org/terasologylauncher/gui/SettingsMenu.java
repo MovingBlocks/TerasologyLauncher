@@ -29,6 +29,7 @@ import org.terasologylauncher.version.TerasologyGameVersions;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -70,6 +71,8 @@ public final class SettingsMenu extends JDialog implements ActionListener {
     private JComboBox maxHeapSizeBox;
     private JComboBox initialHeapSizeBox;
     private JComboBox languageBox;
+    private JCheckBox searchForLauncherUpdatesBox;
+    private JCheckBox closeLauncherAfterGameStartBox;
 
     private final File terasologyDirectory;
     private final Settings settings;
@@ -93,6 +96,8 @@ public final class SettingsMenu extends JDialog implements ActionListener {
         populateVersions(buildVersionNightlyBox, BuildType.NIGHTLY);
         populateHeapSize();
         populateLanguage();
+        populateSearchForLauncherUpdates();
+        populateCloseLauncherAfterGameStart();
 
         pack();
     }
@@ -102,8 +107,8 @@ public final class SettingsMenu extends JDialog implements ActionListener {
 
         JTabbedPane mainSettings = new JTabbedPane();
         mainSettings.addTab(BundleUtils.getLabel("settings_game_title"), createGameSettingsTab(settingsFont));
+        mainSettings.addTab(BundleUtils.getLabel("settings_launcher_title"), createLauncherSettingsTab(settingsFont));
         mainSettings.addTab(BundleUtils.getLabel("settings_directories_title"), createDirectoriesTab(settingsFont));
-        mainSettings.addTab(BundleUtils.getLabel("settings_language_title"), createLanguageTab(settingsFont));
 
         /*================== OK, Cancel, Reset ==================*/
         JButton resetButton = new JButton();
@@ -251,6 +256,75 @@ public final class SettingsMenu extends JDialog implements ActionListener {
         return gameSettingsTab;
     }
 
+    private JPanel createLauncherSettingsTab(final Font settingsFont) {
+        JPanel launcherSettingsTab = new JPanel();
+        launcherSettingsTab.setFont(settingsFont);
+
+        JLabel languageLabel = new JLabel();
+        languageLabel.setText(BundleUtils.getLabel("settings_launcher_chooseLanguage"));
+        languageLabel.setFont(settingsFont);
+
+        languageBox = new JComboBox();
+        languageBox.setFont(settingsFont);
+
+        JLabel searchForLauncherUpdatesLabel = new JLabel();
+        searchForLauncherUpdatesLabel.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
+        searchForLauncherUpdatesLabel.setFont(settingsFont);
+
+        searchForLauncherUpdatesBox = new JCheckBox();
+        searchForLauncherUpdatesBox.setFont(settingsFont);
+
+        JLabel closeLauncherAfterGameStartLabel = new JLabel();
+        closeLauncherAfterGameStartLabel.setText(BundleUtils.getLabel("settings_launcher_closeLauncherAfterGameStart"));
+        closeLauncherAfterGameStartLabel.setFont(settingsFont);
+
+        closeLauncherAfterGameStartBox = new JCheckBox();
+        closeLauncherAfterGameStartBox.setFont(settingsFont);
+
+        final GroupLayout launcherTabLayout = new GroupLayout(launcherSettingsTab);
+        launcherSettingsTab.setLayout(launcherTabLayout);
+
+        launcherTabLayout.setHorizontalGroup(
+            launcherTabLayout.createParallelGroup()
+                .addGroup(launcherTabLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(launcherTabLayout.createParallelGroup()
+                        .addComponent(languageLabel)
+                        .addComponent(searchForLauncherUpdatesLabel)
+                        .addComponent(closeLauncherAfterGameStartLabel))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(launcherTabLayout.createParallelGroup()
+                        .addComponent(languageBox)
+                        .addComponent(searchForLauncherUpdatesBox)
+                        .addComponent(closeLauncherAfterGameStartBox))
+                    .addContainerGap())
+        );
+
+        launcherTabLayout.setVerticalGroup(
+            launcherTabLayout.createParallelGroup()
+                .addGroup(launcherTabLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(languageLabel)
+                        .addComponent(languageBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                            GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(searchForLauncherUpdatesLabel)
+                        .addComponent(searchForLauncherUpdatesBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                            GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(closeLauncherAfterGameStartLabel)
+                        .addComponent(closeLauncherAfterGameStartBox, GroupLayout.PREFERRED_SIZE,
+                            GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addContainerGap())
+        );
+
+
+        return launcherSettingsTab;
+    }
+
     private JPanel createDirectoriesTab(final Font settingsFont) {
         JPanel directoriesTab = new JPanel();
         directoriesTab.setFont(settingsFont);
@@ -362,46 +436,6 @@ public final class SettingsMenu extends JDialog implements ActionListener {
         return directoriesTab;
     }
 
-    private JPanel createLanguageTab(final Font settingsFont) {
-        JPanel languageTab = new JPanel();
-        languageTab.setFont(settingsFont);
-
-        JLabel languageLabel = new JLabel();
-        languageLabel.setText(BundleUtils.getLabel("settings_language_chooseLanguage"));
-        languageLabel.setFont(settingsFont);
-
-        languageBox = new JComboBox();
-        languageBox.setFont(settingsFont);
-
-        final GroupLayout languageTabLayout = new GroupLayout(languageTab);
-        languageTab.setLayout(languageTabLayout);
-
-        languageTabLayout.setHorizontalGroup(
-            languageTabLayout.createParallelGroup()
-                .addGroup(languageTabLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(languageTabLayout.createParallelGroup()
-                        .addComponent(languageLabel))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(languageTabLayout.createParallelGroup()
-                        .addComponent(languageBox))
-                    .addContainerGap())
-        );
-
-        languageTabLayout.setVerticalGroup(
-            languageTabLayout.createParallelGroup()
-                .addGroup(languageTabLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(languageTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(languageLabel)
-                        .addComponent(languageBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                            GroupLayout.PREFERRED_SIZE))
-                    .addContainerGap())
-        );
-
-        return languageTab;
-    }
-
     private void populateBuildType() {
         buildTypeBox.removeAllItems();
 
@@ -488,6 +522,14 @@ public final class SettingsMenu extends JDialog implements ActionListener {
         }
     }
 
+    private void populateSearchForLauncherUpdates() {
+        searchForLauncherUpdatesBox.setSelected(settings.isSearchForLauncherUpdates());
+    }
+
+    private void populateCloseLauncherAfterGameStart() {
+        closeLauncherAfterGameStartBox.setSelected(settings.isCloseLauncherAfterGameStart());
+    }
+
     @Override
     public void actionPerformed(final ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
@@ -534,6 +576,12 @@ public final class SettingsMenu extends JDialog implements ActionListener {
             // save languageBox settings
             Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectedIndex()));
             settings.setLocale(Languages.getCurrentLocale());
+
+            // save searchForLauncherUpdates
+            settings.setSearchForLauncherUpdates(searchForLauncherUpdatesBox.isSelected());
+
+            // save closeLauncherAfterGameStart
+            settings.setCloseLauncherAfterGameStart(closeLauncherAfterGameStartBox.isSelected());
 
             // store changed settings
             try {
