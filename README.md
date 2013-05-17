@@ -1,7 +1,7 @@
 Terasology Launcher - ReadMe
 ============================
 
-Terasology Launcher is the offical launcher for the open source game [Terasology]{https://github.com/MovingBlocks/Terasology}.
+Terasology Launcher is the offical launcher for the open source game [Terasology](https://github.com/MovingBlocks/Terasology).
 
 Terasology Launcher is licensed under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.html) and available in source
 code form at [GitHub](https://github.com/MovingBlocks/TerasologyLauncher).
