@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.terasologylauncher.Languages;
 import org.terasologylauncher.Settings;
 import org.terasologylauncher.gui.LauncherFrame;
-import org.terasologylauncher.gui.SplashScreen;
+import org.terasologylauncher.gui.SplashScreenWindow;
 import org.terasologylauncher.updater.LauncherUpdater;
 import org.terasologylauncher.util.BundleUtils;
 import org.terasologylauncher.util.DirectoryUtils;
@@ -54,7 +54,7 @@ public final class TerasologyLauncher {
             logger.debug("Starting TerasologyLauncher");
 
             // SplashScreen
-            final SplashScreen splash = new SplashScreen(BundleUtils.getBufferedImage("splash"));
+            final SplashScreenWindow splash = new SplashScreenWindow(BundleUtils.getBufferedImage("splash"));
             splash.setVisible(true);
             logger.debug("Show SplashScreen");
 
@@ -162,7 +162,7 @@ public final class TerasologyLauncher {
         }
     }
 
-    private static void showUpdateDialog(final SplashScreen splash, final LauncherUpdater updater) {
+    private static void showUpdateDialog(final SplashScreenWindow splash, final LauncherUpdater updater) {
         final Object[] options = {BundleUtils.getLabel("main_yes"), BundleUtils.getLabel("main_no")};
 
         final JPanel msgPanel = new JPanel(new BorderLayout());

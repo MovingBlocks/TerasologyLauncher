@@ -22,15 +22,17 @@ import javax.swing.JWindow;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.SplashScreen;
 
-public final class SplashScreen extends JWindow {
+public final class SplashScreenWindow extends JWindow {
 
     // TODO: progress bar
     private static final int INFO_LABEL_WIDTH = 400;
 
     private final JLabel infoLabel;
 
-    public SplashScreen(final Image image) {
+    public SplashScreenWindow(final Image image) {
         final ImageIcon icon = new ImageIcon(image);
         final Container contentPane = getContentPane();
         contentPane.setLayout(null);
@@ -51,7 +53,14 @@ public final class SplashScreen extends JWindow {
 
         setSize(background.getWidth(), background.getHeight() + 20);
 
-        setLocationRelativeTo(null);
+        SplashScreen splashScreen = SplashScreen.getSplashScreen();
+        if (splashScreen != null) {
+            Rectangle splashBounds = splashScreen.getBounds();
+            setLocation((int) splashBounds.getX(), (int) splashBounds.getY());
+            splashScreen.close();
+        } else {
+            setLocationRelativeTo(null);
+        }
     }
 
     public JLabel getInfoLabel() {
