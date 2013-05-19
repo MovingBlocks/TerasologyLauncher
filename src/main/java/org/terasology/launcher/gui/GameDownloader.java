@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.version.BuildType;
+import org.terasology.launcher.version.GameBuildType;
 import org.terasology.launcher.version.TerasologyGameVersion;
 import org.terasology.launcher.version.TerasologyGameVersions;
 
@@ -79,7 +79,7 @@ final class GameDownloader extends SwingWorker<Void, Void> {
     @Override
     protected Void doInBackground() {
         final String jobName;
-        if (BuildType.STABLE == gameVersion.getBuildType()) {
+        if (GameBuildType.STABLE == gameVersion.getBuildType()) {
             jobName = DownloadUtils.TERASOLOGY_STABLE_JOB_NAME;
         } else {
             jobName = DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME;

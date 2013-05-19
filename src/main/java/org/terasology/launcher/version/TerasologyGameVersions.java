@@ -60,14 +60,14 @@ public final class TerasologyGameVersions {
         this.launcherSettings = launcherSettings;
     }
 
-    public List<TerasologyGameVersion> getGameVersionList(final BuildType buildType) {
-        if (BuildType.STABLE == buildType) {
+    public List<TerasologyGameVersion> getGameVersionList(final GameBuildType buildType) {
+        if (GameBuildType.STABLE == buildType) {
             return gameVersionListStable;
         }
         return gameVersionListNightly;
     }
 
-    public TerasologyGameVersion getGameVersionForBuildVersion(final BuildType buildType, final int buildVersion) {
+    public TerasologyGameVersion getGameVersionForBuildVersion(final GameBuildType buildType, final int buildVersion) {
         final List<TerasologyGameVersion> gameVersionList = getGameVersionList(buildType);
         for (TerasologyGameVersion gameVersion : gameVersionList) {
             if (buildVersion == gameVersion.getBuildVersion()) {
@@ -84,8 +84,8 @@ public final class TerasologyGameVersions {
         final SortedSet<Integer> buildNumbersStable = new TreeSet<Integer>();
         final SortedSet<Integer> buildNumbersNightly = new TreeSet<Integer>();
 
-        loadSettingsBuildNumber(buildNumbersStable, BuildType.STABLE, MIN_BUILD_NUMBER_STABLE);
-        loadSettingsBuildNumber(buildNumbersNightly, BuildType.NIGHTLY, MIN_BUILD_NUMBER_NIGHTLY);
+        loadSettingsBuildNumber(buildNumbersStable, GameBuildType.STABLE, MIN_BUILD_NUMBER_STABLE);
+        loadSettingsBuildNumber(buildNumbersNightly, GameBuildType.NIGHTLY, MIN_BUILD_NUMBER_NIGHTLY);
 
         final Integer lastBuildNumberStable = loadLastSuccessfulBuildNumber(buildNumbersStable,
             DownloadUtils.TERASOLOGY_STABLE_JOB_NAME, MIN_BUILD_NUMBER_STABLE, PREV_BUILD_NUMBERS_STABLE);
@@ -97,19 +97,19 @@ public final class TerasologyGameVersions {
         fillBuildNumbers(buildNumbersStable, MIN_BUILD_NUMBER_STABLE, lastBuildNumberStable);
         fillBuildNumbers(buildNumbersNightly, MIN_BUILD_NUMBER_NIGHTLY, lastBuildNumberNightly);
 
-        loadGameVersions(buildNumbersStable, BuildType.STABLE,
+        loadGameVersions(buildNumbersStable, GameBuildType.STABLE,
             DownloadUtils.TERASOLOGY_STABLE_JOB_NAME, gameVersionMapStable);
-        loadGameVersions(buildNumbersNightly, BuildType.NIGHTLY,
+        loadGameVersions(buildNumbersNightly, GameBuildType.NIGHTLY,
             DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME, gameVersionMapNightly);
 
-        gameVersionListStable = createList(lastBuildNumberStable, BuildType.STABLE, gameVersionMapStable);
-        gameVersionListNightly = createList(lastBuildNumberNightly, BuildType.NIGHTLY, gameVersionMapNightly);
+        gameVersionListStable = createList(lastBuildNumberStable, GameBuildType.STABLE, gameVersionMapStable);
+        gameVersionListNightly = createList(lastBuildNumberNightly, GameBuildType.NIGHTLY, gameVersionMapNightly);
 
-        fixSettingsBuildVersion(BuildType.STABLE, gameVersionMapStable);
-        fixSettingsBuildVersion(BuildType.NIGHTLY, gameVersionMapNightly);
+        fixSettingsBuildVersion(GameBuildType.STABLE, gameVersionMapStable);
+        fixSettingsBuildVersion(GameBuildType.NIGHTLY, gameVersionMapNightly);
     }
 
-    private void loadSettingsBuildNumber(final SortedSet<Integer> buildNumbers, final BuildType buildType,
+    private void loadSettingsBuildNumber(final SortedSet<Integer> buildNumbers, final GameBuildType buildType,
                                          final int minBuildNumber) {
         final int buildVersion = launcherSettings.getBuildVersion(buildType);
         if ((buildVersion >= minBuildNumber) && (TerasologyGameVersion.BUILD_VERSION_LATEST != buildVersion)) {
@@ -166,23 +166,23 @@ public final class TerasologyGameVersions {
         final File gameJar = new File(terasologyDirectory, FILE_TERASOLOGY_JAR);
         if (gameJar.exists() && gameJar.canRead() && gameJar.isFile()) {
             final TerasologyGameVersionInfo gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(gameJar);
-            BuildType installedBuildType = null;
+            GameBuildType installedBuildType = null;
             Integer installedBuildNumber = null;
 
             if ((gameVersionInfo.getJobName() != null) && (gameVersionInfo.getJobName().length() > 0)) {
                 if (gameVersionInfo.getJobName().equals(DownloadUtils.TERASOLOGY_STABLE_JOB_NAME)) {
-                    installedBuildType = BuildType.STABLE;
+                    installedBuildType = GameBuildType.STABLE;
                 } else if (gameVersionInfo.getJobName().equals(DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME)) {
-                    installedBuildType = BuildType.NIGHTLY;
+                    installedBuildType = GameBuildType.NIGHTLY;
                 }
             }
 
             if ((installedBuildType == null)
                 && (gameVersionInfo.getGitBranch() != null) && (gameVersionInfo.getGitBranch().length() > 0)) {
                 if (gameVersionInfo.getGitBranch().equals(GIT_BRANCH_STABLE)) {
-                    installedBuildType = BuildType.STABLE;
+                    installedBuildType = GameBuildType.STABLE;
                 } else if (gameVersionInfo.getGitBranch().equals(GIT_BRANCH_NIGHTLY)) {
-                    installedBuildType = BuildType.NIGHTLY;
+                    installedBuildType = GameBuildType.NIGHTLY;
                 }
             }
 
@@ -226,7 +226,7 @@ public final class TerasologyGameVersions {
         }
     }
 
-    private void loadGameVersions(final SortedSet<Integer> buildNumbers, final BuildType buildType,
+    private void loadGameVersions(final SortedSet<Integer> buildNumbers, final GameBuildType buildType,
                                   final String jobName, final SortedMap<Integer, TerasologyGameVersion> gameVersions) {
         // TODO Create a cache -> faster loading and works without internet connection
         for (Integer buildNumber : buildNumbers) {
@@ -287,7 +287,7 @@ public final class TerasologyGameVersions {
         }
     }
 
-    private List<TerasologyGameVersion> createList(final Integer lastBuildNumber, final BuildType buildType,
+    private List<TerasologyGameVersion> createList(final Integer lastBuildNumber, final GameBuildType buildType,
                                                    final SortedMap<Integer, TerasologyGameVersion> gameVersionMap) {
         final List<TerasologyGameVersion> gameVersionList = new ArrayList<TerasologyGameVersion>();
         gameVersionList.addAll(gameVersionMap.values());
@@ -308,7 +308,7 @@ public final class TerasologyGameVersions {
         return Collections.unmodifiableList(gameVersionList);
     }
 
-    private void fixSettingsBuildVersion(final BuildType buildType,
+    private void fixSettingsBuildVersion(final GameBuildType buildType,
                                          final SortedMap<Integer, TerasologyGameVersion> gameVersionMap) {
         final int buildVersion = launcherSettings.getBuildVersion(buildType);
         if ((buildVersion != TerasologyGameVersion.BUILD_VERSION_LATEST) && !gameVersionMap.containsKey(buildVersion)) {

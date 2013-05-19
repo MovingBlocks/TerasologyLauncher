@@ -16,7 +16,7 @@
 
 package org.terasology.launcher.version;
 
-public enum BuildType {
+public enum GameBuildType {
 
     STABLE, NIGHTLY
 

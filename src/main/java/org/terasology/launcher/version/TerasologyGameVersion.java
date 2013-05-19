@@ -27,7 +27,7 @@ public final class TerasologyGameVersion {
     public static final int BUILD_VERSION_LATEST = -1;
 
     private Integer buildNumber;
-    private BuildType buildType;
+    private GameBuildType buildType;
     private TerasologyGameVersionInfo gameVersionInfo;
     private File installationPath;
     private File gameJar;
@@ -68,11 +68,11 @@ public final class TerasologyGameVersion {
         this.buildNumber = buildNumber;
     }
 
-    public BuildType getBuildType() {
+    public GameBuildType getBuildType() {
         return buildType;
     }
 
-    void setBuildType(final BuildType buildType) {
+    void setBuildType(final GameBuildType buildType) {
         this.buildType = buildType;
     }
 

@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.version.BuildType;
+import org.terasology.launcher.version.GameBuildType;
 import org.terasology.launcher.version.TerasologyGameVersion;
 
 import java.io.File;
@@ -45,7 +45,7 @@ public final class LauncherSettings {
 
     private static final String COMMENT_SETTINGS = "Terasology Launcher - Settings";
 
-    private static final BuildType BUILD_TYPE_DEFAULT = BuildType.STABLE;
+    private static final GameBuildType BUILD_TYPE_DEFAULT = GameBuildType.STABLE;
     private static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     private static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     private static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
@@ -120,10 +120,10 @@ public final class LauncherSettings {
 
         // buildType
         final String buildTypeStr = properties.getProperty(PROPERTY_BUILD_TYPE);
-        BuildType buildType = BUILD_TYPE_DEFAULT;
+        GameBuildType buildType = BUILD_TYPE_DEFAULT;
         if (buildTypeStr != null) {
             try {
-                buildType = BuildType.valueOf(buildTypeStr);
+                buildType = GameBuildType.valueOf(buildTypeStr);
             } catch (IllegalArgumentException e) {
                 logger.info("Invalid value '{}' for the parameter '{}'!", buildTypeStr, PROPERTY_BUILD_TYPE);
             }
@@ -131,8 +131,8 @@ public final class LauncherSettings {
         properties.setProperty(PROPERTY_BUILD_TYPE, buildType.name());
 
         // buildVersion
-        final BuildType[] buildTypes = BuildType.values();
-        for (BuildType b : buildTypes) {
+        final GameBuildType[] buildTypes = GameBuildType.values();
+        for (GameBuildType b : buildTypes) {
             final String key = PROPERTY_PREFIX_BUILD_VERSION + b.name();
             final String buildVersionStr = properties.getProperty(key);
             int buildVersion = TerasologyGameVersion.BUILD_VERSION_LATEST;
@@ -194,19 +194,19 @@ public final class LauncherSettings {
         properties.setProperty(PROPERTY_LOCALE, locale.toString());
     }
 
-    public synchronized void setBuildType(final BuildType buildType) {
+    public synchronized void setBuildType(final GameBuildType buildType) {
         properties.setProperty(PROPERTY_BUILD_TYPE, buildType.name());
     }
 
-    public synchronized BuildType getBuildType() {
-        return BuildType.valueOf(properties.getProperty(PROPERTY_BUILD_TYPE));
+    public synchronized GameBuildType getBuildType() {
+        return GameBuildType.valueOf(properties.getProperty(PROPERTY_BUILD_TYPE));
     }
 
-    public synchronized void setBuildVersion(final int version, final BuildType buildType) {
+    public synchronized void setBuildVersion(final int version, final GameBuildType buildType) {
         properties.setProperty(PROPERTY_PREFIX_BUILD_VERSION + buildType.name(), String.valueOf(version));
     }
 
-    public synchronized int getBuildVersion(final BuildType buildType) {
+    public synchronized int getBuildVersion(final GameBuildType buildType) {
         return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + buildType.name()));
     }
 

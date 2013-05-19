@@ -23,7 +23,7 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.version.BuildType;
+import org.terasology.launcher.version.GameBuildType;
 import org.terasology.launcher.version.TerasologyGameVersion;
 import org.terasology.launcher.version.TerasologyGameVersions;
 
@@ -92,8 +92,8 @@ final class SettingsMenu extends JDialog implements ActionListener {
         initComponents();
 
         populateBuildType();
-        populateVersions(buildVersionStableBox, BuildType.STABLE);
-        populateVersions(buildVersionNightlyBox, BuildType.NIGHTLY);
+        populateVersions(buildVersionStableBox, GameBuildType.STABLE);
+        populateVersions(buildVersionNightlyBox, GameBuildType.NIGHTLY);
         populateHeapSize();
         populateLanguage();
         populateSearchForLauncherUpdates();
@@ -446,14 +446,14 @@ final class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void updateBuildTypeSelection() {
-        if (launcherSettings.getBuildType() == BuildType.STABLE) {
+        if (launcherSettings.getBuildType() == GameBuildType.STABLE) {
             buildTypeBox.setSelectedIndex(0);
         } else {
             buildTypeBox.setSelectedIndex(1);
         }
     }
 
-    private void populateVersions(final JComboBox buildVersionBox, final BuildType buildType) {
+    private void populateVersions(final JComboBox buildVersionBox, final GameBuildType buildType) {
         final int buildVersion = launcherSettings.getBuildVersion(buildType);
 
         for (final TerasologyGameVersion version : gameVersions.getGameVersionList(buildType)) {
@@ -549,25 +549,25 @@ final class SettingsMenu extends JDialog implements ActionListener {
         } else if (actionCommand.equals(RESET_ACTION)) {
             // reload the right selections
             updateBuildTypeSelection();
-            populateVersions(buildVersionStableBox, BuildType.STABLE);
-            populateVersions(buildVersionNightlyBox, BuildType.NIGHTLY);
+            populateVersions(buildVersionStableBox, GameBuildType.STABLE);
+            populateVersions(buildVersionNightlyBox, GameBuildType.NIGHTLY);
             updateHeapSizeSelection();
             populateLanguage();
         } else if (actionCommand.equals(SAVE_ACTION)) {
             // save build type
-            final BuildType selectedType;
+            final GameBuildType selectedType;
             if (buildTypeBox.getSelectedIndex() == 0) {
-                selectedType = BuildType.STABLE;
+                selectedType = GameBuildType.STABLE;
             } else {
-                selectedType = BuildType.NIGHTLY;
+                selectedType = GameBuildType.NIGHTLY;
             }
             launcherSettings.setBuildType(selectedType);
 
             // save build version
             VersionItem versionItemStable = (VersionItem) buildVersionStableBox.getSelectedItem();
-            launcherSettings.setBuildVersion(versionItemStable.getVersion(), BuildType.STABLE);
+            launcherSettings.setBuildVersion(versionItemStable.getVersion(), GameBuildType.STABLE);
             VersionItem versionItemNightly = (VersionItem) buildVersionNightlyBox.getSelectedItem();
-            launcherSettings.setBuildVersion(versionItemNightly.getVersion(), BuildType.NIGHTLY);
+            launcherSettings.setBuildVersion(versionItemNightly.getVersion(), GameBuildType.NIGHTLY);
 
             // save heap size settings
             launcherSettings.setMaxHeapSize((JavaHeapSize) maxHeapSizeBox.getSelectedItem());
