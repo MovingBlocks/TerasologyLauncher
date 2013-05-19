@@ -41,8 +41,7 @@ public final class LauncherSettings {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherSettings.class);
 
-    private static final String SETTINGS_FILE_NAME = "settings.properties";
-
+    private static final String LAUNCHER_SETTINGS_FILE_NAME = "TerasologyLauncherSettings.properties";
     private static final String COMMENT_SETTINGS = "Terasology Launcher - Settings";
 
     private static final GameBuildType BUILD_TYPE_DEFAULT = GameBuildType.STABLE;
@@ -59,49 +58,49 @@ public final class LauncherSettings {
     private static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
     private static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
 
-    private final File settingsFile;
+    private final File launcherSettingsFile;
     private final Properties properties;
 
-    public LauncherSettings(final File directory) {
-        settingsFile = new File(directory, SETTINGS_FILE_NAME);
+    public LauncherSettings(final File launcherDirectory) {
+        launcherSettingsFile = new File(launcherDirectory, LAUNCHER_SETTINGS_FILE_NAME);
         properties = new Properties();
     }
 
     public synchronized void load() throws IOException {
-        if (settingsFile.exists()) {
-            logger.debug("Load the launcher settings from the file '{}'.", settingsFile);
+        if (launcherSettingsFile.exists()) {
+            logger.debug("Load the launcher settings from the file '{}'.", launcherSettingsFile);
 
             // load settings
-            final InputStream inputStream = new FileInputStream(settingsFile);
+            final InputStream inputStream = new FileInputStream(launcherSettingsFile);
             try {
                 properties.load(inputStream);
             } finally {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    logger.warn("The file '{}' could not be closed.", settingsFile, e);
+                    logger.warn("The file '{}' could not be closed.", launcherSettingsFile, e);
                 }
             }
         }
     }
 
     public synchronized void store() throws IOException {
-        logger.debug("Store the launcher settings into the file '{}'.", settingsFile);
+        logger.debug("Store the launcher settings into the file '{}'.", launcherSettingsFile);
 
         // create directory
-        if (!settingsFile.getParentFile().exists() && !settingsFile.getParentFile().mkdirs()) {
-            throw new IOException("The directory could not be created. " + settingsFile.getParentFile());
+        if (!launcherSettingsFile.getParentFile().exists() && !launcherSettingsFile.getParentFile().mkdirs()) {
+            throw new IOException("The directory could not be created. " + launcherSettingsFile.getParentFile());
         }
 
         // store settings
-        final OutputStream outputStream = new FileOutputStream(settingsFile);
+        final OutputStream outputStream = new FileOutputStream(launcherSettingsFile);
         try {
             properties.store(outputStream, COMMENT_SETTINGS);
         } finally {
             try {
                 outputStream.close();
             } catch (IOException e) {
-                logger.warn("The file '{}' could not be closed.", settingsFile, e);
+                logger.warn("The file '{}' could not be closed.", launcherSettingsFile, e);
             }
         }
     }

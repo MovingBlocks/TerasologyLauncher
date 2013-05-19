@@ -84,14 +84,14 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
     private SettingsMenu settingsMenu;
 
-    private final File terasologyDirectory;
+    private final File gamesDirectory;
     private final OperatingSystem os;
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public LauncherFrame(final File terasologyDirectory, final OperatingSystem os,
+    public LauncherFrame(final File gamesDirectory, final OperatingSystem os,
                          final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
-        this.terasologyDirectory = terasologyDirectory;
+        this.gamesDirectory = gamesDirectory;
         this.os = os;
         this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
@@ -268,7 +268,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private void action(final String command) {
         if (command.equals(SETTINGS_ACTION)) {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-                settingsMenu = new SettingsMenu(this, terasologyDirectory, launcherSettings, gameVersions);
+                settingsMenu = new SettingsMenu(this, gamesDirectory, launcherSettings, gameVersions);
                 settingsMenu.setVisible(true);
                 settingsMenu.addWindowListener(new WindowAdapter() {
                     @Override
@@ -296,7 +296,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             // cleanup the directories (keep savedWorlds and screen shots)
             cleanUp();
             // start a thread with the download
-            final GameDownloader downloader = new GameDownloader(progressBar, this, terasologyDirectory,
+            final GameDownloader downloader = new GameDownloader(progressBar, this, gamesDirectory,
                 getSelectedGameVersion(), gameVersions);
             downloader.execute();
         }
@@ -307,7 +307,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
      * <tt>canBeDeleted</tt> method.
      */
     private void cleanUp() {
-        for (final File f : terasologyDirectory.listFiles()) {
+        for (final File f : gamesDirectory.listFiles()) {
             if (canBeDeleted(f)) {
                 if (f.isDirectory()) {
                     deleteDirectory(f);

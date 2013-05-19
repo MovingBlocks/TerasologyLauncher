@@ -37,7 +37,9 @@ public final class DirectoryUtils {
 
     public static final String TMP = "tmp";
 
-    private static final String APPLICATION_DIR_NAME = "terasology";
+    public static final String LAUNCHER_APPLICATION_DIR_NAME = "terasologylauncher";
+    public static final String GAMES_APPLICATION_DIR_NAME = "terasology";
+
     private static final Logger logger = LoggerFactory.getLogger(DirectoryUtils.class);
 
     private static final String PROPERTY_USER_HOME = "user.home";
@@ -62,23 +64,23 @@ public final class DirectoryUtils {
     /**
      * Should only be executed once at the start.
      */
-    public static File getApplicationDirectory(final OperatingSystem os) {
+    public static File getApplicationDirectory(final OperatingSystem os, final String applicationName) {
         final String userHome = System.getProperty(PROPERTY_USER_HOME, ".");
         File applicationDirectory;
 
         if (os.isUnix()) {
-            applicationDirectory = new File(userHome, '.' + APPLICATION_DIR_NAME + '/');
+            applicationDirectory = new File(userHome, '.' + applicationName + '/');
         } else if (os.isWindows()) {
             final String applicationData = System.getenv("APPDATA");
             if (applicationData != null) {
-                applicationDirectory = new File(applicationData, "." + APPLICATION_DIR_NAME + '/');
+                applicationDirectory = new File(applicationData, "." + applicationName + '/');
             } else {
-                applicationDirectory = new File(userHome, '.' + APPLICATION_DIR_NAME + '/');
+                applicationDirectory = new File(userHome, '.' + applicationName + '/');
             }
         } else if (os.isMac()) {
-            applicationDirectory = new File(userHome, "Library/Application Support/" + APPLICATION_DIR_NAME);
+            applicationDirectory = new File(userHome, "Library/Application Support/" + applicationName);
         } else {
-            applicationDirectory = new File(userHome, APPLICATION_DIR_NAME + '/');
+            applicationDirectory = new File(userHome, applicationName + '/');
         }
 
         return applicationDirectory;

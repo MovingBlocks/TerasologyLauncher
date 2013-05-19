@@ -38,16 +38,16 @@ public final class LauncherUpdater {
     private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
 
     private final OperatingSystem os;
-    private final File applicationDir;
+    private final File launcherDirectory;
     private final String currentVersion;
     private final String jobName;
     private Integer upstreamVersion;
     private TerasologyLauncherVersionInfo versionInfo;
 
-    public LauncherUpdater(final OperatingSystem os, final File applicationDir, final String currentVersion,
+    public LauncherUpdater(final OperatingSystem os, final File launcherDirectory, final String currentVersion,
                            final String jobName) {
         this.os = os;
-        this.applicationDir = applicationDir;
+        this.launcherDirectory = launcherDirectory;
         if ((currentVersion == null) || (currentVersion.trim().length() == 0)) {
             this.currentVersion = "0";
         } else {
@@ -89,7 +89,7 @@ public final class LauncherUpdater {
 
     public void update() {
         // get temporary update path
-        final File temporaryUpdateDir = new File(applicationDir, DirectoryUtils.TMP);
+        final File temporaryUpdateDir = new File(launcherDirectory, DirectoryUtils.TMP);
         try {
             DirectoryUtils.checkDirectory(temporaryUpdateDir);
         } catch (IOException e) {

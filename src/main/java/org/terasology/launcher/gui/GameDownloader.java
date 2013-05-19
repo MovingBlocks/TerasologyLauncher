@@ -49,16 +49,16 @@ final class GameDownloader extends SwingWorker<Void, Void> {
 
     private final JProgressBar progressBar;
     private final LauncherFrame frame;
-    private final File terasologyDirectory;
+    private final File gamesDirectory;
     private final TerasologyGameVersions gameVersions;
     private final TerasologyGameVersion gameVersion;
 
     public GameDownloader(final JProgressBar progressBar, final LauncherFrame frame,
-                          final File terasologyDirectory, final TerasologyGameVersion gameVersion,
+                          final File gamesDirectory, final TerasologyGameVersion gameVersion,
                           final TerasologyGameVersions gameVersions) {
         this.progressBar = progressBar;
         this.frame = frame;
-        this.terasologyDirectory = terasologyDirectory;
+        this.gamesDirectory = gamesDirectory;
         this.gameVersion = gameVersion;
         this.gameVersions = gameVersions;
 
@@ -98,7 +98,7 @@ final class GameDownloader extends SwingWorker<Void, Void> {
 
             try {
 
-                file = new File(terasologyDirectory, ZIP_FILE);
+                file = new File(gamesDirectory, ZIP_FILE);
 
                 in = url.openConnection().getInputStream();
                 out = new FileOutputStream(file);
@@ -138,14 +138,14 @@ final class GameDownloader extends SwingWorker<Void, Void> {
         progressBar.setString(BundleUtils.getLabel("update_game_extractZip"));
         progressBar.setStringPainted(true);
 
-        final File zip = new File(terasologyDirectory, ZIP_FILE);
+        final File zip = new File(gamesDirectory, ZIP_FILE);
         FileUtils.extractZip(zip);
         zip.delete();
 
         progressBar.setString(BundleUtils.getLabel("update_game_gameInfo"));
         progressBar.setStringPainted(true);
 
-        gameVersions.updateGameVersionsAfterInstallation(terasologyDirectory);
+        gameVersions.updateGameVersionsAfterInstallation(gamesDirectory);
         frame.updateGui();
 
         progressBar.setVisible(false);

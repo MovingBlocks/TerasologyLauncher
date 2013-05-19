@@ -78,7 +78,7 @@ public final class TerasologyGameVersions {
         return null;
     }
 
-    public synchronized void loadGameVersions(final File applicationDir) {
+    public synchronized void loadGameVersions(final File gamesDirectory) {
         gameVersionMapStable = new TreeMap<Integer, TerasologyGameVersion>();
         gameVersionMapNightly = new TreeMap<Integer, TerasologyGameVersion>();
         final SortedSet<Integer> buildNumbersStable = new TreeSet<Integer>();
@@ -92,7 +92,7 @@ public final class TerasologyGameVersions {
         final Integer lastBuildNumberNightly = loadLastSuccessfulBuildNumber(buildNumbersNightly,
             DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME, MIN_BUILD_NUMBER_NIGHTLY, PREV_BUILD_NUMBERS_NIGHTLY);
 
-        loadInstalledGames(applicationDir, buildNumbersStable, buildNumbersNightly);
+        loadInstalledGames(gamesDirectory, buildNumbersStable, buildNumbersNightly);
 
         fillBuildNumbers(buildNumbersStable, MIN_BUILD_NUMBER_STABLE, lastBuildNumberStable);
         fillBuildNumbers(buildNumbersNightly, MIN_BUILD_NUMBER_NIGHTLY, lastBuildNumberNightly);
@@ -138,11 +138,11 @@ public final class TerasologyGameVersions {
         return lastSuccessfulBuildNumber;
     }
 
-    private void loadInstalledGames(final File applicationDir,
+    private void loadInstalledGames(final File gamesDirectory,
                                     final SortedSet<Integer> buildNumbersStable,
                                     final SortedSet<Integer> buildNumbersNightly) {
         // TODO Load different installations (maybe from subfolders)
-        final TerasologyGameVersion gameVersion = loadInstalledGameVersion(applicationDir);
+        final TerasologyGameVersion gameVersion = loadInstalledGameVersion(gamesDirectory);
         if (gameVersion != null) {
             switch (gameVersion.getBuildType()) {
                 case STABLE:

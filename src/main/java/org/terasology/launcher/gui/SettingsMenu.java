@@ -74,15 +74,15 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private JCheckBox searchForLauncherUpdatesBox;
     private JCheckBox closeLauncherAfterGameStartBox;
 
-    private final File terasologyDirectory;
+    private final File gamesDirectory; // TODO remove gamesDirectory
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public SettingsMenu(final JFrame parent, final File terasologyDirectory, final LauncherSettings launcherSettings,
+    public SettingsMenu(final JFrame parent, final File gamesDirectory, final LauncherSettings launcherSettings,
                         final TerasologyGameVersions gameVersions) {
         super(parent, BundleUtils.getLabel("settings_title"), true);
 
-        this.terasologyDirectory = terasologyDirectory;
+        this.gamesDirectory = gamesDirectory;
         this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
 
@@ -333,7 +333,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         JButton openLogDir = new JButton();
         openLogDir.setFont(settingsFont);
         openLogDir.setText(BundleUtils.getLabel("settings_directories_open"));
-        final File logDir = new File(terasologyDirectory, DirectoryUtils.LOGS_DIR_NAME);
+        final File logDir = new File(gamesDirectory, DirectoryUtils.LOGS_DIR_NAME);
         if (!logDir.exists()) {
             openLogDir.setEnabled(false);
         }
@@ -348,7 +348,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         JButton openSavedWorldsDir = new JButton();
         openSavedWorldsDir.setFont(settingsFont);
         openSavedWorldsDir.setText(BundleUtils.getLabel("settings_directories_open"));
-        final File savesDir = new File(terasologyDirectory, DirectoryUtils.SAVED_WORLDS_DIR_NAME);
+        final File savesDir = new File(gamesDirectory, DirectoryUtils.SAVED_WORLDS_DIR_NAME);
         if (!savesDir.exists()) {
             openSavedWorldsDir.setEnabled(false);
         }
@@ -363,7 +363,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         JButton openScreenShotsDir = new JButton();
         openScreenShotsDir.setFont(settingsFont);
         openScreenShotsDir.setText(BundleUtils.getLabel("settings_directories_open"));
-        final File screensDir = new File(terasologyDirectory, DirectoryUtils.SCREENSHOTS_DIR_NAME);
+        final File screensDir = new File(gamesDirectory, DirectoryUtils.SCREENSHOTS_DIR_NAME);
         if (!screensDir.exists()) {
             openScreenShotsDir.setEnabled(false);
         }
@@ -378,7 +378,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         JButton openModsDir = new JButton();
         openModsDir.setFont(settingsFont);
         openModsDir.setText(BundleUtils.getLabel("settings_directories_open"));
-        final File modsDir = new File(terasologyDirectory, DirectoryUtils.MODS_DIR_NAME);
+        final File modsDir = new File(gamesDirectory, DirectoryUtils.MODS_DIR_NAME);
         if (!modsDir.exists()) {
             openModsDir.setEnabled(false);
         }
