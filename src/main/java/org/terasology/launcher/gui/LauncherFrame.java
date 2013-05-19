@@ -327,16 +327,10 @@ public final class LauncherFrame extends JFrame implements ActionListener {
      */
     private boolean canBeDeleted(final File f) {
         final String fileName = f.getName();
-        if (fileName.equals(DirectoryUtils.LAUNCHER_DIR_NAME)) {
-            return false;
-        }
         if (fileName.equals(DirectoryUtils.SAVED_WORLDS_DIR_NAME)) {
             return false;
         }
         if (fileName.equals(DirectoryUtils.SCREENSHOTS_DIR_NAME)) {
-            return false;
-        }
-        if (f.getAbsolutePath().equals(DirectoryUtils.BACKUP_DIR_NAME)) {
             return false;
         }
         if (f.getName().equals(DirectoryUtils.MODS_DIR_NAME)) {
