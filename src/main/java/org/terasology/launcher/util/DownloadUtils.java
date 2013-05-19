@@ -52,7 +52,7 @@ public final class DownloadUtils {
     private static final String FILE_TERASOLOGY_GAME_VERSION_INFO =
         "resources/main/org/terasology/version/versionInfo.properties";
     private static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO =
-        "resources/main/org/launcher/version/versionInfo.properties";
+        "resources/main/org/terasology/launcher/version/versionInfo.properties";
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
 
