@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher;
+package org.terasology.launcher.util;
 
 import org.junit.Test;
 

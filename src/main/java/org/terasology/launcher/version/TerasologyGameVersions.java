@@ -18,11 +18,10 @@ package org.terasology.launcher.version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.BuildType;
-import org.terasology.launcher.JobResult;
-import org.terasology.launcher.Settings;
+import org.terasology.launcher.LauncherSettings;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
+import org.terasology.launcher.util.JobResult;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -55,10 +54,10 @@ public final class TerasologyGameVersions {
     private SortedMap<Integer, TerasologyGameVersion> gameVersionMapStable;
     private SortedMap<Integer, TerasologyGameVersion> gameVersionMapNightly;
 
-    private final Settings settings;
+    private final LauncherSettings launcherSettings;
 
-    public TerasologyGameVersions(final Settings settings) {
-        this.settings = settings;
+    public TerasologyGameVersions(final LauncherSettings launcherSettings) {
+        this.launcherSettings = launcherSettings;
     }
 
     public List<TerasologyGameVersion> getGameVersionList(final BuildType buildType) {
@@ -112,7 +111,7 @@ public final class TerasologyGameVersions {
 
     private void loadSettingsBuildNumber(final SortedSet<Integer> buildNumbers, final BuildType buildType,
                                          final int minBuildNumber) {
-        final int buildVersion = settings.getBuildVersion(buildType);
+        final int buildVersion = launcherSettings.getBuildVersion(buildType);
         if ((buildVersion >= minBuildNumber) && (TerasologyGameVersion.BUILD_VERSION_LATEST != buildVersion)) {
             buildNumbers.add(buildVersion);
         }
@@ -311,7 +310,7 @@ public final class TerasologyGameVersions {
 
     private void fixSettingsBuildVersion(final BuildType buildType,
                                          final SortedMap<Integer, TerasologyGameVersion> gameVersionMap) {
-        final int buildVersion = settings.getBuildVersion(buildType);
+        final int buildVersion = launcherSettings.getBuildVersion(buildType);
         if ((buildVersion != TerasologyGameVersion.BUILD_VERSION_LATEST) && !gameVersionMap.containsKey(buildVersion)) {
             Integer newBuildVersion = TerasologyGameVersion.BUILD_VERSION_LATEST;
             for (TerasologyGameVersion gameVersion : gameVersionMap.values()) {
@@ -320,7 +319,7 @@ public final class TerasologyGameVersions {
                     // no break => find highest installed version
                 }
             }
-            settings.setBuildVersion(newBuildVersion, buildType);
+            launcherSettings.setBuildVersion(newBuildVersion, buildType);
             // don't store settings
         }
     }

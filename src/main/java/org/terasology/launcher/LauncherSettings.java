@@ -19,6 +19,8 @@ package org.terasology.launcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.JavaHeapSize;
+import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.version.BuildType;
 import org.terasology.launcher.version.TerasologyGameVersion;
 
 import java.io.File;
@@ -35,9 +37,9 @@ import java.util.Properties;
  *
  * @author Skaldarnar
  */
-public final class Settings {
+public final class LauncherSettings {
 
-    private static final Logger logger = LoggerFactory.getLogger(Settings.class);
+    private static final Logger logger = LoggerFactory.getLogger(LauncherSettings.class);
 
     private static final String SETTINGS_FILE_NAME = "settings.properties";
 
@@ -60,7 +62,7 @@ public final class Settings {
     private final File settingsFile;
     private final Properties properties;
 
-    public Settings(final File directory) {
+    public LauncherSettings(final File directory) {
         settingsFile = new File(directory, SETTINGS_FILE_NAME);
         properties = new Properties();
     }

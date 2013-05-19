@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.updater;
+package org.terasology.launcher.gui;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.BuildType;
-import org.terasology.launcher.gui.LauncherFrame;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.version.BuildType;
 import org.terasology.launcher.version.TerasologyGameVersion;
 import org.terasology.launcher.version.TerasologyGameVersions;
 
@@ -42,7 +41,7 @@ import java.net.URL;
  * @author MrBarsack
  * @author Skaldarnar
  */
-public final class GameDownloader extends SwingWorker<Void, Void> {
+final class GameDownloader extends SwingWorker<Void, Void> {
 
     private static final Logger logger = LoggerFactory.getLogger(GameDownloader.class);
 

@@ -16,8 +16,6 @@
 
 package org.terasology.launcher.version;
 
-import org.terasology.launcher.BuildType;
-
 import java.io.File;
 import java.util.List;
 

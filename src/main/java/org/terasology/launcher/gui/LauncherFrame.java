@@ -16,11 +16,10 @@
 
 package org.terasology.launcher.gui;
 
-import org.terasology.launcher.Settings;
-import org.terasology.launcher.launcher.TerasologyStarter;
-import org.terasology.launcher.updater.GameDownloader;
+import org.terasology.launcher.LauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.GameStarter;
 import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyGameVersion;
 import org.terasology.launcher.version.TerasologyGameVersions;
@@ -87,14 +86,14 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
     private final File terasologyDirectory;
     private final OperatingSystem os;
-    private final Settings settings;
+    private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public LauncherFrame(final File terasologyDirectory, final OperatingSystem os, final Settings settings,
-                         final TerasologyGameVersions gameVersions) {
+    public LauncherFrame(final File terasologyDirectory, final OperatingSystem os,
+                         final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
         this.terasologyDirectory = terasologyDirectory;
         this.os = os;
-        this.settings = settings;
+        this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -255,8 +254,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
 
     private TerasologyGameVersion getSelectedGameVersion() {
-        return gameVersions.getGameVersionForBuildVersion(settings.getBuildType(),
-            settings.getBuildVersion(settings.getBuildType()));
+        return gameVersions.getGameVersionForBuildVersion(launcherSettings.getBuildType(),
+            launcherSettings.getBuildVersion(launcherSettings.getBuildType()));
     }
 
     @Override
@@ -269,7 +268,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private void action(final String command) {
         if (command.equals(SETTINGS_ACTION)) {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-                settingsMenu = new SettingsMenu(this, terasologyDirectory, settings, gameVersions);
+                settingsMenu = new SettingsMenu(this, terasologyDirectory, launcherSettings, gameVersions);
                 settingsMenu.setVisible(true);
                 settingsMenu.addWindowListener(new WindowAdapter() {
                     @Override
@@ -283,10 +282,10 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             System.exit(0);
         } else if (command.equals(START_ACTION)) {
             final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-            final TerasologyStarter terasologyStarter = new TerasologyStarter(gameVersion, os,
-                settings.getMaxHeapSize(), settings.getInitialHeapSize());
-            if (terasologyStarter.startGame()) {
-                if (settings.isCloseLauncherAfterGameStart()) {
+            final GameStarter gameStarter = new GameStarter(gameVersion, os,
+                launcherSettings.getMaxHeapSize(), launcherSettings.getInitialHeapSize());
+            if (gameStarter.startGame()) {
+                if (launcherSettings.isCloseLauncherAfterGameStart()) {
                     System.exit(0);
                 }
             } else {

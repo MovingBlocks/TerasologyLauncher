@@ -18,7 +18,6 @@ package org.terasology.launcher.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.JobResult;
 import org.terasology.launcher.version.TerasologyGameVersionInfo;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 import org.w3c.dom.Document;

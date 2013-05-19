@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.launcher;
+package org.terasology.launcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.Languages;
-import org.terasology.launcher.Settings;
 import org.terasology.launcher.gui.LauncherFrame;
 import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyGameVersions;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
@@ -105,24 +104,24 @@ public final class TerasologyLauncher {
             }
             logger.debug("Launcher directory: {}", launcherDir);
 
-            // Settings
-            final Settings settings = new Settings(launcherDir);
+            // LauncherSettings
+            final LauncherSettings launcherSettings = new LauncherSettings(launcherDir);
             try {
-                settings.load();
-                settings.init();
-                settings.store();
+                launcherSettings.load();
+                launcherSettings.init();
+                launcherSettings.store();
             } catch (IOException e) {
-                logger.error("Cannot load/init/store settings!", e);
+                logger.error("Cannot load/init/store launcher settings!", e);
                 JOptionPane.showMessageDialog(null,
                     BundleUtils.getLabel("message_error_loadSettings"),
                     BundleUtils.getLabel("message_error_title"),
                     JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
-            logger.debug("Settings: {}", settings);
+            logger.debug("LauncherSettings: {}", launcherSettings);
 
             // Launcher Update
-            if (settings.isSearchForLauncherUpdates()) {
+            if (launcherSettings.isSearchForLauncherUpdates()) {
                 splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
                 final LauncherUpdater updater = new LauncherUpdater(os, applicationDir,
                     TerasologyLauncherVersionInfo.getInstance().getBuildNumber(),
@@ -138,13 +137,13 @@ public final class TerasologyLauncher {
 
             // Game versions
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_loadGameVersions"));
-            final TerasologyGameVersions gameVersions = new TerasologyGameVersions(settings);
+            final TerasologyGameVersions gameVersions = new TerasologyGameVersions(launcherSettings);
             gameVersions.loadGameVersions(applicationDir);
             logger.debug("Game versions: {}", gameVersions);
 
             // LauncherFrame
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_createFrame"));
-            final Frame frame = new LauncherFrame(applicationDir, os, settings, gameVersions);
+            final Frame frame = new LauncherFrame(applicationDir, os, launcherSettings, gameVersions);
             frame.setVisible(true);
 
             // Dispose splash screen

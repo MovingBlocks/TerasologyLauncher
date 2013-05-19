@@ -46,7 +46,7 @@ dependencies {
 
 sourceCompatibility = 1.6
 
-mainClassName = "org.terasology.launcher.launcher.TerasologyLauncher"
+mainClassName = "org.terasology.launcher.TerasologyLauncher"
 
 test {
     // ignoreFailures: Specifies whether the build should break when the verifications performed by this task fail.

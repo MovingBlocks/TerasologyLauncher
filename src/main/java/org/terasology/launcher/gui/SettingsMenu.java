@@ -18,12 +18,12 @@ package org.terasology.launcher.gui;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.BuildType;
-import org.terasology.launcher.Languages;
-import org.terasology.launcher.Settings;
+import org.terasology.launcher.LauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.JavaHeapSize;
+import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.version.BuildType;
 import org.terasology.launcher.version.TerasologyGameVersion;
 import org.terasology.launcher.version.TerasologyGameVersions;
 
@@ -75,15 +75,15 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private JCheckBox closeLauncherAfterGameStartBox;
 
     private final File terasologyDirectory;
-    private final Settings settings;
+    private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public SettingsMenu(final JFrame parent, final File terasologyDirectory, final Settings settings,
+    public SettingsMenu(final JFrame parent, final File terasologyDirectory, final LauncherSettings launcherSettings,
                         final TerasologyGameVersions gameVersions) {
         super(parent, BundleUtils.getLabel("settings_title"), true);
 
         this.terasologyDirectory = terasologyDirectory;
-        this.settings = settings;
+        this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
 
         setResizable(false);
@@ -446,7 +446,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void updateBuildTypeSelection() {
-        if (settings.getBuildType() == BuildType.STABLE) {
+        if (launcherSettings.getBuildType() == BuildType.STABLE) {
             buildTypeBox.setSelectedIndex(0);
         } else {
             buildTypeBox.setSelectedIndex(1);
@@ -454,7 +454,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void populateVersions(final JComboBox buildVersionBox, final BuildType buildType) {
-        final int buildVersion = settings.getBuildVersion(buildType);
+        final int buildVersion = launcherSettings.getBuildVersion(buildType);
 
         for (final TerasologyGameVersion version : gameVersions.getGameVersionList(buildType)) {
             final VersionItem versionItem = new VersionItem(version);
@@ -488,8 +488,8 @@ final class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void updateHeapSizeSelection() {
-        maxHeapSizeBox.setSelectedItem(settings.getMaxHeapSize());
-        initialHeapSizeBox.setSelectedItem(settings.getInitialHeapSize());
+        maxHeapSizeBox.setSelectedItem(launcherSettings.getMaxHeapSize());
+        initialHeapSizeBox.setSelectedItem(launcherSettings.getInitialHeapSize());
     }
 
     private void updateInitialHeapSizeBox() {
@@ -523,11 +523,11 @@ final class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void populateSearchForLauncherUpdates() {
-        searchForLauncherUpdatesBox.setSelected(settings.isSearchForLauncherUpdates());
+        searchForLauncherUpdatesBox.setSelected(launcherSettings.isSearchForLauncherUpdates());
     }
 
     private void populateCloseLauncherAfterGameStart() {
-        closeLauncherAfterGameStartBox.setSelected(settings.isCloseLauncherAfterGameStart());
+        closeLauncherAfterGameStartBox.setSelected(launcherSettings.isCloseLauncherAfterGameStart());
     }
 
     @Override
@@ -561,31 +561,31 @@ final class SettingsMenu extends JDialog implements ActionListener {
             } else {
                 selectedType = BuildType.NIGHTLY;
             }
-            settings.setBuildType(selectedType);
+            launcherSettings.setBuildType(selectedType);
 
             // save build version
             VersionItem versionItemStable = (VersionItem) buildVersionStableBox.getSelectedItem();
-            settings.setBuildVersion(versionItemStable.getVersion(), BuildType.STABLE);
+            launcherSettings.setBuildVersion(versionItemStable.getVersion(), BuildType.STABLE);
             VersionItem versionItemNightly = (VersionItem) buildVersionNightlyBox.getSelectedItem();
-            settings.setBuildVersion(versionItemNightly.getVersion(), BuildType.NIGHTLY);
+            launcherSettings.setBuildVersion(versionItemNightly.getVersion(), BuildType.NIGHTLY);
 
             // save heap size settings
-            settings.setMaxHeapSize((JavaHeapSize) maxHeapSizeBox.getSelectedItem());
-            settings.setInitialHeapSize((JavaHeapSize) initialHeapSizeBox.getSelectedItem());
+            launcherSettings.setMaxHeapSize((JavaHeapSize) maxHeapSizeBox.getSelectedItem());
+            launcherSettings.setInitialHeapSize((JavaHeapSize) initialHeapSizeBox.getSelectedItem());
 
             // save languageBox settings
             Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectedIndex()));
-            settings.setLocale(Languages.getCurrentLocale());
+            launcherSettings.setLocale(Languages.getCurrentLocale());
 
             // save searchForLauncherUpdates
-            settings.setSearchForLauncherUpdates(searchForLauncherUpdatesBox.isSelected());
+            launcherSettings.setSearchForLauncherUpdates(searchForLauncherUpdatesBox.isSelected());
 
             // save closeLauncherAfterGameStart
-            settings.setCloseLauncherAfterGameStart(closeLauncherAfterGameStartBox.isSelected());
+            launcherSettings.setCloseLauncherAfterGameStart(closeLauncherAfterGameStartBox.isSelected());
 
             // store changed settings
             try {
-                settings.store();
+                launcherSettings.store();
             } catch (IOException e) {
                 logger.error("Could not store settings!", e);
                 JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_storeSettings"),
