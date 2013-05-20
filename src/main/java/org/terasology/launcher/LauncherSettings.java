@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -57,6 +58,7 @@ public final class LauncherSettings {
     private static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
     private static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
     private static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
+    private static final String PROPERTY_GAMES_DIRECTORY = "gameDirectory";
 
     private final File launcherSettingsFile;
     private final Properties properties;
@@ -187,6 +189,22 @@ public final class LauncherSettings {
             closeLauncherAfterGameStart = Boolean.valueOf(closeLauncherAfterGameStartStr);
         }
         properties.setProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START, Boolean.toString(closeLauncherAfterGameStart));
+
+        // gamesDirectory
+        final String gamesDirectoryStr = properties.getProperty(PROPERTY_GAMES_DIRECTORY);
+        File gamesDirectory = null;
+        if ((gamesDirectoryStr != null) && (gamesDirectoryStr.trim().length() > 0)) {
+            try {
+                gamesDirectory = new File(new URI(gamesDirectoryStr));
+            } catch (Exception e) {
+                logger.info("Invalid value '{}' for the parameter '{}'!", gamesDirectoryStr, PROPERTY_GAMES_DIRECTORY);
+            }
+        }
+        if (gamesDirectory != null) {
+            properties.setProperty(PROPERTY_GAMES_DIRECTORY, gamesDirectory.toURI().toString());
+        } else {
+            properties.setProperty(PROPERTY_GAMES_DIRECTORY, "");
+        }
     }
 
     public synchronized void setLocale(final Locale locale) {
@@ -239,6 +257,22 @@ public final class LauncherSettings {
 
     public synchronized boolean isCloseLauncherAfterGameStart() {
         return Boolean.valueOf(properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START));
+    }
+
+    public synchronized void setGamesDirectory(final File gamesDirectory) {
+        properties.setProperty(PROPERTY_GAMES_DIRECTORY, gamesDirectory.toURI().toString());
+    }
+
+    public synchronized File getGamesDirectory() {
+        final String gamesDirectoryStr = properties.getProperty(PROPERTY_GAMES_DIRECTORY);
+        if ((gamesDirectoryStr != null) && (gamesDirectoryStr.trim().length() > 0)) {
+            try {
+                return new File(new URI(gamesDirectoryStr));
+            } catch (Exception e) {
+                logger.error("Couldn't convert URI-String into File! {}", gamesDirectoryStr, e);
+            }
+        }
+        return null;
     }
 
     @Override
