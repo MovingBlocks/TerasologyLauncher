@@ -96,9 +96,8 @@ public final class TerasologyLauncher {
             try {
                 launcherSettings.load();
                 launcherSettings.init();
-                launcherSettings.store();
             } catch (IOException e) {
-                logger.error("Cannot load/init/store launcher settings!", e);
+                logger.error("Cannot load and init launcher settings!", e);
                 JOptionPane.showMessageDialog(null,
                     BundleUtils.getLabel("message_error_loadSettings"),
                     BundleUtils.getLabel("message_error_title"),
@@ -123,11 +122,13 @@ public final class TerasologyLauncher {
             }
 
             // Games directory
-            // TODO Create/load games directory from settings or user input
-            final File gamesDirectory = DirectoryUtils.getApplicationDirectory(os,
-                DirectoryUtils.GAMES_APPLICATION_DIR_NAME);
+            File gamesDirectory = launcherSettings.getGamesDirectory();
+            if (gamesDirectory == null) {
+                gamesDirectory = DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.GAMES_APPLICATION_DIR_NAME);
+            }
             try {
                 DirectoryUtils.checkDirectory(gamesDirectory);
+                launcherSettings.setGamesDirectory(gamesDirectory);
             } catch (IOException e) {
                 logger.error("Cannot create or use games directory '{}'!", gamesDirectory, e);
                 JOptionPane.showMessageDialog(null,
@@ -140,9 +141,23 @@ public final class TerasologyLauncher {
 
             // Game versions
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_loadGameVersions"));
-            final TerasologyGameVersions gameVersions = new TerasologyGameVersions(launcherSettings);
-            gameVersions.loadGameVersions(gamesDirectory);
+            final TerasologyGameVersions gameVersions = new TerasologyGameVersions();
+            gameVersions.loadGameVersions(launcherSettings, gamesDirectory);
+            gameVersions.fixSettingsBuildVersion(launcherSettings);
             logger.debug("Game versions: {}", gameVersions);
+
+            // Store LauncherSettings (after 'Games directory' and after 'Game versions')
+            try {
+                launcherSettings.store();
+            } catch (IOException e) {
+                logger.error("Cannot store launcher settings!", e);
+                JOptionPane.showMessageDialog(null,
+                    BundleUtils.getLabel("message_error_storeSettings"),
+                    BundleUtils.getLabel("message_error_title"),
+                    JOptionPane.ERROR_MESSAGE);
+                System.exit(1);
+            }
+            logger.debug("LauncherSettings stored: {}", launcherSettings);
 
             // LauncherFrame
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_createFrame"));
