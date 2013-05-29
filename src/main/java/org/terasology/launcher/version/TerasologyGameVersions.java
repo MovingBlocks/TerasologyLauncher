@@ -24,6 +24,7 @@ import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.JobResult;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -140,32 +141,61 @@ public final class TerasologyGameVersions {
         return lastSuccessfulBuildNumber;
     }
 
-    private void loadInstalledGames(final File gamesDirectory,
+    private void loadInstalledGames(final File directory,
                                     final SortedSet<Integer> buildNumbersStable,
                                     final SortedSet<Integer> buildNumbersNightly) {
-        // TODO Load different installations (maybe from subfolders)
-        final TerasologyGameVersion gameVersion = loadInstalledGameVersion(gamesDirectory);
-        if (gameVersion != null) {
-            switch (gameVersion.getBuildType()) {
-                case STABLE:
-                    if (gameVersion.getBuildNumber() >= MIN_BUILD_NUMBER_STABLE) {
-                        buildNumbersStable.add(gameVersion.getBuildNumber());
-                        gameVersionMapStable.put(gameVersion.getBuildNumber(), gameVersion);
-                    }
-                    break;
-                case NIGHTLY:
-                    if (gameVersion.getBuildNumber() >= MIN_BUILD_NUMBER_NIGHTLY) {
-                        buildNumbersNightly.add(gameVersion.getBuildNumber());
-                        gameVersionMapNightly.put(gameVersion.getBuildNumber(), gameVersion);
-                    }
-                    break;
+        final File[] gameJar = directory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(final File file) {
+                return file.isFile() && file.canRead() && FILE_TERASOLOGY_JAR.equals(file.getName());
+            }
+        }
+        );
+
+        if ((gameJar != null) && (gameJar.length == 1)) {
+            final TerasologyGameVersion gameVersion = loadInstalledGameVersion(gameJar[0]);
+            if (gameVersion != null) {
+                switch (gameVersion.getBuildType()) {
+                    case STABLE:
+                        if (gameVersion.getBuildNumber() >= MIN_BUILD_NUMBER_STABLE) {
+                            buildNumbersStable.add(gameVersion.getBuildNumber());
+                            if (!gameVersionMapStable.containsKey(gameVersion.getBuildNumber())) {
+                                gameVersionMapStable.put(gameVersion.getBuildNumber(), gameVersion);
+                            } else {
+                                logger.debug("Installed game already loaded. {}", gameJar[0]);
+                            }
+                        }
+                        break;
+                    case NIGHTLY:
+                        if (gameVersion.getBuildNumber() >= MIN_BUILD_NUMBER_NIGHTLY) {
+                            buildNumbersNightly.add(gameVersion.getBuildNumber());
+                            if (!gameVersionMapNightly.containsKey(gameVersion.getBuildNumber())) {
+                                gameVersionMapNightly.put(gameVersion.getBuildNumber(), gameVersion);
+                            } else {
+                                logger.debug("Installed game already loaded. {}", gameJar[0]);
+                            }
+                        }
+                        break;
+                }
+            }
+        } else {
+            final File[] subDirectories = directory.listFiles(new FileFilter() {
+
+                @Override
+                public boolean accept(final File file) {
+                    return file.isDirectory() && file.canRead();
+                }
+            });
+            if (subDirectories != null) {
+                for (File subDirectory : subDirectories) {
+                    loadInstalledGames(subDirectory, buildNumbersStable, buildNumbersNightly);
+                }
             }
         }
     }
 
-    private TerasologyGameVersion loadInstalledGameVersion(final File terasologyDirectory) {
+    private TerasologyGameVersion loadInstalledGameVersion(final File gameJar) {
         TerasologyGameVersion gameVersion = null;
-        final File gameJar = new File(terasologyDirectory, FILE_TERASOLOGY_JAR);
         if (gameJar.exists() && gameJar.canRead() && gameJar.isFile()) {
             final TerasologyGameVersionInfo gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(gameJar);
             GameBuildType installedBuildType = null;
@@ -200,7 +230,7 @@ public final class TerasologyGameVersions {
                 gameVersion = new TerasologyGameVersion();
                 gameVersion.setBuildType(installedBuildType);
                 gameVersion.setBuildNumber(installedBuildNumber);
-                gameVersion.setInstallationPath(terasologyDirectory);
+                gameVersion.setInstallationPath(gameJar.getParentFile());
                 gameVersion.setGameJar(gameJar);
                 gameVersion.setGameVersionInfo(gameVersionInfo);
             } else {
@@ -327,7 +357,8 @@ public final class TerasologyGameVersions {
     }
 
     public void updateGameVersionsAfterInstallation(final File terasologyDirectory) {
-        final TerasologyGameVersion gameVersion = loadInstalledGameVersion(terasologyDirectory);
+        final File gameJar = new File(terasologyDirectory, FILE_TERASOLOGY_JAR);
+        final TerasologyGameVersion gameVersion = loadInstalledGameVersion(gameJar);
         if (gameVersion != null) {
             final List<TerasologyGameVersion> gameVersionList = getGameVersionList(gameVersion.getBuildType());
             for (TerasologyGameVersion currentGameVersion : gameVersionList) {
