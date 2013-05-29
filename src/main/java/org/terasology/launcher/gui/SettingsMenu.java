@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.version.GameBuildType;
@@ -43,7 +42,6 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -74,15 +72,13 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private JCheckBox searchForLauncherUpdatesBox;
     private JCheckBox closeLauncherAfterGameStartBox;
 
-    private final File gamesDirectory; // TODO remove gamesDirectory
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public SettingsMenu(final JFrame parent, final File gamesDirectory, final LauncherSettings launcherSettings,
+    public SettingsMenu(final JFrame parent, final LauncherSettings launcherSettings,
                         final TerasologyGameVersions gameVersions) {
         super(parent, BundleUtils.getLabel("settings_title"), true);
 
-        this.gamesDirectory = gamesDirectory;
         this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
 
@@ -108,7 +104,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
         JTabbedPane mainSettings = new JTabbedPane();
         mainSettings.addTab(BundleUtils.getLabel("settings_game_title"), createGameSettingsTab(settingsFont));
         mainSettings.addTab(BundleUtils.getLabel("settings_launcher_title"), createLauncherSettingsTab(settingsFont));
-        mainSettings.addTab(BundleUtils.getLabel("settings_directories_title"), createDirectoriesTab(settingsFont));
 
         /*================== OK, Cancel, Reset ==================*/
         JButton resetButton = new JButton();
@@ -325,116 +320,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
         return launcherSettingsTab;
     }
 
-    private JPanel createDirectoriesTab(final Font settingsFont) {
-        JPanel directoriesTab = new JPanel();
-        directoriesTab.setFont(settingsFont);
-
-        final JLabel logDirLabel = new JLabel(BundleUtils.getLabel("settings_directories_logs"));
-        JButton openLogDir = new JButton();
-        openLogDir.setFont(settingsFont);
-        openLogDir.setText(BundleUtils.getLabel("settings_directories_open"));
-        final File logDir = new File(gamesDirectory, DirectoryUtils.LOGS_DIR_NAME);
-        if (!logDir.exists()) {
-            openLogDir.setEnabled(false);
-        }
-        openLogDir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                DirectoryUtils.showInFileManager(logDir);
-            }
-        });
-
-        final JLabel savedWorldsDirLabel = new JLabel(BundleUtils.getLabel("settings_directories_savedWorlds"));
-        JButton openSavedWorldsDir = new JButton();
-        openSavedWorldsDir.setFont(settingsFont);
-        openSavedWorldsDir.setText(BundleUtils.getLabel("settings_directories_open"));
-        final File savesDir = new File(gamesDirectory, DirectoryUtils.SAVED_WORLDS_DIR_NAME);
-        if (!savesDir.exists()) {
-            openSavedWorldsDir.setEnabled(false);
-        }
-        openSavedWorldsDir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                DirectoryUtils.showInFileManager(savesDir);
-            }
-        });
-
-        final JLabel screenShotDirLabel = new JLabel(BundleUtils.getLabel("settings_directories_screenShots"));
-        JButton openScreenShotsDir = new JButton();
-        openScreenShotsDir.setFont(settingsFont);
-        openScreenShotsDir.setText(BundleUtils.getLabel("settings_directories_open"));
-        final File screensDir = new File(gamesDirectory, DirectoryUtils.SCREENSHOTS_DIR_NAME);
-        if (!screensDir.exists()) {
-            openScreenShotsDir.setEnabled(false);
-        }
-        openScreenShotsDir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                DirectoryUtils.showInFileManager(screensDir);
-            }
-        });
-
-        final JLabel modsDirLabel = new JLabel(BundleUtils.getLabel("settings_directories_mods"));
-        JButton openModsDir = new JButton();
-        openModsDir.setFont(settingsFont);
-        openModsDir.setText(BundleUtils.getLabel("settings_directories_open"));
-        final File modsDir = new File(gamesDirectory, DirectoryUtils.MODS_DIR_NAME);
-        if (!modsDir.exists()) {
-            openModsDir.setEnabled(false);
-        }
-        openModsDir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                DirectoryUtils.showInFileManager(modsDir);
-            }
-        });
-
-        final GroupLayout directoriesTabLayout = new GroupLayout(directoriesTab);
-        directoriesTab.setLayout(directoriesTabLayout);
-
-        directoriesTabLayout.setHorizontalGroup(
-            directoriesTabLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(directoriesTabLayout.createParallelGroup()
-                    .addComponent(logDirLabel)
-                    .addComponent(modsDirLabel)
-                    .addComponent(savedWorldsDirLabel)
-                    .addComponent(screenShotDirLabel))
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(directoriesTabLayout.createParallelGroup()
-                    .addComponent(openLogDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
-                        GroupLayout.DEFAULT_SIZE)
-                    .addComponent(openModsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
-                        GroupLayout.DEFAULT_SIZE)
-                    .addComponent(openSavedWorldsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
-                        GroupLayout.DEFAULT_SIZE)
-                    .addComponent(openScreenShotsDir, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
-                        GroupLayout.DEFAULT_SIZE))
-                .addContainerGap()
-        );
-
-        directoriesTabLayout.setVerticalGroup(
-            directoriesTabLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(directoriesTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(logDirLabel)
-                    .addComponent(openLogDir))
-                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(directoriesTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(modsDirLabel)
-                    .addComponent(openModsDir))
-                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(directoriesTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(savedWorldsDirLabel)
-                    .addComponent(openSavedWorldsDir))
-                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(directoriesTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(screenShotDirLabel)
-                    .addComponent(openScreenShotsDir))
-                .addContainerGap()
-        );
-        return directoriesTab;
-    }
 
     private void populateBuildType() {
         buildTypeBox.removeAllItems();

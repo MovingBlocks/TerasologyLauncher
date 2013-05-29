@@ -16,9 +16,10 @@
 
 package org.terasology.launcher.gui;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.GameStarter;
 import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyGameVersion;
@@ -44,11 +45,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.net.MalformedURLException;
 
 /**
  * @author Skaldarnar
  */
 public final class LauncherFrame extends JFrame implements ActionListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(LauncherFrame.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -268,7 +272,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private void action(final String command) {
         if (command.equals(SETTINGS_ACTION)) {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-                settingsMenu = new SettingsMenu(this, gamesDirectory, launcherSettings, gameVersions);
+                settingsMenu = new SettingsMenu(this, launcherSettings, gameVersions);
                 settingsMenu.setVisible(true);
                 settingsMenu.addWindowListener(new WindowAdapter() {
                     @Override
@@ -293,66 +297,19 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                     BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
             }
         } else if (command.equals(DOWNLOAD_ACTION)) {
-            // cleanup the directories (keep savedWorlds and screen shots)
-            cleanUp();
-            // start a thread with the download
-            final GameDownloader downloader = new GameDownloader(progressBar, this, gamesDirectory,
-                getSelectedGameVersion(), gameVersions);
-            downloader.execute();
-        }
-    }
-
-    /**
-     * Clean up the installation directory, that means delete all files and folders except of the files kept by
-     * <tt>canBeDeleted</tt> method.
-     */
-    private void cleanUp() {
-        for (final File f : gamesDirectory.listFiles()) {
-            if (canBeDeleted(f)) {
-                if (f.isDirectory()) {
-                    deleteDirectory(f);
-                } else {
-                    f.delete();
-                }
+            try {
+                // start a thread with the download
+                // TODO Check, if old GameDownloader is running
+                // TODO Define download directory
+                final GameDownloader downloader = new GameDownloader(progressBar, this, gamesDirectory, gamesDirectory,
+                    getSelectedGameVersion(), gameVersions);
+                downloader.execute();
+                startButton.setEnabled(false);
+            } catch (MalformedURLException e) {
+                logger.error("Could not download game!", e);
             }
-        }
-    }
 
-    /**
-     * Check if the file can be deleted on clean up action. The only files/directories kept are "SAVED_WORLDS",
-     * "screens" and "launcher".
-     *
-     * @param f the file to check
-     * @return true if the file can be deleted
-     */
-    private boolean canBeDeleted(final File f) {
-        final String fileName = f.getName();
-        if (fileName.equals(DirectoryUtils.SAVED_WORLDS_DIR_NAME)) {
-            return false;
         }
-        if (fileName.equals(DirectoryUtils.SCREENSHOTS_DIR_NAME)) {
-            return false;
-        }
-        if (f.getName().equals(DirectoryUtils.MODS_DIR_NAME)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * recursively deletes the directory and all of its content.
-     *
-     * @param delDirectory directory
-     */
-    private void deleteDirectory(final File delDirectory) {
-        for (final File sub : delDirectory.listFiles()) {
-            if (sub.isFile()) {
-                sub.delete();
-            } else {
-                deleteDirectory(sub);
-            }
-        }
-        delDirectory.delete();
     }
 
     public void updateGui() {
