@@ -36,80 +36,62 @@ public final class GameStarter {
 
     private static final int PROCESS_START_SLEEP_TIME = 5000;
 
-    private final TerasologyGameVersion gameVersion;
     private final OperatingSystem os;
-    private final JavaHeapSize maxHeapSize;
-    private final JavaHeapSize initialHeapSize;
 
-    public GameStarter(final TerasologyGameVersion gameVersion, final OperatingSystem os,
-                       final JavaHeapSize maxHeapSize, final JavaHeapSize initialHeapSize) {
-        this.gameVersion = gameVersion;
+    private Thread gameThread;
+
+    public GameStarter(final OperatingSystem os) {
         this.os = os;
-        this.maxHeapSize = maxHeapSize;
-        this.initialHeapSize = initialHeapSize;
     }
 
-    public boolean startGame() {
-        if (os.isWindows()) {
-            return startWindows();
-        } else if (os.isMac()) {
-            return startMac();
-        } else if (os.isUnix()) {
-            return startLinux();
-        } else {
-            logger.error("Unknown operating system '{}'. Cannot start game!", os);
+    public boolean isRunning() {
+        return (gameThread != null) && gameThread.isAlive();
+    }
+
+    public boolean startGame(final TerasologyGameVersion gameVersion, final JavaHeapSize maxHeapSize,
+                             final JavaHeapSize initialHeapSize) {
+        if (isRunning()) {
+            logger.warn("Couldn't start a new game because another game is running!");
+            return false;
         }
-        return false;
+
+        final List<String> javaParameters = createJavaParameters(maxHeapSize, initialHeapSize);
+        final List<String> processParameters = createProcessParameters(gameVersion, javaParameters);
+
+        return startProcess(gameVersion, processParameters);
     }
 
-    private boolean startLinux() {
-        final List<String> parameters = new ArrayList<String>();
-        parameters.add("java");
-        parameters.addAll(createParameters());
-        parameters.add("-jar");
-        parameters.add(gameVersion.getGameJar().getName());
-        return startProcess(parameters);
-    }
-
-    private boolean startMac() {
-        final List<String> parameters = new ArrayList<String>();
-        parameters.add("java");
-        parameters.addAll(createParameters());
-        parameters.add("-jar");
-        parameters.add(gameVersion.getGameJar().getName());
-        return startProcess(parameters);
-    }
-
-    private boolean startWindows() {
-        final List<String> parameters = new ArrayList<String>();
-        parameters.add("java");
-        parameters.addAll(createParameters());
-        parameters.add("-jar");
-        parameters.add(gameVersion.getGameJar().getName());
-        return startProcess(parameters);
-    }
-
-    private List<String> createParameters() {
-        final List<String> parameters = new ArrayList<String>();
+    private List<String> createJavaParameters(final JavaHeapSize maxHeapSize, final JavaHeapSize initialHeapSize) {
+        final List<String> javaParameters = new ArrayList<String>();
         if (initialHeapSize.isUsed()) {
-            parameters.add("-Xms" + initialHeapSize.getSizeParameter());
+            javaParameters.add("-Xms" + initialHeapSize.getSizeParameter());
         }
         if (maxHeapSize.isUsed()) {
-            parameters.add("-Xmx" + maxHeapSize.getSizeParameter());
+            javaParameters.add("-Xmx" + maxHeapSize.getSizeParameter());
         }
-        return parameters;
+        return javaParameters;
     }
 
-    private boolean startProcess(final List<String> parameters) {
-        final ProcessBuilder pb = new ProcessBuilder(parameters);
+    private List<String> createProcessParameters(final TerasologyGameVersion gameVersion,
+                                                 final List<String> javaParameters) {
+        final List<String> processParameters = new ArrayList<String>();
+        processParameters.add("java");
+        processParameters.addAll(javaParameters);
+        processParameters.add("-jar");
+        processParameters.add(gameVersion.getGameJar().getName());
+        return processParameters;
+    }
+
+    private boolean startProcess(final TerasologyGameVersion gameVersion, final List<String> processParameters) {
+        final ProcessBuilder pb = new ProcessBuilder(processParameters);
         pb.redirectErrorStream(true);
         pb.directory(gameVersion.getInstallationPath());
-        logger.debug("Starting game process with '{}' in '{}' for '{}'", parameters, gameVersion.getInstallationPath(),
-            gameVersion);
+        logger.debug("Starting game process with '{}' in '{}' for '{}'", processParameters,
+            gameVersion.getInstallationPath(), gameVersion);
         try {
             final Process p = pb.start();
 
-            final Thread t = new Thread(new Runnable() {
+            gameThread = new Thread(new Runnable() {
                 public void run() {
                     try {
                         final BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -118,17 +100,23 @@ public final class GameStarter {
                             logger.trace("Game output: {}", line);
                         }
                         r.close();
-                        logger.debug("Game closed.");
+                        int exitValue = -1;
+                        try {
+                            exitValue = p.waitFor();
+                        } catch (InterruptedException e) {
+                            logger.error("Game thread interrupted!", e);
+                        }
+                        logger.debug("Game closed with exit value '{}'", exitValue);
                     } catch (IOException e) {
                         logger.error("Couldn't read game output!", e);
                     }
                 }
             });
-            t.start();
+            gameThread.start();
 
             Thread.sleep(PROCESS_START_SLEEP_TIME);
 
-            if (!t.isAlive()) {
+            if (!gameThread.isAlive()) {
                 final int exitValue = p.waitFor();
                 logger.warn("Game finished with exit value '{}'", exitValue);
                 return false;
@@ -137,13 +125,13 @@ public final class GameStarter {
             }
         } catch (RuntimeException e) {
             // NullPointerException, SecurityException
-            logger.error("Could not start game with parameters '{}' for '{}'!", parameters, gameVersion, e);
+            logger.error("Could not start game with parameters '{}' for '{}'!", processParameters, gameVersion, e);
             return false;
         } catch (InterruptedException e) {
-            logger.error("Could not start game with parameters '{}' for '{}'!", parameters, gameVersion, e);
+            logger.error("Could not start game with parameters '{}' for '{}'!", processParameters, gameVersion, e);
             return false;
         } catch (IOException e) {
-            logger.error("Could not start game with parameters '{}' for '{}'!", parameters, gameVersion, e);
+            logger.error("Could not start game with parameters '{}' for '{}'!", processParameters, gameVersion, e);
             return false;
         }
         return true;
