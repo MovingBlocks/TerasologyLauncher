@@ -87,18 +87,19 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private LinkJButton reddit;
 
     private SettingsMenu settingsMenu;
+    private final GameStarter gameStarter;
 
     private final File gamesDirectory;
-    private final OperatingSystem os;
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
     public LauncherFrame(final File gamesDirectory, final OperatingSystem os,
                          final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
         this.gamesDirectory = gamesDirectory;
-        this.os = os;
         this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
+
+        gameStarter = new GameStarter(os);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -286,15 +287,22 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             System.exit(0);
         } else if (command.equals(START_ACTION)) {
             final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-            final GameStarter gameStarter = new GameStarter(gameVersion, os,
-                launcherSettings.getMaxHeapSize(), launcherSettings.getInitialHeapSize());
-            if (gameStarter.startGame()) {
-                if (launcherSettings.isCloseLauncherAfterGameStart()) {
+            if ((gameVersion == null) || !gameVersion.isInstalled()) {
+                JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameStart"),
+                    BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+            } else if (gameStarter.isRunning()) {
+                JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_information_gameRunning"),
+                    BundleUtils.getLabel("message_information_title"), JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getMaxHeapSize(),
+                    launcherSettings.getInitialHeapSize());
+                if (!gameStarted) {
+                    JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameStart"),
+                        BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+                } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
+                    logger.info("Close launcher after game start.");
                     System.exit(0);
                 }
-            } else {
-                JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_gameStart"),
-                    BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
             }
         } else if (command.equals(DOWNLOAD_ACTION)) {
             try {
