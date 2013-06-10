@@ -1,22 +1,23 @@
-# Gradle
+# Ignore Gradle
 /.gradle/
 /build/
 
-# IntelliJ IDEA
+# Ignore IntelliJ IDEA
 /out/
 /TerasologyLauncher.iml
 /TerasologyLauncher.ipr
 /TerasologyLauncher.iws
 
-# Eclipse
+# Ignore Eclipse
 /.checkstyle
 /.classpath
 /.project
 /.settings/
 /bin/
 
-# OS generated files
+# Ignore OS generated files
 *.directory
+*~
 .DS_Store
 .DS_Store?
 ._*
