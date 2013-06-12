@@ -473,7 +473,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
                 launcherSettings.store();
             } catch (IOException e) {
                 logger.error("Could not store settings!", e);
-                JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_storeSettings"),
+                JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_storeSettings"),
                     BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
             }
             dispose();

@@ -69,7 +69,7 @@ public final class TerasologyLauncher {
             final OperatingSystem os = OperatingSystem.getOS();
             if (os == OperatingSystem.UNKNOWN) {
                 logger.error("Unknown/Unsupported operating system!");
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(splash,
                     BundleUtils.getLabel("message_error_operatingSystem"),
                     BundleUtils.getLabel("message_error_title"),
                     JOptionPane.ERROR_MESSAGE);
@@ -84,7 +84,7 @@ public final class TerasologyLauncher {
                 DirectoryUtils.checkDirectory(launcherDirectory);
             } catch (IOException e) {
                 logger.error("Cannot create or use launcher directory '{}'!", launcherDirectory, e);
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(splash,
                     BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory,
                     BundleUtils.getLabel("message_error_title"),
                     JOptionPane.ERROR_MESSAGE);
@@ -98,7 +98,7 @@ public final class TerasologyLauncher {
                 DirectoryUtils.checkDirectory(downloadDirectory);
             } catch (IOException e) {
                 logger.error("Cannot create or use download directory '{}'!", downloadDirectory, e);
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(splash,
                     BundleUtils.getLabel("message_error_downloadDirectory") + "\n" + downloadDirectory,
                     BundleUtils.getLabel("message_error_title"),
                     JOptionPane.ERROR_MESSAGE);
@@ -113,7 +113,7 @@ public final class TerasologyLauncher {
                 launcherSettings.init();
             } catch (IOException e) {
                 logger.error("Cannot load and init launcher settings!", e);
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(splash,
                     BundleUtils.getLabel("message_error_loadSettings"),
                     BundleUtils.getLabel("message_error_title"),
                     JOptionPane.ERROR_MESSAGE);
@@ -145,7 +145,7 @@ public final class TerasologyLauncher {
                 launcherSettings.setGamesDirectory(gamesDirectory);
             } catch (IOException e) {
                 logger.error("Cannot create or use games directory '{}'!", gamesDirectory, e);
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(splash,
                     BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
                     BundleUtils.getLabel("message_error_title"),
                     JOptionPane.ERROR_MESSAGE);
@@ -165,7 +165,7 @@ public final class TerasologyLauncher {
                 launcherSettings.store();
             } catch (IOException e) {
                 logger.error("Cannot store launcher settings!", e);
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(splash,
                     BundleUtils.getLabel("message_error_storeSettings"),
                     BundleUtils.getLabel("message_error_title"),
                     JOptionPane.ERROR_MESSAGE);
@@ -227,7 +227,7 @@ public final class TerasologyLauncher {
         msgPanel.add(msgLabel, BorderLayout.PAGE_START);
         msgPanel.add(msgArea, BorderLayout.CENTER);
 
-        final int option = JOptionPane.showOptionDialog(null,
+        final int option = JOptionPane.showOptionDialog(splash,
             msgPanel,
             BundleUtils.getLabel("message_update_launcher_title"),
             JOptionPane.DEFAULT_OPTION,
@@ -238,7 +238,7 @@ public final class TerasologyLauncher {
 
         if (option == 0) {
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher"));
-            updater.update();
+            updater.update(splash);
         }
     }
 }

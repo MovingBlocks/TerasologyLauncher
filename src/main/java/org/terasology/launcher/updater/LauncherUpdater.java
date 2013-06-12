@@ -18,6 +18,7 @@ package org.terasology.launcher.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
@@ -85,7 +86,7 @@ public final class LauncherUpdater {
         return updateAvailable;
     }
 
-    public void update() {
+    public void update(final SplashScreenWindow splash) {
         // Get current launcher location
         File launcherLocation;
         try {
@@ -93,7 +94,7 @@ public final class LauncherUpdater {
                 .toURI());
         } catch (URISyntaxException e) {
             logger.error("Launcher update failed! Could not retrieve current launcher directory.", e);
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(splash,
                 BundleUtils.getLabel("update_launcher_updateFailed"),
                 BundleUtils.getLabel("message_error_title"),
                 JOptionPane.ERROR_MESSAGE);
@@ -118,14 +119,14 @@ public final class LauncherUpdater {
             SelfUpdater.runUpdate(os, downloadDirectory, launcherLocation);
         } catch (MalformedURLException e) {
             logger.error("Launcher update failed!", e);
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(splash,
                 BundleUtils.getLabel("update_launcher_updateFailed"),
                 BundleUtils.getLabel("message_error_title"),
                 JOptionPane.ERROR_MESSAGE);
             logger.error("Aborting update process!");
         } catch (DownloadException e) {
             logger.error("Launcher update failed!", e);
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(splash,
                 BundleUtils.getLabel("update_launcher_updateFailed"),
                 BundleUtils.getLabel("message_error_title"),
                 JOptionPane.ERROR_MESSAGE);
