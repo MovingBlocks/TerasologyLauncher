@@ -58,7 +58,8 @@ public final class TerasologyLauncher {
             logger.debug("Show SplashScreen");
 
             // TerasologyLauncherVersionInfo
-            logger.debug("TerasologyLauncherVersionInfo: {}", TerasologyLauncherVersionInfo.getInstance().toString());
+            final TerasologyLauncherVersionInfo launcherVersionInfo = TerasologyLauncherVersionInfo.getInstance();
+            logger.debug("TerasologyLauncherVersionInfo: {}", launcherVersionInfo.toString());
 
             // Language
             Languages.init();
@@ -110,14 +111,13 @@ public final class TerasologyLauncher {
             if (launcherSettings.isSearchForLauncherUpdates()) {
                 splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
                 final LauncherUpdater updater = new LauncherUpdater(os, launcherDirectory,
-                    TerasologyLauncherVersionInfo.getInstance().getBuildNumber(),
-                    TerasologyLauncherVersionInfo.getInstance().getJobName());
+                    launcherVersionInfo.getBuildNumber(), launcherVersionInfo.getJobName());
                 if (updater.updateAvailable()) {
                     logger.info("Launcher update available! {} {}", updater.getUpstreamVersion(),
                         updater.getVersionInfo());
                     splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
 
-                    showUpdateDialog(splash, updater);
+                    showUpdateDialog(splash, updater, launcherVersionInfo);
                 }
             }
 
@@ -179,7 +179,8 @@ public final class TerasologyLauncher {
         }
     }
 
-    private static void showUpdateDialog(final SplashScreenWindow splash, final LauncherUpdater updater) {
+    private static void showUpdateDialog(final SplashScreenWindow splash, final LauncherUpdater updater,
+                                         final TerasologyLauncherVersionInfo launcherVersionInfo) {
         final Object[] options = {BundleUtils.getLabel("main_yes"), BundleUtils.getLabel("main_no")};
 
         final JPanel msgPanel = new JPanel(new BorderLayout());
@@ -190,7 +191,7 @@ public final class TerasologyLauncher {
         final StringBuilder builder = new StringBuilder();
         builder.append("  ");
         builder.append(BundleUtils.getLabel("message_update_current"));
-        builder.append(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
+        builder.append(launcherVersionInfo.getDisplayVersion());
         builder.append("\n");
         builder.append("  ");
         builder.append(BundleUtils.getLabel("message_update_latest"));
