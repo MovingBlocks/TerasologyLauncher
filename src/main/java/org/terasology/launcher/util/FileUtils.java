@@ -54,6 +54,14 @@ public final class FileUtils {
         return file.delete();
     }
 
+    public static void deleteDirectoryContent(final File directory) {
+        if (directory.isDirectory()) {
+            for (File child : directory.listFiles()) {
+                delete(child);
+            }
+        }
+    }
+
     /**
      * Extracts the given ZIP file to its parent folder.
      *

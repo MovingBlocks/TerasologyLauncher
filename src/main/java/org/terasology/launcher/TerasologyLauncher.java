@@ -23,6 +23,7 @@ import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyGameVersions;
@@ -96,6 +97,7 @@ public final class TerasologyLauncher {
             final File downloadDirectory = new File(launcherDirectory, DirectoryUtils.DOWNLOAD_DIR_NAME);
             try {
                 DirectoryUtils.checkDirectory(downloadDirectory);
+                FileUtils.deleteDirectoryContent(downloadDirectory);
             } catch (IOException e) {
                 logger.error("Cannot create or use download directory '{}'!", downloadDirectory, e);
                 JOptionPane.showMessageDialog(splash,
