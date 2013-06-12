@@ -30,6 +30,7 @@ import org.terasology.launcher.version.TerasologyGameVersions;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.BorderFactory;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -141,6 +142,17 @@ public final class TerasologyLauncher {
             File gamesDirectory = launcherSettings.getGamesDirectory();
             if (gamesDirectory == null) {
                 gamesDirectory = DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.GAMES_APPLICATION_DIR_NAME);
+                final JFileChooser fileChooser = new JFileChooser(gamesDirectory.getParentFile());
+                // Cannot use mode DIRECTORIES_ONLY, because the preselected name doesn't work.
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                fileChooser.setSelectedFile(gamesDirectory);
+                fileChooser.setDialogTitle(BundleUtils.getLabel("message_dialog_title_chooseGamesDirectory"));
+                if (fileChooser.showSaveDialog(splash) != JFileChooser.APPROVE_OPTION) {
+                    logger.debug("New games directory not approved!");
+                    System.exit(0);
+                }
+
+                gamesDirectory = fileChooser.getSelectedFile();
             }
             try {
                 DirectoryUtils.checkDirectory(gamesDirectory);
