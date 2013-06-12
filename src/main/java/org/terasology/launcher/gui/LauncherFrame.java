@@ -89,12 +89,14 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private SettingsMenu settingsMenu;
     private final GameStarter gameStarter;
 
+    private final File downloadDirectory;
     private final File gamesDirectory;
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public LauncherFrame(final File gamesDirectory, final OperatingSystem os,
+    public LauncherFrame(final File downloadDirectory, final File gamesDirectory, final OperatingSystem os,
                          final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
+        this.downloadDirectory = downloadDirectory;
         this.gamesDirectory = gamesDirectory;
         this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
@@ -308,9 +310,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             try {
                 // start a thread with the download
                 // TODO Check, if old GameDownloader is running
-                // TODO Define download directory
-                final GameDownloader downloader = new GameDownloader(progressBar, this, gamesDirectory, gamesDirectory,
-                    getSelectedGameVersion(), gameVersions);
+                final GameDownloader downloader = new GameDownloader(progressBar, this, downloadDirectory,
+                    gamesDirectory, getSelectedGameVersion(), gameVersions);
                 downloader.execute();
                 startButton.setEnabled(false);
             } catch (MalformedURLException e) {

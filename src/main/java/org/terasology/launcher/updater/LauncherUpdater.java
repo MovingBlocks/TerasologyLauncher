@@ -19,7 +19,6 @@ package org.terasology.launcher.updater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -28,7 +27,6 @@ import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.JOptionPane;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -38,16 +36,16 @@ public final class LauncherUpdater {
     private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
 
     private final OperatingSystem os;
-    private final File launcherDirectory;
+    private final File downloadDirectory;
     private final String currentVersion;
     private final String jobName;
     private Integer upstreamVersion;
     private TerasologyLauncherVersionInfo versionInfo;
 
-    public LauncherUpdater(final OperatingSystem os, final File launcherDirectory, final String currentVersion,
-                           final String jobName) {
+    public LauncherUpdater(final OperatingSystem os, final File downloadDirectory,
+                           final String currentVersion, final String jobName) {
         this.os = os;
-        this.launcherDirectory = launcherDirectory;
+        this.downloadDirectory = downloadDirectory;
         if ((currentVersion == null) || (currentVersion.trim().length() == 0)) {
             this.currentVersion = "0";
         } else {
@@ -88,20 +86,6 @@ public final class LauncherUpdater {
     }
 
     public void update() {
-        // get temporary update path
-        final File temporaryUpdateDir = new File(launcherDirectory, DirectoryUtils.TMP);
-        try {
-            DirectoryUtils.checkDirectory(temporaryUpdateDir);
-        } catch (IOException e) {
-            logger.error("Cannot create or use temporary update directory '{}'!", temporaryUpdateDir, e);
-            JOptionPane.showMessageDialog(null,
-                BundleUtils.getLabel("update_launcher_tmpDir") + "\n" + temporaryUpdateDir,
-                BundleUtils.getLabel("message_error_title"),
-                JOptionPane.ERROR_MESSAGE);
-            logger.error("Aborting update process!");
-            return;
-        }
-
         // Get current launcher location
         File launcherLocation;
         try {
@@ -118,19 +102,20 @@ public final class LauncherUpdater {
         }
 
         try {
+            // Download launcher ZIP file
             final URL updateURL = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion,
                 DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
-
-            // download the latest zip file to tmp dir
-
-            final File downloadedZipFile = new File(temporaryUpdateDir, "TerasologyLauncher.zip");
+            final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + ".zip");
             DownloadUtils.downloadToFile(updateURL, downloadedZipFile);
 
-            // Extract ZIP file
+            // Extract launcher ZIP file
             FileUtils.extractZip(downloadedZipFile);
 
+            // Delete launcher ZIP file
+            downloadedZipFile.delete();
+
             // Start SelfUpdater
-            SelfUpdater.runUpdate(os, temporaryUpdateDir, launcherLocation);
+            SelfUpdater.runUpdate(os, downloadDirectory, launcherLocation);
         } catch (MalformedURLException e) {
             logger.error("Launcher update failed!", e);
             JOptionPane.showMessageDialog(null,

@@ -24,10 +24,9 @@ import java.io.IOException;
  */
 public final class DirectoryUtils {
 
-    public static final String TMP = "tmp";
-
     public static final String LAUNCHER_APPLICATION_DIR_NAME = "terasologylauncher";
     public static final String GAMES_APPLICATION_DIR_NAME = "terasology";
+    public static final String DOWNLOAD_DIR_NAME = "download";
 
     private static final String PROPERTY_USER_HOME = "user.home";
 
