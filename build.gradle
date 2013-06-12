@@ -126,3 +126,13 @@ applicationDistribution.from ('src/template/VERSION') {
     expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: env.GIT_BRANCH, dateTime: startDateTimeString, displayVersion: displayVersion)
     filter(FixCrLfFilter, eol:FixCrLfFilter.CrLf.newInstance("crlf"))
 }
+
+// For IntelliJ add a bunch of excluded directories
+idea {
+    // Exclude Gradle dir
+    module.excludeDirs += file('gradle')
+
+    // Exclude Eclipse dirs
+    module.excludeDirs += file('bin')
+    module.excludeDirs += file('.settings')
+}
