@@ -20,8 +20,9 @@ The launcher is still under development, if you want to contribute please contac
 Contributors
 ------------
 [Overview of contributors](https://github.com/MovingBlocks/TerasologyLauncher/graphs/contributors)
-MrBarsack [@MrBarsack](https://github.com/MrBarsack)
-Tobias Nett [@skaldarnar](https://github.com/skaldarnar)
-Mathias Kalb [@mkalb](https://github.com/mkalb)
-Rasmus Praestholm [@Cervator](https://github.com/Cervator)
-Ian Macalinao [@simplyianm](https://github.com/simplyianm)
+
+* MrBarsack [@MrBarsack](https://github.com/MrBarsack)
+* Tobias Nett [@skaldarnar](https://github.com/skaldarnar)
+* Mathias Kalb [@mkalb](https://github.com/mkalb)
+* Rasmus Praestholm [@Cervator](https://github.com/Cervator)
+* Ian Macalinao [@simplyianm](https://github.com/simplyianm)
