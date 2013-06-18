@@ -19,9 +19,6 @@ package org.terasology.launcher.gui;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.version.TerasologyGameVersion;
 
-/**
- * @author Mathias Kalb
- */
 final class VersionItem {
 
     private final TerasologyGameVersion gameVersion;

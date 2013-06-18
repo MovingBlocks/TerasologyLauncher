@@ -24,8 +24,6 @@ import java.awt.Graphics2D;
 
 /**
  * JPanel with transparent background. Both, degree of transparency and color can be defined.
- *
- * @author Skaldarnar
  */
 final class TransparentPanel extends JPanel {
 

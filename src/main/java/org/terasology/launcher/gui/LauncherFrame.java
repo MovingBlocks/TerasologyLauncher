@@ -47,9 +47,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.net.MalformedURLException;
 
-/**
- * @author Skaldarnar
- */
 public final class LauncherFrame extends JFrame implements ActionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherFrame.class);
