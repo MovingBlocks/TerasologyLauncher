@@ -48,9 +48,6 @@ import java.lang.management.OperatingSystemMXBean;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * @author Skaldarnar
- */
 final class SettingsMenu extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;

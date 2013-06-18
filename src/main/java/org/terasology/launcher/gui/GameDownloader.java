@@ -37,10 +37,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-/**
- * @author MrBarsack
- * @author Skaldarnar
- */
 final class GameDownloader extends SwingWorker<Void, Void> {
 
     private static final Logger logger = LoggerFactory.getLogger(GameDownloader.class);

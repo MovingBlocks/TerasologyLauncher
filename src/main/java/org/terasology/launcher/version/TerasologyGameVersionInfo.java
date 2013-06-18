@@ -26,9 +26,6 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-/**
- * @author Mathias Kalb
- */
 public final class TerasologyGameVersionInfo {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersionInfo.class);

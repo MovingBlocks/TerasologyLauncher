@@ -26,8 +26,6 @@ import java.awt.image.Kernel;
 
 /**
  * ImageUtils hold various helper methods for image handling, such as scaling or blur filters.
- *
- * @author Tobias 'Skaldarnar' Nett
  */
 public final class ImageUtils {
 

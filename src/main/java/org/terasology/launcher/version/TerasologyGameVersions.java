@@ -33,10 +33,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-/**
- * @author Skaldarnar
- * @author Mathias Kalb
- */
 public final class TerasologyGameVersions {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersions.class);

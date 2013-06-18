@@ -19,9 +19,6 @@ package org.terasology.launcher.version;
 import java.io.File;
 import java.util.List;
 
-/**
- * @author Mathias Kalb
- */
 public final class TerasologyGameVersion {
 
     public static final int BUILD_VERSION_LATEST = -1;

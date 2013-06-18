@@ -22,9 +22,6 @@ import java.util.Locale;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Mathias Kalb
- */
 public final class TestLanguages {
 
     public TestLanguages() {
