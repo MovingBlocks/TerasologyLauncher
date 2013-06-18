@@ -16,9 +16,6 @@
 
 package org.terasology.launcher.util;
 
-/**
- * @author Mathias Kalb
- */
 public enum JobResult {
 
     ABORTED, FAILURE, NOT_BUILT, SUCCESS, UNSTABLE

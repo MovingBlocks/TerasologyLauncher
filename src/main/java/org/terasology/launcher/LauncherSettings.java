@@ -35,8 +35,6 @@ import java.util.Properties;
 
 /**
  * Provides access to launcher settings.
- *
- * @author Skaldarnar
  */
 public final class LauncherSettings {
 

@@ -26,10 +26,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author MrBarsack
- * @author Skaldarnar
- */
 public final class GameStarter {
 
     private static final Logger logger = LoggerFactory.getLogger(GameStarter.class);

@@ -28,9 +28,6 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URI;
 
-/**
- * @author Skaldarnar
- */
 final class LinkJLabel extends JLabel implements MouseListener {
 
     private static final long serialVersionUID = 1L;

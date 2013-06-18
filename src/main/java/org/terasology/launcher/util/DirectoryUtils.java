@@ -19,9 +19,6 @@ package org.terasology.launcher.util;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * @author Skaldarnar
- */
 public final class DirectoryUtils {
 
     public static final String LAUNCHER_APPLICATION_DIR_NAME = "terasologylauncher";

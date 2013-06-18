@@ -30,8 +30,6 @@ import java.util.List;
  * The SelfUpdater class is responsible for copying the updated files to the right location.
  * <p/>
  * The update method will prepare a new process to run that will copy the files and restart the launcher.
- *
- * @author Skaldarnar
  */
 public final class SelfUpdater {
 

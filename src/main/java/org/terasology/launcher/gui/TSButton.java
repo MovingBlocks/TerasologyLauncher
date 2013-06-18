@@ -35,8 +35,6 @@ import java.awt.image.BufferedImage;
 
 /**
  * Custom JButton using the style/layout from the Terasology main menu.
- *
- * @author Skaldarnar
  */
 final class TSButton extends JButton implements MouseListener {
 

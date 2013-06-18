@@ -40,9 +40,6 @@ import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * @author Skaldarnar
- */
 public final class TerasologyLauncher {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncher.class);

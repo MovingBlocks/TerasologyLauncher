@@ -31,8 +31,6 @@ import java.io.IOException;
 
 /**
  * A JLabel used as background image for launcher.
- *
- * @author Skaldarnar
  */
 final class BackgroundImage extends JLabel {
 
