@@ -17,11 +17,14 @@
 package org.terasology.launcher.version;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.List;
 
-public final class TerasologyGameVersion {
+public final class TerasologyGameVersion implements Serializable {
 
     public static final int BUILD_VERSION_LATEST = -1;
+
+    private static final long serialVersionUID = 1L;
 
     private Integer buildNumber;
     private GameBuildType buildType;
@@ -29,7 +32,7 @@ public final class TerasologyGameVersion {
     private File installationPath;
     private File gameJar;
     private List<String> changeLog;
-    private boolean successful;
+    private Boolean successful;
 
     private boolean latest;
 
@@ -113,11 +116,11 @@ public final class TerasologyGameVersion {
         this.latest = latest;
     }
 
-    public boolean isSuccessful() {
+    public Boolean getSuccessful() {
         return successful;
     }
 
-    void setSuccessful(final boolean successful) {
+    void setSuccessful(final Boolean successful) {
         this.successful = successful;
     }
 

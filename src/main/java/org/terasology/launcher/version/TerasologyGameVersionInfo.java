@@ -22,11 +22,14 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public final class TerasologyGameVersionInfo {
+public final class TerasologyGameVersionInfo implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersionInfo.class);
 

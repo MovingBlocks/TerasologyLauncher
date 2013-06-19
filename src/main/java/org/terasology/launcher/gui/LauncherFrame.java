@@ -388,7 +388,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             startButton.setText(BundleUtils.getLabel("launcher_start"));
             startButton.setToolTipText(BundleUtils.getLabel("tooltip_start"));
             startButton.setActionCommand(START_ACTION);
-        } else if (gameVersion.isSuccessful() && (gameVersion.getBuildNumber() != null)) {
+        } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful().booleanValue()
+            && (gameVersion.getBuildNumber() != null)) {
             // download is possible
             startButton.setVisible(true);
             startButton.setEnabled(true);
