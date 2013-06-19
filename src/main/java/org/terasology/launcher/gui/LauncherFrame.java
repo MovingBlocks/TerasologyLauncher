@@ -421,8 +421,9 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         if (gameVersion.getChangeLog() != null) {
             for (String msg : gameVersion.getChangeLog()) {
                 b.append("-");
-                // TODO escape HTML entities/special characters
-                b.append(msg);
+                // escape special HTML characters
+                b.append(msg.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                    .replace("\"", "&quot;").replace("'", "&#x27;").replace("/", "&#x2F;"));
                 b.append("<br/>");
             }
         }
