@@ -40,7 +40,7 @@ final class VersionItem {
         if (gameVersion.isLatest()) {
             b.append(BundleUtils.getLabel("settings_game_buildVersion_latest"));
         } else {
-            if (gameVersion.isSuccessful()) {
+            if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful().booleanValue()) {
                 b.append(gameVersion.getBuildNumber());
             } else {
                 b.append("[");
