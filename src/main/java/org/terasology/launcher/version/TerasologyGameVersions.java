@@ -19,12 +19,18 @@ package org.terasology.launcher.version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
+import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.JobResult;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -72,7 +78,17 @@ public final class TerasologyGameVersions {
         return null;
     }
 
-    public synchronized void loadGameVersions(final LauncherSettings launcherSettings, final File gamesDirectory) {
+    public synchronized void loadGameVersions(final LauncherSettings launcherSettings, final File launcherDirectory,
+                                              final File gamesDirectory) {
+        File cacheDirectory;
+        try {
+            cacheDirectory = new File(launcherDirectory, "cache");
+            DirectoryUtils.checkDirectory(cacheDirectory);
+        } catch (IOException e) {
+            cacheDirectory = null;
+            logger.error("loadGameVersions", e);
+        }
+
         gameVersionMapStable = new TreeMap<Integer, TerasologyGameVersion>();
         gameVersionMapNightly = new TreeMap<Integer, TerasologyGameVersion>();
         final SortedSet<Integer> buildNumbersStable = new TreeSet<Integer>();
@@ -91,10 +107,27 @@ public final class TerasologyGameVersions {
         fillBuildNumbers(buildNumbersStable, MIN_BUILD_NUMBER_STABLE, lastBuildNumberStable);
         fillBuildNumbers(buildNumbersNightly, MIN_BUILD_NUMBER_NIGHTLY, lastBuildNumberNightly);
 
+        SortedMap<Integer, TerasologyGameVersion> cachedGameVersionMapStable = null;
+        SortedMap<Integer, TerasologyGameVersion> cachedGameVersionMapNightly = null;
+
+        if (cacheDirectory != null) {
+            cachedGameVersionMapStable = readFromCache(buildNumbersStable, GameBuildType.STABLE,
+                DownloadUtils.TERASOLOGY_STABLE_JOB_NAME, cacheDirectory);
+            cachedGameVersionMapNightly = readFromCache(buildNumbersNightly, GameBuildType.NIGHTLY,
+                DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME, cacheDirectory);
+        }
+
         loadGameVersions(buildNumbersStable, GameBuildType.STABLE,
-            DownloadUtils.TERASOLOGY_STABLE_JOB_NAME, gameVersionMapStable);
+            DownloadUtils.TERASOLOGY_STABLE_JOB_NAME, gameVersionMapStable, cachedGameVersionMapStable);
         loadGameVersions(buildNumbersNightly, GameBuildType.NIGHTLY,
-            DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME, gameVersionMapNightly);
+            DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME, gameVersionMapNightly, cachedGameVersionMapNightly);
+
+        if (cacheDirectory != null) {
+            writeToCache(GameBuildType.STABLE, DownloadUtils.TERASOLOGY_STABLE_JOB_NAME, gameVersionMapStable,
+                cacheDirectory);
+            writeToCache(GameBuildType.NIGHTLY, DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME, gameVersionMapNightly,
+                cacheDirectory);
+        }
 
         gameVersionListStable = createList(lastBuildNumberStable, GameBuildType.STABLE, gameVersionMapStable);
         gameVersionListNightly = createList(lastBuildNumberNightly, GameBuildType.NIGHTLY, gameVersionMapNightly);
@@ -254,9 +287,49 @@ public final class TerasologyGameVersions {
         }
     }
 
+    private SortedMap<Integer, TerasologyGameVersion> readFromCache(final SortedSet<Integer> buildNumbers,
+                                                                    final GameBuildType buildType,
+                                                                    final String jobName,
+                                                                    final File cacheDirectory) {
+        final SortedMap<Integer, TerasologyGameVersion> cachedGameVersions
+            = new TreeMap<Integer, TerasologyGameVersion>();
+        try {
+            for (Integer buildNumber : buildNumbers) {
+                final File cacheFile = createCacheFile(buildNumber, buildType, jobName, cacheDirectory);
+                if (cacheFile.exists() && cacheFile.canRead() && cacheFile.isFile()) {
+                    ObjectInputStream ois = null;
+                    try {
+                        ois = new ObjectInputStream(new FileInputStream(cacheFile));
+                        final TerasologyGameVersion gameVersion = (TerasologyGameVersion) ois.readObject();
+                        cachedGameVersions.put(buildNumber, gameVersion);
+                    } finally {
+                        if (ois != null) {
+                            try {
+                                ois.close();
+                            } catch (IOException e) {
+                                logger.info("readFromCache", e);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            logger.error("readFromCache", e);
+        } catch (ClassNotFoundException e) {
+            logger.error("readFromCache", e);
+        }
+        return cachedGameVersions;
+    }
+
+    private File createCacheFile(final Integer buildNumber, final GameBuildType buildType, final String jobName,
+                                 final File cacheDirectory) {
+        return new File(cacheDirectory, "TerasologyGameVersion_" + buildType + "_" + jobName + "_"
+            + buildNumber.toString() + ".cache");
+    }
+
     private void loadGameVersions(final SortedSet<Integer> buildNumbers, final GameBuildType buildType,
-                                  final String jobName, final SortedMap<Integer, TerasologyGameVersion> gameVersions) {
-        // TODO Create a cache -> faster loading and works without internet connection
+                                  final String jobName, final SortedMap<Integer, TerasologyGameVersion> gameVersions,
+                                  final SortedMap<Integer, TerasologyGameVersion> cachedGameVersionMap) {
         for (Integer buildNumber : buildNumbers) {
             final TerasologyGameVersion gameVersion;
             if (gameVersions.containsKey(buildNumber)) {
@@ -268,50 +341,98 @@ public final class TerasologyGameVersions {
                 gameVersions.put(buildNumber, gameVersion);
             }
 
-            // load and set successful
-            boolean successful = false;
-            try {
-                JobResult jobResult = DownloadUtils.loadJobResult(jobName, buildNumber);
-                successful = (jobResult != null
-                    && ((jobResult == JobResult.SUCCESS) || (jobResult == JobResult.UNSTABLE)));
-            } catch (DownloadException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Load job result failed. {}", jobName, e);
-                } else {
-                    logger.warn("Load job result failed.");
+            TerasologyGameVersion cachedGameVersion = null;
+            if ((cachedGameVersionMap != null) && cachedGameVersionMap.containsKey(buildNumber)) {
+                cachedGameVersion = cachedGameVersionMap.get(buildNumber);
+                if (!buildNumber.equals(cachedGameVersion.getBuildNumber())
+                    || !buildType.equals(cachedGameVersion.getBuildType())) {
+                    logger.warn("Cannot use cached game version! " + cachedGameVersion);
+                    cachedGameVersion = null;
                 }
             }
-            gameVersion.setSuccessful(successful);
+
+            // load and set successful
+            if ((cachedGameVersion != null) && (cachedGameVersion.getSuccessful() != null)) {
+                gameVersion.setSuccessful(cachedGameVersion.getSuccessful());
+            } else {
+                Boolean successful = null;
+                try {
+                    JobResult jobResult = DownloadUtils.loadJobResult(jobName, buildNumber);
+                    successful = (jobResult != null
+                        && ((jobResult == JobResult.SUCCESS) || (jobResult == JobResult.UNSTABLE)));
+                } catch (DownloadException e) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Load job result failed. {}", jobName, e);
+                    } else {
+                        logger.warn("Load job result failed.");
+                    }
+                }
+                gameVersion.setSuccessful(successful);
+            }
 
             // load and set changeLog
-            List<String> changeLog = null;
-            try {
-                changeLog = DownloadUtils.loadChangeLog(jobName, buildNumber);
-            } catch (DownloadException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Load change log failed. {}", jobName, e);
-                } else {
-                    logger.warn("Load change log failed.");
+            if ((cachedGameVersion != null) && (cachedGameVersion.getChangeLog() != null)) {
+                gameVersion.setChangeLog(cachedGameVersion.getChangeLog());
+            } else {
+                List<String> changeLog = null;
+                try {
+                    changeLog = DownloadUtils.loadChangeLog(jobName, buildNumber);
+                } catch (DownloadException e) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Load change log failed. {}", jobName, e);
+                    } else {
+                        logger.warn("Load change log failed.");
+                    }
                 }
-            }
-            if ((changeLog != null) && !changeLog.isEmpty()) {
-                gameVersion.setChangeLog(Collections.unmodifiableList(changeLog));
+                if ((changeLog != null) && !changeLog.isEmpty()) {
+                    gameVersion.setChangeLog(Collections.unmodifiableList(changeLog));
+                }
             }
 
             // load and set gameVersionInfo
-            TerasologyGameVersionInfo gameVersionInfo = null;
-            try {
-                gameVersionInfo = DownloadUtils.loadTerasologyGameVersionInfo(jobName, buildNumber);
-            } catch (DownloadException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Load game version info failed. {}", jobName, e);
-                } else {
-                    logger.warn("Load game version info failed.");
+            if ((cachedGameVersion != null) && (cachedGameVersion.getGameVersionInfo() != null)) {
+                gameVersion.setGameVersionInfo(cachedGameVersion.getGameVersionInfo());
+            } else {
+                TerasologyGameVersionInfo gameVersionInfo = null;
+                try {
+                    gameVersionInfo = DownloadUtils.loadTerasologyGameVersionInfo(jobName, buildNumber);
+                } catch (DownloadException e) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Load game version info failed. {}", jobName, e);
+                    } else {
+                        logger.warn("Load game version info failed.");
+                    }
+                }
+                if (gameVersionInfo != null) {
+                    gameVersion.setGameVersionInfo(gameVersionInfo);
                 }
             }
-            if (gameVersionInfo != null) {
-                gameVersion.setGameVersionInfo(gameVersionInfo);
+        }
+    }
+
+    private void writeToCache(final GameBuildType buildType, final String jobName,
+                              final SortedMap<Integer, TerasologyGameVersion> gameVersions,
+                              final File cacheDirectory) {
+        try {
+            for (TerasologyGameVersion gameVersion : gameVersions.values()) {
+                final File cacheFile = createCacheFile(gameVersion.getBuildNumber(), buildType, jobName,
+                    cacheDirectory);
+                ObjectOutputStream oos = null;
+                try {
+                    oos = new ObjectOutputStream(new FileOutputStream(cacheFile));
+                    oos.writeObject(gameVersion);
+                } finally {
+                    if (oos != null) {
+                        try {
+                            oos.close();
+                        } catch (IOException e) {
+                            logger.info("writeToCache", e);
+                        }
+                    }
+                }
             }
+        } catch (IOException e) {
+            logger.error("writeToCache", e);
         }
     }
 
