@@ -35,6 +35,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.WindowConstants;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -100,7 +101,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
         gameStarter = new GameStarter(os);
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         initComponents();
         updateGui();
@@ -388,7 +389,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             startButton.setText(BundleUtils.getLabel("launcher_start"));
             startButton.setToolTipText(BundleUtils.getLabel("tooltip_start"));
             startButton.setActionCommand(START_ACTION);
-        } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful().booleanValue()
+        } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful()
             && (gameVersion.getBuildNumber() != null)) {
             // download is possible
             startButton.setVisible(true);
@@ -411,21 +412,25 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         final StringBuilder b = new StringBuilder();
         // TODO add more information, i18n and tooltip
         if (gameVersion.getBuildType() != null) {
+            b.append("<h1>");
             b.append(gameVersion.getBuildType());
-            b.append("<br/>");
+            b.append("</h1>");
         }
         if (gameVersion.getBuildNumber() != null) {
+            b.append("<h2>#");
             b.append(gameVersion.getBuildNumber());
-            b.append("<br/>");
+            b.append("</h2>");
         }
         if (gameVersion.getChangeLog() != null) {
+            b.append("<ul>");
             for (String msg : gameVersion.getChangeLog()) {
-                b.append("-");
+                b.append("<li>");
                 // escape special HTML characters
                 b.append(msg.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
                     .replace("\"", "&quot;").replace("'", "&#x27;").replace("/", "&#x2F;"));
-                b.append("<br/>");
+                b.append("</li>");
             }
+            b.append("</ul>");
         }
         infoTextPane.setText(b.toString());
         infoTextPane.setCaretPosition(0);

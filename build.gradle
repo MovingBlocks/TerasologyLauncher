@@ -100,7 +100,9 @@ jar {
     rename('logback_jar.xml', 'logback.xml')
     manifest {
         def manifestClasspath = configurations.runtime.collect { it.getName() }.join(" ")
-        attributes("Main-Class": mainClassName, "Class-Path" : manifestClasspath, "Implementation-Title": project.name, "Implementation-Version": displayVersion, "SplashScreen-Image": "org/terasology/launcher/images/splash.png")
+        attributes("Main-Class": mainClassName, "Class-Path" : manifestClasspath,
+                "Implementation-Title": project.name, "Implementation-Version": displayVersion,
+                "SplashScreen-Image": "org/terasology/launcher/images/splash.jpg")
     }
 }
 
