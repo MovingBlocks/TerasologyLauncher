@@ -186,8 +186,7 @@ public final class TerasologyLauncher {
 
             // LauncherFrame
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_createFrame"));
-            final Frame frame = new LauncherFrame(downloadDirectory, gamesDirectory, os, launcherSettings,
-                gameVersions);
+            final Frame frame = new LauncherFrame(downloadDirectory, gamesDirectory, launcherSettings, gameVersions);
             frame.setVisible(true);
 
             // Dispose splash screen

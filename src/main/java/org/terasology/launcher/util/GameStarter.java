@@ -32,12 +32,9 @@ public final class GameStarter {
 
     private static final int PROCESS_START_SLEEP_TIME = 5000;
 
-    private final OperatingSystem os;
-
     private Thread gameThread;
 
-    public GameStarter(final OperatingSystem os) {
-        this.os = os;
+    public GameStarter() {
     }
 
     public boolean isRunning() {

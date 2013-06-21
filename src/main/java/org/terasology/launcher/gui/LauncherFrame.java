@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.GameStarter;
-import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyGameVersion;
 import org.terasology.launcher.version.TerasologyGameVersions;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
@@ -92,14 +91,14 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public LauncherFrame(final File downloadDirectory, final File gamesDirectory, final OperatingSystem os,
+    public LauncherFrame(final File downloadDirectory, final File gamesDirectory,
                          final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
         this.downloadDirectory = downloadDirectory;
         this.gamesDirectory = gamesDirectory;
         this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
 
-        gameStarter = new GameStarter(os);
+        gameStarter = new GameStarter();
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
