@@ -27,6 +27,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 public final class BundleUtils {
@@ -34,6 +35,7 @@ public final class BundleUtils {
     private static final Logger logger = LoggerFactory.getLogger(BundleUtils.class);
 
     private static final String LABELS_BUNDLE = "org.terasology.launcher.bundle.LabelsBundle";
+    private static final String MESSAGE_BUNDLE = "org.terasology.launcher.bundle.MessageBundle";
     private static final String URI_BUNDLE = "org.terasology.launcher.bundle.URIBundle";
     private static final String IMAGE_BUNDLE = "org.terasology.launcher.bundle.ImageBundle";
 
@@ -42,6 +44,12 @@ public final class BundleUtils {
 
     public static String getLabel(final String key) {
         return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.getCurrentLocale()).getString(key);
+    }
+
+    public static String getMessage(final String key, final Object... arguments) {
+        final String pattern = ResourceBundle.getBundle(MESSAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        final MessageFormat messageFormat = new MessageFormat(pattern, Languages.getCurrentLocale());
+        return messageFormat.format(arguments, new StringBuffer(), null).toString();
     }
 
     public static URI getURI(final String key) {

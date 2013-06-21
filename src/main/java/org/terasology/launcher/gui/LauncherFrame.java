@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.GameStarter;
+import org.terasology.launcher.version.GameBuildType;
 import org.terasology.launcher.version.TerasologyGameVersion;
 import org.terasology.launcher.version.TerasologyGameVersions;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
@@ -406,27 +407,53 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         }
     }
 
+    private String escapeHtml(String text) {
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            .replace("\"", "&quot;").replace("'", "&#x27;").replace("/", "&#x2F;");
+    }
+
     private void updateInfoTextPane() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         final StringBuilder b = new StringBuilder();
-        // TODO add more information, i18n and tooltip
+
+        final String infoHeader1;
+        final String infoHeader2;
+        final Object[] arguments = new Object[4];
+        arguments[0] = gameVersion.getBuildType();
+        arguments[1] = gameVersion.getBuildNumber();
+        if ((gameVersion.getGameVersionInfo() != null)
+            && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
+            arguments[2] = gameVersion.getGameVersionInfo().getDisplayVersion();
+        } else {
+            arguments[2] = "";
+        }
+        if (gameVersion.isInstalled()) {
+            arguments[3] = Integer.valueOf(1);
+        } else {
+            arguments[3] = Integer.valueOf(0);
+        }
+        if (gameVersion.getBuildType() == GameBuildType.STABLE) {
+            infoHeader1 = BundleUtils.getMessage("infoHeader1_stable", arguments);
+            infoHeader2 = BundleUtils.getMessage("infoHeader2_stable", arguments);
+        } else {
+            infoHeader1 = BundleUtils.getMessage("infoHeader1_nightly", arguments);
+            infoHeader2 = BundleUtils.getMessage("infoHeader2_nightly", arguments);
+        }
         if (gameVersion.getBuildType() != null) {
             b.append("<h1>");
-            b.append(gameVersion.getBuildType());
+            b.append(escapeHtml(infoHeader1));
             b.append("</h1>");
         }
         if (gameVersion.getBuildNumber() != null) {
-            b.append("<h2>#");
-            b.append(gameVersion.getBuildNumber());
+            b.append("<h2>");
+            b.append(escapeHtml(infoHeader2));
             b.append("</h2>");
         }
         if (gameVersion.getChangeLog() != null) {
             b.append("<ul>");
             for (String msg : gameVersion.getChangeLog()) {
                 b.append("<li>");
-                // escape special HTML characters
-                b.append(msg.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-                    .replace("\"", "&quot;").replace("'", "&#x27;").replace("/", "&#x2F;"));
+                b.append(escapeHtml(msg));
                 b.append("</li>");
             }
             b.append("</ul>");
