@@ -46,8 +46,8 @@ repositories {
 
 // Primary dependencies definition
 dependencies {
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.2'
-    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.9'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.13'
 
     // These dependencies are only needed for running tests
     testCompile group: 'junit', name: 'junit', version: '4.11'
