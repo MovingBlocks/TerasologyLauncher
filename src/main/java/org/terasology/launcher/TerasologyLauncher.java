@@ -137,6 +137,22 @@ public final class TerasologyLauncher {
 
             // Games directory
             File gamesDirectory = launcherSettings.getGamesDirectory();
+            if (gamesDirectory != null) {
+                try {
+                    DirectoryUtils.checkDirectory(gamesDirectory);
+                } catch (IOException e) {
+                    logger.warn("Cannot create or use games directory '{}'!", gamesDirectory, e);
+                    JOptionPane.showMessageDialog(splash,
+                        BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
+                        BundleUtils.getLabel("message_error_title"),
+                        JOptionPane.WARNING_MESSAGE);
+
+                    // Set gamesDirectory to 'null' -> use has to choose new games directory
+                    gamesDirectory = null;
+
+                    splash.setVisible(true);
+                }
+            }
             if (gamesDirectory == null) {
                 gamesDirectory = DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.GAMES_APPLICATION_DIR_NAME);
                 final JFileChooser fileChooser = new JFileChooser(gamesDirectory.getParentFile());
@@ -150,6 +166,8 @@ public final class TerasologyLauncher {
                 }
 
                 gamesDirectory = fileChooser.getSelectedFile();
+
+                splash.setVisible(true);
             }
             try {
                 DirectoryUtils.checkDirectory(gamesDirectory);
@@ -186,7 +204,7 @@ public final class TerasologyLauncher {
 
             // LauncherFrame
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_createFrame"));
-            final Frame frame = new LauncherFrame(downloadDirectory, gamesDirectory, launcherSettings, gameVersions);
+            final Frame frame = new LauncherFrame(downloadDirectory, launcherSettings, gameVersions);
             frame.setVisible(true);
 
             // Dispose splash screen

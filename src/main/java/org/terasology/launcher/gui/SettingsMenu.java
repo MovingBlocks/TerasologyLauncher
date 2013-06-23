@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.version.GameBuildType;
@@ -32,6 +33,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -39,9 +41,11 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.LayoutStyle;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -57,6 +61,8 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private static final String CANCEL_ACTION = "cancel";
     private static final String RESET_ACTION = "reset";
 
+    private static final String GAMES_DIRECTORY_OPEN = "gamesDirectoryOpen";
+    private static final String GAMES_DIRECTORY_EDIT = "gamesDirectoryEdit";
     private static final String MAX_HEAP_SIZE_ACTION = "maxHeapSize";
     private static final String INITIAL_HEAP_SIZE_ACTION = "initialHeapSize";
 
@@ -68,6 +74,8 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private JComboBox languageBox;
     private JCheckBox searchForLauncherUpdatesBox;
     private JCheckBox closeLauncherAfterGameStartBox;
+
+    private File gamesDirectory;
 
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
@@ -91,6 +99,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         populateLanguage();
         populateSearchForLauncherUpdates();
         populateCloseLauncherAfterGameStart();
+        gamesDirectory = launcherSettings.getGamesDirectory();
 
         pack();
     }
@@ -174,6 +183,29 @@ final class SettingsMenu extends JDialog implements ActionListener {
         buildVersionNightlyBox = new JComboBox();
         buildVersionNightlyBox.setFont(settingsFont);
 
+        JPanel gamesDirectoryPanel = new JPanel();
+
+        JLabel gamesDirectoryLabel = new JLabel();
+        gamesDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gamesDirectory"));
+        gamesDirectoryLabel.setFont(settingsFont);
+
+        JButton gamesDirectoryOpenButton = new JButton();
+        gamesDirectoryOpenButton.setFont(settingsFont);
+        gamesDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gamesDirectory_open"));
+        gamesDirectoryOpenButton.addActionListener(this);
+        gamesDirectoryOpenButton.setActionCommand(GAMES_DIRECTORY_OPEN);
+
+        JButton gamesDirectoryEditButton = new JButton();
+        gamesDirectoryEditButton.setFont(settingsFont);
+        gamesDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gamesDirectory_edit"));
+        gamesDirectoryEditButton.addActionListener(this);
+        gamesDirectoryEditButton.setActionCommand(GAMES_DIRECTORY_EDIT);
+
+        if (Desktop.isDesktopSupported()) {
+            gamesDirectoryPanel.add(gamesDirectoryOpenButton);
+        }
+        gamesDirectoryPanel.add(gamesDirectoryEditButton);
+
         JLabel maxHeapSizeLabel = new JLabel();
         maxHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_maxHeapSize"));
         maxHeapSizeLabel.setFont(settingsFont);
@@ -203,6 +235,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
                         .addComponent(buildTypeLabel)
                         .addComponent(buildVersionStableLabel)
                         .addComponent(buildVersionNightlyLabel)
+                        .addComponent(gamesDirectoryLabel)
                         .addComponent(maxHeapSizeLabel)
                         .addComponent(initialHeapSizeLabel))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -210,6 +243,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
                         .addComponent(buildTypeBox)
                         .addComponent(buildVersionStableBox)
                         .addComponent(buildVersionNightlyBox)
+                        .addComponent(gamesDirectoryPanel)
                         .addComponent(maxHeapSizeBox)
                         .addComponent(initialHeapSizeBox))
                     .addContainerGap())
@@ -232,6 +266,11 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(buildVersionNightlyLabel)
                         .addComponent(buildVersionNightlyBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                            GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(gamesDirectoryLabel)
+                        .addComponent(gamesDirectoryPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                             GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
@@ -316,7 +355,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
 
         return launcherSettingsTab;
     }
-
 
     private void populateBuildType() {
         buildTypeBox.removeAllItems();
@@ -420,7 +458,35 @@ final class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void actionPerformed(final String actionCommand) {
-        if (actionCommand.equals(MAX_HEAP_SIZE_ACTION)) {
+        if (actionCommand.equals(GAMES_DIRECTORY_OPEN)) {
+            try {
+                DirectoryUtils.checkDirectory(gamesDirectory);
+                Desktop.getDesktop().open(gamesDirectory);
+            } catch (IOException e) {
+                logger.error("Cannot open games directory '{}'!", gamesDirectory, e);
+                JOptionPane.showMessageDialog(this,
+                    BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
+                    BundleUtils.getLabel("message_error_title"),
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        } else if (actionCommand.equals(GAMES_DIRECTORY_EDIT)) {
+            final JFileChooser fileChooser = new JFileChooser(gamesDirectory);
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            fileChooser.setDialogTitle(BundleUtils.getLabel("settings_game_gamesDirectory_edit_title"));
+            if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    final File selectedFile = fileChooser.getSelectedFile();
+                    DirectoryUtils.checkDirectory(selectedFile);
+                    gamesDirectory = selectedFile;
+                } catch (IOException e) {
+                    logger.error("Cannot create or use games directory '{}'!", gamesDirectory, e);
+                    JOptionPane.showMessageDialog(this,
+                        BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
+                        BundleUtils.getLabel("message_error_title"),
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } else if (actionCommand.equals(MAX_HEAP_SIZE_ACTION)) {
             updateInitialHeapSizeBox();
         } else if (actionCommand.equals(INITIAL_HEAP_SIZE_ACTION)) {
             updateMaxHeapSizeBox();
@@ -435,6 +501,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
             populateVersions(buildVersionNightlyBox, GameBuildType.NIGHTLY);
             updateHeapSizeSelection();
             populateLanguage();
+            gamesDirectory = launcherSettings.getGamesDirectory();
         } else if (actionCommand.equals(SAVE_ACTION)) {
             // save build type
             final GameBuildType selectedType;
@@ -450,6 +517,9 @@ final class SettingsMenu extends JDialog implements ActionListener {
             launcherSettings.setBuildVersion(versionItemStable.getVersion(), GameBuildType.STABLE);
             VersionItem versionItemNightly = (VersionItem) buildVersionNightlyBox.getSelectedItem();
             launcherSettings.setBuildVersion(versionItemNightly.getVersion(), GameBuildType.NIGHTLY);
+
+            // save gamesDirectory
+            launcherSettings.setGamesDirectory(gamesDirectory);
 
             // save heap size settings
             launcherSettings.setMaxHeapSize((JavaHeapSize) maxHeapSizeBox.getSelectedItem());
