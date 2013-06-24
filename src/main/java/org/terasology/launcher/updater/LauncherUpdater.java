@@ -73,7 +73,7 @@ public final class LauncherUpdater {
         versionInfo = null;
         try {
             upstreamVersion = DownloadUtils.loadLastStableBuildNumber(jobName);
-            logger.debug("Current Version: {}, Upstream Version: {}", currentVersion, upstreamVersion);
+            logger.trace("Current Version: {}, Upstream Version: {}", currentVersion, upstreamVersion);
             if (Integer.parseInt(currentVersion) < upstreamVersion) {
                 updateAvailable = true;
                 versionInfo = DownloadUtils.loadTerasologyLauncherVersionInfo(jobName, upstreamVersion);

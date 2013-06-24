@@ -66,9 +66,13 @@ public final class LauncherSettings {
         properties = new Properties();
     }
 
+    String getLauncherSettingsFilePath() {
+        return launcherSettingsFile.getPath();
+    }
+
     public synchronized void load() throws IOException {
         if (launcherSettingsFile.exists()) {
-            logger.debug("Load the launcher settings from the file '{}'.", launcherSettingsFile);
+            logger.trace("Load the launcher settings from the file '{}'.", launcherSettingsFile);
 
             // load settings
             final InputStream inputStream = new FileInputStream(launcherSettingsFile);
@@ -78,14 +82,14 @@ public final class LauncherSettings {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    logger.warn("The file '{}' could not be closed.", launcherSettingsFile, e);
+                    logger.warn("The settings file '{}' could not be closed.", launcherSettingsFile, e);
                 }
             }
         }
     }
 
     public synchronized void store() throws IOException {
-        logger.debug("Store the launcher settings into the file '{}'.", launcherSettingsFile);
+        logger.trace("Store the launcher settings into the file '{}'.", launcherSettingsFile);
 
         // create directory
         if (!launcherSettingsFile.getParentFile().exists() && !launcherSettingsFile.getParentFile().mkdirs()) {
@@ -100,19 +104,21 @@ public final class LauncherSettings {
             try {
                 outputStream.close();
             } catch (IOException e) {
-                logger.warn("The file '{}' could not be closed.", launcherSettingsFile, e);
+                logger.warn("The settings file '{}' could not be closed.", launcherSettingsFile, e);
             }
         }
     }
 
     public synchronized void init() {
+        logger.trace("Init launcher settings. {}" + properties);
+
         // locale
         final String localeStr = properties.getProperty(PROPERTY_LOCALE);
         if (localeStr != null) {
             Languages.init(localeStr);
 
             if (!Languages.getCurrentLocale().toString().equals(localeStr)) {
-                logger.info("Invalid value '{}' for the parameter '{}'!", localeStr, PROPERTY_LOCALE);
+                logger.warn("Invalid value '{}' for the parameter '{}'!", localeStr, PROPERTY_LOCALE);
             }
         }
         properties.setProperty(PROPERTY_LOCALE, Languages.getCurrentLocale().toString());
@@ -124,7 +130,7 @@ public final class LauncherSettings {
             try {
                 buildType = GameBuildType.valueOf(buildTypeStr);
             } catch (IllegalArgumentException e) {
-                logger.info("Invalid value '{}' for the parameter '{}'!", buildTypeStr, PROPERTY_BUILD_TYPE);
+                logger.warn("Invalid value '{}' for the parameter '{}'!", buildTypeStr, PROPERTY_BUILD_TYPE);
             }
         }
         properties.setProperty(PROPERTY_BUILD_TYPE, buildType.name());
@@ -139,7 +145,7 @@ public final class LauncherSettings {
                 try {
                     buildVersion = Integer.parseInt(buildVersionStr);
                 } catch (NumberFormatException e) {
-                    logger.info("Invalid value '{}' for the parameter '{}'!", buildVersionStr, key);
+                    logger.warn("Invalid value '{}' for the parameter '{}'!", buildVersionStr, key);
                 }
             }
             properties.setProperty(key, String.valueOf(buildVersion));
@@ -152,7 +158,7 @@ public final class LauncherSettings {
             try {
                 maxJavaHeapSize = JavaHeapSize.valueOf(maxHeapSizeStr);
             } catch (IllegalArgumentException e) {
-                logger.info("Invalid value '{}' for the parameter '{}'!", maxHeapSizeStr,
+                logger.warn("Invalid value '{}' for the parameter '{}'!", maxHeapSizeStr,
                     PROPERTY_MAX_HEAP_SIZE);
             }
         }
@@ -165,12 +171,11 @@ public final class LauncherSettings {
             try {
                 initialJavaHeapSize = JavaHeapSize.valueOf(initialHeapSizeStr);
             } catch (IllegalArgumentException e) {
-                logger.info("Invalid value '{}' for the parameter '{}'!", initialHeapSizeStr,
+                logger.warn("Invalid value '{}' for the parameter '{}'!", initialHeapSizeStr,
                     PROPERTY_INITIAL_HEAP_SIZE);
             }
         }
         properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialJavaHeapSize.name());
-
 
         // searchForLauncherUpdates
         final String searchForLauncherUpdatesStr = properties.getProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES);
@@ -195,7 +200,7 @@ public final class LauncherSettings {
             try {
                 gamesDirectory = new File(new URI(gamesDirectoryStr));
             } catch (Exception e) {
-                logger.info("Invalid value '{}' for the parameter '{}'!", gamesDirectoryStr, PROPERTY_GAMES_DIRECTORY);
+                logger.warn("Invalid value '{}' for the parameter '{}'!", gamesDirectoryStr, PROPERTY_GAMES_DIRECTORY);
             }
         }
         if (gamesDirectory != null) {

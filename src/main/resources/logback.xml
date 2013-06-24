@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    <root level="DEBUG">
+    <root level="TRACE">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
