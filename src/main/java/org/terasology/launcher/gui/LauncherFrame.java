@@ -422,19 +422,19 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         arguments[0] = gameVersion.getBuildType();
         arguments[1] = gameVersion.getBuildNumber();
         if (gameVersion.isLatest()) {
-            arguments[2] = Integer.valueOf(1);
+            arguments[2] = 1;
         } else {
-            arguments[2] = Integer.valueOf(0);
+            arguments[2] = 0;
         }
         if (gameVersion.isInstalled()) {
-            arguments[3] = Integer.valueOf(1);
+            arguments[3] = 1;
         } else {
-            arguments[3] = Integer.valueOf(0);
+            arguments[3] = 0;
         }
         if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful()) {
-            arguments[4] = Integer.valueOf(1);
+            arguments[4] = 1;
         } else {
-            arguments[4] = Integer.valueOf(0);
+            arguments[4] = 0;
         }
         if ((gameVersion.getGameVersionInfo() != null)
             && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
