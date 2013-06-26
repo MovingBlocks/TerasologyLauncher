@@ -87,12 +87,14 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private SettingsMenu settingsMenu;
     private final GameStarter gameStarter;
 
+    private final File launcherDirectory;
     private final File downloadDirectory;
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public LauncherFrame(final File downloadDirectory, final LauncherSettings launcherSettings,
-                         final TerasologyGameVersions gameVersions) {
+    public LauncherFrame(final File launcherDirectory, final File downloadDirectory,
+                         final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
+        this.launcherDirectory = launcherDirectory;
         this.downloadDirectory = downloadDirectory;
         this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
@@ -271,7 +273,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private void action(final String command) {
         if (command.equals(SETTINGS_ACTION)) {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-                settingsMenu = new SettingsMenu(this, launcherSettings, gameVersions);
+                settingsMenu = new SettingsMenu(this, launcherDirectory, launcherSettings, gameVersions);
                 settingsMenu.setVisible(true);
                 settingsMenu.addWindowListener(new WindowAdapter() {
                     @Override

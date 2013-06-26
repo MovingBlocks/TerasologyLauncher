@@ -61,6 +61,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private static final String CANCEL_ACTION = "cancel";
     private static final String RESET_ACTION = "reset";
 
+    private static final String LAUNCHER_DIRECTORY_OPEN = "launcherDirectoryOpen";
     private static final String GAMES_DIRECTORY_OPEN = "gamesDirectoryOpen";
     private static final String GAMES_DIRECTORY_EDIT = "gamesDirectoryEdit";
     private static final String MAX_HEAP_SIZE_ACTION = "maxHeapSize";
@@ -75,15 +76,17 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private JCheckBox searchForLauncherUpdatesBox;
     private JCheckBox closeLauncherAfterGameStartBox;
 
+    private final File launcherDirectory;
     private File gamesDirectory;
 
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public SettingsMenu(final JFrame parent, final LauncherSettings launcherSettings,
+    public SettingsMenu(final JFrame parent, final File launcherDirectory, final LauncherSettings launcherSettings,
                         final TerasologyGameVersions gameVersions) {
         super(parent, BundleUtils.getLabel("settings_title"), true);
 
+        this.launcherDirectory = launcherDirectory;
         this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
 
@@ -183,27 +186,28 @@ final class SettingsMenu extends JDialog implements ActionListener {
         buildVersionNightlyBox = new JComboBox();
         buildVersionNightlyBox.setFont(settingsFont);
 
-        JPanel gamesDirectoryPanel = new JPanel();
+        final JPanel gamesDirectoryPanel = new JPanel();
 
-        JLabel gamesDirectoryLabel = new JLabel();
+        final JLabel gamesDirectoryLabel = new JLabel();
         gamesDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gamesDirectory"));
         gamesDirectoryLabel.setFont(settingsFont);
 
-        JButton gamesDirectoryOpenButton = new JButton();
+        final JButton gamesDirectoryOpenButton = new JButton();
         gamesDirectoryOpenButton.setFont(settingsFont);
         gamesDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gamesDirectory_open"));
         gamesDirectoryOpenButton.addActionListener(this);
         gamesDirectoryOpenButton.setActionCommand(GAMES_DIRECTORY_OPEN);
+        if (!Desktop.isDesktopSupported()) {
+            gamesDirectoryOpenButton.setEnabled(false);
+        }
 
-        JButton gamesDirectoryEditButton = new JButton();
+        final JButton gamesDirectoryEditButton = new JButton();
         gamesDirectoryEditButton.setFont(settingsFont);
         gamesDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gamesDirectory_edit"));
         gamesDirectoryEditButton.addActionListener(this);
         gamesDirectoryEditButton.setActionCommand(GAMES_DIRECTORY_EDIT);
 
-        if (Desktop.isDesktopSupported()) {
-            gamesDirectoryPanel.add(gamesDirectoryOpenButton);
-        }
+        gamesDirectoryPanel.add(gamesDirectoryOpenButton);
         gamesDirectoryPanel.add(gamesDirectoryEditButton);
 
         JLabel maxHeapSizeLabel = new JLabel();
@@ -312,6 +316,22 @@ final class SettingsMenu extends JDialog implements ActionListener {
         closeLauncherAfterGameStartBox = new JCheckBox();
         closeLauncherAfterGameStartBox.setFont(settingsFont);
 
+        final JPanel launcherDirectoryPanel = new JPanel();
+
+        final JLabel launcherDirectoryLabel = new JLabel();
+        launcherDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory"));
+        launcherDirectoryLabel.setFont(settingsFont);
+
+        final JButton launcherDirectoryOpenButton = new JButton();
+        launcherDirectoryOpenButton.setFont(settingsFont);
+        launcherDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory_open"));
+        launcherDirectoryOpenButton.addActionListener(this);
+        launcherDirectoryOpenButton.setActionCommand(LAUNCHER_DIRECTORY_OPEN);
+        if (!Desktop.isDesktopSupported()) {
+            launcherDirectoryOpenButton.setEnabled(false);
+        }
+        launcherDirectoryPanel.add(launcherDirectoryOpenButton);
+
         final GroupLayout launcherTabLayout = new GroupLayout(launcherSettingsTab);
         launcherSettingsTab.setLayout(launcherTabLayout);
 
@@ -322,12 +342,14 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     .addGroup(launcherTabLayout.createParallelGroup()
                         .addComponent(languageLabel)
                         .addComponent(searchForLauncherUpdatesLabel)
-                        .addComponent(closeLauncherAfterGameStartLabel))
+                        .addComponent(closeLauncherAfterGameStartLabel)
+                        .addComponent(launcherDirectoryLabel))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(launcherTabLayout.createParallelGroup()
                         .addComponent(languageBox)
                         .addComponent(searchForLauncherUpdatesBox)
-                        .addComponent(closeLauncherAfterGameStartBox))
+                        .addComponent(closeLauncherAfterGameStartBox)
+                        .addComponent(launcherDirectoryPanel))
                     .addContainerGap())
         );
 
@@ -349,9 +371,13 @@ final class SettingsMenu extends JDialog implements ActionListener {
                         .addComponent(closeLauncherAfterGameStartLabel)
                         .addComponent(closeLauncherAfterGameStartBox, GroupLayout.PREFERRED_SIZE,
                             GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(launcherDirectoryLabel)
+                        .addComponent(launcherDirectoryPanel, GroupLayout.PREFERRED_SIZE,
+                            GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap())
         );
-
 
         return launcherSettingsTab;
     }
@@ -458,7 +484,18 @@ final class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void actionPerformed(final String actionCommand) {
-        if (actionCommand.equals(GAMES_DIRECTORY_OPEN)) {
+        if (actionCommand.equals(LAUNCHER_DIRECTORY_OPEN)) {
+            try {
+                DirectoryUtils.checkDirectory(launcherDirectory);
+                Desktop.getDesktop().open(launcherDirectory);
+            } catch (IOException e) {
+                logger.error("Cannot open launcher directory '{}'!", launcherDirectory, e);
+                JOptionPane.showMessageDialog(this,
+                    BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory,
+                    BundleUtils.getLabel("message_error_title"),
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        } else if (actionCommand.equals(GAMES_DIRECTORY_OPEN)) {
             try {
                 DirectoryUtils.checkDirectory(gamesDirectory);
                 Desktop.getDesktop().open(gamesDirectory);
