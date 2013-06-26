@@ -21,11 +21,13 @@ import java.io.IOException;
 
 public final class DirectoryUtils {
 
-    public static final String LAUNCHER_APPLICATION_DIR_NAME = "terasologylauncher";
-    public static final String GAMES_APPLICATION_DIR_NAME = "terasology";
+    public static final String LAUNCHER_APPLICATION_DIR_NAME = "TerasologyLauncher";
+    public static final String GAMES_APPLICATION_DIR_NAME = "Terasology";
     public static final String DOWNLOAD_DIR_NAME = "download";
 
     private static final String PROPERTY_USER_HOME = "user.home";
+    private static final String ENV_APPDATA = "APPDATA";
+    private static final String MAC_PATH = "Library/Application Support/";
 
     private DirectoryUtils() {
     }
@@ -48,20 +50,24 @@ public final class DirectoryUtils {
      * Should only be executed once at the start.
      */
     public static File getApplicationDirectory(final OperatingSystem os, final String applicationName) {
-        final String userHome = System.getProperty(PROPERTY_USER_HOME, ".");
+        final File userHome = new File(System.getProperty(PROPERTY_USER_HOME, "."));
         File applicationDirectory;
 
-        if (os.isUnix()) {
-            applicationDirectory = new File(userHome, '.' + applicationName + '/');
-        } else if (os.isWindows()) {
-            final String applicationData = System.getenv("APPDATA");
-            if (applicationData != null) {
-                applicationDirectory = new File(applicationData, "." + applicationName + '/');
+        if (os.isWindows()) {
+            final String envAppData = System.getenv(ENV_APPDATA);
+            if ((envAppData != null) && (envAppData.length() > 0)) {
+                applicationDirectory = new File(envAppData, applicationName + '\\');
             } else {
-                applicationDirectory = new File(userHome, '.' + applicationName + '/');
+                applicationDirectory = new File(userHome, applicationName + '\\');
+                // Alternatives :
+                //   System.getenv("HOME")
+                //   System.getenv("USERPROFILE")
+                //   System.getenv("HOMEDRIVE") + System.getenv("HOMEPATH")
             }
+        } else if (os.isUnix()) {
+            applicationDirectory = new File(userHome, '.' + applicationName.toLowerCase() + '/');
         } else if (os.isMac()) {
-            applicationDirectory = new File(userHome, "Library/Application Support/" + applicationName);
+            applicationDirectory = new File(userHome, MAC_PATH + applicationName + '/');
         } else {
             applicationDirectory = new File(userHome, applicationName + '/');
         }
