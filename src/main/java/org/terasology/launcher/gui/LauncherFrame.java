@@ -416,22 +416,37 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private void updateInfoTextPane() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         final StringBuilder b = new StringBuilder();
-
         final String infoHeader1;
         final String infoHeader2;
-        final Object[] arguments = new Object[4];
+        final Object[] arguments = new Object[7];
         arguments[0] = gameVersion.getBuildType();
         arguments[1] = gameVersion.getBuildNumber();
-        if ((gameVersion.getGameVersionInfo() != null)
-            && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
-            arguments[2] = gameVersion.getGameVersionInfo().getDisplayVersion();
+        if (gameVersion.isLatest()) {
+            arguments[2] = Integer.valueOf(1);
         } else {
-            arguments[2] = "";
+            arguments[2] = Integer.valueOf(0);
         }
         if (gameVersion.isInstalled()) {
             arguments[3] = Integer.valueOf(1);
         } else {
             arguments[3] = Integer.valueOf(0);
+        }
+        if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful()) {
+            arguments[4] = Integer.valueOf(1);
+        } else {
+            arguments[4] = Integer.valueOf(0);
+        }
+        if ((gameVersion.getGameVersionInfo() != null)
+            && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
+            arguments[5] = gameVersion.getGameVersionInfo().getDisplayVersion();
+        } else {
+            arguments[5] = "";
+        }
+        if ((gameVersion.getGameVersionInfo() != null)
+            && (gameVersion.getGameVersionInfo().getDateTime() != null)) {
+            arguments[6] = gameVersion.getGameVersionInfo().getDateTime();
+        } else {
+            arguments[6] = "";
         }
         if (gameVersion.getBuildType() == GameBuildType.STABLE) {
             infoHeader1 = BundleUtils.getMessage("infoHeader1_stable", arguments);
@@ -440,24 +455,24 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             infoHeader1 = BundleUtils.getMessage("infoHeader1_nightly", arguments);
             infoHeader2 = BundleUtils.getMessage("infoHeader2_nightly", arguments);
         }
-        if (gameVersion.getBuildType() != null) {
+        if ((infoHeader1 != null) && (infoHeader1.length() > 0)) {
             b.append("<h1>");
             b.append(escapeHtml(infoHeader1));
-            b.append("</h1>");
+            b.append("</h1>\n");
         }
-        if (gameVersion.getBuildNumber() != null) {
+        if ((infoHeader2 != null) && (infoHeader2.length() > 0)) {
             b.append("<h2>");
             b.append(escapeHtml(infoHeader2));
-            b.append("</h2>");
+            b.append("</h2>\n");
         }
-        if (gameVersion.getChangeLog() != null) {
-            b.append("<ul>");
+        if ((gameVersion.getChangeLog() != null) && !gameVersion.getChangeLog().isEmpty()) {
+            b.append("<ul>\n");
             for (String msg : gameVersion.getChangeLog()) {
                 b.append("<li>");
                 b.append(escapeHtml(msg));
-                b.append("</li>");
+                b.append("</li>\n");
             }
-            b.append("</ul>");
+            b.append("</ul>\n");
         }
         infoTextPane.setText(b.toString());
         infoTextPane.setCaretPosition(0);

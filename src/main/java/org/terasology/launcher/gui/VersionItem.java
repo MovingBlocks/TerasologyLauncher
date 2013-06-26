@@ -37,15 +37,23 @@ final class VersionItem {
     @Override
     public String toString() {
         final StringBuilder b = new StringBuilder();
+        final boolean notSuccessful = (gameVersion.getSuccessful() == null) || !gameVersion.getSuccessful();
+        if (notSuccessful) {
+            b.append("[");
+        }
         if (gameVersion.isLatest()) {
             b.append(BundleUtils.getLabel("settings_game_buildVersion_latest"));
         } else {
-            if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful()) {
-                b.append(gameVersion.getBuildNumber());
-            } else {
-                b.append("[");
-                b.append(gameVersion.getBuildNumber());
-                b.append("]");
+            b.append(gameVersion.getBuildNumber());
+        }
+        if (notSuccessful) {
+            b.append("]");
+        }
+        if (!gameVersion.isLatest()) {
+            if ((gameVersion.getGameVersionInfo() != null)
+                && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
+                b.append(" - ");
+                b.append(gameVersion.getGameVersionInfo().getDisplayVersion());
             }
             if (gameVersion.isInstalled()) {
                 b.append(" - ");
