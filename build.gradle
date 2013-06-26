@@ -34,7 +34,7 @@ ext {
     startDateTimeString = new Date().format("yyyy-MM-dd_HH-mm-ss")
     versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasology/launcher/version')
     versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
-    currentStableDisplayVersion = "0.2.0"
+    currentStableDisplayVersion = "0.3.0"
     displayVersion = (env.JOB_NAME == 'TerasologyLauncherStable') ? currentStableDisplayVersion : ((env.JOB_NAME != null && env.BUILD_ID != null) ? currentStableDisplayVersion + ' (' + env.JOB_NAME + ', ' + env.BUILD_ID + ')' : currentStableDisplayVersion + ' (local development)')
 
     // Splash image for the JAR
