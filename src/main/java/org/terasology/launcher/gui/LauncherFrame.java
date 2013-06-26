@@ -288,9 +288,11 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         } else if (command.equals(START_ACTION)) {
             final TerasologyGameVersion gameVersion = getSelectedGameVersion();
             if ((gameVersion == null) || !gameVersion.isInstalled()) {
+                logger.warn("The selected game version can not be started! '{}'", gameVersion);
                 JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameStart"),
                     BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
             } else if (gameStarter.isRunning()) {
+                logger.debug("The game can not be started because another game is already running!");
                 JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_information_gameRunning"),
                     BundleUtils.getLabel("message_information_title"), JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -313,9 +315,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 downloader.execute();
                 startButton.setEnabled(false);
             } catch (MalformedURLException e) {
-                logger.error("Could not download game!", e);
+                logger.error("The game could not be downloaded!", e);
             }
-
         }
     }
 
@@ -461,5 +462,4 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         infoTextPane.setText(b.toString());
         infoTextPane.setCaretPosition(0);
     }
-
 }

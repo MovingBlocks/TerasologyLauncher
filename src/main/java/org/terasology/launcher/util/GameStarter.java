@@ -44,7 +44,7 @@ public final class GameStarter {
     public boolean startGame(final TerasologyGameVersion gameVersion, final JavaHeapSize maxHeapSize,
                              final JavaHeapSize initialHeapSize) {
         if (isRunning()) {
-            logger.warn("Couldn't start a new game because another game is running!");
+            logger.warn("The game can not be started because another game is already running!");
             return false;
         }
 
@@ -97,11 +97,11 @@ public final class GameStarter {
                         try {
                             exitValue = p.waitFor();
                         } catch (InterruptedException e) {
-                            logger.error("Game thread interrupted!", e);
+                            logger.error("The game thread was interrupted!", e);
                         }
-                        logger.debug("Game closed with exit value '{}'", exitValue);
+                        logger.debug("Game closed with the exit value '{}'.", exitValue);
                     } catch (IOException e) {
-                        logger.error("Couldn't read game output!", e);
+                        logger.error("The output of the game can not be read!", e);
                     }
                 }
             });
@@ -111,20 +111,23 @@ public final class GameStarter {
 
             if (!gameThread.isAlive()) {
                 final int exitValue = p.waitFor();
-                logger.warn("Game finished with exit value '{}'", exitValue);
+                logger.warn("The game was stopped early. It returns with the exit value '{}'.", exitValue);
                 return false;
             } else {
-                logger.info("Game successfully launched");
+                logger.info("The game is successfully launched.");
             }
         } catch (RuntimeException e) {
             // NullPointerException, SecurityException
-            logger.error("Could not start game with parameters '{}' for '{}'!", processParameters, gameVersion, e);
+            logger.error("The game could not be started due to an error! Parameters '{}' for '{}'!", processParameters,
+                gameVersion, e);
             return false;
         } catch (InterruptedException e) {
-            logger.error("Could not start game with parameters '{}' for '{}'!", processParameters, gameVersion, e);
+            logger.error("The game could not be started due to an error! Parameters '{}' for '{}'!", processParameters,
+                gameVersion, e);
             return false;
         } catch (IOException e) {
-            logger.error("Could not start game with parameters '{}' for '{}'!", processParameters, gameVersion, e);
+            logger.error("The game could not be started due to an error! Parameters '{}' for '{}'!", processParameters,
+                gameVersion, e);
             return false;
         }
         return true;

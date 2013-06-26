@@ -40,6 +40,7 @@ public final class LauncherUpdater {
     private final File downloadDirectory;
     private final String currentVersion;
     private final String jobName;
+
     private Integer upstreamVersion;
     private TerasologyLauncherVersionInfo versionInfo;
 
@@ -79,58 +80,64 @@ public final class LauncherUpdater {
                 versionInfo = DownloadUtils.loadTerasologyLauncherVersionInfo(jobName, upstreamVersion);
             }
         } catch (NumberFormatException e) {
-            logger.error("Could not parse current version '{}'!", currentVersion, e);
+            logger.error("The current version '{}' could not be parsed!", currentVersion, e);
         } catch (DownloadException e) {
-            logger.error("Could not load latest stable version!", e);
+            logger.warn("The latest stable version of the launcher could not be determined!", e);
         }
         return updateAvailable;
     }
 
     public void update(final SplashScreenWindow splash) {
-        // Get current launcher location
-        File launcherLocation;
         try {
-            launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation()
-                .toURI());
-        } catch (URISyntaxException e) {
-            logger.error("Launcher update failed! Could not retrieve current launcher directory.", e);
-            JOptionPane.showMessageDialog(splash,
-                BundleUtils.getLabel("update_launcher_updateFailed"),
-                BundleUtils.getLabel("message_error_title"),
-                JOptionPane.ERROR_MESSAGE);
-            logger.error("Aborting update process!");
-            return;
-        }
+            // Get current launcher location
+            final File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource()
+                .getLocation().toURI());
+            logger.trace("Launcher location: {}" + launcherLocation);
 
-        try {
             // Download launcher ZIP file
             final URL updateURL = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion,
                 DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
+            logger.trace("Update URL: {}" + updateURL);
+
             final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + ".zip");
+            logger.trace("Download ZIP file: {}" + downloadedZipFile);
+
             DownloadUtils.downloadToFile(updateURL, downloadedZipFile);
 
             // Extract launcher ZIP file
             FileUtils.extractZip(downloadedZipFile);
+            logger.trace("ZIP file extracted");
 
             // Delete launcher ZIP file
             downloadedZipFile.delete();
+            logger.trace("ZIP file deleted");
 
             // Start SelfUpdater
             SelfUpdater.runUpdate(os, downloadDirectory, launcherLocation);
+        } catch (RuntimeException e) {
+            logger.error("Launcher update failed! Aborting update process!", e);
+            JOptionPane.showMessageDialog(splash,
+                BundleUtils.getLabel("update_launcher_updateFailed"),
+                BundleUtils.getLabel("message_error_title"),
+                JOptionPane.ERROR_MESSAGE);
+        } catch (URISyntaxException e) {
+            logger.error("Launcher update failed! Aborting update process!", e);
+            JOptionPane.showMessageDialog(splash,
+                BundleUtils.getLabel("update_launcher_updateFailed"),
+                BundleUtils.getLabel("message_error_title"),
+                JOptionPane.ERROR_MESSAGE);
         } catch (MalformedURLException e) {
-            logger.error("Launcher update failed!", e);
+            logger.error("Launcher update failed! Aborting update process!", e);
             JOptionPane.showMessageDialog(splash,
                 BundleUtils.getLabel("update_launcher_updateFailed"),
                 BundleUtils.getLabel("message_error_title"),
                 JOptionPane.ERROR_MESSAGE);
-            logger.error("Aborting update process!");
         } catch (DownloadException e) {
-            logger.error("Launcher update failed!", e);
+            logger.error("Launcher update failed! Aborting update process!", e);
             JOptionPane.showMessageDialog(splash,
                 BundleUtils.getLabel("update_launcher_updateFailed"),
                 BundleUtils.getLabel("message_error_title"),
                 JOptionPane.ERROR_MESSAGE);
-            logger.error("Aborting update process!");
         }
     }
 

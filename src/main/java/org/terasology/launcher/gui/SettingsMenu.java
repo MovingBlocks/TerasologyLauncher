@@ -489,7 +489,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
                 DirectoryUtils.checkDirectory(launcherDirectory);
                 Desktop.getDesktop().open(launcherDirectory);
             } catch (IOException e) {
-                logger.error("Cannot open launcher directory '{}'!", launcherDirectory, e);
+                logger.error("The launcher directory can not be opened! '{}'", launcherDirectory, e);
                 JOptionPane.showMessageDialog(this,
                     BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory,
                     BundleUtils.getLabel("message_error_title"),
@@ -500,7 +500,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
                 DirectoryUtils.checkDirectory(gamesDirectory);
                 Desktop.getDesktop().open(gamesDirectory);
             } catch (IOException e) {
-                logger.error("Cannot open games directory '{}'!", gamesDirectory, e);
+                logger.error("The game installation directory can not be opened! '{}'", gamesDirectory, e);
                 JOptionPane.showMessageDialog(this,
                     BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
                     BundleUtils.getLabel("message_error_title"),
@@ -516,7 +516,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     DirectoryUtils.checkDirectory(selectedFile);
                     gamesDirectory = selectedFile;
                 } catch (IOException e) {
-                    logger.error("Cannot create or use games directory '{}'!", gamesDirectory, e);
+                    logger.error("The game installation directory can not be created or used! '{}'", gamesDirectory, e);
                     JOptionPane.showMessageDialog(this,
                         BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
                         BundleUtils.getLabel("message_error_title"),
@@ -576,9 +576,12 @@ final class SettingsMenu extends JDialog implements ActionListener {
             try {
                 launcherSettings.store();
             } catch (IOException e) {
-                logger.error("Could not store settings!", e);
-                JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_storeSettings"),
-                    BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+                logger.error("The launcher settings can not be stored! '{}'",
+                    launcherSettings.getLauncherSettingsFilePath(), e);
+                JOptionPane.showMessageDialog(this,
+                    BundleUtils.getLabel("message_error_storeSettings"),
+                    BundleUtils.getLabel("message_error_title"),
+                    JOptionPane.ERROR_MESSAGE);
             }
             dispose();
             setVisible(false);

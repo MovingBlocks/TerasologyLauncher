@@ -74,7 +74,7 @@ public final class FileUtils {
      * @param outputLocation - where to extract to
      */
     public static void extractZipTo(final File archive, final File outputLocation) {
-        logger.info("Extracting {}.", archive);
+        logger.trace("Extracting '{}' to '{}'.", archive, outputLocation);
 
         byte[] buffer = new byte[4096];
         ZipInputStream zis = null;
@@ -99,16 +99,16 @@ public final class FileUtils {
                 }
             }
         } catch (FileNotFoundException e) {
-            logger.error("Could not find zip archive.", e);
+            logger.error("Could not find zip archive '{}'!", archive, e);
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Could not extract zip archive '{}' to '{}'!", archive, outputLocation, e);
         } finally {
             if (zis != null) {
                 try {
                     zis.closeEntry();
                     zis.close();
-                } catch (IOException ignored) {
-                    logger.warn("Could not close zip input stream.", ignored);
+                } catch (IOException e) {
+                    logger.warn("The zip input stream could not be closed! '{}'!", archive, e);
                 }
             }
         }

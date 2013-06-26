@@ -155,7 +155,7 @@ public final class ImageUtils {
         for (int i = 0; i < entries; i++) {
             kernelMatrix[i] /= total;
         }
-        logger.debug("Gaussian Kernel: {}", kernelMatrix);
+        logger.trace("Gaussian Kernel: {}", kernelMatrix);
         return new Kernel(entries, 1, kernelMatrix);
     }
 }

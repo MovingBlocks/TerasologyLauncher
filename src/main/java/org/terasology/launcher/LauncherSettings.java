@@ -66,7 +66,7 @@ public final class LauncherSettings {
         properties = new Properties();
     }
 
-    String getLauncherSettingsFilePath() {
+    public String getLauncherSettingsFilePath() {
         return launcherSettingsFile.getPath();
     }
 
@@ -110,7 +110,7 @@ public final class LauncherSettings {
     }
 
     public synchronized void init() {
-        logger.trace("Init launcher settings. {}" + properties);
+        logger.trace("Init launcher settings. {}", properties);
 
         // locale
         final String localeStr = properties.getProperty(PROPERTY_LOCALE);

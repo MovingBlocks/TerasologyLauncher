@@ -74,7 +74,7 @@ public final class TerasologyGameVersions {
                 return gameVersion;
             }
         }
-        logger.warn("GameVersion not found for {} {}.", buildType, buildVersion);
+        logger.warn("GameVersion not found for '{}' '{}'.", buildType, buildVersion);
         return null;
     }
 
@@ -86,7 +86,7 @@ public final class TerasologyGameVersions {
             DirectoryUtils.checkDirectory(cacheDirectory);
         } catch (IOException e) {
             cacheDirectory = null;
-            logger.error("loadGameVersions", e);
+            logger.error("The cache directory can not be created or used! '{}'", cacheDirectory, e);
         }
 
         gameVersionMapStable = new TreeMap<Integer, TerasologyGameVersion>();
@@ -161,11 +161,7 @@ public final class TerasologyGameVersions {
                 buildNumbers.add(Math.max(minBuildNumber, lastSuccessfulBuildNumber - prevBuildNumbers));
             }
         } catch (DownloadException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Retrieving last successful build number failed. {}", jobName, e);
-            } else {
-                logger.warn("Retrieving last successful build number failed.");
-            }
+            logger.info("Retrieving last successful build number failed. '{}'", jobName, e);
         }
         return lastSuccessfulBuildNumber;
     }
@@ -191,7 +187,7 @@ public final class TerasologyGameVersions {
                             if (!gameVersionMapStable.containsKey(gameVersion.getBuildNumber())) {
                                 gameVersionMapStable.put(gameVersion.getBuildNumber(), gameVersion);
                             } else {
-                                logger.debug("Installed game already loaded. {}", gameJar[0]);
+                                logger.info("Installed game already loaded. '{}'", gameJar[0]);
                             }
                         }
                         break;
@@ -201,7 +197,7 @@ public final class TerasologyGameVersions {
                             if (!gameVersionMapNightly.containsKey(gameVersion.getBuildNumber())) {
                                 gameVersionMapNightly.put(gameVersion.getBuildNumber(), gameVersion);
                             } else {
-                                logger.debug("Installed game already loaded. {}", gameJar[0]);
+                                logger.info("Installed game already loaded. '{}'", gameJar[0]);
                             }
                         }
                         break;
@@ -251,7 +247,7 @@ public final class TerasologyGameVersions {
                 try {
                     installedBuildNumber = Integer.parseInt(gameVersionInfo.getBuildNumber());
                 } catch (NumberFormatException e) {
-                    logger.error("Could not parse build number '{}'!", gameVersionInfo.getBuildNumber(), e);
+                    logger.error("The build number can not be parsed! '{}'!", gameVersionInfo.getBuildNumber(), e);
                 }
             }
 
@@ -263,7 +259,7 @@ public final class TerasologyGameVersions {
                 gameVersion.setGameJar(gameJar);
                 gameVersion.setGameVersionInfo(gameVersionInfo);
             } else {
-                logger.warn("Could not load version info from file {}.", gameJar);
+                logger.warn("The game version info can not be loaded from the file '{}'!", gameJar);
             }
         }
         return gameVersion;
@@ -307,16 +303,16 @@ public final class TerasologyGameVersions {
                             try {
                                 ois.close();
                             } catch (IOException e) {
-                                logger.info("readFromCache", e);
+                                logger.warn("Closing ObjectInputStream failed!", e);
                             }
                         }
                     }
                 }
             }
         } catch (IOException e) {
-            logger.error("readFromCache", e);
+            logger.error("The cached data can not be loaded!", e);
         } catch (ClassNotFoundException e) {
-            logger.error("readFromCache", e);
+            logger.error("The cached data can not be loaded!", e);
         }
         return cachedGameVersions;
     }
@@ -346,7 +342,7 @@ public final class TerasologyGameVersions {
                 cachedGameVersion = cachedGameVersionMap.get(buildNumber);
                 if (!buildNumber.equals(cachedGameVersion.getBuildNumber())
                     || !buildType.equals(cachedGameVersion.getBuildType())) {
-                    logger.warn("Cannot use cached game version! " + cachedGameVersion);
+                    logger.warn("The cached game version can not be used! '{}'", cachedGameVersion);
                     cachedGameVersion = null;
                 }
             }
@@ -361,11 +357,7 @@ public final class TerasologyGameVersions {
                     successful = (jobResult != null
                         && ((jobResult == JobResult.SUCCESS) || (jobResult == JobResult.UNSTABLE)));
                 } catch (DownloadException e) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Load job result failed. {}", jobName, e);
-                    } else {
-                        logger.warn("Load job result failed.");
-                    }
+                    logger.debug("Load job result failed. '{}' '{}'", jobName, buildNumber, e);
                 }
                 gameVersion.setSuccessful(successful);
             }
@@ -378,11 +370,7 @@ public final class TerasologyGameVersions {
                 try {
                     changeLog = DownloadUtils.loadChangeLog(jobName, buildNumber);
                 } catch (DownloadException e) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Load change log failed. {}", jobName, e);
-                    } else {
-                        logger.warn("Load change log failed.");
-                    }
+                    logger.debug("Load change log failed. '{}' '{}'", jobName, buildNumber, e);
                 }
                 if ((changeLog != null) && !changeLog.isEmpty()) {
                     gameVersion.setChangeLog(Collections.unmodifiableList(changeLog));
@@ -397,11 +385,7 @@ public final class TerasologyGameVersions {
                 try {
                     gameVersionInfo = DownloadUtils.loadTerasologyGameVersionInfo(jobName, buildNumber);
                 } catch (DownloadException e) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Load game version info failed. {}", jobName, e);
-                    } else {
-                        logger.warn("Load game version info failed.");
-                    }
+                    logger.debug("Load game version info failed. '{}' '{}'", jobName, buildNumber, e);
                 }
                 if (gameVersionInfo != null) {
                     gameVersion.setGameVersionInfo(gameVersionInfo);
@@ -426,13 +410,13 @@ public final class TerasologyGameVersions {
                         try {
                             oos.close();
                         } catch (IOException e) {
-                            logger.info("writeToCache", e);
+                            logger.warn("Closing ObjectOutputStream failed!", e);
                         }
                     }
                 }
             }
         } catch (IOException e) {
-            logger.error("writeToCache", e);
+            logger.error("The cache data can not be written!", e);
         }
     }
 
@@ -488,7 +472,7 @@ public final class TerasologyGameVersions {
                 }
             }
         } else {
-            logger.error("Could not load game version from directory. {}", terasologyDirectory);
+            logger.error("The game version can not be loaded from directory '{}'!", terasologyDirectory);
         }
     }
 
