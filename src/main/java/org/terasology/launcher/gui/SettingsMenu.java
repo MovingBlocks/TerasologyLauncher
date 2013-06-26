@@ -110,25 +110,25 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private void initComponents() {
         final Font settingsFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
 
-        JTabbedPane mainSettings = new JTabbedPane();
+        final JTabbedPane mainSettings = new JTabbedPane();
         mainSettings.addTab(BundleUtils.getLabel("settings_game_title"), createGameSettingsTab(settingsFont));
         mainSettings.addTab(BundleUtils.getLabel("settings_launcher_title"), createLauncherSettingsTab(settingsFont));
 
         /*================== OK, Cancel, Reset ==================*/
-        JButton resetButton = new JButton();
+        final JButton saveButton = new JButton();
+        saveButton.setActionCommand(SAVE_ACTION);
+        saveButton.addActionListener(this);
+        saveButton.setText(BundleUtils.getLabel("settings_save"));
+
+        final JButton resetButton = new JButton();
         resetButton.setActionCommand(RESET_ACTION);
         resetButton.addActionListener(this);
         resetButton.setText(BundleUtils.getLabel("settings_reset"));
 
-        JButton cancelButton = new JButton();
+        final JButton cancelButton = new JButton();
         cancelButton.setActionCommand(CANCEL_ACTION);
         cancelButton.addActionListener(this);
         cancelButton.setText(BundleUtils.getLabel("settings_cancel"));
-
-        JButton saveButton = new JButton();
-        saveButton.setActionCommand(SAVE_ACTION);
-        saveButton.addActionListener(this);
-        saveButton.setText(BundleUtils.getLabel("settings_save"));
 
         final Container contentPane = getContentPane();
         final GroupLayout contentPaneLayout = new GroupLayout(contentPane);
@@ -139,11 +139,11 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
                 .addGroup(contentPaneLayout.createSequentialGroup()
                     .addContainerGap()
+                    .addComponent(saveButton)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                     .addComponent(resetButton)
                     .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addComponent(cancelButton)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addComponent(saveButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
+                    .addComponent(cancelButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
                     .addContainerGap())
         );
         contentPaneLayout.setVerticalGroup(
@@ -152,9 +152,9 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     .addComponent(mainSettings, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(saveButton)
                         .addComponent(resetButton)
-                        .addComponent(cancelButton)
-                        .addComponent(saveButton))
+                        .addComponent(cancelButton))
                     .addContainerGap())
         );
         pack();
