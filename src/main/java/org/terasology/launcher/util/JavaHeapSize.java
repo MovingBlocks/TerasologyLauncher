@@ -21,7 +21,7 @@ import java.util.List;
 
 public enum JavaHeapSize {
 
-    NOT_USED(0, "", "heapsize_not_used"),
+    NOT_USED(0, "", "heapsize_notUsed"),
     MB_256(256, "256m", "heapsize_mb_256"),
     MB_512(512, "512m", "heapsize_mb_512"),
     MB_768(768, "768m", "heapsize_mb_768"),

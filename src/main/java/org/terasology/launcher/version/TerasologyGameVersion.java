@@ -126,6 +126,6 @@ public final class TerasologyGameVersion implements Serializable {
 
     public String toString() {
         return this.getClass().getName() + "[" + buildType + ", " + buildNumber + ", latest=" + latest
-            + ", successful=" + successful + "]";
+            + ", successful=" + successful + ", installed=" + isInstalled() + "]";
     }
 }

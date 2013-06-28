@@ -46,6 +46,45 @@ public final class DirectoryUtils {
         }
     }
 
+    public static boolean containsGameData(File gameInstallationPath) {
+        if ((gameInstallationPath == null) || !gameInstallationPath.exists() || !gameInstallationPath.isDirectory()) {
+            return false;
+        }
+
+        for (File child : gameInstallationPath.listFiles()) {
+            if (child.isDirectory()) {
+                if (child.getName().equals("SAVED_WORLDS")
+                    || child.getName().equals("worlds")
+                    || child.getName().equals("screens")
+                    || child.getName().equals("screenshots")) {
+                    if (containsFiles(child)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean containsFiles(File directory) {
+        if ((directory == null) || !directory.exists() || !directory.isDirectory()) {
+            return false;
+        }
+
+        for (File child : directory.listFiles()) {
+            if (child.isDirectory()) {
+                if (containsFiles(child)) {
+                    return true;
+                }
+            } else if (child.isFile()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Should only be executed once at the start.
      */

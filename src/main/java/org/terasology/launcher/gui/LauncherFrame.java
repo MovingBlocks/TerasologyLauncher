@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GameStarter;
 import org.terasology.launcher.version.GameBuildType;
 import org.terasology.launcher.version.TerasologyGameVersion;
@@ -60,14 +62,17 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private static final int INFO_PANEL_WIDTH = 600;
     private static final int INFO_PANEL_HEIGHT = 300;
 
-    private static final String SETTINGS_ACTION = "settings";
-    private static final String CANCEL_ACTION = "cancel";
-    private static final String START_ACTION = "start";
     private static final String DOWNLOAD_ACTION = "download";
+    private static final String START_ACTION = "start";
+    private static final String DELETE_ACTION = "delete";
+    private static final String SETTINGS_ACTION = "settings";
+    private static final String EXIT_ACTION = "exit";
 
+    private JButton downloadButton;
     private JButton startButton;
+    private JButton deleteButton;
     private JButton settingsButton;
-    private JButton cancelButton;
+    private JButton exitButton;
 
     private JTextPane infoTextPane;
     private LinkJLabel logo;
@@ -120,23 +125,35 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             yShift += 30;
         }
 
-        // Setup start button
+        // Download button
+        downloadButton = new TSButton(BundleUtils.getLabel("launcher_download"));
+        downloadButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - (4 * 40)) + yShift, 96, 32);
+        downloadButton.setActionCommand(DOWNLOAD_ACTION);
+        downloadButton.addActionListener(this);
+
+        // Start button
         startButton = new TSButton(BundleUtils.getLabel("launcher_start"));
-        startButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - 40) + yShift, 96, 32);
+        startButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - (3 * 40)) + yShift, 96, 32);
         startButton.setActionCommand(START_ACTION);
         startButton.addActionListener(this);
 
-        // Options Button
+        // Delete button
+        deleteButton = new TSButton(BundleUtils.getLabel("launcher_delete"));
+        deleteButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - (2 * 40)) + yShift, 96, 32);
+        deleteButton.setActionCommand(DELETE_ACTION);
+        deleteButton.addActionListener(this);
+
+        // Settings Button
         settingsButton = new TSButton(BundleUtils.getLabel("launcher_settings"));
-        settingsButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - (2 * 40)) + yShift, 96, 32);
+        settingsButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - (1 * 40)) + yShift, 96, 32);
         settingsButton.setActionCommand(SETTINGS_ACTION);
         settingsButton.addActionListener(this);
 
-        // Cancel button
-        cancelButton = new TSButton(BundleUtils.getLabel("launcher_cancel"));
-        cancelButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70) + yShift, 96, 32);
-        cancelButton.setActionCommand(CANCEL_ACTION);
-        cancelButton.addActionListener(this);
+        // Exit button
+        exitButton = new TSButton(BundleUtils.getLabel("launcher_exit"));
+        exitButton.setBounds(FRAME_WIDTH - 96 - 16 - xShift, (FRAME_HEIGHT - 70 - (0 * 40)) + yShift, 96, 32);
+        exitButton.setActionCommand(EXIT_ACTION);
+        exitButton.addActionListener(this);
 
         // Transparent top panel and content/update panel
         final TransparentPanel topPanel = new TransparentPanel(0.5f);
@@ -238,9 +255,11 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
         contentPane.add(version);
 
+        contentPane.add(downloadButton);
         contentPane.add(startButton);
+        contentPane.add(deleteButton);
         contentPane.add(settingsButton);
-        contentPane.add(cancelButton);
+        contentPane.add(exitButton);
 
         contentPane.add(github);
         contentPane.add(twitter);
@@ -282,7 +301,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                     }
                 });
             }
-        } else if (command.equals(CANCEL_ACTION)) {
+        } else if (command.equals(EXIT_ACTION)) {
             dispose();
             System.exit(0);
         } else if (command.equals(START_ACTION)) {
@@ -317,12 +336,34 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             } catch (MalformedURLException e) {
                 logger.error("The game could not be downloaded!", e);
             }
+        } else if (command.equals(DELETE_ACTION)) {
+            final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+            if ((gameVersion != null) && gameVersion.isInstalled()) {
+                final boolean containsGameData = DirectoryUtils.containsGameData(gameVersion.getInstallationPath());
+                final String msg;
+                if (containsGameData) {
+                    msg = BundleUtils.getMessage("confirmDeleteGame_withData", gameVersion.getInstallationPath());
+                } else {
+                    msg = BundleUtils.getMessage("confirmDeleteGame_withoutData", gameVersion.getInstallationPath());
+                }
+                final int option = JOptionPane.showConfirmDialog(this, msg,
+                    BundleUtils.getLabel("message_deleteGame_title"),
+                    JOptionPane.YES_NO_OPTION);
+                if (option == JOptionPane.YES_OPTION) {
+                    logger.info("Delete installed game! '{}' '{}'", gameVersion, gameVersion.getInstallationPath());
+                    FileUtils.delete(gameVersion.getInstallationPath());
+                    gameVersions.removeInstallationInfo(gameVersion);
+                    updateGui();
+                }
+            } else {
+                logger.warn("The selected game version can not be deleted! '{}'", gameVersion);
+            }
         }
     }
 
     public void updateGui() {
         updateLocale();
-        updateStartButton();
+        updateButtons();
         updateInfoTextPane();
     }
 
@@ -330,12 +371,17 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         setTitle(BundleUtils.getLabel("launcher_title"));
         setIconImage(BundleUtils.getImage("icon"));
 
+        downloadButton.setText(BundleUtils.getLabel("launcher_download"));
+        downloadButton.setToolTipText(BundleUtils.getLabel("tooltip_download"));
+        startButton.setText(BundleUtils.getLabel("launcher_start"));
+        startButton.setToolTipText(BundleUtils.getLabel("tooltip_start"));
+        deleteButton.setText(BundleUtils.getLabel("launcher_delete"));
+        deleteButton.setToolTipText(BundleUtils.getLabel("tooltip_delete"));
         settingsButton.setText(BundleUtils.getLabel("launcher_settings"));
         settingsButton.setToolTipText(BundleUtils.getLabel("tooltip_settings"));
-        cancelButton.setText(BundleUtils.getLabel("launcher_cancel"));
-        cancelButton.setToolTipText(BundleUtils.getLabel("tooltip_cancel"));
+        exitButton.setText(BundleUtils.getLabel("launcher_exit"));
+        exitButton.setToolTipText(BundleUtils.getLabel("tooltip_exit"));
 
-        logo.setText(BundleUtils.getLabel("launcher_website"));
         logo.setToolTipText(BundleUtils.getLabel("tooltip_website"));
         logo.setIcon(BundleUtils.getImageIcon("logo"));
         logo.setUri(BundleUtils.getURI("terasology_website"));
@@ -343,7 +389,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         forums.setToolTipText(BundleUtils.getLabel("tooltip_forum"));
         forums.setUri(BundleUtils.getURI("terasology_forum"));
         issues.setText(BundleUtils.getLabel("launcher_issues"));
-        issues.setToolTipText(BundleUtils.getLabel("tooltip_github_issues"));
+        issues.setToolTipText(BundleUtils.getLabel("tooltip_githubIssues"));
         issues.setUri(BundleUtils.getURI("terasology_github_issues"));
         mods.setText(BundleUtils.getLabel("launcher_mods"));
         mods.setToolTipText(BundleUtils.getLabel("tooltip_mods"));
@@ -381,30 +427,22 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     }
 
 
-    private void updateStartButton() {
+    private void updateButtons() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if (gameVersion.isInstalled()) {
-            // installed game can be started
-            startButton.setVisible(true);
+            downloadButton.setEnabled(false);
             startButton.setEnabled(true);
-            startButton.setText(BundleUtils.getLabel("launcher_start"));
-            startButton.setToolTipText(BundleUtils.getLabel("tooltip_start"));
-            startButton.setActionCommand(START_ACTION);
+            deleteButton.setEnabled(true);
         } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful()
             && (gameVersion.getBuildNumber() != null)) {
-            // download is possible
-            startButton.setVisible(true);
-            startButton.setEnabled(true);
-            startButton.setText(BundleUtils.getLabel("launcher_download"));
-            startButton.setToolTipText(BundleUtils.getLabel("tooltip_download"));
-            startButton.setActionCommand(DOWNLOAD_ACTION);
+            downloadButton.setEnabled(true);
+            startButton.setEnabled(false);
+            deleteButton.setEnabled(false);
         } else {
             // no game installed, and no way to download it...
-            startButton.setVisible(false);
+            downloadButton.setEnabled(false);
             startButton.setEnabled(false);
-            startButton.setText("");
-            startButton.setToolTipText("");
-            startButton.setActionCommand(null);
+            deleteButton.setEnabled(false);
         }
     }
 

@@ -476,6 +476,33 @@ public final class TerasologyGameVersions {
         }
     }
 
+    public void removeInstallationInfo(TerasologyGameVersion gameVersion) {
+        if (gameVersion.isInstalled()) {
+            if (gameVersion.isLatest()) {
+                final TerasologyGameVersion related = getGameVersionForBuildVersion(gameVersion.getBuildType(),
+                    gameVersion.getBuildNumber());
+                if (related.isInstalled()
+                    && (related.getInstallationPath().equals(gameVersion.getInstallationPath()))) {
+                    logger.trace("Remove installation info from related game version. '{}'", related);
+                    related.setInstallationPath(null);
+                    related.setGameJar(null);
+                }
+            } else {
+                final TerasologyGameVersion latest = getGameVersionForBuildVersion(gameVersion.getBuildType(),
+                    TerasologyGameVersion.BUILD_VERSION_LATEST);
+                if (latest.isInstalled()
+                    && (latest.getInstallationPath().equals(gameVersion.getInstallationPath()))) {
+                    logger.trace("Remove installation info from latest game version. '{}'", latest);
+                    latest.setInstallationPath(null);
+                    latest.setGameJar(null);
+                }
+            }
+            logger.trace("Remove installation info from game version. '{}'", gameVersion);
+            gameVersion.setInstallationPath(null);
+            gameVersion.setGameJar(null);
+        }
+    }
+
     @Override
     public String toString() {
         return this.getClass().getName() + "[gameVersionListStable=" + gameVersionListStable

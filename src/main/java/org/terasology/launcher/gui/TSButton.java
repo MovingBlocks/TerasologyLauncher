@@ -95,7 +95,11 @@ final class TSButton extends JButton implements MouseListener {
         }
 
         // Draw label
-        g2d.setColor(Color.WHITE);
+        if (isEnabled()) {
+            g2d.setColor(Color.WHITE);
+        } else {
+            g2d.setColor(Color.GRAY);
+        }
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         float fontSize = 16f;
