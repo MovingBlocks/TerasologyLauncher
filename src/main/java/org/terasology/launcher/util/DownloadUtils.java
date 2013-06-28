@@ -189,6 +189,8 @@ public final class DownloadUtils {
             throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
         } catch (IOException e) {
             throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
+        } catch (RuntimeException e) {
+            throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
         }
         return launcherVersionInfo;
     }
@@ -205,6 +207,8 @@ public final class DownloadUtils {
         } catch (MalformedURLException e) {
             throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
         } catch (IOException e) {
+            throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
+        } catch (RuntimeException e) {
             throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
         }
         return gameVersionInfo;
@@ -229,6 +233,8 @@ public final class DownloadUtils {
         } catch (MalformedURLException e) {
             throw new DownloadException("The job result could not be loaded! " + jobName + " " + urlResult, e);
         } catch (IOException e) {
+            throw new DownloadException("The job result could not be loaded! " + jobName + " " + urlResult, e);
+        } catch (RuntimeException e) {
             throw new DownloadException("The job result could not be loaded! " + jobName + " " + urlResult, e);
         } finally {
             if (reader != null) {
@@ -265,6 +271,8 @@ public final class DownloadUtils {
         } catch (ParserConfigurationException e) {
             throw new DownloadException("The changeLog could not be loaded! " + jobName + " " + urlChangeLog, e);
         } catch (SAXException e) {
+            throw new DownloadException("The changeLog could not be loaded! " + jobName + " " + urlChangeLog, e);
+        } catch (RuntimeException e) {
             throw new DownloadException("The changeLog could not be loaded! " + jobName + " " + urlChangeLog, e);
         } finally {
             if (stream != null) {
