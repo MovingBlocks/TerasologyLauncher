@@ -57,7 +57,7 @@ dependencies {
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
-sourceCompatibility = 1.6
+sourceCompatibility = 1.7
 
 mainClassName = "org.terasology.launcher.TerasologyLauncher"
 

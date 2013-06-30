@@ -10,7 +10,7 @@ Usage
 -----
 The launcher provides easy access to the different game versions and build types. Moreover, it gives users an easy way to specify various system settings.
 
-*Terasology Launcher* and *Terasology* requires Java 6 or 7.
+*Terasology Launcher* requires Java 7.
 
 To start the launcher, just execute the jar file or one of the operating system depending scripts.
 * TerasologyLauncher.exe
