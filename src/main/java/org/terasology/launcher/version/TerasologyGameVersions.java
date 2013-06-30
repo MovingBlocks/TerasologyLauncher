@@ -457,7 +457,7 @@ public final class TerasologyGameVersions {
         }
     }
 
-    public void updateGameVersionsAfterInstallation(final File terasologyDirectory) {
+    public boolean updateGameVersionsAfterInstallation(final File terasologyDirectory) {
         final File gameJar = new File(terasologyDirectory, FILE_TERASOLOGY_JAR);
         final TerasologyGameVersion gameVersion = loadInstalledGameVersion(gameJar);
         if (gameVersion != null) {
@@ -471,9 +471,11 @@ public final class TerasologyGameVersions {
                     currentGameVersion.setGameJar(gameVersion.getGameJar());
                 }
             }
+            return true;
         } else {
             logger.error("The game version can not be loaded from directory '{}'!", terasologyDirectory);
         }
+        return false;
     }
 
     public void removeInstallationInfo(TerasologyGameVersion gameVersion) {

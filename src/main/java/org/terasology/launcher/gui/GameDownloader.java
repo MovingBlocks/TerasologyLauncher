@@ -19,6 +19,7 @@ package org.terasology.launcher.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.version.GameBuildType;
@@ -34,24 +35,24 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 final class GameDownloader extends SwingWorker<Void, Void> {
 
     private static final Logger logger = LoggerFactory.getLogger(GameDownloader.class);
 
-    private final JProgressBar progressBar;
     private final LauncherFrame frame;
     private final TerasologyGameVersions gameVersions;
+
     private final File downloadZipFile;
     private final URL downloadURL;
     private final File gameDirectory;
 
+    private boolean successful;
+
     public GameDownloader(final JProgressBar progressBar, final LauncherFrame frame, final File downloadDirectory,
                           final File gamesDirectory, final TerasologyGameVersion gameVersion,
-                          final TerasologyGameVersions gameVersions) throws MalformedURLException {
-        this.progressBar = progressBar;
+                          final TerasologyGameVersions gameVersions) throws IOException {
         this.frame = frame;
         this.gameVersions = gameVersions;
 
@@ -63,13 +64,16 @@ final class GameDownloader extends SwingWorker<Void, Void> {
         }
         final Integer buildNumber = gameVersion.getBuildNumber();
 
-        final String versionName = gameVersion.getBuildType() + "_" + jobName + "_" + buildNumber;
-
-        downloadZipFile = new File(downloadDirectory, versionName + ".zip");
+        DirectoryUtils.checkDirectory(downloadDirectory);
+        downloadZipFile = new File(downloadDirectory, gameVersion.getBuildType().name() + "_" + jobName + "_"
+            + buildNumber.toString() + ".zip");
+        if (downloadZipFile.exists() && (!downloadZipFile.isFile() || !downloadZipFile.delete())) {
+            throw new IOException("The ZIP file already exists and can not be deleted! " + downloadZipFile);
+        }
         downloadURL = DownloadUtils.createFileDownloadURL(jobName, buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_ZIP);
-        gameDirectory = new File(gamesDirectory, versionName);
-
-        // TODO Check, if downloadZipFile and gameDirectory already exists
+        final File gamesSubDirectory = new File(new File(gamesDirectory, gameVersion.getBuildType().name()), jobName);
+        DirectoryUtils.checkDirectory(gamesSubDirectory);
+        gameDirectory = new File(gamesSubDirectory, buildNumber.toString());
 
         addPropertyChangeListener(new PropertyChangeListener() {
             @Override
@@ -106,10 +110,9 @@ final class GameDownloader extends SwingWorker<Void, Void> {
             downloadZipFile.delete();
 
             firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_gameInfo"));
-            gameVersions.updateGameVersionsAfterInstallation(gameDirectory);
-        } catch (IOException e) {
-            // TODO User feedback -> LauncherFrame
-            logger.error("Could not download game!", e);
+            successful = gameVersions.updateGameVersionsAfterInstallation(gameDirectory);
+        } catch (Exception e) {
+            logger.error("There is an error occurred while downloading the game!", e);
         }
         return null;
     }
@@ -158,7 +161,6 @@ final class GameDownloader extends SwingWorker<Void, Void> {
 
     @Override
     protected void done() {
-        frame.updateGui();
-        progressBar.setVisible(false);
+        frame.finishedGameDownload(successful);
     }
 }

@@ -48,7 +48,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.net.MalformedURLException;
+import java.io.IOException;
 
 public final class LauncherFrame extends JFrame implements ActionListener {
 
@@ -91,6 +91,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
     private SettingsMenu settingsMenu;
     private final GameStarter gameStarter;
+    private GameDownloader gameDownloader;
 
     private final File launcherDirectory;
     private final File downloadDirectory;
@@ -310,6 +311,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 logger.warn("The selected game version can not be started! '{}'", gameVersion);
                 JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameStart"),
                     BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+                updateGui();
             } else if (gameStarter.isRunning()) {
                 logger.debug("The game can not be started because another game is already running!");
                 JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_information_gameRunning"),
@@ -322,19 +324,30 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                         BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
                 } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
                     logger.info("Close launcher after game start.");
+                    dispose();
                     System.exit(0);
                 }
             }
         } else if (command.equals(DOWNLOAD_ACTION)) {
-            try {
-                // start a thread with the download
-                // TODO Check, if old GameDownloader is running
-                final GameDownloader downloader = new GameDownloader(progressBar, this, downloadDirectory,
-                    launcherSettings.getGamesDirectory(), getSelectedGameVersion(), gameVersions);
-                downloader.execute();
-                startButton.setEnabled(false);
-            } catch (MalformedURLException e) {
-                logger.error("The game could not be downloaded!", e);
+            final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+            if ((gameVersion == null) || gameVersion.isInstalled()
+                || (gameVersion.getSuccessful() == null) || !gameVersion.getSuccessful()) {
+                logger.warn("The selected game version can not be downloaded! '{}'", gameVersion);
+                updateGui();
+            } else if (gameDownloader != null) {
+                logger.warn("The game download can not be started because another download is already running!");
+                updateGui();
+            } else {
+                try {
+                    gameDownloader = new GameDownloader(progressBar, this, downloadDirectory,
+                        launcherSettings.getGamesDirectory(), gameVersion, gameVersions);
+                } catch (IOException e) {
+                    logger.error("The game download can not be started!", e);
+                    finishedGameDownload(false);
+                    return;
+                }
+                downloadButton.setEnabled(false);
+                gameDownloader.execute();
             }
         } else if (command.equals(DELETE_ACTION)) {
             final TerasologyGameVersion gameVersion = getSelectedGameVersion();
@@ -426,20 +439,22 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         reddit.setRolloverIcon(BundleUtils.getImageIcon("reddit_hover"));
     }
 
-
     private void updateButtons() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-        if (gameVersion.isInstalled()) {
+        if (gameVersion == null) {
+            downloadButton.setEnabled(false);
+            startButton.setEnabled(false);
+            deleteButton.setEnabled(false);
+        } else if (gameVersion.isInstalled()) {
             downloadButton.setEnabled(false);
             startButton.setEnabled(true);
             deleteButton.setEnabled(true);
         } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful()
-            && (gameVersion.getBuildNumber() != null)) {
+            && (gameVersion.getBuildNumber() != null) && (gameDownloader == null)) {
             downloadButton.setEnabled(true);
             startButton.setEnabled(false);
             deleteButton.setEnabled(false);
         } else {
-            // no game installed, and no way to download it...
             downloadButton.setEnabled(false);
             startButton.setEnabled(false);
             deleteButton.setEnabled(false);
@@ -453,9 +468,17 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
     private void updateInfoTextPane() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-        final StringBuilder b = new StringBuilder();
-        final String infoHeader1;
-        final String infoHeader2;
+        final String gameInfoText;
+        if (gameVersion == null) {
+            gameInfoText = "";
+        } else {
+            gameInfoText = getGameInfoText(gameVersion);
+        }
+        infoTextPane.setText(gameInfoText);
+        infoTextPane.setCaretPosition(0);
+    }
+
+    private String getGameInfoText(final TerasologyGameVersion gameVersion) {
         final Object[] arguments = new Object[7];
         arguments[0] = gameVersion.getBuildType();
         arguments[1] = gameVersion.getBuildNumber();
@@ -486,6 +509,9 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         } else {
             arguments[6] = "";
         }
+
+        final String infoHeader1;
+        final String infoHeader2;
         if (gameVersion.getBuildType() == GameBuildType.STABLE) {
             infoHeader1 = BundleUtils.getMessage("infoHeader1_stable", arguments);
             infoHeader2 = BundleUtils.getMessage("infoHeader2_stable", arguments);
@@ -493,12 +519,14 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             infoHeader1 = BundleUtils.getMessage("infoHeader1_nightly", arguments);
             infoHeader2 = BundleUtils.getMessage("infoHeader2_nightly", arguments);
         }
-        if ((infoHeader1 != null) && (infoHeader1.length() > 0)) {
+
+        final StringBuilder b = new StringBuilder();
+        if ((infoHeader1 != null) && (infoHeader1.trim().length() > 0)) {
             b.append("<h1>");
             b.append(escapeHtml(infoHeader1));
             b.append("</h1>\n");
         }
-        if ((infoHeader2 != null) && (infoHeader2.length() > 0)) {
+        if ((infoHeader2 != null) && (infoHeader2.trim().length() > 0)) {
             b.append("<h2>");
             b.append(escapeHtml(infoHeader2));
             b.append("</h2>\n");
@@ -512,7 +540,16 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             }
             b.append("</ul>\n");
         }
-        infoTextPane.setText(b.toString());
-        infoTextPane.setCaretPosition(0);
+        return b.toString();
+    }
+
+    void finishedGameDownload(final boolean successful) {
+        gameDownloader = null;
+        progressBar.setVisible(false);
+        updateGui();
+        if (!successful) {
+            JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameDownload"),
+                BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
