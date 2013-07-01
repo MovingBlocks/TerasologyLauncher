@@ -75,15 +75,8 @@ public final class LauncherSettings {
             logger.trace("Load the launcher settings from the file '{}'.", launcherSettingsFile);
 
             // load settings
-            final InputStream inputStream = new FileInputStream(launcherSettingsFile);
-            try {
+            try (InputStream inputStream = new FileInputStream(launcherSettingsFile)) {
                 properties.load(inputStream);
-            } finally {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    logger.warn("The settings file '{}' could not be closed.", launcherSettingsFile, e);
-                }
             }
         }
     }
@@ -97,15 +90,8 @@ public final class LauncherSettings {
         }
 
         // store settings
-        final OutputStream outputStream = new FileOutputStream(launcherSettingsFile);
-        try {
+        try (OutputStream outputStream = new FileOutputStream(launcherSettingsFile)) {
             properties.store(outputStream, COMMENT_SETTINGS);
-        } finally {
-            try {
-                outputStream.close();
-            } catch (IOException e) {
-                logger.warn("The settings file '{}' could not be closed.", launcherSettingsFile, e);
-            }
         }
     }
 
@@ -158,8 +144,7 @@ public final class LauncherSettings {
             try {
                 maxJavaHeapSize = JavaHeapSize.valueOf(maxHeapSizeStr);
             } catch (IllegalArgumentException e) {
-                logger.warn("Invalid value '{}' for the parameter '{}'!", maxHeapSizeStr,
-                    PROPERTY_MAX_HEAP_SIZE);
+                logger.warn("Invalid value '{}' for the parameter '{}'!", maxHeapSizeStr, PROPERTY_MAX_HEAP_SIZE);
             }
         }
         properties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxJavaHeapSize.name());

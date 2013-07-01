@@ -169,21 +169,21 @@ final class SettingsMenu extends JDialog implements ActionListener {
         buildTypeLabel.setText(BundleUtils.getLabel("settings_game_buildType"));
         buildTypeLabel.setFont(settingsFont);
 
-        buildTypeBox = new JComboBox<String>();
+        buildTypeBox = new JComboBox<>();
         buildTypeBox.setFont(settingsFont);
 
         JLabel buildVersionStableLabel = new JLabel();
         buildVersionStableLabel.setText(BundleUtils.getLabel("settings_game_buildVersion_stable"));
         buildVersionStableLabel.setFont(settingsFont);
 
-        buildVersionStableBox = new JComboBox<VersionItem>();
+        buildVersionStableBox = new JComboBox<>();
         buildVersionStableBox.setFont(settingsFont);
 
         JLabel buildVersionNightlyLabel = new JLabel();
         buildVersionNightlyLabel.setText(BundleUtils.getLabel("settings_game_buildVersion_nightly"));
         buildVersionNightlyLabel.setFont(settingsFont);
 
-        buildVersionNightlyBox = new JComboBox<VersionItem>();
+        buildVersionNightlyBox = new JComboBox<>();
         buildVersionNightlyBox.setFont(settingsFont);
 
         final JPanel gamesDirectoryPanel = new JPanel();
@@ -214,7 +214,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         maxHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_maxHeapSize"));
         maxHeapSizeLabel.setFont(settingsFont);
 
-        maxHeapSizeBox = new JComboBox<JavaHeapSize>();
+        maxHeapSizeBox = new JComboBox<>();
         maxHeapSizeBox.setFont(settingsFont);
         maxHeapSizeBox.addActionListener(this);
         maxHeapSizeBox.setActionCommand(MAX_HEAP_SIZE_ACTION);
@@ -223,7 +223,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         initialHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_initialHeapSize"));
         initialHeapSizeLabel.setFont(settingsFont);
 
-        initialHeapSizeBox = new JComboBox<JavaHeapSize>();
+        initialHeapSizeBox = new JComboBox<>();
         initialHeapSizeBox.setFont(settingsFont);
         initialHeapSizeBox.addActionListener(this);
         initialHeapSizeBox.setActionCommand(INITIAL_HEAP_SIZE_ACTION);
@@ -299,7 +299,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         languageLabel.setText(BundleUtils.getLabel("settings_launcher_chooseLanguage"));
         languageLabel.setFont(settingsFont);
 
-        languageBox = new JComboBox<String>();
+        languageBox = new JComboBox<>();
         languageBox.setFont(settingsFont);
 
         JLabel searchForLauncherUpdatesLabel = new JLabel();

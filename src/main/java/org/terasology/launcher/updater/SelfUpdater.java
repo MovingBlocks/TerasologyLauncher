@@ -45,7 +45,7 @@ public final class SelfUpdater {
      * @param launcherFile       - where the launcher is located
      */
     public static void runUpdate(final OperatingSystem os, final File temporaryUpdateDir, final File launcherFile) {
-        List<String> arguments = new ArrayList<String>();
+        List<String> arguments = new ArrayList<>();
 
         final String separator = File.separator;
         final String javaBin = System.getProperty("java.home") + separator + "bin" + separator + "java";
@@ -61,8 +61,11 @@ public final class SelfUpdater {
                 "*" + "\"");
         } else {
             final StringBuilder classpathBuilder = new StringBuilder();
-            for (File f : classpath.listFiles()) {
-                classpathBuilder.append(f.toURI()).append(File.pathSeparator);
+            final File[] files = classpath.listFiles();
+            if ((files != null) && (files.length > 0)) {
+                for (File f : files) {
+                    classpathBuilder.append(f.toURI()).append(File.pathSeparator);
+                }
             }
             classpathBuilder.deleteCharAt(classpathBuilder.length() - 1);
             arguments.add(classpathBuilder.toString());
@@ -106,7 +109,7 @@ public final class SelfUpdater {
             logger.error("Auto updating the launcher failed!", e);
         }
 
-        List<String> arguments = new ArrayList<String>();
+        List<String> arguments = new ArrayList<>();
 
         String separator = System.getProperty("file.separator");
         String javaPath = System.getProperty("java.home") + separator + "bin" + separator + "java";
@@ -123,6 +126,5 @@ public final class SelfUpdater {
         } catch (IOException e) {
             logger.error("Failed to restart launcher process after update.", e);
         }
-
     }
 }

@@ -51,14 +51,17 @@ public final class DirectoryUtils {
             return false;
         }
 
-        for (File child : gameInstallationPath.listFiles()) {
-            if (child.isDirectory()) {
-                if (child.getName().equals("SAVED_WORLDS")
-                    || child.getName().equals("worlds")
-                    || child.getName().equals("screens")
-                    || child.getName().equals("screenshots")) {
-                    if (containsFiles(child)) {
-                        return true;
+        final File[] files = gameInstallationPath.listFiles();
+        if ((files != null) && (files.length > 0)) {
+            for (File child : files) {
+                if (child.isDirectory()) {
+                    if (child.getName().equals("SAVED_WORLDS")
+                        || child.getName().equals("worlds")
+                        || child.getName().equals("screens")
+                        || child.getName().equals("screenshots")) {
+                        if (containsFiles(child)) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -72,13 +75,16 @@ public final class DirectoryUtils {
             return false;
         }
 
-        for (File child : directory.listFiles()) {
-            if (child.isDirectory()) {
-                if (containsFiles(child)) {
+        final File[] files = directory.listFiles();
+        if ((files != null) && (files.length > 0)) {
+            for (File child : files) {
+                if (child.isDirectory()) {
+                    if (containsFiles(child)) {
+                        return true;
+                    }
+                } else if (child.isFile()) {
                     return true;
                 }
-            } else if (child.isFile()) {
-                return true;
             }
         }
 

@@ -89,10 +89,10 @@ public final class TerasologyGameVersions {
             logger.error("The cache directory can not be created or used! '{}'", cacheDirectory, e);
         }
 
-        gameVersionMapStable = new TreeMap<Integer, TerasologyGameVersion>();
-        gameVersionMapNightly = new TreeMap<Integer, TerasologyGameVersion>();
-        final SortedSet<Integer> buildNumbersStable = new TreeSet<Integer>();
-        final SortedSet<Integer> buildNumbersNightly = new TreeSet<Integer>();
+        gameVersionMapStable = new TreeMap<>();
+        gameVersionMapNightly = new TreeMap<>();
+        final SortedSet<Integer> buildNumbersStable = new TreeSet<>();
+        final SortedSet<Integer> buildNumbersNightly = new TreeSet<>();
 
         loadSettingsBuildNumber(launcherSettings, buildNumbersStable, GameBuildType.STABLE, MIN_BUILD_NUMBER_STABLE);
         loadSettingsBuildNumber(launcherSettings, buildNumbersNightly, GameBuildType.NIGHTLY, MIN_BUILD_NUMBER_NIGHTLY);
@@ -287,31 +287,18 @@ public final class TerasologyGameVersions {
                                                                     final GameBuildType buildType,
                                                                     final String jobName,
                                                                     final File cacheDirectory) {
-        final SortedMap<Integer, TerasologyGameVersion> cachedGameVersions
-            = new TreeMap<Integer, TerasologyGameVersion>();
+        final SortedMap<Integer, TerasologyGameVersion> cachedGameVersions = new TreeMap<>();
         try {
             for (Integer buildNumber : buildNumbers) {
                 final File cacheFile = createCacheFile(buildNumber, buildType, jobName, cacheDirectory);
                 if (cacheFile.exists() && cacheFile.canRead() && cacheFile.isFile()) {
-                    ObjectInputStream ois = null;
-                    try {
-                        ois = new ObjectInputStream(new FileInputStream(cacheFile));
+                    try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
                         final TerasologyGameVersion gameVersion = (TerasologyGameVersion) ois.readObject();
                         cachedGameVersions.put(buildNumber, gameVersion);
-                    } finally {
-                        if (ois != null) {
-                            try {
-                                ois.close();
-                            } catch (IOException e) {
-                                logger.warn("Closing ObjectInputStream failed!", e);
-                            }
-                        }
                     }
                 }
             }
-        } catch (IOException e) {
-            logger.error("The cached data can not be loaded!", e);
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             logger.error("The cached data can not be loaded!", e);
         }
         return cachedGameVersions;
@@ -401,18 +388,8 @@ public final class TerasologyGameVersions {
             for (TerasologyGameVersion gameVersion : gameVersions.values()) {
                 final File cacheFile = createCacheFile(gameVersion.getBuildNumber(), buildType, jobName,
                     cacheDirectory);
-                ObjectOutputStream oos = null;
-                try {
-                    oos = new ObjectOutputStream(new FileOutputStream(cacheFile));
+                try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
                     oos.writeObject(gameVersion);
-                } finally {
-                    if (oos != null) {
-                        try {
-                            oos.close();
-                        } catch (IOException e) {
-                            logger.warn("Closing ObjectOutputStream failed!", e);
-                        }
-                    }
                 }
             }
         } catch (IOException e) {
@@ -422,7 +399,7 @@ public final class TerasologyGameVersions {
 
     private List<TerasologyGameVersion> createList(final Integer lastBuildNumber, final GameBuildType buildType,
                                                    final SortedMap<Integer, TerasologyGameVersion> gameVersionMap) {
-        final List<TerasologyGameVersion> gameVersionList = new ArrayList<TerasologyGameVersion>();
+        final List<TerasologyGameVersion> gameVersionList = new ArrayList<>();
         gameVersionList.addAll(gameVersionMap.values());
 
         final TerasologyGameVersion latestGameVersion = new TerasologyGameVersion();

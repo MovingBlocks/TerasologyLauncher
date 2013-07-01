@@ -69,7 +69,7 @@ public enum JavaHeapSize {
     }
 
     public static List<JavaHeapSize> getHeapSizes(final long totalPhysicalMemorySize, final boolean bit64) {
-        final List<JavaHeapSize> heapSizes = new ArrayList<JavaHeapSize>();
+        final List<JavaHeapSize> heapSizes = new ArrayList<>();
 
         for (final JavaHeapSize heapSize : JavaHeapSize.values()) {
             if ((heapSize.mb <= totalPhysicalMemorySize) && (bit64 || heapSize.mb <= MAX_32_BIT_MB)) {

@@ -25,7 +25,6 @@ import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
 import java.net.URI;
 
 final class LinkJLabel extends JLabel implements MouseListener {
@@ -68,11 +67,7 @@ final class LinkJLabel extends JLabel implements MouseListener {
             if (desktop.isSupported(Desktop.Action.BROWSE)) {
                 try {
                     desktop.browse(uri);
-                } catch (IOException ex) {
-                    logger.error("Can't browse URI! " + uri, ex);
-                } catch (SecurityException ex) {
-                    logger.error("Can't browse URI! " + uri, ex);
-                } catch (IllegalArgumentException ex) {
+                } catch (Exception ex) {
                     logger.error("Can't browse URI! " + uri, ex);
                 }
             }

@@ -22,11 +22,9 @@ import org.terasology.launcher.version.TerasologyGameVersionInfo;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -76,37 +74,16 @@ public final class DownloadUtils {
      * @throws DownloadException
      */
     public static void downloadToFile(final URL downloadURL, final File file) throws DownloadException {
-        BufferedInputStream in = null;
-        BufferedOutputStream out = null;
-        try {
-            in = new BufferedInputStream(downloadURL.openStream());
-            out = new BufferedOutputStream(new FileOutputStream(file));
-
+        try (BufferedInputStream in = new BufferedInputStream(downloadURL.openStream());
+             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
             final byte[] buffer = new byte[2048];
 
             int n;
             while ((n = in.read(buffer)) != -1) {
                 out.write(buffer, 0, n);
             }
-
-            out.flush();
         } catch (IOException e) {
             throw new DownloadException("Could not download file! URL='" + downloadURL + "', file='" + file + "'", e);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    logger.warn("Closing InputStream for '{}' failed!", downloadURL, e);
-                }
-            }
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    logger.warn("Closing OutputStream for '{}' failed!", file, e);
-                }
-            }
         }
     }
 
@@ -157,12 +134,7 @@ public final class DownloadUtils {
             urlVersion = new URL(JENKINS_JOB_URL + jobName + lastBuild + BUILD_NUMBER);
             reader = new BufferedReader(new InputStreamReader(urlVersion.openStream()));
             buildNumber = Integer.parseInt(reader.readLine());
-        } catch (MalformedURLException e) {
-            throw new DownloadException("The buildNumber could not be loaded! " + jobName + " " + urlVersion, e);
-        } catch (IOException e) {
-            throw new DownloadException("The buildNumber could not be loaded! " + jobName + " " + urlVersion, e);
-        } catch (RuntimeException e) {
-            // NullPointerException, NumberFormatException
+        } catch (Exception e) {
             throw new DownloadException("The buildNumber could not be loaded! " + jobName + " " + urlVersion, e);
         } finally {
             if (reader != null) {
@@ -185,11 +157,7 @@ public final class DownloadUtils {
             urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, buildNumber,
                 FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
             launcherVersionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
-        } catch (MalformedURLException e) {
-            throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
-        } catch (IOException e) {
-            throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
         }
         return launcherVersionInfo;
@@ -204,11 +172,7 @@ public final class DownloadUtils {
             urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, buildNumber,
                 FILE_TERASOLOGY_GAME_VERSION_INFO);
             gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
-        } catch (MalformedURLException e) {
-            throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
-        } catch (IOException e) {
-            throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
         }
         return gameVersionInfo;
@@ -230,11 +194,7 @@ public final class DownloadUtils {
                     }
                 }
             }
-        } catch (MalformedURLException e) {
-            throw new DownloadException("The job result could not be loaded! " + jobName + " " + urlResult, e);
-        } catch (IOException e) {
-            throw new DownloadException("The job result could not be loaded! " + jobName + " " + urlResult, e);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             throw new DownloadException("The job result could not be loaded! " + jobName + " " + urlResult, e);
         } finally {
             if (reader != null) {
@@ -259,20 +219,12 @@ public final class DownloadUtils {
             final Document document = builder.parse(stream);
             final NodeList nodeList = document.getElementsByTagName("msg");
             if ((nodeList != null) && (nodeList.getLength() > 0)) {
-                changeLog = new ArrayList<String>();
+                changeLog = new ArrayList<>();
                 for (int i = 0; i < nodeList.getLength(); i++) {
                     changeLog.add(nodeList.item(i).getLastChild().getTextContent());
                 }
             }
-        } catch (MalformedURLException e) {
-            throw new DownloadException("The changeLog could not be loaded! " + jobName + " " + urlChangeLog, e);
-        } catch (IOException e) {
-            throw new DownloadException("The changeLog could not be loaded! " + jobName + " " + urlChangeLog, e);
-        } catch (ParserConfigurationException e) {
-            throw new DownloadException("The changeLog could not be loaded! " + jobName + " " + urlChangeLog, e);
-        } catch (SAXException e) {
-            throw new DownloadException("The changeLog could not be loaded! " + jobName + " " + urlChangeLog, e);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             throw new DownloadException("The changeLog could not be loaded! " + jobName + " " + urlChangeLog, e);
         } finally {
             if (stream != null) {

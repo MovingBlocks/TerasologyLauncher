@@ -374,7 +374,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         }
     }
 
-    public void updateGui() {
+    void updateGui() {
         updateLocale();
         updateButtons();
         updateInfoTextPane();

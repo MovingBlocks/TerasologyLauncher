@@ -28,8 +28,6 @@ import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.JOptionPane;
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 public final class LauncherUpdater {
@@ -114,25 +112,7 @@ public final class LauncherUpdater {
 
             // Start SelfUpdater
             SelfUpdater.runUpdate(os, downloadDirectory, launcherLocation);
-        } catch (RuntimeException e) {
-            logger.error("Launcher update failed! Aborting update process!", e);
-            JOptionPane.showMessageDialog(splash,
-                BundleUtils.getLabel("update_launcher_updateFailed"),
-                BundleUtils.getLabel("message_error_title"),
-                JOptionPane.ERROR_MESSAGE);
-        } catch (URISyntaxException e) {
-            logger.error("Launcher update failed! Aborting update process!", e);
-            JOptionPane.showMessageDialog(splash,
-                BundleUtils.getLabel("update_launcher_updateFailed"),
-                BundleUtils.getLabel("message_error_title"),
-                JOptionPane.ERROR_MESSAGE);
-        } catch (MalformedURLException e) {
-            logger.error("Launcher update failed! Aborting update process!", e);
-            JOptionPane.showMessageDialog(splash,
-                BundleUtils.getLabel("update_launcher_updateFailed"),
-                BundleUtils.getLabel("message_error_title"),
-                JOptionPane.ERROR_MESSAGE);
-        } catch (DownloadException e) {
+        } catch (Exception e) {
             logger.error("Launcher update failed! Aborting update process!", e);
             JOptionPane.showMessageDialog(splash,
                 BundleUtils.getLabel("update_launcher_updateFailed"),

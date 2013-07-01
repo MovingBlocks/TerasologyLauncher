@@ -118,11 +118,8 @@ final class GameDownloader extends SwingWorker<Void, Void> {
     }
 
     private void downloadZipFile() throws IOException {
-        BufferedInputStream in = null;
-        BufferedOutputStream out = null;
-        try {
-            in = new BufferedInputStream(downloadURL.openStream());
-            out = new BufferedOutputStream(new FileOutputStream(downloadZipFile));
+        try (BufferedInputStream in = new BufferedInputStream(downloadURL.openStream());
+             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(downloadZipFile))) {
             final float sizeFactor = 100f / (float) downloadURL.openConnection().getContentLength();
 
             final byte[] buffer = new byte[2048];
@@ -138,23 +135,6 @@ final class GameDownloader extends SwingWorker<Void, Void> {
                     percentage = 99;
                 }
                 setProgress(percentage);
-            }
-
-            out.flush();
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    logger.warn("Closing InputStream for '{}' failed!", downloadURL, e);
-                }
-            }
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    logger.warn("Closing OutputStream for '{}' failed!", downloadZipFile, e);
-                }
             }
         }
     }

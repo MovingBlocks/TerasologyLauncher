@@ -33,11 +33,11 @@ public final class Languages {
     public static final Map<Locale, String> SETTINGS_LABEL_KEYS;
 
     static {
-        final List<Locale> supportedLocales = new ArrayList<Locale>(2);
+        final List<Locale> supportedLocales = new ArrayList<>(2);
         supportedLocales.add(Locale.ENGLISH);
         supportedLocales.add(Locale.GERMAN);
 
-        final Map<Locale, String> settingsLabelKey = new HashMap<Locale, String>();
+        final Map<Locale, String> settingsLabelKey = new HashMap<>();
         settingsLabelKey.put(Locale.ENGLISH, "settings_language_en");
         settingsLabelKey.put(Locale.GERMAN, "settings_language_de");
 

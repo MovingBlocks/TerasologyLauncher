@@ -55,7 +55,7 @@ public final class GameStarter {
     }
 
     private List<String> createJavaParameters(final JavaHeapSize maxHeapSize, final JavaHeapSize initialHeapSize) {
-        final List<String> javaParameters = new ArrayList<String>();
+        final List<String> javaParameters = new ArrayList<>();
         if (initialHeapSize.isUsed()) {
             javaParameters.add("-Xms" + initialHeapSize.getSizeParameter());
         }
@@ -67,7 +67,7 @@ public final class GameStarter {
 
     private List<String> createProcessParameters(final TerasologyGameVersion gameVersion,
                                                  final List<String> javaParameters) {
-        final List<String> processParameters = new ArrayList<String>();
+        final List<String> processParameters = new ArrayList<>();
         processParameters.add("java");
         processParameters.addAll(javaParameters);
         processParameters.add("-jar");
@@ -116,16 +116,7 @@ public final class GameStarter {
             } else {
                 logger.info("The game is successfully launched.");
             }
-        } catch (RuntimeException e) {
-            // NullPointerException, SecurityException
-            logger.error("The game could not be started due to an error! Parameters '{}' for '{}'!", processParameters,
-                gameVersion, e);
-            return false;
-        } catch (InterruptedException e) {
-            logger.error("The game could not be started due to an error! Parameters '{}' for '{}'!", processParameters,
-                gameVersion, e);
-            return false;
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("The game could not be started due to an error! Parameters '{}' for '{}'!", processParameters,
                 gameVersion, e);
             return false;
