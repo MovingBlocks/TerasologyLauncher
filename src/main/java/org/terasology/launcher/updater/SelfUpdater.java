@@ -57,8 +57,8 @@ public final class SelfUpdater {
         final File classpath = new File(new File(temporaryUpdateDir, "TerasologyLauncher"), "lib");
 
         if (os.isWindows()) {
-            arguments.add("\"" + temporaryUpdateDir + separator + "TerasologyLauncher" + separator + "lib" + separator +
-                "*" + "\"");
+            arguments.add("\"" + temporaryUpdateDir + separator + "TerasologyLauncher" + separator + "lib" + separator
+                + "*" + "\"");
         } else {
             final StringBuilder classpathBuilder = new StringBuilder();
             final File[] files = classpath.listFiles();

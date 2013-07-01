@@ -114,7 +114,7 @@ public final class ImageUtils {
     }
 
     /**
-     * Clamp a value to range 0..255
+     * Clamp a value to range 0..255.
      *
      * @param c - value to clamp
      * @return clamped value in the range 0..255

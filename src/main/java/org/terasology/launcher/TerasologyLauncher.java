@@ -177,8 +177,8 @@ public final class TerasologyLauncher {
                 fileChooser.setSelectedFile(gamesDirectory);
                 fileChooser.setDialogTitle(BundleUtils.getLabel("message_dialog_title_chooseGamesDirectory"));
                 if (fileChooser.showSaveDialog(splash) != JFileChooser.APPROVE_OPTION) {
-                    logger.info("The new game installation directory is not approved. " +
-                        "The TerasologyLauncher is terminated.");
+                    logger.info("The new game installation directory is not approved. "
+                        + "The TerasologyLauncher is terminated.");
                     System.exit(0);
                 }
 
