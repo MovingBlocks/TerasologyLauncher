@@ -469,7 +469,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private void updateInfoTextPane() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         final String gameInfoText;
-        if (gameVersion == null) {
+        if ((gameVersion == null) || (gameVersion.getBuildType() == null) || (gameVersion.getBuildNumber() == null)) {
             gameInfoText = "";
         } else {
             gameInfoText = getGameInfoText(gameVersion);
