@@ -93,6 +93,26 @@
         <!-- Checks for whitespaces -->
         <!-- See http://checkstyle.sourceforge.net/config_whitespace.html -->
         <!-- ********************** -->
+        <!-- Checks the padding of an empty for iterator; that is whether a space is required at an empty for iterator, or such spaces are forbidden. -->
+        <module name="EmptyForIteratorPad">
+            <property name="severity" value="warning"/>
+        </module>
+        <!-- Checks the padding between the identifier of a method definition, constructor definition, method call, or constructor invocation; and the left parenthesis of the parameter list. -->
+        <module name="MethodParamPad">
+            <property name="severity" value="warning"/>
+        </module>
+        <!-- Checks that there is no whitespace after a token. -->
+        <module name="NoWhitespaceAfter">
+            <property name="severity" value="warning"/>
+        </module>
+        <!-- Checks that there is no whitespace before a token. -->
+        <module name="NoWhitespaceBefore">
+            <property name="severity" value="warning"/>
+        </module>
+        <!-- Checks line wrapping for operators. -->
+        <module name="OperatorWrap">
+            <property name="severity" value="warning"/>
+        </module>
         <!-- Checks that the whitespace around the Generic tokens < and > is correct to the typical convention. -->
         <module name="GenericWhitespace">
             <property name="severity" value="warning"/>
@@ -147,14 +167,12 @@
         <!-- Checks for common coding problems -->
         <!-- See http://checkstyle.sourceforge.net/config_coding.html -->
         <!-- ********************************* -->
+        <!-- Checks that classes that define a covariant equals() method also override method equals(java.lang.Object). -->
+        <module name="CovariantEquals"/>
+        <!-- Detects empty statements (standalone ;). -->
+        <module name="EmptyStatement"/>
         <!-- Checks that classes that override equals() also override hashCode(). -->
         <module name="EqualsHashCode"/>
-        <!-- Checks that local variables that never have their values changed are declared final. -->
-        <!--
-                <module name="FinalLocalVariable">
-                    <property name="severity" value="warning"/>
-                </module>
-        -->
         <!-- Checks that a local variable or a parameter does not shadow a field that is defined in the same class. -->
         <module name="HiddenField">
             <property name="ignoreConstructorParameter" value="true"/>
@@ -172,8 +190,18 @@
         <module name="SimplifyBooleanReturn">
             <property name="severity" value="warning"/>
         </module>
+        <!-- Checks that string literals are not used with == or !=.  -->
+        <module name="StringLiteralEquality"/>
+        <!-- This check can be used to ensure that types are not declared to be thrown. Declaring to throw java.lang.Error or java.lang.RuntimeException is almost never acceptable. -->
+        <module name="IllegalThrows">
+            <property name="severity" value="warning"/>
+        </module>
         <!-- Ensure a class is has a package declaration, and (optionally) whether the package name matches the directory name for the source file. -->
         <module name="PackageDeclaration"/>
+        <!-- Checks that particular class are never used as types in variable declarations, return values or parameters. Includes a pattern check that by default disallows abstract classes. -->
+        <module name="IllegalType">
+            <property name="severity" value="warning"/>
+        </module>
         <!-- Checks for the order of the parts of a class. -->
         <module name="DeclarationOrder">
             <property name="severity" value="warning"/>
@@ -186,6 +214,8 @@
         </module>
         <!-- Check that the default is after all the cases in a switch statement. -->
         <module name="DefaultComesLast"/>
+        <!-- Checks for fall through in switch statements Finds locations where a case contains Java code - but lacks a break, return, throw or continue statement. -->
+        <module name="FallThrough"/>
         <!-- Checks that each variable declaration is in its own statement and on its own line. -->
         <module name="MultipleVariableDeclarations"/>
         <!-- Checks there is only one statement per line. -->
@@ -194,6 +224,10 @@
         <!-- Checks for class design -->
         <!-- See http://checkstyle.sourceforge.net/config_design.html -->
         <!-- *********************** -->
+        <!-- Checks visibility of class members. Only static final members may be public. -->
+        <module name="VisibilityModifier">
+            <property name="severity" value="warning"/>
+        </module>
         <!-- Checks that a class which has only private constructors is declared as final. -->
         <module name="FinalClass">
             <property name="severity" value="warning"/>
@@ -220,10 +254,6 @@
         <module name="ArrayTypeStyle">
             <property name="severity" value="warning"/>
         </module>
-        <!-- Check that method/constructor/catch block parameters are final. -->
-        <!--
-                <module name="FinalParameters"/>
-        -->
         <!-- Checks correct indentation of Java Code. -->
         <module name="Indentation">
             <property name="severity" value="warning"/>
