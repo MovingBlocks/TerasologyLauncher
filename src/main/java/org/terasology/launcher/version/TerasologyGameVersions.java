@@ -45,8 +45,8 @@ public final class TerasologyGameVersions {
 
     private static final String FILE_TERASOLOGY_JAR = "Terasology.jar";
 
-    private static final int PREV_BUILD_NUMBERS_STABLE = 4;
-    private static final int PREV_BUILD_NUMBERS_NIGHTLY = 4;
+    private static final int PREV_BUILD_NUMBERS_STABLE = 3;
+    private static final int PREV_BUILD_NUMBERS_NIGHTLY = 9;
     private static final int MIN_BUILD_NUMBER_STABLE = 15; // URL changed between 14 and 15
     private static final int MIN_BUILD_NUMBER_NIGHTLY = 245;  // URL changed between 244 and 245
     private static final String GIT_BRANCH_STABLE = "master";
