@@ -404,13 +404,12 @@ public final class TerasologyGameVersions {
 
         final TerasologyGameVersion latestGameVersion = new TerasologyGameVersion();
         latestGameVersion.setLatest(true);
+        latestGameVersion.setBuildType(buildType);
+        latestGameVersion.setBuildNumber(lastBuildNumber);
         if ((lastBuildNumber != null) && gameVersionMap.containsKey(lastBuildNumber)) {
             gameVersionMap.get(lastBuildNumber).copyTo(latestGameVersion);
-        } else {
-            latestGameVersion.setBuildType(buildType);
-            if (lastBuildNumber != null) {
-                latestGameVersion.setBuildNumber(lastBuildNumber);
-            }
+        } else if ((lastBuildNumber == null) && !gameVersionMap.isEmpty()) {
+            gameVersionMap.get(gameVersionMap.lastKey()).copyTo(latestGameVersion);
         }
         gameVersionList.add(latestGameVersion);
         Collections.reverse(gameVersionList);
