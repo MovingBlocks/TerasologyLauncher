@@ -101,14 +101,25 @@ jar {
     }
 }
 
+applicationDistribution.from('README.md')
+
 applicationDistribution.from('README.md') {
     filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-    rename('README.md', 'README')
+    rename('README.md', 'README.txt')
 }
+
+applicationDistribution.from('CHANGELOG.md')
 
 applicationDistribution.from('CHANGELOG.md') {
     filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-    rename('CHANGELOG.md', 'CHANGELOG')
+    rename('CHANGELOG.md', 'CHANGELOG.txt')
+}
+
+applicationDistribution.from('CONTRIBUTING.md')
+
+applicationDistribution.from('CONTRIBUTING.md') {
+    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+    rename('CONTRIBUTING.md', 'CONTRIBUTING.txt')
 }
 
 applicationDistribution.from('LICENSE') {
@@ -119,10 +130,16 @@ applicationDistribution.from('NOTICE') {
     filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
 }
 
-applicationDistribution.from('src/template/VERSION') {
+applicationDistribution.from('src/template/VERSION.md') {
+    expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: env.GIT_BRANCH,
+            dateTime: startDateTimeString, displayVersion: displayVersion)
+}
+
+applicationDistribution.from('src/template/VERSION.md') {
     expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: env.GIT_BRANCH,
             dateTime: startDateTimeString, displayVersion: displayVersion)
     filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+    rename('VERSION.md', 'VERSION.txt')
 }
 
 // For IntelliJ add a bunch of excluded directories
