@@ -1,11 +1,10 @@
 Terasology Launcher - ReadMe
 ============================
-*Terasology Launcher* is the official launcher for the open source game [Terasology][GitHub Terasology].
+[*Terasology Launcher*][GitHub TerasologyLauncher] is the official launcher for the open source game [Terasology][GitHub Terasology].
 
 The *Terasology Launcher* provides easy access to the different game versions and build types.
 
-It is voluntarily developed by [MovingBlocks team][GitHub MovingBlocks].
-
+Terasology and related projects are developed by a group of software enthusiast volunteers under the organization name [MovingBlocks][GitHub MovingBlocks].
 
 Usage
 -----
