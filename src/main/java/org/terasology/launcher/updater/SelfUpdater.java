@@ -18,6 +18,8 @@ package org.terasology.launcher.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.gui.SplashScreenWindow;
+import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.OperatingSystem;
 
@@ -40,25 +42,21 @@ public final class SelfUpdater {
 
     /**
      * Starts the update process after downloading the needed files.
-     *
-     * @param temporaryUpdateDir - where the downloaded files are located
-     * @param launcherFile       - where the launcher is located
      */
-    public static void runUpdate(final OperatingSystem os, final File temporaryUpdateDir, final File launcherFile) {
-        List<String> arguments = new ArrayList<>();
-
+    public static void runUpdate(final SplashScreenWindow splash, final OperatingSystem os,
+                                 final File downloadDirectory, final File launcherDirectory) {
         final String separator = File.separator;
         final String javaBin = System.getProperty("java.home") + separator + "bin" + separator + "java";
+        final File tempLauncherDirectory = new File(downloadDirectory, "TerasologyLauncher");
+        final File classpath = new File(tempLauncherDirectory, "lib");
 
+        final List<String> arguments = new ArrayList<>();
         // Set 'java' executable as programme to run
         arguments.add(javaBin);
         // Build and set the classpath
         arguments.add("-cp");
-        final File classpath = new File(new File(temporaryUpdateDir, "TerasologyLauncher"), "lib");
-
         if (os.isWindows()) {
-            arguments.add("\"" + temporaryUpdateDir + separator + "TerasologyLauncher" + separator + "lib" + separator
-                + "*" + "\"");
+            arguments.add("\"" + classpath.getPath() + separator + "*" + "\"");
         } else {
             final StringBuilder classpathBuilder = new StringBuilder();
             final File[] files = classpath.listFiles();
@@ -70,19 +68,19 @@ public final class SelfUpdater {
             classpathBuilder.deleteCharAt(classpathBuilder.length() - 1);
             arguments.add(classpathBuilder.toString());
         }
-
         // Specify class with main method to run
         arguments.add(SelfUpdater.class.getCanonicalName());
         // Arguments for update locations
-        arguments.add(launcherFile.getParentFile().getParent());
-        arguments.add(temporaryUpdateDir + separator + "TerasologyLauncher");
+        arguments.add(launcherDirectory.getPath());
+        arguments.add(tempLauncherDirectory.getPath());
 
-        logger.info("Running launcher update with: \t  {}", arguments);
-        logger.info("Current launcher path: \t \t {}", launcherFile);
-        logger.info("New files located in: \t \t {}", temporaryUpdateDir + separator + "TerasologyLauncher");
+        logger.info("Running launcher self update with: {}", arguments);
+        logger.info("Current launcher path: {}", launcherDirectory.getPath());
+        logger.info("New files temporarily located in: {}", tempLauncherDirectory.getPath());
 
-        ProcessBuilder pb = new ProcessBuilder();
+        final ProcessBuilder pb = new ProcessBuilder();
         pb.command(arguments);
+
         try {
             pb.start();
         } catch (IOException e) {
@@ -94,37 +92,45 @@ public final class SelfUpdater {
     public static void main(final String[] args) {
         logger.info("Running self updater.");
 
-        String launcherLocation = args[0];
-        String temporaryUpdatePath = args[1];
+        final String launcherDirectoryArg = args[0];
+        final String tempLauncherDirectoryArg = args[1];
+        final File launcherDirectory = new File(launcherDirectoryArg);
+        final File tempLauncherDirectory = new File(tempLauncherDirectoryArg);
 
-        File launcher = new File(launcherLocation);
-        File updateFiles = new File(temporaryUpdatePath);
-
-        // Copy the new files
-        logger.info("Copying updated files.");
         try {
-            FileUtils.delete(launcher);
-            FileUtils.copyFolder(updateFiles, launcher);
+            // Check both directories
+            DirectoryUtils.checkDirectory(launcherDirectory);
+            DirectoryUtils.checkDirectory(tempLauncherDirectory);
+
+            logger.info("Delete launcher directory: {}", launcherDirectory);
+            FileUtils.delete(launcherDirectory);
+
+            logger.info("Copy new files: {}", tempLauncherDirectory);
+            FileUtils.copyFolder(tempLauncherDirectory, launcherDirectory);
         } catch (IOException e) {
             logger.error("Auto updating the launcher failed!", e);
+            System.exit(1);
         }
 
-        List<String> arguments = new ArrayList<>();
+        // Start new launcher
+        final String separator = System.getProperty("file.separator");
+        final String javaPath = System.getProperty("java.home") + separator + "bin" + separator + "java";
 
-        String separator = System.getProperty("file.separator");
-        String javaPath = System.getProperty("java.home") + separator + "bin" + separator + "java";
-
+        final List<String> arguments = new ArrayList<>();
         arguments.add(javaPath);
         arguments.add("-jar");
-        arguments.add(launcherLocation + separator + "lib" + separator + "TerasologyLauncher.jar");
+        arguments.add(launcherDirectory.getPath() + separator + "lib" + separator + "TerasologyLauncher.jar");
 
-        ProcessBuilder pb = new ProcessBuilder();
+        final ProcessBuilder pb = new ProcessBuilder();
         pb.command(arguments);
 
+        logger.info("Start new launcher: {}", arguments);
         try {
             pb.start();
         } catch (IOException e) {
             logger.error("Failed to restart launcher process after update.", e);
+            System.exit(1);
         }
+        System.exit(0);
     }
 }

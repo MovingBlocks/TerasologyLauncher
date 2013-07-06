@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -87,10 +88,13 @@ public final class LauncherUpdater {
 
     public void update(final SplashScreenWindow splash) {
         try {
-            // Get current launcher location
+            // Get and check current launcher directory
             final File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource()
                 .getLocation().toURI());
             logger.trace("Launcher location: {}" + launcherLocation);
+            final File launcherDirectory = launcherLocation.getParentFile().getParentFile();
+            DirectoryUtils.checkDirectory(launcherDirectory);
+            logger.trace("Launcher directory: {}" + launcherDirectory);
 
             // Download launcher ZIP file
             final URL updateURL = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion,
@@ -106,12 +110,8 @@ public final class LauncherUpdater {
             FileUtils.extractZip(downloadedZipFile);
             logger.trace("ZIP file extracted");
 
-            // Delete launcher ZIP file
-            downloadedZipFile.delete();
-            logger.trace("ZIP file deleted");
-
             // Start SelfUpdater
-            SelfUpdater.runUpdate(os, downloadDirectory, launcherLocation);
+            SelfUpdater.runUpdate(splash, os, downloadDirectory, launcherDirectory);
         } catch (Exception e) {
             logger.error("Launcher update failed! Aborting update process!", e);
             JOptionPane.showMessageDialog(splash,
