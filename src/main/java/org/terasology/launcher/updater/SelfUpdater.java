@@ -55,6 +55,8 @@ public final class SelfUpdater {
         arguments.add(javaBin);
         // Build and set the classpath
         arguments.add("-cp");
+        arguments.add("TerasologyLauncher.jar");
+        /*
         if (os.isWindows()) {
             arguments.add("\"" + classpath.getPath() + separator + "*" + "\"");
         } else {
@@ -68,6 +70,7 @@ public final class SelfUpdater {
             classpathBuilder.deleteCharAt(classpathBuilder.length() - 1);
             arguments.add(classpathBuilder.toString());
         }
+        */
         // Specify class with main method to run
         arguments.add(SelfUpdater.class.getCanonicalName());
         // Arguments for update locations
@@ -80,6 +83,7 @@ public final class SelfUpdater {
 
         final ProcessBuilder pb = new ProcessBuilder();
         pb.command(arguments);
+        pb.directory(classpath);
 
         try {
             pb.start();
@@ -116,13 +120,16 @@ public final class SelfUpdater {
         final String separator = System.getProperty("file.separator");
         final String javaPath = System.getProperty("java.home") + separator + "bin" + separator + "java";
 
+        final File classpath = new File(launcherDirectory, "lib");
+
         final List<String> arguments = new ArrayList<>();
         arguments.add(javaPath);
         arguments.add("-jar");
-        arguments.add(launcherDirectory.getPath() + separator + "lib" + separator + "TerasologyLauncher.jar");
+        arguments.add("TerasologyLauncher.jar");
 
         final ProcessBuilder pb = new ProcessBuilder();
         pb.command(arguments);
+        pb.directory(classpath);
 
         logger.info("Start new launcher: {}", arguments);
         try {
