@@ -91,18 +91,18 @@ public final class LauncherUpdater {
             // Get and check current launcher directory
             final File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource()
                 .getLocation().toURI());
-            logger.trace("Launcher location: {}" + launcherLocation);
+            logger.trace("Launcher location: {}", launcherLocation);
             final File launcherDirectory = launcherLocation.getParentFile().getParentFile();
             DirectoryUtils.checkDirectory(launcherDirectory);
-            logger.trace("Launcher directory: {}" + launcherDirectory);
+            logger.trace("Launcher directory: {}", launcherDirectory);
 
             // Download launcher ZIP file
             final URL updateURL = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion,
                 DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
-            logger.trace("Update URL: {}" + updateURL);
+            logger.trace("Update URL: {}", updateURL);
 
             final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + ".zip");
-            logger.trace("Download ZIP file: {}" + downloadedZipFile);
+            logger.trace("Download ZIP file: {}", downloadedZipFile);
 
             DownloadUtils.downloadToFile(updateURL, downloadedZipFile);
 
