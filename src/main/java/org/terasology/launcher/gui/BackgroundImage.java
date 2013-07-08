@@ -38,7 +38,7 @@ final class BackgroundImage extends JLabel {
     private static final Logger logger = LoggerFactory.getLogger(BackgroundImage.class);
 
     /**
-     * Uses a default image as background. The default image is located in images/background.png.
+     * Uses a default image as background. The default image is located in images/background.jpg.
      *
      * @param width  - the background width
      * @param height - the background height
