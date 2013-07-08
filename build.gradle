@@ -41,7 +41,7 @@ ext {
     versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasology/launcher/version')
     versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
     versionBase = rootProject.file("version.txt").text.trim()
-    displayVersion = (env.JOB_NAME == 'TerasologyLauncherStable') ? versionBase : ((env.BUILD_ID != null) ? versionBase + '-SNAPSHOT.' + env.BUILD_ID : versionBase + '+' + timestampFormat.format(startDateTime))
+    displayVersion = (env.JOB_NAME == 'TerasologyLauncherStable') ? versionBase : ((env.BUILD_NUMBER != null) ? versionBase + '-SNAPSHOT.' + env.BUILD_NUMBER : versionBase + '+' + timestampFormat.format(startDateTime))
 
     // Splash image for the JAR
     splashImage = "org/terasology/launcher/images/splash.jpg"
