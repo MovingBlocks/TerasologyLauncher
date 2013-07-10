@@ -395,45 +395,55 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         exitButton.setText(BundleUtils.getLabel("launcher_exit"));
         exitButton.setToolTipText(BundleUtils.getLabel("tooltip_exit"));
 
-        logo.setToolTipText(BundleUtils.getLabel("tooltip_website"));
+        logo.setToolTipText(BundleUtils.getLabel("tooltip_website") + " - "
+            + BundleUtils.getURI("terasology_website"));
         logo.setIcon(BundleUtils.getImageIcon("logo"));
         logo.setUri(BundleUtils.getURI("terasology_website"));
         forums.setText(BundleUtils.getLabel("launcher_forum"));
-        forums.setToolTipText(BundleUtils.getLabel("tooltip_forum"));
+        forums.setToolTipText(BundleUtils.getLabel("tooltip_forum") + " - "
+            + BundleUtils.getURI("terasology_forum"));
         forums.setUri(BundleUtils.getURI("terasology_forum"));
         issues.setText(BundleUtils.getLabel("launcher_issues"));
-        issues.setToolTipText(BundleUtils.getLabel("tooltip_githubIssues"));
+        issues.setToolTipText(BundleUtils.getLabel("tooltip_githubIssues") + " - "
+            + BundleUtils.getURI("terasology_github_issues"));
         issues.setUri(BundleUtils.getURI("terasology_github_issues"));
         mods.setText(BundleUtils.getLabel("launcher_mods"));
-        mods.setToolTipText(BundleUtils.getLabel("tooltip_mods"));
+        mods.setToolTipText(BundleUtils.getLabel("tooltip_mods") + " - "
+            + BundleUtils.getURI("terasology_mods"));
         mods.setUri(BundleUtils.getURI("terasology_mods"));
 
-        github.setToolTipText(BundleUtils.getLabel("tooltip_github"));
+        github.setToolTipText(BundleUtils.getLabel("tooltip_github") + " - "
+            + BundleUtils.getURI("terasology_github"));
         github.setUri(BundleUtils.getURI("terasology_github"));
         github.setIcon(BundleUtils.getImageIcon("github"));
         github.setRolloverIcon(BundleUtils.getImageIcon("github_hover"));
 
-        twitter.setToolTipText(BundleUtils.getLabel("tooltip_twitter"));
+        twitter.setToolTipText(BundleUtils.getLabel("tooltip_twitter") + " - "
+            + BundleUtils.getURI("terasology_twitter"));
         twitter.setUri(BundleUtils.getURI("terasology_twitter"));
         twitter.setIcon(BundleUtils.getImageIcon("twitter"));
         twitter.setRolloverIcon(BundleUtils.getImageIcon("twitter_hover"));
 
-        facebook.setToolTipText(BundleUtils.getLabel("tooltip_facebook"));
+        facebook.setToolTipText(BundleUtils.getLabel("tooltip_facebook") + " - "
+            + BundleUtils.getURI("terasology_facebook"));
         facebook.setUri(BundleUtils.getURI("terasology_facebook"));
         facebook.setIcon(BundleUtils.getImageIcon("facebook"));
         facebook.setRolloverIcon(BundleUtils.getImageIcon("facebook_hover"));
 
-        gplus.setToolTipText(BundleUtils.getLabel("tooltip_gplus"));
+        gplus.setToolTipText(BundleUtils.getLabel("tooltip_gplus") + " - "
+            + BundleUtils.getURI("terasology_gplus"));
         gplus.setUri(BundleUtils.getURI("terasology_gplus"));
         gplus.setIcon(BundleUtils.getImageIcon("gplus"));
         gplus.setRolloverIcon(BundleUtils.getImageIcon("gplus_hover"));
 
-        youtube.setToolTipText(BundleUtils.getLabel("tooltip_youtube"));
+        youtube.setToolTipText(BundleUtils.getLabel("tooltip_youtube") + " - "
+            + BundleUtils.getURI("terasology_youtube"));
         youtube.setUri(BundleUtils.getURI("terasology_youtube"));
         youtube.setIcon(BundleUtils.getImageIcon("youtube"));
         youtube.setRolloverIcon(BundleUtils.getImageIcon("youtube_hover"));
 
-        reddit.setToolTipText(BundleUtils.getLabel("tooltip_reddit"));
+        reddit.setToolTipText(BundleUtils.getLabel("tooltip_reddit") + " - "
+            + BundleUtils.getURI("terasology_reddit"));
         reddit.setUri(BundleUtils.getURI("terasology_reddit"));
         reddit.setIcon(BundleUtils.getImageIcon("reddit"));
         reddit.setRolloverIcon(BundleUtils.getImageIcon("reddit_hover"));
