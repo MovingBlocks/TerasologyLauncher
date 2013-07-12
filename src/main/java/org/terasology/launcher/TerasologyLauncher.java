@@ -100,21 +100,21 @@ public final class TerasologyLauncher {
             }
             logger.debug("Launcher directory: {}", launcherDirectory);
 
-            // Download directory
-            logger.trace("Init downloadDirectory...");
-            final File downloadDirectory = new File(launcherDirectory, DirectoryUtils.DOWNLOAD_DIR_NAME);
+            // Temp directory
+            logger.trace("Init tempDirectory...");
+            final File tempDirectory = new File(launcherDirectory, DirectoryUtils.TEMP_DIR_NAME);
             try {
-                DirectoryUtils.checkDirectory(downloadDirectory);
-                FileUtils.deleteDirectoryContent(downloadDirectory);
+                DirectoryUtils.checkDirectory(tempDirectory);
+                FileUtils.deleteDirectoryContent(tempDirectory);
             } catch (IOException e) {
-                logger.error("The download directory can not be created or used! '{}'", downloadDirectory, e);
+                logger.error("The temp directory can not be created or used! '{}'", tempDirectory, e);
                 JOptionPane.showMessageDialog(splash,
-                    BundleUtils.getLabel("message_error_downloadDirectory") + "\n" + downloadDirectory,
+                    BundleUtils.getLabel("message_error_tempDirectory") + "\n" + tempDirectory,
                     BundleUtils.getLabel("message_error_title"),
                     JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
-            logger.debug("Download directory: {}", downloadDirectory);
+            logger.debug("Temp directory: {}", tempDirectory);
 
             // LauncherSettings
             logger.trace("Init LauncherSettings...");
@@ -137,7 +137,7 @@ public final class TerasologyLauncher {
             if (launcherSettings.isSearchForLauncherUpdates()) {
                 logger.trace("Search for launcher updates...");
                 splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
-                final LauncherUpdater updater = new LauncherUpdater(os, downloadDirectory,
+                final LauncherUpdater updater = new LauncherUpdater(os, tempDirectory,
                     launcherVersionInfo.getBuildNumber(), launcherVersionInfo.getJobName());
                 if (updater.updateAvailable()) {
                     logger.info("An update is available to the TerasologyLauncher. '{}' '{}'",
@@ -225,7 +225,7 @@ public final class TerasologyLauncher {
             // LauncherFrame
             logger.trace("Create LauncherFrame...");
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_createFrame"));
-            final Frame frame = new LauncherFrame(launcherDirectory, downloadDirectory, launcherSettings, gameVersions);
+            final Frame frame = new LauncherFrame(launcherDirectory, tempDirectory, launcherSettings, gameVersions);
             frame.setVisible(true);
 
             // Dispose splash screen

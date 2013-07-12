@@ -36,17 +36,17 @@ public final class LauncherUpdater {
     private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
 
     private final OperatingSystem os;
-    private final File downloadDirectory;
+    private final File tempDirectory;
     private final String currentVersion;
     private final String jobName;
 
     private Integer upstreamVersion;
     private TerasologyLauncherVersionInfo versionInfo;
 
-    public LauncherUpdater(final OperatingSystem os, final File downloadDirectory,
+    public LauncherUpdater(final OperatingSystem os, final File tempDirectory,
                            final String currentVersion, final String jobName) {
         this.os = os;
-        this.downloadDirectory = downloadDirectory;
+        this.tempDirectory = tempDirectory;
         if ((currentVersion == null) || (currentVersion.trim().length() == 0)) {
             this.currentVersion = "0";
         } else {
@@ -101,7 +101,7 @@ public final class LauncherUpdater {
                 DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
             logger.trace("Update URL: {}", updateURL);
 
-            final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + ".zip");
+            final File downloadedZipFile = new File(tempDirectory, jobName + "_" + upstreamVersion + ".zip");
             logger.trace("Download ZIP file: {}", downloadedZipFile);
 
             DownloadUtils.downloadToFile(updateURL, downloadedZipFile);
@@ -111,7 +111,7 @@ public final class LauncherUpdater {
             logger.trace("ZIP file extracted");
 
             // Start SelfUpdater
-            SelfUpdater.runUpdate(splash, os, downloadDirectory, launcherDirectory);
+            SelfUpdater.runUpdate(splash, os, tempDirectory, launcherDirectory);
         } catch (Exception e) {
             logger.error("Launcher update failed! Aborting update process!", e);
             JOptionPane.showMessageDialog(splash,

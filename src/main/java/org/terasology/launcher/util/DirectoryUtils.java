@@ -23,7 +23,7 @@ public final class DirectoryUtils {
 
     public static final String LAUNCHER_APPLICATION_DIR_NAME = "TerasologyLauncher";
     public static final String GAMES_APPLICATION_DIR_NAME = "Terasology";
-    public static final String DOWNLOAD_DIR_NAME = "download";
+    public static final String TEMP_DIR_NAME = "temp";
 
     private static final String PROPERTY_USER_HOME = "user.home";
     private static final String ENV_APPDATA = "APPDATA";

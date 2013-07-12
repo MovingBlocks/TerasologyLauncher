@@ -44,10 +44,10 @@ public final class SelfUpdater {
      * Starts the update process after downloading the needed files.
      */
     public static void runUpdate(final SplashScreenWindow splash, final OperatingSystem os,
-                                 final File downloadDirectory, final File launcherDirectory) {
+                                 final File tempDirectory, final File launcherDirectory) {
         final String separator = File.separator;
         final String javaBin = System.getProperty("java.home") + separator + "bin" + separator + "java";
-        final File tempLauncherDirectory = new File(downloadDirectory, "TerasologyLauncher");
+        final File tempLauncherDirectory = new File(tempDirectory, "TerasologyLauncher");
         final File classpath = new File(tempLauncherDirectory, "lib");
 
         final List<String> arguments = new ArrayList<>();
