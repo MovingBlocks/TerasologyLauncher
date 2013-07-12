@@ -18,10 +18,8 @@ package org.terasology.launcher.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.util.OperatingSystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,8 +41,7 @@ public final class SelfUpdater {
     /**
      * Starts the update process after downloading the needed files.
      */
-    public static void runUpdate(final SplashScreenWindow splash, final OperatingSystem os,
-                                 final File tempDirectory, final File launcherDirectory) {
+    public static void runUpdate(final File tempDirectory, final File launcherInstallationDirectory) {
         final String separator = File.separator;
         final String javaBin = System.getProperty("java.home") + separator + "bin" + separator + "java";
         final File tempLauncherDirectory = new File(tempDirectory, "TerasologyLauncher");
@@ -56,29 +53,14 @@ public final class SelfUpdater {
         // Build and set the classpath
         arguments.add("-cp");
         arguments.add("TerasologyLauncher.jar");
-        /*
-        if (os.isWindows()) {
-            arguments.add("\"" + classpath.getPath() + separator + "*" + "\"");
-        } else {
-            final StringBuilder classpathBuilder = new StringBuilder();
-            final File[] files = classpath.listFiles();
-            if ((files != null) && (files.length > 0)) {
-                for (File f : files) {
-                    classpathBuilder.append(f.toURI()).append(File.pathSeparator);
-                }
-            }
-            classpathBuilder.deleteCharAt(classpathBuilder.length() - 1);
-            arguments.add(classpathBuilder.toString());
-        }
-        */
         // Specify class with main method to run
         arguments.add(SelfUpdater.class.getCanonicalName());
         // Arguments for update locations
-        arguments.add(launcherDirectory.getPath());
+        arguments.add(launcherInstallationDirectory.getPath());
         arguments.add(tempLauncherDirectory.getPath());
 
         logger.info("Running launcher self update with: {}", arguments);
-        logger.info("Current launcher path: {}", launcherDirectory.getPath());
+        logger.info("Current launcher path: {}", launcherInstallationDirectory.getPath());
         logger.info("New files temporarily located in: {}", tempLauncherDirectory.getPath());
 
         final ProcessBuilder pb = new ProcessBuilder();
@@ -96,21 +78,21 @@ public final class SelfUpdater {
     public static void main(final String[] args) {
         logger.info("Running self updater.");
 
-        final String launcherDirectoryArg = args[0];
+        final String launcherInstallationDirectoryArg = args[0];
         final String tempLauncherDirectoryArg = args[1];
-        final File launcherDirectory = new File(launcherDirectoryArg);
+        final File launcherInstallationDirectory = new File(launcherInstallationDirectoryArg);
         final File tempLauncherDirectory = new File(tempLauncherDirectoryArg);
 
         try {
             // Check both directories
-            DirectoryUtils.checkDirectory(launcherDirectory);
+            DirectoryUtils.checkDirectory(launcherInstallationDirectory);
             DirectoryUtils.checkDirectory(tempLauncherDirectory);
 
-            logger.info("Delete launcher directory: {}", launcherDirectory);
-            FileUtils.delete(launcherDirectory);
+            logger.info("Delete launcher installation directory: {}", launcherInstallationDirectory);
+            FileUtils.delete(launcherInstallationDirectory);
 
             logger.info("Copy new files: {}", tempLauncherDirectory);
-            FileUtils.copyFolder(tempLauncherDirectory, launcherDirectory);
+            FileUtils.copyFolder(tempLauncherDirectory, launcherInstallationDirectory);
         } catch (IOException e) {
             logger.error("Auto updating the launcher failed!", e);
             System.exit(1);
@@ -120,7 +102,7 @@ public final class SelfUpdater {
         final String separator = System.getProperty("file.separator");
         final String javaPath = System.getProperty("java.home") + separator + "bin" + separator + "java";
 
-        final File classpath = new File(launcherDirectory, "lib");
+        final File classpath = new File(launcherInstallationDirectory, "lib");
 
         final List<String> arguments = new ArrayList<>();
         arguments.add(javaPath);

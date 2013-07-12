@@ -24,28 +24,27 @@ import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.JOptionPane;
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 public final class LauncherUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
 
-    private final OperatingSystem os;
     private final File tempDirectory;
     private final String currentVersion;
     private final String jobName;
 
     private Integer upstreamVersion;
     private TerasologyLauncherVersionInfo versionInfo;
+    private File launcherInstallationDirectory;
 
-    public LauncherUpdater(final OperatingSystem os, final File tempDirectory,
-                           final String currentVersion, final String jobName) {
-        this.os = os;
+    public LauncherUpdater(final File tempDirectory, final String currentVersion, final String jobName) {
         this.tempDirectory = tempDirectory;
         if ((currentVersion == null) || (currentVersion.trim().length() == 0)) {
             this.currentVersion = "0";
@@ -86,16 +85,17 @@ public final class LauncherUpdater {
         return updateAvailable;
     }
 
+    public void detectAndCheckLauncherInstallationDirectory() throws URISyntaxException, IOException {
+        final File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource()
+            .getLocation().toURI());
+        logger.trace("Launcher location: {}", launcherLocation);
+        launcherInstallationDirectory = launcherLocation.getParentFile().getParentFile();
+        DirectoryUtils.checkDirectory(launcherInstallationDirectory);
+        logger.trace("Launcher installation directory: {}", launcherInstallationDirectory);
+    }
+
     public void update(final SplashScreenWindow splash) {
         try {
-            // Get and check current launcher directory
-            final File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource()
-                .getLocation().toURI());
-            logger.trace("Launcher location: {}", launcherLocation);
-            final File launcherDirectory = launcherLocation.getParentFile().getParentFile();
-            DirectoryUtils.checkDirectory(launcherDirectory);
-            logger.trace("Launcher directory: {}", launcherDirectory);
-
             // Download launcher ZIP file
             final URL updateURL = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion,
                 DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
@@ -111,7 +111,7 @@ public final class LauncherUpdater {
             logger.trace("ZIP file extracted");
 
             // Start SelfUpdater
-            SelfUpdater.runUpdate(splash, os, tempDirectory, launcherDirectory);
+            SelfUpdater.runUpdate(tempDirectory, launcherInstallationDirectory);
         } catch (Exception e) {
             logger.error("Launcher update failed! Aborting update process!", e);
             JOptionPane.showMessageDialog(splash,
@@ -127,5 +127,9 @@ public final class LauncherUpdater {
 
     public TerasologyLauncherVersionInfo getVersionInfo() {
         return versionInfo;
+    }
+
+    public File getLauncherInstallationDirectory() {
+        return launcherInstallationDirectory;
     }
 }

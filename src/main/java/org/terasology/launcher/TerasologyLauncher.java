@@ -39,6 +39,7 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 public final class TerasologyLauncher {
 
@@ -137,14 +138,22 @@ public final class TerasologyLauncher {
             if (launcherSettings.isSearchForLauncherUpdates()) {
                 logger.trace("Search for launcher updates...");
                 splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
-                final LauncherUpdater updater = new LauncherUpdater(os, tempDirectory,
+                final LauncherUpdater updater = new LauncherUpdater(tempDirectory,
                     launcherVersionInfo.getBuildNumber(), launcherVersionInfo.getJobName());
                 if (updater.updateAvailable()) {
                     logger.info("An update is available to the TerasologyLauncher. '{}' '{}'",
                         updater.getUpstreamVersion(), updater.getVersionInfo());
                     splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
-
-                    showUpdateDialog(splash, updater, launcherVersionInfo);
+                    try {
+                        updater.detectAndCheckLauncherInstallationDirectory();
+                        showUpdateDialog(splash, updater, launcherVersionInfo);
+                    } catch (URISyntaxException | IOException e) {
+                        logger.error("The launcher installation directory can not be detected or used!", e);
+                        JOptionPane.showMessageDialog(splash,
+                            BundleUtils.getLabel("message_error_launcherInstallationDirectory"),
+                            BundleUtils.getLabel("message_error_title"),
+                            JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
 
@@ -256,15 +265,23 @@ public final class TerasologyLauncher {
         final StringBuilder builder = new StringBuilder();
         builder.append("  ");
         builder.append(BundleUtils.getLabel("message_update_current"));
+        builder.append("  ");
         builder.append(launcherVersionInfo.getDisplayVersion());
-        builder.append("\n");
+        builder.append("  \n");
         builder.append("  ");
         builder.append(BundleUtils.getLabel("message_update_latest"));
+        builder.append("  ");
         if (updater.getVersionInfo() != null) {
             builder.append(updater.getVersionInfo().getDisplayVersion());
         } else if (updater.getUpstreamVersion() != null) {
             builder.append(updater.getUpstreamVersion());
         }
+        builder.append("  \n");
+        builder.append("  ");
+        builder.append(BundleUtils.getLabel("message_update_installationDirectory"));
+        builder.append("  ");
+        builder.append(updater.getLauncherInstallationDirectory().getPath());
+        builder.append("  ");
 
         final JTextArea msgArea = new JTextArea();
         msgArea.setText(builder.toString());
