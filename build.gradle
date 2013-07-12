@@ -24,10 +24,9 @@ apply plugin: 'checkstyle'
 //}
 
 import org.apache.tools.ant.filters.FixCrLfFilter;
+import java.text.SimpleDateFormat;
 
-def timestampFormat = new java.text.SimpleDateFormat('yyyyMMddHHmmss')
-timestampFormat.timeZone = TimeZone.getTimeZone("UTC")
-def dateTimeFormat = new java.text.SimpleDateFormat('yyyy-MM-dd_HH-mm-ss')
+def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
 
 // Declare "extra properties" (variables) for the project - a Gradle thing that makes them special.
@@ -36,12 +35,11 @@ ext {
     env = System.getenv()
 
     // Stuff for our automatic version file setup
-    startDateTime = new Date()
-    startDateTimeString = dateTimeFormat.format(startDateTime)
+    startDateTimeString = dateTimeFormat.format(new Date())
     versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasology/launcher/version')
     versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
     versionBase = rootProject.file("version.txt").text.trim()
-    displayVersion = (env.JOB_NAME == 'TerasologyLauncherStable') ? versionBase : ((env.BUILD_NUMBER != null) ? versionBase + '-SNAPSHOT.' + env.BUILD_NUMBER : versionBase + '+' + timestampFormat.format(startDateTime))
+    displayVersion = (env.JOB_NAME == 'TerasologyLauncherStable') ? versionBase : ((env.JOB_NAME != null && env.BUILD_NUMBER != null) ? versionBase + '.' + env.BUILD_NUMBER + '+' + env.JOB_NAME : versionBase + ' local development ' + startDateTimeString)
 
     // Splash image for the JAR
     splashImage = "org/terasology/launcher/images/splash.jpg"
