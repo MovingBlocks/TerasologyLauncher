@@ -37,7 +37,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
-import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import java.awt.Color;
 import java.awt.Container;
