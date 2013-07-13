@@ -49,6 +49,8 @@ final class LinkJLabel extends JLabel implements MouseListener {
         setForeground(standardColor);
         addMouseListener(this);
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        setVerticalAlignment(CENTER);
+        setHorizontalAlignment(CENTER);
     }
 
     Color getHoverColor() {
