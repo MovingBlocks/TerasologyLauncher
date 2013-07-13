@@ -202,18 +202,18 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
         // Forums link
         forums = new LinkJLabel();
-        forums.setFont(forums.getFont().deriveFont(24f));
+        forums.setFont(forums.getFont().deriveFont(20f));
         forums.setBounds(480, 36, 96, 32);
 
         // Issues link
         issues = new LinkJLabel();
-        issues.setFont(issues.getFont().deriveFont(24f));
-        issues.setBounds(640, 36, 96, 32);
+        issues.setFont(issues.getFont().deriveFont(20f));
+        issues.setBounds(616, 36, 128, 32);
 
         // Mods
         mods = new LinkJLabel();
-        mods.setFont(mods.getFont().deriveFont(24f));
-        mods.setBounds(FRAME_WIDTH - 96 - 16 - xShift, 36, 96, 32);
+        mods.setFont(mods.getFont().deriveFont(20f));
+        mods.setBounds(FRAME_WIDTH - 96 - xShift, 36, 96, 32);
 
         // Progress Bar
         progressBar = new JProgressBar();
