@@ -59,7 +59,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
 
     private static final String SAVE_ACTION = "save";
     private static final String CANCEL_ACTION = "cancel";
-    private static final String RESET_ACTION = "reset";
 
     private static final String LAUNCHER_DIRECTORY_OPEN = "launcherDirectoryOpen";
     private static final String GAMES_DIRECTORY_OPEN = "gamesDirectoryOpen";
@@ -114,16 +113,11 @@ final class SettingsMenu extends JDialog implements ActionListener {
         mainSettings.addTab(BundleUtils.getLabel("settings_game_title"), createGameSettingsTab(settingsFont));
         mainSettings.addTab(BundleUtils.getLabel("settings_launcher_title"), createLauncherSettingsTab(settingsFont));
 
-        /*================== OK, Cancel, Reset ==================*/
+        /*================== OK, Cancel ==================*/
         final JButton saveButton = new JButton();
         saveButton.setActionCommand(SAVE_ACTION);
         saveButton.addActionListener(this);
         saveButton.setText(BundleUtils.getLabel("settings_save"));
-
-        final JButton resetButton = new JButton();
-        resetButton.setActionCommand(RESET_ACTION);
-        resetButton.addActionListener(this);
-        resetButton.setText(BundleUtils.getLabel("settings_reset"));
 
         final JButton cancelButton = new JButton();
         cancelButton.setActionCommand(CANCEL_ACTION);
@@ -141,8 +135,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     .addContainerGap()
                     .addComponent(saveButton)
                     .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addComponent(resetButton)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                     .addComponent(cancelButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
                     .addContainerGap())
         );
@@ -153,7 +145,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(saveButton)
-                        .addComponent(resetButton)
                         .addComponent(cancelButton))
                     .addContainerGap())
         );
@@ -484,108 +475,110 @@ final class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void actionPerformed(final String actionCommand) {
-        if (actionCommand.equals(LAUNCHER_DIRECTORY_OPEN)) {
-            try {
-                DirectoryUtils.checkDirectory(launcherDirectory);
-                Desktop.getDesktop().open(launcherDirectory);
-            } catch (IOException e) {
-                logger.error("The launcher directory can not be opened! '{}'", launcherDirectory, e);
-                JOptionPane.showMessageDialog(this,
-                    BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory,
-                    BundleUtils.getLabel("message_error_title"),
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        } else if (actionCommand.equals(GAMES_DIRECTORY_OPEN)) {
-            try {
-                DirectoryUtils.checkDirectory(gamesDirectory);
-                Desktop.getDesktop().open(gamesDirectory);
-            } catch (IOException e) {
-                logger.error("The game installation directory can not be opened! '{}'", gamesDirectory, e);
-                JOptionPane.showMessageDialog(this,
-                    BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
-                    BundleUtils.getLabel("message_error_title"),
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        } else if (actionCommand.equals(GAMES_DIRECTORY_EDIT)) {
-            final JFileChooser fileChooser = new JFileChooser(gamesDirectory);
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            fileChooser.setDialogTitle(BundleUtils.getLabel("settings_game_gamesDirectory_edit_title"));
-            if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+        switch (actionCommand) {
+            case LAUNCHER_DIRECTORY_OPEN:
+
                 try {
-                    final File selectedFile = fileChooser.getSelectedFile();
-                    DirectoryUtils.checkDirectory(selectedFile);
-                    gamesDirectory = selectedFile;
+                    DirectoryUtils.checkDirectory(launcherDirectory);
+                    Desktop.getDesktop().open(launcherDirectory);
                 } catch (IOException e) {
-                    logger.error("The game installation directory can not be created or used! '{}'", gamesDirectory, e);
+                    logger.error("The launcher directory can not be opened! '{}'", launcherDirectory, e);
+                    JOptionPane.showMessageDialog(this,
+                        BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory,
+                        BundleUtils.getLabel("message_error_title"),
+                        JOptionPane.ERROR_MESSAGE);
+                }
+                break;
+            case GAMES_DIRECTORY_OPEN:
+                try {
+                    DirectoryUtils.checkDirectory(gamesDirectory);
+                    Desktop.getDesktop().open(gamesDirectory);
+                } catch (IOException e) {
+                    logger.error("The game installation directory can not be opened! '{}'", gamesDirectory, e);
                     JOptionPane.showMessageDialog(this,
                         BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
                         BundleUtils.getLabel("message_error_title"),
                         JOptionPane.ERROR_MESSAGE);
                 }
-            }
-        } else if (actionCommand.equals(MAX_HEAP_SIZE_ACTION)) {
-            updateInitialHeapSizeBox();
-        } else if (actionCommand.equals(INITIAL_HEAP_SIZE_ACTION)) {
-            updateMaxHeapSizeBox();
-        } else if (actionCommand.equals(CANCEL_ACTION)) {
-            dispose();
-            setVisible(false);
-            setAlwaysOnTop(false);
-        } else if (actionCommand.equals(RESET_ACTION)) {
-            // reload the right selections
-            updateBuildTypeSelection();
-            populateVersions(buildVersionStableBox, GameBuildType.STABLE);
-            populateVersions(buildVersionNightlyBox, GameBuildType.NIGHTLY);
-            updateHeapSizeSelection();
-            populateLanguage();
-            gamesDirectory = launcherSettings.getGamesDirectory();
-        } else if (actionCommand.equals(SAVE_ACTION)) {
-            // save build type
-            final GameBuildType selectedType;
-            if (buildTypeBox.getSelectedIndex() == 0) {
-                selectedType = GameBuildType.STABLE;
-            } else {
-                selectedType = GameBuildType.NIGHTLY;
-            }
-            launcherSettings.setBuildType(selectedType);
+                break;
+            case GAMES_DIRECTORY_EDIT:
+                final JFileChooser fileChooser = new JFileChooser(gamesDirectory);
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooser.setDialogTitle(BundleUtils.getLabel("settings_game_gamesDirectory_edit_title"));
+                if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                    try {
+                        final File selectedFile = fileChooser.getSelectedFile();
+                        DirectoryUtils.checkDirectory(selectedFile);
+                        gamesDirectory = selectedFile;
+                    } catch (IOException e) {
+                        logger.error("The game installation directory can not be created or used! '{}'",
+                            gamesDirectory, e);
+                        JOptionPane.showMessageDialog(this,
+                            BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
+                            BundleUtils.getLabel("message_error_title"),
+                            JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                break;
+            case MAX_HEAP_SIZE_ACTION:
+                updateInitialHeapSizeBox();
+                break;
+            case INITIAL_HEAP_SIZE_ACTION:
+                updateMaxHeapSizeBox();
+                break;
+            case CANCEL_ACTION:
+                dispose();
+                setVisible(false);
+                setAlwaysOnTop(false);
+                break;
+            case SAVE_ACTION:
+                // save build type
+                final GameBuildType selectedType;
+                if (buildTypeBox.getSelectedIndex() == 0) {
+                    selectedType = GameBuildType.STABLE;
+                } else {
+                    selectedType = GameBuildType.NIGHTLY;
+                }
+                launcherSettings.setBuildType(selectedType);
 
-            // save build version
-            VersionItem versionItemStable = (VersionItem) buildVersionStableBox.getSelectedItem();
-            launcherSettings.setBuildVersion(versionItemStable.getVersion(), GameBuildType.STABLE);
-            VersionItem versionItemNightly = (VersionItem) buildVersionNightlyBox.getSelectedItem();
-            launcherSettings.setBuildVersion(versionItemNightly.getVersion(), GameBuildType.NIGHTLY);
+                // save build version
+                VersionItem versionItemStable = (VersionItem) buildVersionStableBox.getSelectedItem();
+                launcherSettings.setBuildVersion(versionItemStable.getVersion(), GameBuildType.STABLE);
+                VersionItem versionItemNightly = (VersionItem) buildVersionNightlyBox.getSelectedItem();
+                launcherSettings.setBuildVersion(versionItemNightly.getVersion(), GameBuildType.NIGHTLY);
 
-            // save gamesDirectory
-            launcherSettings.setGamesDirectory(gamesDirectory);
+                // save gamesDirectory
+                launcherSettings.setGamesDirectory(gamesDirectory);
 
-            // save heap size settings
-            launcherSettings.setMaxHeapSize((JavaHeapSize) maxHeapSizeBox.getSelectedItem());
-            launcherSettings.setInitialHeapSize((JavaHeapSize) initialHeapSizeBox.getSelectedItem());
+                // save heap size settings
+                launcherSettings.setMaxHeapSize((JavaHeapSize) maxHeapSizeBox.getSelectedItem());
+                launcherSettings.setInitialHeapSize((JavaHeapSize) initialHeapSizeBox.getSelectedItem());
 
-            // save languageBox settings
-            Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectedIndex()));
-            launcherSettings.setLocale(Languages.getCurrentLocale());
+                // save languageBox settings
+                Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectedIndex()));
+                launcherSettings.setLocale(Languages.getCurrentLocale());
 
-            // save searchForLauncherUpdates
-            launcherSettings.setSearchForLauncherUpdates(searchForLauncherUpdatesBox.isSelected());
+                // save searchForLauncherUpdates
+                launcherSettings.setSearchForLauncherUpdates(searchForLauncherUpdatesBox.isSelected());
 
-            // save closeLauncherAfterGameStart
-            launcherSettings.setCloseLauncherAfterGameStart(closeLauncherAfterGameStartBox.isSelected());
+                // save closeLauncherAfterGameStart
+                launcherSettings.setCloseLauncherAfterGameStart(closeLauncherAfterGameStartBox.isSelected());
 
-            // store changed settings
-            try {
-                launcherSettings.store();
-            } catch (IOException e) {
-                logger.error("The launcher settings can not be stored! '{}'",
-                    launcherSettings.getLauncherSettingsFilePath(), e);
-                JOptionPane.showMessageDialog(this,
-                    BundleUtils.getLabel("message_error_storeSettings"),
-                    BundleUtils.getLabel("message_error_title"),
-                    JOptionPane.ERROR_MESSAGE);
-            }
-            dispose();
-            setVisible(false);
-            setAlwaysOnTop(false);
+                // store changed settings
+                try {
+                    launcherSettings.store();
+                } catch (IOException e) {
+                    logger.error("The launcher settings can not be stored! '{}'",
+                        launcherSettings.getLauncherSettingsFilePath(), e);
+                    JOptionPane.showMessageDialog(this,
+                        BundleUtils.getLabel("message_error_storeSettings"),
+                        BundleUtils.getLabel("message_error_title"),
+                        JOptionPane.ERROR_MESSAGE);
+                }
+                dispose();
+                setVisible(false);
+                setAlwaysOnTop(false);
+                break;
         }
     }
 }
