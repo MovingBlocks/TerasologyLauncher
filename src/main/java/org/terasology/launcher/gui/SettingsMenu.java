@@ -23,7 +23,7 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.version.GameBuildType;
+import org.terasology.launcher.version.GameJob;
 import org.terasology.launcher.version.TerasologyGameVersion;
 import org.terasology.launcher.version.TerasologyGameVersions;
 
@@ -63,12 +63,12 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private static final String LAUNCHER_DIRECTORY_OPEN = "launcherDirectoryOpen";
     private static final String GAMES_DIRECTORY_OPEN = "gamesDirectoryOpen";
     private static final String GAMES_DIRECTORY_EDIT = "gamesDirectoryEdit";
+    private static final String JOB_ACTION = "job";
     private static final String MAX_HEAP_SIZE_ACTION = "maxHeapSize";
     private static final String INITIAL_HEAP_SIZE_ACTION = "initialHeapSize";
 
-    private JComboBox<String> buildTypeBox;
-    private JComboBox<VersionItem> buildVersionStableBox;
-    private JComboBox<VersionItem> buildVersionNightlyBox;
+    private JComboBox<JobItem> jobBox;
+    private JComboBox<VersionItem> buildVersionBox;
     private JComboBox<JavaHeapSize> maxHeapSizeBox;
     private JComboBox<JavaHeapSize> initialHeapSizeBox;
     private JComboBox<String> languageBox;
@@ -94,9 +94,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
 
         initComponents();
 
-        populateBuildType();
-        populateVersions(buildVersionStableBox, GameBuildType.STABLE);
-        populateVersions(buildVersionNightlyBox, GameBuildType.NIGHTLY);
+        populateJob();
         populateHeapSize();
         populateLanguage();
         populateSearchForLauncherUpdates();
@@ -156,26 +154,21 @@ final class SettingsMenu extends JDialog implements ActionListener {
         JPanel gameSettingsTab = new JPanel();
         gameSettingsTab.setFont(settingsFont);
 
-        JLabel buildTypeLabel = new JLabel();
-        buildTypeLabel.setText(BundleUtils.getLabel("settings_game_buildType"));
-        buildTypeLabel.setFont(settingsFont);
+        JLabel jobLabel = new JLabel();
+        jobLabel.setText(BundleUtils.getLabel("settings_game_job"));
+        jobLabel.setFont(settingsFont);
 
-        buildTypeBox = new JComboBox<>();
-        buildTypeBox.setFont(settingsFont);
+        jobBox = new JComboBox<>();
+        jobBox.setFont(settingsFont);
+        jobBox.addActionListener(this);
+        jobBox.setActionCommand(JOB_ACTION);
 
-        JLabel buildVersionStableLabel = new JLabel();
-        buildVersionStableLabel.setText(BundleUtils.getLabel("settings_game_buildVersion_stable"));
-        buildVersionStableLabel.setFont(settingsFont);
+        JLabel buildVersionLabel = new JLabel();
+        buildVersionLabel.setText(BundleUtils.getLabel("settings_game_buildVersion"));
+        buildVersionLabel.setFont(settingsFont);
 
-        buildVersionStableBox = new JComboBox<>();
-        buildVersionStableBox.setFont(settingsFont);
-
-        JLabel buildVersionNightlyLabel = new JLabel();
-        buildVersionNightlyLabel.setText(BundleUtils.getLabel("settings_game_buildVersion_nightly"));
-        buildVersionNightlyLabel.setFont(settingsFont);
-
-        buildVersionNightlyBox = new JComboBox<>();
-        buildVersionNightlyBox.setFont(settingsFont);
+        buildVersionBox = new JComboBox<>();
+        buildVersionBox.setFont(settingsFont);
 
         final JPanel gamesDirectoryPanel = new JPanel();
 
@@ -227,17 +220,15 @@ final class SettingsMenu extends JDialog implements ActionListener {
                 .addGroup(gameTabLayout.createSequentialGroup()
                     .addContainerGap()
                     .addGroup(gameTabLayout.createParallelGroup()
-                        .addComponent(buildTypeLabel)
-                        .addComponent(buildVersionStableLabel)
-                        .addComponent(buildVersionNightlyLabel)
+                        .addComponent(jobLabel)
+                        .addComponent(buildVersionLabel)
                         .addComponent(gamesDirectoryLabel)
                         .addComponent(maxHeapSizeLabel)
                         .addComponent(initialHeapSizeLabel))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup()
-                        .addComponent(buildTypeBox)
-                        .addComponent(buildVersionStableBox)
-                        .addComponent(buildVersionNightlyBox)
+                        .addComponent(jobBox)
+                        .addComponent(buildVersionBox)
                         .addComponent(gamesDirectoryPanel)
                         .addComponent(maxHeapSizeBox)
                         .addComponent(initialHeapSizeBox))
@@ -249,25 +240,20 @@ final class SettingsMenu extends JDialog implements ActionListener {
                 .addGroup(gameTabLayout.createSequentialGroup()
                     .addContainerGap()
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(buildTypeLabel)
-                        .addComponent(buildTypeBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                        .addComponent(jobLabel)
+                        .addComponent(jobBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                             GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(buildVersionStableLabel)
-                        .addComponent(buildVersionStableBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                        .addComponent(buildVersionLabel)
+                        .addComponent(buildVersionBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                             GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(buildVersionNightlyLabel)
-                        .addComponent(buildVersionNightlyBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                            GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(gamesDirectoryLabel)
                         .addComponent(gamesDirectoryPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                             GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(maxHeapSizeLabel)
                         .addComponent(maxHeapSizeBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
@@ -373,27 +359,23 @@ final class SettingsMenu extends JDialog implements ActionListener {
         return launcherSettingsTab;
     }
 
-    private void populateBuildType() {
-        buildTypeBox.removeAllItems();
-
-        buildTypeBox.addItem(BundleUtils.getLabel("settings_game_buildType_stable"));
-        buildTypeBox.addItem(BundleUtils.getLabel("settings_game_buildType_nightly"));
-
-        updateBuildTypeSelection();
-    }
-
-    private void updateBuildTypeSelection() {
-        if (launcherSettings.getBuildType() == GameBuildType.STABLE) {
-            buildTypeBox.setSelectedIndex(0);
-        } else {
-            buildTypeBox.setSelectedIndex(1);
+    private void populateJob() {
+        for (GameJob job : GameJob.values()) {
+            final JobItem jobItem = new JobItem(job);
+            jobBox.addItem(jobItem);
+            if (launcherSettings.getJob() == job) {
+                jobBox.setSelectedItem(jobItem);
+            }
         }
+        updateBuildVersionBox();
     }
 
-    private void populateVersions(final JComboBox<VersionItem> buildVersionBox, final GameBuildType buildType) {
-        final int buildVersion = launcherSettings.getBuildVersion(buildType);
+    private void updateBuildVersionBox() {
+        buildVersionBox.removeAllItems();
+        final JobItem jobItem = (JobItem) jobBox.getSelectedItem();
+        final int buildVersion = launcherSettings.getBuildVersion(jobItem.getJob());
 
-        for (final TerasologyGameVersion version : gameVersions.getGameVersionList(buildType)) {
+        for (final TerasologyGameVersion version : gameVersions.getGameVersionList(jobItem.getJob())) {
             final VersionItem versionItem = new VersionItem(version);
             buildVersionBox.addItem(versionItem);
             if (versionItem.getVersion() == buildVersion) {
@@ -477,7 +459,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private void actionPerformed(final String actionCommand) {
         switch (actionCommand) {
             case LAUNCHER_DIRECTORY_OPEN:
-
                 try {
                     DirectoryUtils.checkDirectory(launcherDirectory);
                     Desktop.getDesktop().open(launcherDirectory);
@@ -520,6 +501,9 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     }
                 }
                 break;
+            case JOB_ACTION:
+                updateBuildVersionBox();
+                break;
             case MAX_HEAP_SIZE_ACTION:
                 updateInitialHeapSizeBox();
                 break;
@@ -532,20 +516,13 @@ final class SettingsMenu extends JDialog implements ActionListener {
                 setAlwaysOnTop(false);
                 break;
             case SAVE_ACTION:
-                // save build type
-                final GameBuildType selectedType;
-                if (buildTypeBox.getSelectedIndex() == 0) {
-                    selectedType = GameBuildType.STABLE;
-                } else {
-                    selectedType = GameBuildType.NIGHTLY;
-                }
-                launcherSettings.setBuildType(selectedType);
+                // save job
+                final JobItem jobItem = (JobItem) jobBox.getSelectedItem();
+                launcherSettings.setJob(jobItem.getJob());
 
                 // save build version
-                VersionItem versionItemStable = (VersionItem) buildVersionStableBox.getSelectedItem();
-                launcherSettings.setBuildVersion(versionItemStable.getVersion(), GameBuildType.STABLE);
-                VersionItem versionItemNightly = (VersionItem) buildVersionNightlyBox.getSelectedItem();
-                launcherSettings.setBuildVersion(versionItemNightly.getVersion(), GameBuildType.NIGHTLY);
+                final VersionItem versionItem = (VersionItem) buildVersionBox.getSelectedItem();
+                launcherSettings.setBuildVersion(versionItem.getVersion(), jobItem.getJob());
 
                 // save gamesDirectory
                 launcherSettings.setGamesDirectory(gamesDirectory);

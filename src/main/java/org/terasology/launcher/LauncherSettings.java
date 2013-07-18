@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.version.GameBuildType;
+import org.terasology.launcher.version.GameJob;
 import org.terasology.launcher.version.TerasologyGameVersion;
 
 import java.io.File;
@@ -43,14 +43,14 @@ public final class LauncherSettings {
     private static final String LAUNCHER_SETTINGS_FILE_NAME = "TerasologyLauncherSettings.properties";
     private static final String COMMENT_SETTINGS = "Terasology Launcher - Settings";
 
-    private static final GameBuildType BUILD_TYPE_DEFAULT = GameBuildType.STABLE;
+    private static final GameJob JOB_DEFAULT = GameJob.TerasologyStable;
     private static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     private static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     private static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
     private static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
 
     private static final String PROPERTY_LOCALE = "locale";
-    private static final String PROPERTY_BUILD_TYPE = "buildType";
+    private static final String PROPERTY_JOB = "job";
     private static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
     private static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
     private static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
@@ -109,22 +109,21 @@ public final class LauncherSettings {
         }
         properties.setProperty(PROPERTY_LOCALE, Languages.getCurrentLocale().toString());
 
-        // buildType
-        final String buildTypeStr = properties.getProperty(PROPERTY_BUILD_TYPE);
-        GameBuildType buildType = BUILD_TYPE_DEFAULT;
-        if (buildTypeStr != null) {
+        // jobName
+        final String jobStr = properties.getProperty(PROPERTY_JOB);
+        GameJob job = JOB_DEFAULT;
+        if (jobStr != null) {
             try {
-                buildType = GameBuildType.valueOf(buildTypeStr);
+                job = GameJob.valueOf(jobStr);
             } catch (IllegalArgumentException e) {
-                logger.warn("Invalid value '{}' for the parameter '{}'!", buildTypeStr, PROPERTY_BUILD_TYPE);
+                logger.warn("Invalid value '{}' for the parameter '{}'!", jobStr, PROPERTY_JOB);
             }
         }
-        properties.setProperty(PROPERTY_BUILD_TYPE, buildType.name());
+        properties.setProperty(PROPERTY_JOB, job.name());
 
         // buildVersion
-        final GameBuildType[] buildTypes = GameBuildType.values();
-        for (GameBuildType b : buildTypes) {
-            final String key = PROPERTY_PREFIX_BUILD_VERSION + b.name();
+        for (GameJob j : GameJob.values()) {
+            final String key = PROPERTY_PREFIX_BUILD_VERSION + j.name();
             final String buildVersionStr = properties.getProperty(key);
             int buildVersion = TerasologyGameVersion.BUILD_VERSION_LATEST;
             if (buildVersionStr != null) {
@@ -199,20 +198,20 @@ public final class LauncherSettings {
         properties.setProperty(PROPERTY_LOCALE, locale.toString());
     }
 
-    public synchronized void setBuildType(final GameBuildType buildType) {
-        properties.setProperty(PROPERTY_BUILD_TYPE, buildType.name());
+    public synchronized void setJob(final GameJob job) {
+        properties.setProperty(PROPERTY_JOB, job.name());
     }
 
-    public synchronized GameBuildType getBuildType() {
-        return GameBuildType.valueOf(properties.getProperty(PROPERTY_BUILD_TYPE));
+    public synchronized GameJob getJob() {
+        return GameJob.valueOf(properties.getProperty(PROPERTY_JOB));
     }
 
-    public synchronized void setBuildVersion(final int version, final GameBuildType buildType) {
-        properties.setProperty(PROPERTY_PREFIX_BUILD_VERSION + buildType.name(), String.valueOf(version));
+    public synchronized void setBuildVersion(final int version, final GameJob job) {
+        properties.setProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name(), String.valueOf(version));
     }
 
-    public synchronized int getBuildVersion(final GameBuildType buildType) {
-        return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + buildType.name()));
+    public synchronized int getBuildVersion(final GameJob job) {
+        return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name()));
     }
 
     public synchronized void setMaxHeapSize(final JavaHeapSize maxHeapSize) {

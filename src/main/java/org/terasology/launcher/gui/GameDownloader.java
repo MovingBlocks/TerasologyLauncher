@@ -22,7 +22,6 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.version.GameBuildType;
 import org.terasology.launcher.version.TerasologyGameVersion;
 import org.terasology.launcher.version.TerasologyGameVersions;
 
@@ -56,22 +55,17 @@ final class GameDownloader extends SwingWorker<Void, Void> {
         this.frame = frame;
         this.gameVersions = gameVersions;
 
-        final String jobName;
-        if (GameBuildType.STABLE == gameVersion.getBuildType()) {
-            jobName = DownloadUtils.TERASOLOGY_STABLE_JOB_NAME;
-        } else {
-            jobName = DownloadUtils.TERASOLOGY_NIGHTLY_JOB_NAME;
-        }
+        final String jobName = gameVersion.getJob().name();
         final Integer buildNumber = gameVersion.getBuildNumber();
 
         DirectoryUtils.checkDirectory(tempDirectory);
-        downloadZipFile = new File(tempDirectory, gameVersion.getBuildType().name() + "_" + jobName + "_"
-            + buildNumber.toString() + ".zip");
+        downloadZipFile = new File(tempDirectory, jobName + "_" + buildNumber.toString() + ".zip");
         if (downloadZipFile.exists() && (!downloadZipFile.isFile() || !downloadZipFile.delete())) {
             throw new IOException("The ZIP file already exists and can not be deleted! " + downloadZipFile);
         }
         downloadURL = DownloadUtils.createFileDownloadURL(jobName, buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_ZIP);
-        final File gamesSubDirectory = new File(new File(gamesDirectory, gameVersion.getBuildType().name()), jobName);
+        final File gamesSubDirectory = new File(new File(gamesDirectory,
+            gameVersion.getJob().getInstallationDirectory()), jobName);
         DirectoryUtils.checkDirectory(gamesSubDirectory);
         gameDirectory = new File(gamesSubDirectory, buildNumber.toString());
 
