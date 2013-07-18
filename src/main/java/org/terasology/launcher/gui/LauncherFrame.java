@@ -539,6 +539,10 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             b.append(escapeHtml(infoHeader2));
             b.append("</h2>\n");
         }
+        b.append("<strong>\n");
+        b.append(BundleUtils.getLabel("infoHeader3"));
+        b.append("</strong>\n");
+
         if ((gameVersion.getChangeLog() != null) && !gameVersion.getChangeLog().isEmpty()) {
             b.append("<ul>\n");
             for (String msg : gameVersion.getChangeLog()) {
