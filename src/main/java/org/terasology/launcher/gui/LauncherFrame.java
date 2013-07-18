@@ -544,6 +544,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         b.append("</strong>\n");
 
         if ((gameVersion.getChangeLog() != null) && !gameVersion.getChangeLog().isEmpty()) {
+            b.append("<p>\n");
+            b.append(BundleUtils.getLabel("infoHeader4"));
             b.append("<ul>\n");
             for (String msg : gameVersion.getChangeLog()) {
                 b.append("<li>");
@@ -551,6 +553,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 b.append("</li>\n");
             }
             b.append("</ul>\n");
+            b.append("</p>\n");
         }
         return b.toString();
     }
