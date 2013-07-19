@@ -51,7 +51,8 @@ final class VersionItem {
         }
         if (!gameVersion.isLatest()) {
             if ((gameVersion.getGameVersionInfo() != null)
-                && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
+                && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)
+                && (gameVersion.getGameVersionInfo().getDisplayVersion().trim().length() > 0)) {
                 b.append(" - ");
                 b.append(gameVersion.getGameVersionInfo().getDisplayVersion());
             }

@@ -14,10 +14,28 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.version;
+package org.terasology.launcher.gui;
 
-public enum GameBuildType {
+import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.version.GameJob;
 
-    STABLE, NIGHTLY
+final class JobItem {
 
+    private final GameJob job;
+
+    public JobItem(final GameJob job) {
+        this.job = job;
+    }
+
+    public GameJob getJob() {
+        return job;
+    }
+
+    /**
+     * Used at SettingsMenu.
+     */
+    @Override
+    public String toString() {
+        return BundleUtils.getLabel(job.getSettingsKey());
+    }
 }

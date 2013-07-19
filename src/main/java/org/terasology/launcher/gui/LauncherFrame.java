@@ -23,7 +23,6 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GameStarter;
-import org.terasology.launcher.version.GameBuildType;
 import org.terasology.launcher.version.TerasologyGameVersion;
 import org.terasology.launcher.version.TerasologyGameVersions;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
@@ -279,8 +278,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
 
     private TerasologyGameVersion getSelectedGameVersion() {
-        return gameVersions.getGameVersionForBuildVersion(launcherSettings.getBuildType(),
-            launcherSettings.getBuildVersion(launcherSettings.getBuildType()));
+        return gameVersions.getGameVersionForBuildVersion(launcherSettings.getJob(),
+            launcherSettings.getBuildVersion(launcherSettings.getJob()));
     }
 
     @Override
@@ -479,7 +478,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private void updateInfoTextPane() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         final String gameInfoText;
-        if ((gameVersion == null) || (gameVersion.getBuildType() == null) || (gameVersion.getBuildNumber() == null)) {
+        if ((gameVersion == null) || (gameVersion.getJob() == null) || (gameVersion.getBuildNumber() == null)) {
             gameInfoText = "";
         } else {
             gameInfoText = getGameInfoText(gameVersion);
@@ -489,46 +488,45 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     }
 
     private String getGameInfoText(final TerasologyGameVersion gameVersion) {
-        final Object[] arguments = new Object[7];
-        arguments[0] = gameVersion.getBuildType();
-        arguments[1] = gameVersion.getBuildNumber();
+        final Object[] arguments = new Object[9];
+        arguments[0] = gameVersion.getJob().name();
+        if (gameVersion.getJob().isStable()) {
+            arguments[1] = 1;
+        } else {
+            arguments[1] = 0;
+        }
+        arguments[2] = gameVersion.getJob().getGitBranch();
+        arguments[3] = gameVersion.getBuildNumber();
         if (gameVersion.isLatest()) {
-            arguments[2] = 1;
-        } else {
-            arguments[2] = 0;
-        }
-        if (gameVersion.isInstalled()) {
-            arguments[3] = 1;
-        } else {
-            arguments[3] = 0;
-        }
-        if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful()) {
             arguments[4] = 1;
         } else {
             arguments[4] = 0;
         }
+        if (gameVersion.isInstalled()) {
+            arguments[5] = 1;
+        } else {
+            arguments[5] = 0;
+        }
+        if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful()) {
+            arguments[6] = 1;
+        } else {
+            arguments[6] = 0;
+        }
         if ((gameVersion.getGameVersionInfo() != null)
             && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
-            arguments[5] = gameVersion.getGameVersionInfo().getDisplayVersion();
+            arguments[7] = gameVersion.getGameVersionInfo().getDisplayVersion();
         } else {
-            arguments[5] = "";
+            arguments[7] = "";
         }
         if ((gameVersion.getGameVersionInfo() != null)
             && (gameVersion.getGameVersionInfo().getDateTime() != null)) {
-            arguments[6] = gameVersion.getGameVersionInfo().getDateTime();
+            arguments[8] = gameVersion.getGameVersionInfo().getDateTime();
         } else {
-            arguments[6] = "";
+            arguments[8] = "";
         }
 
-        final String infoHeader1;
-        final String infoHeader2;
-        if (gameVersion.getBuildType() == GameBuildType.STABLE) {
-            infoHeader1 = BundleUtils.getMessage("infoHeader1_stable", arguments);
-            infoHeader2 = BundleUtils.getMessage("infoHeader2_stable", arguments);
-        } else {
-            infoHeader1 = BundleUtils.getMessage("infoHeader1_nightly", arguments);
-            infoHeader2 = BundleUtils.getMessage("infoHeader2_nightly", arguments);
-        }
+        final String infoHeader1 = BundleUtils.getMessage(gameVersion.getJob().getInfoMessageKey(), arguments);
+        final String infoHeader2 = BundleUtils.getMessage("infoHeader2", arguments);
 
         final StringBuilder b = new StringBuilder();
         if ((infoHeader1 != null) && (infoHeader1.trim().length() > 0)) {
@@ -541,7 +539,13 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             b.append(escapeHtml(infoHeader2));
             b.append("</h2>\n");
         }
+        b.append("<strong>\n");
+        b.append(BundleUtils.getLabel("infoHeader3"));
+        b.append("</strong>\n");
+
         if ((gameVersion.getChangeLog() != null) && !gameVersion.getChangeLog().isEmpty()) {
+            b.append("<p>\n");
+            b.append(BundleUtils.getLabel("infoHeader4"));
             b.append("<ul>\n");
             for (String msg : gameVersion.getChangeLog()) {
                 b.append("<li>");
@@ -549,6 +553,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 b.append("</li>\n");
             }
             b.append("</ul>\n");
+            b.append("</p>\n");
         }
         return b.toString();
     }

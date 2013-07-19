@@ -24,10 +24,10 @@ public final class TerasologyGameVersion implements Serializable {
 
     public static final int BUILD_VERSION_LATEST = -1;
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private Integer buildNumber;
-    private GameBuildType buildType;
+    private GameJob job;
     private TerasologyGameVersionInfo gameVersionInfo;
     private File installationPath;
     private File gameJar;
@@ -41,7 +41,7 @@ public final class TerasologyGameVersion implements Serializable {
 
     public void copyTo(final TerasologyGameVersion gameVersion) {
         gameVersion.setBuildNumber(buildNumber);
-        gameVersion.setBuildType(buildType);
+        gameVersion.setJob(job);
         gameVersion.setGameVersionInfo(gameVersionInfo);
         gameVersion.setInstallationPath(installationPath);
         gameVersion.setGameJar(gameJar);
@@ -68,12 +68,12 @@ public final class TerasologyGameVersion implements Serializable {
         this.buildNumber = buildNumber;
     }
 
-    public GameBuildType getBuildType() {
-        return buildType;
+    public GameJob getJob() {
+        return job;
     }
 
-    void setBuildType(final GameBuildType buildType) {
-        this.buildType = buildType;
+    void setJob(final GameJob job) {
+        this.job = job;
     }
 
     public TerasologyGameVersionInfo getGameVersionInfo() {
@@ -125,7 +125,7 @@ public final class TerasologyGameVersion implements Serializable {
     }
 
     public String toString() {
-        return this.getClass().getName() + "[" + buildType + ", " + buildNumber + ", latest=" + latest
+        return this.getClass().getName() + "[" + job + ", " + buildNumber + ", latest=" + latest
             + ", successful=" + successful + ", installed=" + isInstalled() + "]";
     }
 }

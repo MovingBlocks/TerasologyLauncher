@@ -40,9 +40,6 @@ import java.util.List;
 
 public final class DownloadUtils {
 
-    public static final String TERASOLOGY_STABLE_JOB_NAME = "TerasologyStable";
-    public static final String TERASOLOGY_NIGHTLY_JOB_NAME = "Terasology";
-    public static final String TERASOLOGY_LAUNCHER_STABLE_JOB_NAME = "TerasologyLauncherStable";
     public static final String TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME = "TerasologyLauncherNightly";
 
     public static final String FILE_TERASOLOGY_GAME_ZIP = "distributions/Terasology.zip";
