@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.version.TerasologyGameVersionInfo;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -215,10 +216,19 @@ public final class DownloadUtils {
             stream = urlChangeLog.openStream();
             final Document document = builder.parse(stream);
             final NodeList nodeList = document.getElementsByTagName("msg");
-            if ((nodeList != null) && (nodeList.getLength() > 0)) {
+            if (nodeList != null) {
                 changeLog = new ArrayList<>();
                 for (int i = 0; i < nodeList.getLength(); i++) {
-                    changeLog.add(nodeList.item(i).getLastChild().getTextContent());
+                    final Node item = nodeList.item(i);
+                    if (item != null) {
+                        final Node lastChild = item.getLastChild();
+                        if (lastChild != null) {
+                            final String textContent = lastChild.getTextContent();
+                            if ((textContent != null) && (textContent.trim().length() > 0)) {
+                                changeLog.add(textContent.trim());
+                            }
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
