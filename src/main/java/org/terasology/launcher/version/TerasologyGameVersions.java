@@ -85,7 +85,7 @@ public final class TerasologyGameVersions {
             buildNumbersMap.put(job, buildNumbers);
 
             loadSettingsBuildNumber(launcherSettings, buildNumbers, job);
-            lastBuildNumbers.put(job, loadLastSuccessfulBuildNumber(buildNumbers, job));
+            lastBuildNumbers.put(job, loadLastSuccessfulBuildNumber(launcherSettings, buildNumbers, job));
         }
 
         loadInstalledGames(gamesDirectory, buildNumbersMap);
@@ -136,11 +136,11 @@ public final class TerasologyGameVersions {
         }
     }
 
-    private Integer loadLastSuccessfulBuildNumber(final SortedSet<Integer> buildNumbers, final GameJob job) {
+    private Integer loadLastSuccessfulBuildNumber(LauncherSettings launcherSettings, final SortedSet<Integer> buildNumbers, final GameJob job) {
         Integer lastSuccessfulBuildNumber = null;
         try {
             // Use "successful" and not "stable" for TerasologyGame.
-            lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumber(job.name());
+            lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumber(launcherSettings, job.name());
             if (lastSuccessfulBuildNumber >= job.getMinBuildNumber()) {
                 buildNumbers.add(lastSuccessfulBuildNumber);
                 // add previous build numbers

@@ -39,6 +39,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import java.awt.Container;
 import java.awt.Desktop;
@@ -78,6 +79,11 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private final File launcherDirectory;
     private File gamesDirectory;
 
+    private final JTextField proxyHostField = new JTextField();
+    private final JTextField proxyPortField = new JTextField();
+    private final JTextField proxyUsernameField = new JTextField();
+    private final JTextField proxyPasswordField = new JTextField();
+
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
@@ -99,12 +105,20 @@ final class SettingsMenu extends JDialog implements ActionListener {
         populateLanguage();
         populateSearchForLauncherUpdates();
         populateCloseLauncherAfterGameStart();
+        populateProxySettings();
         gamesDirectory = launcherSettings.getGamesDirectory();
 
         pack();
     }
 
-    private void initComponents() {
+    private void populateProxySettings() {
+    	proxyHostField.setText(launcherSettings.getProxyHost());
+    	proxyPortField.setText(launcherSettings.getProxyPort());
+    	proxyUsernameField.setText(launcherSettings.getProxyUsername());
+    	proxyPasswordField.setText(launcherSettings.getProxyPassword());
+	}
+
+	private void initComponents() {
         final Font settingsFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
 
         final JTabbedPane mainSettings = new JTabbedPane();
@@ -312,21 +326,36 @@ final class SettingsMenu extends JDialog implements ActionListener {
         final GroupLayout launcherTabLayout = new GroupLayout(launcherSettingsTab);
         launcherSettingsTab.setLayout(launcherTabLayout);
 
-        launcherTabLayout.setHorizontalGroup(
+        JLabel proxyHostLabel = new JLabel(BundleUtils.getLabel("settings_launcher_proxyHost"));
+		JLabel proxyPortLabel = new JLabel(BundleUtils.getLabel("settings_launcher_proxyPort"));
+		JLabel proxyUsernameLabel = new JLabel(BundleUtils.getLabel("settings_launcher_proxyUsername"));
+		JLabel proxyPasswordLabel = new JLabel(BundleUtils.getLabel("settings_launcher_proxyPassword"));
+
+		launcherTabLayout.setHorizontalGroup(
             launcherTabLayout.createParallelGroup()
                 .addGroup(launcherTabLayout.createSequentialGroup()
                     .addContainerGap()
+                    // labels
                     .addGroup(launcherTabLayout.createParallelGroup()
                         .addComponent(languageLabel)
                         .addComponent(searchForLauncherUpdatesLabel)
                         .addComponent(closeLauncherAfterGameStartLabel)
-                        .addComponent(launcherDirectoryLabel))
+                        .addComponent(launcherDirectoryLabel)
+                        .addComponent(proxyHostLabel)
+                        .addComponent(proxyPortLabel)
+                        .addComponent(proxyUsernameLabel)
+                        .addComponent(proxyPasswordLabel))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    // inputs
                     .addGroup(launcherTabLayout.createParallelGroup()
                         .addComponent(languageBox)
                         .addComponent(searchForLauncherUpdatesBox)
                         .addComponent(closeLauncherAfterGameStartBox)
-                        .addComponent(launcherDirectoryPanel))
+                        .addComponent(launcherDirectoryPanel)
+                        .addComponent(proxyHostField)
+                        .addComponent(proxyPortField)
+                        .addComponent(proxyUsernameField)
+                        .addComponent(proxyPasswordField))
                     .addContainerGap())
         );
 
@@ -353,6 +382,22 @@ final class SettingsMenu extends JDialog implements ActionListener {
                         .addComponent(launcherDirectoryLabel)
                         .addComponent(launcherDirectoryPanel, GroupLayout.PREFERRED_SIZE,
                             GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(proxyHostLabel)
+                        .addComponent(proxyHostField, GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(proxyPortLabel)
+                        .addComponent(proxyPortField, GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                		.addComponent(proxyUsernameLabel)
+                		.addComponent(proxyUsernameField, GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+            		.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+            		.addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+        				.addComponent(proxyPasswordLabel)
+        				.addComponent(proxyPasswordField, GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap())
         );
 
@@ -540,6 +585,12 @@ final class SettingsMenu extends JDialog implements ActionListener {
 
                 // save closeLauncherAfterGameStart
                 launcherSettings.setCloseLauncherAfterGameStart(closeLauncherAfterGameStartBox.isSelected());
+
+                // proxy settings
+                launcherSettings.setProxyHost(proxyHostField.getText());
+                launcherSettings.setProxyPort(proxyPortField.getText());
+                launcherSettings.setProxyUsername(proxyUsernameField.getText());
+                launcherSettings.setProxyPassword(proxyPasswordField.getText());
 
                 // store changed settings
                 try {

@@ -57,6 +57,10 @@ public final class LauncherSettings {
     private static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
     private static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
     private static final String PROPERTY_GAMES_DIRECTORY = "gameDirectory";
+    private static final String PROPERTY_PROXY_HOST = "proxyHost";
+    private static final String PROPERTY_PROXY_PORT = "proxyPort";
+    private static final String PROPERTY_PROXY_USERNAME = "proxyUsername";
+    private static final String PROPERTY_PROXY_PASSWORD = "proxyPassword";
 
     private final File launcherSettingsFile;
     private final Properties properties;
@@ -192,6 +196,24 @@ public final class LauncherSettings {
         } else {
             properties.setProperty(PROPERTY_GAMES_DIRECTORY, "");
         }
+
+        // proxy stuff
+		String proxyHost = properties.getProperty(PROPERTY_PROXY_HOST);
+		if (proxyHost == null) {
+			proxyHost = System.getProperty("http.proxyHost");
+        }
+		if (proxyHost == null) {
+			proxyHost = "";
+        }
+		properties.setProperty(PROPERTY_PROXY_HOST, proxyHost);
+		String proxyPort = properties.getProperty(PROPERTY_PROXY_PORT);
+		if (proxyPort == null) {
+			proxyPort = System.getProperty("http.proxyPort");
+		}
+		if (proxyPort == null) {
+			proxyPort = "";
+        }
+		properties.setProperty(PROPERTY_PROXY_PORT, proxyPort);
     }
 
     public synchronized void setLocale(final Locale locale) {
@@ -202,8 +224,37 @@ public final class LauncherSettings {
         properties.setProperty(PROPERTY_JOB, job.name());
     }
 
+    public synchronized void setProxyHost(final String proxyHost) {
+        properties.setProperty(PROPERTY_PROXY_HOST, proxyHost);
+    }
+    public synchronized void setProxyPort(final String proxyPort) {
+    	properties.setProperty(PROPERTY_PROXY_PORT, proxyPort);
+    }
+    public synchronized void setProxyUsername(final String proxyUsername) {
+    	properties.setProperty(PROPERTY_PROXY_USERNAME, proxyUsername);
+    }
+    public synchronized void setProxyPassword(final String proxyPassword) {
+    	properties.setProperty(PROPERTY_PROXY_PASSWORD, proxyPassword);
+    }
+
     public synchronized GameJob getJob() {
         return GameJob.valueOf(properties.getProperty(PROPERTY_JOB));
+    }
+
+    public synchronized String getProxyHost() {
+    	return properties.getProperty(PROPERTY_PROXY_HOST);
+    }
+
+    public synchronized String getProxyPort() {
+    	return properties.getProperty(PROPERTY_PROXY_PORT);
+    }
+
+    public synchronized String getProxyUsername() {
+    	return properties.getProperty(PROPERTY_PROXY_USERNAME);
+    }
+
+    public synchronized String getProxyPassword() {
+    	return properties.getProperty(PROPERTY_PROXY_PASSWORD);
     }
 
     public synchronized void setBuildVersion(final int version, final GameJob job) {

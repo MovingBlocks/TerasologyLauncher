@@ -140,7 +140,7 @@ public final class TerasologyLauncher {
                 splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
                 final LauncherUpdater updater = new LauncherUpdater(tempDirectory,
                     launcherVersionInfo.getBuildNumber(), launcherVersionInfo.getJobName());
-                if (updater.updateAvailable()) {
+                if (updater.updateAvailable(launcherSettings)) {
                     logger.info("An update is available to the TerasologyLauncher. '{}' '{}'",
                         updater.getUpstreamVersion(), updater.getVersionInfo());
                     splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));

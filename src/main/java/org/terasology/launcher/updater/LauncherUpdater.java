@@ -18,6 +18,7 @@ package org.terasology.launcher.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.LauncherSettings;
 import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
@@ -61,17 +62,18 @@ public final class LauncherUpdater {
     /**
      * This method indicates if a new launcher version is available.
      * <p/>
-     * Compares the current launcher version number to the upstream version number if an internet connection is
-     * available.
+     * Compares the current launcher version number to the upstream version number if an Internet connection is available.
+     *
+     * @param launcherSettings
      *
      * @return whether an update is available
      */
-    public boolean updateAvailable() {
+    public boolean updateAvailable(final LauncherSettings launcherSettings) {
         boolean updateAvailable = false;
         upstreamVersion = null;
         versionInfo = null;
         try {
-            upstreamVersion = DownloadUtils.loadLastStableBuildNumber(jobName);
+            upstreamVersion = DownloadUtils.loadLastStableBuildNumber(launcherSettings, jobName);
             logger.trace("Current Version: {}, Upstream Version: {}", currentVersion, upstreamVersion);
             if (Integer.parseInt(currentVersion) < upstreamVersion) {
                 updateAvailable = true;

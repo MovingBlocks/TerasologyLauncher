@@ -18,6 +18,7 @@ package org.terasology.launcher.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.LauncherSettings;
 import org.terasology.launcher.version.TerasologyGameVersionInfo;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 import org.w3c.dom.Document;
@@ -112,22 +113,28 @@ public final class DownloadUtils {
     /**
      * Loads the <code>buildNumber</code> of the last <b>stable</b> build.
      */
-    public static int loadLastStableBuildNumber(final String jobName) throws DownloadException {
-        return loadBuildNumber(jobName, LAST_STABLE_BUILD);
+    public static int loadLastStableBuildNumber(final LauncherSettings launcherSettings, final String jobName) throws DownloadException {
+        return loadBuildNumber(launcherSettings, jobName, LAST_STABLE_BUILD);
     }
 
     /**
      * Loads the <code>buildNumber</code> of the last <b>successful</b> build.
+     *
+     * @param launcherSettings
+     * @param jobName
      */
-    public static int loadLastSuccessfulBuildNumber(final String jobName) throws DownloadException {
-        return loadBuildNumber(jobName, LAST_SUCCESSFUL_BUILD);
+    public static int loadLastSuccessfulBuildNumber(LauncherSettings launcherSettings, final String jobName) throws DownloadException {
+        return loadBuildNumber(launcherSettings, jobName, LAST_SUCCESSFUL_BUILD);
     }
 
-    private static int loadBuildNumber(final String jobName, final String lastBuild) throws DownloadException {
+    private static int loadBuildNumber(final LauncherSettings launcherSettings, final String jobName, final String lastBuild) throws DownloadException {
         int buildNumber;
         URL urlVersion = null;
         BufferedReader reader = null;
         try {
+        	System.setProperty("http.proxyHost", launcherSettings.getProxyHost());
+        	System.setProperty("http.proxyPort", launcherSettings.getProxyPort());
+        	logger.info("Using proxy host: '{}', port: '{}'", launcherSettings.getProxyHost(), launcherSettings.getProxyPort());
             urlVersion = new URL(JENKINS_JOB_URL + jobName + lastBuild + BUILD_NUMBER);
             reader = new BufferedReader(new InputStreamReader(urlVersion.openStream()));
             buildNumber = Integer.parseInt(reader.readLine());
