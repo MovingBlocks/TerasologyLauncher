@@ -26,7 +26,7 @@ apply plugin: 'checkstyle'
 import org.apache.tools.ant.filters.FixCrLfFilter;
 import java.text.SimpleDateFormat;
 
-def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssSSS")
+def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
 
 // Declare "extra properties" (variables) for the project - a Gradle thing that makes them special.
