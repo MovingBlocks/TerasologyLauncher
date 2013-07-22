@@ -1,7 +1,7 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 1.0.0 (2013-07-xx unreleased)
+## 1.0.0 (2013-07-22 unreleased)
 
 * Download, install and start the game *Terasology*
  * Supports setting a custom game installation directory and managing multiple installations / versions
