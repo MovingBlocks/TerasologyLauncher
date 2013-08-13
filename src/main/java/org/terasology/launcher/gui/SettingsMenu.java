@@ -586,6 +586,13 @@ final class SettingsMenu extends JDialog implements ActionListener {
             // store changed settings
             try {
                 launcherSettings.store();
+                // apply http proxy immediately
+                if (launcherSettings.isProxyEnabled()) {
+                    System.setProperty("http.proxyHost", launcherSettings.getProxyHost());
+                    System.setProperty("http.proxyPort", launcherSettings.getProxyPort());
+                    logger.info("Using proxy host: '{}', port: '{}'", launcherSettings.getProxyHost(),
+                            launcherSettings.getProxyPort());
+                }
             } catch (final IOException e) {
                 logger.error("The launcher settings can not be stored! '{}'",
                         launcherSettings.getLauncherSettingsFilePath(), e);

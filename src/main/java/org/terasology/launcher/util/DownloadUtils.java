@@ -135,16 +135,7 @@ public final class DownloadUtils {
         int buildNumber;
         URL urlVersion = null;
         BufferedReader reader = null;
-        // backup proxy settings
-        final String systemProxyHost = System.getProperty("http.proxyHost", null);
-        final String systemProxyPort = System.getProperty("http.proxyPort", null);
         try {
-            if (launcherSettings.isProxyEnabled()) {
-                System.setProperty("http.proxyHost", launcherSettings.getProxyHost());
-                System.setProperty("http.proxyPort", launcherSettings.getProxyPort());
-                logger.info("Using proxy host: '{}', port: '{}'", launcherSettings.getProxyHost(),
-                        launcherSettings.getProxyPort());
-            }
             urlVersion = new URL(JENKINS_JOB_URL + jobName + lastBuild + BUILD_NUMBER);
             reader = new BufferedReader(new InputStreamReader(urlVersion.openStream()));
             buildNumber = Integer.parseInt(reader.readLine());
@@ -157,13 +148,6 @@ public final class DownloadUtils {
                 } catch (final IOException e) {
                     logger.warn("Closing BufferedReader for '{}' failed!", urlVersion, e);
                 }
-            }
-            // restore proxy settings
-            if (systemProxyHost != null) {
-                System.setProperty("http.proxyHost", systemProxyHost);
-            }
-            if (systemProxyPort != null) {
-                System.setProperty("http.proxyPort", systemProxyPort);
             }
         }
         return buildNumber;
