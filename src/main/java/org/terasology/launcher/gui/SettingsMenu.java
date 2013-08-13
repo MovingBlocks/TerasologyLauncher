@@ -41,6 +41,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
+
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Font;
@@ -72,23 +73,23 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private JComboBox<VersionItem> buildVersionBox;
     private JComboBox<JavaHeapSize> maxHeapSizeBox;
     private JComboBox<JavaHeapSize> initialHeapSizeBox;
-    private JComboBox<String> languageBox;
-    private JCheckBox searchForLauncherUpdatesBox;
-    private JCheckBox closeLauncherAfterGameStartBox;
+    private final JComboBox<String> languageBox = new JComboBox<String>();
+    private final JCheckBox searchForLauncherUpdatesBox = new JCheckBox();
+    private final JCheckBox closeLauncherAfterGameStartBox = new JCheckBox();
 
     private final File launcherDirectory;
     private File gamesDirectory;
 
+    private final JCheckBox proxyEnabledBox = new JCheckBox();
     private final JTextField proxyHostField = new JTextField();
     private final JTextField proxyPortField = new JTextField();
-    private final JTextField proxyUsernameField = new JTextField();
-    private final JTextField proxyPasswordField = new JTextField();
 
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
     public SettingsMenu(final JFrame parent, final File launcherDirectory, final LauncherSettings launcherSettings,
-                        final TerasologyGameVersions gameVersions) {
+            final TerasologyGameVersions gameVersions) {
+
         super(parent, BundleUtils.getLabel("settings_title"), true);
 
         this.launcherDirectory = launcherDirectory;
@@ -106,26 +107,26 @@ final class SettingsMenu extends JDialog implements ActionListener {
         populateSearchForLauncherUpdates();
         populateCloseLauncherAfterGameStart();
         populateProxySettings();
+
         gamesDirectory = launcherSettings.getGamesDirectory();
 
         pack();
     }
 
     private void populateProxySettings() {
-    	proxyHostField.setText(launcherSettings.getProxyHost());
-    	proxyPortField.setText(launcherSettings.getProxyPort());
-    	proxyUsernameField.setText(launcherSettings.getProxyUsername());
-    	proxyPasswordField.setText(launcherSettings.getProxyPassword());
-	}
+        proxyEnabledBox.setSelected(launcherSettings.isProxyEnabled());
+        proxyHostField.setText(launcherSettings.getProxyHost());
+        proxyPortField.setText(launcherSettings.getProxyPort());
+    }
 
-	private void initComponents() {
+    private void initComponents() {
         final Font settingsFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
 
         final JTabbedPane mainSettings = new JTabbedPane();
         mainSettings.addTab(BundleUtils.getLabel("settings_game_title"), createGameSettingsTab(settingsFont));
         mainSettings.addTab(BundleUtils.getLabel("settings_launcher_title"), createLauncherSettingsTab(settingsFont));
 
-        /*================== OK, Cancel ==================*/
+        /* ================== OK, Cancel ================== */
         final JButton saveButton = new JButton();
         saveButton.setActionCommand(SAVE_ACTION);
         saveButton.addActionListener(this);
@@ -139,56 +140,47 @@ final class SettingsMenu extends JDialog implements ActionListener {
         final Container contentPane = getContentPane();
         final GroupLayout contentPaneLayout = new GroupLayout(contentPane);
         contentPane.setLayout(contentPaneLayout);
-        contentPaneLayout.setHorizontalGroup(
-            contentPaneLayout.createParallelGroup()
-                .addComponent(mainSettings, GroupLayout.Alignment.TRAILING,
-                    GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
-                .addGroup(contentPaneLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(saveButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addComponent(cancelButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
-                    .addContainerGap())
-        );
-        contentPaneLayout.setVerticalGroup(
-            contentPaneLayout.createParallelGroup()
-                .addGroup(contentPaneLayout.createSequentialGroup()
-                    .addComponent(mainSettings, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(saveButton)
-                        .addComponent(cancelButton))
-                    .addContainerGap())
-        );
+        contentPaneLayout.setHorizontalGroup(contentPaneLayout
+                .createParallelGroup()
+                .addComponent(mainSettings, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 0,
+                        Short.MAX_VALUE)
+                .addGroup(
+                        contentPaneLayout.createSequentialGroup().addContainerGap()
+                                .addComponent(saveButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(cancelButton, GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
+                                .addContainerGap()));
+        contentPaneLayout.setVerticalGroup(contentPaneLayout.createParallelGroup().addGroup(
+                contentPaneLayout
+                        .createSequentialGroup()
+                        .addComponent(mainSettings, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                contentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(saveButton).addComponent(cancelButton)).addContainerGap()));
         pack();
         setLocationRelativeTo(getOwner());
     }
 
     private JPanel createGameSettingsTab(final Font settingsFont) {
-        JPanel gameSettingsTab = new JPanel();
+        final JPanel gameSettingsTab = new JPanel();
         gameSettingsTab.setFont(settingsFont);
 
-        JLabel jobLabel = new JLabel();
-        jobLabel.setText(BundleUtils.getLabel("settings_game_job"));
-        jobLabel.setFont(settingsFont);
+        final JLabel jobLabel = jlabel(BundleUtils.getLabel("settings_game_job"), settingsFont);
 
         jobBox = new JComboBox<>();
         jobBox.setFont(settingsFont);
         jobBox.addActionListener(this);
         jobBox.setActionCommand(JOB_ACTION);
 
-        JLabel buildVersionLabel = new JLabel();
-        buildVersionLabel.setText(BundleUtils.getLabel("settings_game_buildVersion"));
-        buildVersionLabel.setFont(settingsFont);
+        final JLabel buildVersionLabel = jlabel(BundleUtils.getLabel("settings_game_buildVersion"), settingsFont);
 
         buildVersionBox = new JComboBox<>();
         buildVersionBox.setFont(settingsFont);
 
         final JPanel gamesDirectoryPanel = new JPanel();
 
-        final JLabel gamesDirectoryLabel = new JLabel();
-        gamesDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gamesDirectory"));
-        gamesDirectoryLabel.setFont(settingsFont);
+        final JLabel gamesDirectoryLabel = jlabel(BundleUtils.getLabel("settings_game_gamesDirectory"), settingsFont);
 
         final JButton gamesDirectoryOpenButton = new JButton();
         gamesDirectoryOpenButton.setFont(settingsFont);
@@ -208,18 +200,14 @@ final class SettingsMenu extends JDialog implements ActionListener {
         gamesDirectoryPanel.add(gamesDirectoryOpenButton);
         gamesDirectoryPanel.add(gamesDirectoryEditButton);
 
-        JLabel maxHeapSizeLabel = new JLabel();
-        maxHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_maxHeapSize"));
-        maxHeapSizeLabel.setFont(settingsFont);
+        final JLabel maxHeapSizeLabel = jlabel(BundleUtils.getLabel("settings_game_maxHeapSize"), settingsFont);
 
         maxHeapSizeBox = new JComboBox<>();
         maxHeapSizeBox.setFont(settingsFont);
         maxHeapSizeBox.addActionListener(this);
         maxHeapSizeBox.setActionCommand(MAX_HEAP_SIZE_ACTION);
 
-        JLabel initialHeapSizeLabel = new JLabel();
-        initialHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_initialHeapSize"));
-        initialHeapSizeLabel.setFont(settingsFont);
+        final JLabel initialHeapSizeLabel = jlabel(BundleUtils.getLabel("settings_game_initialHeapSize"), settingsFont);
 
         initialHeapSizeBox = new JComboBox<>();
         initialHeapSizeBox.setFont(settingsFont);
@@ -229,89 +217,82 @@ final class SettingsMenu extends JDialog implements ActionListener {
         final GroupLayout gameTabLayout = new GroupLayout(gameSettingsTab);
         gameSettingsTab.setLayout(gameTabLayout);
 
-        gameTabLayout.setHorizontalGroup(
-            gameTabLayout.createParallelGroup()
-                .addGroup(gameTabLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(gameTabLayout.createParallelGroup()
-                        .addComponent(jobLabel)
-                        .addComponent(buildVersionLabel)
-                        .addComponent(gamesDirectoryLabel)
-                        .addComponent(maxHeapSizeLabel)
-                        .addComponent(initialHeapSizeLabel))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(gameTabLayout.createParallelGroup()
-                        .addComponent(jobBox)
-                        .addComponent(buildVersionBox)
-                        .addComponent(gamesDirectoryPanel)
-                        .addComponent(maxHeapSizeBox)
-                        .addComponent(initialHeapSizeBox))
-                    .addContainerGap())
-        );
+        gameTabLayout.setHorizontalGroup(gameTabLayout.createParallelGroup().addGroup(
+                gameTabLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(
+                                gameTabLayout.createParallelGroup().addComponent(jobLabel)
+                                        .addComponent(buildVersionLabel).addComponent(gamesDirectoryLabel)
+                                        .addComponent(maxHeapSizeLabel).addComponent(initialHeapSizeLabel))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                gameTabLayout.createParallelGroup().addComponent(jobBox).addComponent(buildVersionBox)
+                                        .addComponent(gamesDirectoryPanel).addComponent(maxHeapSizeBox)
+                                        .addComponent(initialHeapSizeBox)).addContainerGap()));
 
-        gameTabLayout.setVerticalGroup(
-            gameTabLayout.createParallelGroup()
-                .addGroup(gameTabLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(jobLabel)
-                        .addComponent(jobBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                            GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(buildVersionLabel)
-                        .addComponent(buildVersionBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                            GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(gamesDirectoryLabel)
-                        .addComponent(gamesDirectoryPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                            GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(maxHeapSizeLabel)
-                        .addComponent(maxHeapSizeBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                            GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(initialHeapSizeLabel)
-                        .addComponent(initialHeapSizeBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                            GroupLayout.PREFERRED_SIZE))
-                    .addContainerGap())
-        );
+        gameTabLayout.setVerticalGroup(gameTabLayout.createParallelGroup().addGroup(
+                gameTabLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(
+                                gameTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jobLabel)
+                                        .addComponent(jobBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                                GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                gameTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(buildVersionLabel)
+                                        .addComponent(buildVersionBox, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                gameTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(gamesDirectoryLabel)
+                                        .addComponent(gamesDirectoryPanel, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                gameTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(maxHeapSizeLabel)
+                                        .addComponent(maxHeapSizeBox, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                gameTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(initialHeapSizeLabel)
+                                        .addComponent(initialHeapSizeBox, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap()));
         return gameSettingsTab;
     }
 
     private JPanel createLauncherSettingsTab(final Font settingsFont) {
-        JPanel launcherSettingsTab = new JPanel();
+
+        languageBox.setFont(settingsFont);
+        searchForLauncherUpdatesBox.setFont(settingsFont);
+        closeLauncherAfterGameStartBox.setFont(settingsFont);
+
+        final JPanel launcherSettingsTab = new JPanel();
         launcherSettingsTab.setFont(settingsFont);
 
-        JLabel languageLabel = new JLabel();
-        languageLabel.setText(BundleUtils.getLabel("settings_launcher_chooseLanguage"));
-        languageLabel.setFont(settingsFont);
+        final JLabel languageLabel = jlabel(BundleUtils.getLabel("settings_launcher_chooseLanguage"), settingsFont);
+        final JLabel searchForLauncherUpdatesLabel = jlabel(
+                BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"), settingsFont);
+        final JLabel closeLauncherAfterGameStartLabel = jlabel(
+                BundleUtils.getLabel("settings_launcher_closeLauncherAfterGameStart"), settingsFont);
 
-        languageBox = new JComboBox<>();
-        languageBox.setFont(settingsFont);
-
-        JLabel searchForLauncherUpdatesLabel = new JLabel();
-        searchForLauncherUpdatesLabel.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
-        searchForLauncherUpdatesLabel.setFont(settingsFont);
-
-        searchForLauncherUpdatesBox = new JCheckBox();
-        searchForLauncherUpdatesBox.setFont(settingsFont);
-
-        JLabel closeLauncherAfterGameStartLabel = new JLabel();
-        closeLauncherAfterGameStartLabel.setText(BundleUtils.getLabel("settings_launcher_closeLauncherAfterGameStart"));
-        closeLauncherAfterGameStartLabel.setFont(settingsFont);
-
-        closeLauncherAfterGameStartBox = new JCheckBox();
-        closeLauncherAfterGameStartBox.setFont(settingsFont);
 
         final JPanel launcherDirectoryPanel = new JPanel();
 
-        final JLabel launcherDirectoryLabel = new JLabel();
-        launcherDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory"));
-        launcherDirectoryLabel.setFont(settingsFont);
+        final JLabel launcherDirectoryLabel = jlabel(BundleUtils.getLabel("settings_launcher_launcherDirectory"),
+                settingsFont);
 
         final JButton launcherDirectoryOpenButton = new JButton();
         launcherDirectoryOpenButton.setFont(settingsFont);
@@ -326,86 +307,104 @@ final class SettingsMenu extends JDialog implements ActionListener {
         final GroupLayout launcherTabLayout = new GroupLayout(launcherSettingsTab);
         launcherSettingsTab.setLayout(launcherTabLayout);
 
-        JLabel proxyHostLabel = new JLabel(BundleUtils.getLabel("settings_launcher_proxyHost"));
-		JLabel proxyPortLabel = new JLabel(BundleUtils.getLabel("settings_launcher_proxyPort"));
-		JLabel proxyUsernameLabel = new JLabel(BundleUtils.getLabel("settings_launcher_proxyUsername"));
-		JLabel proxyPasswordLabel = new JLabel(BundleUtils.getLabel("settings_launcher_proxyPassword"));
+        final JLabel proxyEnabledLabel = jlabel(BundleUtils.getLabel("settings_launcher_proxyEnabled"), settingsFont);
+        final JLabel proxyHostLabel = jlabel(BundleUtils.getLabel("settings_launcher_proxyHost"), settingsFont);
+        final JLabel proxyPortLabel = jlabel(BundleUtils.getLabel("settings_launcher_proxyPort"), settingsFont);
 
-		launcherTabLayout.setHorizontalGroup(
-            launcherTabLayout.createParallelGroup()
-                .addGroup(launcherTabLayout.createSequentialGroup()
-                    .addContainerGap()
-                    // labels
-                    .addGroup(launcherTabLayout.createParallelGroup()
-                        .addComponent(languageLabel)
-                        .addComponent(searchForLauncherUpdatesLabel)
-                        .addComponent(closeLauncherAfterGameStartLabel)
-                        .addComponent(launcherDirectoryLabel)
-                        .addComponent(proxyHostLabel)
-                        .addComponent(proxyPortLabel)
-                        .addComponent(proxyUsernameLabel)
-                        .addComponent(proxyPasswordLabel))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    // inputs
-                    .addGroup(launcherTabLayout.createParallelGroup()
-                        .addComponent(languageBox)
-                        .addComponent(searchForLauncherUpdatesBox)
-                        .addComponent(closeLauncherAfterGameStartBox)
-                        .addComponent(launcherDirectoryPanel)
-                        .addComponent(proxyHostField)
-                        .addComponent(proxyPortField)
-                        .addComponent(proxyUsernameField)
-                        .addComponent(proxyPasswordField))
-                    .addContainerGap())
-        );
+        launcherTabLayout.setHorizontalGroup(launcherTabLayout.createParallelGroup().addGroup(
+                launcherTabLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        // labels
+                        .addGroup(
+                                launcherTabLayout.createParallelGroup().addComponent(languageLabel)
+                                        .addComponent(searchForLauncherUpdatesLabel)
+                                        .addComponent(closeLauncherAfterGameStartLabel)
+                                        .addComponent(launcherDirectoryLabel).addComponent(proxyEnabledLabel)
+                                        .addComponent(proxyHostLabel).addComponent(proxyPortLabel))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        // inputs
+                        .addGroup(
+                                launcherTabLayout.createParallelGroup().addComponent(languageBox)
+                                        .addComponent(searchForLauncherUpdatesBox)
+                                        .addComponent(closeLauncherAfterGameStartBox)
+                                        .addComponent(launcherDirectoryPanel).addComponent(proxyEnabledBox)
+                                        .addComponent(proxyHostField).addComponent(proxyPortField))
+                        .addContainerGap()));
 
-        launcherTabLayout.setVerticalGroup(
-            launcherTabLayout.createParallelGroup()
-                .addGroup(launcherTabLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(languageLabel)
-                        .addComponent(languageBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                            GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(searchForLauncherUpdatesLabel)
-                        .addComponent(searchForLauncherUpdatesBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                            GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(closeLauncherAfterGameStartLabel)
-                        .addComponent(closeLauncherAfterGameStartBox, GroupLayout.PREFERRED_SIZE,
-                            GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(launcherDirectoryLabel)
-                        .addComponent(launcherDirectoryPanel, GroupLayout.PREFERRED_SIZE,
-                            GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(proxyHostLabel)
-                        .addComponent(proxyHostField, GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(proxyPortLabel)
-                        .addComponent(proxyPortField, GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                		.addComponent(proxyUsernameLabel)
-                		.addComponent(proxyUsernameField, GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-            		.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-            		.addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-        				.addComponent(proxyPasswordLabel)
-        				.addComponent(proxyPasswordField, GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                    .addContainerGap())
-        );
+        launcherTabLayout.setVerticalGroup(launcherTabLayout.createParallelGroup().addGroup(
+                launcherTabLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(
+                                launcherTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(languageLabel)
+                                        .addComponent(languageBox, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                launcherTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(searchForLauncherUpdatesLabel)
+                                        .addComponent(searchForLauncherUpdatesBox, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                launcherTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(closeLauncherAfterGameStartLabel)
+                                        .addComponent(closeLauncherAfterGameStartBox, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                launcherTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(launcherDirectoryLabel)
+                                        .addComponent(launcherDirectoryPanel, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                launcherTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(proxyEnabledLabel)
+                                        .addComponent(proxyEnabledBox, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                launcherTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(proxyHostLabel)
+                                        .addComponent(proxyHostField, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                launcherTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(proxyPortLabel)
+                                        .addComponent(proxyPortField, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                launcherTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                                launcherTabLayout
+                                        .createParallelGroup(GroupLayout.Alignment.BASELINE))
+                        .addContainerGap()));
 
         return launcherSettingsTab;
     }
 
+    private JLabel jlabel(final String label, final Font font) {
+        final JLabel result = new JLabel(label);
+        result.setFont(font);
+        return result;
+    }
+
     private void populateJob() {
-        for (GameJob job : GameJob.values()) {
+        for (final GameJob job : GameJob.values()) {
             final JobItem jobItem = new JobItem(job);
             jobBox.addItem(jobItem);
             if (launcherSettings.getJob() == job) {
@@ -444,7 +443,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         final boolean bit64 = arch.contains("64");
 
         final List<JavaHeapSize> heapSizes = JavaHeapSize.getHeapSizes(max, bit64);
-        for (JavaHeapSize heapSize : heapSizes) {
+        for (final JavaHeapSize heapSize : heapSizes) {
             maxHeapSizeBox.addItem(heapSize);
             initialHeapSizeBox.addItem(heapSize);
         }
@@ -476,7 +475,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
 
     private void populateLanguage() {
         languageBox.removeAllItems();
-        for (Locale locale : Languages.SUPPORTED_LOCALES) {
+        for (final Locale locale : Languages.SUPPORTED_LOCALES) {
             final String item = BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale));
             languageBox.addItem(item);
 
@@ -503,110 +502,100 @@ final class SettingsMenu extends JDialog implements ActionListener {
 
     private void actionPerformed(final String actionCommand) {
         switch (actionCommand) {
-            case LAUNCHER_DIRECTORY_OPEN:
+        case LAUNCHER_DIRECTORY_OPEN:
+            try {
+                DirectoryUtils.checkDirectory(launcherDirectory);
+                Desktop.getDesktop().open(launcherDirectory);
+            } catch (final IOException e) {
+                logger.error("The launcher directory can not be opened! '{}'", launcherDirectory, e);
+                JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_launcherDirectory") + "\n"
+                        + launcherDirectory, BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+            }
+            break;
+        case GAMES_DIRECTORY_OPEN:
+            try {
+                DirectoryUtils.checkDirectory(gamesDirectory);
+                Desktop.getDesktop().open(gamesDirectory);
+            } catch (final IOException e) {
+                logger.error("The game installation directory can not be opened! '{}'", gamesDirectory, e);
+                JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gamesDirectory") + "\n"
+                        + gamesDirectory, BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+            }
+            break;
+        case GAMES_DIRECTORY_EDIT:
+            final JFileChooser fileChooser = new JFileChooser(gamesDirectory);
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            fileChooser.setDialogTitle(BundleUtils.getLabel("settings_game_gamesDirectory_edit_title"));
+            if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 try {
-                    DirectoryUtils.checkDirectory(launcherDirectory);
-                    Desktop.getDesktop().open(launcherDirectory);
-                } catch (IOException e) {
-                    logger.error("The launcher directory can not be opened! '{}'", launcherDirectory, e);
-                    JOptionPane.showMessageDialog(this,
-                        BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory,
-                        BundleUtils.getLabel("message_error_title"),
-                        JOptionPane.ERROR_MESSAGE);
+                    final File selectedFile = fileChooser.getSelectedFile();
+                    DirectoryUtils.checkDirectory(selectedFile);
+                    gamesDirectory = selectedFile;
+                } catch (final IOException e) {
+                    logger.error("The game installation directory can not be created or used! '{}'", gamesDirectory, e);
+                    JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gamesDirectory") + "\n"
+                            + gamesDirectory, BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
                 }
-                break;
-            case GAMES_DIRECTORY_OPEN:
-                try {
-                    DirectoryUtils.checkDirectory(gamesDirectory);
-                    Desktop.getDesktop().open(gamesDirectory);
-                } catch (IOException e) {
-                    logger.error("The game installation directory can not be opened! '{}'", gamesDirectory, e);
-                    JOptionPane.showMessageDialog(this,
-                        BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
-                        BundleUtils.getLabel("message_error_title"),
-                        JOptionPane.ERROR_MESSAGE);
-                }
-                break;
-            case GAMES_DIRECTORY_EDIT:
-                final JFileChooser fileChooser = new JFileChooser(gamesDirectory);
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                fileChooser.setDialogTitle(BundleUtils.getLabel("settings_game_gamesDirectory_edit_title"));
-                if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-                    try {
-                        final File selectedFile = fileChooser.getSelectedFile();
-                        DirectoryUtils.checkDirectory(selectedFile);
-                        gamesDirectory = selectedFile;
-                    } catch (IOException e) {
-                        logger.error("The game installation directory can not be created or used! '{}'",
-                            gamesDirectory, e);
-                        JOptionPane.showMessageDialog(this,
-                            BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
-                            BundleUtils.getLabel("message_error_title"),
-                            JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-                break;
-            case JOB_ACTION:
-                updateBuildVersionBox();
-                break;
-            case MAX_HEAP_SIZE_ACTION:
-                updateInitialHeapSizeBox();
-                break;
-            case INITIAL_HEAP_SIZE_ACTION:
-                updateMaxHeapSizeBox();
-                break;
-            case CANCEL_ACTION:
-                dispose();
-                setVisible(false);
-                setAlwaysOnTop(false);
-                break;
-            case SAVE_ACTION:
-                // save job
-                final JobItem jobItem = (JobItem) jobBox.getSelectedItem();
-                launcherSettings.setJob(jobItem.getJob());
+            }
+            break;
+        case JOB_ACTION:
+            updateBuildVersionBox();
+            break;
+        case MAX_HEAP_SIZE_ACTION:
+            updateInitialHeapSizeBox();
+            break;
+        case INITIAL_HEAP_SIZE_ACTION:
+            updateMaxHeapSizeBox();
+            break;
+        case CANCEL_ACTION:
+            dispose();
+            setVisible(false);
+            setAlwaysOnTop(false);
+            break;
+        case SAVE_ACTION:
+            // save job
+            final JobItem jobItem = (JobItem) jobBox.getSelectedItem();
+            launcherSettings.setJob(jobItem.getJob());
 
-                // save build version
-                final VersionItem versionItem = (VersionItem) buildVersionBox.getSelectedItem();
-                launcherSettings.setBuildVersion(versionItem.getVersion(), jobItem.getJob());
+            // save build version
+            final VersionItem versionItem = (VersionItem) buildVersionBox.getSelectedItem();
+            launcherSettings.setBuildVersion(versionItem.getVersion(), jobItem.getJob());
 
-                // save gamesDirectory
-                launcherSettings.setGamesDirectory(gamesDirectory);
+            // save gamesDirectory
+            launcherSettings.setGamesDirectory(gamesDirectory);
 
-                // save heap size settings
-                launcherSettings.setMaxHeapSize((JavaHeapSize) maxHeapSizeBox.getSelectedItem());
-                launcherSettings.setInitialHeapSize((JavaHeapSize) initialHeapSizeBox.getSelectedItem());
+            // save heap size settings
+            launcherSettings.setMaxHeapSize((JavaHeapSize) maxHeapSizeBox.getSelectedItem());
+            launcherSettings.setInitialHeapSize((JavaHeapSize) initialHeapSizeBox.getSelectedItem());
 
-                // save languageBox settings
-                Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectedIndex()));
-                launcherSettings.setLocale(Languages.getCurrentLocale());
+            // save languageBox settings
+            Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectedIndex()));
+            launcherSettings.setLocale(Languages.getCurrentLocale());
 
-                // save searchForLauncherUpdates
-                launcherSettings.setSearchForLauncherUpdates(searchForLauncherUpdatesBox.isSelected());
+            // save searchForLauncherUpdates
+            launcherSettings.setSearchForLauncherUpdates(searchForLauncherUpdatesBox.isSelected());
 
-                // save closeLauncherAfterGameStart
-                launcherSettings.setCloseLauncherAfterGameStart(closeLauncherAfterGameStartBox.isSelected());
+            // save closeLauncherAfterGameStart
+            launcherSettings.setCloseLauncherAfterGameStart(closeLauncherAfterGameStartBox.isSelected());
 
-                // proxy settings
-                launcherSettings.setProxyHost(proxyHostField.getText());
-                launcherSettings.setProxyPort(proxyPortField.getText());
-                launcherSettings.setProxyUsername(proxyUsernameField.getText());
-                launcherSettings.setProxyPassword(proxyPasswordField.getText());
+            // proxy settings
+            launcherSettings.setProxyEnabled(proxyEnabledBox.isSelected());
+            launcherSettings.setProxyHost(proxyHostField.getText());
+            launcherSettings.setProxyPort(proxyPortField.getText());
 
-                // store changed settings
-                try {
-                    launcherSettings.store();
-                } catch (IOException e) {
-                    logger.error("The launcher settings can not be stored! '{}'",
+            // store changed settings
+            try {
+                launcherSettings.store();
+            } catch (final IOException e) {
+                logger.error("The launcher settings can not be stored! '{}'",
                         launcherSettings.getLauncherSettingsFilePath(), e);
-                    JOptionPane.showMessageDialog(this,
-                        BundleUtils.getLabel("message_error_storeSettings"),
-                        BundleUtils.getLabel("message_error_title"),
-                        JOptionPane.ERROR_MESSAGE);
-                }
-                dispose();
-                setVisible(false);
-                setAlwaysOnTop(false);
-                break;
+                JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_storeSettings"),
+                        BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+            }
+            dispose();
+            setVisible(false);
+            setAlwaysOnTop(false);
+            break;
         }
     }
 }
