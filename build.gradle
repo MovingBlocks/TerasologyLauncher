@@ -12,16 +12,10 @@ apply plugin: 'eclipse'
 apply plugin: 'application'
 apply plugin: 'checkstyle'
 
-/*
- * Update Gradle Wrapper:
- * 1. Uncomment 'wrapper' task
- * 2. Change 'gradleVersion'
- * 3. Run "gradlew wrapper"
- * 4. Comment 'wrapper' task
- */
-//task wrapper(type: Wrapper) {
-//    gradleVersion = '1.4'
-//}
+// gradle wrapper version
+wrapper {
+    gradleVersion '1.7'
+}
 
 import org.apache.tools.ant.filters.FixCrLfFilter;
 import java.text.SimpleDateFormat;
