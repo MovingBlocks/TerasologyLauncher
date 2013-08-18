@@ -1,6 +1,10 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## 1.y.z (unreleased)
+* Gradle update (1.4 -> 1.7)
+
+
 ## 1.0.0 (2013-07-22)
 
 * Download, install and start the game *Terasology*
