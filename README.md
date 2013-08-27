@@ -11,8 +11,9 @@ Usage
 *Terasology Launcher* requires Java 7.
 
 1. Download and extract the ZIP file
+   * [official releases][Download GitHub Releases] (recommended)
    * [latest stable ZIP][Download Jenkins STABLE]
-   * [latest nightly ZIP][Download Jenkins NIGHTLY]
+   * [latest nightly ZIP][Download Jenkins NIGHTLY] (only for testing)
 2. Start *Terasology Launcher*
    * TerasologyLauncher.exe (Windows)
    * bin/TerasologyLauncher.bat (Windows)
@@ -50,6 +51,7 @@ Contributors
 [GitHub TerasologyLauncher]: https://github.com/MovingBlocks/TerasologyLauncher/ "TerasologyLauncher"
 [GitHub TerasologyLauncher Issues]: https://github.com/MovingBlocks/TerasologyLauncher/issues/ "TerasologyLauncher issues"
 [GitHub TerasologyLauncher Contributors]: https://github.com/MovingBlocks/TerasologyLauncher/graphs/contributors/ "TerasologyLauncher contributors"
+[Download GitHub Releases]: https://github.com/MovingBlocks/TerasologyLauncher/releases/ "TerasologyLauncher download (official releases)"
 [Download Jenkins STABLE]: http://jenkins.movingblocks.net/job/TerasologyLauncherStable/lastStableBuild/artifact/build/distributions/TerasologyLauncher.zip "TerasologyLauncher STABLE download"
 [Download Jenkins NIGHTLY]: http://jenkins.movingblocks.net/job/TerasologyLauncherNightly/lastStableBuild/artifact/build/distributions/TerasologyLauncher.zip "TerasologyLauncher NIGHTLY download"
 [English forum]: http://forum.movingblocks.net/threads/terasologylauncher-mrbarsack.708/ "TerasologyLauncher forum thread"
