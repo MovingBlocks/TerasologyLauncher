@@ -44,7 +44,7 @@ Contributors
 * Mathias Kalb [@mkalb](https://github.com/mkalb)
 * Rasmus Praestholm [@Cervator](https://github.com/Cervator)
 * Ian Macalinao [@simplyianm](https://github.com/simplyianm)
- 
+* Many users of the [german forum][German forum] (ideas, testing, suggestions, bug reports)
 
 [GitHub MovingBlocks]: https://github.com/MovingBlocks/ "MovingBlocks"
 [GitHub Terasology]: https://github.com/MovingBlocks/Terasology/ "Terasology"
