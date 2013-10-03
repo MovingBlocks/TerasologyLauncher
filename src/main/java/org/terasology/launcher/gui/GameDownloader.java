@@ -90,6 +90,7 @@ final class GameDownloader extends SwingWorker<Void, Void> {
         progressBar.setStringPainted(true);
         progressBar.setString(BundleUtils.getLabel("update_game_startDownload"));
         progressBar.setVisible(true);
+        progressBar.setToolTipText(downloadURL.toString());
     }
 
     @Override
@@ -97,14 +98,16 @@ final class GameDownloader extends SwingWorker<Void, Void> {
         try {
             setProgress(0);
             downloadZipFile();
-            setProgress(100);
+            if (!isCancelled()) {
+                setProgress(100);
 
-            firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_extractZip"));
-            FileUtils.extractZipTo(downloadZipFile, gameDirectory);
-            downloadZipFile.delete();
+                firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_extractZip"));
+                FileUtils.extractZipTo(downloadZipFile, gameDirectory);
+                downloadZipFile.delete();
 
-            firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_gameInfo"));
-            successful = gameVersions.updateGameVersionsAfterInstallation(gameDirectory);
+                firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_gameInfo"));
+                successful = gameVersions.updateGameVersionsAfterInstallation(gameDirectory);
+            }
         } catch (Exception e) {
             logger.error("There is an error occurred while downloading the game!", e);
         }
@@ -129,12 +132,16 @@ final class GameDownloader extends SwingWorker<Void, Void> {
                     percentage = 99;
                 }
                 setProgress(percentage);
+
+                if (isCancelled()) {
+                    break;
+                }
             }
         }
     }
 
     @Override
     protected void done() {
-        frame.finishedGameDownload(successful);
+        frame.finishedGameDownload(successful || isCancelled());
     }
 }

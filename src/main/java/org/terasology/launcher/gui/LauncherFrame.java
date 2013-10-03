@@ -329,12 +329,13 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             }
         } else if (command.equals(DOWNLOAD_ACTION)) {
             final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-            if ((gameVersion == null) || gameVersion.isInstalled()
+            if (gameDownloader != null) {
+                // Cancel download
+                logger.info("Cancel game download!");
+                gameDownloader.cancel(false);
+            } else if ((gameVersion == null) || gameVersion.isInstalled()
                 || (gameVersion.getSuccessful() == null) || !gameVersion.getSuccessful()) {
                 logger.warn("The selected game version can not be downloaded! '{}'", gameVersion);
-                updateGui();
-            } else if (gameDownloader != null) {
-                logger.warn("The game download can not be started because another download is already running!");
                 updateGui();
             } else {
                 try {
@@ -345,8 +346,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                     finishedGameDownload(false);
                     return;
                 }
-                downloadButton.setEnabled(false);
                 gameDownloader.execute();
+                updateGui();
             }
         } else if (command.equals(DELETE_ACTION)) {
             final TerasologyGameVersion gameVersion = getSelectedGameVersion();
@@ -383,8 +384,13 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         setTitle(BundleUtils.getLabel("launcher_title"));
         setIconImage(BundleUtils.getImage("icon"));
 
-        downloadButton.setText(BundleUtils.getLabel("launcher_download"));
-        downloadButton.setToolTipText(BundleUtils.getLabel("tooltip_download"));
+        if (gameDownloader != null) {
+            downloadButton.setText(BundleUtils.getLabel("launcher_cancelDownload"));
+            downloadButton.setToolTipText(BundleUtils.getLabel("tooltip_cancelDownload"));
+        } else {
+            downloadButton.setText(BundleUtils.getLabel("launcher_download"));
+            downloadButton.setToolTipText(BundleUtils.getLabel("tooltip_download"));
+        }
         startButton.setText(BundleUtils.getLabel("launcher_start"));
         startButton.setToolTipText(BundleUtils.getLabel("tooltip_start"));
         deleteButton.setText(BundleUtils.getLabel("launcher_delete"));
@@ -467,6 +473,11 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             downloadButton.setEnabled(false);
             startButton.setEnabled(false);
             deleteButton.setEnabled(false);
+        }
+
+        // Cancel download
+        if (gameDownloader != null) {
+            downloadButton.setEnabled(true);
         }
     }
 
