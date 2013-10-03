@@ -119,7 +119,7 @@ public final class ImageUtils {
      * @param c - value to clamp
      * @return clamped value in the range 0..255
      */
-    private static int clamp(int c) {
+    private static int clamp(final int c) {
         if (c < 0) {
             return 0;
         }

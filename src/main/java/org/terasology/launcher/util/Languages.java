@@ -65,7 +65,7 @@ public final class Languages {
         final Locale defaultLocale = Locale.getDefault();
         for (Locale locale : SUPPORTED_LOCALES) {
             if (locale.getLanguage().equals(defaultLocale.getLanguage())) {
-                if (!locale.equals(currentLocale)) {
+                if (logger.isDebugEnabled() && !locale.equals(currentLocale)) {
                     logger.debug("An appropriate locale has been found '{}'. "
                         + "Change the current locale from '{}' to '{}'.", defaultLocale, currentLocale, locale);
                 }
