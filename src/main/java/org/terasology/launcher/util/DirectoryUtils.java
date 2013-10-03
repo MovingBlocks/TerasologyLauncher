@@ -47,7 +47,7 @@ public final class DirectoryUtils {
         }
     }
 
-    public static boolean containsGameData(File gameInstallationPath) {
+    public static boolean containsGameData(final File gameInstallationPath) {
         if ((gameInstallationPath == null) || !gameInstallationPath.exists() || !gameInstallationPath.isDirectory()) {
             return false;
         }
@@ -55,15 +55,13 @@ public final class DirectoryUtils {
         final File[] files = gameInstallationPath.listFiles();
         if ((files != null) && (files.length > 0)) {
             for (File child : files) {
-                if (child.isDirectory()) {
-                    if (child.getName().equals("SAVED_WORLDS")
-                        || child.getName().equals("worlds")
-                        || child.getName().equals("screens")
-                        || child.getName().equals("screenshots")) {
-                        if (containsFiles(child)) {
-                            return true;
-                        }
-                    }
+                if (child.isDirectory()
+                    && (child.getName().equals("SAVED_WORLDS")
+                    || child.getName().equals("worlds")
+                    || child.getName().equals("screens")
+                    || child.getName().equals("screenshots"))
+                    && containsFiles(child)) {
+                    return true;
                 }
             }
         }
@@ -71,7 +69,7 @@ public final class DirectoryUtils {
         return false;
     }
 
-    public static boolean containsFiles(File directory) {
+    public static boolean containsFiles(final File directory) {
         if ((directory == null) || !directory.exists() || !directory.isDirectory()) {
             return false;
         }

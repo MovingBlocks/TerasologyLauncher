@@ -58,10 +58,8 @@ public enum OperatingSystem {
         OperatingSystem best = UNKNOWN;
         final String os = System.getProperty(PROPERTY_OS_NAME).toLowerCase();
         for (final OperatingSystem system : values()) {
-            if (os.contains(system.identifier)) {
-                if (system.identifier.length() > best.identifier.length()) {
-                    best = system;
-                }
+            if (os.contains(system.identifier) && (system.identifier.length() > best.identifier.length())) {
+                best = system;
             }
         }
         return best;

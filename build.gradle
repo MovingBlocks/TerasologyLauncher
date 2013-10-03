@@ -11,6 +11,7 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'application'
 apply plugin: 'checkstyle'
+apply plugin: 'pmd'
 
 // gradle wrapper version
 wrapper {
@@ -62,6 +63,11 @@ mainClassName = "org.terasology.launcher.TerasologyLauncher"
 checkstyle {
     ignoreFailures = true
     configProperties.samedir = checkstyle.configFile.parentFile
+}
+
+pmd {
+    ignoreFailures = true
+    ruleSetFiles = files("config/pmd/pmd.xml")
 }
 
 task createVersionInfoFile {

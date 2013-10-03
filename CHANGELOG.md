@@ -3,6 +3,7 @@ Terasology Launcher - ChangeLog
 
 ## 1.y.z (unreleased)
 * Gradle update (1.4 -> 1.7)
+* Added java source code check tool 'PMD'
 
 
 ## 1.0.0 (2013-07-22)

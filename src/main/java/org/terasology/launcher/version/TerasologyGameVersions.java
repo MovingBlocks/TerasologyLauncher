@@ -421,7 +421,7 @@ public final class TerasologyGameVersions {
         return false;
     }
 
-    public synchronized void removeInstallationInfo(TerasologyGameVersion gameVersion) {
+    public synchronized void removeInstallationInfo(final TerasologyGameVersion gameVersion) {
         if (gameVersion.isInstalled()) {
             if (gameVersion.isLatest()) {
                 final TerasologyGameVersion related = getGameVersionForBuildVersion(gameVersion.getJob(),
