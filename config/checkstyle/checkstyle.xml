@@ -26,7 +26,7 @@
     <!-- Checks that a source file begins with a specified header. -->
     <module name="Header">
         <property name="severity" value="warning"/>
-        <property name="header" value="/*\n * Copyright (c) 2013 MovingBlocks\n *\n"/>
+        <property name="header" value="/*\n * Copyright 2013 MovingBlocks\n *\n"/>
         <property name="fileExtensions" value="java"/>
     </module>
 
