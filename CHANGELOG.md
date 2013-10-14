@@ -2,7 +2,7 @@ Terasology Launcher - ChangeLog
 ===============================
 
 ## 1.y.z (unreleased)
-* Gradle update (1.4 -> 1.7)
+* Gradle update (1.4 -> 1.8)
 * Added java source code check tool 'PMD'
 * Cancel game download
 
