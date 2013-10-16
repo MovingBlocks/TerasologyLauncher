@@ -105,6 +105,13 @@ jar {
     }
 }
 
+task distChangelog(type: Copy) {
+    from('CHANGELOG.md')
+    into "$buildDir/distributions/"
+    rename('CHANGELOG.md', 'CHANGELOG.txt')
+    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+}
+
 applicationDistribution.from('README.md')
 
 applicationDistribution.from('README.md') {
