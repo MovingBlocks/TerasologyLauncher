@@ -36,7 +36,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -197,7 +199,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         version.setFont(version.getFont().deriveFont(12f));
         version.setForeground(Color.WHITE);
         version.setBounds(FRAME_WIDTH - 400 - 16 - xShift, 0, 400, 32);
-        version.setHorizontalAlignment(JLabel.RIGHT);
+        version.setHorizontalAlignment(SwingConstants.RIGHT);
 
         // Forums link
         forums = new LinkJLabel();
@@ -340,8 +342,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             } else {
                 try {
                     gameDownloader = new GameDownloader(progressBar, this, tempDirectory,
-                        launcherSettings.getGamesDirectory(), gameVersion, gameVersions);
-                } catch (IOException e) {
+                            launcherSettings.getGamesDirectory(), gameVersion, gameVersions);
+                } catch (final IOException e) {
                     logger.error("The game download can not be started!", e);
                     finishedGameDownload(false);
                     return;
@@ -558,7 +560,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             b.append("<p>\n");
             b.append(BundleUtils.getLabel("infoHeader4"));
             b.append("<ul>\n");
-            for (String msg : gameVersion.getChangeLog()) {
+            for (final String msg : gameVersion.getChangeLog()) {
                 b.append("<li>");
                 b.append(escapeHtml(msg));
                 b.append("</li>\n");
