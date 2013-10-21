@@ -42,6 +42,7 @@ public final class LauncherUpdater {
 
     private Integer upstreamVersion;
     private TerasologyLauncherVersionInfo versionInfo;
+    private String changeLog;
     private File launcherInstallationDirectory;
 
     public LauncherUpdater(final File tempDirectory, final String currentVersion, final String jobName) {
@@ -76,6 +77,7 @@ public final class LauncherUpdater {
             if (Integer.parseInt(currentVersion) < upstreamVersion) {
                 updateAvailable = true;
                 versionInfo = DownloadUtils.loadTerasologyLauncherVersionInfo(jobName, upstreamVersion);
+                changeLog = DownloadUtils.loadLauncherChangeLog(jobName, upstreamVersion);
             }
         } catch (NumberFormatException e) {
             logger.error("The current version '{}' could not be parsed!", currentVersion, e);
@@ -127,6 +129,10 @@ public final class LauncherUpdater {
 
     public TerasologyLauncherVersionInfo getVersionInfo() {
         return versionInfo;
+    }
+
+    public String getChangeLog() {
+        return changeLog;
     }
 
     public File getLauncherInstallationDirectory() {

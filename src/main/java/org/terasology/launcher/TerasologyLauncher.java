@@ -33,6 +33,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -291,8 +292,15 @@ public final class TerasologyLauncher {
         msgArea.setCaretPosition(msgArea.getText().length());
         msgArea.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
+        final JTextArea changeLogArea = new JTextArea();
+        changeLogArea.setText(updater.getChangeLog());
+        changeLogArea.setEditable(false);
+        changeLogArea.setRows(10);
+        final JScrollPane changeLogPane = new JScrollPane(changeLogArea);
+
         msgPanel.add(msgLabel, BorderLayout.PAGE_START);
         msgPanel.add(msgArea, BorderLayout.CENTER);
+        msgPanel.add(changeLogPane, BorderLayout.PAGE_END);
 
         final int option = JOptionPane.showOptionDialog(splash,
             msgPanel,
