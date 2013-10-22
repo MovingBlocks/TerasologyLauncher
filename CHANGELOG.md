@@ -1,13 +1,14 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 1.1.0 (unreleased)
-* Gradle update (1.4 -> 1.8)
-* Added java source code check tool 'PMD'
+## 1.1.0 (2013-10-xx, unreleased)
+* Show launcher *change log*
 * Cancel game download
 * Add new game type "legacy"
     * STABLE : TerasologyLegacy (legacy, pre-multiplayer)
-
+* Internal changes
+    * Gradle update (1.8)
+    * Java source code check tool 'PMD'
 
 ## 1.0.0 (2013-07-22)
 
