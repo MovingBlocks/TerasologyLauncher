@@ -49,6 +49,7 @@ public final class DownloadUtils {
         "resources/main/org/terasology/version/versionInfo.properties";
     private static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO =
         "resources/main/org/terasology/launcher/version/versionInfo.properties";
+    private static final String FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG = "distributions/CHANGELOG.txt";
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
 
@@ -130,7 +131,7 @@ public final class DownloadUtils {
         BufferedReader reader = null;
         try {
             urlVersion = new URL(JENKINS_JOB_URL + jobName + lastBuild + BUILD_NUMBER);
-            reader = new BufferedReader(new InputStreamReader(urlVersion.openStream()));
+            reader = new BufferedReader(new InputStreamReader(urlVersion.openStream(), "US-ASCII"));
             buildNumber = Integer.parseInt(reader.readLine());
         } catch (Exception e) {
             throw new DownloadException("The buildNumber could not be loaded! " + jobName + " " + urlVersion, e);
@@ -182,7 +183,7 @@ public final class DownloadUtils {
         BufferedReader reader = null;
         try {
             urlResult = DownloadUtils.createURL(jobName, buildNumber, API_JSON_RESULT);
-            reader = new BufferedReader(new InputStreamReader(urlResult.openStream()));
+            reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), "US-ASCII"));
             final String jsonResult = reader.readLine();
             if (jsonResult != null) {
                 for (JobResult result : JobResult.values()) {
@@ -243,5 +244,39 @@ public final class DownloadUtils {
             }
         }
         return changeLog;
+    }
+
+    public static String loadLauncherChangeLog(final String jobName, final Integer buildNumber)
+        throws DownloadException {
+        URL urlChangeLog = null;
+        BufferedReader reader = null;
+        StringBuffer changeLog = new StringBuffer();
+        try {
+            urlChangeLog = DownloadUtils.createFileDownloadURL(jobName, buildNumber,
+                FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG);
+            reader = new BufferedReader(new InputStreamReader(urlChangeLog.openStream(), "US-ASCII"));
+            while (true) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                if (changeLog.length() > 0) {
+                    changeLog.append("\n");
+                }
+                changeLog.append(line);
+            }
+        } catch (Exception e) {
+            throw new DownloadException("The launcher change log could not be loaded! " + jobName + " " + urlChangeLog,
+                e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    logger.warn("Closing BufferedReader for '{}' failed!", urlChangeLog, e);
+                }
+            }
+        }
+        return changeLog.toString();
     }
 }

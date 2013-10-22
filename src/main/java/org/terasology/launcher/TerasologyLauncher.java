@@ -33,6 +33,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -257,7 +258,7 @@ public final class TerasologyLauncher {
                                          final TerasologyLauncherVersionInfo launcherVersionInfo) {
         final Object[] options = {BundleUtils.getLabel("main_yes"), BundleUtils.getLabel("main_no")};
 
-        final JPanel msgPanel = new JPanel(new BorderLayout());
+        final JPanel msgPanel = new JPanel(new BorderLayout(0, 10));
         final JTextArea msgLabel = new JTextArea(BundleUtils.getLabel("message_update_launcher"));
         msgLabel.setBackground(msgPanel.getBackground());
         msgLabel.setEditable(false);
@@ -285,14 +286,20 @@ public final class TerasologyLauncher {
 
         final JTextArea msgArea = new JTextArea();
         msgArea.setText(builder.toString());
-        msgArea.setOpaque(false);
         msgArea.setEditable(false);
-        msgArea.setBackground(msgPanel.getBackground());
-        msgArea.setCaretPosition(msgArea.getText().length());
         msgArea.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
-        msgPanel.add(msgLabel, BorderLayout.PAGE_START);
+        final JTextArea changeLogArea = new JTextArea();
+        changeLogArea.setText(updater.getChangeLog());
+        changeLogArea.setEditable(false);
+        changeLogArea.setRows(15);
+        changeLogArea.setBorder(BorderFactory.createEmptyBorder(1, 7, 1, 7));
+        final JScrollPane changeLogPane = new JScrollPane(changeLogArea);
+        changeLogPane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+
+        msgPanel.add(msgLabel, BorderLayout.NORTH);
         msgPanel.add(msgArea, BorderLayout.CENTER);
+        msgPanel.add(changeLogPane, BorderLayout.SOUTH);
 
         final int option = JOptionPane.showOptionDialog(splash,
             msgPanel,
