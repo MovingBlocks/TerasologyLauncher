@@ -260,8 +260,10 @@ public final class DownloadUtils {
                 if (line == null) {
                     break;
                 }
+                if (changeLog.length() > 0) {
+                    changeLog.append("\n");
+                }
                 changeLog.append(line);
-                changeLog.append("\n");
             }
         } catch (Exception e) {
             throw new DownloadException("The launcher change log could not be loaded! " + jobName + " " + urlChangeLog,
