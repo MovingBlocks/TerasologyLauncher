@@ -49,7 +49,6 @@ public final class DirectoryUtils {
 
     /**
      * Checks if game data is stored in the installation directory.
-     * This is only required for old versions.
      */
     public static boolean containsGameData(final File gameInstallationPath) {
         if ((gameInstallationPath == null) || !gameInstallationPath.exists() || !gameInstallationPath.isDirectory()) {
@@ -62,6 +61,7 @@ public final class DirectoryUtils {
                 if (child.isDirectory()
                     && (child.getName().equals("SAVED_WORLDS")
                     || child.getName().equals("worlds")
+                    || child.getName().equals("saves")
                     || child.getName().equals("screens")
                     || child.getName().equals("screenshots"))
                     && containsFiles(child)) {
