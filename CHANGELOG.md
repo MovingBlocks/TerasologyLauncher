@@ -1,7 +1,7 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 1.1.0 (2013-10-27, unreleased)
+## 1.1.0 (2013-10-27)
 * Show launcher *change log*
 * Cancel game download
 * Add new game type "legacy"
