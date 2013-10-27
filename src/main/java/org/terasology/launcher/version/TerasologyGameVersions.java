@@ -46,6 +46,7 @@ public final class TerasologyGameVersions {
     private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersions.class);
 
     private static final String FILE_TERASOLOGY_JAR = "Terasology.jar";
+    private static final String FILE_LIBS_ENGINE_JAR = "libs/engine.jar";
 
     private final Map<GameJob, List<TerasologyGameVersion>> gameVersionLists;
     private final Map<GameJob, SortedMap<Integer, TerasologyGameVersion>> gameVersionMaps;
@@ -194,20 +195,26 @@ public final class TerasologyGameVersions {
     private TerasologyGameVersion loadInstalledGameVersion(final File gameJar) {
         TerasologyGameVersion gameVersion = null;
         if (gameJar.exists() && gameJar.canRead() && gameJar.isFile()) {
-            final TerasologyGameVersionInfo gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(gameJar);
+            final TerasologyGameVersionInfo gameVersionInfo;
+            final File engineJar = new File(gameJar.getParent(), FILE_LIBS_ENGINE_JAR);
+            if (engineJar.exists() && engineJar.canRead() && engineJar.isFile()) {
+                gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(engineJar);
+            } else {
+                gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(gameJar);
+            }
             if ((gameVersionInfo.getJobName() != null) && (gameVersionInfo.getJobName().length() > 0)
                 && (gameVersionInfo.getBuildNumber() != null) && (gameVersionInfo.getBuildNumber().length() > 0)) {
                 GameJob installedJob = null;
                 try {
                     installedJob = GameJob.valueOf(gameVersionInfo.getJobName());
                 } catch (IllegalArgumentException e) {
-                    logger.error("Unknown job '{}'!", gameVersionInfo.getJobName(), e);
+                    logger.error("Unknown job '{}'!", gameVersionInfo.getJobName());
                 }
                 Integer installedBuildNumber = null;
                 try {
                     installedBuildNumber = Integer.parseInt(gameVersionInfo.getBuildNumber());
                 } catch (NumberFormatException e) {
-                    logger.error("The build number can not be parsed! '{}'!", gameVersionInfo.getBuildNumber(), e);
+                    logger.error("The build number can not be parsed! '{}'!", gameVersionInfo.getBuildNumber());
                 }
 
                 if ((installedJob != null) && (installedBuildNumber != null)
@@ -223,10 +230,12 @@ public final class TerasologyGameVersions {
                     gameVersion.setSuccessful(Boolean.TRUE);
                     gameVersion.setLatest(false);
                 } else {
-                    logger.warn("The game version info can not be used from the file '{}'!", gameJar);
+                    logger.warn("The game version info can not be used from the file '{}' or '{}'!",
+                        gameJar, engineJar);
                 }
             } else {
-                logger.warn("The game version info can not be loaded from the file '{}'!", gameJar);
+                logger.warn("The game version info can not be loaded from the file '{}' or '{}'!",
+                    gameJar, engineJar);
             }
         }
         return gameVersion;
