@@ -1,14 +1,16 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 1.1.0 (2013-10-xx, unreleased)
+## 1.1.0 (2013-10-27, unreleased)
 * Show launcher *change log*
 * Cancel game download
 * Add new game type "legacy"
     * STABLE : TerasologyLegacy (legacy, pre-multiplayer)
+* Supports new structure ('The Great Convergence')
 * Internal changes
     * Gradle update (1.8)
     * Java source code check tool 'PMD'
+    * Better support for 'IntelliJ-IDEA'
 
 ## 1.0.0 (2013-07-22)
 
