@@ -1,6 +1,9 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## x.y.z (unreleased)
+
+
 ## 1.1.0 (2013-10-27)
 * Show launcher *change log*
 * Cancel game download
