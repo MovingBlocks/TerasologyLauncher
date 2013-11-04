@@ -179,14 +179,17 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
         final JScrollPane sp = new JScrollPane();
         sp.getViewport().add(infoTextPane);
-        sp.getVerticalScrollBar().setOpaque(false);
-        sp.getVerticalScrollBar().setUI(new TSScrollBarUI());
         sp.getViewport().setOpaque(false);
-        sp.getVerticalScrollBar().setBorder(BorderFactory.createEmptyBorder());
         sp.setBorder(BorderFactory.createEmptyBorder());
         sp.setOpaque(false);
         sp.setPreferredSize(new Dimension(INFO_PANEL_WIDTH - 16, INFO_PANEL_HEIGHT - 16));
         sp.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, INFO_PANEL_WIDTH - 16, INFO_PANEL_HEIGHT - 16);
+        sp.getHorizontalScrollBar().setUI(new TSScrollBarUI());
+        sp.getHorizontalScrollBar().setOpaque(false);
+        sp.getHorizontalScrollBar().setBorder(BorderFactory.createEmptyBorder());
+        sp.getVerticalScrollBar().setUI(new TSScrollBarUI());
+        sp.getVerticalScrollBar().setOpaque(false);
+        sp.getVerticalScrollBar().setBorder(BorderFactory.createEmptyBorder());
 
         // Terasology logo
         logo = new LinkJLabel();
