@@ -18,6 +18,7 @@ package org.terasology.launcher.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.gui.SplashProgressIndicator;
 import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
@@ -106,7 +107,10 @@ public final class LauncherUpdater {
             final File downloadedZipFile = new File(tempDirectory, jobName + "_" + upstreamVersion + ".zip");
             logger.trace("Download ZIP file: {}", downloadedZipFile);
 
-            DownloadUtils.downloadToFile(updateURL, downloadedZipFile);
+            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new SplashProgressIndicator(splash,
+                "splash_updatingLauncher_download"));
+
+            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 
             // Extract launcher ZIP file
             FileUtils.extractZip(downloadedZipFile);
