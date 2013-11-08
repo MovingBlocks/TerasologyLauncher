@@ -6,6 +6,7 @@ Terasology Launcher - ChangeLog
 * Add progress indicators
     * Downloading and updating the launcher
     * Loading game versions (with change log)
+* Change min java version for 'TerasologyLauncher.exe' (1.7.0)
 
 ## 1.1.0 (2013-10-27)
 * Show launcher *change log*
