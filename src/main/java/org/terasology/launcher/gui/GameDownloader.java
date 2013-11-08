@@ -103,7 +103,10 @@ final class GameDownloader extends SwingWorker<Void, Void> {
 
                 firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_extractZip"));
                 FileUtils.extractZipTo(downloadZipFile, gameDirectory);
-                downloadZipFile.delete();
+                boolean deleted = downloadZipFile.delete();
+                if (!deleted) {
+                    logger.warn("Cannot delete downloaded ZIP file! '{}'", downloadZipFile);
+                }
 
                 firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_gameInfo"));
                 successful = gameVersions.updateGameVersionsAfterInstallation(gameDirectory);
