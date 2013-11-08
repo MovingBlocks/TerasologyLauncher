@@ -267,21 +267,16 @@ ext {
     ideaRunConfig = { Node iwsNode ->
 
         // Adds our run config
-        def runManager = iwsNode.find { it.@name == 'RunManager' }
+        def runManager = iwsNode.component.find { it.'@name' == 'RunManager' }
         runManager.append(new XmlParser().parseText('''
-            <configuration default="false" name="TerasologyLauncher" type="Application" factoryName="Application">
-              <extension name="coverage" enabled="false" merge="false" runner="idea">
-                <pattern>
-                  <option name="PATTERN" value="org.terasology.launcher.*" />
-                  <option name="ENABLED" value="true" />
-                </pattern>
-              </extension>
+            <configuration default="false" name="TerasologyLauncher" type="Application" factoryName="Application" singleton="true">
+              <extension name="coverage" enabled="false" merge="false" />
               <option name="MAIN_CLASS_NAME" value="org.terasology.launcher.TerasologyLauncher" />
-              <option name="VM_PARAMETERS" value="-Xms128m -Xmx512m"/>
-              <option name="PROGRAM_PARAMETERS" />
-              <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+              <option name="VM_PARAMETERS" value="-splash:src/main/resources/org/terasology/launcher/images/splash.jpg" />
+              <option name="PROGRAM_PARAMETERS" value="" />
+              <option name='WORKING_DIRECTORY' value='file://\$PROJECT_DIR\$' />
               <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-              <option name="ALTERNATIVE_JRE_PATH" />
+              <option name="ALTERNATIVE_JRE_PATH" value="" />
               <option name="ENABLE_SWING_INSPECTOR" value="false" />
               <option name="ENV_VARIABLES" />
               <option name="PASS_PARENT_ENVS" value="true" />
@@ -301,8 +296,7 @@ ext {
         '''))
 
         // Makes the added run config the selected item
-        def runManagerTag = iwsNode.component.find { it.@name == 'RunManager' }
-        runManagerTag.@selected = 'Application.TerasologyLauncher'
+        runManager.'@selected' = 'Application.TerasologyLauncher'
     }
 
 }
