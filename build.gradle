@@ -13,6 +13,9 @@ apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 
+// Test for right version of Java in use for running this script
+assert org.gradle.api.JavaVersion.current().isJava7Compatible()
+
 // gradle wrapper version
 wrapper {
     gradleVersion '1.8'
