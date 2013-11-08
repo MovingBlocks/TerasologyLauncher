@@ -342,7 +342,7 @@ public final class TerasologyGameVersions {
             if (gameVersion.getGameVersionInfo() == null) {
                 if ((cachedGameVersion != null) && (cachedGameVersion.getGameVersionInfo() != null)) {
                     gameVersion.setGameVersionInfo(cachedGameVersion.getGameVersionInfo());
-                } else {
+                } else if ((cachedGameVersion == null) || (gameVersion.getSuccessful() == null) || gameVersion.getSuccessful()) {
                     TerasologyGameVersionInfo gameVersionInfo = null;
                     try {
                         gameVersionInfo = DownloadUtils.loadTerasologyGameVersionInfo(job.name(), buildNumber);
