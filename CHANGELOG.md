@@ -1,6 +1,8 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## x.y.z (unreleased)
+
 ## 1.1.1 (2013-11-08)
 * Fix wrong horizontal scroll bar
 * Add progress indicators
