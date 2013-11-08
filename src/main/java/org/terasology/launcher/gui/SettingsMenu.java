@@ -81,8 +81,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public SettingsMenu(final JFrame parent, final File launcherDirectory, final LauncherSettings launcherSettings,
-                        final TerasologyGameVersions gameVersions) {
+    public SettingsMenu(final JFrame parent, final File launcherDirectory, final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
         super(parent, BundleUtils.getLabel("settings_title"), true);
 
         this.launcherDirectory = launcherDirectory;
@@ -492,8 +491,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
                         DirectoryUtils.checkDirectory(selectedFile);
                         gamesDirectory = selectedFile;
                     } catch (IOException e) {
-                        logger.error("The game installation directory can not be created or used! '{}'",
-                            gamesDirectory, e);
+                        logger.error("The game installation directory can not be created or used! '{}'", gamesDirectory, e);
                         JOptionPane.showMessageDialog(this,
                             BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
                             BundleUtils.getLabel("message_error_title"),
@@ -545,8 +543,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
                 try {
                     launcherSettings.store();
                 } catch (IOException e) {
-                    logger.error("The launcher settings can not be stored! '{}'",
-                        launcherSettings.getLauncherSettingsFilePath(), e);
+                    logger.error("The launcher settings can not be stored! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
                     JOptionPane.showMessageDialog(this,
                         BundleUtils.getLabel("message_error_storeSettings"),
                         BundleUtils.getLabel("message_error_title"),

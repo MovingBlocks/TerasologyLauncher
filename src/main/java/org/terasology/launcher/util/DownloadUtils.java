@@ -45,10 +45,8 @@ public final class DownloadUtils {
 
     public static final String FILE_TERASOLOGY_GAME_ZIP = "distributions/Terasology.zip";
     public static final String FILE_TERASOLOGY_LAUNCHER_ZIP = "distributions/TerasologyLauncher.zip";
-    private static final String FILE_TERASOLOGY_GAME_VERSION_INFO =
-        "resources/main/org/terasology/version/versionInfo.properties";
-    private static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO =
-        "resources/main/org/terasology/launcher/version/versionInfo.properties";
+    private static final String FILE_TERASOLOGY_GAME_VERSION_INFO = "resources/main/org/terasology/version/versionInfo.properties";
+    private static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO = "resources/main/org/terasology/launcher/version/versionInfo.properties";
     private static final String FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG = "distributions/CHANGELOG.txt";
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
@@ -73,8 +71,7 @@ public final class DownloadUtils {
      * @param progressListener a progress listener
      * @throws DownloadException
      */
-    public static void downloadToFile(final URL downloadURL, final File file,
-                                      final ProgressListener progressListener) throws DownloadException {
+    public static void downloadToFile(final URL downloadURL, final File file, final ProgressListener progressListener) throws DownloadException {
         try (BufferedInputStream in = new BufferedInputStream(downloadURL.openStream());
              BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
             final byte[] buffer = new byte[2048];
@@ -91,8 +88,7 @@ public final class DownloadUtils {
         }
     }
 
-    public static URL createFileDownloadURL(final String jobName, final int buildNumber, final String fileName)
-        throws MalformedURLException {
+    public static URL createFileDownloadURL(final String jobName, final int buildNumber, final String fileName) throws MalformedURLException {
         final StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(JENKINS_JOB_URL);
         urlBuilder.append(jobName);
@@ -104,8 +100,7 @@ public final class DownloadUtils {
         return new URL(urlBuilder.toString());
     }
 
-    public static URL createURL(final String jobName, final int buildNumber, final String subPath)
-        throws MalformedURLException {
+    public static URL createURL(final String jobName, final int buildNumber, final String subPath) throws MalformedURLException {
         final StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(JENKINS_JOB_URL);
         urlBuilder.append(jobName);
@@ -152,14 +147,11 @@ public final class DownloadUtils {
         return buildNumber;
     }
 
-    public static TerasologyLauncherVersionInfo loadTerasologyLauncherVersionInfo(final String jobName,
-                                                                                  final Integer buildNumber)
-        throws DownloadException {
+    public static TerasologyLauncherVersionInfo loadTerasologyLauncherVersionInfo(final String jobName, final Integer buildNumber) throws DownloadException {
         TerasologyLauncherVersionInfo launcherVersionInfo;
         URL urlVersionInfo = null;
         try {
-            urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, buildNumber,
-                FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
+            urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
             launcherVersionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
         } catch (Exception e) {
             throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
@@ -167,14 +159,11 @@ public final class DownloadUtils {
         return launcherVersionInfo;
     }
 
-    public static TerasologyGameVersionInfo loadTerasologyGameVersionInfo(final String jobName,
-                                                                          final Integer buildNumber)
-        throws DownloadException {
+    public static TerasologyGameVersionInfo loadTerasologyGameVersionInfo(final String jobName, final Integer buildNumber) throws DownloadException {
         TerasologyGameVersionInfo gameVersionInfo;
         URL urlVersionInfo = null;
         try {
-            urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, buildNumber,
-                FILE_TERASOLOGY_GAME_VERSION_INFO);
+            urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_GAME_VERSION_INFO);
             gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
         } catch (Exception e) {
             throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
@@ -251,14 +240,12 @@ public final class DownloadUtils {
         return changeLog;
     }
 
-    public static String loadLauncherChangeLog(final String jobName, final Integer buildNumber)
-        throws DownloadException {
+    public static String loadLauncherChangeLog(final String jobName, final Integer buildNumber) throws DownloadException {
         URL urlChangeLog = null;
         BufferedReader reader = null;
         final StringBuilder changeLog = new StringBuilder();
         try {
-            urlChangeLog = DownloadUtils.createFileDownloadURL(jobName, buildNumber,
-                FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG);
+            urlChangeLog = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG);
             reader = new BufferedReader(new InputStreamReader(urlChangeLog.openStream(), "US-ASCII"));
             while (true) {
                 String line = reader.readLine();
@@ -271,8 +258,7 @@ public final class DownloadUtils {
                 changeLog.append(line);
             }
         } catch (Exception e) {
-            throw new DownloadException("The launcher change log could not be loaded! " + jobName + " " + urlChangeLog,
-                e);
+            throw new DownloadException("The launcher change log could not be loaded! " + jobName + " " + urlChangeLog, e);
         } finally {
             if (reader != null) {
                 try {

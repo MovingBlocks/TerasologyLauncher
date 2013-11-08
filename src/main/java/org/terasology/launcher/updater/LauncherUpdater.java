@@ -89,8 +89,7 @@ public final class LauncherUpdater {
     }
 
     public void detectAndCheckLauncherInstallationDirectory() throws URISyntaxException, IOException {
-        final File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource()
-            .getLocation().toURI());
+        final File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         logger.trace("Launcher location: {}", launcherLocation);
         launcherInstallationDirectory = launcherLocation.getParentFile().getParentFile();
         DirectoryUtils.checkDirectory(launcherInstallationDirectory);
@@ -100,15 +99,13 @@ public final class LauncherUpdater {
     public void update(final SplashScreenWindow splash) {
         try {
             // Download launcher ZIP file
-            final URL updateURL = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion,
-                DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
+            final URL updateURL = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
             logger.trace("Update URL: {}", updateURL);
 
             final File downloadedZipFile = new File(tempDirectory, jobName + "_" + upstreamVersion + ".zip");
             logger.trace("Download ZIP file: {}", downloadedZipFile);
 
-            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new SplashProgressIndicator(splash,
-                "splash_updatingLauncher_download"));
+            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new SplashProgressIndicator(splash, "splash_updatingLauncher_download"));
 
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 

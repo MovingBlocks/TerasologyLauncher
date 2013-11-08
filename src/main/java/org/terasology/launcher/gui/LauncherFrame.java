@@ -97,8 +97,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public LauncherFrame(final File launcherDirectory, final File tempDirectory,
-                         final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
+    public LauncherFrame(final File launcherDirectory, final File tempDirectory, final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
         this.launcherDirectory = launcherDirectory;
         this.tempDirectory = tempDirectory;
         this.launcherSettings = launcherSettings;
@@ -281,8 +280,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
 
     private TerasologyGameVersion getSelectedGameVersion() {
-        return gameVersions.getGameVersionForBuildVersion(launcherSettings.getJob(),
-            launcherSettings.getBuildVersion(launcherSettings.getJob()));
+        return gameVersions.getGameVersionForBuildVersion(launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
     }
 
     @Override
@@ -319,8 +317,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_information_gameRunning"),
                     BundleUtils.getLabel("message_information_title"), JOptionPane.INFORMATION_MESSAGE);
             } else {
-                final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getMaxHeapSize(),
-                    launcherSettings.getInitialHeapSize());
+                final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getMaxHeapSize(), launcherSettings.getInitialHeapSize());
                 if (!gameStarted) {
                     JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameStart"),
                         BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
@@ -336,14 +333,12 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 // Cancel download
                 logger.info("Cancel game download!");
                 gameDownloader.cancel(false);
-            } else if ((gameVersion == null) || gameVersion.isInstalled()
-                || (gameVersion.getSuccessful() == null) || !gameVersion.getSuccessful()) {
+            } else if ((gameVersion == null) || gameVersion.isInstalled() || (gameVersion.getSuccessful() == null) || !gameVersion.getSuccessful()) {
                 logger.warn("The selected game version can not be downloaded! '{}'", gameVersion);
                 updateGui();
             } else {
                 try {
-                    gameDownloader = new GameDownloader(progressBar, this, tempDirectory,
-                        launcherSettings.getGamesDirectory(), gameVersion, gameVersions);
+                    gameDownloader = new GameDownloader(progressBar, this, tempDirectory, launcherSettings.getGamesDirectory(), gameVersion, gameVersions);
                 } catch (IOException e) {
                     logger.error("The game download can not be started!", e);
                     finishedGameDownload(false);
@@ -362,9 +357,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 } else {
                     msg = BundleUtils.getMessage("confirmDeleteGame_withoutData", gameVersion.getInstallationPath());
                 }
-                final int option = JOptionPane.showConfirmDialog(this, msg,
-                    BundleUtils.getLabel("message_deleteGame_title"),
-                    JOptionPane.YES_NO_OPTION);
+                final int option = JOptionPane.showConfirmDialog(this, msg, BundleUtils.getLabel("message_deleteGame_title"), JOptionPane.YES_NO_OPTION);
                 if (option == JOptionPane.YES_OPTION) {
                     logger.info("Delete installed game! '{}' '{}'", gameVersion, gameVersion.getInstallationPath());
                     FileUtils.delete(gameVersion.getInstallationPath());
@@ -403,55 +396,45 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         exitButton.setText(BundleUtils.getLabel("launcher_exit"));
         exitButton.setToolTipText(BundleUtils.getLabel("tooltip_exit"));
 
-        logo.setToolTipText(BundleUtils.getLabel("tooltip_website") + " - "
-            + BundleUtils.getURI("terasology_website"));
+        logo.setToolTipText(BundleUtils.getLabel("tooltip_website") + " - " + BundleUtils.getURI("terasology_website"));
         logo.setIcon(BundleUtils.getImageIcon("logo"));
         logo.setUri(BundleUtils.getURI("terasology_website"));
         forums.setText(BundleUtils.getLabel("launcher_forum"));
-        forums.setToolTipText(BundleUtils.getLabel("tooltip_forum") + " - "
-            + BundleUtils.getURI("terasology_forum"));
+        forums.setToolTipText(BundleUtils.getLabel("tooltip_forum") + " - " + BundleUtils.getURI("terasology_forum"));
         forums.setUri(BundleUtils.getURI("terasology_forum"));
         issues.setText(BundleUtils.getLabel("launcher_issues"));
-        issues.setToolTipText(BundleUtils.getLabel("tooltip_githubIssues") + " - "
-            + BundleUtils.getURI("terasology_github_issues"));
+        issues.setToolTipText(BundleUtils.getLabel("tooltip_githubIssues") + " - " + BundleUtils.getURI("terasology_github_issues"));
         issues.setUri(BundleUtils.getURI("terasology_github_issues"));
         mods.setText(BundleUtils.getLabel("launcher_mods"));
-        mods.setToolTipText(BundleUtils.getLabel("tooltip_mods") + " - "
-            + BundleUtils.getURI("terasology_mods"));
+        mods.setToolTipText(BundleUtils.getLabel("tooltip_mods") + " - " + BundleUtils.getURI("terasology_mods"));
         mods.setUri(BundleUtils.getURI("terasology_mods"));
 
-        github.setToolTipText(BundleUtils.getLabel("tooltip_github") + " - "
-            + BundleUtils.getURI("terasology_github"));
+        github.setToolTipText(BundleUtils.getLabel("tooltip_github") + " - " + BundleUtils.getURI("terasology_github"));
         github.setUri(BundleUtils.getURI("terasology_github"));
         github.setIcon(BundleUtils.getImageIcon("github"));
         github.setRolloverIcon(BundleUtils.getImageIcon("github_hover"));
 
-        twitter.setToolTipText(BundleUtils.getLabel("tooltip_twitter") + " - "
-            + BundleUtils.getURI("terasology_twitter"));
+        twitter.setToolTipText(BundleUtils.getLabel("tooltip_twitter") + " - " + BundleUtils.getURI("terasology_twitter"));
         twitter.setUri(BundleUtils.getURI("terasology_twitter"));
         twitter.setIcon(BundleUtils.getImageIcon("twitter"));
         twitter.setRolloverIcon(BundleUtils.getImageIcon("twitter_hover"));
 
-        facebook.setToolTipText(BundleUtils.getLabel("tooltip_facebook") + " - "
-            + BundleUtils.getURI("terasology_facebook"));
+        facebook.setToolTipText(BundleUtils.getLabel("tooltip_facebook") + " - " + BundleUtils.getURI("terasology_facebook"));
         facebook.setUri(BundleUtils.getURI("terasology_facebook"));
         facebook.setIcon(BundleUtils.getImageIcon("facebook"));
         facebook.setRolloverIcon(BundleUtils.getImageIcon("facebook_hover"));
 
-        gplus.setToolTipText(BundleUtils.getLabel("tooltip_gplus") + " - "
-            + BundleUtils.getURI("terasology_gplus"));
+        gplus.setToolTipText(BundleUtils.getLabel("tooltip_gplus") + " - " + BundleUtils.getURI("terasology_gplus"));
         gplus.setUri(BundleUtils.getURI("terasology_gplus"));
         gplus.setIcon(BundleUtils.getImageIcon("gplus"));
         gplus.setRolloverIcon(BundleUtils.getImageIcon("gplus_hover"));
 
-        youtube.setToolTipText(BundleUtils.getLabel("tooltip_youtube") + " - "
-            + BundleUtils.getURI("terasology_youtube"));
+        youtube.setToolTipText(BundleUtils.getLabel("tooltip_youtube") + " - " + BundleUtils.getURI("terasology_youtube"));
         youtube.setUri(BundleUtils.getURI("terasology_youtube"));
         youtube.setIcon(BundleUtils.getImageIcon("youtube"));
         youtube.setRolloverIcon(BundleUtils.getImageIcon("youtube_hover"));
 
-        reddit.setToolTipText(BundleUtils.getLabel("tooltip_reddit") + " - "
-            + BundleUtils.getURI("terasology_reddit"));
+        reddit.setToolTipText(BundleUtils.getLabel("tooltip_reddit") + " - " + BundleUtils.getURI("terasology_reddit"));
         reddit.setUri(BundleUtils.getURI("terasology_reddit"));
         reddit.setIcon(BundleUtils.getImageIcon("reddit"));
         reddit.setRolloverIcon(BundleUtils.getImageIcon("reddit_hover"));
@@ -467,8 +450,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             downloadButton.setEnabled(false);
             startButton.setEnabled(true);
             deleteButton.setEnabled(true);
-        } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful()
-            && (gameVersion.getBuildNumber() != null) && (gameDownloader == null)) {
+        } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful() && (gameVersion.getBuildNumber() != null) && (gameDownloader == null)) {
             downloadButton.setEnabled(true);
             startButton.setEnabled(false);
             deleteButton.setEnabled(false);
@@ -485,8 +467,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     }
 
     private String escapeHtml(final String text) {
-        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            .replace("\"", "&quot;").replace("'", "&#x27;").replace("/", "&#x2F;");
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#x27;").replace("/", "&#x2F;");
     }
 
     private void updateInfoTextPane() {
@@ -577,8 +558,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         progressBar.setVisible(false);
         updateGui();
         if (!successful) {
-            JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameDownload"),
-                BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameDownload"), BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
         }
     }
 }

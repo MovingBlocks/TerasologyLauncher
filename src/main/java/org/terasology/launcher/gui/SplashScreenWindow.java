@@ -38,8 +38,7 @@ public final class SplashScreenWindow extends JWindow {
 
         // Init the info label
         infoLabel = new JLabel();
-        infoLabel.setBounds((icon.getIconWidth() / 2) - (INFO_LABEL_WIDTH / 2), (icon.getIconHeight() / 2) + 64,
-            INFO_LABEL_WIDTH, 32);
+        infoLabel.setBounds((icon.getIconWidth() / 2) - (INFO_LABEL_WIDTH / 2), (icon.getIconHeight() / 2) + 64, INFO_LABEL_WIDTH, 32);
         infoLabel.setForeground(Color.WHITE);
         infoLabel.setHorizontalTextPosition(JLabel.CENTER);
         infoLabel.setHorizontalAlignment(JLabel.CENTER);
