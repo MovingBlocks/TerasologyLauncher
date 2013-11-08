@@ -198,7 +198,7 @@ idea {
 ext {
     // Activate 'Gradle' plugin
     ideaActivateGradle = { Node iprNode ->
-        def gradleSettings = iprNode.component.find { it.@name == 'GradleSettings' }
+        def gradleSettings = iprNode.component.find { it.'@name' == 'GradleSettings' }
         if (gradleSettings == null) {
             gradleSettings = iprNode.appendNode('component', [name: 'GradleSettings'])
             gradleSettings.appendNode('option', [name: 'linkedProjectPath', value: '$PROJECT_DIR$/build.gradle'])
@@ -207,13 +207,13 @@ ext {
 
     // Activate 'git' as VCS
     ideaActivateGit = { Node iprNode ->
-        def vcsMappings = iprNode.component.find { it.@name == 'VcsDirectoryMappings' }
+        def vcsMappings = iprNode.component.find { it.'@name' == 'VcsDirectoryMappings' }
         vcsMappings.mapping.@vcs = 'Git'
     }
 
     // Activate and config 'Checkstyle' plugin
     ideaActivateCheckstyle = { Node iprNode ->
-        def checkstyle = iprNode.component.find { it.@name == 'CheckStyle-IDEA' }
+        def checkstyle = iprNode.component.find { it.'@name' == 'CheckStyle-IDEA' }
         if (checkstyle == null) {
             // Create new CheckStyle component
             checkstyle = iprNode.appendNode('component', [name: 'CheckStyle-IDEA'])
@@ -242,8 +242,8 @@ ext {
     // Activate copyright conventions
     ideaActivateCopyright = { Node iprNode ->
         def copyrightManager = iprNode.component.find { it.'@name' == 'CopyrightManager' }
-        copyrightManager.@default = "TerasologyLauncher"
-        def copyright = copyrightManager.copyright.find { it.option.find { it.@name == "myName" }?.@value == "TerasologyLauncher" }
+        copyrightManager.'@default' = "TerasologyLauncher"
+        def copyright = copyrightManager.copyright.find { it.option.find { it.'@name' == "myName" }?.'@value' == "TerasologyLauncher" }
         if (copyright == null) {
             copyrightManager.append(new XmlParser().parseText('''
                 <copyright>
@@ -259,7 +259,7 @@ ext {
 
     // Enable "make project automatically"
     ideaMakeAutomatically = { Node iwsNode ->
-        def compilerWsConf = iwsNode.find { it.@name == 'CompilerWorkspaceConfiguration' }
+        def compilerWsConf = iwsNode.find { it.'@name' == 'CompilerWorkspaceConfiguration' }
         if (compilerWsConf == null) {
             compilerWsConf = iwsNode.appendNode('component', [name: 'CompilerWorkspaceConfiguration'])
             compilerWsConf.appendNode("option", [name : "MAKE_PROJECT_ON_SAVE", value : "true"])

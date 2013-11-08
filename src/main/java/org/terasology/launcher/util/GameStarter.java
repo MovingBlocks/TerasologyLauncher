@@ -41,8 +41,7 @@ public final class GameStarter {
         return (gameThread != null) && gameThread.isAlive();
     }
 
-    public boolean startGame(final TerasologyGameVersion gameVersion, final JavaHeapSize maxHeapSize,
-                             final JavaHeapSize initialHeapSize) {
+    public boolean startGame(final TerasologyGameVersion gameVersion, final JavaHeapSize maxHeapSize, final JavaHeapSize initialHeapSize) {
         if (isRunning()) {
             logger.warn("The game can not be started because another game is already running!");
             return false;
@@ -65,8 +64,7 @@ public final class GameStarter {
         return javaParameters;
     }
 
-    private List<String> createProcessParameters(final TerasologyGameVersion gameVersion,
-                                                 final List<String> javaParameters) {
+    private List<String> createProcessParameters(final TerasologyGameVersion gameVersion, final List<String> javaParameters) {
         final List<String> processParameters = new ArrayList<>();
         processParameters.add("java");
         processParameters.addAll(javaParameters);
@@ -79,8 +77,7 @@ public final class GameStarter {
         final ProcessBuilder pb = new ProcessBuilder(processParameters);
         pb.redirectErrorStream(true);
         pb.directory(gameVersion.getInstallationPath());
-        logger.debug("Starting game process with '{}' in '{}' for '{}'", processParameters,
-            gameVersion.getInstallationPath(), gameVersion);
+        logger.debug("Starting game process with '{}' in '{}' for '{}'", processParameters, gameVersion.getInstallationPath(), gameVersion);
         try {
             final Process p = pb.start();
 

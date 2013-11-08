@@ -35,9 +35,11 @@
         <!-- See http://checkstyle.sourceforge.net/config_naming.html -->
         <!-- ***************************** -->
         <!-- class type parameters : ^[A-Z]$ -->
-        <module name="ClassTypeParameterName"/>
+        <module name="ClassTypeParameterName">
+            <property name="format" value="^[A-Z]*$"/>
+        </module>
         <!-- constants (static, final fields) : ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$ -->
-        <!-- Unfortunately this modules is too inclusive - static final fields are not necessarily constants! -->
+        <!-- Unfortunately this module is too inclusive - static final fields are not necessarily constants! -->
         <module name="ConstantName">
             <property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|logger)$"/>
         </module>
@@ -64,7 +66,7 @@
 
         <!-- Checks for imports -->
         <!-- See http://checkstyle.sourceforge.net/config_imports.html -->
-        <!-- *******************-->
+        <!-- ****************** -->
         <!-- Checks that there are no import statements that use the * notation. -->
         <module name="AvoidStarImport">
             <property name="severity" value="warning"/>
@@ -85,7 +87,7 @@
         <!-- ************************** -->
         <module name="LineLength">
             <property name="severity" value="warning"/>
-            <property name="max" value="120"/>
+            <property name="max" value="175"/>
         </module>
         <!-- Checks for the number of types declared at the outer (or root) level in a file. -->
         <module name="OuterTypeNumber"/>
@@ -157,7 +159,7 @@
         </module>
         <!-- Checks for the placement of left curly braces ('{') for code blocks. Default: eol -->
         <module name="LeftCurly">
-            <property name="maxLineLength" value="120"/>
+            <property name="maxLineLength" value="175"/>
         </module>
         <!-- Checks for braces around code blocks. -->
         <module name="NeedBraces"/>
