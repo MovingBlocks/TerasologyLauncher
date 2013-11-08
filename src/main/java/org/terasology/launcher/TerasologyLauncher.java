@@ -19,6 +19,7 @@ package org.terasology.launcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.gui.LauncherFrame;
+import org.terasology.launcher.gui.SplashProgressIndicator;
 import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
@@ -213,7 +214,8 @@ public final class TerasologyLauncher {
             logger.trace("Load game versions...");
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_loadGameVersions"));
             final TerasologyGameVersions gameVersions = new TerasologyGameVersions();
-            gameVersions.loadGameVersions(launcherSettings, launcherDirectory, gamesDirectory);
+            gameVersions.loadGameVersions(launcherSettings, launcherDirectory, gamesDirectory,
+                new SplashProgressIndicator(splash, "splash_loadGameVersions"));
             gameVersions.fixSettingsBuildVersion(launcherSettings);
             logger.debug("Game versions: {}", gameVersions);
 
@@ -312,7 +314,7 @@ public final class TerasologyLauncher {
 
         if (option == 0) {
             logger.trace("Updating TerasologyLauncher...");
-            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher"));
+            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
             updater.update(splash);
         }
     }

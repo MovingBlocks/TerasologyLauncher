@@ -68,18 +68,23 @@ public final class DownloadUtils {
     /**
      * Download the file from the given URL and store it to the specified file.
      *
-     * @param downloadURL - remote location of file to download
-     * @param file        - where to store downloaded file
+     * @param downloadURL      remote location of file to download
+     * @param file             where to store downloaded file
+     * @param progressListener a progress listener
      * @throws DownloadException
      */
-    public static void downloadToFile(final URL downloadURL, final File file) throws DownloadException {
+    public static void downloadToFile(final URL downloadURL, final File file,
+                                      final ProgressListener progressListener) throws DownloadException {
         try (BufferedInputStream in = new BufferedInputStream(downloadURL.openStream());
              BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
             final byte[] buffer = new byte[2048];
 
+            progressListener.update();
+
             int n;
             while ((n = in.read(buffer)) != -1) {
                 out.write(buffer, 0, n);
+                progressListener.update();
             }
         } catch (IOException e) {
             throw new DownloadException("Could not download file! URL='" + downloadURL + "', file='" + file + "'", e);
@@ -250,7 +255,7 @@ public final class DownloadUtils {
         throws DownloadException {
         URL urlChangeLog = null;
         BufferedReader reader = null;
-        StringBuffer changeLog = new StringBuffer();
+        final StringBuilder changeLog = new StringBuilder();
         try {
             urlChangeLog = DownloadUtils.createFileDownloadURL(jobName, buildNumber,
                 FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG);
