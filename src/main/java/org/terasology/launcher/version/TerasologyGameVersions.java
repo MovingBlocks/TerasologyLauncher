@@ -222,7 +222,7 @@ public final class TerasologyGameVersions {
                 }
 
                 if ((installedJob != null) && (installedBuildNumber != null)
-                    && (installedJob.getGitBranch().equals(gameVersionInfo.getGitBranch())) && (installedJob.getMinBuildNumber() <= installedBuildNumber)) {
+                    && (gameVersionInfo.getGitBranch().endsWith(installedJob.getGitBranch())) && (installedJob.getMinBuildNumber() <= installedBuildNumber)) {
                     gameVersion = new TerasologyGameVersion();
                     gameVersion.setJob(installedJob);
                     gameVersion.setBuildNumber(installedBuildNumber);
