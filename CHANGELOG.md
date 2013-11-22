@@ -1,7 +1,7 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 1.1.2 (2013-11-22, unreleased)
+## 1.1.2 (2013-11-22)
 * Fix for a wrong game version info (git branch)
 
 ## 1.1.1 (2013-11-08)
