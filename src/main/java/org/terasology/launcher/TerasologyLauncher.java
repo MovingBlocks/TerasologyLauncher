@@ -27,6 +27,7 @@ import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.OperatingSystem;
+import org.terasology.launcher.version.GameJob;
 import org.terasology.launcher.version.TerasologyGameVersions;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
@@ -209,6 +210,11 @@ public final class TerasologyLauncher {
             gameVersions.loadGameVersions(launcherSettings, launcherDirectory, gamesDirectory, new SplashProgressIndicator(splash, "splash_loadGameVersions"));
             gameVersions.fixSettingsBuildVersion(launcherSettings);
             logger.debug("Game versions: {}", gameVersions);
+            if (logger.isInfoEnabled()) {
+                for (GameJob gameJob : GameJob.values()) {
+                    logger.info("Game versions: {} {}", gameJob, gameVersions.getGameVersionList(gameJob).size() - 1);
+                }
+            }
 
             // Store LauncherSettings (after 'Games directory' and after 'Game versions')
             logger.trace("Store LauncherSettings...");
