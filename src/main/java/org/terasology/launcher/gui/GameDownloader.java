@@ -47,7 +47,8 @@ final class GameDownloader extends SwingWorker<Void, Void> {
     private final URL downloadURL;
     private final File gameDirectory;
 
-    private boolean successful;
+    private boolean successfulDownloadAndExtract;
+    private boolean successfulLoadVersion;
 
     public GameDownloader(final JProgressBar progressBar, final LauncherFrame frame, final File tempDirectory, final File gamesDirectory,
                           final TerasologyGameVersion gameVersion, final TerasologyGameVersions gameVersions) throws IOException {
@@ -105,9 +106,10 @@ final class GameDownloader extends SwingWorker<Void, Void> {
                 if (!deleted) {
                     logger.warn("Cannot delete downloaded ZIP file! '{}'", downloadZipFile);
                 }
+                successfulDownloadAndExtract = true;
 
                 firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_gameInfo"));
-                successful = gameVersions.updateGameVersionsAfterInstallation(gameDirectory);
+                successfulLoadVersion = gameVersions.updateGameVersionsAfterInstallation(gameDirectory);
             }
         } catch (Exception e) {
             logger.error("There is an error occurred while downloading the game!", e);
@@ -143,6 +145,6 @@ final class GameDownloader extends SwingWorker<Void, Void> {
 
     @Override
     protected void done() {
-        frame.finishedGameDownload(successful || isCancelled());
+        frame.finishedGameDownload(isCancelled(), successfulDownloadAndExtract, successfulLoadVersion, gameDirectory);
     }
 }

@@ -341,7 +341,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                     gameDownloader = new GameDownloader(progressBar, this, tempDirectory, launcherSettings.getGamesDirectory(), gameVersion, gameVersions);
                 } catch (IOException e) {
                     logger.error("The game download can not be started!", e);
-                    finishedGameDownload(false);
+                    finishedGameDownload(false, false, false, null);
                     return;
                 }
                 gameDownloader.execute();
@@ -553,12 +553,23 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         return b.toString();
     }
 
-    void finishedGameDownload(final boolean successful) {
+    void finishedGameDownload(final boolean cancelled, final boolean successfulDownloadAndExtract, final boolean successfulLoadVersion, final File gameDirectory) {
         gameDownloader = null;
         progressBar.setVisible(false);
         updateGui();
-        if (!successful) {
-            JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameDownload"), BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+        if (!cancelled) {
+            if (!successfulDownloadAndExtract) {
+                JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameDownload_downloadExtract"),
+                    BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+            } else if (!successfulLoadVersion) {
+                if (gameDirectory != null) {
+                    JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameDownload_loadVersion") + "\n" + gameDirectory,
+                        BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameDownload_loadVersion"),
+                        BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+                }
+            }
         }
     }
 }
