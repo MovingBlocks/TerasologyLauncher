@@ -18,13 +18,13 @@ package org.terasology.launcher.version;
 
 public enum GameJob {
 
-    TerasologyStable("master", 15, 3, true, "STABLE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
+    TerasologyStable("master", 15, 4, true, "STABLE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
 
-    TerasologyLegacy("legacy", 1, 9, true, "STABLE", "infoHeader1_TerasologyLegacy", "settings_game_buildType_TerasologyLegacy"),
+    TerasologyLegacy("legacy", 1, 1, true, "STABLE", "infoHeader1_TerasologyLegacy", "settings_game_buildType_TerasologyLegacy"),
 
     Terasology("develop", 245, 9, false, "NIGHTLY", "infoHeader1_Terasology", "settings_game_buildType_Terasology"),
 
-    TerasologyMulti("multiplayer", 1, 9, false, "NIGHTLY", "infoHeader1_TerasologyMulti", "settings_game_buildType_TerasologyMulti");
+    TerasologyMulti("multiplayer", 1, 1, false, "NIGHTLY", "infoHeader1_TerasologyMulti", "settings_game_buildType_TerasologyMulti");
 
     private final String gitBranch;
     private final int minBuildNumber;
