@@ -56,7 +56,8 @@ public final class LauncherSettings {
     private static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
     private static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
     private static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
-    private static final String PROPERTY_GAMES_DIRECTORY = "gameDirectory";
+    private static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
+    private static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
 
     private final File launcherSettingsFile;
     private final Properties properties;
@@ -177,20 +178,36 @@ public final class LauncherSettings {
         }
         properties.setProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START, Boolean.toString(closeLauncherAfterGameStart));
 
-        // gamesDirectory
-        final String gamesDirectoryStr = properties.getProperty(PROPERTY_GAMES_DIRECTORY);
-        File gamesDirectory = null;
-        if ((gamesDirectoryStr != null) && (gamesDirectoryStr.trim().length() > 0)) {
+        // gameDirectory
+        final String gameDirectoryStr = properties.getProperty(PROPERTY_GAME_DIRECTORY);
+        File gameDirectory = null;
+        if ((gameDirectoryStr != null) && (gameDirectoryStr.trim().length() > 0)) {
             try {
-                gamesDirectory = new File(new URI(gamesDirectoryStr));
+                gameDirectory = new File(new URI(gameDirectoryStr));
             } catch (Exception e) {
-                logger.warn("Invalid value '{}' for the parameter '{}'!", gamesDirectoryStr, PROPERTY_GAMES_DIRECTORY);
+                logger.warn("Invalid value '{}' for the parameter '{}'!", gameDirectoryStr, PROPERTY_GAME_DIRECTORY);
             }
         }
-        if (gamesDirectory != null) {
-            properties.setProperty(PROPERTY_GAMES_DIRECTORY, gamesDirectory.toURI().toString());
+        if (gameDirectory != null) {
+            properties.setProperty(PROPERTY_GAME_DIRECTORY, gameDirectory.toURI().toString());
         } else {
-            properties.setProperty(PROPERTY_GAMES_DIRECTORY, "");
+            properties.setProperty(PROPERTY_GAME_DIRECTORY, "");
+        }
+
+        // gameDataDirectory
+        final String gameDataDirectoryStr = properties.getProperty(PROPERTY_GAME_DATA_DIRECTORY);
+        File gameDataDirectory = null;
+        if ((gameDataDirectoryStr != null) && (gameDataDirectoryStr.trim().length() > 0)) {
+            try {
+                gameDataDirectory = new File(new URI(gameDataDirectoryStr));
+            } catch (Exception e) {
+                logger.warn("Invalid value '{}' for the parameter '{}'!", gameDataDirectoryStr, PROPERTY_GAME_DATA_DIRECTORY);
+            }
+        }
+        if (gameDataDirectory != null) {
+            properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toURI().toString());
+        } else {
+            properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, "");
         }
     }
 
@@ -246,17 +263,33 @@ public final class LauncherSettings {
         return Boolean.valueOf(properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START));
     }
 
-    public synchronized void setGamesDirectory(final File gamesDirectory) {
-        properties.setProperty(PROPERTY_GAMES_DIRECTORY, gamesDirectory.toURI().toString());
+    public synchronized void setGameDirectory(final File gameDirectory) {
+        properties.setProperty(PROPERTY_GAME_DIRECTORY, gameDirectory.toURI().toString());
     }
 
-    public synchronized File getGamesDirectory() {
-        final String gamesDirectoryStr = properties.getProperty(PROPERTY_GAMES_DIRECTORY);
-        if ((gamesDirectoryStr != null) && (gamesDirectoryStr.trim().length() > 0)) {
+    public synchronized File getGameDirectory() {
+        final String gameDirectoryStr = properties.getProperty(PROPERTY_GAME_DIRECTORY);
+        if ((gameDirectoryStr != null) && (gameDirectoryStr.trim().length() > 0)) {
             try {
-                return new File(new URI(gamesDirectoryStr));
+                return new File(new URI(gameDirectoryStr));
             } catch (Exception e) {
-                logger.error("Couldn't convert URI-String into File! {}", gamesDirectoryStr, e);
+                logger.error("Couldn't convert URI-String into File! {}", gameDirectoryStr, e);
+            }
+        }
+        return null;
+    }
+
+    public synchronized void setGameDataDirectory(final File gameDataDirectory) {
+        properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toURI().toString());
+    }
+
+    public synchronized File getGameDataDirectory() {
+        final String gameDataDirectoryStr = properties.getProperty(PROPERTY_GAME_DATA_DIRECTORY);
+        if ((gameDataDirectoryStr != null) && (gameDataDirectoryStr.trim().length() > 0)) {
+            try {
+                return new File(new URI(gameDataDirectoryStr));
+            } catch (Exception e) {
+                logger.error("Couldn't convert URI-String into File! {}", gameDataDirectoryStr, e);
             }
         }
         return null;

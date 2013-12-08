@@ -16,13 +16,17 @@
 
 package org.terasology.launcher.util;
 
+import org.terasology.launcher.util.windows.SavedGamesPathFinder;
+
+import javax.swing.JFileChooser;
 import java.io.File;
 import java.io.IOException;
 
 public final class DirectoryUtils {
 
     public static final String LAUNCHER_APPLICATION_DIR_NAME = "TerasologyLauncher";
-    public static final String GAMES_APPLICATION_DIR_NAME = "Terasology";
+    public static final String GAME_APPLICATION_DIR_NAME = "Terasology";
+    public static final String GAME_DATA_DIR_NAME = "Terasology";
     public static final String TEMP_DIR_NAME = "temp";
     public static final String CACHE_DIR_NAME = "cache";
 
@@ -121,5 +125,42 @@ public final class DirectoryUtils {
         }
 
         return applicationDirectory;
+    }
+
+    /**
+     * Should only be executed once at the start.
+     */
+    public static File getGameDataDirectory(final OperatingSystem os) {
+        final File userHome = new File(System.getProperty(PROPERTY_USER_HOME, "."));
+        File gameDataDirectory;
+
+        if (os.isWindows()) {
+            File path = null;
+
+            final String savedGamesPath = SavedGamesPathFinder.findSavedGamesPath();
+            if (savedGamesPath != null) {
+                path = new File(savedGamesPath);
+            }
+
+            if (path == null) {
+                final String documentsPath = SavedGamesPathFinder.findDocumentsPath();
+                if (documentsPath != null) {
+                    path = new File(documentsPath);
+                }
+            }
+            if (path == null) {
+                path = new JFileChooser().getFileSystemView().getDefaultDirectory();
+            }
+
+            gameDataDirectory = new File(path, GAME_DATA_DIR_NAME + '\\');
+        } else if (os.isUnix()) {
+            gameDataDirectory = new File(userHome, '.' + GAME_DATA_DIR_NAME.toLowerCase() + '/');
+        } else if (os.isMac()) {
+            gameDataDirectory = new File(userHome, MAC_PATH + GAME_DATA_DIR_NAME + '/');
+        } else {
+            gameDataDirectory = new File(userHome, GAME_DATA_DIR_NAME + '/');
+        }
+
+        return gameDataDirectory;
     }
 }

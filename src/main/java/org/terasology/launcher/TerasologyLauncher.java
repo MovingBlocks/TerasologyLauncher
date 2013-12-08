@@ -153,61 +153,111 @@ public final class TerasologyLauncher {
                 }
             }
 
-            // Games directory
-            logger.trace("Init gamesDirectory...");
-            File gamesDirectory = launcherSettings.getGamesDirectory();
-            if (gamesDirectory != null) {
+            // Game directory
+            logger.trace("Init gameDirectory...");
+            File gameDirectory = launcherSettings.getGameDirectory();
+            if (gameDirectory != null) {
                 try {
-                    DirectoryUtils.checkDirectory(gamesDirectory);
+                    DirectoryUtils.checkDirectory(gameDirectory);
                 } catch (IOException e) {
-                    logger.warn("The game installation directory can not be created or used! '{}'", gamesDirectory, e);
+                    logger.warn("The game directory can not be created or used! '{}'", gameDirectory, e);
                     JOptionPane.showMessageDialog(splash,
-                        BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
+                        BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory,
                         BundleUtils.getLabel("message_error_title"),
                         JOptionPane.WARNING_MESSAGE);
 
-                    // Set gamesDirectory to 'null' -> user has to choose new games directory
-                    gamesDirectory = null;
+                    // Set gameDirectory to 'null' -> user has to choose new game directory
+                    gameDirectory = null;
 
                     splash.setVisible(true);
                 }
             }
-            if (gamesDirectory == null) {
-                logger.trace("Choose gamesDirectory...");
-                splash.getInfoLabel().setText(BundleUtils.getLabel("splash_chooseGamesDirectory"));
-                gamesDirectory = DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.GAMES_APPLICATION_DIR_NAME);
-                final JFileChooser fileChooser = new JFileChooser(gamesDirectory.getParentFile());
+            if (gameDirectory == null) {
+                logger.trace("Choose gameDirectory...");
+                splash.getInfoLabel().setText(BundleUtils.getLabel("splash_chooseGameDirectory"));
+                gameDirectory = DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.GAME_APPLICATION_DIR_NAME);
+                final JFileChooser fileChooser = new JFileChooser(gameDirectory.getParentFile());
                 // Cannot use mode DIRECTORIES_ONLY, because the preselected name doesn't work.
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-                fileChooser.setSelectedFile(gamesDirectory);
-                fileChooser.setDialogTitle(BundleUtils.getLabel("message_dialog_title_chooseGamesDirectory"));
+                fileChooser.setSelectedFile(gameDirectory);
+                fileChooser.setDialogTitle(BundleUtils.getLabel("message_dialog_title_chooseGameDirectory"));
                 if (fileChooser.showSaveDialog(splash) != JFileChooser.APPROVE_OPTION) {
-                    logger.info("The new game installation directory is not approved. The TerasologyLauncher is terminated.");
+                    logger.info("The new game directory is not approved. The TerasologyLauncher is terminated.");
                     System.exit(0);
                 }
 
-                gamesDirectory = fileChooser.getSelectedFile();
+                gameDirectory = fileChooser.getSelectedFile();
 
                 splash.setVisible(true);
             }
             try {
-                DirectoryUtils.checkDirectory(gamesDirectory);
-                launcherSettings.setGamesDirectory(gamesDirectory);
+                DirectoryUtils.checkDirectory(gameDirectory);
+                launcherSettings.setGameDirectory(gameDirectory);
             } catch (IOException e) {
-                logger.error("The game installation directory can not be created or used! '{}'", gamesDirectory, e);
+                logger.error("The game directory can not be created or used! '{}'", gameDirectory, e);
                 JOptionPane.showMessageDialog(splash,
-                    BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
+                    BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory,
                     BundleUtils.getLabel("message_error_title"),
                     JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
-            logger.debug("Games directory: {}", gamesDirectory);
+            logger.debug("Game directory: {}", gameDirectory);
+
+            // Game data directory
+            logger.trace("Init gameDataDirectory...");
+            File gameDataDirectory = launcherSettings.getGameDataDirectory();
+            if (gameDataDirectory != null) {
+                try {
+                    DirectoryUtils.checkDirectory(gameDataDirectory);
+                } catch (IOException e) {
+                    logger.warn("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
+                    JOptionPane.showMessageDialog(splash,
+                        BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory,
+                        BundleUtils.getLabel("message_error_title"),
+                        JOptionPane.WARNING_MESSAGE);
+
+                    // Set gameDataDirectory to 'null' -> user has to choose new game data directory
+                    gameDataDirectory = null;
+
+                    splash.setVisible(true);
+                }
+            }
+            if (gameDataDirectory == null) {
+                logger.trace("Choose gameDataDirectory...");
+                splash.getInfoLabel().setText(BundleUtils.getLabel("splash_chooseGameDataDirectory"));
+                gameDataDirectory = DirectoryUtils.getGameDataDirectory(os);
+                final JFileChooser fileChooser = new JFileChooser(gameDataDirectory.getParentFile());
+                // Cannot use mode DIRECTORIES_ONLY, because the preselected name doesn't work.
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                fileChooser.setSelectedFile(gameDataDirectory);
+                fileChooser.setDialogTitle(BundleUtils.getLabel("message_dialog_title_chooseGameDataDirectory"));
+                if (fileChooser.showSaveDialog(splash) != JFileChooser.APPROVE_OPTION) {
+                    logger.info("The new game data directory is not approved. The TerasologyLauncher is terminated.");
+                    System.exit(0);
+                }
+
+                gameDataDirectory = fileChooser.getSelectedFile();
+
+                splash.setVisible(true);
+            }
+            try {
+                DirectoryUtils.checkDirectory(gameDataDirectory);
+                launcherSettings.setGameDataDirectory(gameDataDirectory);
+            } catch (IOException e) {
+                logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
+                JOptionPane.showMessageDialog(splash,
+                    BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory,
+                    BundleUtils.getLabel("message_error_title"),
+                    JOptionPane.ERROR_MESSAGE);
+                System.exit(1);
+            }
+            logger.debug("Game data directory: {}", gameDataDirectory);
 
             // Game versions
             logger.trace("Load game versions...");
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_loadGameVersions"));
             final TerasologyGameVersions gameVersions = new TerasologyGameVersions();
-            gameVersions.loadGameVersions(launcherSettings, launcherDirectory, gamesDirectory, new SplashProgressIndicator(splash, "splash_loadGameVersions"));
+            gameVersions.loadGameVersions(launcherSettings, launcherDirectory, gameDirectory, new SplashProgressIndicator(splash, "splash_loadGameVersions"));
             gameVersions.fixSettingsBuildVersion(launcherSettings);
             logger.debug("Game versions: {}", gameVersions);
             if (logger.isInfoEnabled()) {
@@ -216,7 +266,7 @@ public final class TerasologyLauncher {
                 }
             }
 
-            // Store LauncherSettings (after 'Games directory' and after 'Game versions')
+            // Store LauncherSettings ('Game directory', 'Game data directory', 'Game versions')
             logger.trace("Store LauncherSettings...");
             try {
                 launcherSettings.store();

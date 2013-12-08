@@ -338,7 +338,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 updateGui();
             } else {
                 try {
-                    gameDownloader = new GameDownloader(progressBar, this, tempDirectory, launcherSettings.getGamesDirectory(), gameVersion, gameVersions);
+                    gameDownloader = new GameDownloader(progressBar, this, tempDirectory, launcherSettings.getGameDirectory(), gameVersion, gameVersions);
                 } catch (IOException e) {
                     logger.error("The game download can not be started!", e);
                     finishedGameDownload(false, false, false, null);

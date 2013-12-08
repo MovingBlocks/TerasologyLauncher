@@ -72,7 +72,7 @@ public final class TerasologyGameVersions {
         return null;
     }
 
-    public synchronized void loadGameVersions(final LauncherSettings launcherSettings, final File launcherDirectory, final File gamesDirectory,
+    public synchronized void loadGameVersions(final LauncherSettings launcherSettings, final File launcherDirectory, final File gameDirectory,
                                               final ProgressListener progressListener) {
         final File cacheDirectory = getAndCheckCacheDirectory(launcherDirectory);
 
@@ -92,7 +92,7 @@ public final class TerasologyGameVersions {
             lastBuildNumbers.put(job, loadLastSuccessfulBuildNumber(buildNumbers, job));
         }
 
-        loadInstalledGames(gamesDirectory, buildNumbersMap, progressListener);
+        loadInstalledGames(gameDirectory, buildNumbersMap, progressListener);
 
         for (GameJob job : GameJob.values()) {
             progressListener.update();

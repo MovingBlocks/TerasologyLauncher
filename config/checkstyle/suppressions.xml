@@ -4,9 +4,6 @@
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-    <!-- Example
-        <suppress checks="JavadocStyleCheck"
-                  files="AbstractComplexityCheck.java"
-                  lines="82,108-122"/>
-    -->
+    <suppress checks="MethodName" files="Ole32.java"/>
+    <suppress checks="MethodName" files="Shell32.java"/>
 </suppressions>
