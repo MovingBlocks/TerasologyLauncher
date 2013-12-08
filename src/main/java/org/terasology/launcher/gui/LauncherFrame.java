@@ -317,7 +317,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_information_gameRunning"),
                     BundleUtils.getLabel("message_information_title"), JOptionPane.INFORMATION_MESSAGE);
             } else {
-                final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getMaxHeapSize(), launcherSettings.getInitialHeapSize());
+                final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
+                    launcherSettings.getInitialHeapSize());
                 if (!gameStarted) {
                     JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameStart"),
                         BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);

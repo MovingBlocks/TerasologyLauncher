@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.version.TerasologyGameVersion;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -41,14 +42,14 @@ public final class GameStarter {
         return (gameThread != null) && gameThread.isAlive();
     }
 
-    public boolean startGame(final TerasologyGameVersion gameVersion, final JavaHeapSize maxHeapSize, final JavaHeapSize initialHeapSize) {
+    public boolean startGame(final TerasologyGameVersion gameVersion, final File gameDataDirectory, final JavaHeapSize maxHeapSize, final JavaHeapSize initialHeapSize) {
         if (isRunning()) {
             logger.warn("The game can not be started because another game is already running!");
             return false;
         }
 
         final List<String> javaParameters = createJavaParameters(maxHeapSize, initialHeapSize);
-        final List<String> processParameters = createProcessParameters(gameVersion, javaParameters);
+        final List<String> processParameters = createProcessParameters(gameVersion, gameDataDirectory, javaParameters);
 
         return startProcess(gameVersion, processParameters);
     }
@@ -64,12 +65,14 @@ public final class GameStarter {
         return javaParameters;
     }
 
-    private List<String> createProcessParameters(final TerasologyGameVersion gameVersion, final List<String> javaParameters) {
+    private List<String> createProcessParameters(final TerasologyGameVersion gameVersion, final File gameDataDirectory, final List<String> javaParameters) {
         final List<String> processParameters = new ArrayList<>();
         processParameters.add("java");
         processParameters.addAll(javaParameters);
         processParameters.add("-jar");
         processParameters.add(gameVersion.getGameJar().getName());
+        processParameters.add("-homedir=" + gameDataDirectory.getPath());
+
         return processParameters;
     }
 
