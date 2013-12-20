@@ -32,7 +32,7 @@ public final class Languages {
     public static final List<Locale> SUPPORTED_LOCALES;
     public static final Map<Locale, String> SETTINGS_LABEL_KEYS;
 
-    private static final Locale SPANISH = new Locale("es");
+    static final Locale SPANISH = new Locale("es");
 
     static {
         final List<Locale> supportedLocales = new ArrayList<>(3);
