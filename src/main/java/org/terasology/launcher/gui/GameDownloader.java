@@ -50,7 +50,7 @@ final class GameDownloader extends SwingWorker<Void, Void> {
     private boolean successfulDownloadAndExtract;
     private boolean successfulLoadVersion;
 
-    public GameDownloader(final JProgressBar progressBar, final LauncherFrame frame, final File tempDirectory, final File gamesDirectory,
+    public GameDownloader(final JProgressBar progressBar, final LauncherFrame frame, final File tempDirectory, final File gameParentDirectory,
                           final TerasologyGameVersion gameVersion, final TerasologyGameVersions gameVersions) throws IOException {
         this.frame = frame;
         this.gameVersions = gameVersions;
@@ -64,9 +64,9 @@ final class GameDownloader extends SwingWorker<Void, Void> {
             throw new IOException("The ZIP file already exists and can not be deleted! " + downloadZipFile);
         }
         downloadURL = DownloadUtils.createFileDownloadURL(jobName, buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_ZIP);
-        final File gamesSubDirectory = new File(new File(gamesDirectory, gameVersion.getJob().getInstallationDirectory()), jobName);
-        DirectoryUtils.checkDirectory(gamesSubDirectory);
-        gameDirectory = new File(gamesSubDirectory, buildNumber.toString());
+        final File gameJobDirectory = new File(new File(gameParentDirectory, gameVersion.getJob().getInstallationDirectory()), jobName);
+        DirectoryUtils.checkDirectory(gameJobDirectory);
+        gameDirectory = new File(gameJobDirectory, buildNumber.toString());
 
         addPropertyChangeListener(new PropertyChangeListener() {
             @Override

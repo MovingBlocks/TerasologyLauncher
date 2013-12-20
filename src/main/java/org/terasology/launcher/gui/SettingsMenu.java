@@ -61,8 +61,10 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private static final String CANCEL_ACTION = "cancel";
 
     private static final String LAUNCHER_DIRECTORY_OPEN = "launcherDirectoryOpen";
-    private static final String GAMES_DIRECTORY_OPEN = "gamesDirectoryOpen";
-    private static final String GAMES_DIRECTORY_EDIT = "gamesDirectoryEdit";
+    private static final String GAME_DIRECTORY_OPEN = "gameDirectoryOpen";
+    private static final String GAME_DIRECTORY_EDIT = "gameDirectoryEdit";
+    private static final String GAME_DATA_DIRECTORY_OPEN = "gameDataDirectoryOpen";
+    private static final String GAME_DATA_DIRECTORY_EDIT = "gameDataDirectoryEdit";
     private static final String JOB_ACTION = "job";
     private static final String MAX_HEAP_SIZE_ACTION = "maxHeapSize";
     private static final String INITIAL_HEAP_SIZE_ACTION = "initialHeapSize";
@@ -76,7 +78,8 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private JCheckBox closeLauncherAfterGameStartBox;
 
     private final File launcherDirectory;
-    private File gamesDirectory;
+    private File gameDirectory;
+    private File gameDataDirectory;
 
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
@@ -98,7 +101,8 @@ final class SettingsMenu extends JDialog implements ActionListener {
         populateLanguage();
         populateSearchForLauncherUpdates();
         populateCloseLauncherAfterGameStart();
-        gamesDirectory = launcherSettings.getGamesDirectory();
+        gameDirectory = launcherSettings.getGameDirectory();
+        gameDataDirectory = launcherSettings.getGameDataDirectory();
 
         pack();
     }
@@ -169,29 +173,55 @@ final class SettingsMenu extends JDialog implements ActionListener {
         buildVersionBox = new JComboBox<>();
         buildVersionBox.setFont(settingsFont);
 
-        final JPanel gamesDirectoryPanel = new JPanel();
+        final JPanel gameDirectoryPanel = new JPanel();
 
-        final JLabel gamesDirectoryLabel = new JLabel();
-        gamesDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gamesDirectory"));
-        gamesDirectoryLabel.setFont(settingsFont);
+        final JLabel gameDirectoryLabel = new JLabel();
+        gameDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDirectory"));
+        gameDirectoryLabel.setFont(settingsFont);
 
-        final JButton gamesDirectoryOpenButton = new JButton();
-        gamesDirectoryOpenButton.setFont(settingsFont);
-        gamesDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gamesDirectory_open"));
-        gamesDirectoryOpenButton.addActionListener(this);
-        gamesDirectoryOpenButton.setActionCommand(GAMES_DIRECTORY_OPEN);
+        final JButton gameDirectoryOpenButton = new JButton();
+        gameDirectoryOpenButton.setFont(settingsFont);
+        gameDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_open"));
+        gameDirectoryOpenButton.addActionListener(this);
+        gameDirectoryOpenButton.setActionCommand(GAME_DIRECTORY_OPEN);
         if (!Desktop.isDesktopSupported()) {
-            gamesDirectoryOpenButton.setEnabled(false);
+            gameDirectoryOpenButton.setEnabled(false);
         }
 
-        final JButton gamesDirectoryEditButton = new JButton();
-        gamesDirectoryEditButton.setFont(settingsFont);
-        gamesDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gamesDirectory_edit"));
-        gamesDirectoryEditButton.addActionListener(this);
-        gamesDirectoryEditButton.setActionCommand(GAMES_DIRECTORY_EDIT);
+        final JButton gameDirectoryEditButton = new JButton();
+        gameDirectoryEditButton.setFont(settingsFont);
+        gameDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_edit"));
+        gameDirectoryEditButton.addActionListener(this);
+        gameDirectoryEditButton.setActionCommand(GAME_DIRECTORY_EDIT);
 
-        gamesDirectoryPanel.add(gamesDirectoryOpenButton);
-        gamesDirectoryPanel.add(gamesDirectoryEditButton);
+        gameDirectoryPanel.add(gameDirectoryOpenButton);
+        gameDirectoryPanel.add(gameDirectoryEditButton);
+
+
+        final JPanel gameDataDirectoryPanel = new JPanel();
+
+        final JLabel gameDataDirectoryLabel = new JLabel();
+        gameDataDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDataDirectory"));
+        gameDataDirectoryLabel.setFont(settingsFont);
+
+        final JButton gameDataDirectoryOpenButton = new JButton();
+        gameDataDirectoryOpenButton.setFont(settingsFont);
+        gameDataDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_open"));
+        gameDataDirectoryOpenButton.addActionListener(this);
+        gameDataDirectoryOpenButton.setActionCommand(GAME_DATA_DIRECTORY_OPEN);
+        if (!Desktop.isDesktopSupported()) {
+            gameDataDirectoryOpenButton.setEnabled(false);
+        }
+
+        final JButton gameDataDirectoryEditButton = new JButton();
+        gameDataDirectoryEditButton.setFont(settingsFont);
+        gameDataDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_edit"));
+        gameDataDirectoryEditButton.addActionListener(this);
+        gameDataDirectoryEditButton.setActionCommand(GAME_DATA_DIRECTORY_EDIT);
+
+        gameDataDirectoryPanel.add(gameDataDirectoryOpenButton);
+        gameDataDirectoryPanel.add(gameDataDirectoryEditButton);
+
 
         JLabel maxHeapSizeLabel = new JLabel();
         maxHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_maxHeapSize"));
@@ -221,14 +251,16 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     .addGroup(gameTabLayout.createParallelGroup()
                         .addComponent(jobLabel)
                         .addComponent(buildVersionLabel)
-                        .addComponent(gamesDirectoryLabel)
+                        .addComponent(gameDirectoryLabel)
+                        .addComponent(gameDataDirectoryLabel)
                         .addComponent(maxHeapSizeLabel)
                         .addComponent(initialHeapSizeLabel))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup()
                         .addComponent(jobBox)
                         .addComponent(buildVersionBox)
-                        .addComponent(gamesDirectoryPanel)
+                        .addComponent(gameDirectoryPanel)
+                        .addComponent(gameDataDirectoryPanel)
                         .addComponent(maxHeapSizeBox)
                         .addComponent(initialHeapSizeBox))
                     .addContainerGap())
@@ -249,8 +281,13 @@ final class SettingsMenu extends JDialog implements ActionListener {
                             GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(gamesDirectoryLabel)
-                        .addComponent(gamesDirectoryPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                        .addComponent(gameDirectoryLabel)
+                        .addComponent(gameDirectoryPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                            GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(gameDataDirectoryLabel)
+                        .addComponent(gameDataDirectoryPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                             GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(gameTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
@@ -469,31 +506,61 @@ final class SettingsMenu extends JDialog implements ActionListener {
                         JOptionPane.ERROR_MESSAGE);
                 }
                 break;
-            case GAMES_DIRECTORY_OPEN:
+            case GAME_DIRECTORY_OPEN:
                 try {
-                    DirectoryUtils.checkDirectory(gamesDirectory);
-                    Desktop.getDesktop().open(gamesDirectory);
+                    DirectoryUtils.checkDirectory(gameDirectory);
+                    Desktop.getDesktop().open(gameDirectory);
                 } catch (IOException e) {
-                    logger.error("The game installation directory can not be opened! '{}'", gamesDirectory, e);
+                    logger.error("The game directory can not be opened! '{}'", gameDirectory, e);
                     JOptionPane.showMessageDialog(this,
-                        BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
+                        BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory,
                         BundleUtils.getLabel("message_error_title"),
                         JOptionPane.ERROR_MESSAGE);
                 }
                 break;
-            case GAMES_DIRECTORY_EDIT:
-                final JFileChooser fileChooser = new JFileChooser(gamesDirectory);
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                fileChooser.setDialogTitle(BundleUtils.getLabel("settings_game_gamesDirectory_edit_title"));
-                if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            case GAME_DIRECTORY_EDIT:
+                final JFileChooser fileChooserGameDir = new JFileChooser(gameDirectory);
+                fileChooserGameDir.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooserGameDir.setDialogTitle(BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
+                if (fileChooserGameDir.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                     try {
-                        final File selectedFile = fileChooser.getSelectedFile();
+                        final File selectedFile = fileChooserGameDir.getSelectedFile();
                         DirectoryUtils.checkDirectory(selectedFile);
-                        gamesDirectory = selectedFile;
+                        gameDirectory = selectedFile;
                     } catch (IOException e) {
-                        logger.error("The game installation directory can not be created or used! '{}'", gamesDirectory, e);
+                        logger.error("The game directory can not be created or used! '{}'", gameDirectory, e);
                         JOptionPane.showMessageDialog(this,
-                            BundleUtils.getLabel("message_error_gamesDirectory") + "\n" + gamesDirectory,
+                            BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory,
+                            BundleUtils.getLabel("message_error_title"),
+                            JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                break;
+            case GAME_DATA_DIRECTORY_OPEN:
+                try {
+                    DirectoryUtils.checkDirectory(gameDataDirectory);
+                    Desktop.getDesktop().open(gameDataDirectory);
+                } catch (IOException e) {
+                    logger.error("The game data directory can not be opened! '{}'", gameDataDirectory, e);
+                    JOptionPane.showMessageDialog(this,
+                        BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory,
+                        BundleUtils.getLabel("message_error_title"),
+                        JOptionPane.ERROR_MESSAGE);
+                }
+                break;
+            case GAME_DATA_DIRECTORY_EDIT:
+                final JFileChooser fileChooserGameDataDir = new JFileChooser(gameDataDirectory);
+                fileChooserGameDataDir.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooserGameDataDir.setDialogTitle(BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
+                if (fileChooserGameDataDir.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                    try {
+                        final File selectedFile = fileChooserGameDataDir.getSelectedFile();
+                        DirectoryUtils.checkDirectory(selectedFile);
+                        gameDataDirectory = selectedFile;
+                    } catch (IOException e) {
+                        logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
+                        JOptionPane.showMessageDialog(this,
+                            BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory,
                             BundleUtils.getLabel("message_error_title"),
                             JOptionPane.ERROR_MESSAGE);
                     }
@@ -522,8 +589,11 @@ final class SettingsMenu extends JDialog implements ActionListener {
                 final VersionItem versionItem = (VersionItem) buildVersionBox.getSelectedItem();
                 launcherSettings.setBuildVersion(versionItem.getVersion(), jobItem.getJob());
 
-                // save gamesDirectory
-                launcherSettings.setGamesDirectory(gamesDirectory);
+                // save gameDirectory
+                launcherSettings.setGameDirectory(gameDirectory);
+
+                // save gameDataDirectory
+                launcherSettings.setGameDataDirectory(gameDataDirectory);
 
                 // save heap size settings
                 launcherSettings.setMaxHeapSize((JavaHeapSize) maxHeapSizeBox.getSelectedItem());
