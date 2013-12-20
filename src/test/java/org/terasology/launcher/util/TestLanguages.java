@@ -51,6 +51,12 @@ public final class TestLanguages {
     }
 
     @Test
+    public void testUpdateWithSpanish() {
+        Languages.update(Languages.SPANISH);
+        assertSame(Languages.SPANISH, Languages.getCurrentLocale());
+    }
+
+    @Test
     public void testUpdateWithGermany() {
         Languages.update(Languages.DEFAULT_LOCALE);
         Languages.update(Locale.GERMANY);
@@ -83,6 +89,12 @@ public final class TestLanguages {
     }
 
     @Test
+    public void testInitWithSpanish() {
+        Languages.init(Languages.SPANISH.toString());
+        assertSame(Languages.SPANISH, Languages.getCurrentLocale());
+    }
+
+    @Test
     public void testInitWithGermany() {
         Languages.init(Languages.DEFAULT_LOCALE.toString());
         Languages.init(Locale.GERMANY.toString());
@@ -98,11 +110,11 @@ public final class TestLanguages {
 
     @Test
     public void testSettingsLabelKeysSize() {
-        assertEquals(2, Languages.SETTINGS_LABEL_KEYS.size());
+        assertEquals(3, Languages.SETTINGS_LABEL_KEYS.size());
     }
 
     @Test
     public void testSupportedLocalesSize() {
-        assertEquals(2, Languages.SUPPORTED_LOCALES.size());
+        assertEquals(3, Languages.SUPPORTED_LOCALES.size());
     }
 }
