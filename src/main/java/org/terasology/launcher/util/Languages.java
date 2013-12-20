@@ -32,16 +32,18 @@ public final class Languages {
     public static final List<Locale> SUPPORTED_LOCALES;
     public static final Map<Locale, String> SETTINGS_LABEL_KEYS;
 
+    private static final Locale SPANISH = new Locale("es");
+
     static {
         final List<Locale> supportedLocales = new ArrayList<>(3);
         supportedLocales.add(Locale.ENGLISH);
         supportedLocales.add(Locale.GERMAN);
-        supportedLocales.add(Locales.SPANISH);
+        supportedLocales.add(SPANISH);
 
         final Map<Locale, String> settingsLabelKey = new HashMap<>();
         settingsLabelKey.put(Locale.ENGLISH, "settings_language_en");
         settingsLabelKey.put(Locale.GERMAN, "settings_language_de");
-        settingsLabelKey.put(Locales.SPANISH, "settings_language_es");
+        settingsLabelKey.put(SPANISH, "settings_language_es");
 
         SUPPORTED_LOCALES = Collections.unmodifiableList(supportedLocales);
         SETTINGS_LABEL_KEYS = Collections.unmodifiableMap(settingsLabelKey);
