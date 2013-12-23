@@ -18,7 +18,7 @@ assert org.gradle.api.JavaVersion.current().isJava7Compatible()
 
 // gradle wrapper version
 wrapper {
-    gradleVersion '1.9'
+    gradleVersion '1.10'
 }
 
 import org.apache.tools.ant.filters.FixCrLfFilter;
