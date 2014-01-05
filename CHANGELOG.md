@@ -1,11 +1,14 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 1.2.0 (unreleased)
+## 1.2.0 (2014-01-xx)
 * Choose, edit, show and use game data directory
 * Translation into Spanish
+* Fix for finding game version information
 * Internal changes
-    * Gradle update (1.9)
+    * Gradle update (1.10)
+    * Java source code check tool 'FindBugs'
+    * License header supports year 2014
 
 ## 1.1.2 (2013-11-22)
 * Fix for a wrong game version info (git branch)
