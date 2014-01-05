@@ -12,6 +12,7 @@ apply plugin: 'eclipse'
 apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
+apply plugin: 'findbugs'
 
 // Test for right version of Java in use for running this script
 assert org.gradle.api.JavaVersion.current().isJava7Compatible()
@@ -73,6 +74,13 @@ checkstyle {
 pmd {
     ignoreFailures = true
     ruleSetFiles = files("config/pmd/pmd.xml")
+}
+
+findbugs {
+    toolVersion = '2.0.3'
+    ignoreFailures = true
+    effort = 'max'
+    reportLevel = 'medium'
 }
 
 task createVersionInfoFile {
