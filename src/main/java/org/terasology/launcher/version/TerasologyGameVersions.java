@@ -47,7 +47,8 @@ public final class TerasologyGameVersions {
     private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersions.class);
 
     private static final String FILE_TERASOLOGY_JAR = "Terasology.jar";
-    private static final String FILE_LIBS_ENGINE_JAR = "libs/engine.jar";
+    private static final String DIR_LIBS = "libs";
+    private static final String FILE_ENGINE_JAR = "engine.*jar";
 
     private final Map<GameJob, List<TerasologyGameVersion>> gameVersionLists;
     private final Map<GameJob, SortedMap<Integer, TerasologyGameVersion>> gameVersionMaps;
@@ -199,11 +200,24 @@ public final class TerasologyGameVersions {
     private TerasologyGameVersion loadInstalledGameVersion(final File gameJar) {
         TerasologyGameVersion gameVersion = null;
         if (gameJar.exists() && gameJar.canRead() && gameJar.isFile()) {
-            final TerasologyGameVersionInfo gameVersionInfo;
-            final File engineJar = new File(gameJar.getParent(), FILE_LIBS_ENGINE_JAR);
-            if (engineJar.exists() && engineJar.canRead() && engineJar.isFile()) {
-                gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(engineJar);
-            } else {
+            TerasologyGameVersionInfo gameVersionInfo = null;
+
+            final File libsDirectory = new File(gameJar.getParentFile(), DIR_LIBS);
+            if (libsDirectory.isDirectory() && libsDirectory.canRead()) {
+                final File[] engineJars = libsDirectory.listFiles(new FileFilter() {
+                    @Override
+                    public boolean accept(final File file) {
+                        return file.isFile() && file.canRead() && file.getName().matches(FILE_ENGINE_JAR);
+                    }
+                }
+                );
+
+                if ((engineJars != null) && (engineJars.length == 1)) {
+                    gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(engineJars[0]);
+                }
+            }
+
+            if (gameVersionInfo == null) {
                 gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(gameJar);
             }
             if ((gameVersionInfo.getJobName() != null) && (gameVersionInfo.getJobName().length() > 0)
@@ -233,10 +247,10 @@ public final class TerasologyGameVersions {
                     gameVersion.setSuccessful(Boolean.TRUE);
                     gameVersion.setLatest(false);
                 } else {
-                    logger.warn("The game version info can not be used from the file '{}' or '{}'!", gameJar, engineJar);
+                    logger.warn("The game version info can not be used from the file '{}' or '{}'!", gameJar, FILE_ENGINE_JAR);
                 }
             } else {
-                logger.warn("The game version info can not be loaded from the file '{}' or '{}'!", gameJar, engineJar);
+                logger.warn("The game version info can not be loaded from the file '{}' or '{}'!", gameJar, FILE_ENGINE_JAR);
             }
         }
         return gameVersion;
