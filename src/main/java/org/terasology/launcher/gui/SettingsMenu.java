@@ -397,6 +397,20 @@ final class SettingsMenu extends JDialog implements ActionListener {
 
     private void populateJob() {
         for (GameJob job : GameJob.values()) {
+            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
+                boolean foundInstalled = false;
+                final List<TerasologyGameVersion> gameVersionList = gameVersions.getGameVersionList(job);
+                for (TerasologyGameVersion gameVersion : gameVersionList) {
+                    if (gameVersion.isInstalled()) {
+                        foundInstalled = true;
+                        break;
+                    }
+                }
+                if (!foundInstalled) {
+                    continue;
+                }
+            }
+
             final JobItem jobItem = new JobItem(job);
             jobBox.addItem(jobItem);
             if (launcherSettings.getJob() == job) {

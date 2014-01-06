@@ -5,6 +5,8 @@ Terasology Launcher - ChangeLog
 * Choose, edit, show and use game data directory
 * Translation into Spanish
 * Fix for finding game version information
+* Show outdated nightly multiplayer job only if it is installed
+* Show old nightly versions only if they are installed
 * Internal changes
     * Gradle update (1.10)
     * Java source code check tool 'FindBugs'

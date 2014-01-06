@@ -18,28 +18,30 @@ package org.terasology.launcher.version;
 
 public enum GameJob {
 
-    TerasologyStable("master", 15, 4, true, "STABLE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
+    TerasologyStable("master", 15, 4, true, false, "STABLE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
 
-    TerasologyLegacy("legacy", 1, 1, true, "STABLE", "infoHeader1_TerasologyLegacy", "settings_game_buildType_TerasologyLegacy"),
+    TerasologyLegacy("legacy", 1, 0, true, false, "STABLE", "infoHeader1_TerasologyLegacy", "settings_game_buildType_TerasologyLegacy"),
 
-    Terasology("develop", 245, 9, false, "NIGHTLY", "infoHeader1_Terasology", "settings_game_buildType_Terasology"),
+    Terasology("develop", 245, 4, false, false, "NIGHTLY", "infoHeader1_Terasology", "settings_game_buildType_Terasology"),
 
-    TerasologyMulti("multiplayer", 1, 1, false, "NIGHTLY", "infoHeader1_TerasologyMulti", "settings_game_buildType_TerasologyMulti");
+    TerasologyMulti("multiplayer", 1, 0, false, true, "NIGHTLY", "infoHeader1_TerasologyMulti", "settings_game_buildType_TerasologyMulti");
 
     private final String gitBranch;
     private final int minBuildNumber;
     private final int prevBuildNumbers;
     private final boolean stable;
+    private final boolean onlyInstalled;
     private final String installationDirectory;
     private final String infoMessageKey;
     private final String settingsKey;
 
-    private GameJob(final String gitBranch, final int minBuildNumber, final int prevBuildNumbers, final boolean stable, final String installationDirectory,
-                    final String infoMessageKey, final String settingsKey) {
+    private GameJob(final String gitBranch, final int minBuildNumber, final int prevBuildNumbers, final boolean stable, final boolean onlyInstalled,
+                    final String installationDirectory, final String infoMessageKey, final String settingsKey) {
         this.gitBranch = gitBranch;
         this.minBuildNumber = minBuildNumber;
         this.prevBuildNumbers = prevBuildNumbers;
         this.stable = stable;
+        this.onlyInstalled = onlyInstalled;
         this.installationDirectory = installationDirectory;
         this.infoMessageKey = infoMessageKey;
         this.settingsKey = settingsKey;
@@ -59,6 +61,10 @@ public enum GameJob {
 
     public boolean isStable() {
         return stable;
+    }
+
+    public boolean isOnlyInstalled() {
+        return onlyInstalled;
     }
 
     public String getInstallationDirectory() {

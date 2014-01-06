@@ -102,7 +102,9 @@ public final class TerasologyGameVersions {
             final SortedSet<Integer> buildNumbers = buildNumbersMap.get(job);
             final Integer lastBuildNumber = lastBuildNumbers.get(job);
 
-            fillBuildNumbers(buildNumbers, job.getMinBuildNumber(), lastBuildNumber);
+            if (job.isStable() && !job.isOnlyInstalled()) {
+                fillBuildNumbers(buildNumbers, job.getMinBuildNumber(), lastBuildNumber);
+            }
             SortedMap<Integer, TerasologyGameVersion> cachedGameVersions = null;
             if (cacheDirectory != null) {
                 cachedGameVersions = readFromCache(job, buildNumbers, cacheDirectory);
@@ -150,7 +152,10 @@ public final class TerasologyGameVersions {
             if (lastSuccessfulBuildNumber >= job.getMinBuildNumber()) {
                 buildNumbers.add(lastSuccessfulBuildNumber);
                 // add previous build numbers
-                buildNumbers.add(Math.max(job.getMinBuildNumber(), lastSuccessfulBuildNumber - job.getPrevBuildNumbers()));
+                final int prevBuildNumber = Math.max(job.getMinBuildNumber(), lastSuccessfulBuildNumber - job.getPrevBuildNumbers());
+                for (int buildNumber = prevBuildNumber; buildNumber < lastSuccessfulBuildNumber; buildNumber++) {
+                    buildNumbers.add(buildNumber);
+                }
             }
         } catch (DownloadException e) {
             logger.info("Retrieving last successful build number failed. '{}'", job, e);
@@ -397,6 +402,7 @@ public final class TerasologyGameVersions {
             gameVersionMap.get(gameVersionMap.lastKey()).copyTo(latestGameVersion);
         }
         gameVersionList.add(latestGameVersion);
+
         Collections.reverse(gameVersionList);
 
         return Collections.unmodifiableList(gameVersionList);
