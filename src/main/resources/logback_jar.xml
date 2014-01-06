@@ -11,11 +11,16 @@
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>TerasologyLauncher.log</file>
-        <append>false</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>TerasologyLauncher.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- keep 2 days' worth of history -->
+            <maxHistory>2</maxHistory>
+        </rollingPolicy>
         <encoder>
-            <pattern>%-5level %5relative - %msg [%thread] [%logger]%n</pattern>
+            <pattern>%d %-5level [%thread] - %msg [%logger]%n</pattern>
         </encoder>
     </appender>
 
