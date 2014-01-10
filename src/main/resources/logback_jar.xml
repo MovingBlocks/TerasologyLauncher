@@ -18,6 +18,8 @@
             <fileNamePattern>TerasologyLauncher.%d{yyyy-MM-dd}.log</fileNamePattern>
             <!-- keep 2 days' worth of history -->
             <maxHistory>2</maxHistory>
+            <!-- Delete old files on start -->
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
         <encoder>
             <pattern>%d %-5level [%thread] - %msg [%logger]%n</pattern>
