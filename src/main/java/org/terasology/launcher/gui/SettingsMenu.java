@@ -637,6 +637,8 @@ final class SettingsMenu extends JDialog implements ActionListener {
                 setVisible(false);
                 setAlwaysOnTop(false);
                 break;
+            default:
+                logger.warn("Unhandled action command '{}'.", actionCommand);
         }
     }
 }

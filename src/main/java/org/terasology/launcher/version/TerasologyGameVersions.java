@@ -126,13 +126,13 @@ public final class TerasologyGameVersions {
     }
 
     private File getAndCheckCacheDirectory(final File launcherDirectory) {
-        File cacheDirectory;
+        File cacheDirectory = null;
         try {
             cacheDirectory = new File(launcherDirectory, DirectoryUtils.CACHE_DIR_NAME);
             DirectoryUtils.checkDirectory(cacheDirectory);
         } catch (IOException e) {
-            cacheDirectory = null;
             logger.error("The cache directory can not be created or used! '{}'", cacheDirectory, e);
+            cacheDirectory = null;
         }
         return cacheDirectory;
     }

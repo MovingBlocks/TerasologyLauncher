@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -184,7 +185,7 @@ public final class LauncherSettings {
         if ((gameDirectoryStr != null) && (gameDirectoryStr.trim().length() > 0)) {
             try {
                 gameDirectory = new File(new URI(gameDirectoryStr));
-            } catch (Exception e) {
+            } catch (URISyntaxException | RuntimeException e) {
                 logger.warn("Invalid value '{}' for the parameter '{}'!", gameDirectoryStr, PROPERTY_GAME_DIRECTORY);
             }
         }
@@ -200,7 +201,7 @@ public final class LauncherSettings {
         if ((gameDataDirectoryStr != null) && (gameDataDirectoryStr.trim().length() > 0)) {
             try {
                 gameDataDirectory = new File(new URI(gameDataDirectoryStr));
-            } catch (Exception e) {
+            } catch (URISyntaxException | RuntimeException e) {
                 logger.warn("Invalid value '{}' for the parameter '{}'!", gameDataDirectoryStr, PROPERTY_GAME_DATA_DIRECTORY);
             }
         }
@@ -272,7 +273,7 @@ public final class LauncherSettings {
         if ((gameDirectoryStr != null) && (gameDirectoryStr.trim().length() > 0)) {
             try {
                 return new File(new URI(gameDirectoryStr));
-            } catch (Exception e) {
+            } catch (URISyntaxException | RuntimeException e) {
                 logger.error("Couldn't convert URI-String into File! {}", gameDirectoryStr, e);
             }
         }
@@ -288,7 +289,7 @@ public final class LauncherSettings {
         if ((gameDataDirectoryStr != null) && (gameDataDirectoryStr.trim().length() > 0)) {
             try {
                 return new File(new URI(gameDataDirectoryStr));
-            } catch (Exception e) {
+            } catch (URISyntaxException | RuntimeException e) {
                 logger.error("Couldn't convert URI-String into File! {}", gameDataDirectoryStr, e);
             }
         }

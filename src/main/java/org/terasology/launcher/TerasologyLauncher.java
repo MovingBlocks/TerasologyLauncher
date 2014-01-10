@@ -292,8 +292,8 @@ public final class TerasologyLauncher {
             splash.dispose();
 
             logger.info("The TerasologyLauncher was successfully started.");
-        } catch (Exception e) {
-            logger.error("The TerasologyLauncher could not be started.!", e);
+        } catch (IOException | RuntimeException e) {
+            logger.error("The TerasologyLauncher could not be started!", e);
             JOptionPane.showMessageDialog(null,
                 BundleUtils.getLabel("message_error_launcherStart"),
                 BundleUtils.getLabel("message_error_title"),

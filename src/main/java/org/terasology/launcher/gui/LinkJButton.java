@@ -23,6 +23,7 @@ import javax.swing.JButton;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.net.URI;
 
 /**
@@ -53,14 +54,14 @@ final class LinkJButton extends JButton {
 
     private class ButtonClickHandler implements ActionListener {
         @Override
-        public void actionPerformed(final ActionEvent e) {
-            if (uri != null && Desktop.isDesktopSupported()) {
+        public void actionPerformed(final ActionEvent event) {
+            if ((uri != null) && Desktop.isDesktopSupported()) {
                 final Desktop desktop = Desktop.getDesktop();
                 if (desktop.isSupported(Desktop.Action.BROWSE)) {
                     try {
                         desktop.browse(uri);
-                    } catch (Exception ex) {
-                        logger.error("Can't browse URI! " + uri, ex);
+                    } catch (IOException | RuntimeException e) {
+                        logger.error("Can't browse URI! " + uri, e);
                     }
                 }
             }

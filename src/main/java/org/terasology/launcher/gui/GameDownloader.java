@@ -101,17 +101,18 @@ final class GameDownloader extends SwingWorker<Void, Void> {
                 setProgress(100);
 
                 firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_extractZip"));
-                FileUtils.extractZipTo(downloadZipFile, gameDirectory);
-                boolean deleted = downloadZipFile.delete();
-                if (!deleted) {
-                    logger.warn("Cannot delete downloaded ZIP file! '{}'", downloadZipFile);
-                }
-                successfulDownloadAndExtract = true;
+                successfulDownloadAndExtract = FileUtils.extractZipTo(downloadZipFile, gameDirectory);
+                if (successfulDownloadAndExtract) {
+                    boolean deleted = downloadZipFile.delete();
+                    if (!deleted) {
+                        logger.warn("Cannot delete downloaded ZIP file! '{}'", downloadZipFile);
+                    }
 
-                firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_gameInfo"));
-                successfulLoadVersion = gameVersions.updateGameVersionsAfterInstallation(gameDirectory);
+                    firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_gameInfo"));
+                    successfulLoadVersion = gameVersions.updateGameVersionsAfterInstallation(gameDirectory);
+                }
             }
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             logger.error("There is an error occurred while downloading the game!", e);
         }
         return null;

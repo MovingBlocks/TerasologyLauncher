@@ -23,9 +23,11 @@ import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -59,6 +61,8 @@ public final class DownloadUtils {
 
     private static final String API_JSON_RESULT = "/api/json?tree=result";
     private static final String API_XML_CHANGE_LOG = "/api/xml?xpath=//changeSet/item/msg[1]&wrapper=msgs";
+
+    private static final String CHARSET_US_ASCII = "US-ASCII";
 
     private DownloadUtils() {
     }
@@ -131,9 +135,9 @@ public final class DownloadUtils {
         BufferedReader reader = null;
         try {
             urlVersion = new URL(JENKINS_JOB_URL + jobName + lastBuild + BUILD_NUMBER);
-            reader = new BufferedReader(new InputStreamReader(urlVersion.openStream(), "US-ASCII"));
+            reader = new BufferedReader(new InputStreamReader(urlVersion.openStream(), CHARSET_US_ASCII));
             buildNumber = Integer.parseInt(reader.readLine());
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             throw new DownloadException("The buildNumber could not be loaded! " + jobName + " " + urlVersion, e);
         } finally {
             if (reader != null) {
@@ -153,8 +157,8 @@ public final class DownloadUtils {
         try {
             urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
             launcherVersionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
-        } catch (Exception e) {
-            throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
+        } catch (IOException | RuntimeException e) {
+            throw new DownloadException("The launcher version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
         }
         return launcherVersionInfo;
     }
@@ -165,8 +169,8 @@ public final class DownloadUtils {
         try {
             urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_GAME_VERSION_INFO);
             gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
-        } catch (Exception e) {
-            throw new DownloadException("The version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
+        } catch (IOException | RuntimeException e) {
+            throw new DownloadException("The game version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
         }
         return gameVersionInfo;
     }
@@ -177,7 +181,7 @@ public final class DownloadUtils {
         BufferedReader reader = null;
         try {
             urlResult = DownloadUtils.createURL(jobName, buildNumber, API_JSON_RESULT);
-            reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), "US-ASCII"));
+            reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), CHARSET_US_ASCII));
             final String jsonResult = reader.readLine();
             if (jsonResult != null) {
                 for (JobResult result : JobResult.values()) {
@@ -186,8 +190,11 @@ public final class DownloadUtils {
                         break;
                     }
                 }
+                if (jobResult == null) {
+                    logger.warn("Unknown job result '{}' for '{}'!", jsonResult, urlResult);
+                }
             }
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             throw new DownloadException("The job result could not be loaded! " + jobName + " " + urlResult, e);
         } finally {
             if (reader != null) {
@@ -226,7 +233,7 @@ public final class DownloadUtils {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (ParserConfigurationException | SAXException | IOException | RuntimeException e) {
             throw new DownloadException("The changeLog could not be loaded! " + jobName + " " + urlChangeLog, e);
         } finally {
             if (stream != null) {
@@ -246,7 +253,7 @@ public final class DownloadUtils {
         final StringBuilder changeLog = new StringBuilder();
         try {
             urlChangeLog = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG);
-            reader = new BufferedReader(new InputStreamReader(urlChangeLog.openStream(), "US-ASCII"));
+            reader = new BufferedReader(new InputStreamReader(urlChangeLog.openStream(), CHARSET_US_ASCII));
             while (true) {
                 String line = reader.readLine();
                 if (line == null) {
@@ -257,7 +264,7 @@ public final class DownloadUtils {
                 }
                 changeLog.append(line);
             }
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             throw new DownloadException("The launcher change log could not be loaded! " + jobName + " " + urlChangeLog, e);
         } finally {
             if (reader != null) {

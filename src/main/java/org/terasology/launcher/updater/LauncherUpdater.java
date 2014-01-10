@@ -110,12 +110,15 @@ public final class LauncherUpdater {
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 
             // Extract launcher ZIP file
-            FileUtils.extractZip(downloadedZipFile);
+            boolean extracted = FileUtils.extractZip(downloadedZipFile);
+            if (!extracted) {
+                throw new IOException("Could not extract launcher zip file! " + downloadedZipFile);
+            }
             logger.trace("ZIP file extracted");
 
             // Start SelfUpdater
             SelfUpdater.runUpdate(tempDirectory, launcherInstallationDirectory);
-        } catch (Exception e) {
+        } catch (DownloadException | IOException | RuntimeException e) {
             logger.error("Launcher update failed! Aborting update process!", e);
             JOptionPane.showMessageDialog(splash,
                 BundleUtils.getLabel("update_launcher_updateFailed"),

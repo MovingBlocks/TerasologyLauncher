@@ -42,9 +42,16 @@ public final class GameStarter {
         return (gameThread != null) && gameThread.isAlive();
     }
 
+    public void dispose() {
+        if (gameThread != null) {
+            gameThread.interrupt();
+        }
+        gameThread = null;
+    }
+
     public boolean startGame(final TerasologyGameVersion gameVersion, final File gameDataDirectory, final JavaHeapSize maxHeapSize, final JavaHeapSize initialHeapSize) {
         if (isRunning()) {
-            logger.warn("The game can not be started because another game is already running!");
+            logger.warn("The game can not be started because another game is already running! {}", gameThread);
             return false;
         }
 
@@ -87,12 +94,16 @@ public final class GameStarter {
             gameThread = new Thread(new Runnable() {
                 public void run() {
                     try {
-                        final BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                        String line;
-                        while ((line = r.readLine()) != null) {
-                            logger.trace("Game output: {}", line);
+                        try (final BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                            String line;
+                            while ((line = r.readLine()) != null) {
+                                logger.trace("Game output: {}", line);
+                                if (Thread.currentThread().isInterrupted()) {
+                                    logger.trace("Game thread interrupted!");
+                                    return;
+                                }
+                            }
                         }
-                        r.close();
                         int exitValue = -1;
                         try {
                             exitValue = p.waitFor();
@@ -105,6 +116,7 @@ public final class GameStarter {
                     }
                 }
             });
+            gameThread.setName("game" + gameVersion.getBuildNumber());
             gameThread.start();
 
             Thread.sleep(PROCESS_START_SLEEP_TIME);
@@ -116,9 +128,8 @@ public final class GameStarter {
             } else {
                 logger.info("The game is successfully launched.");
             }
-        } catch (Exception e) {
-            logger.error("The game could not be started due to an error! Parameters '{}' for '{}'!", processParameters,
-                gameVersion, e);
+        } catch (InterruptedException | IOException | RuntimeException e) {
+            logger.error("The game could not be started due to an error! Parameters '{}' for '{}'!", processParameters, gameVersion, e);
             return false;
         }
         return true;

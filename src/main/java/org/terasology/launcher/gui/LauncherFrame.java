@@ -105,7 +105,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
         gameStarter = new GameStarter();
 
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         initComponents();
         updateGui();
@@ -115,6 +115,12 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setResizable(false);
         getContentPane().add(new BackgroundImage(FRAME_WIDTH, FRAME_HEIGHT));
+    }
+
+    public void dispose() {
+        logger.debug("Dispose launcher frame...");
+        gameStarter.dispose();
+        super.dispose();
     }
 
     private void initComponents() {
@@ -304,7 +310,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             }
         } else if (command.equals(EXIT_ACTION)) {
             dispose();
-            System.exit(0);
         } else if (command.equals(START_ACTION)) {
             final TerasologyGameVersion gameVersion = getSelectedGameVersion();
             if ((gameVersion == null) || !gameVersion.isInstalled()) {
@@ -325,7 +330,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
                     logger.info("Close launcher after game start.");
                     dispose();
-                    System.exit(0);
                 }
             }
         } else if (command.equals(DOWNLOAD_ACTION)) {
@@ -361,7 +365,13 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 final int option = JOptionPane.showConfirmDialog(this, msg, BundleUtils.getLabel("message_deleteGame_title"), JOptionPane.YES_NO_OPTION);
                 if (option == JOptionPane.YES_OPTION) {
                     logger.info("Delete installed game! '{}' '{}'", gameVersion, gameVersion.getInstallationPath());
-                    FileUtils.delete(gameVersion.getInstallationPath());
+                    try {
+                        FileUtils.delete(gameVersion.getInstallationPath());
+                    } catch (IOException e) {
+                        logger.error("The selected game version can not be deleted! '{}'", gameVersion, e);
+                        // TODO Show message dialog
+                        return;
+                    }
                     gameVersions.removeInstallationInfo(gameVersion);
                     updateGui();
                 }

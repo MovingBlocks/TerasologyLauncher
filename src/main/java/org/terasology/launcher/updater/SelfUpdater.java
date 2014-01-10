@@ -78,12 +78,20 @@ public final class SelfUpdater {
     public static void main(final String[] args) {
         logger.info("Running self updater.");
 
+        if ((args == null) || (args.length != 2)) {
+            logger.error("Two arguments needed!");
+            System.exit(1);
+        }
+
         final String launcherInstallationDirectoryArg = args[0];
         final String tempLauncherDirectoryArg = args[1];
         final File launcherInstallationDirectory = new File(launcherInstallationDirectoryArg);
         final File tempLauncherDirectory = new File(tempLauncherDirectoryArg);
 
         try {
+            logger.info("Current launcher path: {}", launcherInstallationDirectory.getPath());
+            logger.info("New files temporarily located in: {}", tempLauncherDirectory.getPath());
+
             // Check both directories
             DirectoryUtils.checkDirectory(launcherInstallationDirectory);
             DirectoryUtils.checkDirectory(tempLauncherDirectory);

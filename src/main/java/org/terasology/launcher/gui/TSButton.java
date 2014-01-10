@@ -32,6 +32,7 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 /**
  * Custom JButton using the style/layout from the Terasology main menu.
@@ -57,7 +58,7 @@ final class TSButton extends JButton implements MouseListener {
             normalImg = BundleUtils.getBufferedImage("button");
             hoveredImg = BundleUtils.getBufferedImage("button_hovered");
             pressedImg = BundleUtils.getBufferedImage("button_pressed");
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             logger.error("Read button images failed!", e);
             normalImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);
             hoveredImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);

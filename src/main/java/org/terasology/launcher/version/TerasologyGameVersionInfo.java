@@ -119,12 +119,12 @@ public final class TerasologyGameVersionInfo implements Serializable {
         if (inStream != null) {
             try {
                 properties.load(inStream);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 logger.error("Loading game version info failed!", e);
             } finally {
                 try {
                     inStream.close();
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     logger.warn("Closing InputStream failed!", e);
                 }
             }
