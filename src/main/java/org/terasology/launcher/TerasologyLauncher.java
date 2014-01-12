@@ -150,7 +150,6 @@ public final class TerasologyLauncher {
                             BundleUtils.getLabel("message_error_title"),
                             JOptionPane.ERROR_MESSAGE);
 
-                        // TODO exit or ...
                         splash.setVisible(true);
                     }
                 }
