@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,15 +95,15 @@ public final class GameStarter {
             gameThread = new Thread(new Runnable() {
                 public void run() {
                     try {
-                        try (final BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                        try (final BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.defaultCharset()))) {
                             String line;
-                            while ((line = r.readLine()) != null) {
+                            while (!Thread.currentThread().isInterrupted() && ((line = r.readLine()) != null)) {
                                 logger.trace("Game output: {}", line);
-                                if (Thread.currentThread().isInterrupted()) {
-                                    logger.trace("Game thread interrupted!");
-                                    return;
-                                }
                             }
+                        }
+                        if (Thread.currentThread().isInterrupted()) {
+                            logger.debug("Game thread interrupted.");
+                            return;
                         }
                         int exitValue = -1;
                         try {
