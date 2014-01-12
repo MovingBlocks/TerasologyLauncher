@@ -112,7 +112,7 @@ public final class LauncherUpdater {
             // Extract launcher ZIP file
             boolean extracted = FileUtils.extractZip(downloadedZipFile);
             if (!extracted) {
-                throw new IOException("Could not extract launcher zip file! " + downloadedZipFile);
+                throw new IOException("Could not extract ZIP file! " + downloadedZipFile);
             }
             logger.trace("ZIP file extracted");
 

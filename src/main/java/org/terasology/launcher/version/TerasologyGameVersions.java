@@ -131,7 +131,7 @@ public final class TerasologyGameVersions {
             cacheDirectory = new File(launcherDirectory, DirectoryUtils.CACHE_DIR_NAME);
             DirectoryUtils.checkDirectory(cacheDirectory);
         } catch (IOException e) {
-            logger.error("The cache directory can not be created or used! '{}'", cacheDirectory, e);
+            logger.error("Could not create or use cache directory '{}'!", cacheDirectory, e);
             cacheDirectory = null;
         }
         return cacheDirectory;
@@ -231,13 +231,13 @@ public final class TerasologyGameVersions {
                 try {
                     installedJob = GameJob.valueOf(gameVersionInfo.getJobName());
                 } catch (IllegalArgumentException e) {
-                    logger.error("Unknown job '{}'!", gameVersionInfo.getJobName());
+                    logger.error("Unknown job '{}' found for game '{}'!", gameVersionInfo.getJobName(), gameJar);
                 }
                 Integer installedBuildNumber = null;
                 try {
                     installedBuildNumber = Integer.parseInt(gameVersionInfo.getBuildNumber());
                 } catch (NumberFormatException e) {
-                    logger.error("The build number can not be parsed! '{}'!", gameVersionInfo.getBuildNumber());
+                    logger.error("Could not parse build number '{}'!", gameVersionInfo.getBuildNumber());
                 }
 
                 if ((installedJob != null) && (installedBuildNumber != null)
@@ -291,7 +291,7 @@ public final class TerasologyGameVersions {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            logger.error("The cached data can not be loaded!", e);
+            logger.error("Could not load cached data!", e);
         }
         return cachedGameVersions;
     }
@@ -384,7 +384,7 @@ public final class TerasologyGameVersions {
                 }
             }
         } catch (IOException e) {
-            logger.error("The cache data can not be written!", e);
+            logger.error("Could not write cache data!", e);
         }
     }
 
@@ -449,19 +449,19 @@ public final class TerasologyGameVersions {
             if (gameVersion.isLatest()) {
                 final TerasologyGameVersion related = getGameVersionForBuildVersion(gameVersion.getJob(), gameVersion.getBuildNumber());
                 if ((related != null) && related.isInstalled() && (related.getInstallationPath().equals(gameVersion.getInstallationPath()))) {
-                    logger.trace("Remove installation info from related game version. '{}'", related);
+                    logger.debug("Remove installation info from related game version. '{}'", related);
                     related.setInstallationPath(null);
                     related.setGameJar(null);
                 }
             } else {
                 final TerasologyGameVersion latest = getGameVersionForBuildVersion(gameVersion.getJob(), TerasologyGameVersion.BUILD_VERSION_LATEST);
                 if ((latest != null) && latest.isInstalled() && (latest.getInstallationPath().equals(gameVersion.getInstallationPath()))) {
-                    logger.trace("Remove installation info from latest game version. '{}'", latest);
+                    logger.debug("Remove installation info from latest game version. '{}'", latest);
                     latest.setInstallationPath(null);
                     latest.setGameJar(null);
                 }
             }
-            logger.trace("Remove installation info from game version. '{}'", gameVersion);
+            logger.debug("Remove installation info from game version. '{}'", gameVersion);
             gameVersion.setInstallationPath(null);
             gameVersion.setGameJar(null);
         }

@@ -318,7 +318,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                     BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
                 updateGui();
             } else if (gameStarter.isRunning()) {
-                logger.debug("The game can not be started because another game is already running!");
+                logger.debug("The game can not be started because another game is already running.");
                 JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_information_gameRunning"),
                     BundleUtils.getLabel("message_information_title"), JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -345,7 +345,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 try {
                     gameDownloader = new GameDownloader(progressBar, this, tempDirectory, launcherSettings.getGameDirectory(), gameVersion, gameVersions);
                 } catch (IOException e) {
-                    logger.error("The game download can not be started!", e);
+                    logger.error("Could not start game download!", e);
                     finishedGameDownload(false, false, false, null);
                     return;
                 }
@@ -368,7 +368,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                     try {
                         FileUtils.delete(gameVersion.getInstallationPath());
                     } catch (IOException e) {
-                        logger.error("The selected game version can not be deleted! '{}'", gameVersion, e);
+                        logger.error("Could not delete installed game!", e);
                         // TODO Show message dialog
                         return;
                     }

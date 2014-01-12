@@ -51,7 +51,7 @@ public final class GameStarter {
 
     public boolean startGame(final TerasologyGameVersion gameVersion, final File gameDataDirectory, final JavaHeapSize maxHeapSize, final JavaHeapSize initialHeapSize) {
         if (isRunning()) {
-            logger.warn("The game can not be started because another game is already running! {}", gameThread);
+            logger.warn("The game can not be started because another game is already running! '{}'", gameThread);
             return false;
         }
 
@@ -112,7 +112,7 @@ public final class GameStarter {
                         }
                         logger.debug("Game closed with the exit value '{}'.", exitValue);
                     } catch (IOException e) {
-                        logger.error("The output of the game can not be read!", e);
+                        logger.error("Could not read game output!", e);
                     }
                 }
             });

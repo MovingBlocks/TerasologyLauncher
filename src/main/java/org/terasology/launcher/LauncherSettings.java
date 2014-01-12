@@ -74,7 +74,7 @@ public final class LauncherSettings {
 
     public synchronized void load() throws IOException {
         if (launcherSettingsFile.exists()) {
-            logger.trace("Load the launcher settings from the file '{}'.", launcherSettingsFile);
+            logger.debug("Load the launcher settings from the file '{}'.", launcherSettingsFile);
 
             // load settings
             try (InputStream inputStream = new FileInputStream(launcherSettingsFile)) {
@@ -88,7 +88,7 @@ public final class LauncherSettings {
 
         // create directory
         if (!launcherSettingsFile.getParentFile().exists() && !launcherSettingsFile.getParentFile().mkdirs()) {
-            throw new IOException("The directory could not be created. " + launcherSettingsFile.getParentFile());
+            throw new IOException("Could not create directory! " + launcherSettingsFile.getParentFile());
         }
 
         // store settings
@@ -157,8 +157,7 @@ public final class LauncherSettings {
             try {
                 initialJavaHeapSize = JavaHeapSize.valueOf(initialHeapSizeStr);
             } catch (IllegalArgumentException e) {
-                logger.warn("Invalid value '{}' for the parameter '{}'!", initialHeapSizeStr,
-                    PROPERTY_INITIAL_HEAP_SIZE);
+                logger.warn("Invalid value '{}' for the parameter '{}'!", initialHeapSizeStr, PROPERTY_INITIAL_HEAP_SIZE);
             }
         }
         properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialJavaHeapSize.name());
@@ -274,7 +273,7 @@ public final class LauncherSettings {
             try {
                 return new File(new URI(gameDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
-                logger.error("Couldn't convert URI-String into File! {}", gameDirectoryStr, e);
+                logger.error("Invalid value '{}' for the parameter '{}'!", gameDirectoryStr, PROPERTY_GAME_DIRECTORY);
             }
         }
         return null;
@@ -290,7 +289,7 @@ public final class LauncherSettings {
             try {
                 return new File(new URI(gameDataDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
-                logger.error("Couldn't convert URI-String into File! {}", gameDataDirectoryStr, e);
+                logger.error("Invalid value '{}' for the parameter '{}'!", gameDataDirectoryStr, PROPERTY_GAME_DATA_DIRECTORY);
             }
         }
         return null;

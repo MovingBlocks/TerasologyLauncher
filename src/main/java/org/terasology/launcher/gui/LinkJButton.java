@@ -61,7 +61,7 @@ final class LinkJButton extends JButton {
                     try {
                         desktop.browse(uri);
                     } catch (IOException | RuntimeException e) {
-                        logger.error("Can't browse URI! " + uri, e);
+                        logger.error("Could not browse URI '{}' with desktop!", uri, e);
                     }
                 }
             }

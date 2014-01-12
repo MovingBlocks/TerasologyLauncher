@@ -61,7 +61,7 @@ final class GameDownloader extends SwingWorker<Void, Void> {
         DirectoryUtils.checkDirectory(tempDirectory);
         downloadZipFile = new File(tempDirectory, jobName + "_" + buildNumber.toString() + ".zip");
         if (downloadZipFile.exists() && (!downloadZipFile.isFile() || !downloadZipFile.delete())) {
-            throw new IOException("The ZIP file already exists and can not be deleted! " + downloadZipFile);
+            throw new IOException("Could not delete file! " + downloadZipFile);
         }
         downloadURL = DownloadUtils.createFileDownloadURL(jobName, buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_ZIP);
         final File gameJobDirectory = new File(new File(gameParentDirectory, gameVersion.getJob().getInstallationDirectory()), jobName);
@@ -105,7 +105,7 @@ final class GameDownloader extends SwingWorker<Void, Void> {
                 if (successfulDownloadAndExtract) {
                     boolean deleted = downloadZipFile.delete();
                     if (!deleted) {
-                        logger.warn("Cannot delete downloaded ZIP file! '{}'", downloadZipFile);
+                        logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile);
                     }
 
                     firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_gameInfo"));

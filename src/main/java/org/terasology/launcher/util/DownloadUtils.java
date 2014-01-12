@@ -88,7 +88,7 @@ public final class DownloadUtils {
                 progressListener.update();
             }
         } catch (IOException e) {
-            throw new DownloadException("Could not download file! URL='" + downloadURL + "', file='" + file + "'", e);
+            throw new DownloadException("Could not download file! URL=" + downloadURL + ", file=" + file, e);
         }
     }
 
@@ -138,7 +138,7 @@ public final class DownloadUtils {
             reader = new BufferedReader(new InputStreamReader(urlVersion.openStream(), CHARSET_US_ASCII));
             buildNumber = Integer.parseInt(reader.readLine());
         } catch (IOException | RuntimeException e) {
-            throw new DownloadException("The buildNumber could not be loaded! " + jobName + " " + urlVersion, e);
+            throw new DownloadException("The build number could not be loaded! job=" + jobName + ", URL=" + urlVersion, e);
         } finally {
             if (reader != null) {
                 try {
@@ -158,7 +158,7 @@ public final class DownloadUtils {
             urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
             launcherVersionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
         } catch (IOException | RuntimeException e) {
-            throw new DownloadException("The launcher version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
+            throw new DownloadException("The launcher version info could not be loaded! job=" + jobName + ", URL=" + urlVersionInfo, e);
         }
         return launcherVersionInfo;
     }
@@ -170,7 +170,7 @@ public final class DownloadUtils {
             urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_GAME_VERSION_INFO);
             gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
         } catch (IOException | RuntimeException e) {
-            throw new DownloadException("The game version info could not be loaded! " + jobName + " " + urlVersionInfo, e);
+            throw new DownloadException("The game version info could not be loaded! job=" + jobName + ", URL=" + urlVersionInfo, e);
         }
         return gameVersionInfo;
     }
@@ -191,11 +191,11 @@ public final class DownloadUtils {
                     }
                 }
                 if (jobResult == null) {
-                    logger.warn("Unknown job result '{}' for '{}'!", jsonResult, urlResult);
+                    logger.error("Unknown job result '{}' for '{}'!", jsonResult, urlResult);
                 }
             }
         } catch (IOException | RuntimeException e) {
-            throw new DownloadException("The job result could not be loaded! " + jobName + " " + urlResult, e);
+            throw new DownloadException("The job result could not be loaded! job=" + jobName + ", URL=" + urlResult, e);
         } finally {
             if (reader != null) {
                 try {
@@ -234,7 +234,7 @@ public final class DownloadUtils {
                 }
             }
         } catch (ParserConfigurationException | SAXException | IOException | RuntimeException e) {
-            throw new DownloadException("The changeLog could not be loaded! " + jobName + " " + urlChangeLog, e);
+            throw new DownloadException("The change log could not be loaded! job=" + jobName + ", URL=" + urlChangeLog, e);
         } finally {
             if (stream != null) {
                 try {
@@ -265,7 +265,7 @@ public final class DownloadUtils {
                 changeLog.append(line);
             }
         } catch (IOException | RuntimeException e) {
-            throw new DownloadException("The launcher change log could not be loaded! " + jobName + " " + urlChangeLog, e);
+            throw new DownloadException("The launcher change log could not be loaded! job=" + jobName + ", URL=" + urlChangeLog, e);
         } finally {
             if (reader != null) {
                 try {

@@ -59,7 +59,7 @@ final class TSButton extends JButton implements MouseListener {
             hoveredImg = BundleUtils.getBufferedImage("button_hovered");
             pressedImg = BundleUtils.getBufferedImage("button_pressed");
         } catch (IOException | RuntimeException e) {
-            logger.error("Read button images failed!", e);
+            logger.error("Could not read button image!", e);
             normalImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);
             hoveredImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);
             pressedImg = new BufferedImage(256, 30, BufferedImage.TYPE_INT_RGB);

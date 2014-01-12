@@ -57,7 +57,7 @@ public final class BundleUtils {
         try {
             return new URI(uriStr);
         } catch (URISyntaxException e) {
-            logger.error("Can not create URI '{}' for key '{}'!", uriStr, key, e);
+            logger.error("Could not create URI '{}' for key '{}'!", uriStr, key, e);
         }
         return null;
     }

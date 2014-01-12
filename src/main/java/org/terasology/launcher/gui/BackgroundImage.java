@@ -55,7 +55,7 @@ final class BackgroundImage extends JLabel {
             Kernel kernel = ImageUtils.buildKernel(8, 24f);
             bg = ImageUtils.blur(bg, kernel);
         } catch (IOException e) {
-            logger.error("Could not read background image.", e);
+            logger.error("Could not read background image!", e);
             bg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         }
 

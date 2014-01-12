@@ -50,7 +50,7 @@ public final class FileUtils {
         }
         boolean deleted = file.delete();
         if (!deleted) {
-            throw new IOException("Could not delete file/directory! " + file);
+            throw new IOException("Could not delete file! " + file);
         }
     }
 
@@ -91,7 +91,7 @@ public final class FileUtils {
             if (!outputLocation.exists()) {
                 boolean created = outputLocation.mkdir();
                 if (!created) {
-                    throw new IOException("Could not create outputLocation! " + outputLocation);
+                    throw new IOException("Could not create directory! " + outputLocation);
                 }
             }
             zis = new ZipInputStream(new FileInputStream(archive));
@@ -123,7 +123,7 @@ public final class FileUtils {
                     zis.closeEntry();
                     zis.close();
                 } catch (IOException e) {
-                    logger.warn("The zip input stream could not be closed! '{}'!", archive, e);
+                    logger.warn("The zip input stream could not be closed! '{}'", archive, e);
                 }
             }
         }
@@ -139,7 +139,7 @@ public final class FileUtils {
         if (!destination.exists()) {
             boolean created = destination.createNewFile();
             if (!created) {
-                throw new IOException("Could not create destination file! " + destination);
+                throw new IOException("Could not create file! " + destination);
             }
         }
 
@@ -176,7 +176,7 @@ public final class FileUtils {
             if (!destination.exists()) {
                 boolean created = destination.mkdirs();
                 if (!created) {
-                    throw new IOException("Could not create destination directory! " + destination);
+                    throw new IOException("Could not create directory! " + destination);
                 }
             }
             String[] files = source.list();

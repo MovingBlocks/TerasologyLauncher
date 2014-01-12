@@ -67,6 +67,7 @@ public final class SavedGamesPathFinder {
                 return path;
             }
         } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
+            logger.warn("SHGetKnownFolderPath or CoTaskMemFree not available!");
             return findWindowsPathFallback(folderId);
         }
         return null;
@@ -88,7 +89,7 @@ public final class SavedGamesPathFinder {
                 return new String(outPath, 0, end);
             }
         } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
-            logger.warn("SHGetFolderPath not available");
+            logger.warn("SHGetFolderPath not available!");
         }
         return null;
     }

@@ -125,7 +125,7 @@ public final class SelfUpdater {
         try {
             pb.start();
         } catch (IOException e) {
-            logger.error("Failed to restart launcher process after update.", e);
+            logger.error("Failed to restart launcher process after update!", e);
             System.exit(1);
         }
         System.exit(0);

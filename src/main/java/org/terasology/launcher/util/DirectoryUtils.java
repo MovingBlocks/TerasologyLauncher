@@ -39,7 +39,7 @@ public final class DirectoryUtils {
 
     public static void checkDirectory(final File directory) throws IOException {
         if (!directory.exists() && !directory.mkdirs()) {
-            throw new IOException("Can not create directory! " + directory);
+            throw new IOException("Could not create directory! " + directory);
         }
 
         if (!directory.isDirectory()) {
