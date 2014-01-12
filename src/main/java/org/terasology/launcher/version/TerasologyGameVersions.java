@@ -146,19 +146,21 @@ public final class TerasologyGameVersions {
 
     private Integer loadLastSuccessfulBuildNumber(final SortedSet<Integer> buildNumbers, final GameJob job) {
         Integer lastSuccessfulBuildNumber = null;
-        try {
-            // Use "successful" and not "stable" for TerasologyGame.
-            lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumber(job.name());
-            if (lastSuccessfulBuildNumber >= job.getMinBuildNumber()) {
-                buildNumbers.add(lastSuccessfulBuildNumber);
-                // add previous build numbers
-                final int prevBuildNumber = Math.max(job.getMinBuildNumber(), lastSuccessfulBuildNumber - job.getPrevBuildNumbers());
-                for (int buildNumber = prevBuildNumber; buildNumber < lastSuccessfulBuildNumber; buildNumber++) {
-                    buildNumbers.add(buildNumber);
+        if (!job.isOnlyInstalled()) {
+            try {
+                // Use "successful" and not "stable" for TerasologyGame.
+                lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumber(job.name());
+                if (lastSuccessfulBuildNumber >= job.getMinBuildNumber()) {
+                    buildNumbers.add(lastSuccessfulBuildNumber);
+                    // add previous build numbers
+                    final int prevBuildNumber = Math.max(job.getMinBuildNumber(), lastSuccessfulBuildNumber - job.getPrevBuildNumbers());
+                    for (int buildNumber = prevBuildNumber; buildNumber < lastSuccessfulBuildNumber; buildNumber++) {
+                        buildNumbers.add(buildNumber);
+                    }
                 }
+            } catch (DownloadException e) {
+                logger.info("Retrieving last successful build number failed. '{}'", job, e);
             }
-        } catch (DownloadException e) {
-            logger.info("Retrieving last successful build number failed. '{}'", job, e);
         }
         return lastSuccessfulBuildNumber;
     }
@@ -328,7 +330,7 @@ public final class TerasologyGameVersions {
             if (gameVersion.getSuccessful() == null) {
                 if ((cachedGameVersion != null) && (cachedGameVersion.getSuccessful() != null)) {
                     gameVersion.setSuccessful(cachedGameVersion.getSuccessful());
-                } else {
+                } else if (!job.isOnlyInstalled()) {
                     Boolean successful = null;
                     try {
                         JobResult jobResult = DownloadUtils.loadJobResult(job.name(), buildNumber);
@@ -344,7 +346,7 @@ public final class TerasologyGameVersions {
             if (gameVersion.getChangeLog() == null) {
                 if ((cachedGameVersion != null) && (cachedGameVersion.getChangeLog() != null)) {
                     gameVersion.setChangeLog(cachedGameVersion.getChangeLog());
-                } else {
+                } else if (!job.isOnlyInstalled()) {
                     List<String> changeLog = null;
                     try {
                         changeLog = DownloadUtils.loadChangeLog(job.name(), buildNumber);
@@ -361,7 +363,7 @@ public final class TerasologyGameVersions {
             if (gameVersion.getGameVersionInfo() == null) {
                 if ((cachedGameVersion != null) && (cachedGameVersion.getGameVersionInfo() != null)) {
                     gameVersion.setGameVersionInfo(cachedGameVersion.getGameVersionInfo());
-                } else if ((cachedGameVersion == null) || (gameVersion.getSuccessful() == null) || gameVersion.getSuccessful()) {
+                } else if (!job.isOnlyInstalled() && ((cachedGameVersion == null) || (gameVersion.getSuccessful() == null) || gameVersion.getSuccessful())) {
                     TerasologyGameVersionInfo gameVersionInfo = null;
                     try {
                         gameVersionInfo = DownloadUtils.loadTerasologyGameVersionInfo(job.name(), buildNumber);
