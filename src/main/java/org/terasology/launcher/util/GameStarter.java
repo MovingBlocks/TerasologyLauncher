@@ -97,9 +97,10 @@ public final class GameStarter {
                     try {
                         try (final BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.defaultCharset()))) {
                             String line;
-                            while (!Thread.currentThread().isInterrupted() && ((line = r.readLine()) != null)) {
+                            do {
+                                line = r.readLine();
                                 logger.trace("Game output: {}", line);
-                            }
+                            } while (!Thread.currentThread().isInterrupted() && (line != null));
                         }
                         if (Thread.currentThread().isInterrupted()) {
                             logger.debug("Game thread interrupted.");
