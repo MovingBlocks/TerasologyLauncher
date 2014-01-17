@@ -1,6 +1,8 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## x.y.z (unreleased)
+
 ## 1.2.0 (2014-01-17)
 * Choose, edit, show and use game data directory
 * Translation into Spanish
