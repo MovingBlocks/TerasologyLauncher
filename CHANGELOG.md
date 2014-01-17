@@ -1,7 +1,7 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 1.2.0 (2014-01-xx, unreleased)
+## 1.2.0 (2014-01-17)
 * Choose, edit, show and use game data directory
 * Translation into Spanish
 * Fix for finding game version information
