@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,8 +62,6 @@ public final class DownloadUtils {
 
     private static final String API_JSON_RESULT = "/api/json?tree=result";
     private static final String API_XML_CHANGE_LOG = "/api/xml?xpath=//changeSet/item/msg[1]&wrapper=msgs";
-
-    private static final String CHARSET_US_ASCII = "US-ASCII";
 
     private DownloadUtils() {
     }
@@ -135,7 +134,7 @@ public final class DownloadUtils {
         BufferedReader reader = null;
         try {
             urlVersion = new URL(JENKINS_JOB_URL + jobName + lastBuild + BUILD_NUMBER);
-            reader = new BufferedReader(new InputStreamReader(urlVersion.openStream(), CHARSET_US_ASCII));
+            reader = new BufferedReader(new InputStreamReader(urlVersion.openStream(), StandardCharsets.US_ASCII));
             buildNumber = Integer.parseInt(reader.readLine());
         } catch (IOException | RuntimeException e) {
             throw new DownloadException("The build number could not be loaded! job=" + jobName + ", URL=" + urlVersion, e);
@@ -181,7 +180,7 @@ public final class DownloadUtils {
         BufferedReader reader = null;
         try {
             urlResult = DownloadUtils.createURL(jobName, buildNumber, API_JSON_RESULT);
-            reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), CHARSET_US_ASCII));
+            reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), StandardCharsets.US_ASCII));
             final String jsonResult = reader.readLine();
             if (jsonResult != null) {
                 for (JobResult result : JobResult.values()) {
@@ -253,7 +252,7 @@ public final class DownloadUtils {
         final StringBuilder changeLog = new StringBuilder();
         try {
             urlChangeLog = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG);
-            reader = new BufferedReader(new InputStreamReader(urlChangeLog.openStream(), CHARSET_US_ASCII));
+            reader = new BufferedReader(new InputStreamReader(urlChangeLog.openStream(), StandardCharsets.US_ASCII));
             while (true) {
                 String line = reader.readLine();
                 if (line == null) {
