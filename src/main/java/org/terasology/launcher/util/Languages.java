@@ -36,7 +36,7 @@ public final class Languages {
     static final Locale RUSSIAN = new Locale("ru");
 
     static {
-        final List<Locale> supportedLocales = new ArrayList<>(3);
+        final List<Locale> supportedLocales = new ArrayList<>(4);
         supportedLocales.add(Locale.ENGLISH);
         supportedLocales.add(Locale.GERMAN);
         supportedLocales.add(SPANISH);

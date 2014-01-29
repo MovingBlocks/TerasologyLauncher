@@ -47,6 +47,7 @@ Contributors
 * Immortius [@immortius](https://github.com/immortius)
 * Aldo Borrero [@aldoborrero](https://github.com/aldoborrero)
 * Martin Steiger [@msteiger](https://github.com/msteiger)
+* Anthony Kireev [@small-jeeper](https://github.com/small-jeeper)
 * Many users of the [german forum][German forum] (ideas, testing, suggestions, bug reports)
 
 [GitHub MovingBlocks]: https://github.com/MovingBlocks/ "MovingBlocks"
