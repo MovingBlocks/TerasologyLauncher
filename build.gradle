@@ -13,6 +13,7 @@ apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
+apply plugin: 'jdepend'
 
 // Test for right version of Java in use for running this script
 assert org.gradle.api.JavaVersion.current().isJava7Compatible()
