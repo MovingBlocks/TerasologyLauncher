@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.gui;
+package org.terasology.launcher.game;
 
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.version.TerasologyGameVersion;
 
-final class VersionItem {
+public final class VersionItem {
 
     private final TerasologyGameVersion gameVersion;
 

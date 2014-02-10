@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.version;
+package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -365,9 +366,12 @@ public final class TerasologyGameVersions {
                     gameVersion.setGameVersionInfo(cachedGameVersion.getGameVersionInfo());
                 } else if (!job.isOnlyInstalled() && ((cachedGameVersion == null) || (gameVersion.getSuccessful() == null) || gameVersion.getSuccessful())) {
                     TerasologyGameVersionInfo gameVersionInfo = null;
+                    URL urlVersionInfo = null;
                     try {
-                        gameVersionInfo = DownloadUtils.loadTerasologyGameVersionInfo(job.name(), buildNumber);
-                    } catch (DownloadException e) {
+                        urlVersionInfo = DownloadUtils.createFileDownloadURL(job.name(), buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_VERSION_INFO);
+                        gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
+                    } catch (IOException e) {
+                        // FIXME debug ("The game version info could not be loaded! job=" + jobName + ", URL=" + urlVersionInfo, e);
                         logger.debug("Load game version info failed. '{}' '{}'", job, buildNumber, e);
                     }
                     gameVersion.setGameVersionInfo(gameVersionInfo);

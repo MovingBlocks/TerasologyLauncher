@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.version;
+package org.terasology.launcher.game;
 
 public enum GameJob {
 
