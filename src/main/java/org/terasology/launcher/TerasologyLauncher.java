@@ -90,10 +90,14 @@ public final class TerasologyLauncher {
             final File tempDirectory = new File(launcherDirectory, DirectoryUtils.TEMP_DIR_NAME);
             try {
                 DirectoryUtils.checkDirectory(tempDirectory);
-                FileUtils.deleteDirectoryContent(tempDirectory);
             } catch (IOException e) {
                 logger.error("The temp directory can not be created or used! '{}'", tempDirectory, e);
                 GuiUtils.showErrorMessageDialog(true, splash, BundleUtils.getLabel("message_error_tempDirectory") + "\n" + tempDirectory);
+            }
+            try {
+                FileUtils.deleteDirectoryContent(tempDirectory);
+            } catch (IOException e) {
+                logger.warn("The content of the temp directory can not be deleted! '{}'", tempDirectory, e);
             }
             logger.debug("Temp directory: {}", tempDirectory);
 
