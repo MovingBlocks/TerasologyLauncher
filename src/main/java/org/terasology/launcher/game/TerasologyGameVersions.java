@@ -371,8 +371,7 @@ public final class TerasologyGameVersions {
                         urlVersionInfo = DownloadUtils.createFileDownloadURL(job.name(), buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_VERSION_INFO);
                         gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
                     } catch (IOException e) {
-                        // FIXME debug ("The game version info could not be loaded! job=" + jobName + ", URL=" + urlVersionInfo, e);
-                        logger.debug("Load game version info failed. '{}' '{}'", job, buildNumber, e);
+                        logger.debug("Load game version info failed. '{}' '{}' '{}'", job, buildNumber, urlVersionInfo, e);
                     }
                     gameVersion.setGameVersionInfo(gameVersionInfo);
                 }

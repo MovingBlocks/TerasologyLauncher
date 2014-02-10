@@ -98,16 +98,13 @@ public final class LauncherUpdater {
                 urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
                 versionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
             } catch (IOException e) {
-                // FIXME warn
-                logger.warn("The launcher version info could not be loaded! job=" + jobName + ", URL=" + urlVersionInfo, e);
+                logger.warn("The launcher version info could not be loaded! '{}' '{}'", upstreamVersion, urlVersionInfo, e);
             }
             try {
                 changeLog = DownloadUtils.loadLauncherChangeLog(jobName, upstreamVersion);
             } catch (DownloadException e) {
-                // FIXME warn
-                logger.warn("Can not load additional information about the new launcher version! '{}'", upstreamVersion, e);
+                logger.warn("The launcher change log could not be loaded! '{}'", upstreamVersion, e);
             }
-
         }
         logger.info("An update is available to the TerasologyLauncher. '{}' '{}'", upstreamVersion, versionInfo);
         return updateAvailable;
