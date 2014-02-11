@@ -20,4 +20,8 @@ public interface ProgressListener {
 
     void update();
 
+    void update(int progress);
+
+    boolean isCancelled();
+
 }

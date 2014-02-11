@@ -18,10 +18,10 @@ package org.terasology.launcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.game.GameJob;
+import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.version.GameJob;
-import org.terasology.launcher.version.TerasologyGameVersion;
 
 import java.io.File;
 import java.io.FileInputStream;

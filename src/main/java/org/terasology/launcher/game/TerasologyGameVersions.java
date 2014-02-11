@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.version;
+package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -282,18 +283,18 @@ public final class TerasologyGameVersions {
 
     private SortedMap<Integer, TerasologyGameVersion> readFromCache(final GameJob job, final SortedSet<Integer> buildNumbers, final File cacheDirectory) {
         final SortedMap<Integer, TerasologyGameVersion> cachedGameVersions = new TreeMap<>();
-        try {
-            for (Integer buildNumber : buildNumbers) {
-                final File cacheFile = createCacheFile(job, buildNumber, cacheDirectory);
+        for (Integer buildNumber : buildNumbers) {
+            final File cacheFile = createCacheFile(job, buildNumber, cacheDirectory);
+            try {
                 if (cacheFile.exists() && cacheFile.canRead() && cacheFile.isFile()) {
                     try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
                         final TerasologyGameVersion gameVersion = (TerasologyGameVersion) ois.readObject();
                         cachedGameVersions.put(buildNumber, gameVersion);
                     }
                 }
+            } catch (IOException | ClassNotFoundException e) {
+                logger.warn("Could not load cached data! '{}'", cacheFile);
             }
-        } catch (IOException | ClassNotFoundException e) {
-            logger.error("Could not load cached data!", e);
         }
         return cachedGameVersions;
     }
@@ -365,10 +366,12 @@ public final class TerasologyGameVersions {
                     gameVersion.setGameVersionInfo(cachedGameVersion.getGameVersionInfo());
                 } else if (!job.isOnlyInstalled() && ((cachedGameVersion == null) || (gameVersion.getSuccessful() == null) || gameVersion.getSuccessful())) {
                     TerasologyGameVersionInfo gameVersionInfo = null;
+                    URL urlVersionInfo = null;
                     try {
-                        gameVersionInfo = DownloadUtils.loadTerasologyGameVersionInfo(job.name(), buildNumber);
-                    } catch (DownloadException e) {
-                        logger.debug("Load game version info failed. '{}' '{}'", job, buildNumber, e);
+                        urlVersionInfo = DownloadUtils.createFileDownloadURL(job.name(), buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_VERSION_INFO);
+                        gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
+                    } catch (IOException e) {
+                        logger.debug("Load game version info failed. '{}' '{}' '{}'", job, buildNumber, urlVersionInfo, e);
                     }
                     gameVersion.setGameVersionInfo(gameVersionInfo);
                 }

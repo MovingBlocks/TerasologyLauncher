@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.version;
+package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ import java.util.zip.ZipFile;
 
 public final class TerasologyGameVersionInfo implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersionInfo.class);
 

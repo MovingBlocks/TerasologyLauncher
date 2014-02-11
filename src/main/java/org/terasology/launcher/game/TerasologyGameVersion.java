@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.version;
+package org.terasology.launcher.game;
 
 import java.io.File;
 import java.io.Serializable;
@@ -24,13 +24,13 @@ public final class TerasologyGameVersion implements Serializable {
 
     public static final int BUILD_VERSION_LATEST = -1;
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     private Integer buildNumber;
     private GameJob job;
     private TerasologyGameVersionInfo gameVersionInfo;
-    private File installationPath;
-    private File gameJar;
+    private transient File installationPath;
+    private transient File gameJar;
     private List<String> changeLog;
     private Boolean successful;
 

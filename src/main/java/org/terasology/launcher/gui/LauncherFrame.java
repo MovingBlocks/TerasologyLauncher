@@ -19,12 +19,13 @@ package org.terasology.launcher.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
+import org.terasology.launcher.game.GameDownloader;
+import org.terasology.launcher.game.GameStarter;
+import org.terasology.launcher.game.TerasologyGameVersion;
+import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.util.GameStarter;
-import org.terasology.launcher.version.TerasologyGameVersion;
-import org.terasology.launcher.version.TerasologyGameVersions;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.BorderFactory;
@@ -90,7 +91,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
     private SettingsMenu settingsMenu;
     private final GameStarter gameStarter;
-    private GameDownloader gameDownloader;
+    private GameDownloadWorker gameDownloadWorker;
 
     private final File launcherDirectory;
     private final File tempDirectory;
@@ -334,22 +335,23 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             }
         } else if (command.equals(DOWNLOAD_ACTION)) {
             final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-            if (gameDownloader != null) {
+            if (gameDownloadWorker != null) {
                 // Cancel download
                 logger.info("Cancel game download!");
-                gameDownloader.cancel(false);
+                gameDownloadWorker.cancel(false);
             } else if ((gameVersion == null) || gameVersion.isInstalled() || (gameVersion.getSuccessful() == null) || !gameVersion.getSuccessful()) {
                 logger.warn("The selected game version can not be downloaded! '{}'", gameVersion);
                 updateGui();
             } else {
                 try {
-                    gameDownloader = new GameDownloader(progressBar, this, tempDirectory, launcherSettings.getGameDirectory(), gameVersion, gameVersions);
+                    GameDownloader gameDownloader = new GameDownloader(tempDirectory, launcherSettings.getGameDirectory(), gameVersion, gameVersions);
+                    gameDownloadWorker = new GameDownloadWorker(progressBar, this, gameDownloader);
                 } catch (IOException e) {
                     logger.error("Could not start game download!", e);
                     finishedGameDownload(false, false, false, null);
                     return;
                 }
-                gameDownloader.execute();
+                gameDownloadWorker.execute();
                 updateGui();
             }
         } else if (command.equals(DELETE_ACTION)) {
@@ -391,7 +393,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         setTitle(BundleUtils.getLabel("launcher_title"));
         setIconImage(BundleUtils.getImage("icon"));
 
-        if (gameDownloader != null) {
+        if (gameDownloadWorker != null) {
             downloadButton.setText(BundleUtils.getLabel("launcher_cancelDownload"));
             downloadButton.setToolTipText(BundleUtils.getLabel("tooltip_cancelDownload"));
         } else {
@@ -461,7 +463,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             downloadButton.setEnabled(false);
             startButton.setEnabled(true);
             deleteButton.setEnabled(true);
-        } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful() && (gameVersion.getBuildNumber() != null) && (gameDownloader == null)) {
+        } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful() && (gameVersion.getBuildNumber() != null) && (gameDownloadWorker == null)) {
             downloadButton.setEnabled(true);
             startButton.setEnabled(false);
             deleteButton.setEnabled(false);
@@ -472,7 +474,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         }
 
         // Cancel download
-        if (gameDownloader != null) {
+        if (gameDownloadWorker != null) {
             downloadButton.setEnabled(true);
         }
     }
@@ -565,7 +567,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     }
 
     void finishedGameDownload(final boolean cancelled, final boolean successfulDownloadAndExtract, final boolean successfulLoadVersion, final File gameDirectory) {
-        gameDownloader = null;
+        gameDownloadWorker = null;
         progressBar.setVisible(false);
         updateGui();
         if (!cancelled) {

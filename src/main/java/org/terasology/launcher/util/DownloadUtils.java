@@ -18,8 +18,6 @@ package org.terasology.launcher.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.version.TerasologyGameVersionInfo;
-import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -48,8 +46,8 @@ public final class DownloadUtils {
 
     public static final String FILE_TERASOLOGY_GAME_ZIP = "distributions/Terasology.zip";
     public static final String FILE_TERASOLOGY_LAUNCHER_ZIP = "distributions/TerasologyLauncher.zip";
-    private static final String FILE_TERASOLOGY_GAME_VERSION_INFO = "resources/main/org/terasology/version/versionInfo.properties";
-    private static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO = "resources/main/org/terasology/launcher/version/versionInfo.properties";
+    public static final String FILE_TERASOLOGY_GAME_VERSION_INFO = "resources/main/org/terasology/version/versionInfo.properties";
+    public static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO = "resources/main/org/terasology/launcher/version/versionInfo.properties";
     private static final String FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG = "distributions/CHANGELOG.txt";
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
@@ -66,28 +64,39 @@ public final class DownloadUtils {
     private DownloadUtils() {
     }
 
-    /**
-     * Download the file from the given URL and store it to the specified file.
-     *
-     * @param downloadURL      remote location of file to download
-     * @param file             where to store downloaded file
-     * @param progressListener a progress listener
-     * @throws DownloadException
-     */
     public static void downloadToFile(final URL downloadURL, final File file, final ProgressListener progressListener) throws DownloadException {
+        progressListener.update(0);
         try (BufferedInputStream in = new BufferedInputStream(downloadURL.openStream());
              BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
-            final byte[] buffer = new byte[2048];
+            final float sizeFactor = 100f / (float) downloadURL.openConnection().getContentLength();
 
-            progressListener.update();
+            final byte[] buffer = new byte[2048];
 
             int n;
             while ((n = in.read(buffer)) != -1) {
+                if (progressListener.isCancelled()) {
+                    break;
+                }
+
                 out.write(buffer, 0, n);
-                progressListener.update();
+
+                int percentage = (int) (sizeFactor * (float) file.length());
+                if (percentage < 1) {
+                    percentage = 1;
+                } else if (percentage >= 100) {
+                    percentage = 99;
+                }
+                progressListener.update(percentage);
+
+                if (progressListener.isCancelled()) {
+                    break;
+                }
             }
         } catch (IOException e) {
             throw new DownloadException("Could not download file! URL=" + downloadURL + ", file=" + file, e);
+        }
+        if (!progressListener.isCancelled()) {
+            progressListener.update(100);
         }
     }
 
@@ -148,30 +157,6 @@ public final class DownloadUtils {
             }
         }
         return buildNumber;
-    }
-
-    public static TerasologyLauncherVersionInfo loadTerasologyLauncherVersionInfo(final String jobName, final Integer buildNumber) throws DownloadException {
-        TerasologyLauncherVersionInfo launcherVersionInfo;
-        URL urlVersionInfo = null;
-        try {
-            urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
-            launcherVersionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
-        } catch (IOException | RuntimeException e) {
-            throw new DownloadException("The launcher version info could not be loaded! job=" + jobName + ", URL=" + urlVersionInfo, e);
-        }
-        return launcherVersionInfo;
-    }
-
-    public static TerasologyGameVersionInfo loadTerasologyGameVersionInfo(final String jobName, final Integer buildNumber) throws DownloadException {
-        TerasologyGameVersionInfo gameVersionInfo;
-        URL urlVersionInfo = null;
-        try {
-            urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_GAME_VERSION_INFO);
-            gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
-        } catch (IOException | RuntimeException e) {
-            throw new DownloadException("The game version info could not be loaded! job=" + jobName + ", URL=" + urlVersionInfo, e);
-        }
-        return gameVersionInfo;
     }
 
     public static JobResult loadJobResult(final String jobName, final int buildNumber) throws DownloadException {

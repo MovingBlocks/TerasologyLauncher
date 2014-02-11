@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.util;
+package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.version.TerasologyGameVersion;
+import org.terasology.launcher.util.JavaHeapSize;
 
 import java.io.BufferedReader;
 import java.io.File;

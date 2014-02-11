@@ -19,13 +19,15 @@ package org.terasology.launcher.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
+import org.terasology.launcher.game.GameJob;
+import org.terasology.launcher.game.JobItem;
+import org.terasology.launcher.game.TerasologyGameVersion;
+import org.terasology.launcher.game.TerasologyGameVersions;
+import org.terasology.launcher.game.VersionItem;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.version.GameJob;
-import org.terasology.launcher.version.TerasologyGameVersion;
-import org.terasology.launcher.version.TerasologyGameVersions;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
