@@ -283,18 +283,18 @@ public final class TerasologyGameVersions {
 
     private SortedMap<Integer, TerasologyGameVersion> readFromCache(final GameJob job, final SortedSet<Integer> buildNumbers, final File cacheDirectory) {
         final SortedMap<Integer, TerasologyGameVersion> cachedGameVersions = new TreeMap<>();
-        try {
-            for (Integer buildNumber : buildNumbers) {
-                final File cacheFile = createCacheFile(job, buildNumber, cacheDirectory);
+        for (Integer buildNumber : buildNumbers) {
+            final File cacheFile = createCacheFile(job, buildNumber, cacheDirectory);
+            try {
                 if (cacheFile.exists() && cacheFile.canRead() && cacheFile.isFile()) {
                     try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
                         final TerasologyGameVersion gameVersion = (TerasologyGameVersion) ois.readObject();
                         cachedGameVersions.put(buildNumber, gameVersion);
                     }
                 }
+            } catch (IOException | ClassNotFoundException e) {
+                logger.warn("Could not load cached data! '{}'", cacheFile);
             }
-        } catch (IOException | ClassNotFoundException e) {
-            logger.error("Could not load cached data!", e);
         }
         return cachedGameVersions;
     }

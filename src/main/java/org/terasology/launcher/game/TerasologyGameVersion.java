@@ -29,8 +29,8 @@ public final class TerasologyGameVersion implements Serializable {
     private Integer buildNumber;
     private GameJob job;
     private TerasologyGameVersionInfo gameVersionInfo;
-    private File installationPath;
-    private File gameJar;
+    private transient File installationPath;
+    private transient File gameJar;
     private List<String> changeLog;
     private Boolean successful;
 
