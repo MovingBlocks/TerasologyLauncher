@@ -69,10 +69,11 @@ public final class SelfUpdater {
 
         try {
             pb.start();
+            System.exit(0);
         } catch (IOException e) {
             logger.error("Failed to run self update process!", e);
+            System.exit(1);
         }
-        System.exit(0);
     }
 
     public static void main(final String[] args) {
@@ -81,6 +82,12 @@ public final class SelfUpdater {
         if ((args == null) || (args.length != 2)) {
             logger.error("Two arguments needed!");
             System.exit(1);
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            logger.error("Sleep interrupted!", e);
         }
 
         final String launcherInstallationDirectoryArg = args[0];

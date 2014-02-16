@@ -105,8 +105,8 @@ public final class LauncherUpdater {
             } catch (DownloadException e) {
                 logger.warn("The launcher change log could not be loaded! '{}'", upstreamVersion, e);
             }
+            logger.info("An update is available to the TerasologyLauncher. '{}' '{}'", upstreamVersion, versionInfo);
         }
-        logger.info("An update is available to the TerasologyLauncher. '{}' '{}'", upstreamVersion, versionInfo);
         return updateAvailable;
     }
 
