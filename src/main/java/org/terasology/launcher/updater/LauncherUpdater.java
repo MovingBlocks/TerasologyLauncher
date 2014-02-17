@@ -174,7 +174,7 @@ public final class LauncherUpdater {
         return (option == 0);
     }
 
-    public void update(final File tempDirectory, final SplashScreenWindow splash) {
+    public boolean update(final File tempDirectory, final SplashScreenWindow splash) {
         try {
             logger.trace("Downloading launcher...");
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
@@ -205,13 +205,11 @@ public final class LauncherUpdater {
 
             // Start SelfUpdater
             SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
-
-            logger.info("Exit old launcher: {}", TerasologyLauncherVersionInfo.getInstance());
-            splash.dispose();
-            System.exit(0);
         } catch (DownloadException | IOException | RuntimeException e) {
             logger.error("Launcher update failed! Aborting update process!", e);
             GuiUtils.showErrorMessageDialog(false, splash, BundleUtils.getLabel("update_launcher_updateFailed"));
+            return false;
         }
+        return true;
     }
 }

@@ -35,7 +35,7 @@ public final class SelfUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(SelfUpdater.class);
 
-    private static final String TERASOLOGY_LAUNCHER_JAR = "TerasologyLauncher.jar";
+    private static final String TERASOLOGY_LAUNCHER_JAR = "lib" + File.separator + "TerasologyLauncher.jar";
 
     private SelfUpdater() {
     }
@@ -80,22 +80,22 @@ public final class SelfUpdater {
 
         final ProcessBuilder pb = new ProcessBuilder();
         pb.command(arguments);
-        pb.directory(new File(tempLauncherDirectory, "lib"));
+        pb.directory(tempLauncherDirectory);
         pb.start();
     }
 
     public static void main(final String[] args) {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            logger.error("Sleep interrupted!", e);
+        }
+
         logger.info("Running self updater.");
 
         if ((args == null) || (args.length != 2)) {
             logger.error("Two arguments needed!");
             System.exit(1);
-        }
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            logger.error("Sleep interrupted!", e);
         }
 
         final String launcherInstallationDirectoryArg = args[0];
@@ -130,14 +130,20 @@ public final class SelfUpdater {
         logger.info("Start new launcher: {}", arguments);
 
         try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            logger.error("Sleep interrupted!", e);
+        }
+
+        try {
             final ProcessBuilder pb = new ProcessBuilder();
             pb.command(arguments);
-            pb.directory(new File(launcherInstallationDirectory, "lib"));
+            pb.directory(launcherInstallationDirectory);
             pb.start();
+            System.exit(0);
         } catch (IOException | RuntimeException e) {
             logger.error("Failed to restart launcher process after update! {}", arguments, e);
             System.exit(1);
         }
-        System.exit(0);
     }
 }
