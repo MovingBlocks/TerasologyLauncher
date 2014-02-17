@@ -197,8 +197,18 @@ public final class LauncherUpdater {
             }
             logger.trace("ZIP file extracted");
 
+            final File tempLauncherDirectory = new File(tempDirectory, "TerasologyLauncher");
+            DirectoryUtils.checkDirectory(tempLauncherDirectory);
+
+            logger.info("Current launcher path: {}", launcherInstallationDirectory.getPath());
+            logger.info("New files temporarily located in: {}", tempLauncherDirectory.getPath());
+
             // Start SelfUpdater
-            SelfUpdater.runUpdate(tempDirectory, launcherInstallationDirectory);
+            SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
+
+            logger.info("Exit old launcher: {}", TerasologyLauncherVersionInfo.getInstance());
+            splash.dispose();
+            System.exit(0);
         } catch (DownloadException | IOException | RuntimeException e) {
             logger.error("Launcher update failed! Aborting update process!", e);
             GuiUtils.showErrorMessageDialog(false, splash, BundleUtils.getLabel("update_launcher_updateFailed"));

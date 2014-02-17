@@ -35,45 +35,53 @@ public final class SelfUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(SelfUpdater.class);
 
+    private static final String TERASOLOGY_LAUNCHER_JAR = "TerasologyLauncher.jar";
+
     private SelfUpdater() {
+    }
+
+    private static String getJavaProgramFile() {
+        return System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+    }
+
+    private static void deleteLauncherContent(final File directory) {
+        final File[] files = directory.listFiles();
+        if ((files != null) && (files.length > 0)) {
+            for (File child : files) {
+                if (child.isDirectory()) {
+                    SelfUpdater.deleteLauncherContent(child);
+                } else if (!child.getName().contains(".log")) {
+                    boolean deleted = child.delete();
+                    if (!deleted) {
+                        logger.error("Could not delete file! {}", child);
+                    }
+                }
+            }
+        }
     }
 
     /**
      * Starts the update process after downloading the needed files.
      */
-    public static void runUpdate(final File tempDirectory, final File launcherInstallationDirectory) {
-        final String separator = File.separator;
-        final String javaBin = System.getProperty("java.home") + separator + "bin" + separator + "java";
-        final File tempLauncherDirectory = new File(tempDirectory, "TerasologyLauncher");
-        final File classpath = new File(tempLauncherDirectory, "lib");
-
+    public static void runUpdate(final File tempLauncherDirectory, final File launcherInstallationDirectory) throws IOException {
         final List<String> arguments = new ArrayList<>();
         // Set 'java' executable as programme to run
-        arguments.add(javaBin);
+        arguments.add(getJavaProgramFile());
         // Build and set the classpath
         arguments.add("-cp");
-        arguments.add("TerasologyLauncher.jar");
+        arguments.add(TERASOLOGY_LAUNCHER_JAR);
         // Specify class with main method to run
         arguments.add(SelfUpdater.class.getCanonicalName());
         // Arguments for update locations
         arguments.add(launcherInstallationDirectory.getPath());
         arguments.add(tempLauncherDirectory.getPath());
 
-        logger.info("Running launcher self update with: {}", arguments);
-        logger.info("Current launcher path: {}", launcherInstallationDirectory.getPath());
-        logger.info("New files temporarily located in: {}", tempLauncherDirectory.getPath());
+        logger.info("Running launcher self update: {}", arguments);
 
         final ProcessBuilder pb = new ProcessBuilder();
         pb.command(arguments);
-        pb.directory(classpath);
-
-        try {
-            pb.start();
-            System.exit(0);
-        } catch (IOException e) {
-            logger.error("Failed to run self update process!", e);
-            System.exit(1);
-        }
+        pb.directory(new File(tempLauncherDirectory, "lib"));
+        pb.start();
     }
 
     public static void main(final String[] args) {
@@ -104,35 +112,30 @@ public final class SelfUpdater {
             DirectoryUtils.checkDirectory(tempLauncherDirectory);
 
             logger.info("Delete launcher installation directory: {}", launcherInstallationDirectory);
-            FileUtils.delete(launcherInstallationDirectory);
+            SelfUpdater.deleteLauncherContent(launcherInstallationDirectory);
 
             logger.info("Copy new files: {}", tempLauncherDirectory);
             FileUtils.copyFolder(tempLauncherDirectory, launcherInstallationDirectory);
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             logger.error("Auto updating the launcher failed!", e);
             System.exit(1);
         }
 
         // Start new launcher
-        final String separator = System.getProperty("file.separator");
-        final String javaPath = System.getProperty("java.home") + separator + "bin" + separator + "java";
-
-        final File classpath = new File(launcherInstallationDirectory, "lib");
-
         final List<String> arguments = new ArrayList<>();
-        arguments.add(javaPath);
+        arguments.add(getJavaProgramFile());
         arguments.add("-jar");
-        arguments.add("TerasologyLauncher.jar");
-
-        final ProcessBuilder pb = new ProcessBuilder();
-        pb.command(arguments);
-        pb.directory(classpath);
+        arguments.add(TERASOLOGY_LAUNCHER_JAR);
 
         logger.info("Start new launcher: {}", arguments);
+
         try {
+            final ProcessBuilder pb = new ProcessBuilder();
+            pb.command(arguments);
+            pb.directory(new File(launcherInstallationDirectory, "lib"));
             pb.start();
-        } catch (IOException e) {
-            logger.error("Failed to restart launcher process after update!", e);
+        } catch (IOException | RuntimeException e) {
+            logger.error("Failed to restart launcher process after update! {}", arguments, e);
             System.exit(1);
         }
         System.exit(0);
