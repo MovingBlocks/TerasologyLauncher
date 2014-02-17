@@ -49,7 +49,12 @@ public final class SelfUpdater {
         if ((files != null) && (files.length > 0)) {
             for (File child : files) {
                 if (child.isDirectory()) {
-                    SelfUpdater.deleteLauncherContent(child);
+                    if (child.getName().equals("bin") || child.getName().equals("lib") || child.getName().equals("licenses")) {
+                        logger.info("Delete directory content: {}", child);
+                        SelfUpdater.deleteLauncherContent(child);
+                    } else {
+                        logger.info("Skip directory: {}", child);
+                    }
                 } else if (!child.getName().contains(".log")) {
                     boolean deleted = child.delete();
                     if (!deleted) {
@@ -128,12 +133,6 @@ public final class SelfUpdater {
         arguments.add(TERASOLOGY_LAUNCHER_JAR);
 
         logger.info("Start new launcher: {}", arguments);
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            logger.error("Sleep interrupted!", e);
-        }
 
         try {
             final ProcessBuilder pb = new ProcessBuilder();
