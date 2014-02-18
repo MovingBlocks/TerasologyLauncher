@@ -58,7 +58,7 @@ public final class TerasologyGameVersionInfo implements Serializable {
     private final String displayVersion;
     private final String toString;
 
-    private TerasologyGameVersionInfo(final Properties properties) {
+    private TerasologyGameVersionInfo(Properties properties) {
         buildNumber = properties.getProperty(BUILD_NUMBER, DEFAULT_VALUE);
         buildId = properties.getProperty(BUILD_ID, DEFAULT_VALUE);
         buildTag = properties.getProperty(BUILD_TAG, DEFAULT_VALUE);
@@ -110,11 +110,11 @@ public final class TerasologyGameVersionInfo implements Serializable {
         toString = toStringBuilder.toString();
     }
 
-    public static TerasologyGameVersionInfo loadFromInputStream(final InputStream inStream) {
+    public static TerasologyGameVersionInfo loadFromInputStream(InputStream inStream) {
         return new TerasologyGameVersionInfo(loadPropertiesFromInputStream(inStream));
     }
 
-    private static Properties loadPropertiesFromInputStream(final InputStream inStream) {
+    private static Properties loadPropertiesFromInputStream(InputStream inStream) {
         final Properties properties = new Properties();
         if (inStream != null) {
             try {
@@ -133,7 +133,7 @@ public final class TerasologyGameVersionInfo implements Serializable {
         return properties;
     }
 
-    public static TerasologyGameVersionInfo loadFromJar(final File terasologyGameJar) {
+    public static TerasologyGameVersionInfo loadFromJar(File terasologyGameJar) {
         final Properties properties = new Properties();
         ZipFile zipFile = null;
         try {

@@ -31,11 +31,11 @@ final class TransparentPanel extends JPanel {
 
     private float transparency = 1f;
 
-    public TransparentPanel(final float transparency) {
+    public TransparentPanel(float transparency) {
         this(transparency, Color.BLACK);
     }
 
-    public TransparentPanel(final float transparency, final Color color) {
+    public TransparentPanel(float transparency, Color color) {
         this.transparency = transparency;
         setBorder(null);
         setOpaque(true);
@@ -43,7 +43,7 @@ final class TransparentPanel extends JPanel {
     }
 
     @Override
-    public void paint(final Graphics g) {
+    public void paint(Graphics g) {
         final Graphics2D copy = (Graphics2D) g.create();
         copy.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, transparency));
         super.paint(copy);

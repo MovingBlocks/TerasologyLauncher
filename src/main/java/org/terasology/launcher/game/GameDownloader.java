@@ -39,8 +39,7 @@ public final class GameDownloader {
     private final URL downloadURL;
     private final File gameDirectory;
 
-    public GameDownloader(final File tempDirectory, final File gameParentDirectory, final TerasologyGameVersion gameVersion, final TerasologyGameVersions gameVersions)
-        throws IOException {
+    public GameDownloader(File tempDirectory, File gameParentDirectory, TerasologyGameVersion gameVersion, TerasologyGameVersions gameVersions) throws IOException {
         this.gameVersions = gameVersions;
 
         final String jobName = gameVersion.getJob().name();
@@ -74,7 +73,7 @@ public final class GameDownloader {
     }
 
     public void deleteSilentAfterExtract() {
-        boolean deleted = downloadZipFile.delete();
+        final boolean deleted = downloadZipFile.delete();
         if (!deleted) {
             logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile);
         }

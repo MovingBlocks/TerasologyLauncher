@@ -79,14 +79,13 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private JCheckBox searchForLauncherUpdatesBox;
     private JCheckBox closeLauncherAfterGameStartBox;
 
-    private final File launcherDirectory;
     private File gameDirectory;
     private File gameDataDirectory;
-
+    private final File launcherDirectory;
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public SettingsMenu(final JFrame parent, final File launcherDirectory, final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
+    public SettingsMenu(JFrame parent, File launcherDirectory, LauncherSettings launcherSettings, TerasologyGameVersions gameVersions) {
         super(parent, BundleUtils.getLabel("settings_title"), true);
 
         this.launcherDirectory = launcherDirectory;
@@ -155,11 +154,11 @@ final class SettingsMenu extends JDialog implements ActionListener {
         setLocationRelativeTo(getOwner());
     }
 
-    private JPanel createGameSettingsTab(final Font settingsFont) {
-        JPanel gameSettingsTab = new JPanel();
+    private JPanel createGameSettingsTab(Font settingsFont) {
+        final JPanel gameSettingsTab = new JPanel();
         gameSettingsTab.setFont(settingsFont);
 
-        JLabel jobLabel = new JLabel();
+        final JLabel jobLabel = new JLabel();
         jobLabel.setText(BundleUtils.getLabel("settings_game_job"));
         jobLabel.setFont(settingsFont);
 
@@ -168,7 +167,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         jobBox.addActionListener(this);
         jobBox.setActionCommand(JOB_ACTION);
 
-        JLabel buildVersionLabel = new JLabel();
+        final JLabel buildVersionLabel = new JLabel();
         buildVersionLabel.setText(BundleUtils.getLabel("settings_game_buildVersion"));
         buildVersionLabel.setFont(settingsFont);
 
@@ -199,7 +198,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
         gameDirectoryPanel.add(gameDirectoryOpenButton);
         gameDirectoryPanel.add(gameDirectoryEditButton);
 
-
         final JPanel gameDataDirectoryPanel = new JPanel();
 
         final JLabel gameDataDirectoryLabel = new JLabel();
@@ -224,8 +222,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         gameDataDirectoryPanel.add(gameDataDirectoryOpenButton);
         gameDataDirectoryPanel.add(gameDataDirectoryEditButton);
 
-
-        JLabel maxHeapSizeLabel = new JLabel();
+        final JLabel maxHeapSizeLabel = new JLabel();
         maxHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_maxHeapSize"));
         maxHeapSizeLabel.setFont(settingsFont);
 
@@ -234,7 +231,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         maxHeapSizeBox.addActionListener(this);
         maxHeapSizeBox.setActionCommand(MAX_HEAP_SIZE_ACTION);
 
-        JLabel initialHeapSizeLabel = new JLabel();
+        final JLabel initialHeapSizeLabel = new JLabel();
         initialHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_initialHeapSize"));
         initialHeapSizeLabel.setFont(settingsFont);
 
@@ -306,25 +303,25 @@ final class SettingsMenu extends JDialog implements ActionListener {
         return gameSettingsTab;
     }
 
-    private JPanel createLauncherSettingsTab(final Font settingsFont) {
-        JPanel launcherSettingsTab = new JPanel();
+    private JPanel createLauncherSettingsTab(Font settingsFont) {
+        final JPanel launcherSettingsTab = new JPanel();
         launcherSettingsTab.setFont(settingsFont);
 
-        JLabel languageLabel = new JLabel();
+        final JLabel languageLabel = new JLabel();
         languageLabel.setText(BundleUtils.getLabel("settings_launcher_chooseLanguage"));
         languageLabel.setFont(settingsFont);
 
         languageBox = new JComboBox<>();
         languageBox.setFont(settingsFont);
 
-        JLabel searchForLauncherUpdatesLabel = new JLabel();
+        final JLabel searchForLauncherUpdatesLabel = new JLabel();
         searchForLauncherUpdatesLabel.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
         searchForLauncherUpdatesLabel.setFont(settingsFont);
 
         searchForLauncherUpdatesBox = new JCheckBox();
         searchForLauncherUpdatesBox.setFont(settingsFont);
 
-        JLabel closeLauncherAfterGameStartLabel = new JLabel();
+        final JLabel closeLauncherAfterGameStartLabel = new JLabel();
         closeLauncherAfterGameStartLabel.setText(BundleUtils.getLabel("settings_launcher_closeLauncherAfterGameStart"));
         closeLauncherAfterGameStartLabel.setFont(settingsFont);
 
@@ -427,7 +424,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         final JobItem jobItem = (JobItem) jobBox.getSelectedItem();
         final int buildVersion = launcherSettings.getBuildVersion(jobItem.getJob());
 
-        for (final TerasologyGameVersion version : gameVersions.getGameVersionList(jobItem.getJob())) {
+        for (TerasologyGameVersion version : gameVersions.getGameVersionList(jobItem.getJob())) {
             final VersionItem versionItem = new VersionItem(version);
             buildVersionBox.addItem(versionItem);
             if (versionItem.getVersion() == buildVersion) {
@@ -502,13 +499,13 @@ final class SettingsMenu extends JDialog implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(final ActionEvent e) {
+    public void actionPerformed(ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
             actionPerformed(e.getActionCommand());
         }
     }
 
-    private void actionPerformed(final String actionCommand) {
+    private void actionPerformed(String actionCommand) {
         switch (actionCommand) {
             case LAUNCHER_DIRECTORY_OPEN:
                 try {

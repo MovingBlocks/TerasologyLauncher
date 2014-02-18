@@ -39,13 +39,13 @@ final class GameDownloadWorker extends SwingWorker<Void, Void> implements Progre
     private boolean successfulDownloadAndExtract;
     private boolean successfulLoadVersion;
 
-    public GameDownloadWorker(final JProgressBar progressBar, final LauncherFrame frame, final GameDownloader gameDownloader) {
+    public GameDownloadWorker(final JProgressBar progressBar, LauncherFrame frame, GameDownloader gameDownloader) {
         this.frame = frame;
         this.gameDownloader = gameDownloader;
 
         addPropertyChangeListener(new PropertyChangeListener() {
             @Override
-            public void propertyChange(final PropertyChangeEvent evt) {
+            public void propertyChange(PropertyChangeEvent evt) {
                 if ("progress".equals(evt.getPropertyName())) {
                     progressBar.setString(null);
                     progressBar.setValue((Integer) evt.getNewValue());
@@ -54,7 +54,7 @@ final class GameDownloadWorker extends SwingWorker<Void, Void> implements Progre
         });
         addPropertyChangeListener(new PropertyChangeListener() {
             @Override
-            public void propertyChange(final PropertyChangeEvent evt) {
+            public void propertyChange(PropertyChangeEvent evt) {
                 if ("progressString".equals(evt.getPropertyName())) {
                     progressBar.setString((String) evt.getNewValue());
                 }

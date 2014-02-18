@@ -42,17 +42,17 @@ public final class BundleUtils {
     private BundleUtils() {
     }
 
-    public static String getLabel(final String key) {
+    public static String getLabel(String key) {
         return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.getCurrentLocale()).getString(key);
     }
 
-    public static String getMessage(final String key, final Object... arguments) {
+    public static String getMessage(String key, Object... arguments) {
         final String pattern = ResourceBundle.getBundle(MESSAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
         final MessageFormat messageFormat = new MessageFormat(pattern, Languages.getCurrentLocale());
         return messageFormat.format(arguments, new StringBuffer(), null).toString();
     }
 
-    public static URI getURI(final String key) {
+    public static URI getURI(String key) {
         final String uriStr = ResourceBundle.getBundle(URI_BUNDLE, Languages.getCurrentLocale()).getString(key);
         try {
             return new URI(uriStr);
@@ -62,17 +62,17 @@ public final class BundleUtils {
         return null;
     }
 
-    public static ImageIcon getImageIcon(final String key) {
+    public static ImageIcon getImageIcon(String key) {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
         return new ImageIcon(BundleUtils.class.getResource(imagePath));
     }
 
-    public static Image getImage(final String key) {
+    public static Image getImage(String key) {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
         return Toolkit.getDefaultToolkit().getImage(BundleUtils.class.getResource(imagePath));
     }
 
-    public static BufferedImage getBufferedImage(final String key) throws IOException {
+    public static BufferedImage getBufferedImage(String key) throws IOException {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
         return ImageIO.read(BundleUtils.class.getResourceAsStream(imagePath));
     }

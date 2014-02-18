@@ -31,7 +31,7 @@ public final class SplashScreenWindow extends JWindow {
 
     private final JLabel infoLabel;
 
-    public SplashScreenWindow(final Image image) {
+    public SplashScreenWindow(Image image) {
         final ImageIcon icon = new ImageIcon(image);
         final Container contentPane = getContentPane();
         contentPane.setLayout(null);

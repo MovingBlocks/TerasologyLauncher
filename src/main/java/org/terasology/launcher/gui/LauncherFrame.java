@@ -98,7 +98,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public LauncherFrame(final File launcherDirectory, final File tempDirectory, final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
+    public LauncherFrame(File launcherDirectory, File tempDirectory, LauncherSettings launcherSettings, TerasologyGameVersions gameVersions) {
         this.launcherDirectory = launcherDirectory;
         this.tempDirectory = tempDirectory;
         this.launcherSettings = launcherSettings;
@@ -285,26 +285,25 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         contentPane.add(updatePanel);
     }
 
-
     private TerasologyGameVersion getSelectedGameVersion() {
         return gameVersions.getGameVersionForBuildVersion(launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
     }
 
     @Override
-    public void actionPerformed(final ActionEvent e) {
+    public void actionPerformed(ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
             action(e.getActionCommand());
         }
     }
 
-    private void action(final String command) {
+    private void action(String command) {
         if (command.equals(SETTINGS_ACTION)) {
             if ((settingsMenu == null) || !settingsMenu.isVisible()) {
                 settingsMenu = new SettingsMenu(this, launcherDirectory, launcherSettings, gameVersions);
                 settingsMenu.setVisible(true);
                 settingsMenu.addWindowListener(new WindowAdapter() {
                     @Override
-                    public void windowClosed(final WindowEvent e) {
+                    public void windowClosed(WindowEvent e) {
                         updateGui();
                     }
                 });
@@ -479,7 +478,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         }
     }
 
-    private String escapeHtml(final String text) {
+    private String escapeHtml(String text) {
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#x27;").replace("/", "&#x2F;");
     }
 
@@ -495,7 +494,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         infoTextPane.setCaretPosition(0);
     }
 
-    private String getGameInfoText(final TerasologyGameVersion gameVersion) {
+    private String getGameInfoText(TerasologyGameVersion gameVersion) {
         final Object[] arguments = new Object[9];
         arguments[0] = gameVersion.getJob().name();
         if (gameVersion.getJob().isStable()) {
@@ -566,7 +565,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         return b.toString();
     }
 
-    void finishedGameDownload(final boolean cancelled, final boolean successfulDownloadAndExtract, final boolean successfulLoadVersion, final File gameDirectory) {
+    void finishedGameDownload(boolean cancelled, boolean successfulDownloadAndExtract, boolean successfulLoadVersion, File gameDirectory) {
         gameDownloadWorker = null;
         progressBar.setVisible(false);
         updateGui();

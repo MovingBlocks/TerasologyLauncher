@@ -59,7 +59,7 @@ public final class Languages {
     private Languages() {
     }
 
-    public static void init(final String localeString) {
+    public static void init(String localeString) {
         for (Locale locale : SUPPORTED_LOCALES) {
             if (locale.toString().equals(localeString)) {
                 currentLocale = locale;
@@ -81,7 +81,7 @@ public final class Languages {
         }
     }
 
-    public static void update(final Locale newLocale) {
+    public static void update(Locale newLocale) {
         if (SUPPORTED_LOCALES.contains(newLocale)) {
             currentLocale = newLocale;
         } else {

@@ -49,7 +49,7 @@ final class TSButton extends JButton implements MouseListener {
     private boolean pressed;
     private boolean hovered;
 
-    public TSButton(final String text) {
+    public TSButton(String text) {
         super(text);
         setBorder(BorderFactory.createEmptyBorder());
         addMouseListener(this);
@@ -67,7 +67,7 @@ final class TSButton extends JButton implements MouseListener {
     }
 
     @Override
-    public void setBounds(final int x, final int y, final int width, final int height) {
+    public void setBounds(int x, int y, int width, int height) {
         super.setBounds(x, y, width, height);
         normalImg = ImageUtils.getScaledInstance(normalImg, width, height);
         hoveredImg = ImageUtils.getScaledInstance(hoveredImg, width, height);
@@ -75,12 +75,12 @@ final class TSButton extends JButton implements MouseListener {
     }
 
     @Override
-    public void setBounds(final Rectangle r) {
+    public void setBounds(Rectangle r) {
         this.setBounds(r.x, r.y, r.width, r.height);
     }
 
     @Override
-    protected void paintComponent(final Graphics g) {
+    protected void paintComponent(Graphics g) {
         final Graphics2D g2d = (Graphics2D) g;
         final Color old = g2d.getColor();
 
@@ -115,27 +115,27 @@ final class TSButton extends JButton implements MouseListener {
     }
 
     @Override
-    public void mouseClicked(final MouseEvent e) {
+    public void mouseClicked(MouseEvent e) {
 
     }
 
     @Override
-    public void mousePressed(final MouseEvent e) {
+    public void mousePressed(MouseEvent e) {
         pressed = true;
     }
 
     @Override
-    public void mouseReleased(final MouseEvent e) {
+    public void mouseReleased(MouseEvent e) {
         pressed = false;
     }
 
     @Override
-    public void mouseEntered(final MouseEvent e) {
+    public void mouseEntered(MouseEvent e) {
         hovered = true;
     }
 
     @Override
-    public void mouseExited(final MouseEvent e) {
+    public void mouseExited(MouseEvent e) {
         hovered = false;
     }
 }

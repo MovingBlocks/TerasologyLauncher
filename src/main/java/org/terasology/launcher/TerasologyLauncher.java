@@ -44,7 +44,7 @@ public final class TerasologyLauncher {
     private TerasologyLauncher() {
     }
 
-    public static void main(final String[] args) {
+    public static void main(String[] args) {
         try {
             logger.info("TerasologyLauncher is starting");
 
@@ -123,10 +123,10 @@ public final class TerasologyLauncher {
                     splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
                     try {
                         updater.detectAndCheckLauncherInstallationDirectory();
-                        boolean update = updater.showUpdateDialog(splash);
+                        final boolean update = updater.showUpdateDialog(splash);
                         if (update) {
                             splash.setVisible(true);
-                            boolean selfUpdaterStarted = updater.update(tempDirectory, splash);
+                            final boolean selfUpdaterStarted = updater.update(tempDirectory, splash);
                             if (selfUpdaterStarted) {
                                 logger.info("Exit old launcher: {}", TerasologyLauncherVersionInfo.getInstance());
                                 System.exit(0);

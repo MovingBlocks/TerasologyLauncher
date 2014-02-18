@@ -50,7 +50,7 @@ public enum JavaHeapSize {
     private final String sizeParameter;
     private final String labelKey;
 
-    private JavaHeapSize(final int mb, final String sizeParameter, final String labelKey) {
+    private JavaHeapSize(int mb, String sizeParameter, String labelKey) {
         this.mb = mb;
         this.sizeParameter = sizeParameter;
         this.labelKey = labelKey;
@@ -68,10 +68,10 @@ public enum JavaHeapSize {
         return BundleUtils.getLabel(labelKey);
     }
 
-    public static List<JavaHeapSize> getHeapSizes(final long totalPhysicalMemorySize, final boolean bit64) {
+    public static List<JavaHeapSize> getHeapSizes(long totalPhysicalMemorySize, boolean bit64) {
         final List<JavaHeapSize> heapSizes = new ArrayList<>();
 
-        for (final JavaHeapSize heapSize : JavaHeapSize.values()) {
+        for (JavaHeapSize heapSize : JavaHeapSize.values()) {
             if ((heapSize.mb <= totalPhysicalMemorySize) && (bit64 || heapSize.mb <= MAX_32_BIT_MB)) {
                 heapSizes.add(heapSize);
             }

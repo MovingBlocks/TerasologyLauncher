@@ -22,7 +22,7 @@ public final class VersionItem {
 
     private final TerasologyGameVersion gameVersion;
 
-    public VersionItem(final TerasologyGameVersion gameVersion) {
+    public VersionItem(TerasologyGameVersion gameVersion) {
         this.gameVersion = gameVersion;
     }
 

@@ -37,7 +37,7 @@ public final class DirectoryUtils {
     private DirectoryUtils() {
     }
 
-    public static void checkDirectory(final File directory) throws IOException {
+    public static void checkDirectory(File directory) throws IOException {
         if (!directory.exists() && !directory.mkdirs()) {
             throw new IOException("Could not create directory! " + directory);
         }
@@ -54,7 +54,7 @@ public final class DirectoryUtils {
     /**
      * Checks if game data is stored in the installation directory.
      */
-    public static boolean containsGameData(final File gameInstallationPath) {
+    public static boolean containsGameData(File gameInstallationPath) {
         if ((gameInstallationPath == null) || !gameInstallationPath.exists() || !gameInstallationPath.isDirectory()) {
             return false;
         }
@@ -77,7 +77,7 @@ public final class DirectoryUtils {
         return false;
     }
 
-    public static boolean containsFiles(final File directory) {
+    public static boolean containsFiles(File directory) {
         if ((directory == null) || !directory.exists() || !directory.isDirectory()) {
             return false;
         }
@@ -101,9 +101,9 @@ public final class DirectoryUtils {
     /**
      * Should only be executed once at the start.
      */
-    public static File getApplicationDirectory(final OperatingSystem os, final String applicationName) {
+    public static File getApplicationDirectory(OperatingSystem os, String applicationName) {
         final File userHome = new File(System.getProperty(PROPERTY_USER_HOME, "."));
-        File applicationDirectory;
+        final File applicationDirectory;
 
         if (os.isWindows()) {
             final String envAppData = System.getenv(ENV_APPDATA);
@@ -130,9 +130,9 @@ public final class DirectoryUtils {
     /**
      * Should only be executed once at the start.
      */
-    public static File getGameDataDirectory(final OperatingSystem os) {
+    public static File getGameDataDirectory(OperatingSystem os) {
         final File userHome = new File(System.getProperty(PROPERTY_USER_HOME, "."));
-        File gameDataDirectory;
+        final File gameDataDirectory;
 
         if (os.isWindows()) {
             File path = null;

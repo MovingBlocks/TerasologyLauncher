@@ -42,7 +42,7 @@ public final class ImageUtils {
      * @param height - the new height
      * @return the scaled BufferedImage
      */
-    public static BufferedImage getScaledInstance(final BufferedImage image, final int width, final int height) {
+    public static BufferedImage getScaledInstance(BufferedImage image, int width, int height) {
         BufferedImage scaled = new BufferedImage(width, height, image.getType());
         Graphics2D g = scaled.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -58,7 +58,7 @@ public final class ImageUtils {
      * @param kernel - the kernel used for bluring
      * @return a blured instance of the image
      */
-    public static BufferedImage blur(final BufferedImage image, final Kernel kernel) {
+    public static BufferedImage blur(BufferedImage image, Kernel kernel) {
         final int width = image.getWidth();
         final int height = image.getHeight();
 
@@ -74,7 +74,7 @@ public final class ImageUtils {
         return result;
     }
 
-    private static void convolve(final Kernel kernel, final int[] in, final int[] out, final int width, final int height) {
+    private static void convolve(Kernel kernel, int[] in, int[] out, int width, int height) {
         final float[] matrix = kernel.getKernelData(null);
         final int cols = kernel.getWidth();
         final int halfCols = cols / 2;
@@ -118,7 +118,7 @@ public final class ImageUtils {
      * @param c - value to clamp
      * @return clamped value in the range 0..255
      */
-    private static int clamp(final int c) {
+    private static int clamp(int c) {
         if (c < 0) {
             return 0;
         }
@@ -135,7 +135,7 @@ public final class ImageUtils {
      * @param sigma  - the filter 'intensity'
      * @return Gaussian kernel
      */
-    public static Kernel buildKernel(final int radius, final float sigma) {
+    public static Kernel buildKernel(int radius, float sigma) {
         final int entries = 2 * radius + 1;
 
         float[] kernelMatrix = new float[entries];

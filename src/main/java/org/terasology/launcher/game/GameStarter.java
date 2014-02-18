@@ -50,7 +50,7 @@ public final class GameStarter {
         gameThread = null;
     }
 
-    public boolean startGame(final TerasologyGameVersion gameVersion, final File gameDataDirectory, final JavaHeapSize maxHeapSize, final JavaHeapSize initialHeapSize) {
+    public boolean startGame(TerasologyGameVersion gameVersion, File gameDataDirectory, JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize) {
         if (isRunning()) {
             logger.warn("The game can not be started because another game is already running! '{}'", gameThread);
             return false;
@@ -62,7 +62,7 @@ public final class GameStarter {
         return startProcess(gameVersion, processParameters);
     }
 
-    private List<String> createJavaParameters(final JavaHeapSize maxHeapSize, final JavaHeapSize initialHeapSize) {
+    private List<String> createJavaParameters(JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize) {
         final List<String> javaParameters = new ArrayList<>();
         if (initialHeapSize.isUsed()) {
             javaParameters.add("-Xms" + initialHeapSize.getSizeParameter());
@@ -73,7 +73,7 @@ public final class GameStarter {
         return javaParameters;
     }
 
-    private List<String> createProcessParameters(final TerasologyGameVersion gameVersion, final File gameDataDirectory, final List<String> javaParameters) {
+    private List<String> createProcessParameters(TerasologyGameVersion gameVersion, File gameDataDirectory, List<String> javaParameters) {
         final List<String> processParameters = new ArrayList<>();
         processParameters.add("java");
         processParameters.addAll(javaParameters);
@@ -84,7 +84,7 @@ public final class GameStarter {
         return processParameters;
     }
 
-    private boolean startProcess(final TerasologyGameVersion gameVersion, final List<String> processParameters) {
+    private boolean startProcess(TerasologyGameVersion gameVersion, List<String> processParameters) {
         final ProcessBuilder pb = new ProcessBuilder(processParameters);
         pb.redirectErrorStream(true);
         pb.directory(gameVersion.getInstallationPath());
@@ -95,7 +95,7 @@ public final class GameStarter {
             gameThread = new Thread(new Runnable() {
                 public void run() {
                     try {
-                        try (final BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.defaultCharset()))) {
+                        try (BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.defaultCharset()))) {
                             String line;
                             do {
                                 line = r.readLine();

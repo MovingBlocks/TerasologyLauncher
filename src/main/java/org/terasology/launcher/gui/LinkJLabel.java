@@ -58,7 +58,7 @@ final class LinkJLabel extends JLabel implements MouseListener {
         return hoverColor;
     }
 
-    void setHoverColor(final Color hoverColor) {
+    void setHoverColor(Color hoverColor) {
         this.hoverColor = hoverColor;
     }
 
@@ -66,7 +66,7 @@ final class LinkJLabel extends JLabel implements MouseListener {
         return standardColor;
     }
 
-    void setStandardColor(final Color standardColor) {
+    void setStandardColor(Color standardColor) {
         this.standardColor = standardColor;
     }
 
@@ -74,12 +74,12 @@ final class LinkJLabel extends JLabel implements MouseListener {
         return uri;
     }
 
-    public void setUri(final URI uri) {
+    public void setUri(URI uri) {
         this.uri = uri;
     }
 
     @Override
-    public void mouseClicked(final MouseEvent event) {
+    public void mouseClicked(MouseEvent event) {
         if ((lastClicked + CLICK_DELAY) > System.currentTimeMillis()) {
             return;
         }
@@ -98,20 +98,20 @@ final class LinkJLabel extends JLabel implements MouseListener {
     }
 
     @Override
-    public void mousePressed(final MouseEvent e) {
+    public void mousePressed(MouseEvent e) {
     }
 
     @Override
-    public void mouseReleased(final MouseEvent e) {
+    public void mouseReleased(MouseEvent e) {
     }
 
     @Override
-    public void mouseEntered(final MouseEvent e) {
+    public void mouseEntered(MouseEvent e) {
         setForeground(hoverColor);
     }
 
     @Override
-    public void mouseExited(final MouseEvent e) {
+    public void mouseExited(MouseEvent e) {
         setForeground(standardColor);
     }
 }

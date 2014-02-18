@@ -26,7 +26,7 @@ public class SplashProgressIndicator implements ProgressListener {
     private long lastTime;
     private int counter;
 
-    public SplashProgressIndicator(final SplashScreenWindow splash, final String labelKey) {
+    public SplashProgressIndicator(SplashScreenWindow splash, String labelKey) {
         this.splash = splash;
         downloadMsg = new String[3];
         downloadMsg[0] = BundleUtils.getLabel(labelKey) + ".";

@@ -35,6 +35,7 @@ import java.io.IOException;
 final class BackgroundImage extends JLabel {
 
     private static final long serialVersionUID = 1L;
+
     private static final Logger logger = LoggerFactory.getLogger(BackgroundImage.class);
 
     /**
@@ -43,7 +44,7 @@ final class BackgroundImage extends JLabel {
      * @param width  - the background width
      * @param height - the background height
      */
-    public BackgroundImage(final int width, final int height) {
+    public BackgroundImage(int width, int height) {
         setVerticalAlignment(SwingConstants.CENTER);
         setHorizontalAlignment(SwingConstants.CENTER);
         setBounds(0, 0, width, height);
@@ -64,7 +65,7 @@ final class BackgroundImage extends JLabel {
         setHorizontalAlignment(SwingConstants.LEFT);
     }
 
-    public BackgroundImage(final int width, final int height, final Image image) {
+    public BackgroundImage(int width, int height, Image image) {
         setVerticalAlignment(SwingConstants.CENTER);
         setHorizontalAlignment(SwingConstants.CENTER);
         setBounds(0, 0, width, height);

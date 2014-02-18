@@ -35,7 +35,7 @@ final class TSScrollBarUI extends BasicScrollBarUI {
     }
 
     @Override
-    protected void paintThumb(final Graphics g, final JComponent c, final Rectangle thumbBounds) {
+    protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
         final Graphics2D g2d = (Graphics2D) g;
         final Color old = g2d.getColor();
         g2d.setColor(Color.DARK_GRAY);
@@ -44,7 +44,7 @@ final class TSScrollBarUI extends BasicScrollBarUI {
     }
 
     @Override
-    protected void paintTrack(final Graphics g, final JComponent c, final Rectangle trackBounds) {
+    protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
         // paint nothing
     }
 
@@ -58,12 +58,12 @@ final class TSScrollBarUI extends BasicScrollBarUI {
     }
 
     @Override
-    protected JButton createDecreaseButton(final int orientation) {
+    protected JButton createDecreaseButton(int orientation) {
         return createZeroButton();
     }
 
     @Override
-    protected JButton createIncreaseButton(final int orientation) {
+    protected JButton createIncreaseButton(int orientation) {
         return createZeroButton();
     }
 }

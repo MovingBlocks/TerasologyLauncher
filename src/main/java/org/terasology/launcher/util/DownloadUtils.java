@@ -64,7 +64,7 @@ public final class DownloadUtils {
     private DownloadUtils() {
     }
 
-    public static void downloadToFile(final URL downloadURL, final File file, final ProgressListener progressListener) throws DownloadException {
+    public static void downloadToFile(URL downloadURL, File file, ProgressListener progressListener) throws DownloadException {
         progressListener.update(0);
         try (BufferedInputStream in = new BufferedInputStream(downloadURL.openStream());
              BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
@@ -100,7 +100,7 @@ public final class DownloadUtils {
         }
     }
 
-    public static URL createFileDownloadURL(final String jobName, final int buildNumber, final String fileName) throws MalformedURLException {
+    public static URL createFileDownloadURL(String jobName, int buildNumber, String fileName) throws MalformedURLException {
         final StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(JENKINS_JOB_URL);
         urlBuilder.append(jobName);
@@ -112,7 +112,7 @@ public final class DownloadUtils {
         return new URL(urlBuilder.toString());
     }
 
-    public static URL createURL(final String jobName, final int buildNumber, final String subPath) throws MalformedURLException {
+    public static URL createURL(String jobName, int buildNumber, String subPath) throws MalformedURLException {
         final StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(JENKINS_JOB_URL);
         urlBuilder.append(jobName);
@@ -126,18 +126,18 @@ public final class DownloadUtils {
     /**
      * Loads the <code>buildNumber</code> of the last <b>stable</b> build.
      */
-    public static int loadLastStableBuildNumber(final String jobName) throws DownloadException {
+    public static int loadLastStableBuildNumber(String jobName) throws DownloadException {
         return loadBuildNumber(jobName, LAST_STABLE_BUILD);
     }
 
     /**
      * Loads the <code>buildNumber</code> of the last <b>successful</b> build.
      */
-    public static int loadLastSuccessfulBuildNumber(final String jobName) throws DownloadException {
+    public static int loadLastSuccessfulBuildNumber(String jobName) throws DownloadException {
         return loadBuildNumber(jobName, LAST_SUCCESSFUL_BUILD);
     }
 
-    private static int loadBuildNumber(final String jobName, final String lastBuild) throws DownloadException {
+    private static int loadBuildNumber(String jobName, String lastBuild) throws DownloadException {
         int buildNumber;
         URL urlVersion = null;
         BufferedReader reader = null;
@@ -159,7 +159,7 @@ public final class DownloadUtils {
         return buildNumber;
     }
 
-    public static JobResult loadJobResult(final String jobName, final int buildNumber) throws DownloadException {
+    public static JobResult loadJobResult(String jobName, int buildNumber) throws DownloadException {
         JobResult jobResult = null;
         URL urlResult = null;
         BufferedReader reader = null;
@@ -192,7 +192,7 @@ public final class DownloadUtils {
         return jobResult;
     }
 
-    public static List<String> loadChangeLog(final String jobName, final int buildNumber) throws DownloadException {
+    public static List<String> loadChangeLog(String jobName, int buildNumber) throws DownloadException {
         List<String> changeLog = null;
         URL urlChangeLog = null;
         InputStream stream = null;
@@ -231,7 +231,7 @@ public final class DownloadUtils {
         return changeLog;
     }
 
-    public static String loadLauncherChangeLog(final String jobName, final Integer buildNumber) throws DownloadException {
+    public static String loadLauncherChangeLog(String jobName, Integer buildNumber) throws DownloadException {
         URL urlChangeLog = null;
         BufferedReader reader = null;
         final StringBuilder changeLog = new StringBuilder();

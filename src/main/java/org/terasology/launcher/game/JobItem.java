@@ -22,7 +22,7 @@ public final class JobItem {
 
     private final GameJob job;
 
-    public JobItem(final GameJob job) {
+    public JobItem(GameJob job) {
         this.job = job;
     }
 

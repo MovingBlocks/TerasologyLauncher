@@ -55,7 +55,7 @@ public final class LauncherUpdater {
 
     private File launcherInstallationDirectory;
 
-    public LauncherUpdater(final TerasologyLauncherVersionInfo currentVersionInfo) {
+    public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
         this.currentVersionInfo = currentVersionInfo;
 
         if ((currentVersionInfo.getBuildNumber() == null) || (currentVersionInfo.getBuildNumber().trim().length() == 0)) {
@@ -118,7 +118,7 @@ public final class LauncherUpdater {
         logger.trace("Launcher installation directory: {}", launcherInstallationDirectory);
     }
 
-    public boolean showUpdateDialog(final Component parentComponent) {
+    public boolean showUpdateDialog(Component parentComponent) {
         final JPanel msgPanel = new JPanel(new BorderLayout(0, 10));
         final JTextArea msgLabel = new JTextArea(BundleUtils.getLabel("message_update_launcher"));
         msgLabel.setBackground(msgPanel.getBackground());
@@ -174,7 +174,7 @@ public final class LauncherUpdater {
         return (option == 0);
     }
 
-    public boolean update(final File tempDirectory, final SplashScreenWindow splash) {
+    public boolean update(File tempDirectory, SplashScreenWindow splash) {
         try {
             logger.trace("Downloading launcher...");
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
@@ -191,7 +191,7 @@ public final class LauncherUpdater {
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 
             // Extract launcher ZIP file
-            boolean extracted = FileUtils.extractZip(downloadedZipFile);
+            final boolean extracted = FileUtils.extractZip(downloadedZipFile);
             if (!extracted) {
                 throw new IOException("Could not extract ZIP file! " + downloadedZipFile);
             }

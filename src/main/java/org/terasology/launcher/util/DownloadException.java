@@ -23,15 +23,15 @@ public final class DownloadException extends Exception {
         super();
     }
 
-    public DownloadException(final String message) {
+    public DownloadException(String message) {
         super(message);
     }
 
-    public DownloadException(final String message, final Throwable cause) {
+    public DownloadException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public DownloadException(final Throwable cause) {
+    public DownloadException(Throwable cause) {
         super(cause);
     }
 }

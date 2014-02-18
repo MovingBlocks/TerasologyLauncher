@@ -63,7 +63,7 @@ public final class LauncherSettings {
     private final File launcherSettingsFile;
     private final Properties properties;
 
-    public LauncherSettings(final File launcherDirectory) {
+    public LauncherSettings(File launcherDirectory) {
         launcherSettingsFile = new File(launcherDirectory, LAUNCHER_SETTINGS_FILE_NAME);
         properties = new Properties();
     }
@@ -211,11 +211,11 @@ public final class LauncherSettings {
         }
     }
 
-    public synchronized void setLocale(final Locale locale) {
+    public synchronized void setLocale(Locale locale) {
         properties.setProperty(PROPERTY_LOCALE, locale.toString());
     }
 
-    public synchronized void setJob(final GameJob job) {
+    public synchronized void setJob(GameJob job) {
         properties.setProperty(PROPERTY_JOB, job.name());
     }
 
@@ -223,15 +223,15 @@ public final class LauncherSettings {
         return GameJob.valueOf(properties.getProperty(PROPERTY_JOB));
     }
 
-    public synchronized void setBuildVersion(final int version, final GameJob job) {
+    public synchronized void setBuildVersion(int version, GameJob job) {
         properties.setProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name(), String.valueOf(version));
     }
 
-    public synchronized int getBuildVersion(final GameJob job) {
+    public synchronized int getBuildVersion(GameJob job) {
         return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name()));
     }
 
-    public synchronized void setMaxHeapSize(final JavaHeapSize maxHeapSize) {
+    public synchronized void setMaxHeapSize(JavaHeapSize maxHeapSize) {
         properties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxHeapSize.name());
     }
 
@@ -239,7 +239,7 @@ public final class LauncherSettings {
         return JavaHeapSize.valueOf(properties.getProperty(PROPERTY_MAX_HEAP_SIZE));
     }
 
-    public synchronized void setInitialHeapSize(final JavaHeapSize initialHeapSize) {
+    public synchronized void setInitialHeapSize(JavaHeapSize initialHeapSize) {
         properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialHeapSize.name());
     }
 
@@ -247,7 +247,7 @@ public final class LauncherSettings {
         return JavaHeapSize.valueOf(properties.getProperty(PROPERTY_INITIAL_HEAP_SIZE));
     }
 
-    public synchronized void setSearchForLauncherUpdates(final boolean searchForLauncherUpdates) {
+    public synchronized void setSearchForLauncherUpdates(boolean searchForLauncherUpdates) {
         properties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, Boolean.toString(searchForLauncherUpdates));
     }
 
@@ -255,7 +255,7 @@ public final class LauncherSettings {
         return Boolean.valueOf(properties.getProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES));
     }
 
-    public synchronized void setCloseLauncherAfterGameStart(final boolean closeLauncherAfterGameStart) {
+    public synchronized void setCloseLauncherAfterGameStart(boolean closeLauncherAfterGameStart) {
         properties.setProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START, Boolean.toString(closeLauncherAfterGameStart));
     }
 
@@ -263,7 +263,7 @@ public final class LauncherSettings {
         return Boolean.valueOf(properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START));
     }
 
-    public synchronized void setGameDirectory(final File gameDirectory) {
+    public synchronized void setGameDirectory(File gameDirectory) {
         properties.setProperty(PROPERTY_GAME_DIRECTORY, gameDirectory.toURI().toString());
     }
 
@@ -279,7 +279,7 @@ public final class LauncherSettings {
         return null;
     }
 
-    public synchronized void setGameDataDirectory(final File gameDataDirectory) {
+    public synchronized void setGameDataDirectory(File gameDataDirectory) {
         properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toURI().toString());
     }
 

@@ -39,7 +39,7 @@ public final class FileUtils {
      *
      * @param file - file to delete
      */
-    public static void delete(final File file) throws IOException {
+    public static void delete(File file) throws IOException {
         if (file.isDirectory()) {
             final File[] files = file.listFiles();
             if ((files != null) && (files.length > 0)) {
@@ -48,13 +48,13 @@ public final class FileUtils {
                 }
             }
         }
-        boolean deleted = file.delete();
+        final boolean deleted = file.delete();
         if (!deleted) {
             throw new IOException("Could not delete file! " + file);
         }
     }
 
-    public static void deleteDirectoryContent(final File directory) throws IOException {
+    public static void deleteDirectoryContent(File directory) throws IOException {
         if (directory.isDirectory()) {
             final File[] files = directory.listFiles();
             if ((files != null) && (files.length > 0)) {
@@ -70,7 +70,7 @@ public final class FileUtils {
      *
      * @param archive - the ZIP file to extract
      */
-    public static boolean extractZip(final File archive) {
+    public static boolean extractZip(File archive) {
         return FileUtils.extractZipTo(archive, archive.getParentFile());
     }
 
@@ -80,13 +80,10 @@ public final class FileUtils {
      * @param archive        - the ZIP file to extract
      * @param outputLocation - where to extract to
      */
-    public static boolean extractZipTo(final File archive, final File outputLocation) {
+    public static boolean extractZipTo(File archive, File outputLocation) {
         logger.trace("Extracting '{}' to '{}'.", archive, outputLocation);
 
-        byte[] buffer = new byte[4096];
         ZipInputStream zis = null;
-        ZipEntry ze;
-
         try {
             if (!outputLocation.exists()) {
                 boolean created = outputLocation.mkdir();
@@ -94,7 +91,9 @@ public final class FileUtils {
                     throw new IOException("Could not create directory! " + outputLocation);
                 }
             }
+            final byte[] buffer = new byte[4096];
             zis = new ZipInputStream(new FileInputStream(archive));
+            ZipEntry ze;
             while ((ze = zis.getNextEntry()) != null) {
                 File extractedFile = new File(outputLocation, ze.getName());
                 File extractedDir = extractedFile.getParentFile();
@@ -130,14 +129,14 @@ public final class FileUtils {
         return false;
     }
 
-    private static void copyFile(final File source, final File destination) throws IOException {
+    private static void copyFile(File source, File destination) throws IOException {
         if (!source.exists()) {
             logger.error("Source file doesn't exists! '{}'", source);
             return;
         }
 
         if (!destination.exists()) {
-            boolean created = destination.createNewFile();
+            final boolean created = destination.createNewFile();
             if (!created) {
                 throw new IOException("Could not create file! " + destination);
             }
@@ -166,7 +165,7 @@ public final class FileUtils {
      * @param destination - where to copy to
      * @throws IOException
      */
-    public static void copyFolder(final File source, final File destination) throws IOException {
+    public static void copyFolder(File source, File destination) throws IOException {
         if (!source.exists()) {
             logger.error("Source file doesn't exists! '{}'", source);
             return;
@@ -174,16 +173,16 @@ public final class FileUtils {
 
         if (source.isDirectory()) {
             if (!destination.exists()) {
-                boolean created = destination.mkdirs();
+                final boolean created = destination.mkdirs();
                 if (!created) {
                     throw new IOException("Could not create directory! " + destination);
                 }
             }
-            String[] files = source.list();
+            final String[] files = source.list();
             if ((files != null) && (files.length > 0)) {
                 for (String file : files) {
-                    File srcFile = new File(source, file);
-                    File destFile = new File(destination, file);
+                    final File srcFile = new File(source, file);
+                    final File destFile = new File(destination, file);
                     FileUtils.copyFolder(srcFile, destFile);
                 }
             }

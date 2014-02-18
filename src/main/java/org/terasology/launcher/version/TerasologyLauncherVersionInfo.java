@@ -54,7 +54,7 @@ public final class TerasologyLauncherVersionInfo {
     private final String displayVersion;
     private final String toString;
 
-    private TerasologyLauncherVersionInfo(final Properties versionInfoProperties) {
+    private TerasologyLauncherVersionInfo(Properties versionInfoProperties) {
         final Properties properties;
         if (versionInfoProperties != null) {
             properties = versionInfoProperties;
@@ -120,11 +120,11 @@ public final class TerasologyLauncherVersionInfo {
         return instance;
     }
 
-    public static TerasologyLauncherVersionInfo loadFromInputStream(final InputStream inStream) {
+    public static TerasologyLauncherVersionInfo loadFromInputStream(InputStream inStream) {
         return new TerasologyLauncherVersionInfo(loadPropertiesFromInputStream(inStream));
     }
 
-    private static Properties loadPropertiesFromInputStream(final InputStream inStream) {
+    private static Properties loadPropertiesFromInputStream(InputStream inStream) {
         final Properties properties = new Properties();
         if (inStream != null) {
             try {

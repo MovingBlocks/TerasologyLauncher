@@ -35,8 +35,8 @@ public enum GameJob {
     private final String infoMessageKey;
     private final String settingsKey;
 
-    private GameJob(final String gitBranch, final int minBuildNumber, final int prevBuildNumbers, final boolean stable, final boolean onlyInstalled,
-                    final String installationDirectory, final String infoMessageKey, final String settingsKey) {
+    private GameJob(String gitBranch, int minBuildNumber, int prevBuildNumbers, boolean stable, boolean onlyInstalled, String installationDirectory, String infoMessageKey,
+                    String settingsKey) {
         this.gitBranch = gitBranch;
         this.minBuildNumber = minBuildNumber;
         this.prevBuildNumbers = prevBuildNumbers;

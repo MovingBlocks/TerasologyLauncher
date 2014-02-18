@@ -28,18 +28,18 @@ public final class GuiUtils {
     private GuiUtils() {
     }
 
-    public static void showWarningMessageDialog(final Component parentComponent, final String message) {
+    public static void showWarningMessageDialog(Component parentComponent, String message) {
         JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.WARNING_MESSAGE);
     }
 
-    public static void showErrorMessageDialog(final boolean exitLauncher, final Component parentComponent, final String message) {
+    public static void showErrorMessageDialog(boolean exitLauncher, Component parentComponent, String message) {
         JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
         if (exitLauncher) {
             System.exit(1);
         }
     }
 
-    public static File chooseDirectory(final Component parentComponent, final File directory, final String title) {
+    public static File chooseDirectory(Component parentComponent, File directory, String title) {
         final JFileChooser fileChooser = new JFileChooser(directory.getParentFile());
         // Cannot use mode DIRECTORIES_ONLY, because the preselected name doesn't work.
         fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);

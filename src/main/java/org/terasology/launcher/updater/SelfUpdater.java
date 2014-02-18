@@ -44,7 +44,7 @@ public final class SelfUpdater {
         return System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
     }
 
-    private static void deleteLauncherContent(final File directory) {
+    private static void deleteLauncherContent(File directory) {
         final File[] files = directory.listFiles();
         if ((files != null) && (files.length > 0)) {
             for (File child : files) {
@@ -56,7 +56,7 @@ public final class SelfUpdater {
                         logger.info("Skip directory: {}", child);
                     }
                 } else if (!child.getName().contains(".log")) {
-                    boolean deleted = child.delete();
+                    final boolean deleted = child.delete();
                     if (!deleted) {
                         logger.error("Could not delete file! {}", child);
                     }
@@ -68,7 +68,7 @@ public final class SelfUpdater {
     /**
      * Starts the update process after downloading the needed files.
      */
-    public static void runUpdate(final File tempLauncherDirectory, final File launcherInstallationDirectory) throws IOException {
+    public static void runUpdate(File tempLauncherDirectory, File launcherInstallationDirectory) throws IOException {
         final List<String> arguments = new ArrayList<>();
         // Set 'java' executable as programme to run
         arguments.add(getJavaProgramFile());
@@ -89,7 +89,7 @@ public final class SelfUpdater {
         pb.start();
     }
 
-    public static void main(final String[] args) {
+    public static void main(String[] args) {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {

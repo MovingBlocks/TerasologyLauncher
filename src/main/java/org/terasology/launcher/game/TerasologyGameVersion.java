@@ -39,7 +39,7 @@ public final class TerasologyGameVersion implements Serializable {
     public TerasologyGameVersion() {
     }
 
-    public void copyTo(final TerasologyGameVersion gameVersion) {
+    public void copyTo(TerasologyGameVersion gameVersion) {
         gameVersion.setBuildNumber(buildNumber);
         gameVersion.setJob(job);
         gameVersion.setGameVersionInfo(gameVersionInfo);
@@ -64,7 +64,7 @@ public final class TerasologyGameVersion implements Serializable {
         return buildNumber;
     }
 
-    void setBuildNumber(final Integer buildNumber) {
+    void setBuildNumber(Integer buildNumber) {
         this.buildNumber = buildNumber;
     }
 
@@ -72,7 +72,7 @@ public final class TerasologyGameVersion implements Serializable {
         return job;
     }
 
-    void setJob(final GameJob job) {
+    void setJob(GameJob job) {
         this.job = job;
     }
 
@@ -80,7 +80,7 @@ public final class TerasologyGameVersion implements Serializable {
         return gameVersionInfo;
     }
 
-    void setGameVersionInfo(final TerasologyGameVersionInfo gameVersionInfo) {
+    void setGameVersionInfo(TerasologyGameVersionInfo gameVersionInfo) {
         this.gameVersionInfo = gameVersionInfo;
     }
 
@@ -88,7 +88,7 @@ public final class TerasologyGameVersion implements Serializable {
         return installationPath;
     }
 
-    void setInstallationPath(final File installationPath) {
+    void setInstallationPath(File installationPath) {
         this.installationPath = installationPath;
     }
 
@@ -96,7 +96,7 @@ public final class TerasologyGameVersion implements Serializable {
         return gameJar;
     }
 
-    void setGameJar(final File gameJar) {
+    void setGameJar(File gameJar) {
         this.gameJar = gameJar;
     }
 
@@ -104,7 +104,7 @@ public final class TerasologyGameVersion implements Serializable {
         return changeLog;
     }
 
-    void setChangeLog(final List<String> changeLog) {
+    void setChangeLog(List<String> changeLog) {
         this.changeLog = changeLog;
     }
 
@@ -112,7 +112,7 @@ public final class TerasologyGameVersion implements Serializable {
         return latest;
     }
 
-    void setLatest(final boolean latest) {
+    void setLatest(boolean latest) {
         this.latest = latest;
     }
 
@@ -120,7 +120,7 @@ public final class TerasologyGameVersion implements Serializable {
         return successful;
     }
 
-    void setSuccessful(final Boolean successful) {
+    void setSuccessful(Boolean successful) {
         this.successful = successful;
     }
 

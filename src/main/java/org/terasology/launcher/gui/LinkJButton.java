@@ -48,13 +48,13 @@ final class LinkJButton extends JButton {
         return uri;
     }
 
-    public void setUri(final URI uri) {
+    public void setUri(URI uri) {
         this.uri = uri;
     }
 
     private class ButtonClickHandler implements ActionListener {
         @Override
-        public void actionPerformed(final ActionEvent event) {
+        public void actionPerformed(ActionEvent event) {
             if ((uri != null) && Desktop.isDesktopSupported()) {
                 final Desktop desktop = Desktop.getDesktop();
                 if (desktop.isSupported(Desktop.Action.BROWSE)) {
