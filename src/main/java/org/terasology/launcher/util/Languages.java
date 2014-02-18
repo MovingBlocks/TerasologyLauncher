@@ -37,14 +37,14 @@ public final class Languages {
 
     static {
         final List<Locale> supportedLocales = new ArrayList<>(4);
-        supportedLocales.add(Locale.ENGLISH);
         supportedLocales.add(Locale.GERMAN);
+        supportedLocales.add(Locale.ENGLISH);
         supportedLocales.add(SPANISH);
         supportedLocales.add(RUSSIAN);
 
         final Map<Locale, String> settingsLabelKey = new HashMap<>();
-        settingsLabelKey.put(Locale.ENGLISH, "settings_language_en");
         settingsLabelKey.put(Locale.GERMAN, "settings_language_de");
+        settingsLabelKey.put(Locale.ENGLISH, "settings_language_en");
         settingsLabelKey.put(SPANISH, "settings_language_es");
         settingsLabelKey.put(RUSSIAN, "settings_language_ru");
 
