@@ -124,8 +124,8 @@ public final class TerasologyLauncher {
                     try {
                         updater.detectAndCheckLauncherInstallationDirectory();
                         boolean update = updater.showUpdateDialog(splash);
-                        splash.setVisible(true);
                         if (update) {
+                            splash.setVisible(true);
                             boolean selfUpdaterStarted = updater.update(tempDirectory, splash);
                             if (selfUpdaterStarted) {
                                 logger.info("Exit old launcher: {}", TerasologyLauncherVersionInfo.getInstance());
@@ -135,9 +135,8 @@ public final class TerasologyLauncher {
                     } catch (URISyntaxException | IOException e) {
                         logger.error("The launcher installation directory can not be detected or used!", e);
                         GuiUtils.showErrorMessageDialog(false, splash, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
-
-                        splash.setVisible(true);
                     }
+                    splash.setVisible(true);
                 }
             }
 
