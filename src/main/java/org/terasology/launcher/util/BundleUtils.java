@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public final class BundleUtils {
@@ -44,6 +45,10 @@ public final class BundleUtils {
 
     public static String getLabel(String key) {
         return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.getCurrentLocale()).getString(key);
+    }
+
+    public static String getLabel(Locale locale, String key) {
+        return ResourceBundle.getBundle(LABELS_BUNDLE, locale).getString(key);
     }
 
     public static String getMessage(String key, Object... arguments) {

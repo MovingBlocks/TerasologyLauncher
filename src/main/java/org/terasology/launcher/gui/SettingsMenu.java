@@ -481,7 +481,10 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private void populateLanguage() {
         languageBox.removeAllItems();
         for (Locale locale : Languages.SUPPORTED_LOCALES) {
-            final String item = locale.toLanguageTag() + ": " + BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale));
+            String item = locale.toLanguageTag() + " : " + BundleUtils.getLabel(locale, Languages.SETTINGS_LABEL_KEYS.get(locale));
+            if (!locale.equals(Languages.getCurrentLocale())) {
+                item += " (" + BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale)) + ")";
+            }
             languageBox.addItem(item);
 
             if (Languages.getCurrentLocale().equals(locale)) {
