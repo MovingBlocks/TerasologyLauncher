@@ -120,6 +120,9 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
     public void dispose() {
         logger.debug("Dispose launcher frame...");
+        if (gameDownloadWorker != null) {
+            gameDownloadWorker.cancel(false);
+        }
         gameStarter.dispose();
         super.dispose();
     }
@@ -343,8 +346,12 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameStart"),
                     BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
             } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
-                logger.info("Close launcher after game start.");
-                dispose();
+                if (gameDownloadWorker == null) {
+                    logger.info("Close launcher after game start.");
+                    dispose();
+                } else {
+                    logger.info("The launcher can not be closed after game start, because a download is running.");
+                }
             }
         }
     }

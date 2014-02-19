@@ -80,6 +80,8 @@ final class GameDownloadWorker extends SwingWorker<Void, Void> implements Progre
                     firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_gameInfo"));
                     successfulLoadVersion = gameDownloader.updateAfterDownload();
                 }
+            } else {
+                logger.trace("GameDownloadWorker is cancelled");
             }
         } catch (DownloadException | RuntimeException e) {
             logger.error("There is an error occurred while downloading the game!", e);
