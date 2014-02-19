@@ -26,6 +26,34 @@ License
 -------
 *Terasology Launcher* is licensed under the [Apache License, Version 2.0][Apache License].
 
+Building/Developing
+-------------------
+*Terasology Launcher* use a [Gradle][Gradle]-based build system and provides a [wrapper][Gradle Wrapper].
+It is a script which is called from the root of the source tree.
+
+    ./gradlew build
+
+Compile the source code, run tests and build a jar
+
+    ./gradlew install
+
+Create a runnable installation (./build/install/TerasologyLauncher/)
+
+    ./gradlew run
+
+Build and run
+
+    ./gradlew createRelease
+
+Create a local development release (./build/distributions/)
+
+    ./gradlew tasks
+
+Display available tasks
+
+    ./gradlew idea
+
+Generate IntelliJ IDEA project files
 
 Contributing
 ------------
@@ -34,6 +62,7 @@ Please use [GitHub][GitHub TerasologyLauncher Issues] or the forums ([english][E
 We welcome contributions, especially through pull requests on GitHub.
 Submissions must be licensed under the [Apache License, Version 2.0][Apache License].
 
+See also [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Contributors
 ------------
@@ -61,3 +90,5 @@ Contributors
 [English forum]: http://forum.movingblocks.net/threads/terasologylauncher-mrbarsack.708/ "TerasologyLauncher forum thread"
 [German forum]: http://terasologyforum.de/board49-entwicklung/board53-sonstiges/578-terasology-launcher-v3-mrbarsack/ "TerasologyLauncher forum thread"
 [Apache License]: http://www.apache.org/licenses/LICENSE-2.0.html "Apache License, Version 2.0"
+[Gradle]: http://gradle.org "Gradle"
+[Gradle Wrapper]: http://gradle.org/docs/current/userguide/gradle_wrapper.html "Gradle Wrapper"
