@@ -180,8 +180,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         infoTextPane.setOpaque(false);
         infoTextPane.setContentType("text/html");
         infoTextPane.setForeground(Color.WHITE);
-        //infoTextPane.setBounds(updatePanel.getX() + 8, updatePanel.getY() + 8, updatePanelWidth - 16,
-        // updatePanelHeight - 16);
 
         final JScrollPane sp = new JScrollPane();
         sp.getViewport().add(infoTextPane);
@@ -292,97 +290,117 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
-            action(e.getActionCommand());
+            switch (e.getActionCommand()) {
+                case SETTINGS_ACTION:
+                    settingsAction();
+                    break;
+                case EXIT_ACTION:
+                    dispose();
+                    break;
+                case START_ACTION:
+                    startAction();
+                    break;
+                case DOWNLOAD_ACTION:
+                    downloadAction();
+                    break;
+                case DELETE_ACTION:
+                    deleteAction();
+                    break;
+                default:
+                    logger.warn("Unhandled action command '{}'!", e.getActionCommand());
+            }
         }
     }
 
-    private void action(String command) {
-        if (command.equals(SETTINGS_ACTION)) {
-            if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-                settingsMenu = new SettingsMenu(this, launcherDirectory, launcherSettings, gameVersions);
-                settingsMenu.setVisible(true);
-                settingsMenu.addWindowListener(new WindowAdapter() {
-                    @Override
-                    public void windowClosed(WindowEvent e) {
-                        updateGui();
-                    }
-                });
-            }
-        } else if (command.equals(EXIT_ACTION)) {
-            dispose();
-        } else if (command.equals(START_ACTION)) {
-            final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-            if ((gameVersion == null) || !gameVersion.isInstalled()) {
-                logger.warn("The selected game version can not be started! '{}'", gameVersion);
-                JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameStart"),
-                    BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
-                updateGui();
-            } else if (gameStarter.isRunning()) {
-                logger.debug("The game can not be started because another game is already running.");
-                JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_information_gameRunning"),
-                    BundleUtils.getLabel("message_information_title"), JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
-                    launcherSettings.getInitialHeapSize());
-                if (!gameStarted) {
-                    JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameStart"),
-                        BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
-                } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
-                    logger.info("Close launcher after game start.");
-                    dispose();
-                }
-            }
-        } else if (command.equals(DOWNLOAD_ACTION)) {
-            final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-            if (gameDownloadWorker != null) {
-                // Cancel download
-                logger.info("Cancel game download!");
-                gameDownloadWorker.cancel(false);
-            } else if ((gameVersion == null) || gameVersion.isInstalled() || (gameVersion.getSuccessful() == null) || !gameVersion.getSuccessful()) {
-                logger.warn("The selected game version can not be downloaded! '{}'", gameVersion);
-                updateGui();
-            } else {
-                try {
-                    GameDownloader gameDownloader = new GameDownloader(tempDirectory, launcherSettings.getGameDirectory(), gameVersion, gameVersions);
-                    gameDownloadWorker = new GameDownloadWorker(progressBar, this, gameDownloader);
-                } catch (IOException e) {
-                    logger.error("Could not start game download!", e);
-                    finishedGameDownload(false, false, false, null);
-                    return;
-                }
-                gameDownloadWorker.execute();
-                updateGui();
-            }
-        } else if (command.equals(DELETE_ACTION)) {
-            final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-            if ((gameVersion != null) && gameVersion.isInstalled()) {
-                final boolean containsGameData = DirectoryUtils.containsGameData(gameVersion.getInstallationPath());
-                final String msg;
-                if (containsGameData) {
-                    msg = BundleUtils.getMessage("confirmDeleteGame_withData", gameVersion.getInstallationPath());
-                } else {
-                    msg = BundleUtils.getMessage("confirmDeleteGame_withoutData", gameVersion.getInstallationPath());
-                }
-                final int option = JOptionPane.showConfirmDialog(this, msg, BundleUtils.getLabel("message_deleteGame_title"), JOptionPane.YES_NO_OPTION);
-                if (option == JOptionPane.YES_OPTION) {
-                    logger.info("Delete installed game! '{}' '{}'", gameVersion, gameVersion.getInstallationPath());
-                    try {
-                        FileUtils.delete(gameVersion.getInstallationPath());
-                    } catch (IOException e) {
-                        logger.error("Could not delete installed game!", e);
-                        // TODO Show message dialog
-                        return;
-                    }
-                    gameVersions.removeInstallationInfo(gameVersion);
+    private void settingsAction() {
+        if ((settingsMenu == null) || !settingsMenu.isVisible()) {
+            settingsMenu = new SettingsMenu(this, launcherDirectory, launcherSettings, gameVersions);
+            settingsMenu.setVisible(true);
+            settingsMenu.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
                     updateGui();
                 }
-            } else {
-                logger.warn("The selected game version can not be deleted! '{}'", gameVersion);
+            });
+        }
+    }
+
+    private void startAction() {
+        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+        if ((gameVersion == null) || !gameVersion.isInstalled()) {
+            logger.warn("The selected game version can not be started! '{}'", gameVersion);
+            JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameStart"),
+                BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+            updateGui();
+        } else if (gameStarter.isRunning()) {
+            logger.debug("The game can not be started because another game is already running.");
+            JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_information_gameRunning"),
+                BundleUtils.getLabel("message_information_title"), JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
+                launcherSettings.getInitialHeapSize());
+            if (!gameStarted) {
+                JOptionPane.showMessageDialog(this, BundleUtils.getLabel("message_error_gameStart"),
+                    BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+            } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
+                logger.info("Close launcher after game start.");
+                dispose();
             }
         }
     }
 
-    void updateGui() {
+    private void downloadAction() {
+        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+        if (gameDownloadWorker != null) {
+            // Cancel download
+            logger.info("Cancel game download!");
+            gameDownloadWorker.cancel(false);
+        } else if ((gameVersion == null) || gameVersion.isInstalled() || (gameVersion.getSuccessful() == null) || !gameVersion.getSuccessful()) {
+            logger.warn("The selected game version can not be downloaded! '{}'", gameVersion);
+            updateGui();
+        } else {
+            try {
+                GameDownloader gameDownloader = new GameDownloader(tempDirectory, launcherSettings.getGameDirectory(), gameVersion, gameVersions);
+                gameDownloadWorker = new GameDownloadWorker(progressBar, this, gameDownloader);
+            } catch (IOException e) {
+                logger.error("Could not start game download!", e);
+                finishedGameDownload(false, false, false, null);
+                return;
+            }
+            gameDownloadWorker.execute();
+            updateGui();
+        }
+    }
+
+    private void deleteAction() {
+        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+        if ((gameVersion != null) && gameVersion.isInstalled()) {
+            final boolean containsGameData = DirectoryUtils.containsGameData(gameVersion.getInstallationPath());
+            final String msg;
+            if (containsGameData) {
+                msg = BundleUtils.getMessage("confirmDeleteGame_withData", gameVersion.getInstallationPath());
+            } else {
+                msg = BundleUtils.getMessage("confirmDeleteGame_withoutData", gameVersion.getInstallationPath());
+            }
+            final int option = JOptionPane.showConfirmDialog(this, msg, BundleUtils.getLabel("message_deleteGame_title"), JOptionPane.YES_NO_OPTION);
+            if (option == JOptionPane.YES_OPTION) {
+                logger.info("Delete installed game! '{}' '{}'", gameVersion, gameVersion.getInstallationPath());
+                try {
+                    FileUtils.delete(gameVersion.getInstallationPath());
+                } catch (IOException e) {
+                    logger.error("Could not delete installed game!", e);
+                    // TODO Show message dialog
+                    return;
+                }
+                gameVersions.removeInstallationInfo(gameVersion);
+                updateGui();
+            }
+        } else {
+            logger.warn("The selected game version can not be deleted! '{}'", gameVersion);
+        }
+    }
+
+    private void updateGui() {
         updateLocale();
         updateButtons();
         updateInfoTextPane();
