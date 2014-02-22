@@ -21,37 +21,37 @@ Usage
    * lib/TerasologyLauncher.jar (Java)
 3. Use *Terasology Launcher* to download, config and start *Terasology*
 
-
 License
 -------
 *Terasology Launcher* is licensed under the [Apache License, Version 2.0][Apache License].
 
 Building/Developing
 -------------------
-*Terasology Launcher* use a [Gradle][Gradle]-based build system and provides a [wrapper][Gradle Wrapper].
-It is a script which is called from the root of the source tree.
+*Terasology Launcher* uses a [Gradle][Gradle]-based build system and provides a [wrapper][Gradle Wrapper].
+It is a script which is called from the root of the source tree. It downloads and installs [Gradle][Gradle] automatically.
+Depending on the system it is necessary to call "./gradlew" instead of "gradlew".
 
-    ./gradlew build
+    gradlew build
 
 Compile the source code, run tests and build a jar
 
-    ./gradlew install
+    gradlew install
 
 Create a runnable installation (./build/install/TerasologyLauncher/)
 
-    ./gradlew run
+    gradlew run
 
 Build and run
 
-    ./gradlew createRelease
+    gradlew createRelease
 
 Create a local development release (./build/distributions/)
 
-    ./gradlew tasks
+    gradlew tasks
 
 Display available tasks
 
-    ./gradlew idea
+    gradlew idea
 
 Generate IntelliJ IDEA project files
 

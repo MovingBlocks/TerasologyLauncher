@@ -5,7 +5,7 @@ Terasology Launcher - ChangeLog
 * Translation into Russian
 * Optimize language selection
 * Optimize launcher self update
-* Note: Old cached information about game versions are not compatible
+* Note: Old cached information about game versions are not compatible. These are automatically reloaded.
 * Internal changes
     * Update libraries (logback, slf4j)
     * Restructure and refactor code
