@@ -1,7 +1,7 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 1.3.0 (2014-02-xx, unreleased)
+## 1.3.0 (2014-02-23)
 * Translation into Russian
 * Optimize language selection
 * Optimize launcher self update
