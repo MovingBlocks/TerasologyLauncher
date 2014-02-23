@@ -29,7 +29,7 @@ Building/Developing
 -------------------
 *Terasology Launcher* uses a [Gradle][Gradle]-based build system and provides a [wrapper][Gradle Wrapper].
 It is a script which is called from the root of the source tree. It downloads and installs [Gradle][Gradle] automatically.
-Depending on the system it is necessary to call "./gradlew" instead of "gradlew".
+Depending on the system it may be necessary to call "./gradlew" instead of "gradlew".
 
     gradlew build
 
