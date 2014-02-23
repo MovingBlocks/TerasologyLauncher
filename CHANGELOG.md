@@ -3,6 +3,13 @@ Terasology Launcher - ChangeLog
 
 ## x.y.z (unreleased)
 * Translation into Russian
+* Optimize language selection
+* Optimize launcher self update
+* Note: Old cached information about game versions are not compatible. These are automatically reloaded.
+* Internal changes
+    * Update libraries (logback, slf4j)
+    * Restructure and refactor code
+    * Some small bug fixes
 
 ## 1.2.0 (2014-01-17)
 * Choose, edit, show and use game data directory
