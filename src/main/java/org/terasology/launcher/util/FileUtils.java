@@ -120,6 +120,10 @@ public final class FileUtils {
             if (zis != null) {
                 try {
                     zis.closeEntry();
+                } catch (IOException e) {
+                    logger.warn("The zip entry could not be closed! '{}'", archive, e);
+                }
+                try {
                     zis.close();
                 } catch (IOException e) {
                     logger.warn("The zip input stream could not be closed! '{}'", archive, e);
