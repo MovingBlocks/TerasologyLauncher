@@ -65,10 +65,12 @@ public final class DownloadUtils {
     }
 
     public static void downloadToFile(URL downloadURL, File file, ProgressListener progressListener) throws DownloadException {
+        int contentLength;
         progressListener.update(0);
         try (BufferedInputStream in = new BufferedInputStream(downloadURL.openStream());
              BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
-            final float sizeFactor = 100f / (float) downloadURL.openConnection().getContentLength();
+            contentLength = downloadURL.openConnection().getContentLength();
+            final float sizeFactor = 100f / (float) contentLength;
 
             final byte[] buffer = new byte[2048];
 
@@ -96,6 +98,9 @@ public final class DownloadUtils {
             throw new DownloadException("Could not download file! URL=" + downloadURL + ", file=" + file, e);
         }
         if (!progressListener.isCancelled()) {
+            if (file.length() != contentLength) {
+                throw new DownloadException("Wrong file length! " + file.length() + " <-> " + contentLength);
+            }
             progressListener.update(100);
         }
     }

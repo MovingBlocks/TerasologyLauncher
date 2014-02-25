@@ -54,6 +54,8 @@ public final class GameDownloader {
         final File gameJobDirectory = new File(new File(gameParentDirectory, gameVersion.getJob().getInstallationDirectory()), jobName);
         DirectoryUtils.checkDirectory(gameJobDirectory);
         gameDirectory = new File(gameJobDirectory, buildNumber.toString());
+        DirectoryUtils.checkDirectory(gameDirectory);
+        FileUtils.deleteDirectoryContent(gameDirectory);
     }
 
     public URL getDownloadURL() {
