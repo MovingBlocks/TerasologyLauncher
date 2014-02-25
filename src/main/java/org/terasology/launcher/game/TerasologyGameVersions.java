@@ -439,6 +439,7 @@ public final class TerasologyGameVersions {
                     }
                     currentGameVersion.setInstallationPath(gameVersion.getInstallationPath());
                     currentGameVersion.setGameJar(gameVersion.getGameJar());
+                    logger.debug("Update game version with new installation: {}", currentGameVersion);
                 }
             }
             return true;
