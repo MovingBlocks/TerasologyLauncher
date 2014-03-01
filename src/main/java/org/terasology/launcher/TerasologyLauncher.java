@@ -54,7 +54,11 @@ public final class TerasologyLauncher {
             splash.setVisible(true);
 
             // Java
-            logger.debug("Java version and vendor: {} {}", System.getProperty("java.version"), System.getProperty("java.vendor"));
+            logger.debug("Java: {} {} {}", System.getProperty("java.version"), System.getProperty("java.vendor"), System.getProperty("java.home"));
+            logger.debug("Java VM: {} {} {}", System.getProperty("java.vm.name"), System.getProperty("java.vm.vendor"), System.getProperty("java.vm.version"));
+
+            //Memory
+            logger.debug("Max. Memory: {} bytes", Runtime.getRuntime().maxMemory());
 
             // TerasologyLauncherVersionInfo
             final TerasologyLauncherVersionInfo launcherVersionInfo = TerasologyLauncherVersionInfo.getInstance();
@@ -72,7 +76,7 @@ public final class TerasologyLauncher {
                 logger.error("The operating system is not supported! '{}' '{}'", System.getProperty("os.name"), System.getProperty("os.arch"));
                 GuiUtils.showErrorMessageDialog(true, splash, BundleUtils.getLabel("message_error_operatingSystem"));
             }
-            logger.debug("Operating system: {} {} ({})", System.getProperty("os.name"), System.getProperty("os.arch"), os);
+            logger.debug("Operating system: {} {} {} ({})", System.getProperty("os.name"), System.getProperty("os.arch"), System.getProperty("os.version"), os);
 
             // Launcher directory
             logger.trace("Init launcherDirectory...");
