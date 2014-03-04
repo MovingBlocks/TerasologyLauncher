@@ -49,8 +49,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
 import java.util.List;
 import java.util.Locale;
 
@@ -434,21 +432,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
     }
 
     private void populateHeapSize() {
-        long max = 512;
-
-        final OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
-        if (osBean instanceof com.sun.management.OperatingSystemMXBean) {
-            max = ((com.sun.management.OperatingSystemMXBean) osBean).getTotalPhysicalMemorySize() / 1024 / 1024;
-        }
-
-        max = Math.max(max, 512);
-
-        // detect 32 or 64 bit OS
-        final String arch = System.getProperty("os.arch");
-        final boolean bit64 = arch.contains("64");
-
-        final List<JavaHeapSize> heapSizes = JavaHeapSize.getHeapSizes(max, bit64);
-        for (JavaHeapSize heapSize : heapSizes) {
+        for (JavaHeapSize heapSize : JavaHeapSize.values()) {
             maxHeapSizeBox.addItem(heapSize);
             initialHeapSizeBox.addItem(heapSize);
         }
