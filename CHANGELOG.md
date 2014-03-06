@@ -1,7 +1,10 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## x.y.z (unreleased)
+## 1.3.1 (2014-03-xx, unreleased)
+* Allow all memory (heap size) values (512 MB - 16 GB)
+* Check file length after download
+* Delete content of game installation sub directory before downloading and extracting a game version
 
 ## 1.3.0 (2014-02-23)
 * Translation into Russian
