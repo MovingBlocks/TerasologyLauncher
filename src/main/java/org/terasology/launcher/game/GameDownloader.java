@@ -46,7 +46,7 @@ public final class GameDownloader {
         final Integer buildNumber = gameVersion.getBuildNumber();
 
         DirectoryUtils.checkDirectory(tempDirectory);
-        downloadZipFile = new File(tempDirectory, jobName + "_" + buildNumber.toString() + ".zip");
+        downloadZipFile = new File(tempDirectory, jobName + "_" + buildNumber.toString() + "_" + System.currentTimeMillis() + ".zip");
         if (downloadZipFile.exists() && (!downloadZipFile.isFile() || !downloadZipFile.delete())) {
             throw new IOException("Could not delete file! " + downloadZipFile);
         }

@@ -34,6 +34,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -61,16 +62,39 @@ public final class DownloadUtils {
     private static final String API_JSON_RESULT = "/api/json?tree=result";
     private static final String API_XML_CHANGE_LOG = "/api/xml?xpath=//changeSet/item/msg[1]&wrapper=msgs";
 
+    private static final int CONNECT_TIMEOUT = 1000 * 30;
+    private static final int READ_TIMEOUT = 1000 * 60 * 5;
+
     private DownloadUtils() {
     }
 
     public static void downloadToFile(URL downloadURL, File file, ProgressListener progressListener) throws DownloadException {
-        int contentLength;
         progressListener.update(0);
-        try (BufferedInputStream in = new BufferedInputStream(downloadURL.openStream());
-             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
-            contentLength = downloadURL.openConnection().getContentLength();
-            final float sizeFactor = 100f / (float) contentLength;
+
+        HttpURLConnection connection;
+        long contentLength;
+        try {
+            connection = (HttpURLConnection) downloadURL.openConnection();
+            connection.setConnectTimeout(CONNECT_TIMEOUT);
+            connection.setReadTimeout(READ_TIMEOUT);
+            connection.connect();
+            contentLength = connection.getContentLengthLong();
+            if (contentLength <= 0) {
+                throw new DownloadException("Wrong content length! URL=" + downloadURL + ", contentLength=" + contentLength);
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Download file '{}' ({}; {}) from URL '{}'.", file, contentLength, connection.getContentType(), downloadURL);
+            }
+        } catch (ClassCastException | IOException e) {
+            throw new DownloadException("Could not open/use URL connection! URL=" + downloadURL, e);
+        }
+
+        float sizeFactor = 100f / (float) contentLength;
+        BufferedInputStream in = null;
+        BufferedOutputStream out = null;
+        try {
+            in = new BufferedInputStream(connection.getInputStream());
+            out = new BufferedOutputStream(new FileOutputStream(file));
 
             final byte[] buffer = new byte[2048];
 
@@ -95,11 +119,30 @@ public final class DownloadUtils {
                 }
             }
         } catch (IOException e) {
-            throw new DownloadException("Could not download file! URL=" + downloadURL + ", file=" + file, e);
+            throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    logger.warn("Closing InputStream for '{}' failed!", downloadURL, e);
+                }
+            }
+
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    logger.warn("Closing OutputStream for '{}' failed!", file, e);
+                }
+            }
+
+            connection.disconnect();
         }
+
         if (!progressListener.isCancelled()) {
             if (file.length() != contentLength) {
-                throw new DownloadException("Wrong file length! " + file.length() + " <-> " + contentLength);
+                throw new DownloadException("Wrong file length after download! " + file.length() + " != " + contentLength);
             }
             progressListener.update(100);
         }
