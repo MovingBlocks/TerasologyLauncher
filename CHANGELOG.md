@@ -1,6 +1,8 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## x.y.z (unreleased)
+
 ## 1.3.1 (2014-03-25)
 * Allow all memory (heap size) values (512 MB - 16 GB)
 * Optimize zip file download (checks, logging, timeout, file name, ...)
