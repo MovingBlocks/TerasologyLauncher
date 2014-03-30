@@ -48,14 +48,13 @@ public final class TerasologyLauncher {
         try {
             logger.info("TerasologyLauncher is starting");
 
-            // SplashScreen
-            logger.trace("Create SplashScreenWindow...");
-            final SplashScreenWindow splash = new SplashScreenWindow(BundleUtils.getBufferedImage("splash"));
-            splash.setVisible(true);
-
             // Java
             logger.debug("Java: {} {} {}", System.getProperty("java.version"), System.getProperty("java.vendor"), System.getProperty("java.home"));
             logger.debug("Java VM: {} {} {}", System.getProperty("java.vm.name"), System.getProperty("java.vm.vendor"), System.getProperty("java.vm.version"));
+            logger.debug("Java classpath: {}", System.getProperty("java.class.path"));
+
+            // OS
+            logger.debug("OS: {} {} {}", System.getProperty("os.name"), System.getProperty("os.arch"), System.getProperty("os.version"));
 
             //Memory
             logger.debug("Max. Memory: {} bytes", Runtime.getRuntime().maxMemory());
@@ -69,6 +68,11 @@ public final class TerasologyLauncher {
             Languages.init();
             logger.debug("Language: {}", Languages.getCurrentLocale());
 
+            // SplashScreen
+            logger.trace("Create SplashScreenWindow...");
+            final SplashScreenWindow splash = new SplashScreenWindow(BundleUtils.getBufferedImage("splash"));
+            splash.setVisible(true);
+
             // OS
             logger.trace("Init OperatingSystem...");
             final OperatingSystem os = OperatingSystem.getOS();
@@ -76,7 +80,7 @@ public final class TerasologyLauncher {
                 logger.error("The operating system is not supported! '{}' '{}'", System.getProperty("os.name"), System.getProperty("os.arch"));
                 GuiUtils.showErrorMessageDialog(true, splash, BundleUtils.getLabel("message_error_operatingSystem"));
             }
-            logger.debug("Operating system: {} {} {} ({})", System.getProperty("os.name"), System.getProperty("os.arch"), System.getProperty("os.version"), os);
+            logger.debug("Operating system: {}", os);
 
             // Launcher directory
             logger.trace("Init launcherDirectory...");
