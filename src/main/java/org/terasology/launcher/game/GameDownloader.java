@@ -38,15 +38,22 @@ public final class GameDownloader {
     private final File downloadZipFile;
     private final URL downloadURL;
     private final File gameDirectory;
+    private final boolean saveDownloadedFiles;
 
-    public GameDownloader(File tempDirectory, File gameParentDirectory, TerasologyGameVersion gameVersion, TerasologyGameVersions gameVersions) throws IOException {
+    public GameDownloader(File downloadDirectory, File tempDirectory, boolean saveDownloadedFiles, File gameParentDirectory, TerasologyGameVersion gameVersion,
+                          TerasologyGameVersions gameVersions) throws IOException {
         this.gameVersions = gameVersions;
+        this.saveDownloadedFiles = saveDownloadedFiles;
 
         final String jobName = gameVersion.getJob().name();
         final Integer buildNumber = gameVersion.getBuildNumber();
 
         DirectoryUtils.checkDirectory(tempDirectory);
-        downloadZipFile = new File(tempDirectory, jobName + "_" + buildNumber.toString() + "_" + System.currentTimeMillis() + ".zip");
+        if (saveDownloadedFiles) {
+            downloadZipFile = new File(downloadDirectory, jobName + "_" + buildNumber.toString() + "_" + System.currentTimeMillis() + ".zip");
+        } else {
+            downloadZipFile = new File(tempDirectory, jobName + "_" + buildNumber.toString() + "_" + System.currentTimeMillis() + ".zip");
+        }
         if (downloadZipFile.exists() && (!downloadZipFile.isFile() || !downloadZipFile.delete())) {
             throw new IOException("Could not delete file! " + downloadZipFile);
         }
@@ -75,9 +82,11 @@ public final class GameDownloader {
     }
 
     public void deleteSilentAfterExtract() {
-        final boolean deleted = downloadZipFile.delete();
-        if (!deleted) {
-            logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile);
+        if (!saveDownloadedFiles) {
+            final boolean deleted = downloadZipFile.delete();
+            if (!deleted) {
+                logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile);
+            }
         }
     }
 

@@ -89,6 +89,17 @@ public final class TerasologyLauncher {
             }
             logger.debug("Launcher directory: {}", launcherDirectory);
 
+            // Download directory
+            logger.trace("Init downloadDirectory...");
+            final File downloadDirectory = new File(launcherDirectory, DirectoryUtils.DOWNLOAD_DIR_NAME);
+            try {
+                DirectoryUtils.checkDirectory(downloadDirectory);
+            } catch (IOException e) {
+                logger.error("The download directory can not be created or used! '{}'", downloadDirectory, e);
+                GuiUtils.showErrorMessageDialog(true, splash, BundleUtils.getLabel("message_error_downloadDirectory") + "\n" + downloadDirectory);
+            }
+            logger.debug("Download directory: {}", downloadDirectory);
+
             // Temp directory
             logger.trace("Init tempDirectory...");
             final File tempDirectory = new File(launcherDirectory, DirectoryUtils.TEMP_DIR_NAME);
@@ -130,7 +141,12 @@ public final class TerasologyLauncher {
                         final boolean update = updater.showUpdateDialog(splash);
                         if (update) {
                             splash.setVisible(true);
-                            final boolean selfUpdaterStarted = updater.update(tempDirectory, splash);
+                            final boolean selfUpdaterStarted;
+                            if (launcherSettings.isSaveDownloadedFiles()) {
+                                selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory, splash);
+                            } else {
+                                selfUpdaterStarted = updater.update(tempDirectory, tempDirectory, splash);
+                            }
                             if (selfUpdaterStarted) {
                                 logger.info("Exit old launcher: {}", TerasologyLauncherVersionInfo.getInstance());
                                 System.exit(0);
@@ -244,7 +260,7 @@ public final class TerasologyLauncher {
             // LauncherFrame
             logger.trace("Creating launcher frame...");
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_createFrame"));
-            final Frame frame = new LauncherFrame(launcherDirectory, tempDirectory, launcherSettings, gameVersions);
+            final Frame frame = new LauncherFrame(launcherDirectory, downloadDirectory, tempDirectory, launcherSettings, gameVersions);
             frame.setVisible(true);
 
             // Dispose splash screen

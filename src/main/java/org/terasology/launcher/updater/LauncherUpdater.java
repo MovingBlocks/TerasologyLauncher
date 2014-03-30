@@ -174,7 +174,7 @@ public final class LauncherUpdater {
         return (option == 0);
     }
 
-    public boolean update(File tempDirectory, SplashScreenWindow splash) {
+    public boolean update(File downloadDirectory, File tempDirectory, SplashScreenWindow splash) {
         try {
             logger.trace("Downloading launcher...");
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
@@ -183,7 +183,7 @@ public final class LauncherUpdater {
             final URL updateURL = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
             logger.trace("Update URL: {}", updateURL);
 
-            final File downloadedZipFile = new File(tempDirectory, jobName + "_" + upstreamVersion + ".zip");
+            final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
             logger.trace("Download ZIP file: {}", downloadedZipFile);
 
             DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new SplashProgressIndicator(splash, "splash_updatingLauncher_download"));
@@ -191,7 +191,7 @@ public final class LauncherUpdater {
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 
             // Extract launcher ZIP file
-            final boolean extracted = FileUtils.extractZip(downloadedZipFile);
+            final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
             if (!extracted) {
                 throw new IOException("Could not extract ZIP file! " + downloadedZipFile);
             }

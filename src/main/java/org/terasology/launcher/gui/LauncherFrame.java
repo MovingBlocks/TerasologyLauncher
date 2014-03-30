@@ -94,13 +94,15 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private GameDownloadWorker gameDownloadWorker;
 
     private final File launcherDirectory;
+    private final File downloadDirectory;
     private final File tempDirectory;
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public LauncherFrame(File launcherDirectory, File tempDirectory, LauncherSettings launcherSettings, TerasologyGameVersions gameVersions) {
+    public LauncherFrame(File launcherDirectory, File downloadDirectory, File tempDirectory, LauncherSettings launcherSettings, TerasologyGameVersions gameVersions) {
         this.launcherDirectory = launcherDirectory;
         this.tempDirectory = tempDirectory;
+        this.downloadDirectory = downloadDirectory;
         this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
 
@@ -367,7 +369,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             updateGui();
         } else {
             try {
-                GameDownloader gameDownloader = new GameDownloader(tempDirectory, launcherSettings.getGameDirectory(), gameVersion, gameVersions);
+                GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isSaveDownloadedFiles(),
+                    launcherSettings.getGameDirectory(), gameVersion, gameVersions);
                 gameDownloadWorker = new GameDownloadWorker(progressBar, this, gameDownloader);
             } catch (IOException e) {
                 logger.error("Could not start game download!", e);
