@@ -27,6 +27,7 @@ public final class DirectoryUtils {
     public static final String LAUNCHER_APPLICATION_DIR_NAME = "TerasologyLauncher";
     public static final String GAME_APPLICATION_DIR_NAME = "Terasology";
     public static final String GAME_DATA_DIR_NAME = "Terasology";
+    public static final String DOWNLOAD_DIR_NAME = "download";
     public static final String TEMP_DIR_NAME = "temp";
     public static final String CACHE_DIR_NAME = "cache";
 

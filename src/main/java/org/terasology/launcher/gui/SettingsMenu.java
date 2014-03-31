@@ -61,6 +61,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private static final String CANCEL_ACTION = "cancel";
 
     private static final String LAUNCHER_DIRECTORY_OPEN = "launcherDirectoryOpen";
+    private static final String DOWNLOAD_DIRECTORY_OPEN = "downloadDirectoryOpen";
     private static final String GAME_DIRECTORY_OPEN = "gameDirectoryOpen";
     private static final String GAME_DIRECTORY_EDIT = "gameDirectoryEdit";
     private static final String GAME_DATA_DIRECTORY_OPEN = "gameDataDirectoryOpen";
@@ -76,17 +77,20 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private JComboBox<String> languageBox;
     private JCheckBox searchForLauncherUpdatesBox;
     private JCheckBox closeLauncherAfterGameStartBox;
+    private JCheckBox saveDownloadedFilesBox;
 
     private File gameDirectory;
     private File gameDataDirectory;
     private final File launcherDirectory;
+    private final File downloadDirectory;
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public SettingsMenu(JFrame parent, File launcherDirectory, LauncherSettings launcherSettings, TerasologyGameVersions gameVersions) {
+    public SettingsMenu(JFrame parent, File launcherDirectory, File downloadDirectory, LauncherSettings launcherSettings, TerasologyGameVersions gameVersions) {
         super(parent, BundleUtils.getLabel("settings_title"), true);
 
         this.launcherDirectory = launcherDirectory;
+        this.downloadDirectory = downloadDirectory;
         this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
 
@@ -100,6 +104,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         populateLanguage();
         populateSearchForLauncherUpdates();
         populateCloseLauncherAfterGameStart();
+        populateSaveDownloadedFiles();
         gameDirectory = launcherSettings.getGameDirectory();
         gameDataDirectory = launcherSettings.getGameDataDirectory();
 
@@ -326,6 +331,13 @@ final class SettingsMenu extends JDialog implements ActionListener {
         closeLauncherAfterGameStartBox = new JCheckBox();
         closeLauncherAfterGameStartBox.setFont(settingsFont);
 
+        final JLabel saveDownloadedFilesLabel = new JLabel();
+        saveDownloadedFilesLabel.setText(BundleUtils.getLabel("settings_launcher_saveDownloadedFiles"));
+        saveDownloadedFilesLabel.setFont(settingsFont);
+
+        saveDownloadedFilesBox = new JCheckBox();
+        saveDownloadedFilesBox.setFont(settingsFont);
+
         final JPanel launcherDirectoryPanel = new JPanel();
 
         final JLabel launcherDirectoryLabel = new JLabel();
@@ -342,6 +354,22 @@ final class SettingsMenu extends JDialog implements ActionListener {
         }
         launcherDirectoryPanel.add(launcherDirectoryOpenButton);
 
+        final JPanel downloadDirectoryPanel = new JPanel();
+
+        final JLabel downloadDirectoryLabel = new JLabel();
+        downloadDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory"));
+        downloadDirectoryLabel.setFont(settingsFont);
+
+        final JButton downloadDirectoryOpenButton = new JButton();
+        downloadDirectoryOpenButton.setFont(settingsFont);
+        downloadDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory_open"));
+        downloadDirectoryOpenButton.addActionListener(this);
+        downloadDirectoryOpenButton.setActionCommand(DOWNLOAD_DIRECTORY_OPEN);
+        if (!Desktop.isDesktopSupported()) {
+            downloadDirectoryOpenButton.setEnabled(false);
+        }
+        downloadDirectoryPanel.add(downloadDirectoryOpenButton);
+
         final GroupLayout launcherTabLayout = new GroupLayout(launcherSettingsTab);
         launcherSettingsTab.setLayout(launcherTabLayout);
 
@@ -353,13 +381,17 @@ final class SettingsMenu extends JDialog implements ActionListener {
                         .addComponent(languageLabel)
                         .addComponent(searchForLauncherUpdatesLabel)
                         .addComponent(closeLauncherAfterGameStartLabel)
-                        .addComponent(launcherDirectoryLabel))
+                        .addComponent(launcherDirectoryLabel)
+                        .addComponent(saveDownloadedFilesLabel)
+                        .addComponent(downloadDirectoryLabel))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(launcherTabLayout.createParallelGroup()
                         .addComponent(languageBox)
                         .addComponent(searchForLauncherUpdatesBox)
                         .addComponent(closeLauncherAfterGameStartBox)
-                        .addComponent(launcherDirectoryPanel))
+                        .addComponent(launcherDirectoryPanel)
+                        .addComponent(saveDownloadedFilesBox)
+                        .addComponent(downloadDirectoryPanel))
                     .addContainerGap())
         );
 
@@ -385,6 +417,16 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(launcherDirectoryLabel)
                         .addComponent(launcherDirectoryPanel, GroupLayout.PREFERRED_SIZE,
+                            GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(saveDownloadedFilesLabel)
+                        .addComponent(saveDownloadedFilesBox, GroupLayout.PREFERRED_SIZE,
+                            GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(downloadDirectoryLabel)
+                        .addComponent(downloadDirectoryPanel, GroupLayout.PREFERRED_SIZE,
                             GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap())
         );
@@ -485,6 +527,10 @@ final class SettingsMenu extends JDialog implements ActionListener {
         closeLauncherAfterGameStartBox.setSelected(launcherSettings.isCloseLauncherAfterGameStart());
     }
 
+    private void populateSaveDownloadedFiles() {
+        saveDownloadedFilesBox.setSelected(launcherSettings.isSaveDownloadedFiles());
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
@@ -502,6 +548,18 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     logger.error("The launcher directory can not be opened! '{}'", launcherDirectory, e);
                     JOptionPane.showMessageDialog(this,
                         BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory,
+                        BundleUtils.getLabel("message_error_title"),
+                        JOptionPane.ERROR_MESSAGE);
+                }
+                break;
+            case DOWNLOAD_DIRECTORY_OPEN:
+                try {
+                    DirectoryUtils.checkDirectory(downloadDirectory);
+                    Desktop.getDesktop().open(downloadDirectory);
+                } catch (IOException e) {
+                    logger.error("The download directory can not be opened! '{}'", downloadDirectory, e);
+                    JOptionPane.showMessageDialog(this,
+                        BundleUtils.getLabel("message_error_downloadDirectory") + "\n" + downloadDirectory,
                         BundleUtils.getLabel("message_error_title"),
                         JOptionPane.ERROR_MESSAGE);
                 }
@@ -608,6 +666,9 @@ final class SettingsMenu extends JDialog implements ActionListener {
 
                 // save closeLauncherAfterGameStart
                 launcherSettings.setCloseLauncherAfterGameStart(closeLauncherAfterGameStartBox.isSelected());
+
+                // save saveDownloadedFiles
+                launcherSettings.setSaveDownloadedFiles(saveDownloadedFilesBox.isSelected());
 
                 // store changed settings
                 try {

@@ -49,6 +49,7 @@ public final class LauncherSettings {
     private static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     private static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
     private static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
+    private static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
 
     private static final String PROPERTY_LOCALE = "locale";
     private static final String PROPERTY_JOB = "job";
@@ -59,6 +60,7 @@ public final class LauncherSettings {
     private static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
     private static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
     private static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
+    private static final String PROPERTY_SAVE_DOWNLOADED_FILES = "saveDownloadedFiles";
 
     private final File launcherSettingsFile;
     private final Properties properties;
@@ -178,6 +180,14 @@ public final class LauncherSettings {
         }
         properties.setProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START, Boolean.toString(closeLauncherAfterGameStart));
 
+        // saveDownloadedFiles
+        final String saveDownloadedFilesStr = properties.getProperty(PROPERTY_SAVE_DOWNLOADED_FILES);
+        boolean saveDownloadedFiles = SAVE_DOWNLOADED_FILES_DEFAULT;
+        if (saveDownloadedFilesStr != null) {
+            saveDownloadedFiles = Boolean.valueOf(saveDownloadedFilesStr);
+        }
+        properties.setProperty(PROPERTY_SAVE_DOWNLOADED_FILES, Boolean.toString(saveDownloadedFiles));
+
         // gameDirectory
         final String gameDirectoryStr = properties.getProperty(PROPERTY_GAME_DIRECTORY);
         File gameDirectory = null;
@@ -261,6 +271,14 @@ public final class LauncherSettings {
 
     public synchronized boolean isCloseLauncherAfterGameStart() {
         return Boolean.valueOf(properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START));
+    }
+
+    public synchronized void setSaveDownloadedFiles(boolean saveDownloadedFiles) {
+        properties.setProperty(PROPERTY_SAVE_DOWNLOADED_FILES, Boolean.toString(saveDownloadedFiles));
+    }
+
+    public synchronized boolean isSaveDownloadedFiles() {
+        return Boolean.valueOf(properties.getProperty(PROPERTY_SAVE_DOWNLOADED_FILES));
     }
 
     public synchronized void setGameDirectory(File gameDirectory) {
