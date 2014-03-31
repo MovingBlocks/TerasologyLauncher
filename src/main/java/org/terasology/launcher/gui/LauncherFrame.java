@@ -319,7 +319,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
     private void settingsAction() {
         if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-            settingsMenu = new SettingsMenu(this, launcherDirectory, launcherSettings, gameVersions);
+            settingsMenu = new SettingsMenu(this, launcherDirectory, downloadDirectory, launcherSettings, gameVersions);
             settingsMenu.setVisible(true);
             settingsMenu.addWindowListener(new WindowAdapter() {
                 @Override
