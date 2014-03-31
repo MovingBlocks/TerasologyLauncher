@@ -149,7 +149,7 @@ public final class TerasologyGameVersions {
         if (!job.isOnlyInstalled()) {
             try {
                 // Use "successful" and not "stable" for TerasologyGame.
-                lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumber(job.name());
+                lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumberJenkins(job.name());
                 if (lastSuccessfulBuildNumber >= job.getMinBuildNumber()) {
                     buildNumbers.add(lastSuccessfulBuildNumber);
                     // add previous build numbers
@@ -333,7 +333,7 @@ public final class TerasologyGameVersions {
                 } else if (!job.isOnlyInstalled()) {
                     Boolean successful = null;
                     try {
-                        JobResult jobResult = DownloadUtils.loadJobResult(job.name(), buildNumber);
+                        JobResult jobResult = DownloadUtils.loadJobResultJenkins(job.name(), buildNumber);
                         successful = (jobResult != null && ((jobResult == JobResult.SUCCESS) || (jobResult == JobResult.UNSTABLE)));
                     } catch (DownloadException e) {
                         logger.debug("Load job result failed. '{}' '{}'", job, buildNumber, e);
@@ -349,7 +349,7 @@ public final class TerasologyGameVersions {
                 } else if (!job.isOnlyInstalled()) {
                     List<String> changeLog = null;
                     try {
-                        changeLog = DownloadUtils.loadChangeLog(job.name(), buildNumber);
+                        changeLog = DownloadUtils.loadChangeLogJenkins(job.name(), buildNumber);
                     } catch (DownloadException e) {
                         logger.debug("Load change log failed. '{}' '{}'", job, buildNumber, e);
                     }
@@ -367,7 +367,7 @@ public final class TerasologyGameVersions {
                     TerasologyGameVersionInfo gameVersionInfo = null;
                     URL urlVersionInfo = null;
                     try {
-                        urlVersionInfo = DownloadUtils.createFileDownloadURL(job.name(), buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_VERSION_INFO);
+                        urlVersionInfo = DownloadUtils.createFileDownloadUrlJenkins(job.name(), buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_VERSION_INFO);
                         gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
                     } catch (IOException e) {
                         logger.debug("Load game version info failed. '{}' '{}' '{}'", job, buildNumber, urlVersionInfo, e);

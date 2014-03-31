@@ -57,7 +57,7 @@ public final class GameDownloader {
         if (downloadZipFile.exists() && (!downloadZipFile.isFile() || !downloadZipFile.delete())) {
             throw new IOException("Could not delete file! " + downloadZipFile);
         }
-        downloadURL = DownloadUtils.createFileDownloadURL(jobName, buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_ZIP);
+        downloadURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_ZIP);
         final File gameJobDirectory = new File(new File(gameParentDirectory, gameVersion.getJob().getInstallationDirectory()), jobName);
         DirectoryUtils.checkDirectory(gameJobDirectory);
         gameDirectory = new File(gameJobDirectory, buildNumber.toString());

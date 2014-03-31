@@ -84,7 +84,7 @@ public final class LauncherUpdater {
         versionInfo = null;
         changeLog = null;
         try {
-            upstreamVersion = DownloadUtils.loadLastStableBuildNumber(jobName);
+            upstreamVersion = DownloadUtils.loadLastStableBuildNumberJenkins(jobName);
             logger.trace("Launcher upstream version: {}", upstreamVersion);
             updateAvailable = Integer.parseInt(currentVersion) < upstreamVersion;
         } catch (DownloadException e) {
@@ -95,13 +95,13 @@ public final class LauncherUpdater {
         if (updateAvailable) {
             URL urlVersionInfo = null;
             try {
-                urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
+                urlVersionInfo = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
                 versionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
             } catch (IOException e) {
                 logger.warn("The launcher version info could not be loaded! '{}' '{}'", upstreamVersion, urlVersionInfo, e);
             }
             try {
-                changeLog = DownloadUtils.loadLauncherChangeLog(jobName, upstreamVersion);
+                changeLog = DownloadUtils.loadLauncherChangeLogJenkins(jobName, upstreamVersion);
             } catch (DownloadException e) {
                 logger.warn("The launcher change log could not be loaded! '{}'", upstreamVersion, e);
             }
@@ -180,7 +180,7 @@ public final class LauncherUpdater {
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
 
             // Download launcher ZIP file
-            final URL updateURL = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
+            final URL updateURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
             logger.trace("Update URL: {}", updateURL);
 
             final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");

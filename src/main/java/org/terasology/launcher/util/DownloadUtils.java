@@ -148,7 +148,7 @@ public final class DownloadUtils {
         }
     }
 
-    public static URL createFileDownloadURL(String jobName, int buildNumber, String fileName) throws MalformedURLException {
+    public static URL createFileDownloadUrlJenkins(String jobName, int buildNumber, String fileName) throws MalformedURLException {
         final StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(JENKINS_JOB_URL);
         urlBuilder.append(jobName);
@@ -160,7 +160,7 @@ public final class DownloadUtils {
         return new URL(urlBuilder.toString());
     }
 
-    public static URL createURL(String jobName, int buildNumber, String subPath) throws MalformedURLException {
+    public static URL createUrlJenkins(String jobName, int buildNumber, String subPath) throws MalformedURLException {
         final StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(JENKINS_JOB_URL);
         urlBuilder.append(jobName);
@@ -174,18 +174,18 @@ public final class DownloadUtils {
     /**
      * Loads the <code>buildNumber</code> of the last <b>stable</b> build.
      */
-    public static int loadLastStableBuildNumber(String jobName) throws DownloadException {
-        return loadBuildNumber(jobName, LAST_STABLE_BUILD);
+    public static int loadLastStableBuildNumberJenkins(String jobName) throws DownloadException {
+        return loadBuildNumberJenkins(jobName, LAST_STABLE_BUILD);
     }
 
     /**
      * Loads the <code>buildNumber</code> of the last <b>successful</b> build.
      */
-    public static int loadLastSuccessfulBuildNumber(String jobName) throws DownloadException {
-        return loadBuildNumber(jobName, LAST_SUCCESSFUL_BUILD);
+    public static int loadLastSuccessfulBuildNumberJenkins(String jobName) throws DownloadException {
+        return loadBuildNumberJenkins(jobName, LAST_SUCCESSFUL_BUILD);
     }
 
-    private static int loadBuildNumber(String jobName, String lastBuild) throws DownloadException {
+    private static int loadBuildNumberJenkins(String jobName, String lastBuild) throws DownloadException {
         int buildNumber;
         URL urlVersion = null;
         BufferedReader reader = null;
@@ -207,12 +207,12 @@ public final class DownloadUtils {
         return buildNumber;
     }
 
-    public static JobResult loadJobResult(String jobName, int buildNumber) throws DownloadException {
+    public static JobResult loadJobResultJenkins(String jobName, int buildNumber) throws DownloadException {
         JobResult jobResult = null;
         URL urlResult = null;
         BufferedReader reader = null;
         try {
-            urlResult = DownloadUtils.createURL(jobName, buildNumber, API_JSON_RESULT);
+            urlResult = DownloadUtils.createUrlJenkins(jobName, buildNumber, API_JSON_RESULT);
             reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), StandardCharsets.US_ASCII));
             final String jsonResult = reader.readLine();
             if (jsonResult != null) {
@@ -240,12 +240,12 @@ public final class DownloadUtils {
         return jobResult;
     }
 
-    public static List<String> loadChangeLog(String jobName, int buildNumber) throws DownloadException {
+    public static List<String> loadChangeLogJenkins(String jobName, int buildNumber) throws DownloadException {
         List<String> changeLog = null;
         URL urlChangeLog = null;
         InputStream stream = null;
         try {
-            urlChangeLog = DownloadUtils.createURL(jobName, buildNumber, API_XML_CHANGE_LOG);
+            urlChangeLog = DownloadUtils.createUrlJenkins(jobName, buildNumber, API_XML_CHANGE_LOG);
             final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             stream = urlChangeLog.openStream();
             final Document document = builder.parse(stream);
@@ -279,12 +279,12 @@ public final class DownloadUtils {
         return changeLog;
     }
 
-    public static String loadLauncherChangeLog(String jobName, Integer buildNumber) throws DownloadException {
+    public static String loadLauncherChangeLogJenkins(String jobName, Integer buildNumber) throws DownloadException {
         URL urlChangeLog = null;
         BufferedReader reader = null;
         final StringBuilder changeLog = new StringBuilder();
         try {
-            urlChangeLog = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG);
+            urlChangeLog = DownloadUtils.createFileDownloadUrlJenkins(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG);
             reader = new BufferedReader(new InputStreamReader(urlChangeLog.openStream(), StandardCharsets.US_ASCII));
             while (true) {
                 String line = reader.readLine();
