@@ -20,6 +20,21 @@
         <property name="fileExtensions" value="java"/>
     </module>
 
+    <!-- Check for RegEx -->
+    <!-- See http://checkstyle.sourceforge.net/config_regexp.html -->
+    <!-- *************** -->
+    <!-- A check for detecting single lines that match a supplied regular expression. -->
+    <!-- See http://checkstyle.sourceforge.net/config_regexp.html#RegexpSingleline -->
+    <module name="RegexpSingleline">
+        <property name="format" value="Created with "/>
+    </module>
+    <module name="RegexpSingleline">
+        <property name="format" value="Created by "/>
+    </module>
+    <module name="RegexpSingleline">
+        <property name="format" value="^\s*\*\s*@author"/>
+    </module>
+
     <!-- Checks for header -->
     <!-- See http://checkstyle.sourceforge.net/config_header.html -->
     <!-- ***************** -->
@@ -68,19 +83,25 @@
         <!-- See http://checkstyle.sourceforge.net/config_imports.html -->
         <!-- ****************** -->
         <!-- Checks that there are no import statements that use the * notation. -->
+        <!-- See http://checkstyle.sourceforge.net/config_imports.html#AvoidStarImport -->
         <module name="AvoidStarImport">
             <property name="severity" value="warning"/>
             <!-- allow starred static member imports -->
             <property name="allowStaticMemberImports" value="true"/>
         </module>
         <!-- Checks for redundant import statements. -->
+        <!-- See http://checkstyle.sourceforge.net/config_imports.html#RedundantImport -->
         <module name="RedundantImport">
             <property name="severity" value="warning"/>
         </module>
         <!-- Checks for unused import statements. -->
+        <!-- See http://checkstyle.sourceforge.net/config_imports.html#UnusedImports -->
         <module name="UnusedImports">
             <property name="severity" value="warning"/>
         </module>
+        <!-- Checks for banned packages, sun.* by default. -->
+        <!-- See http://checkstyle.sourceforge.net/config_imports.html#IllegalImport -->
+        <module name="IllegalImport"/>
 
         <!-- Checks for Size Violations -->
         <!-- See http://checkstyle.sourceforge.net/config_sizes.html -->
@@ -140,8 +161,10 @@
         <!-- See http://checkstyle.sourceforge.net/config_modifier.html -->
         <!-- *************** -->
         <!-- Checks that the order of modifiers conforms to the suggestions in the Java Language specification -->
+        <!-- See http://checkstyle.sourceforge.net/config_modifier.html#ModifierOrder -->
         <module name="ModifierOrder"/>
         <!-- Checks for redundant modifiers -->
+        <!-- See http://checkstyle.sourceforge.net/config_modifier.html#RedundantModifier -->
         <module name="RedundantModifier">
             <property name="severity" value="warning"/>
         </module>
@@ -150,20 +173,26 @@
         <!-- See http://checkstyle.sourceforge.net/config_blocks.html -->
         <!-- ***************** -->
         <!-- Finds nested blocks, i.e. blocks that are used freely in the code. -->
+        <!-- See http://checkstyle.sourceforge.net/config_blocks.html#AvoidNestedBlocks -->
         <module name="AvoidNestedBlocks">
             <property name="severity" value="warning"/>
+            <property name="allowInSwitchCase" value="true"/>
         </module>
         <!-- Checks for empty blocks. -->
+        <!-- See http://checkstyle.sourceforge.net/config_blocks.html#EmptyBlock -->
         <module name="EmptyBlock">
             <property name="severity" value="warning"/>
         </module>
         <!-- Checks for the placement of left curly braces ('{') for code blocks. Default: eol -->
+        <!-- See http://checkstyle.sourceforge.net/config_blocks.html#LeftCurly -->
         <module name="LeftCurly">
             <property name="maxLineLength" value="175"/>
         </module>
         <!-- Checks for braces around code blocks. -->
+        <!-- See http://checkstyle.sourceforge.net/config_blocks.html#NeedBraces -->
         <module name="NeedBraces"/>
         <!-- Checks the placement of right curly braces ('}') for else, try, and catch tokens. Default: same -->
+        <!-- See http://checkstyle.sourceforge.net/config_blocks.html#RightCurly -->
         <module name="RightCurly"/>
 
         <!-- Checks for common coding problems -->
@@ -253,16 +282,20 @@
         <!-- See http://checkstyle.sourceforge.net/config_misc.html -->
         <!-- ************************** -->
         <!-- Checks the style of array type definitions. -->
+        <!-- See http://checkstyle.sourceforge.net/config_misc.html#ArrayTypeStyle -->
         <module name="ArrayTypeStyle">
             <property name="severity" value="warning"/>
         </module>
         <!-- Checks correct indentation of Java Code. -->
+        <!-- See http://checkstyle.sourceforge.net/config_misc.html#Indentation -->
         <module name="Indentation">
             <property name="severity" value="warning"/>
         </module>
         <!-- Checks that long constants are defined with an upper ell. That is ' L' and not 'l'. -->
+        <!-- See http://checkstyle.sourceforge.net/config_misc.html#UpperEll -->
         <module name="UpperEll"/>
         <!-- Checks that the outer type name and the file name match. -->
+        <!-- See http://checkstyle.sourceforge.net/config_misc.html#OuterTypeFilename -->
         <module name="OuterTypeFilename"/>
 
         <!-- Checks for annotations -->
@@ -280,5 +313,49 @@
         <module name="MissingOverride">
             <property name="severity" value="warning"/>
         </module>
+
+        <!-- Check javadoc -->
+        <!-- See http://checkstyle.sourceforge.net/config_javadoc.html -->
+        <!-- ************* -->
+        <!-- Custom Checkstyle Check to validate Javadoc. -->
+        <!-- See http://checkstyle.sourceforge.net/config_javadoc.html#JavadocStyle -->
+        <module name="JavadocStyle">
+            <property name="checkEmptyJavadoc" value="true"/>
+        </module>
+
+        <!-- Check metrics -->
+        <!-- See http://checkstyle.sourceforge.net/config_metrics.html -->
+        <!-- ************* -->
+        <!-- Restricts nested boolean operators -->
+        <!-- See http://checkstyle.sourceforge.net/config_metrics.html#BooleanExpressionComplexity -->
+        <module name="BooleanExpressionComplexity">
+            <property name="max" value="5"/>
+        </module>
+        <!-- This metric measures the number of instantiations of other classes within the given class. -->
+        <!-- See http://checkstyle.sourceforge.net/config_metrics.html#ClassDataAbstractionCoupling -->
+        <module name="ClassDataAbstractionCoupling">
+            <property name="max" value="7"/>
+        </module>
+        <!-- The number of other classes a given class relies on. -->
+        <!-- See http://checkstyle.sourceforge.net/config_metrics.html#ClassFanOutComplexity -->
+        <module name="ClassFanOutComplexity">
+            <property name="max" value="30"/>
+        </module>
+        <!-- Checks cyclomatic complexity against a specified limit. -->
+        <!-- See http://checkstyle.sourceforge.net/config_metrics.html#CyclomaticComplexity -->
+        <module name="CyclomaticComplexity">
+            <property name="max" value="12"/>
+        </module>
+        <!-- Checks the npath complexity -->
+        <!-- See http://checkstyle.sourceforge.net/config_metrics.html#NPathComplexity -->
+        <module name="NPathComplexity">
+            <property name="max" value="200"/>
+        </module>
+        <!-- This check calculates the Non Commenting Source Statements (NCSS) metric for java source files and methods. -->
+        <!-- See http://checkstyle.sourceforge.net/config_metrics.html#JavaNCSS -->
+        <module name="JavaNCSS">
+            <property name="methodMaximum" value="100"/>
+        </module>
+
     </module>
 </module>
