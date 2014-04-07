@@ -20,18 +20,28 @@
         <property name="fileExtensions" value="java"/>
     </module>
 
+    <!-- Checks for long source files. -->
+    <!-- See http://checkstyle.sourceforge.net/config_sizes.html#FileLength -->
+    <module name="FileLength">
+        <property name="severity" value="warning"/>
+        <property name="max" value="2000"/>
+    </module>
+
     <!-- Check for RegEx -->
     <!-- See http://checkstyle.sourceforge.net/config_regexp.html -->
     <!-- *************** -->
     <!-- A check for detecting single lines that match a supplied regular expression. -->
     <!-- See http://checkstyle.sourceforge.net/config_regexp.html#RegexpSingleline -->
     <module name="RegexpSingleline">
-        <property name="format" value="Created with "/>
+        <property name="severity" value="warning"/>
+        <property name="format" value="Created with"/>
     </module>
     <module name="RegexpSingleline">
-        <property name="format" value="Created by "/>
+        <property name="severity" value="warning"/>
+        <property name="format" value="Created by"/>
     </module>
     <module name="RegexpSingleline">
+        <property name="severity" value="warning"/>
         <property name="format" value="^\s*\*\s*@author"/>
     </module>
 
@@ -49,6 +59,10 @@
         <!-- Checks for Naming Conventions -->
         <!-- See http://checkstyle.sourceforge.net/config_naming.html -->
         <!-- ***************************** -->
+        <!-- abstract classes : ^Abstract.*$|^.*Factory$ -->
+        <module name="AbstractClassName">
+            <property name="severity" value="warning"/>
+        </module>
         <!-- class type parameters : ^[A-Z]$ -->
         <module name="ClassTypeParameterName">
             <property name="format" value="^[A-Z]*$"/>
@@ -89,6 +103,9 @@
             <!-- allow starred static member imports -->
             <property name="allowStaticMemberImports" value="true"/>
         </module>
+        <!-- Checks for banned packages, sun.* by default. -->
+        <!-- See http://checkstyle.sourceforge.net/config_imports.html#IllegalImport -->
+        <module name="IllegalImport"/>
         <!-- Checks for redundant import statements. -->
         <!-- See http://checkstyle.sourceforge.net/config_imports.html#RedundantImport -->
         <module name="RedundantImport">
@@ -99,19 +116,37 @@
         <module name="UnusedImports">
             <property name="severity" value="warning"/>
         </module>
-        <!-- Checks for banned packages, sun.* by default. -->
-        <!-- See http://checkstyle.sourceforge.net/config_imports.html#IllegalImport -->
-        <module name="IllegalImport"/>
 
         <!-- Checks for Size Violations -->
         <!-- See http://checkstyle.sourceforge.net/config_sizes.html -->
         <!-- ************************** -->
+        <!-- Checks for long lines. -->
         <module name="LineLength">
             <property name="severity" value="warning"/>
             <property name="max" value="175"/>
         </module>
         <!-- Checks for the number of types declared at the outer (or root) level in a file. -->
         <module name="OuterTypeNumber"/>
+        <!-- Checks for long anonymous inner classes. -->
+        <module name="AnonInnerLength">
+            <property name="severity" value="warning"/>
+            <property name="max" value="50"/>
+        </module>
+        <!-- Checks the number of parameters that a method or constructor has. -->
+        <module name="ParameterNumber">
+            <property name="severity" value="warning"/>
+            <property name="max" value="10"/>
+        </module>
+        <!-- Checks for long methods. -->
+        <module name="MethodLength">
+            <property name="severity" value="warning"/>
+            <property name="max" value="200"/>
+        </module>
+        <!-- Checks the number of methods declared in each type. -->
+        <module name="MethodCount">
+            <property name="severity" value="warning"/>
+            <property name="maxTotal" value="75"/>
+        </module>
 
         <!-- Checks for whitespaces -->
         <!-- See http://checkstyle.sourceforge.net/config_whitespace.html -->
