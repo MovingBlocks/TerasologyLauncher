@@ -21,6 +21,7 @@ import org.terasology.launcher.util.windows.SavedGamesPathFinder;
 import javax.swing.JFileChooser;
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 public final class DirectoryUtils {
 
@@ -118,7 +119,7 @@ public final class DirectoryUtils {
                 //   System.getenv("HOMEDRIVE") + System.getenv("HOMEPATH")
             }
         } else if (os.isUnix()) {
-            applicationDirectory = new File(userHome, '.' + applicationName.toLowerCase() + '/');
+            applicationDirectory = new File(userHome, '.' + applicationName.toLowerCase(Locale.ENGLISH) + '/');
         } else if (os.isMac()) {
             applicationDirectory = new File(userHome, MAC_PATH + applicationName + '/');
         } else {
@@ -155,7 +156,7 @@ public final class DirectoryUtils {
 
             gameDataDirectory = new File(path, GAME_DATA_DIR_NAME + '\\');
         } else if (os.isUnix()) {
-            gameDataDirectory = new File(userHome, '.' + GAME_DATA_DIR_NAME.toLowerCase() + '/');
+            gameDataDirectory = new File(userHome, '.' + GAME_DATA_DIR_NAME.toLowerCase(Locale.ENGLISH) + '/');
         } else if (os.isMac()) {
             gameDataDirectory = new File(userHome, MAC_PATH + GAME_DATA_DIR_NAME + '/');
         } else {

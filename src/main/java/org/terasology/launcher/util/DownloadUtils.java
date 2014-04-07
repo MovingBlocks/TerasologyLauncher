@@ -217,7 +217,7 @@ public final class DownloadUtils {
             final String jsonResult = reader.readLine();
             if (jsonResult != null) {
                 for (JobResult result : JobResult.values()) {
-                    if (jsonResult.indexOf(result.name()) > 0) {
+                    if (jsonResult.indexOf(result.name()) == 11) {
                         jobResult = result;
                         break;
                     }
