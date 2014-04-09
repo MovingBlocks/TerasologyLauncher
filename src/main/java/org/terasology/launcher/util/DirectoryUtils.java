@@ -57,26 +57,27 @@ public final class DirectoryUtils {
      * Checks if game data is stored in the installation directory.
      */
     public static boolean containsGameData(File gameInstallationPath) {
-        if ((gameInstallationPath == null) || !gameInstallationPath.exists() || !gameInstallationPath.isDirectory()) {
-            return false;
-        }
-
-        final File[] files = gameInstallationPath.listFiles();
-        if ((files != null) && (files.length > 0)) {
-            for (File child : files) {
-                if (child.isDirectory()
-                    && (child.getName().equals("SAVED_WORLDS")
-                    || child.getName().equals("worlds")
-                    || child.getName().equals("saves")
-                    || child.getName().equals("screens")
-                    || child.getName().equals("screenshots"))
-                    && containsFiles(child)) {
-                    return true;
+        boolean containsGameData = false;
+        if ((gameInstallationPath != null) && gameInstallationPath.exists() && gameInstallationPath.isDirectory() && gameInstallationPath.canRead()) {
+            final File[] files = gameInstallationPath.listFiles();
+            if ((files != null) && (files.length > 0)) {
+                for (File child : files) {
+                    if (child.isDirectory() && isGameDataDirectoryName(child.getName()) && containsFiles(child)) {
+                        containsGameData = true;
+                        break;
+                    }
                 }
             }
         }
+        return containsGameData;
+    }
 
-        return false;
+    private static boolean isGameDataDirectoryName(String directoryName) {
+        return directoryName.equals("SAVED_WORLDS")
+            || directoryName.equals("worlds")
+            || directoryName.equals("saves")
+            || directoryName.equals("screens")
+            || directoryName.equals("screenshots");
     }
 
     public static boolean containsFiles(File directory) {
