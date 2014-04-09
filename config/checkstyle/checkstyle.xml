@@ -369,7 +369,7 @@
         <!-- This metric measures the number of instantiations of other classes within the given class. -->
         <!-- See http://checkstyle.sourceforge.net/config_metrics.html#ClassDataAbstractionCoupling -->
         <module name="ClassDataAbstractionCoupling">
-            <property name="max" value="7"/>
+            <property name="max" value="10"/>
         </module>
         <!-- The number of other classes a given class relies on. -->
         <!-- See http://checkstyle.sourceforge.net/config_metrics.html#ClassFanOutComplexity -->

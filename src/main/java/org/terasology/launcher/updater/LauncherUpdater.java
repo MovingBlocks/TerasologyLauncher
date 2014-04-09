@@ -207,7 +207,7 @@ public final class LauncherUpdater {
             SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
         } catch (DownloadException | IOException | RuntimeException e) {
             logger.error("Launcher update failed! Aborting update process!", e);
-            GuiUtils.showErrorMessageDialog(false, splash, BundleUtils.getLabel("update_launcher_updateFailed"));
+            GuiUtils.showErrorMessageDialog(splash, BundleUtils.getLabel("update_launcher_updateFailed"));
             return false;
         }
         return true;

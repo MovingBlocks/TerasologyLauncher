@@ -102,7 +102,19 @@ public final class LauncherSettings {
     public synchronized void init() {
         logger.trace("Init launcher settings. {}", properties);
 
-        // locale
+        initLocale();
+        initJob();
+        initBuildVersion();
+        initMaxHeapSize();
+        initInitialHeapSize();
+        initSearchForLauncherUpdates();
+        initCloseLauncherAfterGameStart();
+        initSaveDownloadedFiles();
+        initGameDirectory();
+        initGameDataDirectory();
+    }
+
+    private void initLocale() {
         final String localeStr = properties.getProperty(PROPERTY_LOCALE);
         if (localeStr != null) {
             Languages.init(localeStr);
@@ -112,8 +124,9 @@ public final class LauncherSettings {
             }
         }
         properties.setProperty(PROPERTY_LOCALE, Languages.getCurrentLocale().toString());
+    }
 
-        // jobName
+    private void initJob() {
         final String jobStr = properties.getProperty(PROPERTY_JOB);
         GameJob job = JOB_DEFAULT;
         if (jobStr != null) {
@@ -124,8 +137,9 @@ public final class LauncherSettings {
             }
         }
         properties.setProperty(PROPERTY_JOB, job.name());
+    }
 
-        // buildVersion
+    private void initBuildVersion() {
         for (GameJob j : GameJob.values()) {
             final String key = PROPERTY_PREFIX_BUILD_VERSION + j.name();
             final String buildVersionStr = properties.getProperty(key);
@@ -139,8 +153,9 @@ public final class LauncherSettings {
             }
             properties.setProperty(key, String.valueOf(buildVersion));
         }
+    }
 
-        // max heap size
+    private void initMaxHeapSize() {
         final String maxHeapSizeStr = properties.getProperty(PROPERTY_MAX_HEAP_SIZE);
         JavaHeapSize maxJavaHeapSize = MAX_HEAP_SIZE_DEFAULT;
         if (maxHeapSizeStr != null) {
@@ -151,8 +166,9 @@ public final class LauncherSettings {
             }
         }
         properties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxJavaHeapSize.name());
+    }
 
-        // initial heap size
+    private void initInitialHeapSize() {
         final String initialHeapSizeStr = properties.getProperty(PROPERTY_INITIAL_HEAP_SIZE);
         JavaHeapSize initialJavaHeapSize = INITIAL_HEAP_SIZE_DEFAULT;
         if (initialHeapSizeStr != null) {
@@ -163,32 +179,36 @@ public final class LauncherSettings {
             }
         }
         properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialJavaHeapSize.name());
+    }
 
-        // searchForLauncherUpdates
+    private void initSearchForLauncherUpdates() {
         final String searchForLauncherUpdatesStr = properties.getProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES);
         boolean searchForLauncherUpdates = SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT;
         if (searchForLauncherUpdatesStr != null) {
             searchForLauncherUpdates = Boolean.valueOf(searchForLauncherUpdatesStr);
         }
         properties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, Boolean.toString(searchForLauncherUpdates));
+    }
 
-        // closeLauncherAfterGameStart
+    private void initCloseLauncherAfterGameStart() {
         final String closeLauncherAfterGameStartStr = properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START);
         boolean closeLauncherAfterGameStart = CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT;
         if (closeLauncherAfterGameStartStr != null) {
             closeLauncherAfterGameStart = Boolean.valueOf(closeLauncherAfterGameStartStr);
         }
         properties.setProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START, Boolean.toString(closeLauncherAfterGameStart));
+    }
 
-        // saveDownloadedFiles
+    private void initSaveDownloadedFiles() {
         final String saveDownloadedFilesStr = properties.getProperty(PROPERTY_SAVE_DOWNLOADED_FILES);
         boolean saveDownloadedFiles = SAVE_DOWNLOADED_FILES_DEFAULT;
         if (saveDownloadedFilesStr != null) {
             saveDownloadedFiles = Boolean.valueOf(saveDownloadedFilesStr);
         }
         properties.setProperty(PROPERTY_SAVE_DOWNLOADED_FILES, Boolean.toString(saveDownloadedFiles));
+    }
 
-        // gameDirectory
+    private void initGameDirectory() {
         final String gameDirectoryStr = properties.getProperty(PROPERTY_GAME_DIRECTORY);
         File gameDirectory = null;
         if ((gameDirectoryStr != null) && (gameDirectoryStr.trim().length() > 0)) {
@@ -203,8 +223,9 @@ public final class LauncherSettings {
         } else {
             properties.setProperty(PROPERTY_GAME_DIRECTORY, "");
         }
+    }
 
-        // gameDataDirectory
+    private void initGameDataDirectory() {
         final String gameDataDirectoryStr = properties.getProperty(PROPERTY_GAME_DATA_DIRECTORY);
         File gameDataDirectory = null;
         if ((gameDataDirectoryStr != null) && (gameDataDirectoryStr.trim().length() > 0)) {
