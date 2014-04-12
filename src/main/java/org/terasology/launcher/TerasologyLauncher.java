@@ -332,7 +332,7 @@ public final class TerasologyLauncher {
             launcherSettings.setGameDirectory(gameDirectory);
             launcherSettings.setGameDataDirectory(gameDataDirectory);
             gameVersions.fixSettingsBuildVersion(launcherSettings);
-            
+
             storeLauncherSettingsAfterInit(splash, launcherSettings);
 
             logger.trace("Creating launcher frame...");

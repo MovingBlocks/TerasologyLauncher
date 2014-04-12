@@ -24,7 +24,7 @@
     <!-- See http://checkstyle.sourceforge.net/config_sizes.html#FileLength -->
     <module name="FileLength">
         <property name="severity" value="warning"/>
-        <property name="max" value="2000"/>
+        <property name="max" value="1000"/>
     </module>
 
     <!-- Check for RegEx -->
@@ -130,17 +130,17 @@
         <!-- Checks for long anonymous inner classes. -->
         <module name="AnonInnerLength">
             <property name="severity" value="warning"/>
-            <property name="max" value="50"/>
+            <property name="max" value="20"/>
         </module>
         <!-- Checks the number of parameters that a method or constructor has. -->
         <module name="ParameterNumber">
             <property name="severity" value="warning"/>
-            <property name="max" value="10"/>
+            <property name="max" value="8"/>
         </module>
         <!-- Checks for long methods. -->
         <module name="MethodLength">
             <property name="severity" value="warning"/>
-            <property name="max" value="200"/>
+            <property name="max" value="150"/>
         </module>
         <!-- Checks the number of methods declared in each type. -->
         <module name="MethodCount">
@@ -364,31 +364,37 @@
         <!-- Restricts nested boolean operators -->
         <!-- See http://checkstyle.sourceforge.net/config_metrics.html#BooleanExpressionComplexity -->
         <module name="BooleanExpressionComplexity">
+            <property name="severity" value="warning"/>
             <property name="max" value="5"/>
         </module>
         <!-- This metric measures the number of instantiations of other classes within the given class. -->
         <!-- See http://checkstyle.sourceforge.net/config_metrics.html#ClassDataAbstractionCoupling -->
         <module name="ClassDataAbstractionCoupling">
+            <property name="severity" value="warning"/>
             <property name="max" value="10"/>
         </module>
         <!-- The number of other classes a given class relies on. -->
         <!-- See http://checkstyle.sourceforge.net/config_metrics.html#ClassFanOutComplexity -->
         <module name="ClassFanOutComplexity">
+            <property name="severity" value="warning"/>
             <property name="max" value="30"/>
         </module>
         <!-- Checks cyclomatic complexity against a specified limit. -->
         <!-- See http://checkstyle.sourceforge.net/config_metrics.html#CyclomaticComplexity -->
         <module name="CyclomaticComplexity">
+            <property name="severity" value="warning"/>
             <property name="max" value="12"/>
         </module>
         <!-- Checks the npath complexity -->
         <!-- See http://checkstyle.sourceforge.net/config_metrics.html#NPathComplexity -->
         <module name="NPathComplexity">
+            <property name="severity" value="warning"/>
             <property name="max" value="200"/>
         </module>
         <!-- This check calculates the Non Commenting Source Statements (NCSS) metric for java source files and methods. -->
         <!-- See http://checkstyle.sourceforge.net/config_metrics.html#JavaNCSS -->
         <module name="JavaNCSS">
+            <property name="severity" value="warning"/>
             <property name="methodMaximum" value="100"/>
         </module>
 

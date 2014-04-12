@@ -20,11 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.JavaHeapSize;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,32 +89,7 @@ public final class GameStarter {
         try {
             final Process p = pb.start();
 
-            gameThread = new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        try (BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.defaultCharset()))) {
-                            String line;
-                            do {
-                                line = r.readLine();
-                                logger.trace("Game output: {}", line);
-                            } while (!Thread.currentThread().isInterrupted() && (line != null));
-                        }
-                        if (Thread.currentThread().isInterrupted()) {
-                            logger.debug("Game thread interrupted.");
-                            return;
-                        }
-                        int exitValue = -1;
-                        try {
-                            exitValue = p.waitFor();
-                        } catch (InterruptedException e) {
-                            logger.error("The game thread was interrupted!", e);
-                        }
-                        logger.debug("Game closed with the exit value '{}'.", exitValue);
-                    } catch (IOException e) {
-                        logger.error("Could not read game output!", e);
-                    }
-                }
-            });
+            gameThread = new Thread(new GameRunner(p));
             gameThread.setName("game" + gameVersion.getBuildNumber());
             gameThread.start();
 

@@ -90,6 +90,13 @@ public final class GameDownloader {
         }
     }
 
+    public void deleteSilentAfterCancel() {
+        final boolean deleted = downloadZipFile.delete();
+        if (!deleted) {
+            logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile);
+        }
+    }
+
     public boolean updateAfterDownload() {
         return gameVersions.updateGameVersionsAfterInstallation(gameDirectory);
     }

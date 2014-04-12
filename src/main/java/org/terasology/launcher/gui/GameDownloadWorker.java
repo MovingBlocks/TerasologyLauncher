@@ -81,6 +81,7 @@ final class GameDownloadWorker extends SwingWorker<Void, Void> implements Progre
                     successfulLoadVersion = gameDownloader.updateAfterDownload();
                 }
             } else {
+                gameDownloader.deleteSilentAfterCancel();
                 logger.trace("GameDownloadWorker is cancelled");
             }
         } catch (DownloadException | RuntimeException e) {
