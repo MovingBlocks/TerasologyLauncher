@@ -371,7 +371,7 @@
         <!-- See http://checkstyle.sourceforge.net/config_metrics.html#ClassDataAbstractionCoupling -->
         <module name="ClassDataAbstractionCoupling">
             <property name="severity" value="warning"/>
-            <property name="max" value="10"/>
+            <property name="max" value="12"/>
         </module>
         <!-- The number of other classes a given class relies on. -->
         <!-- See http://checkstyle.sourceforge.net/config_metrics.html#ClassFanOutComplexity -->

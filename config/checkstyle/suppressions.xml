@@ -7,9 +7,10 @@
     <suppress checks="MethodName" files="Ole32.java"/>
     <suppress checks="MethodName" files="Shell32.java"/>
     <suppress checks="ClassDataAbstractionCoupling" files="LauncherFrame.java"/>
-    <suppress checks="ClassDataAbstractionCoupling" files="SettingsMenu.java"/>
     <suppress checks="CyclomaticComplexity" files="LauncherFrame.java"/>
     <suppress checks="CyclomaticComplexity" files="SettingsMenu.java"/>
     <suppress checks="NPathComplexity" files="LauncherFrame.java"/>
     <suppress checks="NPathComplexity" files="SettingsMenu.java"/>
+    <suppress checks="MethodLength" files="LauncherFrame.java"/>
+    <suppress checks="JavaNCSS" files="LauncherFrame.java"/>
 </suppressions>
