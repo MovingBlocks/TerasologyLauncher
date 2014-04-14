@@ -19,6 +19,7 @@ package org.terasology.launcher.game;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
+import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
@@ -28,6 +29,7 @@ import org.terasology.launcher.util.ProgressListener;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -364,14 +366,16 @@ public final class TerasologyGameVersions {
             if ((cachedGameVersion != null) && (cachedGameVersion.getChangeLog() != null)) {
                 gameVersion.setChangeLog(cachedGameVersion.getChangeLog());
             } else if (!job.isOnlyInstalled()) {
-                List<String> changeLog = null;
                 try {
-                    changeLog = DownloadUtils.loadChangeLogJenkins(job.name(), buildNumber);
+                    final List<String> changeLog = DownloadUtils.loadChangeLogJenkins(job.name(), buildNumber);
+                    if (changeLog != null) {
+                        if (changeLog.isEmpty()) {
+                            changeLog.add(BundleUtils.getLabel("message_noChangeLog"));
+                        }
+                        gameVersion.setChangeLog(Collections.unmodifiableList(changeLog));
+                    }
                 } catch (DownloadException e) {
                     logger.debug("Load change log failed. '{}' '{}'", job, buildNumber, e);
-                }
-                if ((changeLog != null) && !changeLog.isEmpty()) {
-                    gameVersion.setChangeLog(Collections.unmodifiableList(changeLog));
                 }
             }
         }
@@ -388,7 +392,12 @@ public final class TerasologyGameVersions {
                     urlVersionInfo = DownloadUtils.createFileDownloadUrlJenkins(job.name(), buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_VERSION_INFO);
                     gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
                 } catch (IOException e) {
-                    logger.debug("Load game version info failed. '{}' '{}' '{}'", job, buildNumber, urlVersionInfo, e);
+                    if (e instanceof FileNotFoundException) {
+                        logger.debug("Load game version info failed. '{}' '{}' '{}'", job, buildNumber, urlVersionInfo);
+                        gameVersionInfo = TerasologyGameVersionInfo.getEmptyGameVersionInfo();
+                    } else {
+                        logger.info("Load game version info failed. '{}' '{}' '{}'", job, buildNumber, urlVersionInfo, e);
+                    }
                 }
                 gameVersion.setGameVersionInfo(gameVersionInfo);
             }
