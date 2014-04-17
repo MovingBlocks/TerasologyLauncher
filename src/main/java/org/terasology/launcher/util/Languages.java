@@ -34,19 +34,22 @@ public final class Languages {
 
     static final Locale SPANISH = new Locale("es");
     static final Locale RUSSIAN = new Locale("ru");
+	static final Locale POLISH = new Locale("pl");
 
     static {
-        final List<Locale> supportedLocales = new ArrayList<>(4);
+        final List<Locale> supportedLocales = new ArrayList<>(5);
         supportedLocales.add(Locale.GERMAN);
         supportedLocales.add(Locale.ENGLISH);
         supportedLocales.add(SPANISH);
         supportedLocales.add(RUSSIAN);
+		supportedLocales.add(POLISH);
 
         final Map<Locale, String> settingsLabelKey = new HashMap<>();
         settingsLabelKey.put(Locale.GERMAN, "settings_language_de");
         settingsLabelKey.put(Locale.ENGLISH, "settings_language_en");
         settingsLabelKey.put(SPANISH, "settings_language_es");
         settingsLabelKey.put(RUSSIAN, "settings_language_ru");
+		settingsLabelKey.put(POLISH, "settings_language_pl");
 
         SUPPORTED_LOCALES = Collections.unmodifiableList(supportedLocales);
         SETTINGS_LABEL_KEYS = Collections.unmodifiableMap(settingsLabelKey);
