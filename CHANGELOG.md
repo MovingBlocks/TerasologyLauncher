@@ -2,6 +2,7 @@ Terasology Launcher - ChangeLog
 ===============================
 
 ## x.y.z (unreleased)
+* Translation into Polish
 
 ## 1.3.1 (2014-03-25)
 * Allow all memory (heap size) values (512 MB - 16 GB)

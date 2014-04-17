@@ -56,12 +56,12 @@ public final class TestLanguages {
         assertSame(Languages.SPANISH, Languages.getCurrentLocale());
     }
 
-	@Test
+    @Test
     public void testUpdateWithPolish() {
         Languages.update(Languages.POLISH);
         assertSame(Languages.POLISH, Languages.getCurrentLocale());
     }
-	
+
     @Test
     public void testUpdateWithRussian() {
         Languages.update(Languages.RUSSIAN);
@@ -106,12 +106,12 @@ public final class TestLanguages {
         assertSame(Languages.SPANISH, Languages.getCurrentLocale());
     }
 
-	@Test
+    @Test
     public void testInitWithPolish() {
         Languages.init(Languages.POLISH.toString());
         assertSame(Languages.POLISH, Languages.getCurrentLocale());
-	}
-	
+    }
+
     @Test
     public void testInitWithRussian() {
         Languages.init(Languages.RUSSIAN.toString());
