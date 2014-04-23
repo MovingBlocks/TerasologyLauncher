@@ -1,8 +1,15 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## x.y.z (unreleased)
+## 1.4.0 (unreleased)
 * Translation into Polish
+* Fallback for missing language translations
+* New setting "Save downloaded files" and new "download" directory
+* Better handling for failed or change-less builds
+* Internal changes
+    * Restructure and refactor code
+    * More and better logging
+    * Some small bug fixes
 
 ## 1.3.1 (2014-03-25)
 * Allow all memory (heap size) values (512 MB - 16 GB)
