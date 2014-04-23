@@ -32,24 +32,24 @@ public final class Languages {
     public static final List<Locale> SUPPORTED_LOCALES;
     public static final Map<Locale, String> SETTINGS_LABEL_KEYS;
 
-    static final Locale SPANISH = new Locale("es");
-    static final Locale POLISH = new Locale("pl");
-    static final Locale RUSSIAN = new Locale("ru");
-
     static {
-        final List<Locale> supportedLocales = new ArrayList<>(5);
+        final Locale spanish = new Locale("es");
+        final Locale polish = new Locale("pl");
+        final Locale russian = new Locale("ru");
+
+        final List<Locale> supportedLocales = new ArrayList<>();
         supportedLocales.add(Locale.GERMAN);
         supportedLocales.add(Locale.ENGLISH);
-        supportedLocales.add(SPANISH);
-        supportedLocales.add(POLISH);
-        supportedLocales.add(RUSSIAN);
+        supportedLocales.add(spanish);
+        supportedLocales.add(polish);
+        supportedLocales.add(russian);
 
         final Map<Locale, String> settingsLabelKey = new HashMap<>();
         settingsLabelKey.put(Locale.GERMAN, "settings_language_de");
         settingsLabelKey.put(Locale.ENGLISH, "settings_language_en");
-        settingsLabelKey.put(SPANISH, "settings_language_es");
-        settingsLabelKey.put(POLISH, "settings_language_pl");
-        settingsLabelKey.put(RUSSIAN, "settings_language_ru");
+        settingsLabelKey.put(spanish, "settings_language_es");
+        settingsLabelKey.put(polish, "settings_language_pl");
+        settingsLabelKey.put(russian, "settings_language_ru");
 
         SUPPORTED_LOCALES = Collections.unmodifiableList(supportedLocales);
         SETTINGS_LABEL_KEYS = Collections.unmodifiableMap(settingsLabelKey);
