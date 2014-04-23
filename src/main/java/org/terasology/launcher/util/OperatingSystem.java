@@ -16,6 +16,8 @@
 
 package org.terasology.launcher.util;
 
+import java.util.Locale;
+
 public enum OperatingSystem {
 
     UNIX("Unix"),
@@ -35,7 +37,7 @@ public enum OperatingSystem {
     private final String identifier;
 
     private OperatingSystem(String system) {
-        identifier = system.toLowerCase();
+        identifier = system.toLowerCase(Locale.ENGLISH);
     }
 
     public boolean isUnix() {
@@ -55,7 +57,7 @@ public enum OperatingSystem {
      */
     public static OperatingSystem getOS() {
         OperatingSystem best = UNKNOWN;
-        final String os = System.getProperty(PROPERTY_OS_NAME).toLowerCase();
+        final String os = System.getProperty(PROPERTY_OS_NAME).toLowerCase(Locale.ENGLISH);
         for (OperatingSystem system : values()) {
             if (os.contains(system.identifier) && (system.identifier.length() > best.identifier.length())) {
                 best = system;

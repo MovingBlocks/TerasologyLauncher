@@ -113,7 +113,7 @@ public final class TerasologyLauncherVersionInfo {
         toString = toStringBuilder.toString();
     }
 
-    public static TerasologyLauncherVersionInfo getInstance() {
+    public static synchronized TerasologyLauncherVersionInfo getInstance() {
         if (instance == null) {
             instance = new TerasologyLauncherVersionInfo(null);
         }

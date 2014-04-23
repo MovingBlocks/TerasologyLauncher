@@ -94,13 +94,15 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private GameDownloadWorker gameDownloadWorker;
 
     private final File launcherDirectory;
+    private final File downloadDirectory;
     private final File tempDirectory;
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public LauncherFrame(File launcherDirectory, File tempDirectory, LauncherSettings launcherSettings, TerasologyGameVersions gameVersions) {
+    public LauncherFrame(File launcherDirectory, File downloadDirectory, File tempDirectory, LauncherSettings launcherSettings, TerasologyGameVersions gameVersions) {
         this.launcherDirectory = launcherDirectory;
         this.tempDirectory = tempDirectory;
+        this.downloadDirectory = downloadDirectory;
         this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
 
@@ -317,7 +319,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
     private void settingsAction() {
         if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-            settingsMenu = new SettingsMenu(this, launcherDirectory, launcherSettings, gameVersions);
+            settingsMenu = new SettingsMenu(this, launcherDirectory, downloadDirectory, launcherSettings, gameVersions);
             settingsMenu.setVisible(true);
             settingsMenu.addWindowListener(new WindowAdapter() {
                 @Override
@@ -367,7 +369,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             updateGui();
         } else {
             try {
-                GameDownloader gameDownloader = new GameDownloader(tempDirectory, launcherSettings.getGameDirectory(), gameVersion, gameVersions);
+                GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isSaveDownloadedFiles(),
+                    launcherSettings.getGameDirectory(), gameVersion, gameVersions);
                 gameDownloadWorker = new GameDownloadWorker(progressBar, this, gameDownloader);
             } catch (IOException e) {
                 logger.error("Could not start game download!", e);
@@ -539,10 +542,16 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         } else {
             arguments[5] = 0;
         }
-        if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful()) {
-            arguments[6] = 1;
+        if (gameVersion.getSuccessful() != null) {
+            if (!gameVersion.getSuccessful()) {
+                // faulty
+                arguments[6] = 0;
+            } else {
+                arguments[6] = 1;
+            }
         } else {
-            arguments[6] = 0;
+            // unknown
+            arguments[6] = 2;
         }
         if ((gameVersion.getGameVersionInfo() != null)
             && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {

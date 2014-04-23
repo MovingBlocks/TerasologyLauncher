@@ -32,11 +32,8 @@ public final class GuiUtils {
         JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.WARNING_MESSAGE);
     }
 
-    public static void showErrorMessageDialog(boolean exitLauncher, Component parentComponent, String message) {
+    public static void showErrorMessageDialog(Component parentComponent, String message) {
         JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
-        if (exitLauncher) {
-            System.exit(1);
-        }
     }
 
     public static File chooseDirectory(Component parentComponent, File directory, String title) {

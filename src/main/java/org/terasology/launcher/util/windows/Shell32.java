@@ -25,9 +25,7 @@ import com.sun.jna.win32.StdCallLibrary;
 import com.sun.jna.win32.W32APIOptions;
 
 /**
- * Access to the Windows Shell32 library, for the purpose of looking up special directory paths (Windows Vista/7 only)
- *
- * @author Immortius
+ * Access to the Windows Shell32 library, for the purpose of looking up special directory paths (Windows Vista/7 only).
  */
 public interface Shell32 extends StdCallLibrary {
 

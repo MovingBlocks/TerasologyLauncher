@@ -110,6 +110,10 @@ public final class TerasologyGameVersionInfo implements Serializable {
         toString = toStringBuilder.toString();
     }
 
+    public static TerasologyGameVersionInfo getEmptyGameVersionInfo() {
+        return new TerasologyGameVersionInfo(new Properties());
+    }
+
     public static TerasologyGameVersionInfo loadFromInputStream(InputStream inStream) {
         return new TerasologyGameVersionInfo(loadPropertiesFromInputStream(inStream));
     }

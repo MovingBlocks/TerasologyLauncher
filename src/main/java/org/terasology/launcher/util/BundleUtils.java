@@ -29,6 +29,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 public final class BundleUtils {
@@ -44,15 +45,31 @@ public final class BundleUtils {
     }
 
     public static String getLabel(String key) {
-        return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        try {
+            return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        } catch (MissingResourceException e) {
+            logger.error("Missing label translation! key={}, locale={}", key, Languages.getCurrentLocale());
+            return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.DEFAULT_LOCALE).getString(key);
+        }
     }
 
     public static String getLabel(Locale locale, String key) {
-        return ResourceBundle.getBundle(LABELS_BUNDLE, locale).getString(key);
+        try {
+            return ResourceBundle.getBundle(LABELS_BUNDLE, locale).getString(key);
+        } catch (MissingResourceException e) {
+            logger.error("Missing label translation! key={}, locale={}", key, locale);
+            return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.DEFAULT_LOCALE).getString(key);
+        }
     }
 
     public static String getMessage(String key, Object... arguments) {
-        final String pattern = ResourceBundle.getBundle(MESSAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        String pattern;
+        try {
+            pattern = ResourceBundle.getBundle(MESSAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        } catch (MissingResourceException e) {
+            logger.error("Missing message translation! key={}, locale={}", key, Languages.getCurrentLocale());
+            pattern = ResourceBundle.getBundle(MESSAGE_BUNDLE, Languages.DEFAULT_LOCALE).getString(key);
+        }
         final MessageFormat messageFormat = new MessageFormat(pattern, Languages.getCurrentLocale());
         return messageFormat.format(arguments, new StringBuffer(), null).toString();
     }

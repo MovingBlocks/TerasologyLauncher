@@ -84,7 +84,7 @@ public final class LauncherUpdater {
         versionInfo = null;
         changeLog = null;
         try {
-            upstreamVersion = DownloadUtils.loadLastStableBuildNumber(jobName);
+            upstreamVersion = DownloadUtils.loadLastStableBuildNumberJenkins(jobName);
             logger.trace("Launcher upstream version: {}", upstreamVersion);
             updateAvailable = Integer.parseInt(currentVersion) < upstreamVersion;
         } catch (DownloadException e) {
@@ -95,13 +95,13 @@ public final class LauncherUpdater {
         if (updateAvailable) {
             URL urlVersionInfo = null;
             try {
-                urlVersionInfo = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
+                urlVersionInfo = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
                 versionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
             } catch (IOException e) {
                 logger.warn("The launcher version info could not be loaded! '{}' '{}'", upstreamVersion, urlVersionInfo, e);
             }
             try {
-                changeLog = DownloadUtils.loadLauncherChangeLog(jobName, upstreamVersion);
+                changeLog = DownloadUtils.loadLauncherChangeLogJenkins(jobName, upstreamVersion);
             } catch (DownloadException e) {
                 logger.warn("The launcher change log could not be loaded! '{}'", upstreamVersion, e);
             }
@@ -174,16 +174,16 @@ public final class LauncherUpdater {
         return (option == 0);
     }
 
-    public boolean update(File tempDirectory, SplashScreenWindow splash) {
+    public boolean update(File downloadDirectory, File tempDirectory, SplashScreenWindow splash) {
         try {
             logger.trace("Downloading launcher...");
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
 
             // Download launcher ZIP file
-            final URL updateURL = DownloadUtils.createFileDownloadURL(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
+            final URL updateURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
             logger.trace("Update URL: {}", updateURL);
 
-            final File downloadedZipFile = new File(tempDirectory, jobName + "_" + upstreamVersion + ".zip");
+            final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
             logger.trace("Download ZIP file: {}", downloadedZipFile);
 
             DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new SplashProgressIndicator(splash, "splash_updatingLauncher_download"));
@@ -191,7 +191,7 @@ public final class LauncherUpdater {
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 
             // Extract launcher ZIP file
-            final boolean extracted = FileUtils.extractZip(downloadedZipFile);
+            final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
             if (!extracted) {
                 throw new IOException("Could not extract ZIP file! " + downloadedZipFile);
             }
@@ -207,7 +207,7 @@ public final class LauncherUpdater {
             SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
         } catch (DownloadException | IOException | RuntimeException e) {
             logger.error("Launcher update failed! Aborting update process!", e);
-            GuiUtils.showErrorMessageDialog(false, splash, BundleUtils.getLabel("update_launcher_updateFailed"));
+            GuiUtils.showErrorMessageDialog(splash, BundleUtils.getLabel("update_launcher_updateFailed"));
             return false;
         }
         return true;

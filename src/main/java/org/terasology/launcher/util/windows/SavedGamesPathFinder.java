@@ -25,9 +25,6 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author Immortius
- */
 public final class SavedGamesPathFinder {
 
     private static final Logger logger = LoggerFactory.getLogger(SavedGamesPathFinder.class);

@@ -21,12 +21,14 @@ import org.terasology.launcher.util.windows.SavedGamesPathFinder;
 import javax.swing.JFileChooser;
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 public final class DirectoryUtils {
 
     public static final String LAUNCHER_APPLICATION_DIR_NAME = "TerasologyLauncher";
     public static final String GAME_APPLICATION_DIR_NAME = "Terasology";
     public static final String GAME_DATA_DIR_NAME = "Terasology";
+    public static final String DOWNLOAD_DIR_NAME = "download";
     public static final String TEMP_DIR_NAME = "temp";
     public static final String CACHE_DIR_NAME = "cache";
 
@@ -55,26 +57,27 @@ public final class DirectoryUtils {
      * Checks if game data is stored in the installation directory.
      */
     public static boolean containsGameData(File gameInstallationPath) {
-        if ((gameInstallationPath == null) || !gameInstallationPath.exists() || !gameInstallationPath.isDirectory()) {
-            return false;
-        }
-
-        final File[] files = gameInstallationPath.listFiles();
-        if ((files != null) && (files.length > 0)) {
-            for (File child : files) {
-                if (child.isDirectory()
-                    && (child.getName().equals("SAVED_WORLDS")
-                    || child.getName().equals("worlds")
-                    || child.getName().equals("saves")
-                    || child.getName().equals("screens")
-                    || child.getName().equals("screenshots"))
-                    && containsFiles(child)) {
-                    return true;
+        boolean containsGameData = false;
+        if ((gameInstallationPath != null) && gameInstallationPath.exists() && gameInstallationPath.isDirectory() && gameInstallationPath.canRead()) {
+            final File[] files = gameInstallationPath.listFiles();
+            if ((files != null) && (files.length > 0)) {
+                for (File child : files) {
+                    if (child.isDirectory() && isGameDataDirectoryName(child.getName()) && containsFiles(child)) {
+                        containsGameData = true;
+                        break;
+                    }
                 }
             }
         }
+        return containsGameData;
+    }
 
-        return false;
+    private static boolean isGameDataDirectoryName(String directoryName) {
+        return directoryName.equals("SAVED_WORLDS")
+            || directoryName.equals("worlds")
+            || directoryName.equals("saves")
+            || directoryName.equals("screens")
+            || directoryName.equals("screenshots");
     }
 
     public static boolean containsFiles(File directory) {
@@ -117,7 +120,7 @@ public final class DirectoryUtils {
                 //   System.getenv("HOMEDRIVE") + System.getenv("HOMEPATH")
             }
         } else if (os.isUnix()) {
-            applicationDirectory = new File(userHome, '.' + applicationName.toLowerCase() + '/');
+            applicationDirectory = new File(userHome, '.' + applicationName.toLowerCase(Locale.ENGLISH) + '/');
         } else if (os.isMac()) {
             applicationDirectory = new File(userHome, MAC_PATH + applicationName + '/');
         } else {
@@ -154,7 +157,7 @@ public final class DirectoryUtils {
 
             gameDataDirectory = new File(path, GAME_DATA_DIR_NAME + '\\');
         } else if (os.isUnix()) {
-            gameDataDirectory = new File(userHome, '.' + GAME_DATA_DIR_NAME.toLowerCase() + '/');
+            gameDataDirectory = new File(userHome, '.' + GAME_DATA_DIR_NAME.toLowerCase(Locale.ENGLISH) + '/');
         } else if (os.isMac()) {
             gameDataDirectory = new File(userHome, MAC_PATH + GAME_DATA_DIR_NAME + '/');
         } else {

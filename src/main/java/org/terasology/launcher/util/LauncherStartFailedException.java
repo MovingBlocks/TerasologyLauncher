@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.util.windows;
+package org.terasology.launcher.util;
 
-import com.sun.jna.Native;
-import com.sun.jna.Pointer;
-import com.sun.jna.win32.StdCallLibrary;
-import com.sun.jna.win32.W32APIOptions;
+public class LauncherStartFailedException extends Exception {
 
-public interface Ole32 extends StdCallLibrary {
-
-    Ole32 INSTANCE = (Ole32) Native.loadLibrary(
-        "Ole32", Ole32.class, W32APIOptions.UNICODE_OPTIONS);
-
-    void CoTaskMemFree(Pointer pv);
+    public LauncherStartFailedException() {
+    }
 }
