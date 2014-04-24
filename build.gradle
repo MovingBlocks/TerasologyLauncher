@@ -134,7 +134,14 @@ distTar.dependsOn createVersionInfoFile
 
 jar {
     // DEBUG: include all source files to verify that class files are up-to-date 
-    from sourceSets.main.java 
+    from sourceSets.main.java
+	
+	// Copying the jnlp webstart file in to the signed JAR allows JWS to 
+	// verify the correctness. The freestanding copy is still needed though.
+	into ('JNLP_INF') {
+		from 'webstart.jnlp'
+		rename 'webstart.jnlp', 'APPLICATION.JNLP'
+	}
     
     // replace development "logback.xml" with productive "logback_jar.xml"
     exclude "logback.xml"
@@ -142,10 +149,10 @@ jar {
     manifest {
         def manifestClasspath = configurations.runtime.collect { it.getName() }.join(" ")
         attributes("Main-Class": mainClassName)
-		attributes("Class-Path": manifestClasspath)
-		attributes("Implementation-Title": project.name)
-		attributes("Implementation-Version": displayVersion)
-		attributes("SplashScreen-Image": splashImage)
+        attributes("Class-Path": manifestClasspath)
+        attributes("Implementation-Title": project.name)
+        attributes("Implementation-Version": displayVersion)
+        attributes("SplashScreen-Image": splashImage)
         
         // allow everything
         attributes('Permissions': 'all-permissions')
@@ -158,21 +165,21 @@ jar {
 }
 
 
-task copyLibs(type: Sync) {
-	dependsOn jar
+task copyLibs(type: Copy) {
+    dependsOn jar
 
-	from configurations.compile			// these are the compile-time dependencies
-	from jar                            // this is the applet.jar file
-	from 'webstart'						// jnlp file, icons, etc.
+    from configurations.compile         // these are the compile-time dependencies
+    from jar                            // this is the applet.jar file
+    from 'webstart.jnlp'                // jnlp file
+    from 'icons'                        // splash screen, etc
 	
-	into "$buildDir/webstart"
-	
-	eachFile { println "Copying " + it.file }
+    into "$buildDir/webstart"
+    
+    eachFile { println "Copying " + it.file }
 }
 
-// At the end of the applet distribution sign the jar files so they can get expanded rights in a browser
-task signJars {
-	dependsOn copyLibs
+// Sign the jar files so they can get full rights in a browser
+copyLibs.doLast {
 
     if (!file('certum.jks').exists()) {
         throw new GradleException("Copy the \"certum.jks\" keystore file in \"$projectDir\" first.");
@@ -184,7 +191,7 @@ task signJars {
         
     tree.each {
         if (!IsSigned.isSigned(it, null)) {
-			logger.lifecycle("Signing $it");
+            logger.lifecycle("Signing $it");
             sign(it);
         } else {
             logger.lifecycle("File $it already signed");
@@ -198,9 +205,9 @@ def sign(File it) {
 
 
 task webstart {
-	description "Prepare WebStart launcher files"
-	
-	dependsOn signJars
+    description "Prepare WebStart launcher files"
+    
+    dependsOn copyLibs
 }
 
 task distChangelog(type: Copy) {

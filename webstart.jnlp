@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="1.0+">
+<jnlp spec="1.0+" codebase="." href="webstart.jnlp">
     <information>
         <title>Terasology Launcher</title>
         <vendor>MovingBlocks</vendor>
@@ -9,11 +9,11 @@
 		<description kind="short">Terasology Launcher (SHORT)</description>
 		<description kind="tooltip">Terasology Launcher (TOOLTIP)</description>
 		
-		<icon href="gooey_sweet_128.png" width="128" height="128"/>
-		<icon href="gooey_sweet_64.png"   width="64"  height="64"/>
-		<icon href="gooey_sweet_32.png"   width="32"  height="32"/>
-		<icon href="gooey_sweet_16.png"   width="16"  height="16"/>
-		<icon kind="splash" href="bluegoo_128.png"/>
+		<icon href="icons/gooey_sweet_128.png" width="128" height="128"/>
+		<icon href="icons/gooey_sweet_64.png"   width="64"  height="64"/>
+		<icon href="icons/gooey_sweet_32.png"   width="32"  height="32"/>
+		<icon href="icons/gooey_sweet_16.png"   width="16"  height="16"/>
+		<icon kind="splash" href="icons/bluegoo_128.png"/>
 		
     </information>
     <resources>
