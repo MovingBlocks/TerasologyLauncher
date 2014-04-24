@@ -39,6 +39,7 @@ wrapper {
 }
 
 import org.apache.tools.ant.filters.FixCrLfFilter;
+import org.apache.tools.ant.taskdefs.condition.IsSigned;
 import java.text.SimpleDateFormat;
 
 def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
@@ -140,9 +141,11 @@ jar {
     rename('logback_jar.xml', 'logback.xml')
     manifest {
         def manifestClasspath = configurations.runtime.collect { it.getName() }.join(" ")
-        attributes("Main-Class": mainClassName, "Class-Path": manifestClasspath,
-                "Implementation-Title": project.name, "Implementation-Version": displayVersion,
-                "SplashScreen-Image": splashImage)
+        attributes("Main-Class": mainClassName)
+		attributes("Class-Path": manifestClasspath)
+		attributes("Implementation-Title": project.name)
+		attributes("Implementation-Version": displayVersion)
+		attributes("SplashScreen-Image": splashImage)
         
         // allow everything
         attributes('Permissions': 'all-permissions')
@@ -152,6 +155,52 @@ jar {
         attributes('Caller-Allowable-Codebase': '*')
         attributes('Trusted-Only': 'false')
     }
+}
+
+
+task copyLibs(type: Sync) {
+	dependsOn jar
+
+	from configurations.compile			// these are the compile-time dependencies
+	from jar                            // this is the applet.jar file
+	from 'webstart'						// jnlp file, icons, etc.
+	
+	into "$buildDir/webstart"
+	
+	eachFile { println "Copying " + it.file }
+}
+
+// At the end of the applet distribution sign the jar files so they can get expanded rights in a browser
+task signJars {
+	dependsOn copyLibs
+
+    if (!file('certum.jks').exists()) {
+        throw new GradleException("Copy the \"certum.jks\" keystore file in \"$projectDir\" first.");
+    }
+
+    FileTree tree = fileTree(dir: "$buildDir/webstart")
+    
+    tree.include '*.jar'
+        
+    tree.each {
+        if (!IsSigned.isSigned(it, null)) {
+			logger.lifecycle("Signing $it");
+            sign(it);
+        } else {
+            logger.lifecycle("File $it already signed");
+        }
+    }    
+}
+
+def sign(File it) {
+    ant.signjar(jar: it, keystore: "certum.jks", alias: 'cervator', storepass: 'Terasology', tsaurl: 'http://time.certum.pl/')
+}
+
+
+task webstart {
+	description "Prepare WebStart launcher files"
+	
+	dependsOn signJars
 }
 
 task distChangelog(type: Copy) {

@@ -3,10 +3,23 @@
     <information>
         <title>Terasology Launcher</title>
         <vendor>MovingBlocks</vendor>
+		<homepage href="https://terasology.org"/>
+		
+		<description>Terasology Launcher Desc</description>
+		<description kind="short">Terasology Launcher (SHORT)</description>
+		<description kind="tooltip">Terasology Launcher (TOOLTIP)</description>
+		
+		<icon href="gooey_sweet_128.png" width="128" height="128"/>
+		<icon href="gooey_sweet_64.png"   width="64"  height="64"/>
+		<icon href="gooey_sweet_32.png"   width="32"  height="32"/>
+		<icon href="gooey_sweet_16.png"   width="16"  height="16"/>
+		<icon kind="splash" href="bluegoo_128.png"/>
+		
     </information>
     <resources>
-        <!-- Application Resources -->
-        <j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se"/>
+		<!-- Acceptable JVMs in preferred order, best first -->
+		<java version="1.8+" href="http://java.sun.com/products/autodl/j2se" java-vm-args="-ea" initial-heap-size="128m" max-heap-size="1024m"/>
+		<java version="1.7+" href="http://java.sun.com/products/autodl/j2se" java-vm-args="-ea" initial-heap-size="128m" max-heap-size="1024m"/>
 		
         <jar href="TerasologyLauncher.jar" main="true" />
         
@@ -18,13 +31,15 @@
 
     </resources>
     <application-desc
-        name="Terasology Launcher"
+        name="Terasology Launcher (APPNAME)"
         main-class="org.terasology.launcher.TerasologyLauncher">
     </application-desc>
 	
-    <update check="background"/>
+	<!--Do not set the update flag to "background", because this make JWS cache the jars files. Consequently updates are not recognized properly-->
+    <!--update check="background"/-->
 	 
 	<security>
 		<all-permissions/>
+		<!-- all-permissions requires the jars be signed -->
     </security>  
 </jnlp>
