@@ -132,6 +132,9 @@ distZip.dependsOn createVersionInfoFile
 distTar.dependsOn createVersionInfoFile
 
 jar {
+    // DEBUG: include all source files to verify that class files are up-to-date 
+    from sourceSets.main.java 
+    
     // replace development "logback.xml" with productive "logback_jar.xml"
     exclude "logback.xml"
     rename('logback_jar.xml', 'logback.xml')
@@ -140,6 +143,14 @@ jar {
         attributes("Main-Class": mainClassName, "Class-Path": manifestClasspath,
                 "Implementation-Title": project.name, "Implementation-Version": displayVersion,
                 "SplashScreen-Image": splashImage)
+        
+        // allow everything
+        attributes('Permissions': 'all-permissions')
+        attributes('Codebase': '*')
+        attributes('Application-Name': project.name)
+        attributes('Application-Library-Allowable-Codebase': '*')
+        attributes('Caller-Allowable-Codebase': '*')
+        attributes('Trusted-Only': 'false')
     }
 }
 

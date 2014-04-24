@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+">
+    <information>
+        <title>Terasology Launcher</title>
+        <vendor>MovingBlocks</vendor>
+    </information>
+    <resources>
+        <!-- Application Resources -->
+        <j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se"/>
+		
+        <jar href="TerasologyLauncher.jar" main="true" />
+        
+		<jar href="platform-3.5.2.jar" />
+        <jar href="jna-3.5.2.jar" />
+        <jar href="logback-core-1.1.1.jar" />
+		<jar href="logback-classic-1.1.1.jar" />
+		<jar href="slf4j-api-1.7.6.jar" />
+
+    </resources>
+    <application-desc
+        name="Terasology Launcher"
+        main-class="org.terasology.launcher.TerasologyLauncher">
+    </application-desc>
+	
+    <update check="background"/>
+	 
+	<security>
+		<all-permissions/>
+    </security>  
+</jnlp>
