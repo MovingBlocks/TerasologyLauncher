@@ -47,7 +47,6 @@ public final class LauncherSettings {
     private static final GameJob JOB_DEFAULT = GameJob.TerasologyStable;
     private static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     private static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
-    private static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
     private static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
     private static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
 
@@ -56,7 +55,6 @@ public final class LauncherSettings {
     private static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
     private static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
     private static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
-    private static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
     private static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
     private static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
     private static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
@@ -107,7 +105,6 @@ public final class LauncherSettings {
         initBuildVersion();
         initMaxHeapSize();
         initInitialHeapSize();
-        initSearchForLauncherUpdates();
         initCloseLauncherAfterGameStart();
         initSaveDownloadedFiles();
         initGameDirectory();
@@ -179,15 +176,6 @@ public final class LauncherSettings {
             }
         }
         properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialJavaHeapSize.name());
-    }
-
-    private void initSearchForLauncherUpdates() {
-        final String searchForLauncherUpdatesStr = properties.getProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES);
-        boolean searchForLauncherUpdates = SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT;
-        if (searchForLauncherUpdatesStr != null) {
-            searchForLauncherUpdates = Boolean.valueOf(searchForLauncherUpdatesStr);
-        }
-        properties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, Boolean.toString(searchForLauncherUpdates));
     }
 
     private void initCloseLauncherAfterGameStart() {
@@ -276,14 +264,6 @@ public final class LauncherSettings {
 
     public synchronized JavaHeapSize getInitialHeapSize() {
         return JavaHeapSize.valueOf(properties.getProperty(PROPERTY_INITIAL_HEAP_SIZE));
-    }
-
-    public synchronized void setSearchForLauncherUpdates(boolean searchForLauncherUpdates) {
-        properties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, Boolean.toString(searchForLauncherUpdates));
-    }
-
-    public synchronized boolean isSearchForLauncherUpdates() {
-        return Boolean.valueOf(properties.getProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES));
     }
 
     public synchronized void setCloseLauncherAfterGameStart(boolean closeLauncherAfterGameStart) {

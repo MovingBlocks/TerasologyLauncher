@@ -75,7 +75,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
     private JComboBox<JavaHeapSize> maxHeapSizeBox;
     private JComboBox<JavaHeapSize> initialHeapSizeBox;
     private JComboBox<String> languageBox;
-    private JCheckBox searchForLauncherUpdatesBox;
     private JCheckBox closeLauncherAfterGameStartBox;
     private JCheckBox saveDownloadedFilesBox;
 
@@ -102,7 +101,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
         populateJob();
         populateHeapSize();
         populateLanguage();
-        populateSearchForLauncherUpdates();
         populateCloseLauncherAfterGameStart();
         populateSaveDownloadedFiles();
         gameDirectory = launcherSettings.getGameDirectory();
@@ -317,13 +315,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
         languageBox = new JComboBox<>();
         languageBox.setFont(settingsFont);
 
-        final JLabel searchForLauncherUpdatesLabel = new JLabel();
-        searchForLauncherUpdatesLabel.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
-        searchForLauncherUpdatesLabel.setFont(settingsFont);
-
-        searchForLauncherUpdatesBox = new JCheckBox();
-        searchForLauncherUpdatesBox.setFont(settingsFont);
-
         final JLabel closeLauncherAfterGameStartLabel = new JLabel();
         closeLauncherAfterGameStartLabel.setText(BundleUtils.getLabel("settings_launcher_closeLauncherAfterGameStart"));
         closeLauncherAfterGameStartLabel.setFont(settingsFont);
@@ -379,7 +370,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     .addContainerGap()
                     .addGroup(launcherTabLayout.createParallelGroup()
                         .addComponent(languageLabel)
-                        .addComponent(searchForLauncherUpdatesLabel)
                         .addComponent(closeLauncherAfterGameStartLabel)
                         .addComponent(launcherDirectoryLabel)
                         .addComponent(saveDownloadedFilesLabel)
@@ -387,7 +377,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(launcherTabLayout.createParallelGroup()
                         .addComponent(languageBox)
-                        .addComponent(searchForLauncherUpdatesBox)
                         .addComponent(closeLauncherAfterGameStartBox)
                         .addComponent(launcherDirectoryPanel)
                         .addComponent(saveDownloadedFilesBox)
@@ -402,11 +391,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
                     .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(languageLabel)
                         .addComponent(languageBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                            GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(searchForLauncherUpdatesLabel)
-                        .addComponent(searchForLauncherUpdatesBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                             GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addGroup(launcherTabLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
@@ -517,10 +501,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
                 languageBox.setSelectedItem(item);
             }
         }
-    }
-
-    private void populateSearchForLauncherUpdates() {
-        searchForLauncherUpdatesBox.setSelected(launcherSettings.isSearchForLauncherUpdates());
     }
 
     private void populateCloseLauncherAfterGameStart() {
@@ -660,9 +640,6 @@ final class SettingsMenu extends JDialog implements ActionListener {
                 // save languageBox settings
                 Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectedIndex()));
                 launcherSettings.setLocale(Languages.getCurrentLocale());
-
-                // save searchForLauncherUpdates
-                launcherSettings.setSearchForLauncherUpdates(searchForLauncherUpdatesBox.isSelected());
 
                 // save closeLauncherAfterGameStart
                 launcherSettings.setCloseLauncherAfterGameStart(closeLauncherAfterGameStartBox.isSelected());

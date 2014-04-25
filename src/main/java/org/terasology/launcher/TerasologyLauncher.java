@@ -24,7 +24,6 @@ import org.terasology.launcher.gui.GuiUtils;
 import org.terasology.launcher.gui.LauncherFrame;
 import org.terasology.launcher.gui.SplashProgressIndicator;
 import org.terasology.launcher.gui.SplashScreenWindow;
-import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -36,7 +35,6 @@ import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 public final class TerasologyLauncher {
 
@@ -155,39 +153,6 @@ public final class TerasologyLauncher {
         }
         logger.debug("Launcher Settings: {}", launcherSettings);
         return launcherSettings;
-    }
-
-    private static boolean checkForLauncherUpdates(SplashScreenWindow splash, File downloadDirectory, File tempDirectory, boolean saveDownloadedFiles) {
-        logger.trace("Check for launcher updates...");
-        boolean selfUpdaterStarted = false;
-        splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
-        final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
-        if (updater.updateAvailable()) {
-            logger.trace("Launcher update available!");
-            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
-            boolean foundLauncherInstallationDirectory = false;
-            try {
-                updater.detectAndCheckLauncherInstallationDirectory();
-                foundLauncherInstallationDirectory = true;
-            } catch (URISyntaxException | IOException e) {
-                logger.error("The launcher installation directory can not be detected or used!", e);
-                GuiUtils.showErrorMessageDialog(splash, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
-                // Run launcher without an update. Don't throw a LauncherStartFailedException.
-            }
-            if (foundLauncherInstallationDirectory) {
-                final boolean update = updater.showUpdateDialog(splash);
-                if (update) {
-                    splash.setVisible(true);
-                    if (saveDownloadedFiles) {
-                        selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory, splash);
-                    } else {
-                        selfUpdaterStarted = updater.update(tempDirectory, tempDirectory, splash);
-                    }
-                }
-            }
-            splash.setVisible(true);
-        }
-        return selfUpdaterStarted;
     }
 
     private static File getGameDirectory(SplashScreenWindow splash, OperatingSystem os, File settingsGameDirectory) throws LauncherStartFailedException {
@@ -314,14 +279,6 @@ public final class TerasologyLauncher {
             final File tempDirectory = getTempDirectory(splash, launcherDirectory);
 
             final LauncherSettings launcherSettings = getLauncherSettings(splash, launcherDirectory);
-
-            if (launcherSettings.isSearchForLauncherUpdates()) {
-                final boolean selfUpdaterStarted = checkForLauncherUpdates(splash, downloadDirectory, tempDirectory, launcherSettings.isSaveDownloadedFiles());
-                if (selfUpdaterStarted) {
-                    logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
-                    System.exit(0);
-                }
-            }
 
             final File gameDirectory = getGameDirectory(splash, os, launcherSettings.getGameDirectory());
             final File gameDataDirectory = getGameDataDirectory(splash, os, launcherSettings.getGameDataDirectory());
