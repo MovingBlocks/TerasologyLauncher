@@ -49,7 +49,12 @@ public final class BundleUtils {
             return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.getCurrentLocale()).getString(key);
         } catch (MissingResourceException e) {
             logger.error("Missing label translation! key={}, locale={}", key, Languages.getCurrentLocale());
-            return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.DEFAULT_LOCALE).getString(key);
+            try {
+                return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.DEFAULT_LOCALE).getString(key);
+            } catch (MissingResourceException ee) {
+                logger.warn("Missing label definition! key={}", key);
+                return "$" + key + "$";
+            }
         }
     }
 
