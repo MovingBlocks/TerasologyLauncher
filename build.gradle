@@ -134,7 +134,7 @@ distTar.dependsOn createVersionInfoFile
 
 jar {
     // DEBUG: include all source files to verify that class files are up-to-date 
-    from sourceSets.main.java
+//    from sourceSets.main.java
 	
 	// Copying the jnlp webstart file in to the signed JAR allows JWS to 
 	// verify the correctness. The freestanding copy is still needed though.

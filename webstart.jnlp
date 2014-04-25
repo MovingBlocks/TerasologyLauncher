@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="1.0+" codebase="." href="webstart.jnlp">
+<jnlp spec="6.0+" codebase="." href="webstart.jnlp">
     <information>
         <title>Terasology Launcher</title>
         <vendor>MovingBlocks</vendor>
@@ -35,8 +35,9 @@
         main-class="org.terasology.launcher.TerasologyLauncher">
     </application-desc>
 	
-	<!--Do not set the update flag to "background", because this make JWS cache the jars files. Consequently updates are not recognized properly-->
-    <!--update check="background"/-->
+    <!-- check: always check for updates before launching the application -->
+	<!-- policy: ask the user if he/she wants to download and run the updated version, or launch the cached version -->
+	<update check="always" policy="prompt-update"> 
 	 
 	<security>
 		<all-permissions/>
