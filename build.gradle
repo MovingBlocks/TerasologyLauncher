@@ -25,7 +25,6 @@ apply plugin: 'java'
 apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
-apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
@@ -81,8 +80,6 @@ dependencies {
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
 sourceCompatibility = 1.7
 
-mainClassName = "org.terasology.launcher.TerasologyLauncher"
-
 checkstyle {
     ignoreFailures = true
     configProperties.samedir = checkstyle.configFile.parentFile
@@ -129,8 +126,6 @@ task createVersionInfoFile {
 }
 createVersionInfoFile.dependsOn processResources
 jar.dependsOn createVersionInfoFile
-distZip.dependsOn createVersionInfoFile
-distTar.dependsOn createVersionInfoFile
 
 jar {
     // DEBUG: include all source files to verify that class files are up-to-date 
@@ -148,7 +143,7 @@ jar {
     rename('logback_jar.xml', 'logback.xml')
     manifest {
         def manifestClasspath = configurations.runtime.collect { it.getName() }.join(" ")
-        attributes("Main-Class": mainClassName)
+        attributes("Main-Class": "org.terasology.launcher.TerasologyLauncher")
         attributes("Class-Path": manifestClasspath)
         attributes("Implementation-Title": project.name)
         attributes("Implementation-Version": displayVersion)
@@ -166,6 +161,8 @@ jar {
 
 
 task copyLibs(type: Copy) {
+	description = "Copy all webstart-related files to the webstart folder (and sign the jars)"
+	
     dependsOn jar
 
     from configurations.compile         // these are the compile-time dependencies
@@ -178,6 +175,7 @@ task copyLibs(type: Copy) {
     eachFile { println "Copying " + it.file }
 }
 
+// I wanted the signing to be a task, but it wouldn't run after copyLibs :-(
 // Sign the jar files so they can get full rights in a browser
 copyLibs.doLast {
 
@@ -203,13 +201,6 @@ def sign(File it) {
     ant.signjar(jar: it, keystore: "certum.jks", alias: 'cervator', storepass: 'Terasology', tsaurl: 'http://time.certum.pl/')
 }
 
-
-task webstart {
-    description "Prepare WebStart launcher files"
-    
-    dependsOn copyLibs
-}
-
 task distChangelog(type: Copy) {
     description 'Distribute CHANGELOG.md'
     from('CHANGELOG.md')
@@ -218,55 +209,42 @@ task distChangelog(type: Copy) {
     filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
 }
 
-task createRelease {
-    description 'Create a release'
-    dependsOn build
-    dependsOn distZip
+task copyExtra(type: Copy) {
+	filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+	
+	from('README.md') {
+		rename('README.md', 'README.txt')
+	}
+	
+	from('CHANGELOG.md') {
+		rename('CHANGELOG.md', 'CHANGELOG.txt')
+	}
+	
+	from('CONTRIBUTING.md') {
+		rename('CONTRIBUTING.md', 'CONTRIBUTING.txt')
+	}
+	
+	from('LICENSE')
+	from('NOTICE')
+	
+	from('src/template/VERSION.md') {
+		expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH), 
+				dateTime: startDateTimeString, displayVersion: displayVersion)
+		rename('VERSION.md', 'VERSION.txt')
+	}
+	
+	into "$buildDir/webstart/"
+}
+
+task webstart {
+    description "Prepare WebStart launcher files"
+    
+    dependsOn copyLibs
+	dependsOn copyExtra
     dependsOn distChangelog
     doLast {
         println 'Created release: ' + displayVersion
     }
-}
-
-applicationDistribution.from('README.md')
-
-applicationDistribution.from('README.md') {
-    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-    rename('README.md', 'README.txt')
-}
-
-applicationDistribution.from('CHANGELOG.md')
-
-applicationDistribution.from('CHANGELOG.md') {
-    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-    rename('CHANGELOG.md', 'CHANGELOG.txt')
-}
-
-applicationDistribution.from('CONTRIBUTING.md')
-
-applicationDistribution.from('CONTRIBUTING.md') {
-    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-    rename('CONTRIBUTING.md', 'CONTRIBUTING.txt')
-}
-
-applicationDistribution.from('LICENSE') {
-    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-}
-
-applicationDistribution.from('NOTICE') {
-    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-}
-
-applicationDistribution.from('src/template/VERSION.md') {
-    expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH),
-            dateTime: startDateTimeString, displayVersion: displayVersion)
-}
-
-applicationDistribution.from('src/template/VERSION.md') {
-    expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH),
-            dateTime: startDateTimeString, displayVersion: displayVersion)
-    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-    rename('VERSION.md', 'VERSION.txt')
 }
 
 // Setup IntelliJ-IDEA
