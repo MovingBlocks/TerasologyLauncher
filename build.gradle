@@ -168,11 +168,14 @@ task copyLibs(type: Copy) {
     from configurations.compile         // these are the compile-time dependencies
     from jar                            // this is the applet.jar file
     from 'webstart.jnlp'                // jnlp file
-    from 'icons'                        // splash screen, etc
+    
+	into ('icons') {                    // splash screen, etc
+	    from 'icons'
+    }
 	
     into "$buildDir/webstart"
     
-    eachFile { println "Copying " + it.file }
+    eachFile { println "Copying " + it.file.getName() }
 }
 
 // I wanted the signing to be a task, but it wouldn't run after copyLibs :-(

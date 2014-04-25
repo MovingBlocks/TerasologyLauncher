@@ -45,6 +45,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle;
 
+import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Font;
@@ -453,13 +454,13 @@ final class SettingsMenu extends JDialog implements ActionListener {
 
     
     private JPanel createChangelogSettingsTab(Font settingsFont) {
-        final JPanel tab = new JPanel();
+        final JPanel tab = new JPanel(new BorderLayout());
         tab.setFont(settingsFont);
 
         final JTextArea changeLogArea = new JTextArea();
         changeLogArea.setText(getChangeLog());
         changeLogArea.setEditable(false);
-        changeLogArea.setRows(15);
+        changeLogArea.setCaretPosition(0);
         final JScrollPane changeLogPane = new JScrollPane(changeLogArea);
 
         tab.add(changeLogPane);
