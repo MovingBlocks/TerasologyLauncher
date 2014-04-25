@@ -40,8 +40,11 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.LayoutStyle;
+
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Font;
@@ -49,6 +52,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 
@@ -115,6 +122,7 @@ final class SettingsMenu extends JDialog implements ActionListener {
         final JTabbedPane mainSettings = new JTabbedPane();
         mainSettings.addTab(BundleUtils.getLabel("settings_game_title"), createGameSettingsTab(settingsFont));
         mainSettings.addTab(BundleUtils.getLabel("settings_launcher_title"), createLauncherSettingsTab(settingsFont));
+        mainSettings.addTab(BundleUtils.getLabel("settings_changelog_title"), createChangelogSettingsTab(settingsFont));
 
         /*================== OK, Cancel ==================*/
         final JButton saveButton = new JButton();
@@ -417,6 +425,48 @@ final class SettingsMenu extends JDialog implements ActionListener {
 
         return launcherSettingsTab;
     }
+    
+    private String getChangeLog() {
+        StringBuilder builder = new StringBuilder();
+        
+        List<String> lines;
+        try {
+            Path path = Paths.get("CHANGELOG.txt");
+            
+            // the filename is changed by the gradle script
+            if (!path.toFile().exists()) {
+                path = Paths.get("CHANGELOG.md");
+            }
+            
+            lines = Files.readAllLines(path, Charset.defaultCharset());
+            for (String line : lines) {
+                // consider stripping Markdown symbols
+                builder.append(line);
+                builder.append(System.lineSeparator());
+            }
+        } catch (IOException e) {
+            logger.warn("Could not read CHANGELOG file", e);
+        }
+        
+        return builder.toString();
+    }
+
+    
+    private JPanel createChangelogSettingsTab(Font settingsFont) {
+        final JPanel tab = new JPanel();
+        tab.setFont(settingsFont);
+
+        final JTextArea changeLogArea = new JTextArea();
+        changeLogArea.setText(getChangeLog());
+        changeLogArea.setEditable(false);
+        changeLogArea.setRows(15);
+        final JScrollPane changeLogPane = new JScrollPane(changeLogArea);
+
+        tab.add(changeLogPane);
+        
+        return tab;
+    }
+
 
     private void populateJob() {
         for (GameJob job : GameJob.values()) {
