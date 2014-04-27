@@ -29,7 +29,7 @@ import java.util.zip.ZipFile;
 
 public final class TerasologyGameVersionInfo implements Serializable {
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersionInfo.class);
 
