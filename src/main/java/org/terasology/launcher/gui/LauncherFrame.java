@@ -523,6 +523,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     }
 
     private String getGameInfoText(TerasologyGameVersion gameVersion) {
+        logger.debug("Display game version: {} {}", gameVersion, gameVersion.getGameVersionInfo());
+
         final Object[] arguments = new Object[9];
         arguments[0] = gameVersion.getJob().name();
         if (gameVersion.getJob().isStable()) {

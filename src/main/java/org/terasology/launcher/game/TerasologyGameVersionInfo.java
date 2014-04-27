@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ public final class TerasologyGameVersionInfo implements Serializable {
     private static final String GIT_COMMIT = "gitCommit";
     private static final String DATE_TIME = "dateTime";
     private static final String DISPLAY_VERSION = "displayVersion";
+    private static final String ENGINE_VERSION = "engineVersion";
 
     private static final String DEFAULT_VALUE = "";
 
@@ -56,6 +57,7 @@ public final class TerasologyGameVersionInfo implements Serializable {
     private final String gitCommit;
     private final String dateTime;
     private final String displayVersion;
+    private final String engineVersion;
     private final String toString;
 
     private TerasologyGameVersionInfo(Properties properties) {
@@ -68,6 +70,7 @@ public final class TerasologyGameVersionInfo implements Serializable {
         gitCommit = properties.getProperty(GIT_COMMIT, DEFAULT_VALUE);
         dateTime = properties.getProperty(DATE_TIME, DEFAULT_VALUE);
         displayVersion = properties.getProperty(DISPLAY_VERSION, DEFAULT_VALUE);
+        engineVersion = properties.getProperty(ENGINE_VERSION, DEFAULT_VALUE);
 
         final StringBuilder toStringBuilder = new StringBuilder();
         toStringBuilder.append("[");
@@ -106,6 +109,10 @@ public final class TerasologyGameVersionInfo implements Serializable {
         toStringBuilder.append(DISPLAY_VERSION);
         toStringBuilder.append("=");
         toStringBuilder.append(displayVersion);
+        toStringBuilder.append(", ");
+        toStringBuilder.append(ENGINE_VERSION);
+        toStringBuilder.append("=");
+        toStringBuilder.append(engineVersion);
         toStringBuilder.append("]");
         toString = toStringBuilder.toString();
     }
@@ -201,6 +208,10 @@ public final class TerasologyGameVersionInfo implements Serializable {
 
     public String getDisplayVersion() {
         return displayVersion;
+    }
+
+    public String getEngineVersion() {
+        return engineVersion;
     }
 
     @Override
