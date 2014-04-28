@@ -6,10 +6,13 @@ Terasology Launcher - ChangeLog
 * Fallback for missing language translations
 * New setting "Save downloaded files" and new "download" directory
 * Better handling for failed or change-less builds
+* Delete old and unused cache files
+* Note: Old cached information about game versions are not compatible. These are automatically reloaded.
 * Internal changes
     * Restructure and refactor code
     * More and better logging
     * Some small bug fixes
+    * Update LOGBack, SLF4J and launch4j
 
 ## 1.3.1 (2014-03-25)
 * Allow all memory (heap size) values (512 MB - 16 GB)
