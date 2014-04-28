@@ -18,7 +18,6 @@ package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.LauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
@@ -78,7 +77,7 @@ public final class TerasologyGameVersions {
         return null;
     }
 
-    public synchronized void loadGameVersions(LauncherSettings launcherSettings, File launcherDirectory, File gameDirectory, ProgressListener progressListener) {
+    public synchronized void loadGameVersions(GameSettings gameSettings, File launcherDirectory, File gameDirectory, ProgressListener progressListener) {
         final File cacheDirectory = getAndCheckCacheDirectory(launcherDirectory);
 
         gameVersionLists.clear();
@@ -93,7 +92,7 @@ public final class TerasologyGameVersions {
             final SortedSet<Integer> buildNumbers = new TreeSet<>();
             buildNumbersMap.put(job, buildNumbers);
 
-            loadSettingsBuildNumber(launcherSettings, buildNumbers, job);
+            loadSettingsBuildNumber(gameSettings, buildNumbers, job);
             lastBuildNumbers.put(job, loadLastSuccessfulBuildNumber(buildNumbers, job));
         }
 
@@ -126,10 +125,10 @@ public final class TerasologyGameVersions {
         }
     }
 
-    public synchronized void fixSettingsBuildVersion(LauncherSettings launcherSettings) {
+    public synchronized void fixSettingsBuildVersion(GameSettings gameSettings) {
         for (GameJob job : GameJob.values()) {
             final SortedMap<Integer, TerasologyGameVersion> gameVersions = gameVersionMaps.get(job);
-            fixSettingsBuildVersion(launcherSettings, job, gameVersions);
+            fixSettingsBuildVersion(gameSettings, job, gameVersions);
         }
     }
 
@@ -145,8 +144,8 @@ public final class TerasologyGameVersions {
         return cacheDirectory;
     }
 
-    private void loadSettingsBuildNumber(LauncherSettings launcherSettings, SortedSet<Integer> buildNumbers, GameJob job) {
-        final int buildVersion = launcherSettings.getBuildVersion(job);
+    private void loadSettingsBuildNumber(GameSettings gameSettings, SortedSet<Integer> buildNumbers, GameJob job) {
+        final int buildVersion = gameSettings.getBuildVersion(job);
         if ((buildVersion >= job.getMinBuildNumber()) && (TerasologyGameVersion.BUILD_VERSION_LATEST != buildVersion)) {
             buildNumbers.add(buildVersion);
         }
@@ -462,8 +461,8 @@ public final class TerasologyGameVersions {
         return Collections.unmodifiableList(gameVersionList);
     }
 
-    private void fixSettingsBuildVersion(LauncherSettings launcherSettings, GameJob job, SortedMap<Integer, TerasologyGameVersion> gameVersionMap) {
-        final int buildVersion = launcherSettings.getBuildVersion(job);
+    private void fixSettingsBuildVersion(GameSettings gameSettings, GameJob job, SortedMap<Integer, TerasologyGameVersion> gameVersionMap) {
+        final int buildVersion = gameSettings.getBuildVersion(job);
         if ((buildVersion != TerasologyGameVersion.BUILD_VERSION_LATEST) && !gameVersionMap.containsKey(buildVersion)) {
             Integer newBuildVersion = TerasologyGameVersion.BUILD_VERSION_LATEST;
             for (TerasologyGameVersion gameVersion : gameVersionMap.values()) {
@@ -472,7 +471,7 @@ public final class TerasologyGameVersions {
                     // no break => find highest installed version
                 }
             }
-            launcherSettings.setBuildVersion(newBuildVersion, job);
+            gameSettings.setBuildVersion(newBuildVersion, job);
             // don't store settings
         }
     }

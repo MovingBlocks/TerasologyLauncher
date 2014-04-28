@@ -19,6 +19,7 @@ package org.terasology.launcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
+import org.terasology.launcher.game.GameSettings;
 import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
@@ -37,7 +38,7 @@ import java.util.Properties;
 /**
  * Provides access to launcher settings.
  */
-public final class LauncherSettings {
+public final class LauncherSettings implements GameSettings {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherSettings.class);
 
