@@ -52,6 +52,8 @@ public final class TerasologyGameVersions {
     private static final String FILE_TERASOLOGY_JAR = "Terasology.jar";
     private static final String DIR_LIBS = "libs";
     private static final String FILE_ENGINE_JAR = "engine.*jar";
+    private static final long OUTDATED_CACHE_MILLI_SECONDS = 1000L * 60L * 60L * 24L; // one day
+    private static final String FILE_SUFFIX_CACHE = ".cache";
 
     private final Map<GameJob, List<TerasologyGameVersion>> gameVersionLists;
     private final Map<GameJob, SortedMap<Integer, TerasologyGameVersion>> gameVersionMaps;
@@ -117,6 +119,10 @@ public final class TerasologyGameVersions {
             }
             final List<TerasologyGameVersion> gameVersionList = createList(lastBuildNumber, job, gameVersionMap);
             gameVersionLists.put(job, gameVersionList);
+        }
+
+        if (cacheDirectory != null) {
+            deleteOldCache(cacheDirectory);
         }
     }
 
@@ -309,7 +315,7 @@ public final class TerasologyGameVersions {
     }
 
     private File createCacheFile(GameJob job, Integer buildNumber, File cacheDirectory) {
-        return new File(cacheDirectory, "TerasologyGameVersion_" + job.name() + "_" + buildNumber.toString() + ".cache");
+        return new File(cacheDirectory, "TerasologyGameVersion_" + job.name() + "_" + buildNumber.toString() + FILE_SUFFIX_CACHE);
     }
 
     private void loadGameVersions(SortedSet<Integer> buildNumbers, GameJob job, SortedMap<Integer, TerasologyGameVersion> gameVersions,
@@ -415,6 +421,24 @@ public final class TerasologyGameVersions {
             }
         } catch (IOException e) {
             logger.error("Could not write cache data!", e);
+        }
+    }
+
+    private void deleteOldCache(File cacheDirectory) {
+        final File[] cacheFiles = cacheDirectory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                return pathname.exists() && pathname.isFile()
+                    && pathname.canRead() && pathname.canWrite()
+                    && pathname.getName().endsWith(FILE_SUFFIX_CACHE)
+                    && pathname.lastModified() < (System.currentTimeMillis() - OUTDATED_CACHE_MILLI_SECONDS);
+            }
+        });
+        if ((cacheFiles != null) && (cacheFiles.length > 0)) {
+            logger.debug("Delete {} outdated cache files on exit.", cacheFiles.length);
+            for (File cacheFile : cacheFiles) {
+                cacheFile.deleteOnExit();
+            }
         }
     }
 
