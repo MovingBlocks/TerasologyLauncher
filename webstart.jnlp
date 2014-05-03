@@ -37,7 +37,7 @@
 	
     <!-- check: always check for updates before launching the application -->
 	<!-- policy: ask the user if he/she wants to download and run the updated version, or launch the cached version -->
-	<update check="always" policy="prompt-update"> 
+	<update check="always" policy="prompt-update"/>
 	 
 	<security>
 		<all-permissions/>
