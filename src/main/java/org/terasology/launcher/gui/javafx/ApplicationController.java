@@ -28,7 +28,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -83,6 +85,8 @@ public class ApplicationController {
     private Button startButton;
     @FXML
     private Button deleteButton;
+    @FXML
+    private WebView changelogView;
 
     @FXML
     protected void handleExitButtonAction() {
@@ -147,6 +151,7 @@ public class ApplicationController {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            updateBuildVersionBox();
             updateGui();
         }
     }
@@ -203,7 +208,7 @@ public class ApplicationController {
             progressBar.setVisible(true);
             new Thread(gameDownloadWorker).start();
         }
-        updateButtons();
+        updateGui();
     }
 
     @FXML
@@ -212,7 +217,7 @@ public class ApplicationController {
         logger.info("Cancel game download!");
         gameDownloadWorker.cancel(false);
 
-        updateButtons();
+        updateGui();
     }
 
     @FXML
@@ -287,14 +292,13 @@ public class ApplicationController {
         populateJob();
 
         // add change listeners
-        // TODO disable start/delete/download button if necessary
         jobBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<JobItem>() {
             @Override
             public void changed(final ObservableValue<? extends JobItem> observableValue, final JobItem oldItem, final JobItem newItem) {
                 updateBuildVersionBox();
                 newLauncherSettings.setJob(newItem.getJob());
                 logger.debug("Selected gamejob: {} -- {}", newLauncherSettings.getJob(), newLauncherSettings.getBuildVersion(newLauncherSettings.getJob()));
-                updateButtons();
+                updateGui();
             }
         });
 
@@ -303,10 +307,9 @@ public class ApplicationController {
             public void changed(final ObservableValue<? extends VersionItem> observableValue, final VersionItem oldVersionItem, final VersionItem newVersionItem) {
                 if (newVersionItem != null) {
                     final Integer version = newVersionItem.getVersion();
-                    final GameJob job = jobBox.getSelectionModel().getSelectedItem().getJob();
                     newLauncherSettings.setBuildVersion(version, newLauncherSettings.getJob());
                     logger.debug("Selected gamejob: {} -- {}", newLauncherSettings.getJob(), newLauncherSettings.getBuildVersion(newLauncherSettings.getJob()));
-                    updateButtons();
+                    updateGui();
                 }
             }
         });
@@ -346,8 +349,8 @@ public class ApplicationController {
     }
 
     private void updateGui() {
-        updateBuildVersionBox();
         updateButtons();
+        updateChangeLog();
     }
 
     private void updateButtons() {
@@ -398,6 +401,103 @@ public class ApplicationController {
         }
     }
 
+    private void updateChangeLog() {
+        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+        final String gameInfoTextHTML;
+        if ((gameVersion == null) || (gameVersion.getJob() == null) || (gameVersion.getBuildNumber() == null)) {
+            gameInfoTextHTML = "";
+        } else {
+            gameInfoTextHTML = getGameInfoText(gameVersion);
+        }
+        changelogView.getEngine().loadContent(
+            "<html><body style='background-color:#0a0a0a; color:#dfdfdf;'>" + gameInfoTextHTML + "</body></html>"
+        );
+        changelogView.setBlendMode(BlendMode.LIGHTEN);
+    }
+
+    private String getGameInfoText(TerasologyGameVersion gameVersion) {
+        logger.debug("Display game version: {} {}", gameVersion, gameVersion.getGameVersionInfo());
+
+        final Object[] arguments = new Object[9];
+        arguments[0] = gameVersion.getJob().name();
+        if (gameVersion.getJob().isStable()) {
+            arguments[1] = 1;
+        } else {
+            arguments[1] = 0;
+        }
+        arguments[2] = gameVersion.getJob().getGitBranch();
+        arguments[3] = gameVersion.getBuildNumber();
+        if (gameVersion.isLatest()) {
+            arguments[4] = 1;
+        } else {
+            arguments[4] = 0;
+        }
+        if (gameVersion.isInstalled()) {
+            arguments[5] = 1;
+        } else {
+            arguments[5] = 0;
+        }
+        if (gameVersion.getSuccessful() != null) {
+            if (!gameVersion.getSuccessful()) {
+                // faulty
+                arguments[6] = 0;
+            } else {
+                arguments[6] = 1;
+            }
+        } else {
+            // unknown
+            arguments[6] = 2;
+        }
+        if ((gameVersion.getGameVersionInfo() != null)
+            && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
+            arguments[7] = gameVersion.getGameVersionInfo().getDisplayVersion();
+        } else {
+            arguments[7] = "";
+        }
+        if ((gameVersion.getGameVersionInfo() != null)
+            && (gameVersion.getGameVersionInfo().getDateTime() != null)) {
+            arguments[8] = gameVersion.getGameVersionInfo().getDateTime();
+        } else {
+            arguments[8] = "";
+        }
+
+        final String infoHeader1 = BundleUtils.getMessage(gameVersion.getJob().getInfoMessageKey(), arguments);
+        final String infoHeader2 = BundleUtils.getMessage("infoHeader2", arguments);
+
+        final StringBuilder b = new StringBuilder();
+        if ((infoHeader1 != null) && (infoHeader1.trim().length() > 0)) {
+            b.append("<h1>");
+            b.append(escapeHtml(infoHeader1));
+            b.append("</h1>\n");
+        }
+        if ((infoHeader2 != null) && (infoHeader2.trim().length() > 0)) {
+            b.append("<h2>");
+            b.append(escapeHtml(infoHeader2));
+            b.append("</h2>\n");
+        }
+        b.append("<strong>\n");
+        b.append(BundleUtils.getLabel("infoHeader3"));
+        b.append("</strong>\n");
+
+        if ((gameVersion.getChangeLog() != null) && !gameVersion.getChangeLog().isEmpty()) {
+            b.append("<p>\n");
+            b.append(BundleUtils.getLabel("infoHeader4"));
+            b.append("<ul>\n");
+            for (String msg : gameVersion.getChangeLog()) {
+                b.append("<li>");
+                b.append(escapeHtml(msg));
+                b.append("</li>\n");
+            }
+            b.append("</ul>\n");
+            b.append("</p>\n");
+        }
+        return b.toString();
+    }
+
+    private String escapeHtml(String text) {
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#x27;").replace("/", "&#x2F;");
+    }
+
     void finishedGameDownload(boolean cancelled, boolean successfulDownloadAndExtract, boolean successfulLoadVersion, File gameDirectory) {
         gameDownloadWorker = null;
         progressBar.setVisible(false);
@@ -415,7 +515,7 @@ public class ApplicationController {
                 }
             }
         }
-        updateButtons();
+        updateGui();
     }
 
     private TerasologyGameVersion getSelectedGameVersion() {

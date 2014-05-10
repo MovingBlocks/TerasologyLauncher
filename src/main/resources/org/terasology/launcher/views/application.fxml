@@ -33,6 +33,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
 <?import java.lang.String?>
 <?import java.net.URL?>
 <AnchorPane id="AnchorPane" fx:id="launcherFrame" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="562.140625"
@@ -54,7 +55,7 @@
                 </ImageView>
                 <BorderPane prefHeight="529.0" prefWidth="756.0">
                     <bottom>
-                        <HBox fx:id="bottomPanel" alignment="CENTER" prefHeight="64.0" prefWidth="756.0" spacing="8.0"
+                        <HBox fx:id="bottomPanel" alignment="CENTER" prefHeight="64.0" prefWidth="979.0" spacing="8.0"
                               style="-fx-background-color:  rgba(10,10,10,0.7);&#10;-fx-background-radius: 10;">
                             <children>
                                 <Button id="" fx:id="facebookButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#openFacebook"
@@ -132,12 +133,22 @@
                                 <VBox alignment="BOTTOM_CENTER" prefHeight="399.0" prefWidth="969.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <children>
-                                        <TabPane id="contentTabPane" maxWidth="-Infinity" prefHeight="367.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
+                                        <TabPane id="contentTabPane" maxWidth="-Infinity" prefHeight="367.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE">
                                             <stylesheets>
                                                 <URL value="@terasology.css"/>
                                             </stylesheets>
                                             <tabs>
-                                                <Tab text="Changelog">
+                                                <Tab fx:id="changelogTab" text="Changelog">
+                                                    <content>
+                                                        <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                            <children>
+                                                                <WebView fx:id="changelogView" prefHeight="336.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                                         AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                                                            </children>
+                                                        </AnchorPane>
+                                                    </content>
+                                                </Tab>
+                                                <Tab fx:id="aboutTab" closable="false" text="About">
                                                     <content>
                                                         <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
                                                     </content>
@@ -275,4 +286,7 @@
             </children>
         </StackPane>
     </children>
+    <stylesheets>
+        <URL value="@terasology.css"/>
+    </stylesheets>
 </AnchorPane>
