@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.terasology.launcher;
 
 import javafx.application.Application;
+import javafx.application.Preloader;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -33,13 +34,14 @@ import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.util.OperatingSystem;
+import org.terasology.launcher.util.ProgressListener;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
-public final class TerasologyLauncher extends Application {
+public final class TerasologyLauncher extends Application implements ProgressListener {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncher.class);
 
@@ -360,5 +362,21 @@ public final class TerasologyLauncher extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    @Override
+    public void update() {
+        // TODO notify preloader?
+    }
+
+    @Override
+    public void update(final int progress) {
+        // TODO update splash screen when no preloader
+        notifyPreloader(new Preloader.ProgressNotification(progress / 100));
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return false;
     }
 }
