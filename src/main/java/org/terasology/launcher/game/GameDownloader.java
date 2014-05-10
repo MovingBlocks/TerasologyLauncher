@@ -19,11 +19,11 @@ package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.gui.javafx.GameDownloadWorker;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.ProgressListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,8 +73,8 @@ public final class GameDownloader {
         return gameDirectory;
     }
 
-    public void downloadZipFile(GameDownloadWorker worker) throws DownloadException {
-        DownloadUtils.downloadToFile(downloadURL, downloadZipFile, worker);
+    public void download(ProgressListener listener) throws DownloadException {
+        DownloadUtils.downloadToFile(downloadURL, downloadZipFile, listener);
     }
 
     public boolean extractAfterDownload() {

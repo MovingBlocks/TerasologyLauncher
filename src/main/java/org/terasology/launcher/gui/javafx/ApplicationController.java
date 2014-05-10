@@ -415,6 +415,7 @@ public class ApplicationController {
                 }
             }
         }
+        updateButtons();
     }
 
     private TerasologyGameVersion getSelectedGameVersion() {

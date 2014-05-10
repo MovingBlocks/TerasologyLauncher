@@ -22,8 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameDownloader;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DownloadException;
+import org.terasology.launcher.util.ProgressListener;
 
-public class GameDownloadWorker extends Task<Void> {
+public class GameDownloadWorker extends Task<Void> implements ProgressListener {
 
     private static final Logger logger = LoggerFactory.getLogger(GameDownloadWorker.class);
     private final GameDownloader gameDownloader;
@@ -40,7 +41,7 @@ public class GameDownloadWorker extends Task<Void> {
     @Override
     protected Void call() throws Exception {
         try {
-            gameDownloader.downloadZipFile(this);
+            gameDownloader.download(this);
             if (!isCancelled()) {
                 updateMessage(BundleUtils.getLabel("update_game_extractZip"));
                 successfulDownloadAndExtract = gameDownloader.extractAfterDownload();
@@ -65,7 +66,13 @@ public class GameDownloadWorker extends Task<Void> {
         controller.finishedGameDownload(isCancelled(), successfulDownloadAndExtract, successfulLoadVersion, gameDownloader.getGameDirectory());
     }
 
-    public void updateProgress(final long progress) {
+    @Override
+    public void update() {
+        // not implemented
+    }
+
+    @Override
+    public void update(final int progress) {
         updateProgress(progress, 100);
     }
 }
