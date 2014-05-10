@@ -28,6 +28,7 @@ import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.gui.GuiUtils;
 import org.terasology.launcher.gui.javafx.ApplicationController;
+import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -39,6 +40,7 @@ import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ResourceBundle;
 
 public final class TerasologyLauncher extends Application implements ProgressListener {
@@ -64,6 +66,14 @@ public final class TerasologyLauncher extends Application implements ProgressLis
 
             // launcher settings
             final LauncherSettings launcherSettings = getLauncherSettings(launcherDirectory);
+
+            if (launcherSettings.isSearchForLauncherUpdates()) {
+                final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isSaveDownloadedFiles());
+                if (selfUpdaterStarted) {
+                    logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
+                    System.exit(0);
+                }
+            }
 
             // game directories
             final File gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory());
@@ -210,40 +220,39 @@ public final class TerasologyLauncher extends Application implements ProgressLis
         return launcherSettings;
     }
 
-  /*
-    private static boolean checkForLauncherUpdates(SplashScreenWindow splash, File downloadDirectory, File tempDirectory, boolean saveDownloadedFiles) {
+    private boolean checkForLauncherUpdates(File downloadDirectory, File tempDirectory, boolean saveDownloadedFiles) {
         logger.trace("Check for launcher updates...");
         boolean selfUpdaterStarted = false;
-        splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
+        // TODO splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateCheck"));
         final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
         if (updater.updateAvailable()) {
             logger.trace("Launcher update available!");
-            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
+            // TODO splash.getInfoLabel().setText(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
             boolean foundLauncherInstallationDirectory = false;
             try {
                 updater.detectAndCheckLauncherInstallationDirectory();
                 foundLauncherInstallationDirectory = true;
             } catch (URISyntaxException | IOException e) {
                 logger.error("The launcher installation directory can not be detected or used!", e);
-                GuiUtils.showErrorMessageDialog(splash, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
+                GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
                 // Run launcher without an update. Don't throw a LauncherStartFailedException.
             }
             if (foundLauncherInstallationDirectory) {
-                final boolean update = updater.showUpdateDialog(splash);
+                final boolean update = updater.showUpdateDialog(null);
                 if (update) {
-                    splash.setVisible(true);
+                    // TODO splash.setVisible(true);
                     if (saveDownloadedFiles) {
-                        selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory, splash);
+                        selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory, null);
                     } else {
-                        selfUpdaterStarted = updater.update(tempDirectory, tempDirectory, splash);
+                        selfUpdaterStarted = updater.update(tempDirectory, tempDirectory, null);
                     }
                 }
             }
-            splash.setVisible(true);
+            // TODO splash screen
+            // splash.setVisible(true);
         }
         return selfUpdaterStarted;
     }
-  */
 
     private File getGameDirectory(OperatingSystem os, File settingsGameDirectory) throws LauncherStartFailedException {
         logger.trace("Init GameDirectory...");
