@@ -19,13 +19,13 @@
               <content>
                 <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                   <children>
-                    <GridPane prefHeight="319.0" prefWidth="568.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="16.0" AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="0.0">
+                    <GridPane prefHeight="319.0" prefWidth="568.0" AnchorPane.bottomAnchor="-0.5" AnchorPane.leftAnchor="16.0" AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="0.5">
                       <children>
                         <Label text="%settings_game_gameDirectory" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                         <Label text="%settings_game_gameDataDirectory" GridPane.columnIndex="0" GridPane.rowIndex="3" />
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="259.0" spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                           <children>
-                            <TextField editable="false" prefWidth="200.0" promptText="/home/user/.terasology" />
+                            <TextField editable="false" focusTraversable="false" prefWidth="200.0" promptText="/home/user/.terasology" />
                             <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%settings_game_gameDirectory_open" HBox.hgrow="ALWAYS" />
                             <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%settings_game_gameDirectory_edit" HBox.hgrow="ALWAYS" />
                           </children>
@@ -107,8 +107,8 @@
                         </HBox>
                       </children>
                       <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="299.0" minWidth="10.0" prefWidth="176.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="471.0" minWidth="10.0" prefWidth="392.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="256.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="471.0" minWidth="10.0" prefWidth="376.0" />
                       </columnConstraints>
                       <rowConstraints>
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -127,26 +127,71 @@
               <content>
                 <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                   <children>
-                    <TilePane prefHeight="319.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <GridPane prefHeight="319.0" prefWidth="568.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="16.0" AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="0.0">
                       <children>
-                        <Label text="Label" />
-                        <ChoiceBox>
-                          <items>
-                            <FXCollections fx:factory="observableArrayList">
-                              <String fx:value="Item 1" />
-                              <String fx:value="Item 2" />
-                              <String fx:value="Item 3" />
-                            </FXCollections>
-                          </items>
-                        </ChoiceBox>
+                        <Label text="%settings_launcher_chooseLanguage" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                        <Label text="%settings_launcher_closeLauncherAfterGameStart" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                        <Label text="%settings_launcher_launcherDirectory" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                        <Label text="%settings_launcher_launcherDirectory" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                        <Label text="%settings_launcher_downloadDirectory" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                          <children>
+                            <ChoiceBox maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+                              <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                  <String fx:value="Item 1" />
+                                  <String fx:value="Item 2" />
+                                  <String fx:value="Item 3" />
+                                </FXCollections>
+                              </items>
+                            </ChoiceBox>
+                          </children>
+                          <padding>
+                            <Insets left="8.0" right="8.0" fx:id="x1" />
+                          </padding>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" padding="$x1" prefHeight="100.0" prefWidth="200.0" spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                          <children>
+                            <CheckBox contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" />
+                          </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" padding="$x1" prefHeight="100.0" prefWidth="200.0" spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                          <children>
+                            <CheckBox contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" />
+                          </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" padding="$x1" prefHeight="100.0" prefWidth="200.0" spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                          <children>
+                            <TextField prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                            <Button maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="128.0" text="%settings_launcher_launcherDirectory_open" HBox.hgrow="SOMETIMES" />
+                          </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" padding="$x1" prefHeight="100.0" prefWidth="200.0" spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                          <children>
+                            <TextField prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                            <Button maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="128.0" text="%settings_launcher_downloadDirectory_open" HBox.hgrow="SOMETIMES" />
+                          </children>
+                        </HBox>
                       </children>
-                    </TilePane>
+                      <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="256.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      </columnConstraints>
+                      <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      </rowConstraints>
+                    </GridPane>
                   </children>
                 </AnchorPane>
               </content>
             </Tab>
           </tabs>
         </TabPane>
+        <Separator prefWidth="200.0" />
         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="64.0" VBox.vgrow="NEVER">
           <children>
             <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%settings_save" textAlignment="CENTER" HBox.hgrow="ALWAYS" />
