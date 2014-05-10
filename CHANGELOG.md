@@ -1,7 +1,7 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 1.4.0 (unreleased)
+## 1.4.0 (2014-05-xx, unreleased)
 * Translation into Polish
 * Fallback for missing language translations
 * New setting "Save downloaded files" and new "download" directory
@@ -10,9 +10,12 @@ Terasology Launcher - ChangeLog
 * Note: Old cached information about game versions are not compatible. These are automatically reloaded.
 * Internal changes
     * Restructure and refactor code
+    * Change Checkstyle and FindBugs configurations
+    * Load and log game engine version
     * More and better logging
     * Some small bug fixes
-    * Update LOGBack, SLF4J and launch4j
+    * Update compile and runtime dependencies
+    * Update gradle wrapper (1.12)
 
 ## 1.3.1 (2014-03-25)
 * Allow all memory (heap size) values (512 MB - 16 GB)
