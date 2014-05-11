@@ -16,6 +16,11 @@
 
 package org.terasology.launcher;
 
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
@@ -37,12 +42,26 @@ import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ResourceBundle;
 
-public final class TerasologyLauncher {
+public final class TerasologyLauncher extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncher.class);
 
-    private TerasologyLauncher() {
+    @Override
+    public void start(final Stage stage) throws Exception {
+        logger.info("TerasologyLauncher is starting");
+        logSystemInformation();
+        initLanguage();
+
+        Parent root = FXMLLoader.load(BundleUtils.getFXMLUrl("application"), ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle"));
+        Scene scene = new Scene(root);
+        scene.getStylesheets().add(BundleUtils.getStylesheet("css_terasology"));
+
+        stage.setScene(scene);
+        stage.show();
+
+        logger.info("The TerasologyLauncher was successfully started.");
     }
 
     private static void logSystemInformation() {
@@ -297,7 +316,7 @@ public final class TerasologyLauncher {
         logger.debug("Launcher Settings stored: {}", launcherSettings);
     }
 
-    public static void main(String[] args) {
+    public static void mainold(String[] args) {
         try {
             logger.info("TerasologyLauncher is starting");
 
@@ -353,5 +372,9 @@ public final class TerasologyLauncher {
             GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_launcherStart"));
             System.exit(1);
         }
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }
