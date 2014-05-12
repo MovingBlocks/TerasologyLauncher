@@ -93,7 +93,7 @@ public final class TerasologyGameVersions {
             buildNumbersMap.put(job, buildNumbers);
 
             loadSettingsBuildNumber(gameSettings, buildNumbers, job);
-            lastBuildNumbers.put(job, loadLastSuccessfulBuildNumber(buildNumbers, job));
+            lastBuildNumbers.put(job, loadLastSuccessfulBuildNumber(getLastBuildNumberFromSettings(gameSettings, job), buildNumbers, job));
         }
 
         loadInstalledGames(gameDirectory, buildNumbersMap, progressListener);
@@ -105,6 +105,7 @@ public final class TerasologyGameVersions {
             final SortedSet<Integer> buildNumbers = buildNumbersMap.get(job);
             final Integer lastBuildNumber = lastBuildNumbers.get(job);
 
+            gameSettings.setLastBuildNumber(lastBuildNumber, job);
             if (job.isStable() && !job.isOnlyInstalled()) {
                 fillBuildNumbers(buildNumbers, job.getMinBuildNumber(), lastBuildNumber);
             }
@@ -146,27 +147,44 @@ public final class TerasologyGameVersions {
 
     private void loadSettingsBuildNumber(GameSettings gameSettings, SortedSet<Integer> buildNumbers, GameJob job) {
         final int buildVersion = gameSettings.getBuildVersion(job);
-        if ((buildVersion >= job.getMinBuildNumber()) && (TerasologyGameVersion.BUILD_VERSION_LATEST != buildVersion)) {
+        if ((TerasologyGameVersion.BUILD_VERSION_LATEST != buildVersion) && (buildVersion >= job.getMinBuildNumber())) {
             buildNumbers.add(buildVersion);
         }
     }
 
-    private Integer loadLastSuccessfulBuildNumber(SortedSet<Integer> buildNumbers, GameJob job) {
+    private Integer getLastBuildNumberFromSettings(GameSettings gameSettings, GameJob job) {
+        final Integer lastBuildNumber = gameSettings.getLastBuildNumber(job);
+        final int buildVersion = gameSettings.getBuildVersion(job);
+        final int lastBuildVersion;
+        if (lastBuildNumber == null) {
+            lastBuildVersion = buildVersion;
+        } else {
+            lastBuildVersion = Math.max(lastBuildNumber, buildVersion);
+        }
+        if ((TerasologyGameVersion.BUILD_VERSION_LATEST != lastBuildVersion) && (lastBuildVersion >= job.getMinBuildNumber())) {
+            return lastBuildVersion;
+        }
+        return null;
+    }
+
+    private Integer loadLastSuccessfulBuildNumber(Integer lastBuildNumber, SortedSet<Integer> buildNumbers, GameJob job) {
         Integer lastSuccessfulBuildNumber = null;
         if (!job.isOnlyInstalled()) {
             try {
                 // Use "successful" and not "stable" for TerasologyGame.
                 lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumberJenkins(job.name());
-                if (lastSuccessfulBuildNumber >= job.getMinBuildNumber()) {
-                    buildNumbers.add(lastSuccessfulBuildNumber);
-                    // add previous build numbers
-                    final int prevBuildNumber = Math.max(job.getMinBuildNumber(), lastSuccessfulBuildNumber - job.getPrevBuildNumbers());
-                    for (int buildNumber = prevBuildNumber; buildNumber < lastSuccessfulBuildNumber; buildNumber++) {
-                        buildNumbers.add(buildNumber);
-                    }
-                }
             } catch (DownloadException e) {
                 logger.info("Retrieving last successful build number failed. '{}'", job, e);
+                lastSuccessfulBuildNumber = lastBuildNumber;
+            }
+
+            if ((lastSuccessfulBuildNumber != null) && (lastSuccessfulBuildNumber >= job.getMinBuildNumber())) {
+                buildNumbers.add(lastSuccessfulBuildNumber);
+                // add previous build numbers
+                final int prevBuildNumber = Math.max(job.getMinBuildNumber(), lastSuccessfulBuildNumber - job.getPrevBuildNumbers());
+                for (int buildNumber = prevBuildNumber; buildNumber < lastSuccessfulBuildNumber; buildNumber++) {
+                    buildNumbers.add(buildNumber);
+                }
             }
         }
         return lastSuccessfulBuildNumber;

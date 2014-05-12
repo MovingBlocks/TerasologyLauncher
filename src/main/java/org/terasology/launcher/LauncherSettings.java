@@ -48,6 +48,7 @@ public final class LauncherSettings implements GameSettings {
     private static final GameJob JOB_DEFAULT = GameJob.TerasologyStable;
     private static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     private static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
+    private static final String LAST_BUILD_NUMBER_DEFAULT = "";
     private static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
     private static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
     private static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
@@ -57,6 +58,7 @@ public final class LauncherSettings implements GameSettings {
     private static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
     private static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
     private static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
+    private static final String PROPERTY_PREFIX_LAST_BUILD_NUMBER = "lastBuildNumber_";
     private static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
     private static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
     private static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
@@ -106,6 +108,7 @@ public final class LauncherSettings implements GameSettings {
         initLocale();
         initJob();
         initBuildVersion();
+        initLastBuildNumber();
         initMaxHeapSize();
         initInitialHeapSize();
         initSearchForLauncherUpdates();
@@ -153,6 +156,26 @@ public final class LauncherSettings implements GameSettings {
                 }
             }
             properties.setProperty(key, String.valueOf(buildVersion));
+        }
+    }
+
+    private void initLastBuildNumber() {
+        for (GameJob j : GameJob.values()) {
+            final String key = PROPERTY_PREFIX_LAST_BUILD_NUMBER + j.name();
+            final String lastBuildNumberStr = properties.getProperty(key);
+            Integer lastBuildNumber = null;
+            if (lastBuildNumberStr != null) {
+                try {
+                    lastBuildNumber = Integer.parseInt(lastBuildNumberStr);
+                } catch (NumberFormatException e) {
+                    logger.warn("Invalid value '{}' for the parameter '{}'!", lastBuildNumberStr, key);
+                }
+            }
+            if ((lastBuildNumber != null) && (lastBuildNumber >= j.getMinBuildNumber())) {
+                properties.setProperty(key, lastBuildNumber.toString());
+            } else {
+                properties.setProperty(key, LAST_BUILD_NUMBER_DEFAULT);
+            }
         }
     }
 
@@ -261,6 +284,22 @@ public final class LauncherSettings implements GameSettings {
 
     public synchronized int getBuildVersion(GameJob job) {
         return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name()));
+    }
+
+    public synchronized void setLastBuildNumber(Integer lastBuildNumber, GameJob job) {
+        if ((lastBuildNumber != null) && (lastBuildNumber >= job.getMinBuildNumber())) {
+            properties.setProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name(), lastBuildNumber.toString());
+        } else {
+            properties.setProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name(), LAST_BUILD_NUMBER_DEFAULT);
+        }
+    }
+
+    public synchronized Integer getLastBuildNumber(GameJob job) {
+        final String lastBuildNumberStr = properties.getProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name());
+        if (LAST_BUILD_NUMBER_DEFAULT.equals(lastBuildNumberStr)) {
+            return null;
+        }
+        return Integer.parseInt(lastBuildNumberStr);
     }
 
     public synchronized void setMaxHeapSize(JavaHeapSize maxHeapSize) {
