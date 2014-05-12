@@ -5,7 +5,8 @@ Terasology Launcher - ChangeLog
 * Translation into Polish
 * Fallback for missing language translations
 * New setting "Save downloaded files" and new "download" directory
-* Better handling for failed or change-less builds
+* Update "TerasologyLauncher.exe"
+* Better handling for failed or change-less game builds
 * Delete old and unused cache files
 * Note: Old cached information about game versions are not compatible. These are automatically reloaded.
 * Internal changes
@@ -15,7 +16,8 @@ Terasology Launcher - ChangeLog
     * More and better logging
     * Some small bug fixes
     * Update compile and runtime dependencies
-    * Update gradle wrapper (1.12)
+    * Update gradle wrapper (1.10 -> 1.12)
+    * Update launch4j (3.0.2 -> 3.4)
 
 ## 1.3.1 (2014-03-25)
 * Allow all memory (heap size) values (512 MB - 16 GB)
