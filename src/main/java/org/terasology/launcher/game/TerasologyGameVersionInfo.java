@@ -29,7 +29,7 @@ import java.util.zip.ZipFile;
 
 public final class TerasologyGameVersionInfo implements Serializable {
 
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 4L;
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyGameVersionInfo.class);
 
@@ -58,7 +58,7 @@ public final class TerasologyGameVersionInfo implements Serializable {
     private final String dateTime;
     private final String displayVersion;
     private final String engineVersion;
-    private final String toString;
+    private final String stringRepresentation;
 
     private TerasologyGameVersionInfo(Properties properties) {
         buildNumber = properties.getProperty(BUILD_NUMBER, DEFAULT_VALUE);
@@ -72,49 +72,49 @@ public final class TerasologyGameVersionInfo implements Serializable {
         displayVersion = properties.getProperty(DISPLAY_VERSION, DEFAULT_VALUE);
         engineVersion = properties.getProperty(ENGINE_VERSION, DEFAULT_VALUE);
 
-        final StringBuilder toStringBuilder = new StringBuilder();
-        toStringBuilder.append("[");
-        toStringBuilder.append(BUILD_NUMBER);
-        toStringBuilder.append("=");
-        toStringBuilder.append(buildNumber);
-        toStringBuilder.append(", ");
-        toStringBuilder.append(BUILD_ID);
-        toStringBuilder.append("=");
-        toStringBuilder.append(buildId);
-        toStringBuilder.append(", ");
-        toStringBuilder.append(BUILD_TAG);
-        toStringBuilder.append("=");
-        toStringBuilder.append(buildTag);
-        toStringBuilder.append(", ");
-        toStringBuilder.append(BUILD_URL);
-        toStringBuilder.append("=");
-        toStringBuilder.append(buildUrl);
-        toStringBuilder.append(", ");
-        toStringBuilder.append(JOB_NAME);
-        toStringBuilder.append("=");
-        toStringBuilder.append(jobName);
-        toStringBuilder.append(", ");
-        toStringBuilder.append(GIT_BRANCH);
-        toStringBuilder.append("=");
-        toStringBuilder.append(gitBranch);
-        toStringBuilder.append(", ");
-        toStringBuilder.append(GIT_COMMIT);
-        toStringBuilder.append("=");
-        toStringBuilder.append(gitCommit);
-        toStringBuilder.append(", ");
-        toStringBuilder.append(DATE_TIME);
-        toStringBuilder.append("=");
-        toStringBuilder.append(dateTime);
-        toStringBuilder.append(", ");
-        toStringBuilder.append(DISPLAY_VERSION);
-        toStringBuilder.append("=");
-        toStringBuilder.append(displayVersion);
-        toStringBuilder.append(", ");
-        toStringBuilder.append(ENGINE_VERSION);
-        toStringBuilder.append("=");
-        toStringBuilder.append(engineVersion);
-        toStringBuilder.append("]");
-        toString = toStringBuilder.toString();
+        final StringBuilder stringRepresentationBuilder = new StringBuilder();
+        stringRepresentationBuilder.append("[");
+        stringRepresentationBuilder.append(BUILD_NUMBER);
+        stringRepresentationBuilder.append("=");
+        stringRepresentationBuilder.append(buildNumber);
+        stringRepresentationBuilder.append(", ");
+        stringRepresentationBuilder.append(BUILD_ID);
+        stringRepresentationBuilder.append("=");
+        stringRepresentationBuilder.append(buildId);
+        stringRepresentationBuilder.append(", ");
+        stringRepresentationBuilder.append(BUILD_TAG);
+        stringRepresentationBuilder.append("=");
+        stringRepresentationBuilder.append(buildTag);
+        stringRepresentationBuilder.append(", ");
+        stringRepresentationBuilder.append(BUILD_URL);
+        stringRepresentationBuilder.append("=");
+        stringRepresentationBuilder.append(buildUrl);
+        stringRepresentationBuilder.append(", ");
+        stringRepresentationBuilder.append(JOB_NAME);
+        stringRepresentationBuilder.append("=");
+        stringRepresentationBuilder.append(jobName);
+        stringRepresentationBuilder.append(", ");
+        stringRepresentationBuilder.append(GIT_BRANCH);
+        stringRepresentationBuilder.append("=");
+        stringRepresentationBuilder.append(gitBranch);
+        stringRepresentationBuilder.append(", ");
+        stringRepresentationBuilder.append(GIT_COMMIT);
+        stringRepresentationBuilder.append("=");
+        stringRepresentationBuilder.append(gitCommit);
+        stringRepresentationBuilder.append(", ");
+        stringRepresentationBuilder.append(DATE_TIME);
+        stringRepresentationBuilder.append("=");
+        stringRepresentationBuilder.append(dateTime);
+        stringRepresentationBuilder.append(", ");
+        stringRepresentationBuilder.append(DISPLAY_VERSION);
+        stringRepresentationBuilder.append("=");
+        stringRepresentationBuilder.append(displayVersion);
+        stringRepresentationBuilder.append(", ");
+        stringRepresentationBuilder.append(ENGINE_VERSION);
+        stringRepresentationBuilder.append("=");
+        stringRepresentationBuilder.append(engineVersion);
+        stringRepresentationBuilder.append("]");
+        stringRepresentation = stringRepresentationBuilder.toString();
     }
 
     public static TerasologyGameVersionInfo getEmptyGameVersionInfo() {
@@ -216,6 +216,6 @@ public final class TerasologyGameVersionInfo implements Serializable {
 
     @Override
     public String toString() {
-        return toString;
+        return stringRepresentation;
     }
 }

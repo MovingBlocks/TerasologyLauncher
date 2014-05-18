@@ -65,6 +65,8 @@ public final class LauncherSettings implements GameSettings {
     private static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
     private static final String PROPERTY_SAVE_DOWNLOADED_FILES = "saveDownloadedFiles";
 
+    private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
+
     private final File launcherSettingsFile;
     private final Properties properties;
 
@@ -124,7 +126,7 @@ public final class LauncherSettings implements GameSettings {
             Languages.init(localeStr);
 
             if (!Languages.getCurrentLocale().toString().equals(localeStr)) {
-                logger.warn("Invalid value '{}' for the parameter '{}'!", localeStr, PROPERTY_LOCALE);
+                logger.warn(WARN_MSG_INVALID_VALUE, localeStr, PROPERTY_LOCALE);
             }
         }
         properties.setProperty(PROPERTY_LOCALE, Languages.getCurrentLocale().toString());
@@ -137,7 +139,7 @@ public final class LauncherSettings implements GameSettings {
             try {
                 job = GameJob.valueOf(jobStr);
             } catch (IllegalArgumentException e) {
-                logger.warn("Invalid value '{}' for the parameter '{}'!", jobStr, PROPERTY_JOB);
+                logger.warn(WARN_MSG_INVALID_VALUE, jobStr, PROPERTY_JOB);
             }
         }
         properties.setProperty(PROPERTY_JOB, job.name());
@@ -152,7 +154,7 @@ public final class LauncherSettings implements GameSettings {
                 try {
                     buildVersion = Integer.parseInt(buildVersionStr);
                 } catch (NumberFormatException e) {
-                    logger.warn("Invalid value '{}' for the parameter '{}'!", buildVersionStr, key);
+                    logger.warn(WARN_MSG_INVALID_VALUE, buildVersionStr, key);
                 }
             }
             properties.setProperty(key, String.valueOf(buildVersion));
@@ -168,7 +170,7 @@ public final class LauncherSettings implements GameSettings {
                 try {
                     lastBuildNumber = Integer.parseInt(lastBuildNumberStr);
                 } catch (NumberFormatException e) {
-                    logger.warn("Invalid value '{}' for the parameter '{}'!", lastBuildNumberStr, key);
+                    logger.warn(WARN_MSG_INVALID_VALUE, lastBuildNumberStr, key);
                 }
             }
             if ((lastBuildNumber != null) && (lastBuildNumber >= j.getMinBuildNumber())) {
@@ -186,7 +188,7 @@ public final class LauncherSettings implements GameSettings {
             try {
                 maxJavaHeapSize = JavaHeapSize.valueOf(maxHeapSizeStr);
             } catch (IllegalArgumentException e) {
-                logger.warn("Invalid value '{}' for the parameter '{}'!", maxHeapSizeStr, PROPERTY_MAX_HEAP_SIZE);
+                logger.warn(WARN_MSG_INVALID_VALUE, maxHeapSizeStr, PROPERTY_MAX_HEAP_SIZE);
             }
         }
         properties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxJavaHeapSize.name());
@@ -199,7 +201,7 @@ public final class LauncherSettings implements GameSettings {
             try {
                 initialJavaHeapSize = JavaHeapSize.valueOf(initialHeapSizeStr);
             } catch (IllegalArgumentException e) {
-                logger.warn("Invalid value '{}' for the parameter '{}'!", initialHeapSizeStr, PROPERTY_INITIAL_HEAP_SIZE);
+                logger.warn(WARN_MSG_INVALID_VALUE, initialHeapSizeStr, PROPERTY_INITIAL_HEAP_SIZE);
             }
         }
         properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialJavaHeapSize.name());
@@ -239,7 +241,7 @@ public final class LauncherSettings implements GameSettings {
             try {
                 gameDirectory = new File(new URI(gameDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
-                logger.warn("Invalid value '{}' for the parameter '{}'!", gameDirectoryStr, PROPERTY_GAME_DIRECTORY);
+                logger.warn(WARN_MSG_INVALID_VALUE, gameDirectoryStr, PROPERTY_GAME_DIRECTORY);
             }
         }
         if (gameDirectory != null) {
@@ -256,7 +258,7 @@ public final class LauncherSettings implements GameSettings {
             try {
                 gameDataDirectory = new File(new URI(gameDataDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
-                logger.warn("Invalid value '{}' for the parameter '{}'!", gameDataDirectoryStr, PROPERTY_GAME_DATA_DIRECTORY);
+                logger.warn(WARN_MSG_INVALID_VALUE, gameDataDirectoryStr, PROPERTY_GAME_DATA_DIRECTORY);
             }
         }
         if (gameDataDirectory != null) {
@@ -352,7 +354,7 @@ public final class LauncherSettings implements GameSettings {
             try {
                 return new File(new URI(gameDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
-                logger.error("Invalid value '{}' for the parameter '{}'!", gameDirectoryStr, PROPERTY_GAME_DIRECTORY);
+                logger.error(WARN_MSG_INVALID_VALUE, gameDirectoryStr, PROPERTY_GAME_DIRECTORY);
             }
         }
         return null;
@@ -368,7 +370,7 @@ public final class LauncherSettings implements GameSettings {
             try {
                 return new File(new URI(gameDataDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
-                logger.error("Invalid value '{}' for the parameter '{}'!", gameDataDirectoryStr, PROPERTY_GAME_DATA_DIRECTORY);
+                logger.error(WARN_MSG_INVALID_VALUE, gameDataDirectoryStr, PROPERTY_GAME_DATA_DIRECTORY);
             }
         }
         return null;
