@@ -70,7 +70,7 @@ final class GameDownloadWorker extends SwingWorker<Void, Void> implements Progre
     @Override
     protected Void doInBackground() {
         try {
-            gameDownloader.downloadZipFile(this);
+            gameDownloader.downloadZipFile(null);
             if (!isCancelled()) {
                 firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_extractZip"));
                 successfulDownloadAndExtract = gameDownloader.extractAfterDownload();

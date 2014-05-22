@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?scenebuilder-stylesheet terasology.css?>
+<!--
+  ~ Copyright 2013 MovingBlocks
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
 
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
@@ -20,22 +35,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import java.lang.String?>
 <?import java.net.URL?>
-<!--
-  ~ Copyright 2013 MovingBlocks
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~      http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
-
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="562.140625" prefWidth="968.1666259765625"
             xmlns:fx="http://javafx.com/fxml" fx:controller="org.terasology.launcher.gui.javafx.ApplicationController">
     <children>
@@ -141,7 +140,7 @@
                                         </TabPane>
                                         <HBox alignment="CENTER" prefHeight="32.0" prefWidth="969.0">
                                             <children>
-                                                <ProgressBar prefHeight="16.0" prefWidth="600.0" progress="0.69"/>
+                                                <ProgressBar fx:id="progressBar" prefHeight="16.0" prefWidth="600.0" progress="0.69" visible="false"/>
                                             </children>
                                         </HBox>
                                     </children>
@@ -160,9 +159,9 @@
                                 </ImageView>
                                 <HBox alignment="CENTER_RIGHT" prefHeight="96.0" prefWidth="668.1666259765625" spacing="32.0">
                                     <children>
-                                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="8.0" HBox.hgrow="ALWAYS">
+                                        <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="8.0" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <ChoiceBox maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+                                                <ChoiceBox fx:id="jobBox" maxWidth="1.7976931348623157E308">
                                                     <items>
                                                         <FXCollections fx:factory="observableArrayList">
                                                             <String fx:value="Item 1"/>
@@ -171,7 +170,7 @@
                                                         </FXCollections>
                                                     </items>
                                                 </ChoiceBox>
-                                                <ChoiceBox maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+                                                <ChoiceBox fx:id="buildVersionBox" maxWidth="1.7976931348623157E308">
                                                     <items>
                                                         <FXCollections fx:factory="observableArrayList">
                                                             <String fx:value="Item 1"/>
@@ -179,17 +178,17 @@
                                                             <String fx:value="Item 3"/>
                                                         </FXCollections>
                                                     </items>
-                                                    <HBox.margin>
-                                                        <Insets/>
-                                                    </HBox.margin>
                                                 </ChoiceBox>
                                             </children>
-                                        </HBox>
+                                            <padding>
+                                                <Insets left="8.0" right="8.0"/>
+                                            </padding>
+                                        </VBox>
                                         <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="4.0">
                                             <children>
-                                                <Button contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false"
-                                                        onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited"
-                                                        styleClass="controlButton">
+                                                <Button fx:id="downloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false"
+                                                        onAction="#downloadAction" onMouseEntered="#handleControlButtonMouseEntered"
+                                                        onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
                                                     <graphic>
                                                         <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
                                                             <image>
@@ -198,9 +197,9 @@
                                                         </ImageView>
                                                     </graphic>
                                                 </Button>
-                                                <Button contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false"
-                                                        onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited"
-                                                        styleClass="controlButton">
+                                                <Button fx:id="deleteButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false"
+                                                        onAction="#deleteAction" onMouseEntered="#handleControlButtonMouseEntered"
+                                                        onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
                                                     <graphic>
                                                         <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
                                                             <image>
@@ -209,9 +208,9 @@
                                                         </ImageView>
                                                     </graphic>
                                                 </Button>
-                                                <Button contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false"
-                                                        onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited"
-                                                        styleClass="controlButton">
+                                                <Button fx:id="startButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false"
+                                                        onAction="#startGameAction" onMouseEntered="#handleControlButtonMouseEntered"
+                                                        onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
                                                     <graphic>
                                                         <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
                                                             <image>
@@ -220,7 +219,7 @@
                                                         </ImageView>
                                                     </graphic>
                                                 </Button>
-                                                <Button fx:id="settingsButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleSettingsButtonAction"
+                                                <Button fx:id="settingsButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#openSettingsAction"
                                                         onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited"
                                                         styleClass="controlButton">
                                                     <graphic>

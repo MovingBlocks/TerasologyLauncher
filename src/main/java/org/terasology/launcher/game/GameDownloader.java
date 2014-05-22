@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 MovingBlocks
+ * Copyright 2013 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.gui.javafx.GameDownloadWorker;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.util.ProgressListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,8 +73,8 @@ public final class GameDownloader {
         return gameDirectory;
     }
 
-    public void downloadZipFile(ProgressListener progressListener) throws DownloadException {
-        DownloadUtils.downloadToFile(downloadURL, downloadZipFile, progressListener);
+    public void downloadZipFile(GameDownloadWorker worker) throws DownloadException {
+        DownloadUtils.downloadToFile(downloadURL, downloadZipFile, worker);
     }
 
     public boolean extractAfterDownload() {

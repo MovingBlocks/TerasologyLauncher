@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.game;
 
+import javafx.application.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
@@ -23,7 +24,6 @@ import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.JobResult;
-import org.terasology.launcher.util.ProgressListener;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -77,7 +77,7 @@ public final class TerasologyGameVersions {
         return null;
     }
 
-    public synchronized void loadGameVersions(GameSettings gameSettings, File launcherDirectory, File gameDirectory, ProgressListener progressListener) {
+    public synchronized void loadGameVersions(GameSettings gameSettings, File launcherDirectory, File gameDirectory, Application app) {
         final File cacheDirectory = getAndCheckCacheDirectory(launcherDirectory);
 
         gameVersionLists.clear();
@@ -86,7 +86,9 @@ public final class TerasologyGameVersions {
         final Map<GameJob, SortedSet<Integer>> buildNumbersMap = new HashMap<>();
         final Map<GameJob, Integer> lastBuildNumbers = new HashMap<>();
         for (GameJob job : GameJob.values()) {
-            progressListener.update();
+            // TODO JavaFX Preloader
+            // app.notifyPreloader();
+            // progressListener.update();
 
             gameVersionMaps.put(job, new TreeMap<Integer, TerasologyGameVersion>());
             final SortedSet<Integer> buildNumbers = new TreeSet<>();
@@ -96,10 +98,12 @@ public final class TerasologyGameVersions {
             lastBuildNumbers.put(job, loadLastSuccessfulBuildNumber(buildNumbers, job));
         }
 
-        loadInstalledGames(gameDirectory, buildNumbersMap, progressListener);
+        loadInstalledGames(gameDirectory, buildNumbersMap, app);
 
         for (GameJob job : GameJob.values()) {
-            progressListener.update();
+            // TODO JavaFX Preloader
+            // app.notifyPreloader();
+            // progressListener.update();
 
             final SortedMap<Integer, TerasologyGameVersion> gameVersionMap = gameVersionMaps.get(job);
             final SortedSet<Integer> buildNumbers = buildNumbersMap.get(job);
@@ -112,7 +116,7 @@ public final class TerasologyGameVersions {
             if (cacheDirectory != null) {
                 cachedGameVersions = readFromCache(job, buildNumbers, cacheDirectory);
             }
-            loadGameVersions(buildNumbers, job, gameVersionMap, cachedGameVersions, progressListener);
+            loadGameVersions(buildNumbers, job, gameVersionMap, cachedGameVersions, app);
             if (cacheDirectory != null) {
                 writeToCache(job, cacheDirectory);
             }
@@ -172,8 +176,10 @@ public final class TerasologyGameVersions {
         return lastSuccessfulBuildNumber;
     }
 
-    private void loadInstalledGames(File directory, Map<GameJob, SortedSet<Integer>> buildNumbersMap, ProgressListener progressListener) {
-        progressListener.update();
+    private void loadInstalledGames(File directory, Map<GameJob, SortedSet<Integer>> buildNumbersMap, Application app) {
+        // TODO JavaFX Preloader
+        // app.notifyPreloader();
+        // progressListener.update();
 
         final File[] gameJar = directory.listFiles(new FileFilter() {
             @Override
@@ -205,7 +211,7 @@ public final class TerasologyGameVersions {
             });
             if (subDirectories != null) {
                 for (File subDirectory : subDirectories) {
-                    loadInstalledGames(subDirectory, buildNumbersMap, progressListener);
+                    loadInstalledGames(subDirectory, buildNumbersMap, app);
                 }
             }
         }
@@ -318,9 +324,11 @@ public final class TerasologyGameVersions {
     }
 
     private void loadGameVersions(SortedSet<Integer> buildNumbers, GameJob job, SortedMap<Integer, TerasologyGameVersion> gameVersions,
-                                  SortedMap<Integer, TerasologyGameVersion> cachedGameVersionMap, ProgressListener progressListener) {
+                                  SortedMap<Integer, TerasologyGameVersion> cachedGameVersionMap, Application app) {
         for (Integer buildNumber : buildNumbers) {
-            progressListener.update();
+            // TODO JavaFX Preloader
+            // app.notifyPreloader();
+            // progressListener.update();
 
             final TerasologyGameVersion gameVersion;
             if (gameVersions.containsKey(buildNumber)) {
