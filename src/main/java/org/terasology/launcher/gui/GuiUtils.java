@@ -16,7 +16,7 @@
 
 package org.terasology.launcher.gui;
 
-import javafx.stage.FileChooser;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.terasology.launcher.util.BundleUtils;
 
@@ -38,11 +38,10 @@ public final class GuiUtils {
     }
 
     public static File chooseDirectory(Component parentComponent, File directory, String title) {
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(directory.getParentFile());
-        fileChooser.setInitialFileName(directory.getName());
+        final DirectoryChooser fileChooser = new DirectoryChooser();
+        fileChooser.setInitialDirectory(directory);
         fileChooser.setTitle(title);
 
-        return fileChooser.showSaveDialog(new Stage());
+        return fileChooser.showDialog(new Stage());
     }
 }
