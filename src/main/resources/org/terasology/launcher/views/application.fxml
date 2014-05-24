@@ -2,7 +2,7 @@
 
 <?scenebuilder-stylesheet terasology.css?>
 <!--
-  ~ Copyright 2013 MovingBlocks
+  ~ Copyright 2014 MovingBlocks
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -170,7 +170,8 @@
                                                         </FXCollections>
                                                     </items>
                                                 </ChoiceBox>
-                                                <ChoiceBox fx:id="buildVersionBox" maxWidth="1.7976931348623157E308">
+                                                <ChoiceBox fx:id="buildVersionBox" maxWidth="1.7976931348623157E308"
+                                                           style=".choice-box {&#10;    -fx-pref-width: 100;&#10;}&#10;&#10;.choice-box-popup &gt; .list-view {&#10;    -fx-pref-width: 100;&#10;}">
                                                     <items>
                                                         <FXCollections fx:factory="observableArrayList">
                                                             <String fx:value="Item 1"/>
