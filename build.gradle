@@ -29,6 +29,7 @@ apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
+apply from: "http://dl.bintray.com/content/shemnon/javafx-gradle/0.4.0/javafx.plugin"
 
 // Test for right version of Java in use for running this script
 assert org.gradle.api.JavaVersion.current().isJava7Compatible()
@@ -81,7 +82,9 @@ dependencies {
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
 sourceCompatibility = 1.7
 
-mainClassName = "org.terasology.launcher.TerasologyLauncher"
+javafx {
+    mainClass = 'org.terasology.launcher.TerasologyLauncher'
+}
 
 checkstyle {
     ignoreFailures = true
