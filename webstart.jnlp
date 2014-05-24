@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="6.0+" codebase="." href="webstart.jnlp">
+<jnlp spec="6.0+" xmlns:jfx="http://javafx.com" codebase="." href="webstart.jnlp">
     <information>
         <title>Terasology Launcher</title>
         <vendor>MovingBlocks</vendor>
@@ -25,7 +25,8 @@
         <!-- Acceptable JVMs in preferred order, best first -->
         <java version="1.8+" href="http://java.sun.com/products/autodl/j2se" java-vm-args="-ea" initial-heap-size="128m" max-heap-size="1024m"/>
         <java version="1.7+" href="http://java.sun.com/products/autodl/j2se" java-vm-args="-ea" initial-heap-size="128m" max-heap-size="1024m"/>
-        
+        <jfx:javafx-runtime version="2.1+"/>
+
         <jar href="TerasologyLauncher.jar" main="true" />
         
         <jar href="platform-3.5.2.jar" />

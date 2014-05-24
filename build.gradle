@@ -138,13 +138,13 @@ distTar.dependsOn createVersionInfoFile
 jar {
     // DEBUG: include all source files to verify that class files are up-to-date 
 //    from sourceSets.main.java
-	
-	// Copying the jnlp webstart file in to the signed JAR allows JWS to 
-	// verify the correctness. The freestanding copy is still needed though.
-	into ('JNLP_INF') {
-		from 'webstart.jnlp'
-		rename 'webstart.jnlp', 'APPLICATION.JNLP'
-	}
+    
+    // Copying the jnlp webstart file in to the signed JAR allows JWS to 
+    // verify the correctness. The freestanding copy is still needed though.
+    into ('JNLP_INF') {
+        from 'webstart.jnlp'
+        rename 'webstart.jnlp', 'APPLICATION.JNLP'
+    }
     
     // replace development "logback.xml" with productive "logback_jar.xml"
     exclude "logback.xml"
@@ -190,13 +190,16 @@ task copyLibs(type: Copy) {
 
     dependsOn jar
     from configurations.compile         // these are the compile-time dependencies
+
+    exclude 'jfxrt.jar'                 // no need to deploy the JavaFX runtime - it's part of the JRE now
+
     from jar                            // this is the applet.jar file
     from 'webstart.jnlp'                // jnlp file
     
-	into ('icons') {                    // splash screen, etc
-	    from 'icons'
+    into ('icons') {                    // splash screen, etc
+        from 'icons'
     }
-	
+    
     into "$buildDir/webstart"
     
     eachFile { println "Copying " + it.file.getName() }
@@ -213,7 +216,7 @@ copyLibs.doLast {
     FileTree tree = fileTree(dir: "$buildDir/webstart")
     
     tree.include '*.jar'
-        
+    
     tree.each {
         if (!IsSigned.isSigned(it, null)) {
             logger.lifecycle("Signing $it");
@@ -229,38 +232,37 @@ def sign(File it) {
 }
 
 task copyExtra(type: Copy) {
-	filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-	
-	from('README.md') {
-		rename('README.md', 'README.txt')
-	}
-	
-	from('CHANGELOG.md') {
-		rename('CHANGELOG.md', 'CHANGELOG.txt')
-	}
-	
-	from('CONTRIBUTING.md') {
-		rename('CONTRIBUTING.md', 'CONTRIBUTING.txt')
-	}
-	
-	from('LICENSE')
-	from('NOTICE')
-	
-	from('src/template/VERSION.md') {
-		expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH), 
-				dateTime: startDateTimeString, displayVersion: displayVersion)
-		rename('VERSION.md', 'VERSION.txt')
-	}
-	
-	into "$buildDir/webstart/"
+    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+    
+    from('README.md') {
+        rename('README.md', 'README.txt')
+    }
+    
+    from('CHANGELOG.md') {
+        rename('CHANGELOG.md', 'CHANGELOG.txt')
+    }
+    
+    from('CONTRIBUTING.md') {
+        rename('CONTRIBUTING.md', 'CONTRIBUTING.txt')
+    }
+    
+    from('LICENSE')
+    from('NOTICE')
+    
+    from('src/template/VERSION.md') {
+        expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH), 
+                dateTime: startDateTimeString, displayVersion: displayVersion)
+        rename('VERSION.md', 'VERSION.txt')
+    }
+    
+    into "$buildDir/webstart/"
 }
 
 task webstart {
     description "Prepare WebStart launcher files"
     
     dependsOn copyLibs
-	dependsOn copyExtra
-    dependsOn distChangelog
+    dependsOn copyExtra
     doLast {
         println 'Created release: ' + displayVersion
     }
