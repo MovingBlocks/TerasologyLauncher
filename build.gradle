@@ -39,6 +39,7 @@ wrapper {
 }
 
 import org.apache.tools.ant.filters.FixCrLfFilter;
+import org.apache.tools.ant.taskdefs.condition.IsSigned;
 import java.text.SimpleDateFormat;
 
 def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
@@ -132,14 +133,34 @@ distZip.dependsOn createVersionInfoFile
 distTar.dependsOn createVersionInfoFile
 
 jar {
+    // DEBUG: include all source files to verify that class files are up-to-date 
+//    from sourceSets.main.java
+	
+	// Copying the jnlp webstart file in to the signed JAR allows JWS to 
+	// verify the correctness. The freestanding copy is still needed though.
+	into ('JNLP_INF') {
+		from 'webstart.jnlp'
+		rename 'webstart.jnlp', 'APPLICATION.JNLP'
+	}
+    
     // replace development "logback.xml" with productive "logback_jar.xml"
     exclude "logback.xml"
     rename('logback_jar.xml', 'logback.xml')
     manifest {
         def manifestClasspath = configurations.runtime.collect { it.getName() }.join(" ")
-        attributes("Main-Class": mainClassName, "Class-Path": manifestClasspath,
-                "Implementation-Title": project.name, "Implementation-Version": displayVersion,
-                "SplashScreen-Image": splashImage)
+        attributes("Main-Class": "org.terasology.launcher.TerasologyLauncher")
+        attributes("Class-Path": manifestClasspath)
+        attributes("Implementation-Title": project.name)
+        attributes("Implementation-Version": displayVersion)
+        attributes("SplashScreen-Image": splashImage)
+        
+        // allow everything
+        attributes('Permissions': 'all-permissions')
+        attributes('Codebase': '*')
+        attributes('Application-Name': project.name)
+        attributes('Application-Library-Allowable-Codebase': '*')
+        attributes('Caller-Allowable-Codebase': '*')
+        attributes('Trusted-Only': 'false')
     }
 }
 
@@ -161,45 +182,85 @@ task createRelease {
     }
 }
 
-applicationDistribution.from('README.md')
+task copyLibs(type: Copy) {
+    description = "Copy all webstart-related files to the webstart folder (and sign the jars)"
 
-applicationDistribution.from('README.md') {
-    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-    rename('README.md', 'README.txt')
+    dependsOn jar
+    from configurations.compile         // these are the compile-time dependencies
+    from jar                            // this is the applet.jar file
+    from 'webstart.jnlp'                // jnlp file
+    
+	into ('icons') {                    // splash screen, etc
+	    from 'icons'
+    }
+	
+    into "$buildDir/webstart"
+    
+    eachFile { println "Copying " + it.file.getName() }
 }
 
-applicationDistribution.from('CHANGELOG.md')
+// I wanted the signing to be a task, but it wouldn't run after copyLibs :-(
+// Sign the jar files so they can get full rights in a browser
+copyLibs.doLast {
 
-applicationDistribution.from('CHANGELOG.md') {
-    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-    rename('CHANGELOG.md', 'CHANGELOG.txt')
+    if (!file('certum.jks').exists()) {
+        throw new GradleException("Copy the \"certum.jks\" keystore file in \"$projectDir\" first.");
+    }
+
+    FileTree tree = fileTree(dir: "$buildDir/webstart")
+    
+    tree.include '*.jar'
+        
+    tree.each {
+        if (!IsSigned.isSigned(it, null)) {
+            logger.lifecycle("Signing $it");
+            sign(it);
+        } else {
+            logger.lifecycle("File $it already signed");
+        }
+    }    
 }
 
-applicationDistribution.from('CONTRIBUTING.md')
-
-applicationDistribution.from('CONTRIBUTING.md') {
-    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-    rename('CONTRIBUTING.md', 'CONTRIBUTING.txt')
+def sign(File it) {
+    ant.signjar(jar: it, keystore: "certum.jks", alias: 'cervator', storepass: 'Terasology', tsaurl: 'http://time.certum.pl/')
 }
 
-applicationDistribution.from('LICENSE') {
-    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+task copyExtra(type: Copy) {
+	filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+	
+	from('README.md') {
+		rename('README.md', 'README.txt')
+	}
+	
+	from('CHANGELOG.md') {
+		rename('CHANGELOG.md', 'CHANGELOG.txt')
+	}
+	
+	from('CONTRIBUTING.md') {
+		rename('CONTRIBUTING.md', 'CONTRIBUTING.txt')
+	}
+	
+	from('LICENSE')
+	from('NOTICE')
+	
+	from('src/template/VERSION.md') {
+		expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH), 
+				dateTime: startDateTimeString, displayVersion: displayVersion)
+		rename('VERSION.md', 'VERSION.txt')
+	}
+	
+	into "$buildDir/webstart/"
 }
 
-applicationDistribution.from('NOTICE') {
-    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-}
-
-applicationDistribution.from('src/template/VERSION.md') {
-    expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH),
-            dateTime: startDateTimeString, displayVersion: displayVersion)
-}
-
-applicationDistribution.from('src/template/VERSION.md') {
-    expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH),
-            dateTime: startDateTimeString, displayVersion: displayVersion)
-    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
-    rename('VERSION.md', 'VERSION.txt')
+task webstart {
+    description "Prepare WebStart launcher files"
+    
+    dependsOn copyLibs
+	dependsOn copyExtra
+    dependsOn distChangelog
+    doLast {
+        println 'Created release: ' + displayVersion
+    }
 }
 
 // Setup IntelliJ-IDEA
