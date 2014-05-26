@@ -207,7 +207,7 @@ task copyLibs(type: Copy) {
 
 // I wanted the signing to be a task, but it wouldn't run after copyLibs :-(
 // Sign the jar files so they can get full rights in a browser
-copyLibs.doLast {
+task signLibs(dependsOn: copyLibs) << {
 
     if (!file('certum.jks').exists()) {
         throw new GradleException("Copy the \"certum.jks\" keystore file in \"$projectDir\" first.");
@@ -261,7 +261,7 @@ task copyExtra(type: Copy) {
 task webstart {
     description "Prepare WebStart launcher files"
     
-    dependsOn copyLibs
+    dependsOn signLibs
     dependsOn copyExtra
     doLast {
         println 'Created release: ' + displayVersion
