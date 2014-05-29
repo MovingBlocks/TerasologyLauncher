@@ -235,20 +235,13 @@ public class SettingsController {
         populateJob();
         populateHeapSize();
         populateLanguage();
-        // TODO populateSearchForLauncherUpdates();
-        // TODO populateCloseLauncherAfterGameStart();
+        populateSearchForLauncherUpdates();
+        populateCloseLauncherAfterGameStart();
         populateSaveDownloadedFiles();
         gameDirectory = newLauncherSettings.getGameDirectory();
         gameDataDirectory = newLauncherSettings.getGameDataDirectory();
 
         updateDirectoryPathLabels();
-    }
-
-    private void updateDirectoryPathLabels() {
-        gameDirectoryPath.setText(gameDirectory.getPath());
-        gameDataDirectoryPath.setText(gameDataDirectory.getPath());
-        launcherDirectoryPath.setText(launcherDirectory.getPath());
-        downloadDirectoryPath.setText(downloadDirectory.getPath());
     }
 
     private void populateJob() {
@@ -278,21 +271,6 @@ public class SettingsController {
         updateBuildVersionBox();
     }
 
-    private void updateBuildVersionBox() {
-        buildVersionBox.getItems().clear();
-
-        final JobItem jobItem = jobBox.getSelectionModel().getSelectedItem();
-        final int buildVersion = launcherSettings.getBuildVersion(jobItem.getJob());
-
-        for (TerasologyGameVersion version : gameVersions.getGameVersionList(jobItem.getJob())) {
-            final VersionItem versionItem = new VersionItem(version);
-            buildVersionBox.getItems().add(versionItem);
-            if (versionItem.getVersion() == buildVersion) {
-                buildVersionBox.getSelectionModel().select(versionItem);
-            }
-        }
-    }
-
     private void populateHeapSize() {
         maxHeapSizeBox.getItems().clear();
         initialHeapSizeBox.getItems().clear();
@@ -301,11 +279,6 @@ public class SettingsController {
             initialHeapSizeBox.getItems().add(heapSize);
         }
         updateHeapSizeSelection();
-    }
-
-    private void updateHeapSizeSelection() {
-        maxHeapSizeBox.getSelectionModel().select(launcherSettings.getMaxHeapSize());
-        initialHeapSizeBox.getSelectionModel().select(launcherSettings.getInitialHeapSize());
     }
 
     private void populateLanguage() {
@@ -323,7 +296,42 @@ public class SettingsController {
         }
     }
 
+    private void populateSearchForLauncherUpdates() {
+        searchForUpdatesBox.setSelected(launcherSettings.isSearchForLauncherUpdates());
+    }
+
+    private void populateCloseLauncherAfterGameStart() {
+        closeAfterStartBox.setSelected(launcherSettings.isCloseLauncherAfterGameStart());
+    }
+
     private void populateSaveDownloadedFiles() {
         saveDownloadedFilesBox.setSelected(launcherSettings.isSaveDownloadedFiles());
+    }
+
+    private void updateBuildVersionBox() {
+        buildVersionBox.getItems().clear();
+
+        final JobItem jobItem = jobBox.getSelectionModel().getSelectedItem();
+        final int buildVersion = launcherSettings.getBuildVersion(jobItem.getJob());
+
+        for (TerasologyGameVersion version : gameVersions.getGameVersionList(jobItem.getJob())) {
+            final VersionItem versionItem = new VersionItem(version);
+            buildVersionBox.getItems().add(versionItem);
+            if (versionItem.getVersion() == buildVersion) {
+                buildVersionBox.getSelectionModel().select(versionItem);
+            }
+        }
+    }
+
+    private void updateDirectoryPathLabels() {
+        gameDirectoryPath.setText(gameDirectory.getPath());
+        gameDataDirectoryPath.setText(gameDataDirectory.getPath());
+        launcherDirectoryPath.setText(launcherDirectory.getPath());
+        downloadDirectoryPath.setText(downloadDirectory.getPath());
+    }
+
+    private void updateHeapSizeSelection() {
+        maxHeapSizeBox.getSelectionModel().select(launcherSettings.getMaxHeapSize());
+        initialHeapSizeBox.getSelectionModel().select(launcherSettings.getInitialHeapSize());
     }
 }
