@@ -26,4 +26,8 @@ public interface GameSettings {
     void setBuildVersion(int version, GameJob job);
 
     int getBuildVersion(GameJob job);
+
+    void setLastBuildNumber(Integer lastBuildNumber, GameJob job);
+
+    Integer getLastBuildNumber(GameJob job);
 }
