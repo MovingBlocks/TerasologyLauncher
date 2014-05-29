@@ -1,7 +1,7 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 1.4.0 (2014-05-29, unreleased)
+## 1.4.0 (2014-05-29)
 * Translation into Polish
 * Fallback for missing language translations
 * New setting "Save downloaded files" and new "download" directory
