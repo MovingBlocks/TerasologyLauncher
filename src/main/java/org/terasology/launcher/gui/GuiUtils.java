@@ -16,9 +16,10 @@
 
 package org.terasology.launcher.gui;
 
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import org.terasology.launcher.util.BundleUtils;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.File;
@@ -37,14 +38,10 @@ public final class GuiUtils {
     }
 
     public static File chooseDirectory(Component parentComponent, File directory, String title) {
-        final JFileChooser fileChooser = new JFileChooser(directory.getParentFile());
-        // Cannot use mode DIRECTORIES_ONLY, because the preselected name doesn't work.
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        fileChooser.setSelectedFile(directory);
-        fileChooser.setDialogTitle(title);
-        if (fileChooser.showSaveDialog(parentComponent) != JFileChooser.APPROVE_OPTION) {
-            return null;
-        }
-        return fileChooser.getSelectedFile();
+        final DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setInitialDirectory(directory);
+        directoryChooser.setTitle(title);
+
+        return directoryChooser.showDialog(new Stage());
     }
 }

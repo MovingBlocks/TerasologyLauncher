@@ -42,3 +42,6 @@ $RECYCLE.BIN/
 
 # Ignore output stuff
 TerasologyLauncher.log
+
+# Signing certificate - Do not EVER put this file into the repository
+certum.jks
