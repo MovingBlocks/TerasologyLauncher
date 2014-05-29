@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ public final class GuiUtils {
     }
 
     public static File chooseDirectory(Component parentComponent, File directory, String title) {
-        final DirectoryChooser fileChooser = new DirectoryChooser();
-        fileChooser.setInitialDirectory(directory);
-        fileChooser.setTitle(title);
+        final DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setInitialDirectory(directory);
+        directoryChooser.setTitle(title);
 
-        return fileChooser.showDialog(new Stage());
+        return directoryChooser.showDialog(new Stage());
     }
 }

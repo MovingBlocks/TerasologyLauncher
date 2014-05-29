@@ -114,17 +114,18 @@
                                                 </HBox>
                                                 <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                                     <children>
-                                                        <Label graphicTextGap="8.0" maxWidth="1.7976931348623157E308" styleClass="boxed" text="Label">
+                                                        <Label fx:id="gameDirectoryPath" graphicTextGap="8.0" maxWidth="1.7976931348623157E308" styleClass="boxed"
+                                                               text="Label">
                                                             <VBox.margin>
                                                                 <Insets/>
                                                             </VBox.margin>
                                                         </Label>
                                                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="259.0" spacing="8.0">
                                                             <children>
-                                                                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%settings_game_gameDirectory_open"
-                                                                        HBox.hgrow="ALWAYS"/>
-                                                                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%settings_game_gameDirectory_edit"
-                                                                        HBox.hgrow="ALWAYS"/>
+                                                                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#openGameDirectoryAction"
+                                                                        text="%settings_game_gameDirectory_open" HBox.hgrow="ALWAYS"/>
+                                                                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#editGameDirectoryAction"
+                                                                        text="%settings_game_gameDirectory_edit" HBox.hgrow="ALWAYS"/>
                                                             </children>
                                                         </HBox>
                                                     </children>
@@ -134,13 +135,14 @@
                                                 </VBox>
                                                 <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="3">
                                                     <children>
-                                                        <Label maxWidth="1.7976931348623157E308" styleClass="boxed" text="Label" VBox.vgrow="ALWAYS"/>
+                                                        <Label fx:id="gameDataDirectoryPath" maxWidth="1.7976931348623157E308" styleClass="boxed" text="Label"
+                                                               VBox.vgrow="ALWAYS"/>
                                                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="259.0" spacing="8.0">
                                                             <children>
-                                                                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%settings_game_gameDataDirectory_open"
-                                                                        HBox.hgrow="ALWAYS"/>
-                                                                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%settings_game_gameDataDirectory_edit"
-                                                                        HBox.hgrow="ALWAYS"/>
+                                                                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#openGameDataDirectoryAction"
+                                                                        text="%settings_game_gameDataDirectory_open" HBox.hgrow="ALWAYS"/>
+                                                                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#editGameDataDirectoryAction"
+                                                                        text="%settings_game_gameDataDirectory_edit" HBox.hgrow="ALWAYS"/>
                                                             </children>
                                                         </HBox>
                                                     </children>
@@ -204,7 +206,7 @@
                                                 <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="8.0" GridPane.columnIndex="1"
                                                       GridPane.rowIndex="1">
                                                     <children>
-                                                        <CheckBox fx:id="closeLauncherBox" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"/>
+                                                        <CheckBox id="closeLauncherBox" fx:id="closeAfterStartBox" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"/>
                                                     </children>
                                                     <padding>
                                                         <Insets left="8.0" right="8.0" fx:id="x1"/>
@@ -222,9 +224,10 @@
                                                 <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="8.0" GridPane.columnIndex="1"
                                                       GridPane.rowIndex="4">
                                                     <children>
-                                                        <Label maxWidth="1.7976931348623157E308" styleClass="boxed" text="Label" HBox.hgrow="ALWAYS"/>
-                                                        <Button maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="128.0"
-                                                                text="%settings_launcher_launcherDirectory_open" HBox.hgrow="SOMETIMES"/>
+                                                        <Label fx:id="launcherDirectoryPath" maxWidth="1.7976931348623157E308" styleClass="boxed" text="Label"
+                                                               HBox.hgrow="ALWAYS"/>
+                                                        <Button maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openLauncherDirectoryAction"
+                                                                prefWidth="128.0" text="%settings_launcher_launcherDirectory_open" HBox.hgrow="SOMETIMES"/>
                                                     </children>
                                                     <padding>
                                                         <Insets left="8.0" right="8.0" fx:id="x1"/>
@@ -233,9 +236,10 @@
                                                 <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="8.0" GridPane.columnIndex="1"
                                                       GridPane.rowIndex="5">
                                                     <children>
-                                                        <Label maxWidth="1.7976931348623157E308" styleClass="boxed" text="Label" HBox.hgrow="ALWAYS"/>
-                                                        <Button maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="128.0"
-                                                                text="%settings_launcher_downloadDirectory_open" HBox.hgrow="SOMETIMES"/>
+                                                        <Label fx:id="downloadDirectoryPath" maxWidth="1.7976931348623157E308" onDragDetected="#openDownloadDirectoryAction"
+                                                               styleClass="boxed" text="Label" HBox.hgrow="ALWAYS"/>
+                                                        <Button maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openDownloadDirectoryAction"
+                                                                prefWidth="128.0" text="%settings_launcher_downloadDirectory_open" HBox.hgrow="SOMETIMES"/>
                                                     </children>
                                                     <padding>
                                                         <Insets left="8.0" right="8.0" fx:id="x1"/>

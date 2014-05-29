@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
@@ -30,11 +31,14 @@ import org.terasology.launcher.game.JobItem;
 import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.game.VersionItem;
+import org.terasology.launcher.gui.GuiUtils;
 import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 
 import javax.swing.JOptionPane;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -53,15 +57,29 @@ public class SettingsController {
     private File gameDataDirectory;
 
     @FXML
-    ComboBox<JobItem> jobBox;
+    private ComboBox<JobItem> jobBox;
     @FXML
-    ComboBox<VersionItem> buildVersionBox;
+    private ComboBox<VersionItem> buildVersionBox;
     @FXML
-    ComboBox<JavaHeapSize> maxHeapSizeBox, initialHeapSizeBox;
+    private ComboBox<JavaHeapSize> maxHeapSizeBox;
     @FXML
-    ChoiceBox<String> languageBox;
+    private ComboBox<JavaHeapSize> initialHeapSizeBox;
     @FXML
-    CheckBox saveDownloadedFilesBox;
+    private ChoiceBox<String> languageBox;
+    @FXML
+    private CheckBox saveDownloadedFilesBox;
+    @FXML
+    private CheckBox searchForUpdatesBox;
+    @FXML
+    private CheckBox closeAfterStartBox;
+    @FXML
+    private Label gameDirectoryPath;
+    @FXML
+    private Label gameDataDirectoryPath;
+    @FXML
+    private Label launcherDirectoryPath;
+    @FXML
+    private Label downloadDirectoryPath;
 
     @FXML
     protected void cancelSettingsAction(ActionEvent event) {
@@ -93,10 +111,10 @@ public class SettingsController {
         launcherSettings.setLocale(Languages.getCurrentLocale());
 
         // save searchForLauncherUpdates
-        // TODO launcherSettings.setSearchForLauncherUpdates(searchForLauncherUpdatesBox.isSelected());
+        launcherSettings.setSearchForLauncherUpdates(searchForUpdatesBox.isSelected());
 
         // save closeLauncherAfterGameStart
-        // TODO launcherSettings.setCloseLauncherAfterGameStart(closeLauncherAfterGameStartBox.isSelected());
+        launcherSettings.setCloseLauncherAfterGameStart(closeAfterStartBox.isSelected());
 
         // save saveDownloadedFiles
         launcherSettings.setSaveDownloadedFiles(saveDownloadedFilesBox.isSelected());
@@ -115,11 +133,104 @@ public class SettingsController {
         }
     }
 
-    public void initialize(final File launcherDirectory, final File downloadDirectory, final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
-        this.launcherDirectory = launcherDirectory;
-        this.downloadDirectory = downloadDirectory;
-        this.launcherSettings = launcherSettings;
-        this.gameVersions = gameVersions;
+    @FXML
+    protected void openGameDirectoryAction() {
+        try {
+            DirectoryUtils.checkDirectory(gameDirectory);
+            Desktop.getDesktop().open(gameDirectory);
+        } catch (IOException e) {
+            logger.error("The game directory can not be opened! '{}'", gameDirectory, e);
+            JOptionPane.showMessageDialog(null,
+                BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory,
+                BundleUtils.getLabel("message_error_title"),
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    @FXML
+    protected void editGameDirectoryAction() {
+        final File selectedFile = GuiUtils.chooseDirectory(null, gameDirectory, BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
+        if (selectedFile != null) {
+            try {
+                DirectoryUtils.checkDirectory(selectedFile);
+                gameDirectory = selectedFile;
+                updateDirectoryPathLabels();
+            } catch (IOException e) {
+                logger.error("The game directory can not be created or used! '{}'", gameDirectory, e);
+                JOptionPane.showMessageDialog(null,
+                    BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory,
+                    BundleUtils.getLabel("message_error_title"),
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    @FXML
+    protected void openGameDataDirectoryAction() {
+        try {
+            DirectoryUtils.checkDirectory(gameDataDirectory);
+            Desktop.getDesktop().open(gameDataDirectory);
+        } catch (IOException e) {
+            logger.error("The game data directory can not be opened! '{}'", gameDataDirectory, e);
+            JOptionPane.showMessageDialog(null,
+                BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory,
+                BundleUtils.getLabel("message_error_title"),
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    @FXML
+    protected void editGameDataDirectoryAction() {
+        final File selectedFile = GuiUtils.chooseDirectory(null, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
+        if (selectedFile != null) {
+            try {
+                DirectoryUtils.checkDirectory(selectedFile);
+                gameDataDirectory = selectedFile;
+                updateDirectoryPathLabels();
+            } catch (IOException e) {
+                logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
+                JOptionPane.showMessageDialog(null,
+                    BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory,
+                    BundleUtils.getLabel("message_error_title"),
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    @FXML
+    protected void openLauncherDirectoryAction() {
+        try {
+            DirectoryUtils.checkDirectory(launcherDirectory);
+            Desktop.getDesktop().open(launcherDirectory);
+        } catch (IOException e) {
+            logger.error("The game launcher directory can not be opened! '{}'", launcherDirectory, e);
+            JOptionPane.showMessageDialog(null,
+                BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory,
+                BundleUtils.getLabel("message_error_title"),
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    @FXML
+    protected void openDownloadDirectoryAction() {
+        try {
+            DirectoryUtils.checkDirectory(downloadDirectory);
+            Desktop.getDesktop().open(downloadDirectory);
+        } catch (IOException e) {
+            logger.error("The game download directory can not be opened! '{}'", downloadDirectory, e);
+            JOptionPane.showMessageDialog(null,
+                BundleUtils.getLabel("message_error_downloadDirectory") + "\n" + downloadDirectory,
+                BundleUtils.getLabel("message_error_title"),
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final LauncherSettings newLauncherSettings,
+                           final TerasologyGameVersions newGameVersions) {
+        this.launcherDirectory = newLauncherDirectory;
+        this.downloadDirectory = newDownloadDirectory;
+        this.launcherSettings = newLauncherSettings;
+        this.gameVersions = newGameVersions;
 
         populateJob();
         populateHeapSize();
@@ -127,11 +238,19 @@ public class SettingsController {
         // TODO populateSearchForLauncherUpdates();
         // TODO populateCloseLauncherAfterGameStart();
         populateSaveDownloadedFiles();
-        gameDirectory = launcherSettings.getGameDirectory();
-        gameDataDirectory = launcherSettings.getGameDataDirectory();
+        gameDirectory = newLauncherSettings.getGameDirectory();
+        gameDataDirectory = newLauncherSettings.getGameDataDirectory();
+
+        updateDirectoryPathLabels();
     }
 
-    // Private methods for initializing and populating choice boxes, etc.
+    private void updateDirectoryPathLabels() {
+        gameDirectoryPath.setText(gameDirectory.getPath());
+        gameDataDirectoryPath.setText(gameDataDirectory.getPath());
+        launcherDirectoryPath.setText(launcherDirectory.getPath());
+        downloadDirectoryPath.setText(downloadDirectory.getPath());
+    }
+
     private void populateJob() {
         jobBox.getItems().clear();
 
