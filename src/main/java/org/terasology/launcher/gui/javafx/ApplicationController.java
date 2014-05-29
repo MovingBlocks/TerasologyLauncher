@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -49,8 +48,10 @@ import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
 
 import javax.swing.JOptionPane;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -67,19 +68,25 @@ public class ApplicationController {
     private GameDownloadWorker gameDownloadWorker;
 
     @FXML
-    ChoiceBox<JobItem> jobBox;
+    private ChoiceBox<JobItem> jobBox;
     @FXML
-    ChoiceBox<VersionItem> buildVersionBox;
+    private ChoiceBox<VersionItem> buildVersionBox;
     @FXML
-    ProgressBar progressBar;
+    private Node launcherFrame;
     @FXML
-    Button downloadButton, startButton, deleteButton;
+    private ProgressBar progressBar;
+    @FXML
+    private Button downloadButton;
+    @FXML
+    private Button cancelDownloadButton;
+    @FXML
+    private Button startButton;
+    @FXML
+    private Button deleteButton;
 
-
     @FXML
-    protected void handleExitButtonAction(ActionEvent event) {
-        logger.debug("Closing the launcher ...");
-        System.exit(0);
+    protected void handleExitButtonAction() {
+        close();
     }
 
     @FXML
@@ -111,7 +118,21 @@ public class ApplicationController {
     }
 
     @FXML
-    protected void openSettingsAction(ActionEvent event) {
+    protected void handleSocialButtonMousePressed(MouseEvent event) {
+        final Node source = (Node) event.getSource();
+        final Transition t = createScaleTransition(0.8, source);
+        t.playFromStart();
+    }
+
+    @FXML
+    protected void handleSocialButtonMouseReleased(MouseEvent event) {
+        final Node source = (Node) event.getSource();
+        final Transition t = createScaleTransition(1.2, source);
+        t.playFromStart();
+    }
+
+    @FXML
+    protected void openSettingsAction() {
         try {
             final FXMLLoader fxmlLoader = new FXMLLoader(BundleUtils.getFXMLUrl("settings"), ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle"));
             Parent root = (Parent) fxmlLoader.load();
@@ -131,7 +152,7 @@ public class ApplicationController {
     }
 
     @FXML
-    protected void startGameAction(ActionEvent event) {
+    protected void startGameAction() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if ((gameVersion == null) || !gameVersion.isInstalled()) {
             logger.warn("The selected game version can not be started! '{}'", gameVersion);
@@ -149,18 +170,18 @@ public class ApplicationController {
                 JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_gameStart"),
                     BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
             } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
-                /*if (gameDownloadWorker == null) {
+                if (gameDownloadWorker == null) {
                     logger.info("Close launcher after game start.");
-                    dispose();
+                    close();
                 } else {
                     logger.info("The launcher can not be closed after game start, because a download is running.");
-                } */
+                }
             }
         }
     }
 
     @FXML
-    protected void downloadAction(ActionEvent event) {
+    protected void downloadAction() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if (gameDownloadWorker != null) {
             // Cancel download
@@ -172,7 +193,7 @@ public class ApplicationController {
             try {
                 GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isSaveDownloadedFiles(),
                     launcherSettings.getGameDirectory(), gameVersion, gameVersions);
-                gameDownloadWorker = new GameDownloadWorker(gameDownloader);
+                gameDownloadWorker = new GameDownloadWorker(this, gameDownloader);
             } catch (IOException e) {
                 logger.error("Could not start game download!", e);
                 finishedGameDownload(false, false, false, null);
@@ -182,10 +203,20 @@ public class ApplicationController {
             progressBar.setVisible(true);
             new Thread(gameDownloadWorker).start();
         }
+        updateButtons();
     }
 
     @FXML
-    protected void deleteAction(ActionEvent event) {
+    protected void cancelDownloadAction() {
+        // Cancel download
+        logger.info("Cancel game download!");
+        gameDownloadWorker.cancel(false);
+
+        updateButtons();
+    }
+
+    @FXML
+    protected void deleteAction() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if ((gameVersion != null) && gameVersion.isInstalled()) {
             final boolean containsGameData = DirectoryUtils.containsGameData(gameVersion.getInstallationPath());
@@ -210,6 +241,107 @@ public class ApplicationController {
             }
         } else {
             logger.warn("The selected game version can not be deleted! '{}'", gameVersion);
+        }
+    }
+
+    @FXML
+    protected void openFacebook() {
+        openUri(BundleUtils.getURI("terasology_facebook"));
+    }
+
+    @FXML
+    protected void openGithub() {
+        openUri(BundleUtils.getURI("terasology_github"));
+    }
+
+    @FXML
+    protected void openGPlus() {
+        openUri(BundleUtils.getURI("terasology_gplus"));
+    }
+
+    @FXML
+    protected void openReddit() {
+        openUri(BundleUtils.getURI("terasology_reddit"));
+    }
+
+    @FXML
+    protected void openTwitter() {
+        openUri(BundleUtils.getURI("terasology_twitter"));
+    }
+
+    @FXML
+    protected void openYoutube() {
+        openUri(BundleUtils.getURI("terasology_youtube"));
+    }
+
+    public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final File newTempDirectory, final LauncherSettings newLauncherSettings,
+                           final TerasologyGameVersions newGameVersions) {
+        this.launcherDirectory = newLauncherDirectory;
+        this.downloadDirectory = newDownloadDirectory;
+        this.tempDirectory = newTempDirectory;
+        this.launcherSettings = newLauncherSettings;
+        this.gameVersions = newGameVersions;
+
+        gameStarter = new GameStarter();
+
+        populateJob();
+
+        // add change listeners
+        // TODO disable start/delete/download button if necessary
+        jobBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<JobItem>() {
+            @Override
+            public void changed(final ObservableValue<? extends JobItem> observableValue, final JobItem oldItem, final JobItem newItem) {
+                updateBuildVersionBox();
+                newLauncherSettings.setJob(newItem.getJob());
+                logger.debug("Selected gamejob: {} -- {}", newLauncherSettings.getJob(), newLauncherSettings.getBuildVersion(newLauncherSettings.getJob()));
+                updateButtons();
+            }
+        });
+
+        buildVersionBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<VersionItem>() {
+            @Override
+            public void changed(final ObservableValue<? extends VersionItem> observableValue, final VersionItem oldVersionItem, final VersionItem newVersionItem) {
+                if (newVersionItem != null) {
+                    final Integer version = newVersionItem.getVersion();
+                    final GameJob job = jobBox.getSelectionModel().getSelectedItem().getJob();
+                    newLauncherSettings.setBuildVersion(version, newLauncherSettings.getJob());
+                    logger.debug("Selected gamejob: {} -- {}", newLauncherSettings.getJob(), newLauncherSettings.getBuildVersion(newLauncherSettings.getJob()));
+                    updateButtons();
+                }
+            }
+        });
+
+        downloadButton.managedProperty().bind(downloadButton.visibleProperty());
+        cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
+        updateGui();
+    }
+
+    /**
+     * Closes the launcher frame this Controller handles. The launcher frame Stage is determined by the enclosing anchor pane.
+     */
+    private void close() {
+        logger.debug("Dispose launcher frame...");
+        if (gameDownloadWorker != null) {
+            gameDownloadWorker.cancel(false);
+        }
+        gameStarter.dispose();
+
+        logger.debug("Closing the launcher ...");
+        final Stage stage = (Stage) launcherFrame.getScene().getWindow();
+        stage.close();
+        //System.exit(0);
+    }
+
+    private void openUri(URI uri) {
+        if ((uri != null) && Desktop.isDesktopSupported()) {
+            final Desktop desktop = Desktop.getDesktop();
+            if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                try {
+                    desktop.browse(uri);
+                } catch (IOException | RuntimeException e) {
+                    logger.error("Could not browse URI '{}' with desktop!", uri, e);
+                }
+            }
         }
     }
 
@@ -240,7 +372,29 @@ public class ApplicationController {
 
         // Cancel download
         if (gameDownloadWorker != null) {
+            // TODO turn download button into cancel button and vice versa!
+            // TODO or make them invisible in turn
             //downloadButton.setEnabled(true);
+            downloadButton.setVisible(false);
+            cancelDownloadButton.setVisible(true);
+        } else {
+            downloadButton.setVisible(true);
+            cancelDownloadButton.setVisible(false);
+        }
+    }
+
+    private void updateBuildVersionBox() {
+        buildVersionBox.getItems().clear();
+
+        final JobItem jobItem = jobBox.getSelectionModel().getSelectedItem();
+        final int buildVersion = launcherSettings.getBuildVersion(jobItem.getJob());
+
+        for (TerasologyGameVersion version : gameVersions.getGameVersionList(jobItem.getJob())) {
+            final VersionItem versionItem = new VersionItem(version);
+            buildVersionBox.getItems().add(versionItem);
+            if (versionItem.getVersion() == buildVersion) {
+                buildVersionBox.getSelectionModel().select(versionItem);
+            }
         }
     }
 
@@ -283,45 +437,6 @@ public class ApplicationController {
         return scaleTransition;
     }
 
-    public void initialize(final File launcherDirectory, final File downloadDirectory, final File tempDirectory, final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
-        this.launcherDirectory = launcherDirectory;
-        this.downloadDirectory = downloadDirectory;
-        this.tempDirectory = tempDirectory;
-        this.launcherSettings = launcherSettings;
-        this.gameVersions = gameVersions;
-
-        gameStarter = new GameStarter();
-
-        populateJob();
-
-        // add change listeners
-        // TODO disable start/delete/download button if necessary
-        jobBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<JobItem>() {
-            @Override
-            public void changed(final ObservableValue<? extends JobItem> observableValue, final JobItem oldItem, final JobItem newItem) {
-                updateBuildVersionBox();
-                launcherSettings.setJob(newItem.getJob());
-                logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
-                updateButtons();
-            }
-        });
-
-        buildVersionBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<VersionItem>() {
-            @Override
-            public void changed(final ObservableValue<? extends VersionItem> observableValue, final VersionItem oldVersionItem, final VersionItem newVersionItem) {
-                if (newVersionItem != null) {
-                    final Integer version = newVersionItem.getVersion();
-                    final GameJob job = jobBox.getSelectionModel().getSelectedItem().getJob();
-                    launcherSettings.setBuildVersion(version, launcherSettings.getJob());
-                    logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
-                    updateButtons();
-                }
-            }
-        });
-
-        updateGui();
-    }
-
     private void populateJob() {
         jobBox.getItems().clear();
 
@@ -347,20 +462,5 @@ public class ApplicationController {
             }
         }
         updateBuildVersionBox();
-    }
-
-    private void updateBuildVersionBox() {
-        buildVersionBox.getItems().clear();
-
-        final JobItem jobItem = jobBox.getSelectionModel().getSelectedItem();
-        final int buildVersion = launcherSettings.getBuildVersion(jobItem.getJob());
-
-        for (TerasologyGameVersion version : gameVersions.getGameVersionList(jobItem.getJob())) {
-            final VersionItem versionItem = new VersionItem(version);
-            buildVersionBox.getItems().add(versionItem);
-            if (versionItem.getVersion() == buildVersion) {
-                buildVersionBox.getSelectionModel().select(versionItem);
-            }
-        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,14 @@ public class GameDownloadWorker extends Task<Void> {
 
     private static final Logger logger = LoggerFactory.getLogger(GameDownloadWorker.class);
     private final GameDownloader gameDownloader;
+    private ApplicationController controller;
 
     private boolean successfulDownloadAndExtract;
     private boolean successfulLoadVersion;
 
-    public GameDownloadWorker(final GameDownloader gameDownloader) {
+    public GameDownloadWorker(final ApplicationController controller, final GameDownloader gameDownloader) {
         this.gameDownloader = gameDownloader;
+        this.controller = controller;
     }
 
     @Override
@@ -56,6 +58,11 @@ public class GameDownloadWorker extends Task<Void> {
             logger.error("There is an error occurred while downloading the game!", e);
         }
         return null;
+    }
+
+    @Override
+    protected void done() {
+        controller.finishedGameDownload(isCancelled(), successfulDownloadAndExtract, successfulLoadVersion, gameDownloader.getGameDirectory());
     }
 
     public void updateProgress(final long progress) {
