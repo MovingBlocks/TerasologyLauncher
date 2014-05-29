@@ -1,6 +1,8 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## 1.5.0 (unreleased)
+
 ## 1.4.0 (2014-05-29)
 * Translation into Polish
 * Fallback for missing language translations
