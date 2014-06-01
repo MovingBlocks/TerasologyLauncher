@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="6.0+" xmlns:jfx="http://javafx.com" codebase="." href="webstart.jnlp">
+<jnlp spec="6.0+" xmlns:jfx="http://javafx.com" href="webstart.jnlp">
     <information>
         <title>Terasology Launcher</title>
         <vendor>MovingBlocks</vendor>

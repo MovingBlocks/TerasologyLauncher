@@ -198,15 +198,31 @@ task signLibs(dependsOn: copyLibs) {
 
     doLast {
 
-        if (!file('certum.jks').exists()) {
-            throw new GradleException("Copy the \"certum.jks\" keystore file in \"$projectDir\" first.");
+        if (!project.hasProperty('certificateAlias')) {
+            throw new GradleException('You need to define "certificateAlias"');
+        }
+
+        if (!project.hasProperty('certificateStorePass')) {
+            throw new GradleException('You need to define "certificateStorePass"');
+        }
+
+        if (!project.hasProperty('certificateKeyPass'))  {
+            throw new GradleException('You need to define "certificateKeyPass"');
+        }
+
+        if (!project.hasProperty('certificateFile')) {
+            throw new GradleException('You need to define "certificateFile"');
+        }
+
+        if (!file(certificateFile).exists()) {
+            throw new GradleException("The certificate file $certificateFile does not exist.");
         }
 
         file("$buildDir/distributions/signed").mkdirs()
 
         tree.each {
             def signed = file(it.parent + '/signed/' + it.name)
-            if (!IsSigned.isSigned(signed, null)) {
+            if (!signed.exists() || !IsSigned.isSigned(signed, null)) {
                 logger.lifecycle("Signing $it");
 
                 sign(it, signed);
@@ -218,7 +234,7 @@ task signLibs(dependsOn: copyLibs) {
 }
 
 def sign(File source, File target) {
-    ant.signjar(jar: source, signedjar: target, keystore: "certum.jks", alias: 'cervator', storepass: 'Terasology', tsaurl: 'http://time.certum.pl/')
+    ant.signjar(jar: source, signedjar: target, keystore: certificateFile, alias: certificateAlias, storepass: certificateStorePass, keypass: certificateKeyPass, tsaurl: 'http://time.certum.pl/')
 }
 
 
@@ -230,7 +246,7 @@ task updateJnlp(dependsOn:signLibs) {
     doFirst {
         def mainJar = 'TerasologyLauncher.jar'
         def root = new XmlParser().parse('webstart-template.jnlp')
-        root.@codebase = (env.BUILD_URL != null) ? env.BUILD_URL : '.'
+//        root.@codebase = (env.BUILD_URL != null) ? 'http://blog.movingblocks.net/webstart/' : '.'
 
         // Adding signed jars to resources
         def resources = root.resources[0]
