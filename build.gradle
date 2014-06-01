@@ -140,10 +140,11 @@ jar {
 
     // Copying the jnlp webstart file in to the signed JAR allows JWS to 
     // verify the correctness. The freestanding copy is still needed though.
-    into ('JNLP_INF') {
-        from 'webstart.jnlp'
-        rename 'webstart.jnlp', 'APPLICATION.JNLP'
-    }
+    // TODO: disabled, because the one in the distributions folder should be used
+//    into ('JNLP_INF') {
+//        from 'webstart.jnlp'
+//        rename 'webstart.jnlp', 'APPLICATION.JNLP'
+//    }
 
     // replace development "logback.xml" with productive "logback_jar.xml"
     exclude "logback.xml"
@@ -166,15 +167,6 @@ jar {
     }
 }
 
-task createRelease {
-    description 'Create a release'
-    dependsOn build
-    dependsOn createVersionInfoFile
-    doLast {
-        println 'Created release: ' + displayVersion
-    }
-}
-
 task copyLibs(type: Copy) {
     description = "Copy all files to the distributions folder"
 
@@ -184,7 +176,6 @@ task copyLibs(type: Copy) {
     exclude 'jfxrt.jar'                 // no need to deploy the JavaFX runtime - it's part of the JRE now
 
     from jar                            // this is the applet.jar file
-    from 'webstart.jnlp'                // jnlp file
 
     into ('icons') {                    // splash screen, etc
         from 'icons'
@@ -214,9 +205,9 @@ task signLibs(dependsOn: copyLibs) {
         file("$buildDir/distributions/signed").mkdirs()
 
         tree.each {
-            if (!IsSigned.isSigned(it, null)) {
+            def signed = file(it.parent + '/signed/' + it.name)
+            if (!IsSigned.isSigned(signed, null)) {
                 logger.lifecycle("Signing $it");
-                def signed = file(it.parent + '/signed/' + it.name)
 
                 sign(it, signed);
             } else {
@@ -228,6 +219,34 @@ task signLibs(dependsOn: copyLibs) {
 
 def sign(File source, File target) {
     ant.signjar(jar: source, signedjar: target, keystore: "certum.jks", alias: 'cervator', storepass: 'Terasology', tsaurl: 'http://time.certum.pl/')
+}
+
+
+task updateJnlp(dependsOn:signLibs) {
+
+    inputs.file 'webstart-template.jnlp'
+    outputs.file "$buildDir/distributions/webstart.jnlp"
+
+    doFirst {
+        def mainJar = 'TerasologyLauncher.jar'
+        def root = new XmlParser().parse('webstart-template.jnlp')
+        root.@codebase = (env.BUILD_URL != null) ? env.BUILD_URL : '.'
+
+        // Adding signed jars to resources
+        def resources = root.resources[0]
+        def collection = files { file("$buildDir/distributions/signed").listFiles() }
+        collection.each {
+            def resource= [href: "signed/$it.name"]
+            if (mainJar == it.name) {
+                resource= [href: "signed/$it.name", main: 'true']
+            }
+            resources.appendNode('jar', resource)
+        }
+
+        // Writing the jnlp file filled
+        File jnlpFile = new File("$buildDir/distributions/webstart.jnlp")
+        new XmlNodePrinter(new PrintWriter(jnlpFile)).print(root)
+    }
 }
 
 task copyExtra(type: Copy) {
@@ -257,12 +276,22 @@ task copyExtra(type: Copy) {
     into "$buildDir/distributions"
 }
 
+task createRelease {
+    description 'Create a release'
+    dependsOn build
+    dependsOn createVersionInfoFile
+    doLast {
+        println 'Created release: ' + displayVersion
+    }
+}
+
 task webstart {
     description "Prepare WebStart launcher files"
 
     dependsOn signLibs
     dependsOn copyExtra
     dependsOn createVersionInfoFile
+    dependsOn updateJnlp
     doLast {
         println 'Created webstart release: ' + displayVersion
     }

@@ -4,11 +4,11 @@
         <title>Terasology Launcher</title>
         <vendor>MovingBlocks</vendor>
         <homepage href="https://terasology.org"/>
-        
+
         <description>Terasology Launcher Desc</description>
         <description kind="short">Terasology Launcher (SHORT)</description>
         <description kind="tooltip">Terasology Launcher (TOOLTIP)</description>
-        
+
         <icon href="icons/gooey_sweet_128.png" width="128" height="128"/>
         <icon href="icons/gooey_sweet_64.png"   width="64"  height="64"/>
         <icon href="icons/gooey_sweet_32.png"   width="32"  height="32"/>
@@ -19,32 +19,26 @@
             <desktop/>
             <menu submenu="Terasology"/>
         </shortcut>
-        
+
     </information>
     <resources>
         <!-- Acceptable JVMs in preferred order, best first -->
         <java version="1.8+" href="http://java.sun.com/products/autodl/j2se" java-vm-args="-ea" initial-heap-size="128m" max-heap-size="1024m"/>
         <java version="1.7+" href="http://java.sun.com/products/autodl/j2se" java-vm-args="-ea" initial-heap-size="128m" max-heap-size="1024m"/>
         <jfx:javafx-runtime version="2.1+"/>
-
-        <jar href="TerasologyLauncher.jar" main="true" />
-        
-        <jar href="jna-platform-4.1.0.jar" />
-        <jar href="jna-4.1.0.jar" />
-        <jar href="logback-core-1.1.2.jar" />
-        <jar href="logback-classic-1.1.2.jar" />
-        <jar href="slf4j-api-1.7.7.jar" />
+		
+		<!-- Libary jars will be added here by the gradle task "updateJnlp"-->
 
     </resources>
     <application-desc
         name="Terasology Launcher (APPNAME)"
         main-class="org.terasology.launcher.TerasologyLauncher">
     </application-desc>
-    
+
     <!-- check: always check for updates before launching the application -->
     <!-- policy: ask the user if he/she wants to download and run the updated version, or launch the cached version -->
     <update check="always" policy="prompt-update"/>
-     
+
     <security>
         <all-permissions/>
         <!-- all-permissions requires the jars be signed -->
