@@ -25,6 +25,7 @@ apply plugin: 'java'
 apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
+apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
@@ -42,8 +43,7 @@ import org.apache.tools.ant.filters.FixCrLfFilter;
 import org.apache.tools.ant.taskdefs.condition.IsSigned;
 import java.text.SimpleDateFormat;
 
-// 'T'HH:mm:ssXXX
-def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd")
+def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
 
 // Declare "extra properties" (variables) for the project - a Gradle thing that makes them special.
@@ -83,8 +83,10 @@ dependencies {
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
 sourceCompatibility = 1.7
 
+mainClassName = "org.terasology.launcher.TerasologyLauncher"
+
 javafx {
-    mainClass = 'org.terasology.launcher.TerasologyLauncher'
+    mainClass = mainClassName
 }
 
 checkstyle {
@@ -133,25 +135,16 @@ task createVersionInfoFile {
 }
 createVersionInfoFile.dependsOn processResources
 jar.dependsOn createVersionInfoFile
+distZip.dependsOn createVersionInfoFile
+distTar.dependsOn createVersionInfoFile
 
 jar {
-    // DEBUG: include all source files to verify that class files are up-to-date 
-//    from sourceSets.main.java
-
-    // Copying the jnlp webstart file in to the signed JAR allows JWS to 
-    // verify the correctness. The freestanding copy is still needed though.
-    // TODO: disabled, because the one in the distributions folder should be used
-//    into ('JNLP_INF') {
-//        from 'webstart.jnlp'
-//        rename 'webstart.jnlp', 'APPLICATION.JNLP'
-//    }
-
     // replace development "logback.xml" with productive "logback_jar.xml"
     exclude "logback.xml"
     rename('logback_jar.xml', 'logback.xml')
     manifest {
         def manifestClasspath = configurations.runtime.collect { it.getName() }.join(" ")
-        attributes("Main-Class": "org.terasology.launcher.TerasologyLauncher")
+        attributes("Main-Class": mainClassName)
         attributes("Class-Path": manifestClasspath)
         attributes("Implementation-Title": project.name)
         attributes("Implementation-Version": displayVersion)
@@ -188,6 +181,7 @@ task copyLibs(type: Copy) {
 
 // Sign the jar files so they can get full rights in a browser
 task signLibs(dependsOn: copyLibs) {
+    onlyIf { env.BUILD_URL != null || project.hasProperty('certificateAlias') }
 
     FileTree tree = fileTree(dir: "$buildDir/distributions")
 
@@ -292,10 +286,19 @@ task copyExtra(type: Copy) {
     into "$buildDir/distributions"
 }
 
+task distChangelog(type: Copy) {
+    description 'Distribute CHANGELOG.md'
+    from('CHANGELOG.md')
+    into "$buildDir/distributions/"
+    rename('CHANGELOG.md', 'CHANGELOG.txt')
+    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+}
+
 task createRelease {
     description 'Create a release'
     dependsOn build
-    dependsOn createVersionInfoFile
+    dependsOn distZip
+    dependsOn distChangelog
     doLast {
         println 'Created release: ' + displayVersion
     }
@@ -311,6 +314,47 @@ task webstart {
     doLast {
         println 'Created webstart release: ' + displayVersion
     }
+}
+
+applicationDistribution.from('README.md')
+
+applicationDistribution.from('README.md') {
+    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+    rename('README.md', 'README.txt')
+}
+
+applicationDistribution.from('CHANGELOG.md')
+
+applicationDistribution.from('CHANGELOG.md') {
+    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+    rename('CHANGELOG.md', 'CHANGELOG.txt')
+}
+
+applicationDistribution.from('CONTRIBUTING.md')
+
+applicationDistribution.from('CONTRIBUTING.md') {
+    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+    rename('CONTRIBUTING.md', 'CONTRIBUTING.txt')
+}
+
+applicationDistribution.from('LICENSE') {
+    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+}
+
+applicationDistribution.from('NOTICE') {
+    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+}
+
+applicationDistribution.from('src/template/VERSION.md') {
+    expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH),
+            dateTime: startDateTimeString, displayVersion: displayVersion)
+}
+
+applicationDistribution.from('src/template/VERSION.md') {
+    expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH),
+            dateTime: startDateTimeString, displayVersion: displayVersion)
+    filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
+    rename('VERSION.md', 'VERSION.txt')
 }
 
 // Setup IntelliJ-IDEA
