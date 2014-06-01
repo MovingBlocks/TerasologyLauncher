@@ -246,7 +246,7 @@ task updateJnlp(dependsOn:signLibs) {
     doFirst {
         def mainJar = 'TerasologyLauncher.jar'
         def root = new XmlParser().parse('webstart-template.jnlp')
-//        root.@codebase = (env.BUILD_URL != null) ? 'http://blog.movingblocks.net/webstart/' : '.'
+        root.@codebase = (env.BUILD_URL != null) ? 'http://blog.movingblocks.net/webstart/' : '.' 
 
         // Adding signed jars to resources
         def resources = root.resources[0]
