@@ -73,8 +73,8 @@ public final class GameDownloader {
         return gameDirectory;
     }
 
-    public void download(ProgressListener progressListener) throws DownloadException {
-        DownloadUtils.downloadToFile(downloadURL, downloadZipFile, progressListener);
+    public void download(ProgressListener listener) throws DownloadException {
+        DownloadUtils.downloadToFile(downloadURL, downloadZipFile, listener);
     }
 
     public boolean extractAfterDownload() {

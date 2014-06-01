@@ -19,7 +19,6 @@ package org.terasology.launcher.updater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.gui.GuiUtils;
-import org.terasology.launcher.gui.SplashProgressIndicator;
 import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
@@ -73,8 +72,7 @@ public final class LauncherUpdater {
     /**
      * This method indicates if a new launcher version is available.
      * <p/>
-     * Compares the current launcher version number to the upstream version number if an internet connection is
-     * available.
+     * Compares the current launcher version number to the upstream version number if an internet connection is available.
      *
      * @return whether an update is available
      */
@@ -186,7 +184,7 @@ public final class LauncherUpdater {
             final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
             logger.trace("Download ZIP file: {}", downloadedZipFile);
 
-            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new SplashProgressIndicator(splash, "splash_updatingLauncher_download"));
+            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, null);
 
             splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,8 +68,8 @@ public final class DownloadUtils {
     private DownloadUtils() {
     }
 
-    public static void downloadToFile(URL downloadURL, File file, ProgressListener progressListener) throws DownloadException {
-        progressListener.update(0);
+    public static void downloadToFile(URL downloadURL, File file, ProgressListener listener) throws DownloadException {
+        listener.update(0);
 
         final HttpURLConnection connection = getConnectedDownloadConnection(downloadURL);
 
@@ -86,7 +86,7 @@ public final class DownloadUtils {
         try {
             in = new BufferedInputStream(connection.getInputStream());
             out = new BufferedOutputStream(new FileOutputStream(file));
-            downloadToFile(progressListener, contentLength, in, out);
+            downloadToFile(listener, contentLength, in, out);
         } catch (IOException e) {
             throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
         } finally {
@@ -109,11 +109,11 @@ public final class DownloadUtils {
             connection.disconnect();
         }
 
-        if (!progressListener.isCancelled()) {
+        if (!listener.isCancelled()) {
             if (file.length() != contentLength) {
                 throw new DownloadException("Wrong file length after download! " + file.length() + " != " + contentLength);
             }
-            progressListener.update(100);
+            listener.update(100);
         }
     }
 
@@ -130,14 +130,14 @@ public final class DownloadUtils {
         return connection;
     }
 
-    private static void downloadToFile(ProgressListener progressListener, long contentLength, BufferedInputStream in, BufferedOutputStream out) throws IOException {
+    private static void downloadToFile(ProgressListener listener, long contentLength, BufferedInputStream in, BufferedOutputStream out) throws IOException {
         final byte[] buffer = new byte[2048];
         final float sizeFactor = 100f / (float) contentLength;
         long writtenBytes = 0;
         int n;
-        if (!progressListener.isCancelled()) {
+        if (!listener.isCancelled()) {
             while ((n = in.read(buffer)) != -1) {
-                if (progressListener.isCancelled()) {
+                if (listener.isCancelled()) {
                     break;
                 }
 
@@ -150,9 +150,9 @@ public final class DownloadUtils {
                 } else if (percentage >= 100) {
                     percentage = 99;
                 }
-                progressListener.update(percentage);
+                listener.update(percentage);
 
-                if (progressListener.isCancelled()) {
+                if (listener.isCancelled()) {
                     break;
                 }
             }

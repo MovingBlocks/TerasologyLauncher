@@ -27,6 +27,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -40,6 +41,7 @@ public final class BundleUtils {
     private static final String MESSAGE_BUNDLE = "org.terasology.launcher.bundle.MessageBundle";
     private static final String URI_BUNDLE = "org.terasology.launcher.bundle.URIBundle";
     private static final String IMAGE_BUNDLE = "org.terasology.launcher.bundle.ImageBundle";
+    private static final String FXML_BUNDLE = "org.terasology.launcher.bundle.FXMLBundle";
 
     private BundleUtils() {
     }
@@ -97,5 +99,14 @@ public final class BundleUtils {
     public static BufferedImage getBufferedImage(String key) throws IOException {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
         return ImageIO.read(BundleUtils.class.getResourceAsStream(imagePath));
+    }
+
+    public static URL getFXMLUrl(String key) {
+        final String url = ResourceBundle.getBundle(FXML_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        return BundleUtils.class.getResource(url);
+    }
+
+    public static String getStylesheet(String key) {
+        return ResourceBundle.getBundle(FXML_BUNDLE, Languages.getCurrentLocale()).getString(key);
     }
 }
