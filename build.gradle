@@ -25,6 +25,7 @@ apply plugin: 'java'
 apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
+apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
@@ -42,8 +43,7 @@ import org.apache.tools.ant.filters.FixCrLfFilter;
 import org.apache.tools.ant.taskdefs.condition.IsSigned;
 import java.text.SimpleDateFormat;
 
-// 'T'HH:mm:ssXXX
-def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd")
+def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
 
 // Declare "extra properties" (variables) for the project - a Gradle thing that makes them special.
@@ -83,8 +83,10 @@ dependencies {
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
 sourceCompatibility = 1.7
 
+mainClassName = 'org.terasology.launcher.TerasologyLauncher'
+
 javafx {
-    mainClass = 'org.terasology.launcher.TerasologyLauncher'
+    mainClass = mainClassName
 }
 
 checkstyle {
@@ -133,7 +135,9 @@ task createVersionInfoFile {
 }
 createVersionInfoFile.dependsOn processResources
 jar.dependsOn createVersionInfoFile
-
+distZip.dependsOn createVersionInfoFile
+distTar.dependsOn createVersionInfoFile
+ 
 jar {
     // DEBUG: include all source files to verify that class files are up-to-date 
 //    from sourceSets.main.java
@@ -151,7 +155,7 @@ jar {
     rename('logback_jar.xml', 'logback.xml')
     manifest {
         def manifestClasspath = configurations.runtime.collect { it.getName() }.join(" ")
-        attributes("Main-Class": "org.terasology.launcher.TerasologyLauncher")
+        attributes("Main-Class": mainClassName)
         attributes("Class-Path": manifestClasspath)
         attributes("Implementation-Title": project.name)
         attributes("Implementation-Version": displayVersion)
@@ -295,7 +299,7 @@ task copyExtra(type: Copy) {
 task createRelease {
     description 'Create a release'
     dependsOn build
-    dependsOn createVersionInfoFile
+    dependsOn distZip
     doLast {
         println 'Created release: ' + displayVersion
     }
