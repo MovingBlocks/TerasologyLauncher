@@ -25,7 +25,6 @@ apply plugin: 'java'
 apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
-apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
@@ -83,7 +82,7 @@ dependencies {
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
 sourceCompatibility = 1.7
 
-mainClassName = 'org.terasology.launcher.TerasologyLauncher'
+def mainClassName = 'org.terasology.launcher.TerasologyLauncher'
 
 javafx {
     mainClass = mainClassName
@@ -135,21 +134,8 @@ task createVersionInfoFile {
 }
 createVersionInfoFile.dependsOn processResources
 jar.dependsOn createVersionInfoFile
-distZip.dependsOn createVersionInfoFile
-distTar.dependsOn createVersionInfoFile
  
 jar {
-    // DEBUG: include all source files to verify that class files are up-to-date 
-//    from sourceSets.main.java
-
-    // Copying the jnlp webstart file in to the signed JAR allows JWS to 
-    // verify the correctness. The freestanding copy is still needed though.
-    // TODO: disabled, because the one in the distributions folder should be used
-//    into ('JNLP_INF') {
-//        from 'webstart.jnlp'
-//        rename 'webstart.jnlp', 'APPLICATION.JNLP'
-//    }
-
     // replace development "logback.xml" with productive "logback_jar.xml"
     exclude "logback.xml"
     rename('logback_jar.xml', 'logback.xml')
@@ -158,7 +144,7 @@ jar {
         attributes("Main-Class": mainClassName)
         attributes("Class-Path": manifestClasspath)
         attributes("Implementation-Title": project.name)
-        attributes("Implementation-Version": displayVersion)
+        attributes("Implementation-Version": versionBase)  // Use base version only to avoid re-creating identical jar
         attributes("SplashScreen-Image": splashImage)
 
         // allow everything
@@ -179,7 +165,7 @@ task copyLibs(type: Copy) {
 
     exclude 'jfxrt.jar'                 // no need to deploy the JavaFX runtime - it's part of the JRE now
 
-    from jar                            // this is the applet.jar file
+    from jar                            // this is the launcher jar file
 
     into ('icons') {                    // splash screen, etc
         from 'icons'
@@ -296,10 +282,22 @@ task copyExtra(type: Copy) {
     into "$buildDir/distributions"
 }
 
-task createRelease {
-    description 'Create a release'
-    dependsOn build
-    dependsOn distZip
+task createRelease(type: Zip) {
+    dependsOn createVersionInfoFile
+
+    from(project.file("src/dist"))
+
+    into("lib") {
+        from configurations.runtime         // these are the runtime-time dependencies
+        exclude 'jfxrt.jar'                 // no need to deploy the JavaFX runtime - it's part of the JRE now
+        from jar                            // this is the launcher jar file
+    }
+
+//    into("bin") {
+//        from(startScripts)
+//        fileMode = 0755
+//    }
+
     doLast {
         println 'Created release: ' + displayVersion
     }
