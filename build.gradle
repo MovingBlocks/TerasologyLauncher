@@ -282,6 +282,12 @@ task copyExtra(type: Copy) {
     into "$buildDir/distributions"
 }
 
+task copyHtml(type: Copy) {
+    from('index.html')
+
+    into "$buildDir/distributions"
+}
+
 task createRelease(type: Zip) {
     dependsOn createVersionInfoFile
 
@@ -310,6 +316,8 @@ task webstart {
     dependsOn copyExtra
     dependsOn createVersionInfoFile
     dependsOn updateJnlp
+    dependsOn copyHtml
+
     doLast {
         println 'Created webstart release: ' + displayVersion
     }
