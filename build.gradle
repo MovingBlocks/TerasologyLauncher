@@ -65,6 +65,10 @@ ext {
 repositories {
     // Main Maven repo
     mavenCentral()
+    // MovingBlocks Artifactory instance for libs not readily available elsewhere plus our own libs
+    maven {
+        url "http://www.movingblocks.net:8081/artifactory/repo"
+    }
 }
 
 // Primary dependencies definition
@@ -72,6 +76,7 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.7'
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
     compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.1.0'
+    compile group: 'org.terasology', name: 'CrashReporter', version: '1.1+', changing: true
 
     runtime group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
 
