@@ -162,7 +162,7 @@ jar {
     }
 }
 
-task copyLibs(type: Copy) {
+task copyLibs(type: IncrementalCopy) {
     description = "Copy all files to the distributions folder"
 
     dependsOn jar
@@ -177,61 +177,80 @@ task copyLibs(type: Copy) {
     }
 
     into "$buildDir/distributions"
-
-    eachFile { println "Copying " + it.file.getName() }
 }
 
-// Sign the jar files so they can get full rights in a browser
-task signLibs(dependsOn: copyLibs) {
-
-    FileTree tree = fileTree(dir: "$buildDir/distributions")
-
-    tree.include '*.jar'
-
-    inputs.files tree
-    outputs.dir "$buildDir/distributions/signed"
-
-    doLast {
-
-        if (!project.hasProperty('certificateAlias')) {
-            throw new GradleException('You need to define "certificateAlias"');
+class IncrementalCopy extends Copy {
+    
+    @TaskAction
+    void execute(IncrementalTaskInputs inputs) {
+        inputs.outOfDate { change ->
+            println "Copying: ${change.file.name}"
         }
 
-        if (!project.hasProperty('certificateStorePass')) {
-            throw new GradleException('You need to define "certificateStorePass"');
-        }
-
-        if (!project.hasProperty('certificateKeyPass'))  {
-            throw new GradleException('You need to define "certificateKeyPass"');
-        }
-
-        if (!project.hasProperty('certificateFile')) {
-            throw new GradleException('You need to define "certificateFile"');
-        }
-
-        if (!file(certificateFile).exists()) {
-            throw new GradleException("The certificate file $certificateFile does not exist.");
-        }
-
-        file("$buildDir/distributions/signed").mkdirs()
-
-        tree.each {
-            def signed = file(it.parent + '/signed/' + it.name)
-            if (!signed.exists() || !IsSigned.isSigned(signed, null)) {
-                logger.lifecycle("Signing $it");
-
-                sign(it, signed);
-            } else {
-                logger.lifecycle("File $it already signed");
-            }
+        inputs.removed { change ->
+            println "Removed: ${change.file.name}"
         }
     }
 }
 
-def sign(File source, File target) {
-    ant.signjar(jar: source, signedjar: target, keystore: certificateFile, alias: certificateAlias, storepass: certificateStorePass, keypass: certificateKeyPass, tsaurl: 'http://time.certum.pl/')
+
+// Sign the jar files so they can get full rights in a browser
+task signLibs(type: IncrementalSigningTask, dependsOn: copyLibs) {
+
+    FileTree tree = fileTree(dir: "$buildDir/distributions")
+    tree.include '*.jar'
+    inputs.files tree
+	
+	certFile = certificateFile
+	certAlias = certificateAlias
+	certStorePass = certificateStorePass
+	certKeyPass = certificateKeyPass
+	
+    outputDir = file("$buildDir/distributions/signed")
 }
 
+class IncrementalSigningTask extends DefaultTask {
+
+	@Input
+	String certFile
+	
+	@Input
+	String certAlias
+	
+	@Input
+	String certStorePass
+	
+	@Input
+	String certKeyPass
+
+	@OutputDirectory
+    def File outputDir
+
+    @TaskAction
+    void execute(IncrementalTaskInputs inputs) {
+
+		outputDir.mkdirs()
+
+        inputs.outOfDate { change ->
+			logger.lifecycle("Signing ${change.file.name}");
+
+			def target = new File(outputDir, change.file.name)
+			
+			ant.signjar(
+				jar: change.file, 
+				signedjar: target, 
+				keystore: certFile, 
+				alias: certAlias, 
+				storepass: certStorePass, 
+				keypass: certKeyPass, 
+				tsaurl: 'http://time.certum.pl/')
+        }
+
+        inputs.removed { change ->
+            println "removed: ${change.file.name}"
+        }
+    }
+}
 
 task updateJnlp(dependsOn:signLibs) {
 
