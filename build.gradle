@@ -25,6 +25,7 @@ apply plugin: 'java'
 apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
+apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
@@ -87,7 +88,7 @@ dependencies {
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
 sourceCompatibility = 1.7
 
-def mainClassName = 'org.terasology.launcher.TerasologyLauncher'
+mainClassName = 'org.terasology.launcher.TerasologyLauncher'
 
 javafx {
     mainClass = mainClassName
@@ -139,6 +140,8 @@ task createVersionInfoFile {
 }
 createVersionInfoFile.dependsOn processResources
 jar.dependsOn createVersionInfoFile
+distZip.dependsOn createVersionInfoFile
+distTar.dependsOn createVersionInfoFile
  
 jar {
     // replace development "logback.xml" with productive "logback_jar.xml"
@@ -168,8 +171,6 @@ task copyLibs(type: IncrementalCopy) {
     dependsOn jar
     from configurations.runtime         // these are the runtime-time dependencies
 
-    exclude 'jfxrt.jar'                 // no need to deploy the JavaFX runtime - it's part of the JRE now
-
     from jar                            // this is the launcher jar file
 
     into ('icons') {                    // splash screen, etc
@@ -180,7 +181,7 @@ task copyLibs(type: IncrementalCopy) {
 }
 
 class IncrementalCopy extends Copy {
-    
+
     @TaskAction
     void execute(IncrementalTaskInputs inputs) {
         inputs.outOfDate { change ->
@@ -199,51 +200,53 @@ task signLibs(type: IncrementalSigningTask, dependsOn: copyLibs) {
 
     FileTree tree = fileTree(dir: "$buildDir/distributions")
     tree.include '*.jar'
+    tree.exclude 'jfxrt.jar'                 // no need to sign the JavaFX runtime - it's part of the JRE now
+
     inputs.files tree
-	
-	certFile = certificateFile
-	certAlias = certificateAlias
-	certStorePass = certificateStorePass
-	certKeyPass = certificateKeyPass
-	
+
+    certFile = certificateFile
+    certAlias = certificateAlias
+    certStorePass = certificateStorePass
+    certKeyPass = certificateKeyPass
+
     outputDir = file("$buildDir/distributions/signed")
 }
 
 class IncrementalSigningTask extends DefaultTask {
 
-	@Input
-	String certFile
-	
-	@Input
-	String certAlias
-	
-	@Input
-	String certStorePass
-	
-	@Input
-	String certKeyPass
+    @Input
+    String certFile
 
-	@OutputDirectory
+    @Input
+    String certAlias
+
+    @Input
+    String certStorePass
+
+    @Input
+    String certKeyPass
+
+    @OutputDirectory
     def File outputDir
 
     @TaskAction
     void execute(IncrementalTaskInputs inputs) {
 
-		outputDir.mkdirs()
+        outputDir.mkdirs()
 
         inputs.outOfDate { change ->
-			logger.lifecycle("Signing ${change.file.name}");
+            logger.lifecycle("Signing ${change.file.name}");
 
-			def target = new File(outputDir, change.file.name)
-			
-			ant.signjar(
-				jar: change.file, 
-				signedjar: target, 
-				keystore: certFile, 
-				alias: certAlias, 
-				storepass: certStorePass, 
-				keypass: certKeyPass, 
-				tsaurl: 'http://time.certum.pl/')
+            def target = new File(outputDir, change.file.name)
+
+            ant.signjar(
+                jar: change.file,
+                signedjar: target,
+                keystore: certFile,
+                alias: certAlias,
+                storepass: certStorePass 
+                keypass: certKeyPass,
+                tsaurl: 'http://time.certum.pl/')
         }
 
         inputs.removed { change ->
@@ -312,21 +315,8 @@ task copyHtml(type: Copy) {
     into "$buildDir/distributions"
 }
 
-task createRelease(type: Zip) {
-    dependsOn createVersionInfoFile
-
-    from(project.file("src/dist"))
-
-    into("lib") {
-        from configurations.runtime         // these are the runtime-time dependencies
-        exclude 'jfxrt.jar'                 // no need to deploy the JavaFX runtime - it's part of the JRE now
-        from jar                            // this is the launcher jar file
-    }
-
-//    into("bin") {
-//        from(startScripts)
-//        fileMode = 0755
-//    }
+task createRelease() {
+    dependsOn distZip
 
     doLast {
         println 'Created release: ' + displayVersion
