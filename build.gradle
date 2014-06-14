@@ -42,6 +42,8 @@ wrapper {
 import org.apache.tools.ant.filters.FixCrLfFilter;
 import org.apache.tools.ant.taskdefs.condition.IsSigned;
 import java.text.SimpleDateFormat;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -234,24 +236,29 @@ class IncrementalSigningTask extends DefaultTask {
 
         outputDir.mkdirs()
 
+        def pool = Executors.newCachedThreadPool()
+
         inputs.outOfDate { change ->
-            logger.lifecycle("Signing ${change.file.name}");
+            pool.submit({
 
-            def target = new File(outputDir, change.file.name)
+                def target = new File(outputDir, change.file.name)
 
-            ant.signjar(
-                jar: change.file,
-                signedjar: target,
-                keystore: certFile,
-                alias: certAlias,
-                storepass: certStorePass,
-                keypass: certKeyPass,
-                tsaurl: 'http://time.certum.pl/')
+                ant.signjar(
+                    jar: change.file,
+                    signedjar: target,
+                    keystore: certFile,
+                    alias: certAlias,
+                    storepass: certStorePass,
+                    keypass: certKeyPass,
+                    tsaurl: 'http://time.certum.pl/')
+
+                logger.lifecycle("Signed ${change.file.name}");
+            });
         }
 
-        inputs.removed { change ->
-            println "removed: ${change.file.name}"
-        }
+        pool.shutdown()
+        pool.awaitTermination(10, TimeUnit.MINUTES)
+        logger.lifecycle("Signing complete")
     }
 }
 
