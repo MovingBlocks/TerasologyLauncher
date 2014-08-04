@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* ========================== STYLE THE CHANGELOG & CO TAB VIEW ========================== */
 #contentTabPane .tab-header-area .tab-header-background {
     -fx-background-color: transparent;
 }
@@ -59,21 +60,28 @@
     -fx-background-insets: 0, 0 0 1 0;
 }
 
-/*
-#contentTabPane .tab-content-area {
-    -fx-background-color: rgba(10, 10, 10, 0.7);
-    -fx-background-radius: 10;
+/* ========================== STYLE ALL SCROLL BARS ========================== */
+/*.scroll-bar {
+    -fx-background-color: transparent;
 }
-
-#contentTabPane .tab-header-area .tab {
-    -fx-background-color: rgba(10, 10, 10, 0.9);
+.scroll-bar .thumb {
+    -fx-background-color: #dfdfdf;
+    -fx-background-insets: 0, 0, 0;
+    -fx-background-radius: 0.0em;
 }
-
-#contentTabPane .tab-header-area .tab:selected {
-    -fx-background-color: rgba(10, 10, 10, 0.7);
+.scroll-bar .track {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-border-color: transparent;
+    -fx-border-radius: 2em;
+}
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 0 10 0;
 }
 */
-
+/* ========================== STYLE THE FANCY BUTTONS ========================== */
 .controlButton {
     -fx-background-color: transparent;
     -fx-effect: innershadow(three-pass-box, #dfdfdf, 127.0, 0.0, 0, 0);

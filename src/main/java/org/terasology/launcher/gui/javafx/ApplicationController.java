@@ -87,6 +87,8 @@ public class ApplicationController {
     private Button deleteButton;
     @FXML
     private WebView changelogView;
+    @FXML
+    private WebView readmeView;
 
     @FXML
     protected void handleExitButtonAction() {
@@ -351,6 +353,7 @@ public class ApplicationController {
     private void updateGui() {
         updateButtons();
         updateChangeLog();
+        updateAboutTab();
     }
 
     private void updateButtons() {
@@ -409,10 +412,14 @@ public class ApplicationController {
         } else {
             gameInfoTextHTML = getGameInfoText(gameVersion);
         }
-        changelogView.getEngine().loadContent(
-            "<html><body style='background-color:#0a0a0a; color:#dfdfdf;'>" + gameInfoTextHTML + "</body></html>"
-        );
+
+        changelogView.getEngine().loadContent(gameInfoTextHTML);
         changelogView.setBlendMode(BlendMode.LIGHTEN);
+        changelogView.getEngine().setUserStyleSheetLocation(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
+    }
+
+    private void updateAboutTab() {
+        readmeView.getEngine().load(BundleUtils.getFXMLUrl("readme_txt").toExternalForm());
     }
 
     private String getGameInfoText(TerasologyGameVersion gameVersion) {
