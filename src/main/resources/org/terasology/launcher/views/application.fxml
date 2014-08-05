@@ -26,7 +26,6 @@
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.effect.GaussianBlur?>
 <?import javafx.scene.effect.Glow?>
 <?import javafx.scene.image.Image?>
@@ -132,7 +131,7 @@
                                         </Button>
                                     </children>
                                 </HBox>
-                                <Label text="version 1.5.0-rc-1" textFill="#dfdfdf" StackPane.alignment="BOTTOM_RIGHT">
+                                <Label fx:id="versionInfo" text="2.0.0-rc1" textFill="#dfdfdf" StackPane.alignment="BOTTOM_RIGHT">
                                     <font>
                                         <Font name="System Bold" size="12.0"/>
                                     </font>
@@ -165,40 +164,8 @@
                                                     <content>
                                                         <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                             <children>
-                                                                <Accordion prefHeight="336.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                                                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                    <expandedPane>
-                                                                        <TitledPane fx:id="x1" animated="false" text="ReadMe">
-                                                                            <content>
-                                                                                <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                                                    <children>
-                                                                                        <WebView fx:id="readmeView" prefHeight="244.0" prefWidth="796.0"
-                                                                                                 AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                                                                                 AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
-                                                                                    </children>
-                                                                                </AnchorPane>
-                                                                            </content>
-                                                                        </TitledPane>
-                                                                    </expandedPane>
-                                                                    <panes>
-                                                                        <fx:reference source="x1"/>
-                                                                        <TitledPane animated="false" text="Launcher Changelog">
-                                                                            <content>
-                                                                                <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
-                                                                            </content>
-                                                                        </TitledPane>
-                                                                        <TitledPane animated="false" text="Contributing">
-                                                                            <content>
-                                                                                <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
-                                                                            </content>
-                                                                        </TitledPane>
-                                                                        <TitledPane animated="false" text="Licenses">
-                                                                            <content>
-                                                                                <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
-                                                                            </content>
-                                                                        </TitledPane>
-                                                                    </panes>
-                                                                </Accordion>
+                                                                <Accordion fx:id="aboutInfoAccordion" prefHeight="336.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0"
+                                                                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
                                                             </children>
                                                         </AnchorPane>
                                                     </content>

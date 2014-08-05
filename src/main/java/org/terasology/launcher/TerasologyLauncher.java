@@ -93,9 +93,10 @@ public final class TerasologyLauncher extends Application implements ProgressLis
             // splash.getInfoLabel().setText(BundleUtils.getLabel("splash_createFrame"));
 
             // launcher frame
-            final FXMLLoader fxmlLoader = new FXMLLoader(BundleUtils.getFXMLUrl("application"), ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle"));
+            final FXMLLoader fxmlLoader = new FXMLLoader(BundleUtils.getFXMLUrl("application"), ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle",
+                Languages.getCurrentLocale()));
             final Parent root = (Parent) fxmlLoader.load();
-            final ApplicationController controller = fxmlLoader.<ApplicationController>getController();
+            final ApplicationController controller = fxmlLoader.getController();
             controller.initialize(launcherDirectory, downloadDirectory, tempDirectory, launcherSettings, gameVersions);
 
             Scene scene = new Scene(root);

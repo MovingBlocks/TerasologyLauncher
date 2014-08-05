@@ -25,11 +25,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TitledPane;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -48,12 +52,16 @@ import org.terasology.launcher.game.VersionItem;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.JOptionPane;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -88,7 +96,9 @@ public class ApplicationController {
     @FXML
     private WebView changelogView;
     @FXML
-    private WebView readmeView;
+    private Label versionInfo;
+    @FXML
+    private Accordion aboutInfoAccordion;
 
     @FXML
     protected void handleExitButtonAction() {
@@ -140,7 +150,9 @@ public class ApplicationController {
     @FXML
     protected void openSettingsAction() {
         try {
-            final FXMLLoader fxmlLoader = new FXMLLoader(BundleUtils.getFXMLUrl("settings"), ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle"));
+            logger.info("Current Locale: {}", Languages.getCurrentLocale());
+            final FXMLLoader fxmlLoader = new FXMLLoader(BundleUtils.getFXMLUrl("settings"), ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle",
+                Languages.getCurrentLocale()));
             Parent root = (Parent) fxmlLoader.load();
             final SettingsController settingsController = fxmlLoader.getController();
             settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, gameVersions);
@@ -153,7 +165,7 @@ public class ApplicationController {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            updateBuildVersionBox();
+            updateJobBox();
             updateGui();
         }
     }
@@ -291,12 +303,15 @@ public class ApplicationController {
 
         gameStarter = new GameStarter();
 
-        populateJob();
+        updateJobBox();
 
         // add change listeners
         jobBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<JobItem>() {
             @Override
             public void changed(final ObservableValue<? extends JobItem> observableValue, final JobItem oldItem, final JobItem newItem) {
+                if (jobBox.getItems().isEmpty()) {
+                    return;
+                }
                 updateBuildVersionBox();
                 newLauncherSettings.setJob(newItem.getJob());
                 logger.debug("Selected gamejob: {} -- {}", newLauncherSettings.getJob(), newLauncherSettings.getBuildVersion(newLauncherSettings.getJob()));
@@ -352,8 +367,19 @@ public class ApplicationController {
 
     private void updateGui() {
         updateButtons();
+        updateLabels();
         updateChangeLog();
         updateAboutTab();
+    }
+
+    private void updateLabels() {
+        // set and display version info
+        final String launcherVersion = TerasologyLauncherVersionInfo.getInstance().getDisplayVersion();
+        if (launcherVersion.isEmpty()) {
+            versionInfo.setText(BundleUtils.getLabel("launcher_versionInfo"));
+        } else {
+            versionInfo.setText(launcherVersion);
+        }
     }
 
     private void updateButtons() {
@@ -378,15 +404,39 @@ public class ApplicationController {
 
         // Cancel download
         if (gameDownloadWorker != null) {
-            // TODO turn download button into cancel button and vice versa!
-            // TODO or make them invisible in turn
-            //downloadButton.setEnabled(true);
             downloadButton.setVisible(false);
             cancelDownloadButton.setVisible(true);
         } else {
             downloadButton.setVisible(true);
             cancelDownloadButton.setVisible(false);
         }
+    }
+
+    private void updateJobBox() {
+        jobBox.getItems().clear();
+        for (GameJob job : GameJob.values()) {
+            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
+                boolean foundInstalled = false;
+                final List<TerasologyGameVersion> gameVersionList = gameVersions.getGameVersionList(job);
+                for (TerasologyGameVersion gameVersion : gameVersionList) {
+                    if (gameVersion.isInstalled()) {
+                        foundInstalled = true;
+                        break;
+                    }
+                }
+                if (!foundInstalled) {
+                    continue;
+                }
+            }
+
+            final JobItem jobItem = new JobItem(job);
+            jobBox.getItems().add(jobItem);
+            if (launcherSettings.getJob() == job) {
+                jobBox.getSelectionModel().select(jobItem);
+            }
+        }
+
+        updateBuildVersionBox();
     }
 
     private void updateBuildVersionBox() {
@@ -419,7 +469,29 @@ public class ApplicationController {
     }
 
     private void updateAboutTab() {
-        readmeView.getEngine().load(BundleUtils.getFXMLUrl("readme_txt").toExternalForm());
+        final File aboutDir = new File(BundleUtils.getFXMLUrl("about").getFile());
+        logger.debug("Scanning resource directory for info files - {}", aboutDir);
+        for (File f : aboutDir.listFiles()) {
+            try {
+                final URL url = f.toURI().toURL();
+
+                logger.debug("\t\t Found info file: {}", url);
+
+                final WebView view = new WebView();
+                view.getEngine().load(url.toExternalForm());
+                view.getStylesheets().add(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
+                view.setContextMenuEnabled(false);
+
+                final AnchorPane pane = new AnchorPane();
+                AnchorPane.setBottomAnchor(view, 0.0);
+                AnchorPane.setTopAnchor(view, 0.0);
+                pane.getChildren().add(view);
+
+                aboutInfoAccordion.getPanes().add(new TitledPane(f.getName(), pane));
+            } catch (MalformedURLException e) {
+                logger.warn("Could not load info file -- {}", f);
+            }
+        }
     }
 
     private String getGameInfoText(TerasologyGameVersion gameVersion) {
@@ -543,32 +615,5 @@ public class ApplicationController {
         scaleTransition.setToX(factor);
         scaleTransition.setToY(factor);
         return scaleTransition;
-    }
-
-    private void populateJob() {
-        jobBox.getItems().clear();
-
-        for (GameJob job : GameJob.values()) {
-            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
-                boolean foundInstalled = false;
-                final List<TerasologyGameVersion> gameVersionList = gameVersions.getGameVersionList(job);
-                for (TerasologyGameVersion gameVersion : gameVersionList) {
-                    if (gameVersion.isInstalled()) {
-                        foundInstalled = true;
-                        break;
-                    }
-                }
-                if (!foundInstalled) {
-                    continue;
-                }
-            }
-
-            final JobItem jobItem = new JobItem(job);
-            jobBox.getItems().add(jobItem);
-            if (launcherSettings.getJob() == job) {
-                jobBox.getSelectionModel().select(jobItem);
-            }
-        }
-        updateBuildVersionBox();
     }
 }
