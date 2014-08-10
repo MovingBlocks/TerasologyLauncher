@@ -309,6 +309,19 @@ task copyExtra(type: Copy) {
     into "$buildDir/distributions"
 }
 
+task copyExtraIntroResource(type: Copy) {
+    from('README.md')
+    from('CHANGELOG.md')
+    from('CONTRIBUTING.md')
+    from('LICENSE')
+    from('NOTICE')
+	
+	into('src/main/resources/text')
+}
+
+jar.dependsOn copyExtraIntroResource
+eclipseProject.dependsOn copyExtraIntroResource
+
 task copyHtml(type: Copy) {
     from('index.html')
 
