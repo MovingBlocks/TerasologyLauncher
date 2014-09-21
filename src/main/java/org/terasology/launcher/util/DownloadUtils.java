@@ -53,7 +53,7 @@ public final class DownloadUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
 
-    private static final String JENKINS_JOB_URL = "http://jenkins.movingblocks.net/job/";
+    private static final String JENKINS_JOB_URL = "http://jenkins.terasology.org/job/";
     private static final String LAST_STABLE_BUILD = "/lastStableBuild";
     private static final String LAST_SUCCESSFUL_BUILD = "/lastSuccessfulBuild";
     private static final String BUILD_NUMBER = "/buildNumber/";
