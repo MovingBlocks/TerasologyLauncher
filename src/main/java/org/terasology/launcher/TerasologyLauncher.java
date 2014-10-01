@@ -25,15 +25,11 @@ import org.terasology.launcher.gui.LauncherFrame;
 import org.terasology.launcher.gui.SplashProgressIndicator;
 import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.updater.LauncherUpdater;
-import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DirectoryUtils;
-import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.LauncherStartFailedException;
-import org.terasology.launcher.util.OperatingSystem;
+import org.terasology.launcher.util.*;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
-import java.awt.Frame;
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -297,7 +293,7 @@ public final class TerasologyLauncher {
         logger.debug("Launcher Settings stored: {}", launcherSettings);
     }
 
-    public static void main(String[] args) {
+    private static void createAndShowLauncher() {
         try {
             logger.info("TerasologyLauncher is starting");
 
@@ -353,5 +349,14 @@ public final class TerasologyLauncher {
             GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_launcherStart"));
             System.exit(1);
         }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                createAndShowLauncher();
+            }
+        });
     }
 }

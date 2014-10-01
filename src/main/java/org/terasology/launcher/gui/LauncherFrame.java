@@ -28,21 +28,8 @@ import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.WindowConstants;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Toolkit;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -67,37 +54,30 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private static final String DELETE_ACTION = "delete";
     private static final String SETTINGS_ACTION = "settings";
     private static final String EXIT_ACTION = "exit";
-
+    private final GameStarter gameStarter;
+    private final File launcherDirectory;
+    private final File downloadDirectory;
+    private final File tempDirectory;
+    private final LauncherSettings launcherSettings;
+    private final TerasologyGameVersions gameVersions;
     private JButton downloadButton;
     private JButton startButton;
     private JButton deleteButton;
     private JButton settingsButton;
     private JButton exitButton;
-
     private JTextPane infoTextPane;
     private LinkJLabel logo;
     private LinkJLabel forums;
     private LinkJLabel issues;
-    private LinkJLabel mods;
-
     private JProgressBar progressBar;
-
     private LinkJButton github;
     private LinkJButton twitter;
     private LinkJButton facebook;
     private LinkJButton gplus;
     private LinkJButton youtube;
     private LinkJButton reddit;
-
     private SettingsMenu settingsMenu;
-    private final GameStarter gameStarter;
     private GameDownloadWorker gameDownloadWorker;
-
-    private final File launcherDirectory;
-    private final File downloadDirectory;
-    private final File tempDirectory;
-    private final LauncherSettings launcherSettings;
-    private final TerasologyGameVersions gameVersions;
 
     public LauncherFrame(File launcherDirectory, File downloadDirectory, File tempDirectory, LauncherSettings launcherSettings, TerasologyGameVersions gameVersions) {
         this.launcherDirectory = launcherDirectory;
@@ -214,17 +194,12 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         // Forums link
         forums = new LinkJLabel();
         forums.setFont(forums.getFont().deriveFont(20f));
-        forums.setBounds(480, 36, 96, 32);
+        forums.setBounds(580, 36, 128, 32);
 
         // Issues link
         issues = new LinkJLabel();
         issues.setFont(issues.getFont().deriveFont(20f));
-        issues.setBounds(616, 36, 128, 32);
-
-        // Mods
-        mods = new LinkJLabel();
-        mods.setFont(mods.getFont().deriveFont(20f));
-        mods.setBounds(FRAME_WIDTH - 96 - xShift, 36, 96, 32);
+        issues.setBounds(720, 36, 128, 32);
 
         // Progress Bar
         progressBar = new JProgressBar();
@@ -263,7 +238,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         contentPane.add(logo);
         contentPane.add(forums);
         contentPane.add(issues);
-        contentPane.add(mods);
 
         contentPane.add(version);
 
@@ -445,9 +419,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         issues.setText(BundleUtils.getLabel("launcher_issues"));
         issues.setToolTipText(BundleUtils.getLabel("tooltip_githubIssues") + " - " + BundleUtils.getURI("terasology_github_issues"));
         issues.setUri(BundleUtils.getURI("terasology_github_issues"));
-        mods.setText(BundleUtils.getLabel("launcher_mods"));
-        mods.setToolTipText(BundleUtils.getLabel("tooltip_mods") + " - " + BundleUtils.getURI("terasology_mods"));
-        mods.setUri(BundleUtils.getURI("terasology_mods"));
 
         github.setToolTipText(BundleUtils.getLabel("tooltip_github") + " - " + BundleUtils.getURI("terasology_github"));
         github.setUri(BundleUtils.getURI("terasology_github"));
