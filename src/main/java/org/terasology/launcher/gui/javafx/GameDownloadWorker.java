@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.gui.javafx;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +64,12 @@ public class GameDownloadWorker extends Task<Void> implements ProgressListener {
 
     @Override
     protected void done() {
-        controller.finishedGameDownload(isCancelled(), successfulDownloadAndExtract, successfulLoadVersion, gameDownloader.getGameDirectory());
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                controller.finishedGameDownload(isCancelled(), successfulDownloadAndExtract, successfulLoadVersion, gameDownloader.getGameDirectory());
+            }
+        });
     }
 
     @Override
