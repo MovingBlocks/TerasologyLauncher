@@ -25,6 +25,7 @@ apply plugin: 'java'
 apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
+apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
@@ -35,7 +36,7 @@ assert org.gradle.api.JavaVersion.current().isJava7Compatible()
 
 // gradle wrapper version
 wrapper {
-    gradleVersion '1.12'
+    gradleVersion '2.1'
 }
 
 import org.apache.tools.ant.filters.FixCrLfFilter;
@@ -65,6 +66,10 @@ ext {
 repositories {
     // Main Maven repo
     mavenCentral()
+    // MovingBlocks Artifactory instance for libs not readily available elsewhere plus our own libs
+    maven {
+        url "http://artifactory.terasology.org/artifactory/repo"
+    }
 }
 
 // Primary dependencies definition
@@ -72,6 +77,7 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.7'
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
     compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.1.0'
+    compile group: 'org.terasology', name: 'CrashReporter', version: '1.2.+'
 
     runtime group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
 
@@ -81,8 +87,9 @@ dependencies {
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
 sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
-def mainClassName = 'org.terasology.launcher.TerasologyLauncher'
+mainClassName = 'org.terasology.launcher.TerasologyLauncher'
 
 javafx {
     mainClass = mainClassName
@@ -134,6 +141,8 @@ task createVersionInfoFile {
 }
 createVersionInfoFile.dependsOn processResources
 jar.dependsOn createVersionInfoFile
+distZip.dependsOn createVersionInfoFile
+distTar.dependsOn createVersionInfoFile
  
 jar {
     // replace development "logback.xml" with productive "logback_jar.xml"
@@ -157,13 +166,11 @@ jar {
     }
 }
 
-task copyLibs(type: Copy) {
+task copyLibs(type: IncrementalCopy) {
     description = "Copy all files to the distributions folder"
 
     dependsOn jar
     from configurations.runtime         // these are the runtime-time dependencies
-
-    exclude 'jfxrt.jar'                 // no need to deploy the JavaFX runtime - it's part of the JRE now
 
     from jar                            // this is the launcher jar file
 
@@ -172,61 +179,92 @@ task copyLibs(type: Copy) {
     }
 
     into "$buildDir/distributions"
-
-    eachFile { println "Copying " + it.file.getName() }
 }
 
-// Sign the jar files so they can get full rights in a browser
-task signLibs(dependsOn: copyLibs) {
+class IncrementalCopy extends Copy {
 
-    FileTree tree = fileTree(dir: "$buildDir/distributions")
-
-    tree.include '*.jar'
-
-    inputs.files tree
-    outputs.dir "$buildDir/distributions/signed"
-
-    doLast {
-
-        if (!project.hasProperty('certificateAlias')) {
-            throw new GradleException('You need to define "certificateAlias"');
+    @TaskAction
+    void execute(IncrementalTaskInputs inputs) {
+        inputs.outOfDate { change ->
+            println "Copying: ${change.file.name}"
         }
 
-        if (!project.hasProperty('certificateStorePass')) {
-            throw new GradleException('You need to define "certificateStorePass"');
-        }
-
-        if (!project.hasProperty('certificateKeyPass'))  {
-            throw new GradleException('You need to define "certificateKeyPass"');
-        }
-
-        if (!project.hasProperty('certificateFile')) {
-            throw new GradleException('You need to define "certificateFile"');
-        }
-
-        if (!file(certificateFile).exists()) {
-            throw new GradleException("The certificate file $certificateFile does not exist.");
-        }
-
-        file("$buildDir/distributions/signed").mkdirs()
-
-        tree.each {
-            def signed = file(it.parent + '/signed/' + it.name)
-            if (!signed.exists() || !IsSigned.isSigned(signed, null)) {
-                logger.lifecycle("Signing $it");
-
-                sign(it, signed);
-            } else {
-                logger.lifecycle("File $it already signed");
-            }
+        inputs.removed { change ->
+            println "Removed: ${change.file.name}"
         }
     }
 }
 
-def sign(File source, File target) {
-    ant.signjar(jar: source, signedjar: target, keystore: certificateFile, alias: certificateAlias, storepass: certificateStorePass, keypass: certificateKeyPass, tsaurl: 'http://time.certum.pl/')
+
+// Sign the jar files so they can get full rights in a browser
+task signLibs(type: IncrementalSigningTask, dependsOn: copyLibs) {
+
+    FileTree tree = fileTree(dir: "$buildDir/distributions")
+    tree.include '*.jar'
+    tree.exclude 'jfxrt.jar'                 // no need to sign the JavaFX runtime - it's part of the JRE now
+
+    inputs.files tree
+	
+	// assign only if the property exists
+	// --> missing properties do not affect other tasks if not needed
+	
+	certFile = project.hasProperty('certificateFile') ? certificateFile : 'MISSING';
+	certAlias = project.hasProperty('certificateAlias') ? certificateAlias : 'MISSING';
+	certStorePass = project.hasProperty('certificateStorePass') ? certificateStorePass : 'MISSING';
+	certKeyPass = project.hasProperty('certificateKeyPass') ? certificateKeyPass : 'MISSING';
+	
+	doFirst {
+		if (!project.hasProperty('certificateFile')) {
+			throw new GradleException('Please set certificate properties in your ~/.gradle/gradle.properties file first');
+		}
+	}
+	
+    outputDir = file("$buildDir/distributions/signed")
 }
 
+
+class IncrementalSigningTask extends DefaultTask {
+
+    @Input
+    String certFile
+
+    @Input
+    String certAlias
+
+    @Input
+    String certStorePass
+
+    @Input
+    String certKeyPass
+
+    @OutputDirectory
+    def File outputDir
+
+    @TaskAction
+    void execute(IncrementalTaskInputs inputs) {
+
+        outputDir.mkdirs()
+
+        inputs.outOfDate { change ->
+            logger.lifecycle("Signing ${change.file.name}");
+
+            def target = new File(outputDir, change.file.name)
+
+            ant.signjar(
+                jar: change.file,
+                signedjar: target,
+                keystore: certFile,
+                alias: certAlias,
+                storepass: certStorePass,
+                keypass: certKeyPass,
+                tsaurl: 'http://time.certum.pl/')
+        }
+
+        inputs.removed { change ->
+            println "removed: ${change.file.name}"
+        }
+    }
+}
 
 task updateJnlp(dependsOn:signLibs) {
 
@@ -282,27 +320,27 @@ task copyExtra(type: Copy) {
     into "$buildDir/distributions"
 }
 
+task copyExtraIntoResources(type: Copy) {
+    from('README.md')
+    from('CHANGELOG.md')
+    from('CONTRIBUTING.md')
+    from('LICENSE')
+    from('NOTICE')
+	
+	into('src/main/resources/text')
+}
+
+jar.dependsOn copyExtraIntoResources
+eclipseProject.dependsOn copyExtraIntoResources
+
 task copyHtml(type: Copy) {
     from('index.html')
 
     into "$buildDir/distributions"
 }
 
-task createRelease(type: Zip) {
-    dependsOn createVersionInfoFile
-
-    from(project.file("src/dist"))
-
-    into("lib") {
-        from configurations.runtime         // these are the runtime-time dependencies
-        exclude 'jfxrt.jar'                 // no need to deploy the JavaFX runtime - it's part of the JRE now
-        from jar                            // this is the launcher jar file
-    }
-
-//    into("bin") {
-//        from(startScripts)
-//        fileMode = 0755
-//    }
+task createRelease() {
+    dependsOn distZip
 
     doLast {
         println 'Created release: ' + displayVersion

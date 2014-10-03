@@ -22,8 +22,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.crashreporter.CrashReporter;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.gui.GuiUtils;
@@ -41,6 +43,8 @@ import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 public final class TerasologyLauncher extends Application implements ProgressListener {
@@ -112,7 +116,9 @@ public final class TerasologyLauncher extends Application implements ProgressLis
             System.exit(1);
         } catch (RuntimeException | Error e) {
             logger.error("The TerasologyLauncher could not be started!", e);
-            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_launcherStart"));
+
+            Path logFile = Paths.get("TerasologyLauncher.log");
+            CrashReporter.report(e, logFile);
             System.exit(1);
         }
     }
