@@ -204,14 +204,24 @@ task signLibs(type: IncrementalSigningTask, dependsOn: copyLibs) {
     tree.exclude 'jfxrt.jar'                 // no need to sign the JavaFX runtime - it's part of the JRE now
 
     inputs.files tree
-
-    certFile = certificateFile
-    certAlias = certificateAlias
-    certStorePass = certificateStorePass
-    certKeyPass = certificateKeyPass
-
+	
+	// assign only if the property exists
+	// --> missing properties do not affect other tasks if not needed
+	
+	certFile = project.hasProperty('certificateFile') ? certificateFile : 'MISSING';
+	certAlias = project.hasProperty('certificateAlias') ? certificateAlias : 'MISSING';
+	certStorePass = project.hasProperty('certificateStorePass') ? certificateStorePass : 'MISSING';
+	certKeyPass = project.hasProperty('certificateKeyPass') ? certificateKeyPass : 'MISSING';
+	
+	doFirst {
+		if (!project.hasProperty('certificateFile')) {
+			throw new GradleException('Please set certificate properties in your ~/.gradle/gradle.properties file first');
+		}
+	}
+	
     outputDir = file("$buildDir/distributions/signed")
 }
+
 
 class IncrementalSigningTask extends DefaultTask {
 
