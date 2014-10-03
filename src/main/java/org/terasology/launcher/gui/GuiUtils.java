@@ -17,7 +17,7 @@
 package org.terasology.launcher.gui;
 
 import javafx.stage.DirectoryChooser;
-import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.terasology.launcher.util.BundleUtils;
 
 import javax.swing.JOptionPane;
@@ -37,11 +37,19 @@ public final class GuiUtils {
         JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
     }
 
-    public static File chooseDirectory(Component parentComponent, File directory, String title) {
+    public static File chooseDirectory(Window parentWindow, File directory, String title) {
         final DirectoryChooser directoryChooser = new DirectoryChooser();
+        if (!directory.isDirectory()) {
+            directory.mkdir();
+        }
         directoryChooser.setInitialDirectory(directory);
         directoryChooser.setTitle(title);
 
-        return directoryChooser.showDialog(new Stage());
+        final File selected = directoryChooser.showDialog(parentWindow);
+        // directory proposal needs to be deleted if the user chose a different one
+        if (!selected.equals(directory)) {
+            directory.delete();
+        }
+        return selected;
     }
 }
