@@ -36,7 +36,7 @@ assert org.gradle.api.JavaVersion.current().isJava7Compatible()
 
 // gradle wrapper version
 wrapper {
-    gradleVersion '1.12'
+    gradleVersion '2.1'
 }
 
 import org.apache.tools.ant.filters.FixCrLfFilter;
@@ -68,7 +68,7 @@ repositories {
     mavenCentral()
     // MovingBlocks Artifactory instance for libs not readily available elsewhere plus our own libs
     maven {
-        url "http://www.movingblocks.net:8081/artifactory/repo"
+        url "http://artifactory.terasology.org/artifactory/repo"
     }
 }
 
@@ -77,7 +77,7 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.7'
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
     compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.1.0'
-    compile group: 'org.terasology', name: 'CrashReporter', version: '1.1+', changing: true
+    compile group: 'org.terasology', name: 'CrashReporter', version: '1.2.+'
 
     runtime group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
 
@@ -87,6 +87,7 @@ dependencies {
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
 sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 mainClassName = 'org.terasology.launcher.TerasologyLauncher'
 
