@@ -327,7 +327,7 @@ task copyExtraIntoResources(type: Copy) {
     from('LICENSE')
     from('NOTICE')
 	
-	into('src/main/resources/text')
+	into('src/main/resources/about')
 }
 
 jar.dependsOn copyExtraIntoResources
