@@ -1,11 +1,11 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,24 +16,26 @@
 
 package org.terasology.launcher.util;
 
+/**
+ * A dummy implementation of {@link ProgressListener}
+ * that does nothing
+ * @author Martin Steiger
+ */
+public class DummyProgressListener implements ProgressListener {
 
-public final class DownloadException extends Exception {
-
-    private static final long serialVersionUID = -6597132435025903769L;
-
-    public DownloadException() {
-        super();
+    @Override
+    public void update() {
+        // ignore
     }
 
-    public DownloadException(String message) {
-        super(message);
+    @Override
+    public void update(int progress) {
+        // ignore
     }
 
-    public DownloadException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public boolean isCancelled() {
+        return false;
     }
 
-    public DownloadException(Throwable cause) {
-        super(cause);
-    }
 }

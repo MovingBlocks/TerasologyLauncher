@@ -90,10 +90,12 @@ final class GameDownloadWorker extends SwingWorker<Void, Void> implements Progre
         return null;
     }
 
+    @Override
     public void update() {
         // Not implemented!
     }
 
+    @Override
     public void update(int progress) {
         setProgress(progress);
     }

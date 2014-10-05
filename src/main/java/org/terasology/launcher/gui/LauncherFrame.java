@@ -37,7 +37,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -120,6 +122,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         getContentPane().add(new BackgroundImage(FRAME_WIDTH, FRAME_HEIGHT));
     }
 
+    @Override
     public void dispose() {
         logger.debug("Dispose launcher frame...");
         if (gameDownloadWorker != null) {
@@ -209,7 +212,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         version.setFont(version.getFont().deriveFont(12f));
         version.setForeground(Color.WHITE);
         version.setBounds(FRAME_WIDTH - 400 - 16 - xShift, 0, 400, 32);
-        version.setHorizontalAlignment(JLabel.RIGHT);
+        version.setHorizontalAlignment(SwingConstants.RIGHT);
 
         // Forums link
         forums = new LinkJLabel();
