@@ -78,6 +78,7 @@ dependencies {
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
     compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.1.0'
     compile group: 'org.terasology', name: 'CrashReporter', version: '1.2.+'
+    compile group: 'com.github.rjeschke', name: 'txtmark', version: '0.11'
 
     runtime group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
 
@@ -327,7 +328,7 @@ task copyExtraIntoResources(type: Copy) {
     from('LICENSE')
     from('NOTICE')
 	
-	into('src/main/resources/about')
+	into('src/main/resources/org/terasology/launcher/about')
 }
 
 jar.dependsOn copyExtraIntoResources

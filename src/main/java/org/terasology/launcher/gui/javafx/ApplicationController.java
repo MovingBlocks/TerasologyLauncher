@@ -39,6 +39,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
@@ -55,13 +56,24 @@ import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
+import com.github.rjeschke.txtmark.Configuration;
+import com.github.rjeschke.txtmark.Processor;
+
 import javax.swing.JOptionPane;
+
 import java.awt.Desktop;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -473,12 +485,40 @@ public class ApplicationController {
         logger.debug("Scanning resource directory for info files - {}", aboutDir);
         for (File f : aboutDir.listFiles()) {
             try {
-                final URL url = f.toURI().toURL();
-
-                logger.debug("\t\t Found info file: {}", url);
+                logger.debug("\t\t Found info file: {}", f.getAbsolutePath());
+                String fname = f.getName().toLowerCase();
 
                 final WebView view = new WebView();
-                view.getEngine().load(url.toExternalForm());
+
+                if (fname.endsWith(".md") || fname.endsWith(".markdown")) {
+                    try (FileInputStream input = new FileInputStream(f)) {
+                        String html = Processor.process(input, Configuration.DEFAULT);
+                        view.getEngine().loadContent(html);
+                    }
+                } else
+
+                if (fname.endsWith(".htm") || fname.endsWith(".html")) {
+                    final URL url = f.toURI().toURL();
+                    view.getEngine().load(url.toExternalForm());
+                } else {
+                    Charset cs = Charset.forName("UTF-8");
+                    try (Reader isr = new InputStreamReader(new FileInputStream(f), cs);
+                         BufferedReader br = new BufferedReader(isr)) {
+                        StringBuilder sb = new StringBuilder();
+                        String line = br.readLine();
+
+                        while (line != null) {
+                            sb.append(line);
+                            sb.append(System.lineSeparator());
+                            line = br.readLine();
+                        }
+
+                        // msteiger: I suspect that the second parameter is the MIME type
+                        view.getEngine().loadContent(sb.toString(), "text/plain");
+                    }
+                }
+
+
                 view.getStylesheets().add(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
                 view.setContextMenuEnabled(false);
 
@@ -490,6 +530,8 @@ public class ApplicationController {
                 aboutInfoAccordion.getPanes().add(new TitledPane(f.getName(), pane));
             } catch (MalformedURLException e) {
                 logger.warn("Could not load info file -- {}", f);
+            } catch (IOException e) {
+                logger.warn("Failed to parse markdown file {}", f.getAbsolutePath(), e);
             }
         }
     }
