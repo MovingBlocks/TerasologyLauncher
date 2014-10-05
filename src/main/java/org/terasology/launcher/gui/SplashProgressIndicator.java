@@ -50,10 +50,12 @@ public class SplashProgressIndicator implements ProgressListener {
         }
     }
 
+    @Override
     public void update(int progress) {
         update();
     }
 
+    @Override
     public boolean isCancelled() {
         return false;
     }

@@ -81,31 +81,12 @@ public final class DownloadUtils {
             logger.debug("Download file '{}' ({}; {}) from URL '{}'.", file, contentLength, connection.getContentType(), downloadURL);
         }
 
-        BufferedInputStream in = null;
-        BufferedOutputStream out = null;
-        try {
-            in = new BufferedInputStream(connection.getInputStream());
-            out = new BufferedOutputStream(new FileOutputStream(file));
+        try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
             downloadToFile(listener, contentLength, in, out);
         } catch (IOException e) {
             throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
         } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    logger.warn("Closing InputStream for '{}' failed!", downloadURL, e);
-                }
-            }
-
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    logger.warn("Closing OutputStream for '{}' failed!", file, e);
-                }
-            }
-
             connection.disconnect();
         }
 
@@ -132,7 +113,7 @@ public final class DownloadUtils {
 
     private static void downloadToFile(ProgressListener listener, long contentLength, BufferedInputStream in, BufferedOutputStream out) throws IOException {
         final byte[] buffer = new byte[2048];
-        final float sizeFactor = 100f / (float) contentLength;
+        final float sizeFactor = 100f / contentLength;
         long writtenBytes = 0;
         int n;
         if (!listener.isCancelled()) {
@@ -144,7 +125,7 @@ public final class DownloadUtils {
                 out.write(buffer, 0, n);
                 writtenBytes += n;
 
-                int percentage = (int) (sizeFactor * (float) writtenBytes);
+                int percentage = (int) (sizeFactor * writtenBytes);
                 if (percentage < 1) {
                     percentage = 1;
                 } else if (percentage >= 100) {
@@ -254,23 +235,24 @@ public final class DownloadUtils {
     public static List<String> loadChangeLogJenkins(String jobName, int buildNumber) throws DownloadException {
         List<String> changeLog = null;
         URL urlChangeLog = null;
-        InputStream stream = null;
         try {
             urlChangeLog = DownloadUtils.createUrlJenkins(jobName, buildNumber, API_XML_CHANGE_LOG);
             final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            stream = urlChangeLog.openStream();
-            final Document document = builder.parse(stream);
-            final NodeList nodeList = document.getElementsByTagName("msg");
-            if (nodeList != null) {
-                changeLog = new ArrayList<>();
-                for (int i = 0; i < nodeList.getLength(); i++) {
-                    final Node item = nodeList.item(i);
-                    if (item != null) {
-                        final Node lastChild = item.getLastChild();
-                        if (lastChild != null) {
-                            final String textContent = lastChild.getTextContent();
-                            if ((textContent != null) && (textContent.trim().length() > 0)) {
-                                changeLog.add(textContent.trim());
+
+            try (InputStream stream = urlChangeLog.openStream()) {
+                final Document document = builder.parse(stream);
+                final NodeList nodeList = document.getElementsByTagName("msg");
+                if (nodeList != null) {
+                    changeLog = new ArrayList<>();
+                    for (int i = 0; i < nodeList.getLength(); i++) {
+                        final Node item = nodeList.item(i);
+                        if (item != null) {
+                            final Node lastChild = item.getLastChild();
+                            if (lastChild != null) {
+                                final String textContent = lastChild.getTextContent();
+                                if ((textContent != null) && (textContent.trim().length() > 0)) {
+                                    changeLog.add(textContent.trim());
+                                }
                             }
                         }
                     }
@@ -278,14 +260,6 @@ public final class DownloadUtils {
             }
         } catch (ParserConfigurationException | SAXException | IOException | RuntimeException e) {
             throw new DownloadException("The change log could not be loaded! job=" + jobName + ", URL=" + urlChangeLog, e);
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    logger.warn("Closing InputStream for '{}' failed!", urlChangeLog, e);
-                }
-            }
         }
         return changeLog;
     }

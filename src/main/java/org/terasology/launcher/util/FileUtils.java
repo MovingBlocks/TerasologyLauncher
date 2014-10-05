@@ -23,7 +23,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -83,7 +84,6 @@ public final class FileUtils {
     public static boolean extractZipTo(File archive, File outputLocation) {
         logger.trace("Extracting '{}' to '{}'.", archive, outputLocation);
 
-        ZipInputStream zis = null;
         try {
             if (!outputLocation.exists()) {
                 boolean created = outputLocation.mkdir();
@@ -92,43 +92,31 @@ public final class FileUtils {
                 }
             }
             final byte[] buffer = new byte[4096];
-            zis = new ZipInputStream(new FileInputStream(archive));
-            ZipEntry ze;
-            while ((ze = zis.getNextEntry()) != null) {
-                File extractedFile = new File(outputLocation, ze.getName());
-                File extractedDir = extractedFile.getParentFile();
-                if (!extractedDir.exists()) {
-                    boolean created = extractedDir.mkdirs();
-                    if (!created) {
-                        throw new IOException("Could not create directory! " + extractedDir);
-                    }
-                }
-                if (!ze.isDirectory()) {
-                    try (FileOutputStream fos = new FileOutputStream(extractedFile)) {
-                        int c;
-                        while ((c = zis.read(buffer)) > 0) {
-                            fos.write(buffer, 0, c);
+            try (ZipInputStream zis = new ZipInputStream(new FileInputStream(archive))) {
+                ZipEntry ze;
+                while ((ze = zis.getNextEntry()) != null) {
+                    File extractedFile = new File(outputLocation, ze.getName());
+                    File extractedDir = extractedFile.getParentFile();
+                    if (!extractedDir.exists()) {
+                        boolean created = extractedDir.mkdirs();
+                        if (!created) {
+                            throw new IOException("Could not create directory! " + extractedDir);
                         }
-                        fos.flush();
+                    }
+                    if (!ze.isDirectory()) {
+                        try (FileOutputStream fos = new FileOutputStream(extractedFile)) {
+                            int c;
+                            while ((c = zis.read(buffer)) > 0) {
+                                fos.write(buffer, 0, c);
+                            }
+                            fos.flush();
+                        }
                     }
                 }
             }
             return true;
         } catch (IOException e) {
             logger.error("Could not extract zip archive '{}' to '{}'!", archive, outputLocation, e);
-        } finally {
-            if (zis != null) {
-                try {
-                    zis.closeEntry();
-                } catch (IOException e) {
-                    logger.warn("The zip entry could not be closed! '{}'", archive, e);
-                }
-                try {
-                    zis.close();
-                } catch (IOException e) {
-                    logger.warn("The zip input stream could not be closed! '{}'", archive, e);
-                }
-            }
         }
         return false;
     }
@@ -139,27 +127,7 @@ public final class FileUtils {
             return;
         }
 
-        if (!destination.exists()) {
-            final boolean created = destination.createNewFile();
-            if (!created) {
-                throw new IOException("Could not create file! " + destination);
-            }
-        }
-
-        FileChannel sourceStream = null;
-        FileChannel destinationStream = null;
-        try {
-            sourceStream = new FileInputStream(source).getChannel();
-            destinationStream = new FileOutputStream(destination).getChannel();
-            destinationStream.transferFrom(sourceStream, 0, sourceStream.size());
-        } finally {
-            if (sourceStream != null) {
-                sourceStream.close();
-            }
-            if (destinationStream != null) {
-                destinationStream.close();
-            }
-        }
+        Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**

@@ -24,6 +24,7 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
+import org.terasology.launcher.util.DummyProgressListener;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
@@ -32,6 +33,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -175,7 +177,7 @@ public final class LauncherUpdater {
     public boolean update(File downloadDirectory, File tempDirectory, SplashScreenWindow splash) {
         try {
             logger.trace("Downloading launcher...");
-            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
+//            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
 
             // Download launcher ZIP file
             final URL updateURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
@@ -184,9 +186,9 @@ public final class LauncherUpdater {
             final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
             logger.trace("Download ZIP file: {}", downloadedZipFile);
 
-            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, null);
+            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new DummyProgressListener());
 
-            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
+//            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 
             // Extract launcher ZIP file
             final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);

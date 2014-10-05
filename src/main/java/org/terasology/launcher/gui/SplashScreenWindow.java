@@ -19,6 +19,8 @@ package org.terasology.launcher.gui;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JWindow;
+import javax.swing.SwingConstants;
+
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Image;
@@ -26,6 +28,8 @@ import java.awt.Rectangle;
 import java.awt.SplashScreen;
 
 public final class SplashScreenWindow extends JWindow {
+
+    private static final long serialVersionUID = -900732950593843822L;
 
     private static final int INFO_LABEL_WIDTH = 400;
 
@@ -40,8 +44,8 @@ public final class SplashScreenWindow extends JWindow {
         infoLabel = new JLabel();
         infoLabel.setBounds((icon.getIconWidth() / 2) - (INFO_LABEL_WIDTH / 2), (icon.getIconHeight() / 2) + 64, INFO_LABEL_WIDTH, 32);
         infoLabel.setForeground(Color.WHITE);
-        infoLabel.setHorizontalTextPosition(JLabel.CENTER);
-        infoLabel.setHorizontalAlignment(JLabel.CENTER);
+        infoLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+        infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         contentPane.add(infoLabel);
 

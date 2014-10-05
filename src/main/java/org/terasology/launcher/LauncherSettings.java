@@ -272,22 +272,27 @@ public final class LauncherSettings implements GameSettings {
         properties.setProperty(PROPERTY_LOCALE, locale.toString());
     }
 
+    @Override
     public synchronized void setJob(GameJob job) {
         properties.setProperty(PROPERTY_JOB, job.name());
     }
 
+    @Override
     public synchronized GameJob getJob() {
         return GameJob.valueOf(properties.getProperty(PROPERTY_JOB));
     }
 
+    @Override
     public synchronized void setBuildVersion(int version, GameJob job) {
         properties.setProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name(), String.valueOf(version));
     }
 
+    @Override
     public synchronized int getBuildVersion(GameJob job) {
         return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name()));
     }
 
+    @Override
     public synchronized void setLastBuildNumber(Integer lastBuildNumber, GameJob job) {
         if ((lastBuildNumber != null) && (lastBuildNumber >= job.getMinBuildNumber())) {
             properties.setProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name(), lastBuildNumber.toString());
@@ -296,6 +301,7 @@ public final class LauncherSettings implements GameSettings {
         }
     }
 
+    @Override
     public synchronized Integer getLastBuildNumber(GameJob job) {
         final String lastBuildNumberStr = properties.getProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name());
         if (LAST_BUILD_NUMBER_DEFAULT.equals(lastBuildNumberStr)) {

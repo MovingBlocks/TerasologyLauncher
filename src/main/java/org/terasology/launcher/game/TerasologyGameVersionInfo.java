@@ -146,13 +146,13 @@ public final class TerasologyGameVersionInfo implements Serializable {
 
     public static TerasologyGameVersionInfo loadFromJar(File terasologyGameJar) {
         final Properties properties = new Properties();
-        ZipFile zipFile = null;
         try {
             if (terasologyGameJar.exists() && terasologyGameJar.isFile() && terasologyGameJar.canRead()) {
-                zipFile = new ZipFile(terasologyGameJar);
-                final ZipEntry zipEntry = zipFile.getEntry(VERSION_INFO_FILE);
-                if (zipEntry != null) {
-                    properties.load(zipFile.getInputStream(zipEntry));
+                try (ZipFile zipFile = new ZipFile(terasologyGameJar)) {
+                    final ZipEntry zipEntry = zipFile.getEntry(VERSION_INFO_FILE);
+                    if (zipEntry != null) {
+                        properties.load(zipFile.getInputStream(zipEntry));
+                    }
                 }
             }
 
@@ -161,14 +161,6 @@ public final class TerasologyGameVersionInfo implements Serializable {
             }
         } catch (IOException e) {
             logger.error("Could not load TerasologyGameVersionInfo from file '{}'!", terasologyGameJar, e);
-        } finally {
-            if (zipFile != null) {
-                try {
-                    zipFile.close();
-                } catch (IOException e) {
-                    logger.warn("The file '{}' could not be closed.", zipFile, e);
-                }
-            }
         }
 
         return new TerasologyGameVersionInfo(properties);
