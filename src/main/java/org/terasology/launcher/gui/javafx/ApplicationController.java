@@ -486,6 +486,9 @@ public class ApplicationController {
     }
 
     private void updateAboutTab() {
+
+        aboutInfoAccordion.getPanes().clear();
+
         Collection<URL> files = new ArrayList<>();
         files.add(BundleUtils.getFXMLUrl("about", "README.md"));
         files.add(BundleUtils.getFXMLUrl("about", "CONTRIBUTING.md"));
@@ -497,7 +500,7 @@ public class ApplicationController {
                 logger.debug("\t\t Found info file: {}", url.toExternalForm());
                 int fnameIdx = url.getFile().lastIndexOf('/');
                 int extIdx = url.getFile().lastIndexOf('.');
-                String fname = extIdx < 0 ? "" : url.getFile().substring(fnameIdx + 1);
+                String fname = url.getFile().substring(fnameIdx + 1);
                 String ext = extIdx < 0 ? "" : url.getFile().substring(extIdx + 1).toLowerCase();
 
                 final WebView view = new WebView();

@@ -47,4 +47,4 @@ TerasologyLauncher.log
 certum.jks
 
 # Ignore text files that are copied by a gradle task from the root folder into resources to make them accessible for java code
-/src/main/resources/text
+/src/main/resources/org/terasology/launcher/about/

@@ -331,7 +331,7 @@ task copyExtraIntoResources(type: Copy) {
 	into('src/main/resources/org/terasology/launcher/about')
 }
 
-jar.dependsOn copyExtraIntoResources
+processResources.dependsOn copyExtraIntoResources
 eclipseProject.dependsOn copyExtraIntoResources
 
 task copyHtml(type: Copy) {
