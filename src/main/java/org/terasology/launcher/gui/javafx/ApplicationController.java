@@ -39,6 +39,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
@@ -55,13 +56,29 @@ import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
+import com.github.rjeschke.txtmark.Configuration;
+import com.github.rjeschke.txtmark.Processor;
+
 import javax.swing.JOptionPane;
+
 import java.awt.Desktop;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -469,16 +486,52 @@ public class ApplicationController {
     }
 
     private void updateAboutTab() {
-        final File aboutDir = new File(BundleUtils.getFXMLUrl("about").getFile());
-        logger.debug("Scanning resource directory for info files - {}", aboutDir);
-        for (File f : aboutDir.listFiles()) {
-            try {
-                final URL url = f.toURI().toURL();
 
-                logger.debug("\t\t Found info file: {}", url);
+        aboutInfoAccordion.getPanes().clear();
+
+        Collection<URL> files = new ArrayList<>();
+        files.add(BundleUtils.getFXMLUrl("about", "README.md"));
+        files.add(BundleUtils.getFXMLUrl("about", "CONTRIBUTING.md"));
+        files.add(BundleUtils.getFXMLUrl("about", "LICENSE"));
+        Charset cs = Charset.forName("UTF-8");
+
+        for (URL url : files) {
+            try {
+                logger.debug("\t\t Found info file: {}", url.toExternalForm());
+                int fnameIdx = url.getFile().lastIndexOf('/');
+                int extIdx = url.getFile().lastIndexOf('.');
+                String fname = url.getFile().substring(fnameIdx + 1);
+                String ext = extIdx < 0 ? "" : url.getFile().substring(extIdx + 1).toLowerCase();
 
                 final WebView view = new WebView();
-                view.getEngine().load(url.toExternalForm());
+
+                if (ext.equals("md") || ext.equals("markdown")) {
+                    try (InputStream input = url.openStream()) {
+                        String html = Processor.process(input, Configuration.DEFAULT);
+                        view.getEngine().loadContent(html);
+                    }
+                } else
+
+                if (ext.equals("htm") || ext.equals("html")) {
+                    view.getEngine().load(url.toExternalForm());
+                } else {
+                    try (Reader isr = new InputStreamReader(url.openStream(), cs);
+                         BufferedReader br = new BufferedReader(isr)) {
+                        StringBuilder sb = new StringBuilder();
+                        String line = br.readLine();
+
+                        while (line != null) {
+                            sb.append(line);
+                            sb.append(System.lineSeparator());
+                            line = br.readLine();
+                        }
+
+                        // msteiger: I suspect that the second parameter is the MIME type
+                        view.getEngine().loadContent(sb.toString(), "text/plain");
+                    }
+                }
+
+
                 view.getStylesheets().add(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
                 view.setContextMenuEnabled(false);
 
@@ -487,9 +540,11 @@ public class ApplicationController {
                 AnchorPane.setTopAnchor(view, 0.0);
                 pane.getChildren().add(view);
 
-                aboutInfoAccordion.getPanes().add(new TitledPane(f.getName(), pane));
+                aboutInfoAccordion.getPanes().add(new TitledPane(fname, pane));
             } catch (MalformedURLException e) {
-                logger.warn("Could not load info file -- {}", f);
+                logger.warn("Could not load info file -- {}", url);
+            } catch (IOException e) {
+                logger.warn("Failed to parse markdown file {}", url, e);
             }
         }
     }

@@ -106,6 +106,11 @@ public final class BundleUtils {
         return BundleUtils.class.getResource(url);
     }
 
+    public static URL getFXMLUrl(String key, String relative) {
+        final String url = ResourceBundle.getBundle(FXML_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        return BundleUtils.class.getResource(url + '/' + relative);
+    }
+
     public static String getStylesheet(String key) {
         return ResourceBundle.getBundle(FXML_BUNDLE, Languages.getCurrentLocale()).getString(key);
     }
