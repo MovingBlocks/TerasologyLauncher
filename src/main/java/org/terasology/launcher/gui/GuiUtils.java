@@ -47,7 +47,7 @@ public final class GuiUtils {
 
         final File selected = directoryChooser.showDialog(parentWindow);
         // directory proposal needs to be deleted if the user chose a different one
-        if (!selected.equals(directory)) {
+        if (!directory.equals(selected)) {
             directory.delete();
         }
         return selected;
