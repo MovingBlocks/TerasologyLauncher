@@ -16,6 +16,8 @@
 
 package org.terasology.launcher.gui.javafx;
 
+import com.github.rjeschke.txtmark.Configuration;
+import com.github.rjeschke.txtmark.Processor;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.beans.value.ChangeListener;
@@ -39,7 +41,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
@@ -56,16 +57,10 @@ import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
-import com.github.rjeschke.txtmark.Configuration;
-import com.github.rjeschke.txtmark.Processor;
-
 import javax.swing.JOptionPane;
-
 import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -74,9 +69,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -491,6 +483,7 @@ public class ApplicationController {
 
         Collection<URL> files = new ArrayList<>();
         files.add(BundleUtils.getFXMLUrl("about", "README.md"));
+        files.add(BundleUtils.getFXMLUrl("about", "CHANGELOG.md"));
         files.add(BundleUtils.getFXMLUrl("about", "CONTRIBUTING.md"));
         files.add(BundleUtils.getFXMLUrl("about", "LICENSE"));
         Charset cs = Charset.forName("UTF-8");
@@ -510,9 +503,7 @@ public class ApplicationController {
                         String html = Processor.process(input, Configuration.DEFAULT);
                         view.getEngine().loadContent(html);
                     }
-                } else
-
-                if (ext.equals("htm") || ext.equals("html")) {
+                } else if (ext.equals("htm") || ext.equals("html")) {
                     view.getEngine().load(url.toExternalForm());
                 } else {
                     try (Reader isr = new InputStreamReader(url.openStream(), cs);
