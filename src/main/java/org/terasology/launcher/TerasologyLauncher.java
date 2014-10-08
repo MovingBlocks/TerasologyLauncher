@@ -21,6 +21,7 @@ import javafx.application.Preloader;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -106,6 +107,11 @@ public final class TerasologyLauncher extends Application implements ProgressLis
             Scene scene = new Scene(root);
             scene.getStylesheets().add(BundleUtils.getStylesheet("css_terasology"));
 
+            stage.setTitle("TerasologyLauncher "+ TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
+            stage.getIcons().add(new Image("file:icons/gooey_sweet_16.png"));
+            stage.getIcons().add(new Image("file:icons/gooey_sweet_32.png"));
+            stage.getIcons().add(new Image("file:icons/gooey_sweet_64.png"));
+            stage.getIcons().add(new Image("file:icons/gooey_sweet_128.png"));
             stage.setScene(scene);
             stage.setResizable(false);
             stage.show();
