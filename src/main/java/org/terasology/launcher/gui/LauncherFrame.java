@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
-
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -48,11 +47,10 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 
+@Deprecated
 public final class LauncherFrame extends JFrame implements ActionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherFrame.class);
@@ -78,21 +76,9 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private JButton exitButton;
 
     private JTextPane infoTextPane;
-    private LinkJLabel logo;
-    private LinkJLabel forums;
-    private LinkJLabel issues;
-    private LinkJLabel mods;
 
     private JProgressBar progressBar;
 
-    private LinkJButton github;
-    private LinkJButton twitter;
-    private LinkJButton facebook;
-    private LinkJButton gplus;
-    private LinkJButton youtube;
-    private LinkJButton reddit;
-
-    private SettingsMenu settingsMenu;
     private final GameStarter gameStarter;
     private GameDownloadWorker gameDownloadWorker;
 
@@ -204,10 +190,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         sp.getVerticalScrollBar().setOpaque(false);
         sp.getVerticalScrollBar().setBorder(BorderFactory.createEmptyBorder());
 
-        // Terasology logo
-        logo = new LinkJLabel();
-        logo.setBounds(8, 0, 400, 96);
-
         // Launcher version info label
         final JLabel version = new JLabel(TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
         version.setFont(version.getFont().deriveFont(12f));
@@ -215,59 +197,15 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         version.setBounds(FRAME_WIDTH - 400 - 16 - xShift, 0, 400, 32);
         version.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        // Forums link
-        forums = new LinkJLabel();
-        forums.setFont(forums.getFont().deriveFont(20f));
-        forums.setBounds(480, 36, 96, 32);
-
-        // Issues link
-        issues = new LinkJLabel();
-        issues.setFont(issues.getFont().deriveFont(20f));
-        issues.setBounds(616, 36, 128, 32);
-
-        // Mods
-        mods = new LinkJLabel();
-        mods.setFont(mods.getFont().deriveFont(20f));
-        mods.setBounds(FRAME_WIDTH - 96 - xShift, 36, 96, 32);
-
         // Progress Bar
         progressBar = new JProgressBar();
         progressBar.setBounds((FRAME_WIDTH / 2) - 200, (FRAME_HEIGHT - 70) + yShift, 400, 23);
         progressBar.setVisible(false);
         progressBar.setStringPainted(true);
 
-        // Social media
-        github = new LinkJButton();
-        github.setBounds(8 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
-        github.setBorder(null);
-
-        twitter = new LinkJButton();
-        twitter.setBounds(8 + (38 * 4) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
-        twitter.setBorder(null);
-
-        facebook = new LinkJButton();
-        facebook.setBounds(8 + (38 * 3) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
-        facebook.setBorder(null);
-
-        gplus = new LinkJButton();
-        gplus.setBounds(8 + (38 * 2) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
-        gplus.setBorder(null);
-
-        youtube = new LinkJButton();
-        youtube.setBounds(8 + 38 + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
-        youtube.setBorder(null);
-
-        reddit = new LinkJButton();
-        reddit.setBounds(8 + (38 * 5) + xShift, (FRAME_HEIGHT - 70) + yShift, 32, 32);
-        reddit.setBorder(null);
 
         final Container contentPane = getContentPane();
         contentPane.setLayout(null);
-
-        contentPane.add(logo);
-        contentPane.add(forums);
-        contentPane.add(issues);
-        contentPane.add(mods);
 
         contentPane.add(version);
 
@@ -276,13 +214,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         contentPane.add(deleteButton);
         contentPane.add(settingsButton);
         contentPane.add(exitButton);
-
-        contentPane.add(github);
-        contentPane.add(twitter);
-        contentPane.add(facebook);
-        contentPane.add(gplus);
-        contentPane.add(youtube);
-        contentPane.add(reddit);
 
         contentPane.add(progressBar);
 
@@ -300,9 +231,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() instanceof JComponent) {
             switch (e.getActionCommand()) {
-                case SETTINGS_ACTION:
-                    settingsAction();
-                    break;
                 case EXIT_ACTION:
                     dispose();
                     break;
@@ -318,19 +246,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
                 default:
                     logger.warn("Unhandled action command '{}'!", e.getActionCommand());
             }
-        }
-    }
-
-    private void settingsAction() {
-        if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-            settingsMenu = new SettingsMenu(this, launcherDirectory, downloadDirectory, launcherSettings, gameVersions);
-            settingsMenu.setVisible(true);
-            settingsMenu.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosed(WindowEvent e) {
-                    updateGui();
-                }
-            });
         }
     }
 
@@ -444,49 +359,6 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         settingsButton.setToolTipText(BundleUtils.getLabel("tooltip_settings"));
         exitButton.setText(BundleUtils.getLabel("launcher_exit"));
         exitButton.setToolTipText(BundleUtils.getLabel("tooltip_exit"));
-
-        logo.setToolTipText(BundleUtils.getLabel("tooltip_website") + " - " + BundleUtils.getURI("terasology_website"));
-        logo.setIcon(BundleUtils.getImageIcon("logo"));
-        logo.setUri(BundleUtils.getURI("terasology_website"));
-        forums.setText(BundleUtils.getLabel("launcher_forum"));
-        forums.setToolTipText(BundleUtils.getLabel("tooltip_forum") + " - " + BundleUtils.getURI("terasology_forum"));
-        forums.setUri(BundleUtils.getURI("terasology_forum"));
-        issues.setText(BundleUtils.getLabel("launcher_issues"));
-        issues.setToolTipText(BundleUtils.getLabel("tooltip_githubIssues") + " - " + BundleUtils.getURI("terasology_github_issues"));
-        issues.setUri(BundleUtils.getURI("terasology_github_issues"));
-        mods.setText(BundleUtils.getLabel("launcher_mods"));
-        mods.setToolTipText(BundleUtils.getLabel("tooltip_mods") + " - " + BundleUtils.getURI("terasology_mods"));
-        mods.setUri(BundleUtils.getURI("terasology_mods"));
-
-        github.setToolTipText(BundleUtils.getLabel("tooltip_github") + " - " + BundleUtils.getURI("terasology_github"));
-        github.setUri(BundleUtils.getURI("terasology_github"));
-        github.setIcon(BundleUtils.getImageIcon("github"));
-        github.setRolloverIcon(BundleUtils.getImageIcon("github_hover"));
-
-        twitter.setToolTipText(BundleUtils.getLabel("tooltip_twitter") + " - " + BundleUtils.getURI("terasology_twitter"));
-        twitter.setUri(BundleUtils.getURI("terasology_twitter"));
-        twitter.setIcon(BundleUtils.getImageIcon("twitter"));
-        twitter.setRolloverIcon(BundleUtils.getImageIcon("twitter_hover"));
-
-        facebook.setToolTipText(BundleUtils.getLabel("tooltip_facebook") + " - " + BundleUtils.getURI("terasology_facebook"));
-        facebook.setUri(BundleUtils.getURI("terasology_facebook"));
-        facebook.setIcon(BundleUtils.getImageIcon("facebook"));
-        facebook.setRolloverIcon(BundleUtils.getImageIcon("facebook_hover"));
-
-        gplus.setToolTipText(BundleUtils.getLabel("tooltip_gplus") + " - " + BundleUtils.getURI("terasology_gplus"));
-        gplus.setUri(BundleUtils.getURI("terasology_gplus"));
-        gplus.setIcon(BundleUtils.getImageIcon("gplus"));
-        gplus.setRolloverIcon(BundleUtils.getImageIcon("gplus_hover"));
-
-        youtube.setToolTipText(BundleUtils.getLabel("tooltip_youtube") + " - " + BundleUtils.getURI("terasology_youtube"));
-        youtube.setUri(BundleUtils.getURI("terasology_youtube"));
-        youtube.setIcon(BundleUtils.getImageIcon("youtube"));
-        youtube.setRolloverIcon(BundleUtils.getImageIcon("youtube_hover"));
-
-        reddit.setToolTipText(BundleUtils.getLabel("tooltip_reddit") + " - " + BundleUtils.getURI("terasology_reddit"));
-        reddit.setUri(BundleUtils.getURI("terasology_reddit"));
-        reddit.setIcon(BundleUtils.getImageIcon("reddit"));
-        reddit.setRolloverIcon(BundleUtils.getImageIcon("reddit_hover"));
     }
 
     private void updateButtons() {

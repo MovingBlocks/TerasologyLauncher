@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.terasology.launcher.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.gui.GuiUtils;
 import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
@@ -26,6 +25,7 @@ import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.DummyProgressListener;
 import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.BorderFactory;
@@ -33,7 +33,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -119,6 +118,7 @@ public final class LauncherUpdater {
     }
 
     public boolean showUpdateDialog(Component parentComponent) {
+        //TODO: Java8 -- ControlsFX Dialog
         final JPanel msgPanel = new JPanel(new BorderLayout(0, 10));
         final JTextArea msgLabel = new JTextArea(BundleUtils.getLabel("message_update_launcher"));
         msgLabel.setBackground(msgPanel.getBackground());
@@ -177,7 +177,7 @@ public final class LauncherUpdater {
     public boolean update(File downloadDirectory, File tempDirectory, SplashScreenWindow splash) {
         try {
             logger.trace("Downloading launcher...");
-//            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
+            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
 
             // Download launcher ZIP file
             final URL updateURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
@@ -188,7 +188,7 @@ public final class LauncherUpdater {
 
             DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new DummyProgressListener());
 
-//            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
+            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 
             // Extract launcher ZIP file
             final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);

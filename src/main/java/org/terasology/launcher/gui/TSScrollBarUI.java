@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- * Custom scroll bar style to fit into the launcher. The scroll bar is a custom design with just a dark grey thumb
- * element with rounded corners and no background.
+ * Custom scroll bar style to fit into the launcher. The scroll bar is a custom design with just a dark grey thumb element with rounded corners and no background.
  */
+@Deprecated
 final class TSScrollBarUI extends BasicScrollBarUI {
 
     public TSScrollBarUI() {

@@ -31,9 +31,9 @@ import org.terasology.launcher.game.JobItem;
 import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.game.VersionItem;
-import org.terasology.launcher.gui.GuiUtils;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 
@@ -149,7 +149,7 @@ public class SettingsController {
 
     @FXML
     protected void editGameDirectoryAction() {
-        final File selectedFile = GuiUtils.chooseDirectory(null, gameDirectory, BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
+        final File selectedFile = GuiUtils.chooseDirectoryDialog(null, gameDirectory, BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
         if (selectedFile != null) {
             try {
                 DirectoryUtils.checkDirectory(selectedFile);
@@ -181,7 +181,7 @@ public class SettingsController {
 
     @FXML
     protected void editGameDataDirectoryAction() {
-        final File selectedFile = GuiUtils.chooseDirectory(null, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
+        final File selectedFile = GuiUtils.chooseDirectoryDialog(null, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
         if (selectedFile != null) {
             try {
                 DirectoryUtils.checkDirectory(selectedFile);

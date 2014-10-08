@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.awt.Graphics2D;
 /**
  * JPanel with transparent background. Both, degree of transparency and color can be defined.
  */
+@Deprecated
 final class TransparentPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;

@@ -16,7 +16,7 @@
 
 package org.terasology.launcher.util;
 
-public class LauncherStartFailedException extends Exception {
+public class LauncherStartFailedException extends RuntimeException {
 
     private static final long serialVersionUID = -6096111978556806948L;
 

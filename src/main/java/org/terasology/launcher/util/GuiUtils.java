@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.gui;
+package org.terasology.launcher.util;
 
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
-import org.terasology.launcher.util.BundleUtils;
 
 import javax.swing.JOptionPane;
 import java.awt.Component;
@@ -30,14 +29,16 @@ public final class GuiUtils {
     }
 
     public static void showWarningMessageDialog(Component parentComponent, String message) {
+        // TODO: Java8 -- Use ControlsFX dialog
         JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.WARNING_MESSAGE);
     }
 
     public static void showErrorMessageDialog(Component parentComponent, String message) {
+        // TODO: Java8 -- Use ControlsFX dialog
         JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
     }
 
-    public static File chooseDirectory(Window parentWindow, File directory, String title) {
+    public static File chooseDirectoryDialog(Window parentWindow, File directory, String title) {
         final DirectoryChooser directoryChooser = new DirectoryChooser();
         if (!directory.isDirectory()) {
             directory.mkdir();

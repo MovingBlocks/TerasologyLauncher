@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+@Deprecated
 final class SettingsMenu extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;

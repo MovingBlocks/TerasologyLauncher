@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JWindow;
 import javax.swing.SwingConstants;
-
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.SplashScreen;
 
+@Deprecated
 public final class SplashScreenWindow extends JWindow {
 
     private static final long serialVersionUID = -900732950593843822L;

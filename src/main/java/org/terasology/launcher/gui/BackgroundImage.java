@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.io.IOException;
 /**
  * A JLabel used as background image for launcher.
  */
+@Deprecated
 final class BackgroundImage extends JLabel {
 
     private static final long serialVersionUID = 1L;
