@@ -42,3 +42,9 @@ $RECYCLE.BIN/
 
 # Ignore output stuff
 TerasologyLauncher.log
+
+# Signing certificate - Do not EVER put this file into the repository
+certum.jks
+
+# Ignore text files that are copied by a gradle task from the root folder into resources to make them accessible for java code
+/src/main/resources/org/terasology/launcher/about/

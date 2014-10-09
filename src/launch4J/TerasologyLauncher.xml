@@ -1,7 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <launch4jConfig>
   <dontWrapJar>true</dontWrapJar>
   <headerType>gui</headerType>
   <jar>lib\TerasologyLauncher.jar</jar>
+  <classPath>
+    <cp>%JREHOMEDIR%\lib\jfxrt.jar</cp>
+  </classPath>
   <outfile>..\dist\TerasologyLauncher.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
@@ -9,14 +13,15 @@
   <priority>normal</priority>
   <downloadUrl>http://java.com/download</downloadUrl>
   <supportUrl></supportUrl>
-  <customProcName>false</customProcName>
   <stayAlive>false</stayAlive>
   <manifest></manifest>
   <icon>TerasologyLauncher.ico</icon>
   <jre>
     <path></path>
+    <bundledJre64Bit>false</bundledJre64Bit>
     <minVersion>1.7.0</minVersion>
     <maxVersion></maxVersion>
     <jdkPreference>preferJre</jdkPreference>
+    <runtimeBits>64/32</runtimeBits>
   </jre>
 </launch4jConfig>

@@ -19,6 +19,8 @@ package org.terasology.launcher.util;
 
 public final class DownloadException extends Exception {
 
+    private static final long serialVersionUID = -6597132435025903769L;
+
     public DownloadException() {
         super();
     }

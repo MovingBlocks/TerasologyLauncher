@@ -21,9 +21,6 @@ import com.sun.jna.Pointer;
 import com.sun.jna.win32.StdCallLibrary;
 import com.sun.jna.win32.W32APIOptions;
 
-/**
- * @author Immortius
- */
 public interface Ole32 extends StdCallLibrary {
 
     Ole32 INSTANCE = (Ole32) Native.loadLibrary(

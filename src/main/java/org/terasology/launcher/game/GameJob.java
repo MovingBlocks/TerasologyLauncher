@@ -18,7 +18,7 @@ package org.terasology.launcher.game;
 
 public enum GameJob {
 
-    TerasologyStable("master", 15, 4, true, false, "STABLE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
+    TerasologyStable("master", 15, 9, true, false, "STABLE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
 
     TerasologyLegacy("legacy", 1, 0, true, false, "STABLE", "infoHeader1_TerasologyLegacy", "settings_game_buildType_TerasologyLegacy"),
 

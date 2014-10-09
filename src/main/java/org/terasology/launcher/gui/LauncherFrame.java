@@ -37,7 +37,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -94,13 +96,15 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     private GameDownloadWorker gameDownloadWorker;
 
     private final File launcherDirectory;
+    private final File downloadDirectory;
     private final File tempDirectory;
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public LauncherFrame(File launcherDirectory, File tempDirectory, LauncherSettings launcherSettings, TerasologyGameVersions gameVersions) {
+    public LauncherFrame(File launcherDirectory, File downloadDirectory, File tempDirectory, LauncherSettings launcherSettings, TerasologyGameVersions gameVersions) {
         this.launcherDirectory = launcherDirectory;
         this.tempDirectory = tempDirectory;
+        this.downloadDirectory = downloadDirectory;
         this.launcherSettings = launcherSettings;
         this.gameVersions = gameVersions;
 
@@ -118,6 +122,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         getContentPane().add(new BackgroundImage(FRAME_WIDTH, FRAME_HEIGHT));
     }
 
+    @Override
     public void dispose() {
         logger.debug("Dispose launcher frame...");
         if (gameDownloadWorker != null) {
@@ -207,7 +212,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         version.setFont(version.getFont().deriveFont(12f));
         version.setForeground(Color.WHITE);
         version.setBounds(FRAME_WIDTH - 400 - 16 - xShift, 0, 400, 32);
-        version.setHorizontalAlignment(JLabel.RIGHT);
+        version.setHorizontalAlignment(SwingConstants.RIGHT);
 
         // Forums link
         forums = new LinkJLabel();
@@ -317,7 +322,7 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
     private void settingsAction() {
         if ((settingsMenu == null) || !settingsMenu.isVisible()) {
-            settingsMenu = new SettingsMenu(this, launcherDirectory, launcherSettings, gameVersions);
+            settingsMenu = new SettingsMenu(this, launcherDirectory, downloadDirectory, launcherSettings, gameVersions);
             settingsMenu.setVisible(true);
             settingsMenu.addWindowListener(new WindowAdapter() {
                 @Override
@@ -367,7 +372,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
             updateGui();
         } else {
             try {
-                GameDownloader gameDownloader = new GameDownloader(tempDirectory, launcherSettings.getGameDirectory(), gameVersion, gameVersions);
+                GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isSaveDownloadedFiles(),
+                    launcherSettings.getGameDirectory(), gameVersion, gameVersions);
                 gameDownloadWorker = new GameDownloadWorker(progressBar, this, gameDownloader);
             } catch (IOException e) {
                 logger.error("Could not start game download!", e);
@@ -520,6 +526,8 @@ public final class LauncherFrame extends JFrame implements ActionListener {
     }
 
     private String getGameInfoText(TerasologyGameVersion gameVersion) {
+        logger.debug("Display game version: {} {}", gameVersion, gameVersion.getGameVersionInfo());
+
         final Object[] arguments = new Object[9];
         arguments[0] = gameVersion.getJob().name();
         if (gameVersion.getJob().isStable()) {
@@ -539,10 +547,16 @@ public final class LauncherFrame extends JFrame implements ActionListener {
         } else {
             arguments[5] = 0;
         }
-        if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful()) {
-            arguments[6] = 1;
+        if (gameVersion.getSuccessful() != null) {
+            if (!gameVersion.getSuccessful()) {
+                // faulty
+                arguments[6] = 0;
+            } else {
+                arguments[6] = 1;
+            }
         } else {
-            arguments[6] = 0;
+            // unknown
+            arguments[6] = 2;
         }
         if ((gameVersion.getGameVersionInfo() != null)
             && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {

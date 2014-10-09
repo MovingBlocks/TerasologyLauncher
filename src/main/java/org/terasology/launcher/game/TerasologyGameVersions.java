@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.LauncherSettings;
+import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
@@ -28,6 +28,7 @@ import org.terasology.launcher.util.ProgressListener;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -50,6 +51,8 @@ public final class TerasologyGameVersions {
     private static final String FILE_TERASOLOGY_JAR = "Terasology.jar";
     private static final String DIR_LIBS = "libs";
     private static final String FILE_ENGINE_JAR = "engine.*jar";
+    private static final long OUTDATED_CACHE_MILLI_SECONDS = 1000L * 60L * 60L * 24L; // one day
+    private static final String FILE_SUFFIX_CACHE = ".cache";
 
     private final Map<GameJob, List<TerasologyGameVersion>> gameVersionLists;
     private final Map<GameJob, SortedMap<Integer, TerasologyGameVersion>> gameVersionMaps;
@@ -74,7 +77,7 @@ public final class TerasologyGameVersions {
         return null;
     }
 
-    public synchronized void loadGameVersions(LauncherSettings launcherSettings, File launcherDirectory, File gameDirectory, ProgressListener progressListener) {
+    public synchronized void loadGameVersions(GameSettings gameSettings, File launcherDirectory, File gameDirectory, ProgressListener listener) {
         final File cacheDirectory = getAndCheckCacheDirectory(launcherDirectory);
 
         gameVersionLists.clear();
@@ -83,25 +86,28 @@ public final class TerasologyGameVersions {
         final Map<GameJob, SortedSet<Integer>> buildNumbersMap = new HashMap<>();
         final Map<GameJob, Integer> lastBuildNumbers = new HashMap<>();
         for (GameJob job : GameJob.values()) {
-            progressListener.update();
+            // TODO update with message?
+            listener.update();
 
             gameVersionMaps.put(job, new TreeMap<Integer, TerasologyGameVersion>());
             final SortedSet<Integer> buildNumbers = new TreeSet<>();
             buildNumbersMap.put(job, buildNumbers);
 
-            loadSettingsBuildNumber(launcherSettings, buildNumbers, job);
-            lastBuildNumbers.put(job, loadLastSuccessfulBuildNumber(buildNumbers, job));
+            loadSettingsBuildNumber(gameSettings, buildNumbers, job);
+            lastBuildNumbers.put(job, loadLastSuccessfulBuildNumber(getLastBuildNumberFromSettings(gameSettings, job), buildNumbers, job));
         }
 
-        loadInstalledGames(gameDirectory, buildNumbersMap, progressListener);
+        loadInstalledGames(gameDirectory, buildNumbersMap, listener);
 
         for (GameJob job : GameJob.values()) {
-            progressListener.update();
+            // TODO update with message?
+            listener.update();
 
             final SortedMap<Integer, TerasologyGameVersion> gameVersionMap = gameVersionMaps.get(job);
             final SortedSet<Integer> buildNumbers = buildNumbersMap.get(job);
             final Integer lastBuildNumber = lastBuildNumbers.get(job);
 
+            gameSettings.setLastBuildNumber(lastBuildNumber, job);
             if (job.isStable() && !job.isOnlyInstalled()) {
                 fillBuildNumbers(buildNumbers, job.getMinBuildNumber(), lastBuildNumber);
             }
@@ -109,19 +115,23 @@ public final class TerasologyGameVersions {
             if (cacheDirectory != null) {
                 cachedGameVersions = readFromCache(job, buildNumbers, cacheDirectory);
             }
-            loadGameVersions(buildNumbers, job, gameVersionMap, cachedGameVersions, progressListener);
+            loadGameVersions(buildNumbers, job, gameVersionMap, cachedGameVersions, listener);
             if (cacheDirectory != null) {
                 writeToCache(job, cacheDirectory);
             }
             final List<TerasologyGameVersion> gameVersionList = createList(lastBuildNumber, job, gameVersionMap);
             gameVersionLists.put(job, gameVersionList);
         }
+
+        if (cacheDirectory != null) {
+            deleteOldCache(cacheDirectory);
+        }
     }
 
-    public synchronized void fixSettingsBuildVersion(LauncherSettings launcherSettings) {
+    public synchronized void fixSettingsBuildVersion(GameSettings gameSettings) {
         for (GameJob job : GameJob.values()) {
             final SortedMap<Integer, TerasologyGameVersion> gameVersions = gameVersionMaps.get(job);
-            fixSettingsBuildVersion(launcherSettings, job, gameVersions);
+            fixSettingsBuildVersion(gameSettings, job, gameVersions);
         }
     }
 
@@ -137,36 +147,54 @@ public final class TerasologyGameVersions {
         return cacheDirectory;
     }
 
-    private void loadSettingsBuildNumber(LauncherSettings launcherSettings, SortedSet<Integer> buildNumbers, GameJob job) {
-        final int buildVersion = launcherSettings.getBuildVersion(job);
-        if ((buildVersion >= job.getMinBuildNumber()) && (TerasologyGameVersion.BUILD_VERSION_LATEST != buildVersion)) {
+    private void loadSettingsBuildNumber(GameSettings gameSettings, SortedSet<Integer> buildNumbers, GameJob job) {
+        final int buildVersion = gameSettings.getBuildVersion(job);
+        if ((TerasologyGameVersion.BUILD_VERSION_LATEST != buildVersion) && (buildVersion >= job.getMinBuildNumber())) {
             buildNumbers.add(buildVersion);
         }
     }
 
-    private Integer loadLastSuccessfulBuildNumber(SortedSet<Integer> buildNumbers, GameJob job) {
+    private Integer getLastBuildNumberFromSettings(GameSettings gameSettings, GameJob job) {
+        final Integer lastBuildNumber = gameSettings.getLastBuildNumber(job);
+        final int buildVersion = gameSettings.getBuildVersion(job);
+        final int lastBuildVersion;
+        if (lastBuildNumber == null) {
+            lastBuildVersion = buildVersion;
+        } else {
+            lastBuildVersion = Math.max(lastBuildNumber, buildVersion);
+        }
+        if ((TerasologyGameVersion.BUILD_VERSION_LATEST != lastBuildVersion) && (lastBuildVersion >= job.getMinBuildNumber())) {
+            return lastBuildVersion;
+        }
+        return null;
+    }
+
+    private Integer loadLastSuccessfulBuildNumber(Integer lastBuildNumber, SortedSet<Integer> buildNumbers, GameJob job) {
         Integer lastSuccessfulBuildNumber = null;
         if (!job.isOnlyInstalled()) {
             try {
                 // Use "successful" and not "stable" for TerasologyGame.
-                lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumber(job.name());
-                if (lastSuccessfulBuildNumber >= job.getMinBuildNumber()) {
-                    buildNumbers.add(lastSuccessfulBuildNumber);
-                    // add previous build numbers
-                    final int prevBuildNumber = Math.max(job.getMinBuildNumber(), lastSuccessfulBuildNumber - job.getPrevBuildNumbers());
-                    for (int buildNumber = prevBuildNumber; buildNumber < lastSuccessfulBuildNumber; buildNumber++) {
-                        buildNumbers.add(buildNumber);
-                    }
-                }
+                lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumberJenkins(job.name());
             } catch (DownloadException e) {
                 logger.info("Retrieving last successful build number failed. '{}'", job, e);
+                lastSuccessfulBuildNumber = lastBuildNumber;
+            }
+
+            if ((lastSuccessfulBuildNumber != null) && (lastSuccessfulBuildNumber >= job.getMinBuildNumber())) {
+                buildNumbers.add(lastSuccessfulBuildNumber);
+                // add previous build numbers
+                final int prevBuildNumber = Math.max(job.getMinBuildNumber(), lastSuccessfulBuildNumber - job.getPrevBuildNumbers());
+                for (int buildNumber = prevBuildNumber; buildNumber < lastSuccessfulBuildNumber; buildNumber++) {
+                    buildNumbers.add(buildNumber);
+                }
             }
         }
         return lastSuccessfulBuildNumber;
     }
 
-    private void loadInstalledGames(File directory, Map<GameJob, SortedSet<Integer>> buildNumbersMap, ProgressListener progressListener) {
-        progressListener.update();
+    private void loadInstalledGames(File directory, Map<GameJob, SortedSet<Integer>> buildNumbersMap, ProgressListener listener) {
+        // TODO update with message?
+        listener.update();
 
         final File[] gameJar = directory.listFiles(new FileFilter() {
             @Override
@@ -198,7 +226,7 @@ public final class TerasologyGameVersions {
             });
             if (subDirectories != null) {
                 for (File subDirectory : subDirectories) {
-                    loadInstalledGames(subDirectory, buildNumbersMap, progressListener);
+                    loadInstalledGames(subDirectory, buildNumbersMap, listener);
                 }
             }
         }
@@ -206,9 +234,48 @@ public final class TerasologyGameVersions {
 
     private TerasologyGameVersion loadInstalledGameVersion(File gameJar) {
         TerasologyGameVersion gameVersion = null;
-        if (gameJar.exists() && gameJar.canRead() && gameJar.isFile()) {
-            TerasologyGameVersionInfo gameVersionInfo = null;
+        final TerasologyGameVersionInfo gameVersionInfo = loadInstalledGameVersionInfo(gameJar);
 
+        if ((gameVersionInfo != null)
+            && (gameVersionInfo.getJobName() != null) && (gameVersionInfo.getJobName().length() > 0)
+            && (gameVersionInfo.getBuildNumber() != null) && (gameVersionInfo.getBuildNumber().length() > 0)) {
+            GameJob installedJob = null;
+            try {
+                installedJob = GameJob.valueOf(gameVersionInfo.getJobName());
+            } catch (IllegalArgumentException e) {
+                logger.error("Unknown job '{}' found for game '{}'!", gameVersionInfo.getJobName(), gameJar);
+            }
+            Integer installedBuildNumber = null;
+            try {
+                installedBuildNumber = Integer.parseInt(gameVersionInfo.getBuildNumber());
+            } catch (NumberFormatException e) {
+                logger.error("Could not parse build number '{}'!", gameVersionInfo.getBuildNumber());
+            }
+
+            if ((installedJob != null) && (installedBuildNumber != null)
+                && (gameVersionInfo.getGitBranch().endsWith(installedJob.getGitBranch())) && (installedJob.getMinBuildNumber() <= installedBuildNumber)) {
+                gameVersion = new TerasologyGameVersion();
+                gameVersion.setJob(installedJob);
+                gameVersion.setBuildNumber(installedBuildNumber);
+                gameVersion.setInstallationPath(gameJar.getParentFile());
+                gameVersion.setGameJar(gameJar);
+                gameVersion.setGameVersionInfo(gameVersionInfo);
+                gameVersion.setChangeLog(null);
+                gameVersion.setSuccessful(Boolean.TRUE);
+                gameVersion.setLatest(false);
+            } else {
+                logger.warn("The game version info can not be used from the file '{}' or '{}'!", gameJar, FILE_ENGINE_JAR);
+            }
+        } else {
+            logger.warn("The game version info can not be loaded from the file '{}' or '{}'!", gameJar, FILE_ENGINE_JAR);
+        }
+        return gameVersion;
+    }
+
+    private TerasologyGameVersionInfo loadInstalledGameVersionInfo(File gameJar) {
+        TerasologyGameVersionInfo gameVersionInfo = null;
+
+        if (gameJar.exists() && gameJar.canRead() && gameJar.isFile()) {
             final File libsDirectory = new File(gameJar.getParentFile(), DIR_LIBS);
             if (libsDirectory.isDirectory() && libsDirectory.canRead()) {
                 final File[] engineJars = libsDirectory.listFiles(new FileFilter() {
@@ -227,40 +294,9 @@ public final class TerasologyGameVersions {
             if (gameVersionInfo == null) {
                 gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(gameJar);
             }
-            if ((gameVersionInfo.getJobName() != null) && (gameVersionInfo.getJobName().length() > 0)
-                && (gameVersionInfo.getBuildNumber() != null) && (gameVersionInfo.getBuildNumber().length() > 0)) {
-                GameJob installedJob = null;
-                try {
-                    installedJob = GameJob.valueOf(gameVersionInfo.getJobName());
-                } catch (IllegalArgumentException e) {
-                    logger.error("Unknown job '{}' found for game '{}'!", gameVersionInfo.getJobName(), gameJar);
-                }
-                Integer installedBuildNumber = null;
-                try {
-                    installedBuildNumber = Integer.parseInt(gameVersionInfo.getBuildNumber());
-                } catch (NumberFormatException e) {
-                    logger.error("Could not parse build number '{}'!", gameVersionInfo.getBuildNumber());
-                }
-
-                if ((installedJob != null) && (installedBuildNumber != null)
-                    && (gameVersionInfo.getGitBranch().endsWith(installedJob.getGitBranch())) && (installedJob.getMinBuildNumber() <= installedBuildNumber)) {
-                    gameVersion = new TerasologyGameVersion();
-                    gameVersion.setJob(installedJob);
-                    gameVersion.setBuildNumber(installedBuildNumber);
-                    gameVersion.setInstallationPath(gameJar.getParentFile());
-                    gameVersion.setGameJar(gameJar);
-                    gameVersion.setGameVersionInfo(gameVersionInfo);
-                    gameVersion.setChangeLog(null);
-                    gameVersion.setSuccessful(Boolean.TRUE);
-                    gameVersion.setLatest(false);
-                } else {
-                    logger.warn("The game version info can not be used from the file '{}' or '{}'!", gameJar, FILE_ENGINE_JAR);
-                }
-            } else {
-                logger.warn("The game version info can not be loaded from the file '{}' or '{}'!", gameJar, FILE_ENGINE_JAR);
-            }
         }
-        return gameVersion;
+
+        return gameVersionInfo;
     }
 
     private void fillBuildNumbers(SortedSet<Integer> buildNumbers, int minBuildNumber, Integer lastBuildNumber) {
@@ -299,13 +335,14 @@ public final class TerasologyGameVersions {
     }
 
     private File createCacheFile(GameJob job, Integer buildNumber, File cacheDirectory) {
-        return new File(cacheDirectory, "TerasologyGameVersion_" + job.name() + "_" + buildNumber.toString() + ".cache");
+        return new File(cacheDirectory, "TerasologyGameVersion_" + job.name() + "_" + buildNumber.toString() + FILE_SUFFIX_CACHE);
     }
 
     private void loadGameVersions(SortedSet<Integer> buildNumbers, GameJob job, SortedMap<Integer, TerasologyGameVersion> gameVersions,
-                                  SortedMap<Integer, TerasologyGameVersion> cachedGameVersionMap, ProgressListener progressListener) {
+                                  SortedMap<Integer, TerasologyGameVersion> cachedGameVersionMap, ProgressListener listener) {
         for (Integer buildNumber : buildNumbers) {
-            progressListener.update();
+            // TODO update with message?
+            listener.update();
 
             final TerasologyGameVersion gameVersion;
             if (gameVersions.containsKey(buildNumber)) {
@@ -326,54 +363,70 @@ public final class TerasologyGameVersions {
                 }
             }
 
-            // load and set successful
-            if (gameVersion.getSuccessful() == null) {
-                if ((cachedGameVersion != null) && (cachedGameVersion.getSuccessful() != null)) {
-                    gameVersion.setSuccessful(cachedGameVersion.getSuccessful());
-                } else if (!job.isOnlyInstalled()) {
-                    Boolean successful = null;
-                    try {
-                        JobResult jobResult = DownloadUtils.loadJobResult(job.name(), buildNumber);
-                        successful = (jobResult != null && ((jobResult == JobResult.SUCCESS) || (jobResult == JobResult.UNSTABLE)));
-                    } catch (DownloadException e) {
-                        logger.debug("Load job result failed. '{}' '{}'", job, buildNumber, e);
-                    }
-                    gameVersion.setSuccessful(successful);
-                }
-            }
+            loadAndSetSuccessful(gameVersion, cachedGameVersion, job, buildNumber);
 
-            // load and set changeLog
-            if (gameVersion.getChangeLog() == null) {
-                if ((cachedGameVersion != null) && (cachedGameVersion.getChangeLog() != null)) {
-                    gameVersion.setChangeLog(cachedGameVersion.getChangeLog());
-                } else if (!job.isOnlyInstalled()) {
-                    List<String> changeLog = null;
-                    try {
-                        changeLog = DownloadUtils.loadChangeLog(job.name(), buildNumber);
-                    } catch (DownloadException e) {
-                        logger.debug("Load change log failed. '{}' '{}'", job, buildNumber, e);
-                    }
-                    if ((changeLog != null) && !changeLog.isEmpty()) {
+            loadAndSetChangeLog(gameVersion, cachedGameVersion, job, buildNumber);
+
+            loadAndSetGameVersionInfo(gameVersion, cachedGameVersion, job, buildNumber);
+        }
+    }
+
+    private void loadAndSetSuccessful(TerasologyGameVersion gameVersion, TerasologyGameVersion cachedGameVersion, GameJob job, Integer buildNumber) {
+        if (gameVersion.getSuccessful() == null) {
+            if ((cachedGameVersion != null) && (cachedGameVersion.getSuccessful() != null)) {
+                gameVersion.setSuccessful(cachedGameVersion.getSuccessful());
+            } else if (!job.isOnlyInstalled()) {
+                Boolean successful = null;
+                try {
+                    JobResult jobResult = DownloadUtils.loadJobResultJenkins(job.name(), buildNumber);
+                    successful = (jobResult != null && ((jobResult == JobResult.SUCCESS) || (jobResult == JobResult.UNSTABLE)));
+                } catch (DownloadException e) {
+                    logger.debug("Load job result failed. '{}' '{}'", job, buildNumber, e);
+                }
+                gameVersion.setSuccessful(successful);
+            }
+        }
+    }
+
+    private void loadAndSetChangeLog(TerasologyGameVersion gameVersion, TerasologyGameVersion cachedGameVersion, GameJob job, Integer buildNumber) {
+        if (gameVersion.getChangeLog() == null) {
+            if ((cachedGameVersion != null) && (cachedGameVersion.getChangeLog() != null)) {
+                gameVersion.setChangeLog(cachedGameVersion.getChangeLog());
+            } else if (!job.isOnlyInstalled()) {
+                try {
+                    final List<String> changeLog = DownloadUtils.loadChangeLogJenkins(job.name(), buildNumber);
+                    if (changeLog != null) {
+                        if (changeLog.isEmpty()) {
+                            changeLog.add(BundleUtils.getLabel("message_noChangeLog"));
+                        }
                         gameVersion.setChangeLog(Collections.unmodifiableList(changeLog));
                     }
+                } catch (DownloadException e) {
+                    logger.debug("Load change log failed. '{}' '{}'", job, buildNumber, e);
                 }
             }
+        }
+    }
 
-            // load and set gameVersionInfo
-            if (gameVersion.getGameVersionInfo() == null) {
-                if ((cachedGameVersion != null) && (cachedGameVersion.getGameVersionInfo() != null)) {
-                    gameVersion.setGameVersionInfo(cachedGameVersion.getGameVersionInfo());
-                } else if (!job.isOnlyInstalled() && ((cachedGameVersion == null) || (gameVersion.getSuccessful() == null) || gameVersion.getSuccessful())) {
-                    TerasologyGameVersionInfo gameVersionInfo = null;
-                    URL urlVersionInfo = null;
-                    try {
-                        urlVersionInfo = DownloadUtils.createFileDownloadURL(job.name(), buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_VERSION_INFO);
-                        gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
-                    } catch (IOException e) {
-                        logger.debug("Load game version info failed. '{}' '{}' '{}'", job, buildNumber, urlVersionInfo, e);
+    private void loadAndSetGameVersionInfo(TerasologyGameVersion gameVersion, TerasologyGameVersion cachedGameVersion, GameJob job, Integer buildNumber) {
+        if (gameVersion.getGameVersionInfo() == null) {
+            if ((cachedGameVersion != null) && (cachedGameVersion.getGameVersionInfo() != null)) {
+                gameVersion.setGameVersionInfo(cachedGameVersion.getGameVersionInfo());
+            } else if (!job.isOnlyInstalled() && ((cachedGameVersion == null) || (gameVersion.getSuccessful() == null) || gameVersion.getSuccessful())) {
+                TerasologyGameVersionInfo gameVersionInfo = null;
+                URL urlVersionInfo = null;
+                try {
+                    urlVersionInfo = DownloadUtils.createFileDownloadUrlJenkins(job.name(), buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_VERSION_INFO);
+                    gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
+                } catch (IOException e) {
+                    if (e instanceof FileNotFoundException) {
+                        logger.debug("Load game version info failed. '{}' '{}' '{}'", job, buildNumber, urlVersionInfo);
+                        gameVersionInfo = TerasologyGameVersionInfo.getEmptyGameVersionInfo();
+                    } else {
+                        logger.info("Load game version info failed. '{}' '{}' '{}'", job, buildNumber, urlVersionInfo, e);
                     }
-                    gameVersion.setGameVersionInfo(gameVersionInfo);
                 }
+                gameVersion.setGameVersionInfo(gameVersionInfo);
             }
         }
     }
@@ -389,6 +442,24 @@ public final class TerasologyGameVersions {
             }
         } catch (IOException e) {
             logger.error("Could not write cache data!", e);
+        }
+    }
+
+    private void deleteOldCache(File cacheDirectory) {
+        final File[] cacheFiles = cacheDirectory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                return pathname.exists() && pathname.isFile()
+                    && pathname.canRead() && pathname.canWrite()
+                    && pathname.getName().endsWith(FILE_SUFFIX_CACHE)
+                    && pathname.lastModified() < (System.currentTimeMillis() - OUTDATED_CACHE_MILLI_SECONDS);
+            }
+        });
+        if ((cacheFiles != null) && (cacheFiles.length > 0)) {
+            logger.debug("Delete {} outdated cache files on exit.", cacheFiles.length);
+            for (File cacheFile : cacheFiles) {
+                cacheFile.deleteOnExit();
+            }
         }
     }
 
@@ -412,8 +483,8 @@ public final class TerasologyGameVersions {
         return Collections.unmodifiableList(gameVersionList);
     }
 
-    private void fixSettingsBuildVersion(LauncherSettings launcherSettings, GameJob job, SortedMap<Integer, TerasologyGameVersion> gameVersionMap) {
-        final int buildVersion = launcherSettings.getBuildVersion(job);
+    private void fixSettingsBuildVersion(GameSettings gameSettings, GameJob job, SortedMap<Integer, TerasologyGameVersion> gameVersionMap) {
+        final int buildVersion = gameSettings.getBuildVersion(job);
         if ((buildVersion != TerasologyGameVersion.BUILD_VERSION_LATEST) && !gameVersionMap.containsKey(buildVersion)) {
             Integer newBuildVersion = TerasologyGameVersion.BUILD_VERSION_LATEST;
             for (TerasologyGameVersion gameVersion : gameVersionMap.values()) {
@@ -422,7 +493,7 @@ public final class TerasologyGameVersions {
                     // no break => find highest installed version
                 }
             }
-            launcherSettings.setBuildVersion(newBuildVersion, job);
+            gameSettings.setBuildVersion(newBuildVersion, job);
             // don't store settings
         }
     }

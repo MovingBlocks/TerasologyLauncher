@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?scenebuilder-stylesheet terasology.css?>
+<!--
+  ~ Copyright 2014 MovingBlocks
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.effect.GaussianBlur?>
+<?import javafx.scene.effect.Glow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.web.WebView?>
+<?import java.lang.String?>
+<?import java.net.URL?>
+<AnchorPane id="AnchorPane" fx:id="launcherFrame" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="562.140625"
+            prefWidth="968.1666259765625" xmlns:fx="http://javafx.com/fxml" fx:controller="org.terasology.launcher.gui.javafx.ApplicationController">
+    <children>
+        <StackPane prefHeight="529.0" prefWidth="756.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <ImageView fitHeight="582.875" fitWidth="1036.2221943113727" pickOnBounds="true">
+                    <effect>
+                        <GaussianBlur radius="13.730263157894736">
+                            <input>
+                                <Glow/>
+                            </input>
+                        </GaussianBlur>
+                    </effect>
+                    <image>
+                        <Image url="@../images/background.jpg" preserveRatio="true" smooth="false"/>
+                    </image>
+                </ImageView>
+                <BorderPane prefHeight="529.0" prefWidth="756.0">
+                    <bottom>
+                        <StackPane maxHeight="-Infinity" prefHeight="64.0" prefWidth="200.0">
+                            <children>
+                                <HBox fx:id="bottomPanel" alignment="CENTER" maxHeight="-Infinity" prefHeight="64.0" prefWidth="979.0" spacing="8.0"
+                                      style="-fx-background-color:  rgba(10,10,10,0.7);&#10;-fx-background-radius: 10 10 0 0;" StackPane.alignment="BOTTOM_CENTER">
+                                    <children>
+                                        <Button id="" fx:id="facebookButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false"
+                                                onAction="#openFacebook" onMouseEntered="#handleSocialButtonMouseEntered" onMouseExited="#handleSocialButtonMouseExited"
+                                                onMousePressed="#handleSocialButtonMousePressed" onMouseReleased="#handleSocialButtonMouseReleased" styleClass="socialButton">
+                                            <graphic>
+                                                <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../images/facebook.png" preserveRatio="false" smooth="false"/>
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+                                        <Button id="" fx:id="githubButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#openGithub"
+                                                onMouseEntered="#handleSocialButtonMouseEntered" onMouseExited="#handleSocialButtonMouseExited"
+                                                onMousePressed="#handleSocialButtonMousePressed" onMouseReleased="#handleSocialButtonMouseReleased" styleClass="socialButton">
+                                            <graphic>
+                                                <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../images/github.png" preserveRatio="false" smooth="false"/>
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+                                        <Button id="" fx:id="gplusButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#openGPlus"
+                                                onMouseEntered="#handleSocialButtonMouseEntered" onMouseExited="#handleSocialButtonMouseExited"
+                                                onMousePressed="#handleSocialButtonMousePressed" onMouseReleased="#handleSocialButtonMouseReleased" styleClass="socialButton">
+                                            <graphic>
+                                                <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../images/gplus.png" preserveRatio="false" smooth="false"/>
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+                                        <Button id="" fx:id="redditButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#openReddit"
+                                                onMouseEntered="#handleSocialButtonMouseEntered" onMouseExited="#handleSocialButtonMouseExited"
+                                                onMousePressed="#handleSocialButtonMousePressed" onMouseReleased="#handleSocialButtonMouseReleased" styleClass="socialButton">
+                                            <graphic>
+                                                <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../images/reddit.png" preserveRatio="false" smooth="false"/>
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+                                        <Button id="" fx:id="twitterButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#openTwitter"
+                                                onMouseEntered="#handleSocialButtonMouseEntered" onMouseExited="#handleSocialButtonMouseExited"
+                                                onMousePressed="#handleSocialButtonMousePressed" onMouseReleased="#handleSocialButtonMouseReleased" styleClass="socialButton">
+                                            <graphic>
+                                                <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../images/twitter.png" preserveRatio="false" smooth="false"/>
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+                                        <Button id="" fx:id="youtubeButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#openYoutube"
+                                                onMouseEntered="#handleSocialButtonMouseEntered" onMouseExited="#handleSocialButtonMouseExited"
+                                                onMousePressed="#handleSocialButtonMousePressed" onMouseReleased="#handleSocialButtonMouseReleased" styleClass="socialButton">
+                                            <graphic>
+                                                <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../images/youtube.png" preserveRatio="false" smooth="false"/>
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+                                    </children>
+                                </HBox>
+                                <Label fx:id="versionInfo" text="2.0.0-rc1" textFill="#dfdfdf" StackPane.alignment="BOTTOM_RIGHT">
+                                    <font>
+                                        <Font name="System Bold" size="12.0"/>
+                                    </font>
+                                </Label>
+                            </children>
+                        </StackPane>
+                    </bottom>
+                    <center>
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                            <children>
+                                <VBox alignment="BOTTOM_CENTER" prefHeight="399.0" prefWidth="969.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <TabPane id="contentTabPane" maxWidth="-Infinity" prefHeight="367.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE">
+                                            <stylesheets>
+                                                <URL value="@terasology.css"/>
+                                            </stylesheets>
+                                            <tabs>
+                                                <Tab fx:id="changelogTab" text="Changelog">
+                                                    <content>
+                                                        <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                            <children>
+                                                                <WebView fx:id="changelogView" prefHeight="336.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                                         AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                                                            </children>
+                                                        </AnchorPane>
+                                                    </content>
+                                                </Tab>
+                                                <Tab fx:id="aboutTab" closable="false" text="About">
+                                                    <content>
+                                                        <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                            <children>
+                                                                <Accordion fx:id="aboutInfoAccordion" prefHeight="336.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0"
+                                                                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                                                            </children>
+                                                        </AnchorPane>
+                                                    </content>
+                                                </Tab>
+                                            </tabs>
+                                        </TabPane>
+                                        <HBox alignment="CENTER" prefHeight="32.0" prefWidth="969.0">
+                                            <children>
+                                                <ProgressBar fx:id="progressBar" prefHeight="16.0" prefWidth="600.0" progress="0.69" visible="false"/>
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </center>
+                    <top>
+                        <HBox fx:id="topPanel" alignment="CENTER_LEFT" blendMode="SRC_OVER" prefHeight="96.0" prefWidth="969.0"
+                              style="-fx-background-color:  rgba(10,10,10,0.7);&#10;-fx-background-radius: 0 0 10 10;">
+                            <children>
+                                <ImageView fitHeight="96.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../images/logo.png" preserveRatio="false" smooth="false"/>
+                                    </image>
+                                </ImageView>
+                                <HBox alignment="CENTER_RIGHT" prefHeight="96.0" prefWidth="668.1666259765625" spacing="8.0">
+                                    <children>
+                                        <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="8.0" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <ChoiceBox fx:id="jobBox" maxWidth="1.7976931348623157E308">
+                                                    <items>
+                                                        <FXCollections fx:factory="observableArrayList">
+                                                            <String fx:value="Item 1"/>
+                                                            <String fx:value="Item 2"/>
+                                                            <String fx:value="Item 3"/>
+                                                        </FXCollections>
+                                                    </items>
+                                                </ChoiceBox>
+                                                <ChoiceBox fx:id="buildVersionBox" maxWidth="1.7976931348623157E308">
+                                                    <items>
+                                                        <FXCollections fx:factory="observableArrayList">
+                                                            <String fx:value="Item 1"/>
+                                                            <String fx:value="Item 2"/>
+                                                            <String fx:value="Item 3"/>
+                                                        </FXCollections>
+                                                    </items>
+                                                </ChoiceBox>
+                                            </children>
+                                            <padding>
+                                                <Insets left="8.0" right="8.0"/>
+                                            </padding>
+                                        </VBox>
+                                        <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="4.0">
+                                            <children>
+                                                <Button id="downloadButton" fx:id="cancelDownloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0"
+                                                        mnemonicParsing="false" onAction="#cancelDownloadAction" onMouseEntered="#handleControlButtonMouseEntered"
+                                                        onMouseExited="#handleControlButtonMouseExited" styleClass="controlButtonCancel">
+                                                    <graphic>
+                                                        <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@../images/cancel.png" preserveRatio="false" smooth="false"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                    <HBox.margin>
+                                                        <Insets/>
+                                                    </HBox.margin>
+                                                </Button>
+                                                <Button fx:id="downloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false"
+                                                        onAction="#downloadAction" onMouseEntered="#handleControlButtonMouseEntered"
+                                                        onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
+                                                    <graphic>
+                                                        <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@../images/download.png" preserveRatio="false" smooth="false"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                </Button>
+                                                <Button fx:id="deleteButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false"
+                                                        onAction="#deleteAction" onMouseEntered="#handleControlButtonMouseEntered"
+                                                        onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
+                                                    <graphic>
+                                                        <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@../images/trash.png" preserveRatio="false" smooth="false"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                </Button>
+                                                <Button fx:id="startButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false"
+                                                        onAction="#startGameAction" onMouseEntered="#handleControlButtonMouseEntered"
+                                                        onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
+                                                    <graphic>
+                                                        <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@../images/play.png" preserveRatio="false" smooth="false"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                </Button>
+                                                <Button fx:id="settingsButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#openSettingsAction"
+                                                        onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited"
+                                                        styleClass="controlButton">
+                                                    <graphic>
+                                                        <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@../images/settings.png" preserveRatio="false" smooth="false"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                </Button>
+                                                <Button fx:id="exitButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false"
+                                                        onAction="#handleExitButtonAction" onMouseEntered="#handleControlButtonMouseEntered"
+                                                        onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
+                                                    <graphic>
+                                                        <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@../images/exit.png" preserveRatio="false" smooth="false"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                </Button>
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                    <HBox.margin>
+                                        <Insets left="8.0" right="8.0"/>
+                                    </HBox.margin>
+                                </HBox>
+                            </children>
+                        </HBox>
+                    </top>
+                </BorderPane>
+            </children>
+        </StackPane>
+    </children>
+    <stylesheets>
+        <URL value="@terasology.css"/>
+    </stylesheets>
+</AnchorPane>

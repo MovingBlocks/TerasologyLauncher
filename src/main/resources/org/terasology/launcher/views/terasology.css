@@ -1,0 +1,113 @@
+/*
+ * Copyright 2014 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* ========================== STYLE THE CHANGELOG & CO TAB VIEW ========================== */
+#contentTabPane .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+#contentTabPane .tab {
+    -fx-background-insets: 0 1 0 1, 0, 0;
+}
+
+/*#contentTabPane .tab-pane .tab {
+    -fx-background-color: rgba(142,142,142,0.75);
+} */
+
+#contentTabPane .tab-header-area .tab {
+    -fx-background-color: rgba(242, 242, 242, 0.2);
+}
+
+/*#contentTabPane .tab-pane .tab:selected {
+    -fx-background-color: rgba(10,10,10,0.75);
+} */
+
+#contentTabPane .tab-header-area .tab:selected {
+    -fx-background-color: rgba(10, 10, 10, 0.5);
+}
+
+#contentTabPane .tab-content-area {
+    -fx-background-color: rgba(10, 10, 10, 0.5);
+    -fx-background-radius: 10;
+}
+
+#contentTabPane .tab .tab-label {
+    -fx-alignment: center;
+    -fx-text-fill: #181818;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+#contentTabPane .tab:selected .tab-label {
+    -fx-alignment: center;
+    -fx-text-fill: #dfdfdf;
+}
+
+#contentTabPane .tab-pane:top *.tab-header-area {
+    -fx-background-insets: 0, 0 0 1 0;
+}
+
+/* ========================== STYLE ALL SCROLL BARS ========================== */
+/*.scroll-bar {
+    -fx-background-color: transparent;
+}
+.scroll-bar .thumb {
+    -fx-background-color: #dfdfdf;
+    -fx-background-insets: 0, 0, 0;
+    -fx-background-radius: 0.0em;
+}
+.scroll-bar .track {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-border-color: transparent;
+    -fx-border-radius: 2em;
+}
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 0 10 0;
+}
+*/
+/* ========================== STYLE THE FANCY BUTTONS ========================== */
+.controlButton {
+    -fx-background-color: transparent;
+    -fx-effect: innershadow(three-pass-box, #dfdfdf, 127.0, 0.0, 0, 0);
+}
+
+.controlButton:hover {
+    -fx-effect: innershadow(three-pass-box, #72cc00, 64.0, 0.0, 0, 0);
+}
+
+.controlButton:hover:pressed {
+    -fx-effect: innershadow(three-pass-box, #00993d, 64.0, 0.0, 0, 0);
+}
+
+.controlButtonCancel {
+    -fx-background-color: transparent;
+    -fx-effect: innershadow(three-pass-box, #dfdfdf, 127.0, 0.0, 0, 0);
+}
+
+.controlButtonCancel:hover {
+    -fx-effect: innershadow(three-pass-box, #cc0500, 64.0, 0.0, 0, 0);
+}
+
+.controlButtonCancel:hover:pressed {
+    -fx-effect: innershadow(three-pass-box, #980500, 64.0, 0.0, 0, 0);
+}
+
+.socialButton {
+    -fx-background-color: transparent;
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ final class GameDownloadWorker extends SwingWorker<Void, Void> implements Progre
     @Override
     protected Void doInBackground() {
         try {
-            gameDownloader.downloadZipFile(this);
+            gameDownloader.download(null);
             if (!isCancelled()) {
                 firePropertyChange("progressString", null, BundleUtils.getLabel("update_game_extractZip"));
                 successfulDownloadAndExtract = gameDownloader.extractAfterDownload();
@@ -81,6 +81,7 @@ final class GameDownloadWorker extends SwingWorker<Void, Void> implements Progre
                     successfulLoadVersion = gameDownloader.updateAfterDownload();
                 }
             } else {
+                gameDownloader.deleteSilentAfterCancel();
                 logger.trace("GameDownloadWorker is cancelled");
             }
         } catch (DownloadException | RuntimeException e) {
@@ -89,10 +90,12 @@ final class GameDownloadWorker extends SwingWorker<Void, Void> implements Progre
         return null;
     }
 
+    @Override
     public void update() {
         // Not implemented!
     }
 
+    @Override
     public void update(int progress) {
         setProgress(progress);
     }

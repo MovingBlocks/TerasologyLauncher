@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public final class DownloadUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
 
-    private static final String JENKINS_JOB_URL = "http://jenkins.movingblocks.net/job/";
+    private static final String JENKINS_JOB_URL = "http://jenkins.terasology.org/job/";
     private static final String LAST_STABLE_BUILD = "/lastStableBuild";
     private static final String LAST_SUCCESSFUL_BUILD = "/lastSuccessfulBuild";
     private static final String BUILD_NUMBER = "/buildNumber/";
@@ -68,87 +68,79 @@ public final class DownloadUtils {
     private DownloadUtils() {
     }
 
-    public static void downloadToFile(URL downloadURL, File file, ProgressListener progressListener) throws DownloadException {
-        progressListener.update(0);
+    public static void downloadToFile(URL downloadURL, File file, ProgressListener listener) throws DownloadException {
+        listener.update(0);
 
-        HttpURLConnection connection;
-        long contentLength;
+        final HttpURLConnection connection = getConnectedDownloadConnection(downloadURL);
+
+        final long contentLength = connection.getContentLengthLong();
+        if (contentLength <= 0) {
+            throw new DownloadException("Wrong content length! URL=" + downloadURL + ", contentLength=" + contentLength);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Download file '{}' ({}; {}) from URL '{}'.", file, contentLength, connection.getContentType(), downloadURL);
+        }
+
+        try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+            downloadToFile(listener, contentLength, in, out);
+        } catch (IOException e) {
+            throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
+        } finally {
+            connection.disconnect();
+        }
+
+        if (!listener.isCancelled()) {
+            if (file.length() != contentLength) {
+                throw new DownloadException("Wrong file length after download! " + file.length() + " != " + contentLength);
+            }
+            listener.update(100);
+        }
+    }
+
+    private static HttpURLConnection getConnectedDownloadConnection(URL downloadURL) throws DownloadException {
+        final HttpURLConnection connection;
         try {
             connection = (HttpURLConnection) downloadURL.openConnection();
             connection.setConnectTimeout(CONNECT_TIMEOUT);
             connection.setReadTimeout(READ_TIMEOUT);
             connection.connect();
-            contentLength = connection.getContentLengthLong();
-            if (contentLength <= 0) {
-                throw new DownloadException("Wrong content length! URL=" + downloadURL + ", contentLength=" + contentLength);
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("Download file '{}' ({}; {}) from URL '{}'.", file, contentLength, connection.getContentType(), downloadURL);
-            }
         } catch (ClassCastException | IOException e) {
-            throw new DownloadException("Could not open/use URL connection! URL=" + downloadURL, e);
+            throw new DownloadException("Could not open/connect HTTP-URL connection! URL=" + downloadURL, e);
         }
+        return connection;
+    }
 
-        float sizeFactor = 100f / (float) contentLength;
-        BufferedInputStream in = null;
-        BufferedOutputStream out = null;
-        try {
-            in = new BufferedInputStream(connection.getInputStream());
-            out = new BufferedOutputStream(new FileOutputStream(file));
-
-            final byte[] buffer = new byte[2048];
-
-            int n;
+    private static void downloadToFile(ProgressListener listener, long contentLength, BufferedInputStream in, BufferedOutputStream out) throws IOException {
+        final byte[] buffer = new byte[2048];
+        final float sizeFactor = 100f / contentLength;
+        long writtenBytes = 0;
+        int n;
+        if (!listener.isCancelled()) {
             while ((n = in.read(buffer)) != -1) {
-                if (progressListener.isCancelled()) {
+                if (listener.isCancelled()) {
                     break;
                 }
 
                 out.write(buffer, 0, n);
+                writtenBytes += n;
 
-                int percentage = (int) (sizeFactor * (float) file.length());
+                int percentage = (int) (sizeFactor * writtenBytes);
                 if (percentage < 1) {
                     percentage = 1;
                 } else if (percentage >= 100) {
                     percentage = 99;
                 }
-                progressListener.update(percentage);
+                listener.update(percentage);
 
-                if (progressListener.isCancelled()) {
+                if (listener.isCancelled()) {
                     break;
                 }
             }
-        } catch (IOException e) {
-            throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    logger.warn("Closing InputStream for '{}' failed!", downloadURL, e);
-                }
-            }
-
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    logger.warn("Closing OutputStream for '{}' failed!", file, e);
-                }
-            }
-
-            connection.disconnect();
-        }
-
-        if (!progressListener.isCancelled()) {
-            if (file.length() != contentLength) {
-                throw new DownloadException("Wrong file length after download! " + file.length() + " != " + contentLength);
-            }
-            progressListener.update(100);
         }
     }
 
-    public static URL createFileDownloadURL(String jobName, int buildNumber, String fileName) throws MalformedURLException {
+    public static URL createFileDownloadUrlJenkins(String jobName, int buildNumber, String fileName) throws MalformedURLException {
         final StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(JENKINS_JOB_URL);
         urlBuilder.append(jobName);
@@ -160,7 +152,7 @@ public final class DownloadUtils {
         return new URL(urlBuilder.toString());
     }
 
-    public static URL createURL(String jobName, int buildNumber, String subPath) throws MalformedURLException {
+    public static URL createUrlJenkins(String jobName, int buildNumber, String subPath) throws MalformedURLException {
         final StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(JENKINS_JOB_URL);
         urlBuilder.append(jobName);
@@ -174,18 +166,18 @@ public final class DownloadUtils {
     /**
      * Loads the <code>buildNumber</code> of the last <b>stable</b> build.
      */
-    public static int loadLastStableBuildNumber(String jobName) throws DownloadException {
-        return loadBuildNumber(jobName, LAST_STABLE_BUILD);
+    public static int loadLastStableBuildNumberJenkins(String jobName) throws DownloadException {
+        return loadBuildNumberJenkins(jobName, LAST_STABLE_BUILD);
     }
 
     /**
      * Loads the <code>buildNumber</code> of the last <b>successful</b> build.
      */
-    public static int loadLastSuccessfulBuildNumber(String jobName) throws DownloadException {
-        return loadBuildNumber(jobName, LAST_SUCCESSFUL_BUILD);
+    public static int loadLastSuccessfulBuildNumberJenkins(String jobName) throws DownloadException {
+        return loadBuildNumberJenkins(jobName, LAST_SUCCESSFUL_BUILD);
     }
 
-    private static int loadBuildNumber(String jobName, String lastBuild) throws DownloadException {
+    private static int loadBuildNumberJenkins(String jobName, String lastBuild) throws DownloadException {
         int buildNumber;
         URL urlVersion = null;
         BufferedReader reader = null;
@@ -207,17 +199,17 @@ public final class DownloadUtils {
         return buildNumber;
     }
 
-    public static JobResult loadJobResult(String jobName, int buildNumber) throws DownloadException {
+    public static JobResult loadJobResultJenkins(String jobName, int buildNumber) throws DownloadException {
         JobResult jobResult = null;
         URL urlResult = null;
         BufferedReader reader = null;
         try {
-            urlResult = DownloadUtils.createURL(jobName, buildNumber, API_JSON_RESULT);
+            urlResult = DownloadUtils.createUrlJenkins(jobName, buildNumber, API_JSON_RESULT);
             reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), StandardCharsets.US_ASCII));
             final String jsonResult = reader.readLine();
             if (jsonResult != null) {
                 for (JobResult result : JobResult.values()) {
-                    if (jsonResult.indexOf(result.name()) > 0) {
+                    if (jsonResult.indexOf(result.name()) == 11) {
                         jobResult = result;
                         break;
                     }
@@ -240,26 +232,27 @@ public final class DownloadUtils {
         return jobResult;
     }
 
-    public static List<String> loadChangeLog(String jobName, int buildNumber) throws DownloadException {
+    public static List<String> loadChangeLogJenkins(String jobName, int buildNumber) throws DownloadException {
         List<String> changeLog = null;
         URL urlChangeLog = null;
-        InputStream stream = null;
         try {
-            urlChangeLog = DownloadUtils.createURL(jobName, buildNumber, API_XML_CHANGE_LOG);
+            urlChangeLog = DownloadUtils.createUrlJenkins(jobName, buildNumber, API_XML_CHANGE_LOG);
             final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            stream = urlChangeLog.openStream();
-            final Document document = builder.parse(stream);
-            final NodeList nodeList = document.getElementsByTagName("msg");
-            if (nodeList != null) {
-                changeLog = new ArrayList<>();
-                for (int i = 0; i < nodeList.getLength(); i++) {
-                    final Node item = nodeList.item(i);
-                    if (item != null) {
-                        final Node lastChild = item.getLastChild();
-                        if (lastChild != null) {
-                            final String textContent = lastChild.getTextContent();
-                            if ((textContent != null) && (textContent.trim().length() > 0)) {
-                                changeLog.add(textContent.trim());
+
+            try (InputStream stream = urlChangeLog.openStream()) {
+                final Document document = builder.parse(stream);
+                final NodeList nodeList = document.getElementsByTagName("msg");
+                if (nodeList != null) {
+                    changeLog = new ArrayList<>();
+                    for (int i = 0; i < nodeList.getLength(); i++) {
+                        final Node item = nodeList.item(i);
+                        if (item != null) {
+                            final Node lastChild = item.getLastChild();
+                            if (lastChild != null) {
+                                final String textContent = lastChild.getTextContent();
+                                if ((textContent != null) && (textContent.trim().length() > 0)) {
+                                    changeLog.add(textContent.trim());
+                                }
                             }
                         }
                     }
@@ -267,24 +260,16 @@ public final class DownloadUtils {
             }
         } catch (ParserConfigurationException | SAXException | IOException | RuntimeException e) {
             throw new DownloadException("The change log could not be loaded! job=" + jobName + ", URL=" + urlChangeLog, e);
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    logger.warn("Closing InputStream for '{}' failed!", urlChangeLog, e);
-                }
-            }
         }
         return changeLog;
     }
 
-    public static String loadLauncherChangeLog(String jobName, Integer buildNumber) throws DownloadException {
+    public static String loadLauncherChangeLogJenkins(String jobName, Integer buildNumber) throws DownloadException {
         URL urlChangeLog = null;
         BufferedReader reader = null;
         final StringBuilder changeLog = new StringBuilder();
         try {
-            urlChangeLog = DownloadUtils.createFileDownloadURL(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG);
+            urlChangeLog = DownloadUtils.createFileDownloadUrlJenkins(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG);
             reader = new BufferedReader(new InputStreamReader(urlChangeLog.openStream(), StandardCharsets.US_ASCII));
             while (true) {
                 String line = reader.readLine();

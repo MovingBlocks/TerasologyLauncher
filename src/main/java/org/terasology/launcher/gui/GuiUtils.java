@@ -16,9 +16,10 @@
 
 package org.terasology.launcher.gui;
 
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Window;
 import org.terasology.launcher.util.BundleUtils;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.File;
@@ -32,22 +33,23 @@ public final class GuiUtils {
         JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.WARNING_MESSAGE);
     }
 
-    public static void showErrorMessageDialog(boolean exitLauncher, Component parentComponent, String message) {
+    public static void showErrorMessageDialog(Component parentComponent, String message) {
         JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
-        if (exitLauncher) {
-            System.exit(1);
-        }
     }
 
-    public static File chooseDirectory(Component parentComponent, File directory, String title) {
-        final JFileChooser fileChooser = new JFileChooser(directory.getParentFile());
-        // Cannot use mode DIRECTORIES_ONLY, because the preselected name doesn't work.
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        fileChooser.setSelectedFile(directory);
-        fileChooser.setDialogTitle(title);
-        if (fileChooser.showSaveDialog(parentComponent) != JFileChooser.APPROVE_OPTION) {
-            return null;
+    public static File chooseDirectory(Window parentWindow, File directory, String title) {
+        final DirectoryChooser directoryChooser = new DirectoryChooser();
+        if (!directory.isDirectory()) {
+            directory.mkdir();
         }
-        return fileChooser.getSelectedFile();
+        directoryChooser.setInitialDirectory(directory);
+        directoryChooser.setTitle(title);
+
+        final File selected = directoryChooser.showDialog(parentWindow);
+        // directory proposal needs to be deleted if the user chose a different one
+        if (!directory.equals(selected)) {
+            directory.delete();
+        }
+        return selected;
     }
 }
