@@ -178,9 +178,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 final boolean update = updater.showUpdateDialog(null);
                 if (update) {
                     if (saveDownloadedFiles) {
-                        selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory, null);
+                        selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory);
                     } else {
-                        selfUpdaterStarted = updater.update(tempDirectory, tempDirectory, null);
+                        selfUpdaterStarted = updater.update(tempDirectory, tempDirectory);
                     }
                 }
             }

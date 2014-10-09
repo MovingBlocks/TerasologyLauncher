@@ -18,7 +18,6 @@ package org.terasology.launcher.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
@@ -174,7 +173,7 @@ public final class LauncherUpdater {
         return (option == 0);
     }
 
-    public boolean update(File downloadDirectory, File tempDirectory, SplashScreenWindow splash) {
+    public boolean update(File downloadDirectory, File tempDirectory) {
         try {
             logger.trace("Downloading launcher...");
             //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
@@ -207,7 +206,7 @@ public final class LauncherUpdater {
             SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
         } catch (DownloadException | IOException | RuntimeException e) {
             logger.error("Launcher update failed! Aborting update process!", e);
-            GuiUtils.showErrorMessageDialog(splash, BundleUtils.getLabel("update_launcher_updateFailed"));
+            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("update_launcher_updateFailed"));
             return false;
         }
         return true;
