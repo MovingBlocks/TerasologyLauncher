@@ -28,6 +28,7 @@ import org.terasology.launcher.util.ProgressListener;
 public class GameDownloadWorker extends Task<Void> implements ProgressListener {
 
     private static final Logger logger = LoggerFactory.getLogger(GameDownloadWorker.class);
+
     private final GameDownloader gameDownloader;
     private ApplicationController controller;
 

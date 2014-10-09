@@ -67,8 +67,8 @@ public final class TerasologyLauncher extends Application {
     private ProgressBar loadProgress;
     private Label progressText;
     private Stage mainStage;
-    private static final int SPLASH_WIDTH = 676;
-    private static final int SPLASH_HEIGHT = 227;
+    private static final int SPLASH_WIDTH = 800;
+    private static final int SPLASH_HEIGHT = 223;
 
     public static void main(String[] args) {
         launch(args);
@@ -76,14 +76,14 @@ public final class TerasologyLauncher extends Application {
 
     @Override
     public void init() throws Exception {
-        ImageView splash = new ImageView(new Image("http://fxexperience.com/wp-content/uploads/2010/06/logo.png"));
+        ImageView splash = new ImageView(BundleUtils.getFxImage("splash"));
         loadProgress = new ProgressBar();
-        loadProgress.setPrefWidth(SPLASH_WIDTH - 20);
-        progressText = new Label("Will find friends for peanuts . . .");
+        loadProgress.setPrefWidth(SPLASH_WIDTH);
+        progressText = new Label();
         splashLayout = new VBox();
         splashLayout.getChildren().addAll(splash, loadProgress, progressText);
         progressText.setAlignment(Pos.CENTER);
-        splashLayout.setStyle("-fx-padding: 5; -fx-background-color: cornsilk; -fx-border-width:5; -fx-border-color: linear-gradient(to bottom, chocolate, derive(chocolate, 50%));");
+        splashLayout.getStylesheets().add(BundleUtils.getStylesheet("css_splash"));
         splashLayout.setEffect(new DropShadow());
     }
 
