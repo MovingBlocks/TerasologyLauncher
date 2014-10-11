@@ -52,7 +52,7 @@ final class BackgroundImage extends JLabel {
         BufferedImage bg;
 
         try {
-            bg = BundleUtils.getBufferedImage("background");
+            bg = BundleUtils.getImage("background");
             Kernel kernel = ImageUtils.buildKernel(8, 24f);
             bg = ImageUtils.blur(bg, kernel);
         } catch (IOException e) {

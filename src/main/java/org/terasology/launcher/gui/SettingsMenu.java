@@ -42,9 +42,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.LayoutStyle;
+
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -95,7 +97,12 @@ final class SettingsMenu extends JDialog implements ActionListener {
         this.gameVersions = gameVersions;
 
         setResizable(false);
-        setIconImage(BundleUtils.getImage("icon"));
+        try {
+            Image icon = BundleUtils.getImage("icon32");
+            setIconImage(icon);
+        } catch (IOException e) {
+            logger.warn("Could not load icon", e);
+        }
 
         initComponents();
 

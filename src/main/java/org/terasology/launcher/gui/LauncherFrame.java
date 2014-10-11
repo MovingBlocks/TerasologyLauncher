@@ -44,6 +44,7 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -421,7 +422,12 @@ public final class LauncherFrame extends JFrame implements ActionListener {
 
     private void updateLocale() {
         setTitle(BundleUtils.getLabel("launcher_title"));
-        setIconImage(BundleUtils.getImage("icon"));
+        try {
+            Image icon = BundleUtils.getImage("icon32");
+            setIconImage(icon);
+        } catch (IOException e) {
+            logger.warn("Could not load icon", e);
+        }
 
         if (gameDownloadWorker != null) {
             downloadButton.setText(BundleUtils.getLabel("launcher_cancelDownload"));
