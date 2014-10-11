@@ -23,7 +23,6 @@ import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.JobResult;
-import org.terasology.launcher.util.ProgressListener;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -77,7 +76,7 @@ public final class TerasologyGameVersions {
         return null;
     }
 
-    public synchronized void loadGameVersions(GameSettings gameSettings, File launcherDirectory, File gameDirectory, ProgressListener listener) {
+    public synchronized void loadGameVersions(GameSettings gameSettings, File launcherDirectory, File gameDirectory) {
         final File cacheDirectory = getAndCheckCacheDirectory(launcherDirectory);
 
         gameVersionLists.clear();
@@ -86,9 +85,6 @@ public final class TerasologyGameVersions {
         final Map<GameJob, SortedSet<Integer>> buildNumbersMap = new HashMap<>();
         final Map<GameJob, Integer> lastBuildNumbers = new HashMap<>();
         for (GameJob job : GameJob.values()) {
-            // TODO update with message?
-            listener.update();
-
             gameVersionMaps.put(job, new TreeMap<Integer, TerasologyGameVersion>());
             final SortedSet<Integer> buildNumbers = new TreeSet<>();
             buildNumbersMap.put(job, buildNumbers);
@@ -97,12 +93,9 @@ public final class TerasologyGameVersions {
             lastBuildNumbers.put(job, loadLastSuccessfulBuildNumber(getLastBuildNumberFromSettings(gameSettings, job), buildNumbers, job));
         }
 
-        loadInstalledGames(gameDirectory, buildNumbersMap, listener);
+        loadInstalledGames(gameDirectory, buildNumbersMap);
 
         for (GameJob job : GameJob.values()) {
-            // TODO update with message?
-            listener.update();
-
             final SortedMap<Integer, TerasologyGameVersion> gameVersionMap = gameVersionMaps.get(job);
             final SortedSet<Integer> buildNumbers = buildNumbersMap.get(job);
             final Integer lastBuildNumber = lastBuildNumbers.get(job);
@@ -115,7 +108,7 @@ public final class TerasologyGameVersions {
             if (cacheDirectory != null) {
                 cachedGameVersions = readFromCache(job, buildNumbers, cacheDirectory);
             }
-            loadGameVersions(buildNumbers, job, gameVersionMap, cachedGameVersions, listener);
+            loadGameVersions(buildNumbers, job, gameVersionMap, cachedGameVersions);
             if (cacheDirectory != null) {
                 writeToCache(job, cacheDirectory);
             }
@@ -192,10 +185,7 @@ public final class TerasologyGameVersions {
         return lastSuccessfulBuildNumber;
     }
 
-    private void loadInstalledGames(File directory, Map<GameJob, SortedSet<Integer>> buildNumbersMap, ProgressListener listener) {
-        // TODO update with message?
-        listener.update();
-
+    private void loadInstalledGames(File directory, Map<GameJob, SortedSet<Integer>> buildNumbersMap) {
         final File[] gameJar = directory.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
@@ -226,7 +216,7 @@ public final class TerasologyGameVersions {
             });
             if (subDirectories != null) {
                 for (File subDirectory : subDirectories) {
-                    loadInstalledGames(subDirectory, buildNumbersMap, listener);
+                    loadInstalledGames(subDirectory, buildNumbersMap);
                 }
             }
         }
@@ -339,11 +329,8 @@ public final class TerasologyGameVersions {
     }
 
     private void loadGameVersions(SortedSet<Integer> buildNumbers, GameJob job, SortedMap<Integer, TerasologyGameVersion> gameVersions,
-                                  SortedMap<Integer, TerasologyGameVersion> cachedGameVersionMap, ProgressListener listener) {
+                                  SortedMap<Integer, TerasologyGameVersion> cachedGameVersionMap) {
         for (Integer buildNumber : buildNumbers) {
-            // TODO update with message?
-            listener.update();
-
             final TerasologyGameVersion gameVersion;
             if (gameVersions.containsKey(buildNumber)) {
                 gameVersion = gameVersions.get(buildNumber);
