@@ -170,6 +170,12 @@
                                                         </AnchorPane>
                                                     </content>
                                                 </Tab>
+                                                <Tab fx:id="logTab" closable="false" text="Log">
+                                                    <content>
+                                                        <AnchorPane fx:id="logContent" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="800.0">
+                                                        </AnchorPane>
+                                                    </content>
+                                                </Tab>
                                             </tabs>
                                         </TabPane>
                                         <HBox alignment="CENTER" prefHeight="32.0" prefWidth="969.0">
