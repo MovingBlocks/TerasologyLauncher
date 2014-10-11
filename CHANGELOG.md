@@ -1,7 +1,12 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 1.5.0 (unreleased)
+## 1.4.2 (2014-10-11)
+* Fix for OS X when selecting game and launcher directory at first start
+* Small GUI change (removed "Mods" link)
+
+## 1.4.1 (skipped)
+* Rebuild of v1.4.0 with new URLs after server crash 
 
 ## 1.4.0 (2014-05-29)
 * Translation into Polish
