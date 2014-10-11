@@ -327,12 +327,19 @@ task copyExtraIntoResources(type: Copy) {
     from('CONTRIBUTING.md')
     from('LICENSE')
     from('NOTICE')
-	
-	into('src/main/resources/org/terasology/launcher/about')
+
+    into('src/main/resources/org/terasology/launcher/about')
 }
 
 processResources.dependsOn copyExtraIntoResources
-eclipseProject.dependsOn copyExtraIntoResources
+
+task copyIconsIntoResources(type: Copy) {
+    from('icons')
+
+    into('src/main/resources/org/terasology/launcher/icons')
+}
+
+processResources.dependsOn copyIconsIntoResources
 
 task copyHtml(type: Copy) {
     from('index.html')

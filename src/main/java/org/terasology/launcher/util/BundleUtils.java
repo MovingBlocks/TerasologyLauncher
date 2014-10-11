@@ -19,10 +19,11 @@ package org.terasology.launcher.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javafx.scene.image.Image;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import java.awt.Image;
-import java.awt.Toolkit;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
@@ -91,14 +92,19 @@ public final class BundleUtils {
         return new ImageIcon(BundleUtils.class.getResource(imagePath));
     }
 
-    public static Image getImage(String key) {
-        final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
-        return Toolkit.getDefaultToolkit().getImage(BundleUtils.class.getResource(imagePath));
-    }
-
-    public static BufferedImage getBufferedImage(String key) throws IOException {
+    public static BufferedImage getImage(String key) throws IOException {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
         return ImageIO.read(BundleUtils.class.getResourceAsStream(imagePath));
+    }
+
+    /**
+     * @param key the key as specified in the image bundle file
+     * @return the JavaFX image
+     * @throws MissingResourceException if no resource for the specified key can be found
+     */
+    public static Image getFxImage(String key) throws MissingResourceException {
+        final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        return new Image(BundleUtils.class.getResource(imagePath).toExternalForm());
     }
 
     public static URL getFXMLUrl(String key) {

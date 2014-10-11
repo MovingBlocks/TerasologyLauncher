@@ -9,11 +9,11 @@
         <description kind="short">Terasology Launcher (SHORT)</description>
         <description kind="tooltip">Terasology Launcher (TOOLTIP)</description>
 
-        <icon href="icons/gooey_sweet_128.png" width="128" height="128"/>
-        <icon href="icons/gooey_sweet_64.png"   width="64"  height="64"/>
-        <icon href="icons/gooey_sweet_32.png"   width="32"  height="32"/>
-        <icon href="icons/gooey_sweet_16.png"   width="16"  height="16"/>
-        <icon kind="splash" href="icons/bluegoo_128.png"/>
+        <icon href="icons/gooey_star_128.png" width="128" height="128"/>
+        <icon href="icons/gooey_star_64.png"   width="64"  height="64"/>
+        <icon href="icons/gooey_star_32.png"   width="32"  height="32"/>
+        <icon href="icons/gooey_star_16.png"   width="16"  height="16"/>
+        <icon kind="splash" href="icons/gooey_star.png"/>
 
         <shortcut online="true" install="true">
             <desktop/>

@@ -28,8 +28,6 @@
 .DS_Store?
 .AppleDouble
 .LSOverride
-Icon
-Icon?
 ._*
 .Spotlight-V100
 .Trashes
@@ -48,3 +46,6 @@ certum.jks
 
 # Ignore text files that are copied by a gradle task from the root folder into resources to make them accessible for java code
 /src/main/resources/org/terasology/launcher/about/
+
+# Ignore icons that exists twice (for reference inside the jar and for the webstarter)
+/src/main/resources/org/terasology/launcher/icons/

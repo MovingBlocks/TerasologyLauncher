@@ -46,6 +46,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 public final class TerasologyLauncher extends Application implements ProgressListener {
@@ -107,11 +110,17 @@ public final class TerasologyLauncher extends Application implements ProgressLis
             Scene scene = new Scene(root);
             scene.getStylesheets().add(BundleUtils.getStylesheet("css_terasology"));
 
-            stage.setTitle("TerasologyLauncher "+ TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
-            stage.getIcons().add(new Image("file:icons/gooey_sweet_16.png"));
-            stage.getIcons().add(new Image("file:icons/gooey_sweet_32.png"));
-            stage.getIcons().add(new Image("file:icons/gooey_sweet_64.png"));
-            stage.getIcons().add(new Image("file:icons/gooey_sweet_128.png"));
+            stage.setTitle("TerasologyLauncher " + TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
+            List<String> iconIds = Arrays.asList("icon16", "icon32", "icon64", "icon128");
+
+            for (String id : iconIds) {
+                try {
+                    Image image = BundleUtils.getFxImage(id);
+                    stage.getIcons().add(image);
+                } catch (MissingResourceException e) {
+                    logger.warn("Could not load icon image", e);
+                }
+            }
             stage.setScene(scene);
             stage.setResizable(false);
             stage.show();
