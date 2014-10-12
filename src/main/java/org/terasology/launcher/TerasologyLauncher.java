@@ -142,17 +142,7 @@ public final class TerasologyLauncher extends Application {
         Scene scene = new Scene(root);
         scene.getStylesheets().add(BundleUtils.getStylesheet("css_terasology"));
 
-        mainStage.setTitle("TerasologyLauncher " + TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
-        List<String> iconIds = Arrays.asList("icon16", "icon32", "icon64", "icon128");
-
-        for (String id : iconIds) {
-            try {
-                Image image = BundleUtils.getFxImage(id);
-                mainStage.getIcons().add(image);
-            } catch (MissingResourceException e) {
-                logger.warn("Could not load icon image", e);
-            }
-        }
+        decorateStage(mainStage);
 
         mainStage.setScene(scene);
         mainStage.setResizable(false);
@@ -187,6 +177,9 @@ public final class TerasologyLauncher extends Application {
                 } // todo add code to gracefully handle other task states.
             }
         });
+
+        decorateStage(initialStage);
+
         Scene splashScene = new Scene(splashLayout);
         initialStage.initStyle(StageStyle.UNDECORATED);
         final Rectangle2D bounds = Screen.getPrimary().getBounds();
@@ -218,5 +211,23 @@ public final class TerasologyLauncher extends Application {
         logger.trace("Init Languages...");
         Languages.init();
         logger.debug("Language: {}", Languages.getCurrentLocale());
+    }
+
+    /**
+     * Adds title and icons to a stage
+     * @param stage the stage to decorate
+     */
+    private static void decorateStage(Stage stage) {
+        stage.setTitle("TerasologyLauncher " + TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
+        List<String> iconIds = Arrays.asList("icon16", "icon32", "icon64", "icon128");
+
+        for (String id : iconIds) {
+            try {
+                Image image = BundleUtils.getFxImage(id);
+                stage.getIcons().add(image);
+            } catch (MissingResourceException e) {
+                logger.warn("Could not load icon image", e);
+            }
+        }
     }
 }
