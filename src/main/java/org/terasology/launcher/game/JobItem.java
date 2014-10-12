@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.terasology.launcher.game;
 
 import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.Languages;
 
 public final class JobItem {
 
@@ -35,6 +36,6 @@ public final class JobItem {
      */
     @Override
     public String toString() {
-        return BundleUtils.getLabel(job.getSettingsKey());
+        return BundleUtils.getLabel(Languages.getCurrentLocale(), job.getSettingsKey());
     }
 }

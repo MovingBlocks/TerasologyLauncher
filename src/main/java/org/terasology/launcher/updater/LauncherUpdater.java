@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,13 @@ package org.terasology.launcher.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.gui.GuiUtils;
-import org.terasology.launcher.gui.SplashProgressIndicator;
-import org.terasology.launcher.gui.SplashScreenWindow;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
+import org.terasology.launcher.util.DummyProgressListener;
 import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.BorderFactory;
@@ -73,8 +72,7 @@ public final class LauncherUpdater {
     /**
      * This method indicates if a new launcher version is available.
      * <p/>
-     * Compares the current launcher version number to the upstream version number if an internet connection is
-     * available.
+     * Compares the current launcher version number to the upstream version number if an internet connection is available.
      *
      * @return whether an update is available
      */
@@ -119,6 +117,7 @@ public final class LauncherUpdater {
     }
 
     public boolean showUpdateDialog(Component parentComponent) {
+        //TODO: Java8 -- ControlsFX Dialog
         final JPanel msgPanel = new JPanel(new BorderLayout(0, 10));
         final JTextArea msgLabel = new JTextArea(BundleUtils.getLabel("message_update_launcher"));
         msgLabel.setBackground(msgPanel.getBackground());
@@ -174,10 +173,10 @@ public final class LauncherUpdater {
         return (option == 0);
     }
 
-    public boolean update(File downloadDirectory, File tempDirectory, SplashScreenWindow splash) {
+    public boolean update(File downloadDirectory, File tempDirectory) {
         try {
             logger.trace("Downloading launcher...");
-            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
+            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
 
             // Download launcher ZIP file
             final URL updateURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
@@ -186,9 +185,9 @@ public final class LauncherUpdater {
             final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
             logger.trace("Download ZIP file: {}", downloadedZipFile);
 
-            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new SplashProgressIndicator(splash, "splash_updatingLauncher_download"));
+            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new DummyProgressListener());
 
-            splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
+            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 
             // Extract launcher ZIP file
             final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
@@ -207,7 +206,7 @@ public final class LauncherUpdater {
             SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
         } catch (DownloadException | IOException | RuntimeException e) {
             logger.error("Launcher update failed! Aborting update process!", e);
-            GuiUtils.showErrorMessageDialog(splash, BundleUtils.getLabel("update_launcher_updateFailed"));
+            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("update_launcher_updateFailed"));
             return false;
         }
         return true;

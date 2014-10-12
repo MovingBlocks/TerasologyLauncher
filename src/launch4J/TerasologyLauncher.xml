@@ -3,6 +3,9 @@
   <dontWrapJar>true</dontWrapJar>
   <headerType>gui</headerType>
   <jar>lib\TerasologyLauncher.jar</jar>
+  <classPath>
+    <cp>%JREHOMEDIR%\lib\jfxrt.jar</cp>
+  </classPath>
   <outfile>..\dist\TerasologyLauncher.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
