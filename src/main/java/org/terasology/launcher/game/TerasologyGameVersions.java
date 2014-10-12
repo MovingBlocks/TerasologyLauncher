@@ -176,9 +176,16 @@ public final class TerasologyGameVersions {
             if ((lastSuccessfulBuildNumber != null) && (lastSuccessfulBuildNumber >= job.getMinBuildNumber())) {
                 buildNumbers.add(lastSuccessfulBuildNumber);
                 // add previous build numbers
-                final int prevBuildNumber = Math.max(job.getMinBuildNumber(), lastSuccessfulBuildNumber - job.getPrevBuildNumbers());
-                for (int buildNumber = prevBuildNumber; buildNumber < lastSuccessfulBuildNumber; buildNumber++) {
-                    buildNumbers.add(buildNumber);
+                for (int buildNumber = lastSuccessfulBuildNumber - 1; ((buildNumbers.size() <= job.getPrevBuildNumbers()) && buildNumber > job.getMinBuildNumber());
+                     buildNumber--) {
+                    try {
+                        // Skip unavailable builds
+                        DownloadUtils.loadJobResultJenkins(job.name(), buildNumber);
+                        buildNumbers.add(buildNumber);
+                    } catch (DownloadException e) {
+                        logger.info("Cannot find build number '{}' for job '{}'.", buildNumber, job);
+                    }
+
                 }
             }
         }
@@ -452,7 +459,12 @@ public final class TerasologyGameVersions {
 
     private List<TerasologyGameVersion> createList(Integer lastBuildNumber, GameJob job, SortedMap<Integer, TerasologyGameVersion> gameVersionMap) {
         final List<TerasologyGameVersion> gameVersionList = new ArrayList<>();
-        gameVersionList.addAll(gameVersionMap.values());
+        // add only available builds
+        for (TerasologyGameVersion version : gameVersionMap.values()) {
+            if (version.getSuccessful() != null) {
+                gameVersionList.add(version);
+            }
+        }
 
         final TerasologyGameVersion latestGameVersion = new TerasologyGameVersion();
         latestGameVersion.setLatest(true);
