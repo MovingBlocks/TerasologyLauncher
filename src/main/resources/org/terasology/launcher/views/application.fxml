@@ -24,7 +24,9 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.effect.GaussianBlur?>
 <?import javafx.scene.effect.Glow?>
@@ -173,6 +175,13 @@
                                                 <Tab fx:id="logTab" closable="false" text="Log">
                                                     <content>
                                                         <AnchorPane fx:id="logContent" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="800.0">
+                                                            <children>
+                                                                <ScrollPane id="ScrollPane" prefViewportHeight="336.0" prefViewportWidth="800.0">
+                                                                    <content>
+                                                                        <TableView fx:id="loggingView" prefHeight="336.0" prefWidth="800.0"/>
+                                                                    </content>
+                                                                </ScrollPane>
+                                                            </children>
                                                         </AnchorPane>
                                                     </content>
                                                 </Tab>

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,9 @@
 
 package org.terasology.launcher.gui.javafx;
 
-import java.text.DateFormat;
-import java.util.Date;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -28,12 +28,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.AppenderBase;
+
+import java.text.DateFormat;
+import java.util.Date;
 
 /**
- * Appends to a log view
+ * Appends to a log view.
+ *
  * @author Martin Steiger
  */
 public class LogViewAppender extends AppenderBase<ILoggingEvent> {
@@ -41,8 +42,8 @@ public class LogViewAppender extends AppenderBase<ILoggingEvent> {
     private final TableView<ILoggingEvent> view;
     private final ObservableList<ILoggingEvent> data;
 
-    public LogViewAppender() {
-        this.view = new TableView<>();
+    public LogViewAppender(TableView<ILoggingEvent> newView) {
+        this.view = newView;
 
         view.setEditable(false);
 
@@ -105,13 +106,6 @@ public class LogViewAppender extends AppenderBase<ILoggingEvent> {
     @Override
     public void start() {
         super.start();
-    }
-
-    /**
-     * @return the view
-     */
-    public TableView<ILoggingEvent> getView() {
-        return view;
     }
 
     @Override
