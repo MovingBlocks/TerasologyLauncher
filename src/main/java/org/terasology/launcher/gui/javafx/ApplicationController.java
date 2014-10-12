@@ -17,8 +17,10 @@
 package org.terasology.launcher.gui.javafx;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+
 import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
+
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.beans.value.ChangeListener;
@@ -43,6 +45,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
@@ -53,6 +56,7 @@ import org.terasology.launcher.game.JobItem;
 import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.game.VersionItem;
+import org.terasology.launcher.log.LogViewAppender;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -60,6 +64,7 @@ import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.JOptionPane;
+
 import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
@@ -316,6 +321,17 @@ public class ApplicationController {
         this.launcherSettings = newLauncherSettings;
         this.gameVersions = newGameVersions;
 
+        // add Logback view appender view to both the root logger and the tab
+        Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        if (rootLogger instanceof ch.qos.logback.classic.Logger) {
+            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
+
+            LogViewAppender viewLogger = new LogViewAppender(loggingView);
+            viewLogger.setContext(logbackLogger.getLoggerContext());
+            viewLogger.start(); // CHECK: do I really need to start it manually here?
+            logbackLogger.addAppender(viewLogger);
+        }
+
         gameStarter = new GameStarter();
 
         updateJobBox();
@@ -348,17 +364,6 @@ public class ApplicationController {
 
         downloadButton.managedProperty().bind(downloadButton.visibleProperty());
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
-
-        // add Logback view appender view to both the root logger and the tab
-        Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        if (rootLogger instanceof ch.qos.logback.classic.Logger) {
-            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
-
-            LogViewAppender viewLogger = new LogViewAppender(loggingView);
-            viewLogger.setContext(logbackLogger.getLoggerContext());
-            viewLogger.start(); // CHECK: do I really need to start it manually here?
-            logbackLogger.addAppender(viewLogger);
-        }
 
         updateGui();
     }
