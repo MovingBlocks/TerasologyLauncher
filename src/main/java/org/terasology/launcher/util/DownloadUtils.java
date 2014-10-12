@@ -141,26 +141,11 @@ public final class DownloadUtils {
     }
 
     public static URL createFileDownloadUrlJenkins(String jobName, int buildNumber, String fileName) throws MalformedURLException {
-        final StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(JENKINS_JOB_URL);
-        urlBuilder.append(jobName);
-        urlBuilder.append("/");
-        urlBuilder.append(buildNumber);
-        urlBuilder.append(ARTIFACT_BUILD);
-        urlBuilder.append(fileName);
-
-        return new URL(urlBuilder.toString());
+        return new URL(JENKINS_JOB_URL + jobName + "/" + buildNumber + ARTIFACT_BUILD + fileName);
     }
 
     public static URL createUrlJenkins(String jobName, int buildNumber, String subPath) throws MalformedURLException {
-        final StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(JENKINS_JOB_URL);
-        urlBuilder.append(jobName);
-        urlBuilder.append("/");
-        urlBuilder.append(buildNumber);
-        urlBuilder.append(subPath);
-
-        return new URL(urlBuilder.toString());
+        return new URL(JENKINS_JOB_URL + jobName + "/" + buildNumber + subPath);
     }
 
     /**

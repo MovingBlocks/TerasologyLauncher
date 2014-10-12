@@ -25,7 +25,6 @@ import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.JobResult;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -33,7 +32,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +40,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public final class TerasologyGameVersions {
 
@@ -85,7 +84,7 @@ public final class TerasologyGameVersions {
         final Map<GameJob, SortedSet<Integer>> buildNumbersMap = new HashMap<>();
         final Map<GameJob, Integer> lastBuildNumbers = new HashMap<>();
         for (GameJob job : GameJob.values()) {
-            gameVersionMaps.put(job, new TreeMap<Integer, TerasologyGameVersion>());
+            gameVersionMaps.put(job, new TreeMap<>());
             final SortedSet<Integer> buildNumbers = new TreeSet<>();
             buildNumbersMap.put(job, buildNumbers);
 
@@ -193,12 +192,8 @@ public final class TerasologyGameVersions {
     }
 
     private void loadInstalledGames(File directory, Map<GameJob, SortedSet<Integer>> buildNumbersMap) {
-        final File[] gameJar = directory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isFile() && file.canRead() && FILE_TERASOLOGY_JAR.equals(file.getName());
-            }
-        }
+        final File[] gameJar = directory.listFiles(
+            file -> file.isFile() && file.canRead() && FILE_TERASOLOGY_JAR.equals(file.getName())
         );
 
         if ((gameJar != null) && (gameJar.length == 1)) {
@@ -214,13 +209,7 @@ public final class TerasologyGameVersions {
                 }
             }
         } else {
-            final File[] subDirectories = directory.listFiles(new FileFilter() {
-
-                @Override
-                public boolean accept(File file) {
-                    return file.isDirectory() && file.canRead();
-                }
-            });
+            final File[] subDirectories = directory.listFiles(file -> file.isDirectory() && file.canRead());
             if (subDirectories != null) {
                 for (File subDirectory : subDirectories) {
                     loadInstalledGames(subDirectory, buildNumbersMap);
@@ -275,12 +264,8 @@ public final class TerasologyGameVersions {
         if (gameJar.exists() && gameJar.canRead() && gameJar.isFile()) {
             final File libsDirectory = new File(gameJar.getParentFile(), DIR_LIBS);
             if (libsDirectory.isDirectory() && libsDirectory.canRead()) {
-                final File[] engineJars = libsDirectory.listFiles(new FileFilter() {
-                    @Override
-                    public boolean accept(File file) {
-                        return file.isFile() && file.canRead() && file.getName().matches(FILE_ENGINE_JAR);
-                    }
-                }
+                final File[] engineJars = libsDirectory.listFiles(
+                    file -> file.isFile() && file.canRead() && file.getName().matches(FILE_ENGINE_JAR)
                 );
 
                 if ((engineJars != null) && (engineJars.length == 1)) {
@@ -440,15 +425,11 @@ public final class TerasologyGameVersions {
     }
 
     private void deleteOldCache(File cacheDirectory) {
-        final File[] cacheFiles = cacheDirectory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                return pathname.exists() && pathname.isFile()
-                    && pathname.canRead() && pathname.canWrite()
-                    && pathname.getName().endsWith(FILE_SUFFIX_CACHE)
-                    && pathname.lastModified() < (System.currentTimeMillis() - OUTDATED_CACHE_MILLI_SECONDS);
-            }
-        });
+        final File[] cacheFiles = cacheDirectory.listFiles(
+            pathname -> pathname.exists() && pathname.isFile()
+            && pathname.canRead() && pathname.canWrite()
+            && pathname.getName().endsWith(FILE_SUFFIX_CACHE)
+            && pathname.lastModified() < (System.currentTimeMillis() - OUTDATED_CACHE_MILLI_SECONDS));
         if ((cacheFiles != null) && (cacheFiles.length > 0)) {
             logger.debug("Delete {} outdated cache files on exit.", cacheFiles.length);
             for (File cacheFile : cacheFiles) {
@@ -458,13 +439,11 @@ public final class TerasologyGameVersions {
     }
 
     private List<TerasologyGameVersion> createList(Integer lastBuildNumber, GameJob job, SortedMap<Integer, TerasologyGameVersion> gameVersionMap) {
-        final List<TerasologyGameVersion> gameVersionList = new ArrayList<>();
         // add only available builds
-        for (TerasologyGameVersion version : gameVersionMap.values()) {
-            if (version.getSuccessful() != null) {
-                gameVersionList.add(version);
-            }
-        }
+        final List<TerasologyGameVersion> gameVersionList = gameVersionMap.values()
+            .stream()
+            .filter(v -> v.getSuccessful() != null)
+            .collect(Collectors.toList());
 
         final TerasologyGameVersion latestGameVersion = new TerasologyGameVersion();
         latestGameVersion.setLatest(true);

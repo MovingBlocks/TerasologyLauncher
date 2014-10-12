@@ -65,12 +65,14 @@ public class GameDownloadWorker extends Task<Void> implements ProgressListener {
 
     @Override
     protected void done() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                controller.finishedGameDownload(isCancelled(), successfulDownloadAndExtract, successfulLoadVersion, gameDownloader.getGameDirectory());
-            }
-        });
+        Platform.runLater(
+            () -> controller.finishedGameDownload(
+                isCancelled(),
+                successfulDownloadAndExtract,
+                successfulLoadVersion,
+                gameDownloader.getGameDirectory()
+            )
+        );
     }
 
     @Override
