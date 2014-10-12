@@ -16,6 +16,13 @@
 
 package org.terasology.launcher;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -52,13 +59,6 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 public final class TerasologyLauncher extends Application {
 
