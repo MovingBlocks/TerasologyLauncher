@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.gui.javafx;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
 import javafx.animation.ScaleTransition;
@@ -32,6 +33,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TitledPane;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.input.MouseEvent;
@@ -108,6 +110,10 @@ public class ApplicationController {
     private Label versionInfo;
     @FXML
     private Accordion aboutInfoAccordion;
+    @FXML
+    private AnchorPane logContent;
+    @FXML
+    private TableView<ILoggingEvent> loggingView;
 
     @FXML
     protected void handleExitButtonAction() {
@@ -342,6 +348,18 @@ public class ApplicationController {
 
         downloadButton.managedProperty().bind(downloadButton.visibleProperty());
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
+
+        // add Logback view appender view to both the root logger and the tab
+        Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        if (rootLogger instanceof ch.qos.logback.classic.Logger) {
+            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
+
+            LogViewAppender viewLogger = new LogViewAppender(loggingView);
+            viewLogger.setContext(logbackLogger.getLoggerContext());
+            viewLogger.start(); // CHECK: do I really need to start it manually here?
+            logbackLogger.addAppender(viewLogger);
+        }
+
         updateGui();
     }
 

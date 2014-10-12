@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+
+
 /*
  * This is a Gradle build file:
  * - Gradle Homepage: http://gradle.org/
@@ -80,7 +82,7 @@ dependencies {
     compile group: 'org.terasology', name: 'CrashReporter', version: '1.2.+'
     compile group: 'com.github.rjeschke', name: 'txtmark', version: '0.11'
 
-    runtime group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
 
     // These dependencies are only needed for running tests
     testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -144,7 +146,7 @@ createVersionInfoFile.dependsOn processResources
 jar.dependsOn createVersionInfoFile
 distZip.dependsOn createVersionInfoFile
 distTar.dependsOn createVersionInfoFile
- 
+
 jar {
     // replace development "logback.xml" with productive "logback_jar.xml"
     exclude "logback.xml"
@@ -175,7 +177,7 @@ task copyLibs(type: IncrementalCopy) {
 
     from jar                            // this is the launcher jar file
 
-    into ('icons') {                    // splash screen, etc
+    into('icons') {                    // splash screen, etc
         from 'icons'
     }
 
@@ -196,7 +198,6 @@ class IncrementalCopy extends Copy {
     }
 }
 
-
 // Sign the jar files so they can get full rights in a browser
 task signLibs(type: IncrementalSigningTask, dependsOn: copyLibs) {
 
@@ -205,21 +206,21 @@ task signLibs(type: IncrementalSigningTask, dependsOn: copyLibs) {
     tree.exclude 'jfxrt.jar'                 // no need to sign the JavaFX runtime - it's part of the JRE now
 
     inputs.files tree
-	
-	// assign only if the property exists
-	// --> missing properties do not affect other tasks if not needed
-	
-	certFile = project.hasProperty('certificateFile') ? certificateFile : 'MISSING';
-	certAlias = project.hasProperty('certificateAlias') ? certificateAlias : 'MISSING';
-	certStorePass = project.hasProperty('certificateStorePass') ? certificateStorePass : 'MISSING';
-	certKeyPass = project.hasProperty('certificateKeyPass') ? certificateKeyPass : 'MISSING';
-	
-	doFirst {
-		if (!project.hasProperty('certificateFile')) {
-			throw new GradleException('Please set certificate properties in your ~/.gradle/gradle.properties file first');
-		}
-	}
-	
+
+    // assign only if the property exists
+    // --> missing properties do not affect other tasks if not needed
+
+    certFile = project.hasProperty('certificateFile') ? certificateFile : 'MISSING';
+    certAlias = project.hasProperty('certificateAlias') ? certificateAlias : 'MISSING';
+    certStorePass = project.hasProperty('certificateStorePass') ? certificateStorePass : 'MISSING';
+    certKeyPass = project.hasProperty('certificateKeyPass') ? certificateKeyPass : 'MISSING';
+
+    doFirst {
+        if (!project.hasProperty('certificateFile')) {
+            throw new GradleException('Please set certificate properties in your ~/.gradle/gradle.properties file first');
+        }
+    }
+
     outputDir = file("$buildDir/distributions/signed")
 }
 
@@ -252,13 +253,13 @@ class IncrementalSigningTask extends DefaultTask {
             def target = new File(outputDir, change.file.name)
 
             ant.signjar(
-                jar: change.file,
-                signedjar: target,
-                keystore: certFile,
-                alias: certAlias,
-                storepass: certStorePass,
-                keypass: certKeyPass,
-                tsaurl: 'http://time.certum.pl/')
+                    jar: change.file,
+                    signedjar: target,
+                    keystore: certFile,
+                    alias: certAlias,
+                    storepass: certStorePass,
+                    keypass: certKeyPass,
+                    tsaurl: 'http://time.certum.pl/')
         }
 
         inputs.removed { change ->
@@ -267,7 +268,7 @@ class IncrementalSigningTask extends DefaultTask {
     }
 }
 
-task updateJnlp(dependsOn:signLibs) {
+task updateJnlp(dependsOn: signLibs) {
 
     inputs.file 'webstart-template.jnlp'
     outputs.file "$buildDir/distributions/webstart.jnlp"
@@ -275,15 +276,15 @@ task updateJnlp(dependsOn:signLibs) {
     doFirst {
         def mainJar = 'TerasologyLauncher.jar'
         def root = new XmlParser().parse('webstart-template.jnlp')
-        root.@codebase = (env.BUILD_URL != null) ? 'http://jenkins.terasology.org/job/TerasologyLauncher2.0/lastSuccessfulBuild/artifact/build/distributions/' : '.' 
+        root.@codebase = (env.BUILD_URL != null) ? 'http://jenkins.terasology.org/job/TerasologyLauncher2.0/lastSuccessfulBuild/artifact/build/distributions/' : '.'
 
         // Adding signed jars to resources
         def resources = root.resources[0]
         def collection = files { file("$buildDir/distributions/signed").listFiles() }
         collection.each {
-            def resource= [href: "signed/$it.name"]
+            def resource = [href: "signed/$it.name"]
             if (mainJar == it.name) {
-                resource= [href: "signed/$it.name", main: 'true']
+                resource = [href: "signed/$it.name", main: 'true']
             }
             resources.appendNode('jar', resource)
         }
@@ -313,7 +314,7 @@ task copyExtra(type: Copy) {
     from('NOTICE')
 
     from('src/template/VERSION.md') {
-        expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH), 
+        expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH),
                 dateTime: startDateTimeString, displayVersion: displayVersion)
         rename('VERSION.md', 'VERSION.txt')
     }
