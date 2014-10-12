@@ -42,10 +42,12 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.crashreporter.CrashReporter;
 import org.terasology.launcher.gui.javafx.ApplicationController;
+import org.terasology.launcher.log.TempLogFilePropertyDefiner;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LauncherStartFailedException;
@@ -53,7 +55,6 @@ import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.MissingResourceException;
@@ -63,12 +64,13 @@ public final class TerasologyLauncher extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncher.class);
 
+    private static final int SPLASH_WIDTH = 800;
+    private static final int SPLASH_HEIGHT = 223;
+
     private Pane splashLayout;
     private ProgressBar loadProgress;
     private Label progressText;
     private Stage mainStage;
-    private static final int SPLASH_WIDTH = 800;
-    private static final int SPLASH_HEIGHT = 223;
 
     public static void main(String[] args) {
         launch(args);
@@ -115,7 +117,7 @@ public final class TerasologyLauncher extends Application {
         } catch (RuntimeException | Error e) {
             logger.error("The TerasologyLauncher could not be started!", e);
 
-            Path logFile = Paths.get("TerasologyLauncher.log");
+            Path logFile = TempLogFilePropertyDefiner.getInstance().getLogFile();
             CrashReporter.report(e, logFile);
             System.exit(1);
         }
@@ -151,7 +153,7 @@ public final class TerasologyLauncher extends Application {
                 logger.warn("Could not load icon image", e);
             }
         }
-        
+
         mainStage.setScene(scene);
         mainStage.setResizable(false);
         mainStage.show();

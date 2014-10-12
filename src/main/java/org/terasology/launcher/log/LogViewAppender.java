@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.gui.javafx;
+package org.terasology.launcher.log;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
