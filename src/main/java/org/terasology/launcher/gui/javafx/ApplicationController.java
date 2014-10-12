@@ -23,8 +23,6 @@ import com.github.rjeschke.txtmark.Processor;
 
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -173,7 +171,7 @@ public class ApplicationController {
             logger.info("Current Locale: {}", Languages.getCurrentLocale());
             final FXMLLoader fxmlLoader = new FXMLLoader(BundleUtils.getFXMLUrl("settings"), ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle",
                 Languages.getCurrentLocale()));
-            Parent root = (Parent) fxmlLoader.load();
+            Parent root = fxmlLoader.load();
             final SettingsController settingsController = fxmlLoader.getController();
             settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, gameVersions);
 
@@ -337,28 +335,22 @@ public class ApplicationController {
         updateJobBox();
 
         // add change listeners
-        jobBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<JobItem>() {
-            @Override
-            public void changed(final ObservableValue<? extends JobItem> observableValue, final JobItem oldItem, final JobItem newItem) {
-                if (jobBox.getItems().isEmpty()) {
-                    return;
-                }
-                updateBuildVersionBox();
-                newLauncherSettings.setJob(newItem.getJob());
-                logger.debug("Selected gamejob: {} -- {}", newLauncherSettings.getJob(), newLauncherSettings.getBuildVersion(newLauncherSettings.getJob()));
-                updateGui();
+        jobBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldItem, newItem) -> {
+            if (jobBox.getItems().isEmpty()) {
+                return;
             }
+            updateBuildVersionBox();
+            newLauncherSettings.setJob(newItem.getJob());
+            logger.debug("Selected gamejob: {} -- {}", newLauncherSettings.getJob(), newLauncherSettings.getBuildVersion(newLauncherSettings.getJob()));
+            updateGui();
         });
 
-        buildVersionBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<VersionItem>() {
-            @Override
-            public void changed(final ObservableValue<? extends VersionItem> observableValue, final VersionItem oldVersionItem, final VersionItem newVersionItem) {
-                if (newVersionItem != null) {
-                    final Integer version = newVersionItem.getVersion();
-                    newLauncherSettings.setBuildVersion(version, newLauncherSettings.getJob());
-                    logger.debug("Selected gamejob: {} -- {}", newLauncherSettings.getJob(), newLauncherSettings.getBuildVersion(newLauncherSettings.getJob()));
-                    updateGui();
-                }
+        buildVersionBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldVersionItem, newVersionItem) -> {
+            if (newVersionItem != null) {
+                final Integer version = newVersionItem.getVersion();
+                newLauncherSettings.setBuildVersion(version, newLauncherSettings.getJob());
+                logger.debug("Selected gamejob: {} -- {}", newLauncherSettings.getJob(), newLauncherSettings.getBuildVersion(newLauncherSettings.getJob()));
+                updateGui();
             }
         });
 
@@ -521,28 +513,34 @@ public class ApplicationController {
 
                 final WebView view = new WebView();
 
-                if (ext.equals("md") || ext.equals("markdown")) {
-                    try (InputStream input = url.openStream()) {
-                        String html = Processor.process(input, Configuration.DEFAULT);
-                        view.getEngine().loadContent(html);
-                    }
-                } else if (ext.equals("htm") || ext.equals("html")) {
-                    view.getEngine().load(url.toExternalForm());
-                } else {
-                    try (Reader isr = new InputStreamReader(url.openStream(), cs);
-                         BufferedReader br = new BufferedReader(isr)) {
-                        StringBuilder sb = new StringBuilder();
-                        String line = br.readLine();
-
-                        while (line != null) {
-                            sb.append(line);
-                            sb.append(System.lineSeparator());
-                            line = br.readLine();
+                switch (ext) {
+                    case "md":
+                    case "markdown":
+                        try (InputStream input = url.openStream()) {
+                            String html = Processor.process(input, Configuration.DEFAULT);
+                            view.getEngine().loadContent(html);
                         }
+                        break;
+                    case "htm":
+                    case "html":
+                        view.getEngine().load(url.toExternalForm());
+                        break;
+                    default:
+                        try (Reader isr = new InputStreamReader(url.openStream(), cs);
+                             BufferedReader br = new BufferedReader(isr)) {
+                            StringBuilder sb = new StringBuilder();
+                            String line = br.readLine();
 
-                        // msteiger: I suspect that the second parameter is the MIME type
-                        view.getEngine().loadContent(sb.toString(), "text/plain");
-                    }
+                            while (line != null) {
+                                sb.append(line);
+                                sb.append(System.lineSeparator());
+                                line = br.readLine();
+                            }
+
+                            // msteiger: I suspect that the second parameter is the MIME type
+                            view.getEngine().loadContent(sb.toString(), "text/plain");
+                        }
+                        break;
                 }
 
 

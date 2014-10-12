@@ -20,14 +20,11 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
-import javafx.util.Callback;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -39,41 +36,23 @@ import java.util.Date;
  */
 public class LogViewAppender extends AppenderBase<ILoggingEvent> {
 
-    private final TableView<ILoggingEvent> view;
     private final ObservableList<ILoggingEvent> data;
 
-    public LogViewAppender(TableView<ILoggingEvent> newView) {
-        this.view = newView;
-
+    public LogViewAppender(TableView<ILoggingEvent> view) {
         view.setEditable(false);
 
         data = FXCollections.observableArrayList();
         view.setItems(data);
 
         TableColumn<ILoggingEvent, Date> timestampCol = new TableColumn<>("Timestamp");
-        timestampCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ILoggingEvent, Date>, ObservableValue<Date>>() {
-
-            @Override
-            public ObservableValue<Date> call(CellDataFeatures<ILoggingEvent, Date> item) {
-                return new ReadOnlyObjectWrapper<>(new Date(item.getValue().getTimeStamp()));
-            }
-        });
+        timestampCol.setCellValueFactory(item -> new ReadOnlyObjectWrapper<>(new Date(item.getValue().getTimeStamp())));
         view.getColumns().add(timestampCol);
 
         TableColumn<ILoggingEvent, Level> levelCol = new TableColumn<>("Level");
-        levelCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ILoggingEvent, Level>, ObservableValue<Level>>() {
-
-            @Override
-            public ObservableValue<Level> call(CellDataFeatures<ILoggingEvent, Level> item) {
-                return new ReadOnlyObjectWrapper<>(item.getValue().getLevel());
-            }
-        });
+        levelCol.setCellValueFactory(item -> new ReadOnlyObjectWrapper<>(item.getValue().getLevel()));
         view.getColumns().add(levelCol);
 
-        timestampCol.setCellFactory(new Callback<TableColumn<ILoggingEvent, Date>, TableCell<ILoggingEvent, Date>>() {
-            @Override
-            public TableCell<ILoggingEvent, Date> call(TableColumn<ILoggingEvent, Date> param) {
-                return new TableCell<ILoggingEvent, Date>() {
+        timestampCol.setCellFactory(column-> new TableCell<ILoggingEvent, Date>() {
 
                     private DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM);
 
@@ -87,20 +66,11 @@ public class LogViewAppender extends AppenderBase<ILoggingEvent> {
                             setText(null);
                         }
                     }
-                };
-            }
         });
 
         TableColumn<ILoggingEvent, String> messageCol = new TableColumn<>("Message");
-        messageCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ILoggingEvent, String>, ObservableValue<String>>() {
-
-            @Override
-            public ObservableValue<String> call(CellDataFeatures<ILoggingEvent, String> item) {
-                return new ReadOnlyObjectWrapper<>(item.getValue().getFormattedMessage());
-            }
-        });
+        messageCol.setCellValueFactory(item -> new ReadOnlyObjectWrapper<>(item.getValue().getFormattedMessage()));
         view.getColumns().add(messageCol);
-
     }
 
     @Override
