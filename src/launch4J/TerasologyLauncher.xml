@@ -3,9 +3,6 @@
   <dontWrapJar>true</dontWrapJar>
   <headerType>gui</headerType>
   <jar>lib\TerasologyLauncher.jar</jar>
-  <classPath>
-    <cp>%JREHOMEDIR%\lib\jfxrt.jar</cp>
-  </classPath>
   <outfile>..\dist\TerasologyLauncher.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
@@ -19,7 +16,7 @@
   <jre>
     <path></path>
     <bundledJre64Bit>false</bundledJre64Bit>
-    <minVersion>1.7.0</minVersion>
+    <minVersion>1.8.0</minVersion>
     <maxVersion></maxVersion>
     <jdkPreference>preferJre</jdkPreference>
     <runtimeBits>64/32</runtimeBits>
