@@ -57,6 +57,9 @@ import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.game.VersionItem;
 import org.terasology.launcher.log.LogViewAppender;
+import org.terasology.launcher.modules.ModuleInfo;
+import org.terasology.launcher.modules.ModuleManager;
+import org.terasology.launcher.modules.ModuleView;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -116,9 +119,9 @@ public class ApplicationController {
     @FXML
     private Accordion aboutInfoAccordion;
     @FXML
-    private AnchorPane logContent;
-    @FXML
     private TableView<ILoggingEvent> loggingView;
+    @FXML
+    private TableView<ModuleInfo> moduleView;
 
     @FXML
     protected void handleExitButtonAction() {
@@ -365,6 +368,7 @@ public class ApplicationController {
         downloadButton.managedProperty().bind(downloadButton.visibleProperty());
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
 
+        updateModulesTab();
         updateGui();
     }
 
@@ -402,6 +406,17 @@ public class ApplicationController {
         updateLabels();
         updateChangeLog();
         updateAboutTab();
+    }
+
+    private void updateModulesTab() {
+        try {
+            URI jenkins = BundleUtils.getURI("terasology_jenkins");
+            URL index = jenkins.resolve("job/UpdateModuleIndex/lastSuccessfulBuild/artifact/index.json").toURL();
+            ModuleManager mm = new ModuleManager(index);
+            ModuleView.configure(moduleView, mm);
+        } catch (IOException e) {
+            logger.error("Could not read module infos", e);
+        }
     }
 
     private void updateLabels() {

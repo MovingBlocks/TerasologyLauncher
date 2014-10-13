@@ -162,6 +162,19 @@
                                                         </AnchorPane>
                                                     </content>
                                                 </Tab>
+                                                <Tab fx:id="moduleTab" closable="false" text="Modules">
+                                                    <content>
+                                                        <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="800.0">
+                                                            <children>
+                                                                <ScrollPane id="ScrollPane" prefViewportHeight="336.0" prefViewportWidth="800.0">
+                                                                    <content>
+                                                                        <TableView fx:id="moduleView" prefHeight="336.0" prefWidth="800.0"/>
+                                                                    </content>
+                                                                </ScrollPane>
+                                                            </children>
+                                                        </AnchorPane>
+                                                    </content>
+                                                </Tab>
                                                 <Tab fx:id="aboutTab" closable="false" text="About">
                                                     <content>
                                                         <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -174,7 +187,7 @@
                                                 </Tab>
                                                 <Tab fx:id="logTab" closable="false" text="Log">
                                                     <content>
-                                                        <AnchorPane fx:id="logContent" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="800.0">
+                                                        <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="800.0">
                                                             <children>
                                                                 <ScrollPane id="ScrollPane" prefViewportHeight="336.0" prefViewportWidth="800.0">
                                                                     <content>
