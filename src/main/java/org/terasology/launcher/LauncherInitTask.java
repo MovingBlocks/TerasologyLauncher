@@ -38,46 +38,55 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherInitTask.class);
 
+    /**
+     * Assembles a {@link LauncherConfiguration}.
+     *
+     * @return a complete launcher configuration or {@code null} if the initialization failed
+     */
     @Override
-    protected LauncherConfiguration call() throws LauncherStartFailedException, IOException {
+    protected LauncherConfiguration call() {
+        try {
+            // get OS info
+            final OperatingSystem os = getOperatingSystem();
 
-        // get OS info
-        final OperatingSystem os = getOperatingSystem();
+            // init directories
+            updateMessage(BundleUtils.getLabel("splash_initLauncherDirs"));
+            final File launcherDirectory = getLauncherDirectory(os);
+            final File downloadDirectory = getDownloadDirectory(launcherDirectory);
+            final File tempDirectory = getTempDirectory(launcherDirectory);
 
-        // init directories
-        updateMessage(BundleUtils.getLabel("splash_initLauncherDirs"));
-        final File launcherDirectory = getLauncherDirectory(os);
-        final File downloadDirectory = getDownloadDirectory(launcherDirectory);
-        final File tempDirectory = getTempDirectory(launcherDirectory);
+            // launcher settings
+            final LauncherSettings launcherSettings = getLauncherSettings(launcherDirectory);
 
-        // launcher settings
-        final LauncherSettings launcherSettings = getLauncherSettings(launcherDirectory);
-
-        if (launcherSettings.isSearchForLauncherUpdates()) {
-            final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isSaveDownloadedFiles());
-            if (selfUpdaterStarted) {
-                logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
-                System.exit(0);
+            if (launcherSettings.isSearchForLauncherUpdates()) {
+                final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isSaveDownloadedFiles());
+                if (selfUpdaterStarted) {
+                    logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
+                    System.exit(0);
+                }
             }
+
+            // game directories
+            updateMessage(BundleUtils.getLabel("splash_initGameDirs"));
+            final File gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory());
+            final File gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory());
+
+            final TerasologyGameVersions gameVersions = getTerasologyGameVersions(launcherDirectory, gameDirectory, launcherSettings);
+
+            logger.trace("Change LauncherSettings...");
+            launcherSettings.setGameDirectory(gameDirectory);
+            launcherSettings.setGameDataDirectory(gameDataDirectory);
+            gameVersions.fixSettingsBuildVersion(launcherSettings);
+
+            storeLauncherSettingsAfterInit(launcherSettings);
+
+            logger.trace("Creating launcher frame...");
+
+            return new LauncherConfiguration(launcherDirectory, downloadDirectory, tempDirectory, launcherSettings, gameVersions);
+        } catch (LauncherStartFailedException e) {
+            logger.warn("Could not configure launcher.");
         }
-
-        // game directories
-        updateMessage(BundleUtils.getLabel("splash_initGameDirs"));
-        final File gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory());
-        final File gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory());
-
-        final TerasologyGameVersions gameVersions = getTerasologyGameVersions(launcherDirectory, gameDirectory, launcherSettings);
-
-        logger.trace("Change LauncherSettings...");
-        launcherSettings.setGameDirectory(gameDirectory);
-        launcherSettings.setGameDataDirectory(gameDataDirectory);
-        gameVersions.fixSettingsBuildVersion(launcherSettings);
-
-        storeLauncherSettingsAfterInit(launcherSettings);
-
-        logger.trace("Creating launcher frame...");
-
-        return new LauncherConfiguration(launcherDirectory, downloadDirectory, tempDirectory, launcherSettings, gameVersions);
+        return null;
     }
 
     private OperatingSystem getOperatingSystem() throws LauncherStartFailedException {
