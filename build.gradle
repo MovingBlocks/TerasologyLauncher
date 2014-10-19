@@ -16,6 +16,8 @@
 
 
 
+
+
 /*
  * This is a Gradle build file:
  * - Gradle Homepage: http://gradle.org/
@@ -276,7 +278,7 @@ task updateJnlp(dependsOn: signLibs) {
     doFirst {
         def mainJar = 'TerasologyLauncher.jar'
         def root = new XmlParser().parse('webstart-template.jnlp')
-        root.@codebase = (env.BUILD_URL != null) ? 'http://jenkins.terasology.org/job/TerasologyLauncher2.0/lastSuccessfulBuild/artifact/build/distributions/' : '.'
+        root.@codebase = (env.BUILD_URL != null) ? 'http://jenkins.terasology.org/job/' + env.JOB_NAME + '/lastSuccessfulBuild/artifact/build/distributions/' : '.'
 
         // Adding signed jars to resources
         def resources = root.resources[0]
