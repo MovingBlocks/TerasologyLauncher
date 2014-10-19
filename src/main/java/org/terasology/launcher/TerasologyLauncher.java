@@ -16,16 +16,8 @@
 
 package org.terasology.launcher;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -49,7 +41,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.crashreporter.CrashReporter;
@@ -59,6 +50,13 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 public final class TerasologyLauncher extends Application {
 
@@ -90,7 +88,7 @@ public final class TerasologyLauncher extends Application {
     }
 
     @Override
-    public void start(final Stage initialStage) throws Exception {
+    public void start(final Stage initialStage) {
         logger.info("TerasologyLauncher is starting");
         logSystemInformation();
 
@@ -98,37 +96,40 @@ public final class TerasologyLauncher extends Application {
 
         final Task<LauncherConfiguration> launcherInitTask = new LauncherInitTask();
 
-        try {
-            showSplashStage(initialStage, launcherInitTask);
-            new Thread(launcherInitTask).start();
-            launcherInitTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-                @Override
-                public void handle(final WorkerStateEvent workerStateEvent) {
-                    try {
-                        showMainStage(launcherInitTask.valueProperty());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        } catch (LauncherStartFailedException e) {
-            logger.error("The TerasologyLauncher could not be started!");
-            System.exit(1);
-        } catch (RuntimeException | Error e) {
-            logger.error("The TerasologyLauncher could not be started!", e);
+        showSplashStage(initialStage, launcherInitTask);
+        Thread initThread = new Thread(launcherInitTask);
 
-            Path logFile = TempLogFilePropertyDefiner.getInstance().getLogFile();
-            CrashReporter.report(e, logFile);
-            System.exit(1);
-        }
+        launcherInitTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(final WorkerStateEvent workerStateEvent) {
+                try {
+                    LauncherConfiguration config = launcherInitTask.getValue();
+                    if (config == null) {
+                        throw new LauncherStartFailedException("Launcher configuration was `null`.");
+                    }
+                    showMainStage(config);
+                } catch (IOException | LauncherStartFailedException e) {
+                    openCrashReporterAndExit(e);
+                }
+            }
+        });
+        initThread.start();
     }
 
-    private void showMainStage(final ReadOnlyObjectProperty<LauncherConfiguration> launcherConfigurationReadOnlyObjectProperty) throws IOException {
-        final LauncherConfiguration launcherConfiguration = launcherConfigurationReadOnlyObjectProperty.getValue();
-        if (launcherConfiguration == null) {
-            throw new LauncherStartFailedException();
-        }
+    /**
+     * Opens the CrashReporter with the given exception and exits the launcher.
+     *
+     * @param e the exception causing the launcher to fail
+     */
+    private void openCrashReporterAndExit(Exception e) {
+        logger.error("The TerasologyLauncher could not be started!");
 
+        Path logFile = TempLogFilePropertyDefiner.getInstance().getLogFile();
+        CrashReporter.report(e, logFile);
+        System.exit(1);
+    }
+
+    private void showMainStage(final LauncherConfiguration launcherConfiguration) throws IOException {
         mainStage = new Stage(StageStyle.DECORATED);
 
         // launcher frame
@@ -214,7 +215,8 @@ public final class TerasologyLauncher extends Application {
     }
 
     /**
-     * Adds title and icons to a stage
+     * Adds title and icons to a stage.
+     *
      * @param stage the stage to decorate
      */
     private static void decorateStage(Stage stage) {
