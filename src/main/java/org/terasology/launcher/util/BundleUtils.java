@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 
 package org.terasology.launcher.util;
 
+import javafx.scene.image.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.scene.image.Image;
-
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
@@ -98,6 +96,8 @@ public final class BundleUtils {
     }
 
     /**
+     * Loads a JavaFX {@code Image} from the image path specified by the key in the image bundle file.
+     *
      * @param key the key as specified in the image bundle file
      * @return the JavaFX image
      * @throws MissingResourceException if no resource for the specified key can be found

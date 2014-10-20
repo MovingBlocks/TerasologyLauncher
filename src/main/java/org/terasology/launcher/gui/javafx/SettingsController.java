@@ -23,6 +23,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
@@ -55,6 +56,8 @@ public class SettingsController {
 
     private File gameDirectory;
     private File gameDataDirectory;
+
+    private Stage stage;
 
     @FXML
     private ComboBox<JobItem> jobBox;
@@ -149,7 +152,7 @@ public class SettingsController {
 
     @FXML
     protected void editGameDirectoryAction() {
-        final File selectedFile = GuiUtils.chooseDirectoryDialog(null, gameDirectory, BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
+        final File selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDirectory, BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
         if (selectedFile != null) {
             try {
                 DirectoryUtils.checkDirectory(selectedFile);
@@ -181,7 +184,7 @@ public class SettingsController {
 
     @FXML
     protected void editGameDataDirectoryAction() {
-        final File selectedFile = GuiUtils.chooseDirectoryDialog(null, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
+        final File selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
         if (selectedFile != null) {
             try {
                 DirectoryUtils.checkDirectory(selectedFile);
@@ -333,5 +336,9 @@ public class SettingsController {
     private void updateHeapSizeSelection() {
         maxHeapSizeBox.getSelectionModel().select(launcherSettings.getMaxHeapSize());
         initialHeapSizeBox.getSelectionModel().select(launcherSettings.getInitialHeapSize());
+    }
+
+    public void setStage(final Stage stage) {
+        this.stage = stage;
     }
 }
