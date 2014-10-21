@@ -17,10 +17,8 @@
 package org.terasology.launcher.gui.javafx;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-
 import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
-
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.beans.value.ChangeListener;
@@ -45,7 +43,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherSettings;
@@ -64,7 +61,6 @@ import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import javax.swing.JOptionPane;
-
 import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
@@ -92,6 +88,7 @@ public class ApplicationController {
     private TerasologyGameVersions gameVersions;
     private GameStarter gameStarter;
     private GameDownloadWorker gameDownloadWorker;
+    private Stage stage;
 
     @FXML
     private ChoiceBox<JobItem> jobBox;
@@ -171,17 +168,18 @@ public class ApplicationController {
     protected void openSettingsAction() {
         try {
             logger.info("Current Locale: {}", Languages.getCurrentLocale());
+            Stage settingsStage = new Stage(StageStyle.UNDECORATED);
+            settingsStage.initModality(Modality.APPLICATION_MODAL);
+
             final FXMLLoader fxmlLoader = new FXMLLoader(BundleUtils.getFXMLUrl("settings"), ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle",
                 Languages.getCurrentLocale()));
             Parent root = (Parent) fxmlLoader.load();
             final SettingsController settingsController = fxmlLoader.getController();
-            settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, gameVersions);
+            settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, gameVersions, settingsStage);
 
             Scene scene = new Scene(root);
-            Stage settings = new Stage(StageStyle.UNDECORATED);
-            settings.initModality(Modality.APPLICATION_MODAL);
-            settings.setScene(scene);
-            settings.showAndWait();
+            settingsStage.setScene(scene);
+            settingsStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -314,12 +312,13 @@ public class ApplicationController {
     }
 
     public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final File newTempDirectory, final LauncherSettings newLauncherSettings,
-                           final TerasologyGameVersions newGameVersions) {
+                           final TerasologyGameVersions newGameVersions, final Stage newStage) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
         this.tempDirectory = newTempDirectory;
         this.launcherSettings = newLauncherSettings;
         this.gameVersions = newGameVersions;
+        this.stage = newStage;
 
         // add Logback view appender view to both the root logger and the tab
         Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -379,7 +378,6 @@ public class ApplicationController {
         gameStarter.dispose();
 
         logger.debug("Closing the launcher ...");
-        final Stage stage = (Stage) launcherFrame.getScene().getWindow();
         stage.close();
         //System.exit(0);
     }

@@ -94,7 +94,7 @@ public final class TerasologyLauncher extends Application {
 
         initLanguage();
 
-        final Task<LauncherConfiguration> launcherInitTask = new LauncherInitTask();
+        final Task<LauncherConfiguration> launcherInitTask = new LauncherInitTask(initialStage);
 
         showSplashStage(initialStage, launcherInitTask);
         Thread initThread = new Thread(launcherInitTask);
@@ -138,7 +138,7 @@ public final class TerasologyLauncher extends Application {
         final Parent root = (Parent) fxmlLoader.load();
         final ApplicationController controller = fxmlLoader.getController();
         controller.initialize(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(), launcherConfiguration.getTempDirectory(),
-            launcherConfiguration.getLauncherSettings(), launcherConfiguration.getGameVersions());
+            launcherConfiguration.getLauncherSettings(), launcherConfiguration.getGameVersions(), mainStage);
 
         Scene scene = new Scene(root);
         scene.getStylesheets().add(BundleUtils.getStylesheet("css_terasology"));

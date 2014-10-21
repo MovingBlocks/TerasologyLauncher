@@ -27,7 +27,8 @@ public class LauncherConfiguration {
     private final LauncherSettings launcherSettings;
     private final TerasologyGameVersions gameVersions;
 
-    public LauncherConfiguration(final File launcherDirectory, final File downloadDirectory, final File tempDirectory, final LauncherSettings launcherSettings, final TerasologyGameVersions gameVersions) {
+    public LauncherConfiguration(final File launcherDirectory, final File downloadDirectory, final File tempDirectory, final LauncherSettings launcherSettings,
+                                 final TerasologyGameVersions gameVersions) {
         this.launcherDirectory = launcherDirectory;
         this.downloadDirectory = downloadDirectory;
         this.tempDirectory = tempDirectory;

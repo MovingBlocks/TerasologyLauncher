@@ -17,6 +17,7 @@
 package org.terasology.launcher;
 
 import javafx.concurrent.Task;
+import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
@@ -37,6 +38,12 @@ import java.net.URISyntaxException;
 public class LauncherInitTask extends Task<LauncherConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherInitTask.class);
+
+    private final Window owner;
+
+    public LauncherInitTask(final Window newOwner) {
+        this.owner = newOwner;
+    }
 
     /**
      * Assembles a {@link LauncherConfiguration}.
@@ -214,7 +221,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         if (gameDirectory == null) {
             logger.trace("Choose installation directory for the game...");
             updateMessage(BundleUtils.getLabel("splash_chooseGameDirectory"));
-            gameDirectory = GuiUtils.chooseDirectoryDialog(null, DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.GAME_APPLICATION_DIR_NAME),
+            gameDirectory = GuiUtils.chooseDirectoryDialog(owner, DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.GAME_APPLICATION_DIR_NAME),
                 BundleUtils.getLabel("message_dialog_title_chooseGameDirectory"));
             if (gameDirectory == null) {
                 logger.info("The new game directory is not approved. The TerasologyLauncher is terminated.");
@@ -249,7 +256,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         if (gameDataDirectory == null) {
             logger.trace("Choose data directory for the game...");
             updateMessage(BundleUtils.getLabel("splash_chooseGameDataDirectory"));
-            gameDataDirectory = GuiUtils.chooseDirectoryDialog(null, DirectoryUtils.getGameDataDirectory(os),
+            gameDataDirectory = GuiUtils.chooseDirectoryDialog(owner, DirectoryUtils.getGameDataDirectory(os),
                 BundleUtils.getLabel("message_dialog_title_chooseGameDataDirectory"));
             if (gameDataDirectory == null) {
                 logger.info("The new game data directory is not approved. The TerasologyLauncher is terminated.");

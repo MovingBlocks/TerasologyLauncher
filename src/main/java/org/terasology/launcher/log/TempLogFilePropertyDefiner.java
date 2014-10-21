@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,11 @@
 
 package org.terasology.launcher.log;
 
+import ch.qos.logback.core.PropertyDefinerBase;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import ch.qos.logback.core.PropertyDefinerBase;
 
 /**
  * Define a temporary log file name that can
@@ -39,7 +39,7 @@ public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
     private boolean failed;
 
     /**
-     * Default contructor (necessary) - called by Logback
+     * Default constructor (necessary) - called by Logback.
      */
     public TempLogFilePropertyDefiner() {
         if (instance != null) {
@@ -69,6 +69,7 @@ public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
     }
 
     /**
+     * Set the prefix string for generating the file's name.
      * @param prefix the prefix string to be used in generating the file's name; may be null
      */
     public void setPrefix(String prefix) {
@@ -80,6 +81,7 @@ public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
     }
 
     /**
+     * Set the suffix string for generating the file's name.
      * @param suffix the suffix string to be used in generating the file's name; may be null, in which case ".tmp" is used
      */
     public void setSuffix(String suffix) {
@@ -87,6 +89,7 @@ public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
     }
 
     /**
+     * Returns the temporary log file.
      * @return the log file
      */
     public Path getLogFile() {
