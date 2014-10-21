@@ -175,8 +175,7 @@ public class ApplicationController {
                 Languages.getCurrentLocale()));
             Parent root = (Parent) fxmlLoader.load();
             final SettingsController settingsController = fxmlLoader.getController();
-            settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, gameVersions);
-            settingsController.setStage(settingsStage);
+            settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, gameVersions, settingsStage);
 
             Scene scene = new Scene(root);
             settingsStage.setScene(scene);
@@ -313,14 +312,13 @@ public class ApplicationController {
     }
 
     public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final File newTempDirectory, final LauncherSettings newLauncherSettings,
-                           final TerasologyGameVersions newGameVersions) {
+                           final TerasologyGameVersions newGameVersions, final Stage newStage) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
         this.tempDirectory = newTempDirectory;
         this.launcherSettings = newLauncherSettings;
         this.gameVersions = newGameVersions;
-
-        this.stage = (Stage) launcherFrame.getScene().getWindow();
+        this.stage = newStage;
 
         // add Logback view appender view to both the root logger and the tab
         Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);

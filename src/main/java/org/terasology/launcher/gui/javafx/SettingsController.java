@@ -229,11 +229,12 @@ public class SettingsController {
     }
 
     public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final LauncherSettings newLauncherSettings,
-                           final TerasologyGameVersions newGameVersions) {
+                           final TerasologyGameVersions newGameVersions, final Stage newStage) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
         this.launcherSettings = newLauncherSettings;
         this.gameVersions = newGameVersions;
+        this.stage = newStage;
 
         populateJob();
         populateHeapSize();
@@ -336,9 +337,5 @@ public class SettingsController {
     private void updateHeapSizeSelection() {
         maxHeapSizeBox.getSelectionModel().select(launcherSettings.getMaxHeapSize());
         initialHeapSizeBox.getSelectionModel().select(launcherSettings.getInitialHeapSize());
-    }
-
-    public void setStage(final Stage stage) {
-        this.stage = stage;
     }
 }
