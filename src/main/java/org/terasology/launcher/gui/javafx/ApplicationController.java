@@ -372,6 +372,11 @@ public class ApplicationController {
      */
     private void close() {
         logger.debug("Dispose launcher frame...");
+        try {
+            launcherSettings.store();
+        } catch (IOException e) {
+            logger.warn("Could not store current launcher settings!");
+        }
         if (gameDownloadWorker != null) {
             gameDownloadWorker.cancel(false);
         }
@@ -379,7 +384,6 @@ public class ApplicationController {
 
         logger.debug("Closing the launcher ...");
         stage.close();
-        //System.exit(0);
     }
 
     private void openUri(URI uri) {
@@ -511,7 +515,6 @@ public class ApplicationController {
 
         for (URL url : files) {
             try {
-                logger.debug("\t\t Found info file: {}", url.toExternalForm());
                 int fnameIdx = url.getFile().lastIndexOf('/');
                 int extIdx = url.getFile().lastIndexOf('.');
                 String fname = url.getFile().substring(fnameIdx + 1);
