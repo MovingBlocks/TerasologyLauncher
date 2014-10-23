@@ -42,7 +42,8 @@
 <?import java.lang.String?>
 <?import java.net.URL?>
 <AnchorPane id="AnchorPane" fx:id="launcherFrame" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="562.140625"
-            prefWidth="968.1666259765625" xmlns:fx="http://javafx.com/fxml" fx:controller="org.terasology.launcher.gui.javafx.ApplicationController">
+            prefWidth="968.1666259765625" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2"
+            fx:controller="org.terasology.launcher.gui.javafx.ApplicationController">
     <children>
         <StackPane prefHeight="529.0" prefWidth="756.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -147,7 +148,8 @@
                                 <VBox alignment="BOTTOM_CENTER" prefHeight="399.0" prefWidth="969.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <children>
-                                        <TabPane id="contentTabPane" maxWidth="-Infinity" prefHeight="367.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE">
+                                        <TabPane id="contentTabPane" maxWidth="-Infinity" prefHeight="367.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE"
+                                                 tabMinWidth="100.0">
                                             <stylesheets>
                                                 <URL value="@terasology.css"/>
                                             </stylesheets>
@@ -156,9 +158,12 @@
                                                     <content>
                                                         <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                             <children>
-                                                                <WebView fx:id="changelogView" prefHeight="336.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                                                         AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                                                                <WebView fx:id="changelogView" prefHeight="336.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0"
+                                                                         AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0"/>
                                                             </children>
+                                                            <padding>
+                                                                <Insets/>
+                                                            </padding>
                                                         </AnchorPane>
                                                     </content>
                                                 </Tab>
@@ -166,8 +171,8 @@
                                                     <content>
                                                         <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                             <children>
-                                                                <Accordion fx:id="aboutInfoAccordion" prefHeight="336.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0"
-                                                                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                                                                <Accordion fx:id="aboutInfoAccordion" prefHeight="336.0" prefWidth="800.0" AnchorPane.bottomAnchor="8.0"
+                                                                           AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0"/>
                                                             </children>
                                                         </AnchorPane>
                                                     </content>
@@ -176,7 +181,8 @@
                                                     <content>
                                                         <AnchorPane fx:id="logContent" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="800.0">
                                                             <children>
-                                                                <ScrollPane id="ScrollPane" prefViewportHeight="336.0" prefViewportWidth="800.0">
+                                                                <ScrollPane id="ScrollPane" prefViewportHeight="336.0" prefViewportWidth="800.0" AnchorPane.bottomAnchor="8.0"
+                                                                            AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0">
                                                                     <content>
                                                                         <TableView fx:id="loggingView" prefHeight="336.0" prefWidth="800.0"/>
                                                                     </content>
