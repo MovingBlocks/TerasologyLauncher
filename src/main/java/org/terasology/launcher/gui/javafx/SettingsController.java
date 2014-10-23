@@ -228,6 +228,24 @@ public class SettingsController {
         }
     }
 
+    @FXML
+    protected void updateMaxHeapSizeBox() {
+        final JavaHeapSize initialHeapSize = initialHeapSizeBox.getSelectionModel().getSelectedItem();
+        final JavaHeapSize maxHeapSize = maxHeapSizeBox.getSelectionModel().getSelectedItem();
+        if ((initialHeapSize != null) && (maxHeapSize != null) && (maxHeapSize.compareTo(initialHeapSize) < 0)) {
+            initialHeapSizeBox.getSelectionModel().select(maxHeapSize);
+        }
+    }
+
+    @FXML
+    protected void updateInitialHeapSizeBox() {
+        final JavaHeapSize initialHeapSize = initialHeapSizeBox.getSelectionModel().getSelectedItem();
+        final JavaHeapSize maxHeapSize = maxHeapSizeBox.getSelectionModel().getSelectedItem();
+        if ((initialHeapSize != null) && (maxHeapSize != null) && (maxHeapSize.compareTo(initialHeapSize) < 0)) {
+            maxHeapSizeBox.getSelectionModel().select(initialHeapSize);
+        }
+    }
+
     public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final LauncherSettings newLauncherSettings,
                            final TerasologyGameVersions newGameVersions, final Stage newStage) {
         this.launcherDirectory = newLauncherDirectory;
