@@ -54,10 +54,6 @@
     -fx-font-weight: bold;
 }
 
-#contentTabPane .tab-pane:top *.tab-header-area {
-    -fx-background-insets: 0, 0 0 1 0;
-}
-
 /* ========================== STYLE ALL SCROLL BARS ========================== */
 /*.scroll-bar {
     -fx-background-color: transparent;
