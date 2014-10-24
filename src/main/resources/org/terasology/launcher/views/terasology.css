@@ -19,21 +19,17 @@
     -fx-background-color: transparent;
 }
 
-#contentTabPane .tab {
-    -fx-background-insets: 0 1 0 1, 0, 0;
+#contentTabPane .tab-pane .tab {
+    -fx-background-color: rgba(142, 142, 142, 0.75);
 }
-
-/*#contentTabPane .tab-pane .tab {
-    -fx-background-color: rgba(142,142,142,0.75);
-} */
 
 #contentTabPane .tab-header-area .tab {
     -fx-background-color: rgba(242, 242, 242, 0.2);
 }
 
-/*#contentTabPane .tab-pane .tab:selected {
+#contentTabPane .tab-pane .tab:selected {
     -fx-background-color: rgba(10,10,10,0.75);
-} */
+}
 
 #contentTabPane .tab-header-area .tab:selected {
     -fx-background-color: rgba(10, 10, 10, 0.5);
@@ -41,7 +37,6 @@
 
 #contentTabPane .tab-content-area {
     -fx-background-color: rgba(10, 10, 10, 0.5);
-    -fx-background-radius: 10;
 }
 
 #contentTabPane .tab .tab-label {
@@ -54,10 +49,8 @@
 #contentTabPane .tab:selected .tab-label {
     -fx-alignment: center;
     -fx-text-fill: #dfdfdf;
-}
-
-#contentTabPane .tab-pane:top *.tab-header-area {
-    -fx-background-insets: 0, 0 0 1 0;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
 }
 
 /* ========================== STYLE ALL SCROLL BARS ========================== */

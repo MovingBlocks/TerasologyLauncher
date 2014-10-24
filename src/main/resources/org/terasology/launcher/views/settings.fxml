@@ -31,7 +31,7 @@
 <?import java.lang.String?>
 <?import java.net.URL?>
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0000999999975" prefWidth="692.0"
-            xmlns:fx="http://javafx.com/fxml" fx:controller="org.terasology.launcher.gui.javafx.SettingsController">
+            xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="org.terasology.launcher.gui.javafx.SettingsController">
     <children>
         <VBox prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -48,7 +48,8 @@
                                                 <Label text="%settings_game_initialHeapSize" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
                                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                                                     <children>
-                                                        <ComboBox id="maxHeapSize" fx:id="maxHeapSizeBox" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+                                                        <ComboBox id="maxHeapSize" fx:id="maxHeapSizeBox" maxWidth="1.7976931348623157E308" onAction="#updateMaxHeapSizeBox"
+                                                                  HBox.hgrow="ALWAYS">
                                                             <items>
                                                                 <FXCollections fx:factory="observableArrayList">
                                                                     <String fx:value="Item 1"/>
@@ -64,7 +65,8 @@
                                                 </HBox>
                                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
                                                     <children>
-                                                        <ComboBox id="initialHeapSize" fx:id="initialHeapSizeBox" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+                                                        <ComboBox id="initialHeapSize" fx:id="initialHeapSizeBox" maxWidth="1.7976931348623157E308"
+                                                                  onAction="#updateInitialHeapSizeBox" HBox.hgrow="ALWAYS">
                                                             <items>
                                                                 <FXCollections fx:factory="observableArrayList">
                                                                     <String fx:value="Item 1"/>

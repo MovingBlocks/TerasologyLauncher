@@ -95,8 +95,6 @@ public class ApplicationController {
     @FXML
     private ChoiceBox<VersionItem> buildVersionBox;
     @FXML
-    private Node launcherFrame;
-    @FXML
     private ProgressBar progressBar;
     @FXML
     private Button downloadButton;
@@ -112,8 +110,6 @@ public class ApplicationController {
     private Label versionInfo;
     @FXML
     private Accordion aboutInfoAccordion;
-    @FXML
-    private AnchorPane logContent;
     @FXML
     private TableView<ILoggingEvent> loggingView;
 
