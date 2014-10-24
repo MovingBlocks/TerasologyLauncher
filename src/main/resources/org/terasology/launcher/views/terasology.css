@@ -37,7 +37,6 @@
 
 #contentTabPane .tab-content-area {
     -fx-background-color: rgba(10, 10, 10, 0.5);
-    -fx-background-radius: 10;
 }
 
 #contentTabPane .tab .tab-label {
