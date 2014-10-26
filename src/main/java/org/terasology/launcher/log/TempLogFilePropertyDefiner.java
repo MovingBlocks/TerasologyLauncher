@@ -23,9 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Define a temporary log file name that can
- * be used by Logback properties.
- * @author Martin Steiger
+ * Define a temporary log file name that can be used by Logback properties.
  */
 public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
 

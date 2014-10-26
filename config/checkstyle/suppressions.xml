@@ -1,4 +1,20 @@
 <?xml version="1.0"?>
+<!--
+  ~ Copyright 2014 MovingBlocks
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <!DOCTYPE suppressions PUBLIC
         "-//Puppy Crawl//DTD Suppressions 1.1//EN"
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
@@ -6,11 +22,9 @@
 <suppressions>
     <suppress checks="MethodName" files="Ole32.java"/>
     <suppress checks="MethodName" files="Shell32.java"/>
-    <suppress checks="ClassDataAbstractionCoupling" files="LauncherFrame.java"/>
-    <suppress checks="CyclomaticComplexity" files="LauncherFrame.java"/>
-    <suppress checks="CyclomaticComplexity" files="SettingsMenu.java"/>
-    <suppress checks="NPathComplexity" files="LauncherFrame.java"/>
-    <suppress checks="NPathComplexity" files="SettingsMenu.java"/>
-    <suppress checks="MethodLength" files="LauncherFrame.java"/>
-    <suppress checks="JavaNCSS" files="LauncherFrame.java"/>
+    <suppress checks="ClassDataAbstractionCoupling" files="ApplicationController.java"/>
+    <suppress checks="ClassDataAbstractionCoupling" files="TerasologyLauncher.java"/>
+    <suppress checks="CyclomaticComplexity" files="ApplicationController.java"/>
+    <suppress checks="NPathComplexity" files="ApplicationController.java"/>
+    <suppress checks="ClassFanOutComplexity" files="ApplicationController.java"/>
 </suppressions>
