@@ -54,7 +54,7 @@ public final class LauncherSettings implements GameSettings {
     private static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
     private static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
     private static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
-    private static final String USER_JAVA_PARAMETERS_DEFAULT = "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX\:MaxGCPauseMillis\=20 -XX:ParallelGCThreads=10";
+    private static final String USER_JAVA_PARAMETERS_DEFAULT = "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=20 -XX:ParallelGCThreads=10";
     private static final String USER_GAME_PARAMETERS_DEFAULT = "";
 
     private static final String PROPERTY_LOCALE = "locale";
