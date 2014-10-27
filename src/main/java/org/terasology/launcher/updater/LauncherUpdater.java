@@ -71,7 +71,7 @@ public final class LauncherUpdater {
 
     /**
      * This method indicates if a new launcher version is available.
-     * <p/>
+     * <br>
      * Compares the current launcher version number to the upstream version number if an internet connection is available.
      *
      * @return whether an update is available

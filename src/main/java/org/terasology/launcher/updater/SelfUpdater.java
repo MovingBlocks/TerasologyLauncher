@@ -28,7 +28,7 @@ import java.util.List;
 
 /**
  * The SelfUpdater class is responsible for copying the updated files to the right location.
- * <p/>
+ * <br>
  * The update method will prepare a new process to run that will copy the files and restart the launcher.
  */
 public final class SelfUpdater {
@@ -67,6 +67,9 @@ public final class SelfUpdater {
 
     /**
      * Starts the update process after downloading the needed files.
+     * @param tempLauncherDirectory the temp. launcher folder
+     * @param launcherInstallationDirectory  the installation folder
+     * @throws IOException if something goes wrong
      */
     public static void runUpdate(File tempLauncherDirectory, File launcherInstallationDirectory) throws IOException {
         final List<String> arguments = new ArrayList<>();

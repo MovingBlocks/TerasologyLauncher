@@ -54,7 +54,8 @@ public final class DirectoryUtils {
     }
 
     /**
-     * Checks if game data is stored in the installation directory.
+     * @param gameInstallationPath the game installation folder
+     * @return true if game data is stored in the installation directory.
      */
     public static boolean containsGameData(File gameInstallationPath) {
         boolean containsGameData = false;
@@ -103,6 +104,9 @@ public final class DirectoryUtils {
 
     /**
      * Should only be executed once at the start.
+     * @param os the operating system
+     * @param applicationName the name of the application
+     * @return the app. folder
      */
     public static File getApplicationDirectory(OperatingSystem os, String applicationName) {
         final File userHome = new File(System.getProperty(PROPERTY_USER_HOME, "."));
@@ -132,6 +136,8 @@ public final class DirectoryUtils {
 
     /**
      * Should only be executed once at the start.
+     * @param os the operating system
+     * @return the gama data directory
      */
     public static File getGameDataDirectory(OperatingSystem os) {
         final File userHome = new File(System.getProperty(PROPERTY_USER_HOME, "."));

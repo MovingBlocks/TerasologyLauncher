@@ -164,14 +164,18 @@ public final class DownloadUtils {
     }
 
     /**
-     * Loads the <code>buildNumber</code> of the last <b>stable</b> build.
+     * @param jobName the Jenkins job name
+     * @return the <code>buildNumber</code> of the last <b>stable</b> build
+     * @throws DownloadException if something goes wrong
      */
     public static int loadLastStableBuildNumberJenkins(String jobName) throws DownloadException {
         return loadBuildNumberJenkins(jobName, LAST_STABLE_BUILD);
     }
 
     /**
-     * Loads the <code>buildNumber</code> of the last <b>successful</b> build.
+     * @param jobName the Jenkins job name
+     * @return the <code>buildNumber</code> of the last <b>successful</b> build
+     * @throws DownloadException if something goes wrong
      */
     public static int loadLastSuccessfulBuildNumberJenkins(String jobName) throws DownloadException {
         return loadBuildNumberJenkins(jobName, LAST_SUCCESSFUL_BUILD);

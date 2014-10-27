@@ -54,6 +54,7 @@ public enum OperatingSystem {
 
     /**
      * Should only be executed once at the start.
+     * @return the operating system
      */
     public static OperatingSystem getOS() {
         OperatingSystem best = UNKNOWN;

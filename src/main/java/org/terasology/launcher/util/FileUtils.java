@@ -39,6 +39,7 @@ public final class FileUtils {
      * Deletes the specified file or directory (directories are removed recursively).
      *
      * @param file - file to delete
+     * @throws IOException if something goes wrong
      */
     public static void delete(File file) throws IOException {
         if (file.isDirectory()) {
@@ -70,6 +71,7 @@ public final class FileUtils {
      * Extracts the given ZIP file to its parent folder.
      *
      * @param archive - the ZIP file to extract
+     * @return true if successful
      */
     public static boolean extractZip(File archive) {
         return FileUtils.extractZipTo(archive, archive.getParentFile());
@@ -80,6 +82,7 @@ public final class FileUtils {
      *
      * @param archive        - the ZIP file to extract
      * @param outputLocation - where to extract to
+     * @return true if successful
      */
     public static boolean extractZipTo(File archive, File outputLocation) {
         logger.trace("Extracting '{}' to '{}'.", archive, outputLocation);
@@ -135,7 +138,7 @@ public final class FileUtils {
      *
      * @param source      - the folder to copy
      * @param destination - where to copy to
-     * @throws IOException
+     * @throws IOException if something goes wrong
      */
     public static void copyFolder(File source, File destination) throws IOException {
         if (!source.exists()) {
