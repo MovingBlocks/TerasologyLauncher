@@ -218,12 +218,16 @@ public final class LauncherSettings implements GameSettings {
 
     private void initUserJavaParameters() {
         final String userJavaParsStr = properties.getProperty(PROPERTY_USER_JAVA_PARAMETERS);
-        if (userJavaParsStr == null || userJavaParsStr.isEmpty()) properties.setProperty(PROPERTY_USER_JAVA_PARAMETERS, USER_JAVA_PARAMETERS_DEFAULT);
+        if (userJavaParsStr == null || userJavaParsStr.isEmpty()) {
+            properties.setProperty(PROPERTY_USER_JAVA_PARAMETERS, USER_JAVA_PARAMETERS_DEFAULT);
+        }
     }
 
     private void initUserGameParameters() {
         final String userJavaParsStr = properties.getProperty(PROPERTY_USER_GAME_PARAMETERS);
-        if (userJavaParsStr == null || userJavaParsStr.isEmpty()) properties.setProperty(PROPERTY_USER_GAME_PARAMETERS, USER_GAME_PARAMETERS_DEFAULT);
+        if (userJavaParsStr == null || userJavaParsStr.isEmpty()) {
+            properties.setProperty(PROPERTY_USER_GAME_PARAMETERS, USER_GAME_PARAMETERS_DEFAULT);
+        }
     }
 
     private void initSearchForLauncherUpdates() {
