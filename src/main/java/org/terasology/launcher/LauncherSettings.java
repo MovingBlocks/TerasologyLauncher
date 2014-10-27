@@ -32,6 +32,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -52,6 +54,8 @@ public final class LauncherSettings implements GameSettings {
     private static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
     private static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
     private static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
+    private static final String USER_JAVA_PARAMETERS_DEFAULT = "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC";
+    private static final String USER_GAME_PARAMETERS_DEFAULT = "";
 
     private static final String PROPERTY_LOCALE = "locale";
     private static final String PROPERTY_JOB = "job";
@@ -64,6 +68,8 @@ public final class LauncherSettings implements GameSettings {
     private static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
     private static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
     private static final String PROPERTY_SAVE_DOWNLOADED_FILES = "saveDownloadedFiles";
+    private static final String PROPERTY_USER_JAVA_PARAMETERS = "userJavaParameters";
+    private static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
 
     private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
 
@@ -119,6 +125,8 @@ public final class LauncherSettings implements GameSettings {
         initSaveDownloadedFiles();
         initGameDirectory();
         initGameDataDirectory();
+        initUserJavaParameters();
+        initUserGameParameters();
     }
 
     private void initLocale() {
@@ -206,6 +214,16 @@ public final class LauncherSettings implements GameSettings {
             }
         }
         properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialJavaHeapSize.name());
+    }
+
+    private void initUserJavaParameters() {
+        final String userJavaParsStr = properties.getProperty(PROPERTY_USER_JAVA_PARAMETERS);
+        if (userJavaParsStr == null || userJavaParsStr.isEmpty()) properties.setProperty(PROPERTY_USER_JAVA_PARAMETERS, USER_JAVA_PARAMETERS_DEFAULT);
+    }
+
+    private void initUserGameParameters() {
+        final String userJavaParsStr = properties.getProperty(PROPERTY_USER_GAME_PARAMETERS);
+        if (userJavaParsStr == null || userJavaParsStr.isEmpty()) properties.setProperty(PROPERTY_USER_GAME_PARAMETERS, USER_GAME_PARAMETERS_DEFAULT);
     }
 
     private void initSearchForLauncherUpdates() {
@@ -325,6 +343,30 @@ public final class LauncherSettings implements GameSettings {
 
     public synchronized JavaHeapSize getInitialHeapSize() {
         return JavaHeapSize.valueOf(properties.getProperty(PROPERTY_INITIAL_HEAP_SIZE));
+    }
+
+    public synchronized void setUserJavaParameters(String userJavaParameters) {
+        properties.setProperty(PROPERTY_USER_JAVA_PARAMETERS, userJavaParameters);
+    }
+
+    public synchronized String getUserJavaParameters() {
+        return properties.getProperty(PROPERTY_USER_JAVA_PARAMETERS);
+    }
+
+    public synchronized List<String> getUserJavaParameterList() {
+        return Arrays.asList(getUserJavaParameters().split("\\s+"));
+    }
+
+    public synchronized void setUserGameParameters(String userGameParameters) {
+        properties.setProperty(PROPERTY_USER_GAME_PARAMETERS, userGameParameters);
+    }
+
+    public synchronized String getUserGameParameters() {
+        return properties.getProperty(PROPERTY_USER_GAME_PARAMETERS);
+    }
+
+    public synchronized List<String> getUserGameParameterList() {
+        return Arrays.asList(getUserGameParameters().split("\\s+"));
     }
 
     public synchronized void setSearchForLauncherUpdates(boolean searchForLauncherUpdates) {
