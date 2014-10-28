@@ -48,9 +48,18 @@ You are welcome to contribute to the project with pull requests. Please follow t
 
 __Please note:__ if you want to change multiple things that don't depend on each other, make sure you check the master branch back out before making more changes - that way we can take in each change seperately.
 
+Commits and Commit Messages
+---------------------------
+Follow these guidelines when creating public commits and writing commit messages.
+
+1. If your work spans multiple local commits make sure they can be merged directly into the target branch. If you have some commit and merge noise in the history have a look at git-rebase. Ideally, every commit should be able to be used in isolation -- that is, each commit must build and pass all tests.
+2. The first line of the commit message should be a descriptive sentence about what the commit is doing. It should be possible to fully understand what the commit does by just reading this single line. 
+3. **Optional:** Following the single line description (ideally no more than 70 characters long) should be a blank line followed by a list with the details of the commit.
+4. Add keywords for your commit (depending on the degree of automation we reach, the list may change over time):
+    - `Review by @githubuser` - will notify the reviewer via GitHub. Everyone is encouraged to give feedback, however. (Remember that @-mentions will result in notifications also when pushing to a WIP branch, so please only include this in your commit message when you're ready for your pull request to be reviewed. Alternatively, you may request a review in the pull request's description.)
+    - `Fix/Fixing/Fixes/Close/Closing/Refs #ticket` - if you want to mark the ticket as fixed in the issue tracker. 
 
 For questions please join us in our [forum](forum.terasology.org) or on `#terasology` (irc.freenode.net).
-
 
 [Apache License]: http://www.apache.org/licenses/LICENSE-2.0.html "Apache License, Version 2.0"
 [SemVer]: http://semver.org/ "SemVer"
