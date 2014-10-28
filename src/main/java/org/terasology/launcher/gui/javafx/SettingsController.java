@@ -23,6 +23,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +84,10 @@ public class SettingsController {
     private Label launcherDirectoryPath;
     @FXML
     private Label downloadDirectoryPath;
+    @FXML
+    private TextField userJavaParametersField;
+    @FXML
+    private TextField userGameParametersField;
 
     @FXML
     protected void cancelSettingsAction(ActionEvent event) {
@@ -121,6 +126,14 @@ public class SettingsController {
 
         // save saveDownloadedFiles
         launcherSettings.setSaveDownloadedFiles(saveDownloadedFilesBox.isSelected());
+
+        //save userParameters (java & game), if textfield is empty then set to defaults
+        if (userJavaParametersField.getText().isEmpty()) {
+            launcherSettings.setUserJavaParameters(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+        }
+        if (userGameParametersField.getText().isEmpty()) {
+            launcherSettings.setUserGameParameters(LauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
+        }
 
         // store changed settings
         try {
@@ -264,6 +277,7 @@ public class SettingsController {
         gameDataDirectory = newLauncherSettings.getGameDataDirectory();
 
         updateDirectoryPathLabels();
+        initUserParameterFields();
     }
 
     private void populateJob() {
@@ -355,5 +369,16 @@ public class SettingsController {
     private void updateHeapSizeSelection() {
         maxHeapSizeBox.getSelectionModel().select(launcherSettings.getMaxHeapSize());
         initialHeapSizeBox.getSelectionModel().select(launcherSettings.getInitialHeapSize());
+    }
+
+    private void initUserParameterFields()  {
+        //if the VM parameters are left default do not display, the prompt message will show
+        if (!launcherSettings.getUserJavaParameters().equals(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT)) {
+            userJavaParametersField.setText(launcherSettings.getUserJavaParameters());
+        }
+        //if the Game parameters are left default do not display, the prompt message will show
+        if (!launcherSettings.getUserGameParameters().equals(LauncherSettings.USER_GAME_PARAMETERS_DEFAULT)) {
+            userJavaParametersField.setText(launcherSettings.getUserJavaParameters());
+        }
     }
 }

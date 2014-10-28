@@ -198,7 +198,7 @@ public class ApplicationController {
                 BundleUtils.getLabel("message_information_title"), JOptionPane.INFORMATION_MESSAGE);
         } else {
             final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
-                launcherSettings.getInitialHeapSize());
+                launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(), launcherSettings.getUserGameParameterList());
             if (!gameStarted) {
                 JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_gameStart"),
                     BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);

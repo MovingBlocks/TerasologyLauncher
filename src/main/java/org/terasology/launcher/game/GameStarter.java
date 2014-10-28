@@ -47,19 +47,19 @@ public final class GameStarter {
         gameThread = null;
     }
 
-    public boolean startGame(TerasologyGameVersion gameVersion, File gameDataDirectory, JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize) {
+    public boolean startGame(TerasologyGameVersion gameVersion, File gameDataDirectory, JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize, List<String> userJavaParameters, List<String> userGameParameters) {
         if (isRunning()) {
             logger.warn("The game can not be started because another game is already running! '{}'", gameThread);
             return false;
         }
 
-        final List<String> javaParameters = createJavaParameters(maxHeapSize, initialHeapSize);
-        final List<String> processParameters = createProcessParameters(gameVersion, gameDataDirectory, javaParameters);
+        final List<String> javaParameters = createJavaParameters(maxHeapSize, initialHeapSize, userJavaParameters);
+        final List<String> processParameters = createProcessParameters(gameVersion, gameDataDirectory, javaParameters, userGameParameters);
 
         return startProcess(gameVersion, processParameters);
     }
 
-    private List<String> createJavaParameters(JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize) {
+    private List<String> createJavaParameters(JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize, List<String> userJavaParameters) {
         final List<String> javaParameters = new ArrayList<>();
         if (initialHeapSize.isUsed()) {
             javaParameters.add("-Xms" + initialHeapSize.getSizeParameter());
@@ -67,16 +67,18 @@ public final class GameStarter {
         if (maxHeapSize.isUsed()) {
             javaParameters.add("-Xmx" + maxHeapSize.getSizeParameter());
         }
+        javaParameters.addAll(userJavaParameters);
         return javaParameters;
     }
 
-    private List<String> createProcessParameters(TerasologyGameVersion gameVersion, File gameDataDirectory, List<String> javaParameters) {
+    private List<String> createProcessParameters(TerasologyGameVersion gameVersion, File gameDataDirectory, List<String> javaParameters, List<String> gameParameters) {
         final List<String> processParameters = new ArrayList<>();
         processParameters.add("java");
         processParameters.addAll(javaParameters);
         processParameters.add("-jar");
         processParameters.add(gameVersion.getGameJar().getName());
         processParameters.add("-homedir=" + gameDataDirectory.getPath());
+        processParameters.addAll(gameParameters);
 
         return processParameters;
     }
