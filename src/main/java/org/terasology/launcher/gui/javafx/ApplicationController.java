@@ -407,6 +407,8 @@ public class ApplicationController {
         final String launcherVersion = TerasologyLauncherVersionInfo.getInstance().getDisplayVersion();
         if (launcherVersion.isEmpty()) {
             versionInfo.setText(BundleUtils.getLabel("launcher_versionInfo"));
+        } else if (!launcherVersion.matches("v\\d\\.\\d\\.\\d")) {
+            versionInfo.setText(BundleUtils.getLabel("launcher_versionInfo") + " - " + launcherVersion);
         } else {
             versionInfo.setText(launcherVersion);
         }
