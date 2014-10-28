@@ -49,6 +49,3 @@ certum.jks
 
 # Ignore icons that exists twice (for reference inside the jar and for the webstarter)
 /src/main/resources/org/terasology/launcher/icons/
-
-# Ignore version info file(s)
-src/main/resources/org/terasology/launcher/version/

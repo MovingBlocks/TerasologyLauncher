@@ -50,30 +50,20 @@ import java.text.SimpleDateFormat;
 def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
 
-group = 'org.terasology'
-version = getGitDesc()
-
-def getGitDesc() {
-    def cmd = "git describe --match v?.?* --dirty"
-
-    try {
-        def proc = cmd.execute()
-        proc.waitFor()                                // wait for the command to finish
-        return proc.in.text.trim().substring(1)       // "out" from the process is "in" for gradle
-    } catch (IOException e) {
-        logger.warn("Could not run '$cmd' - using date - {}", e.getLocalizedMessage());
-        return startDateTimeString;
-    }
-}
-
 // Declare "extra properties" (variables) for the project - a Gradle thing that makes them special.
 ext {
     // Read environment variables, including variables passed by jenkins continuous integration server
     env = System.getenv()
-	
+
     // Stuff for our automatic version file setup
     startDateTimeString = dateTimeFormat.format(new Date())
-	displayVersion = 'v' + version
+    versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasology/launcher/version')
+    versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
+    versionBase = rootProject.file("version.txt").text.trim()
+    displayVersion = (env.JOB_NAME == 'TerasologyLauncherStable') ? versionBase : ((env.JOB_NAME != null && env.BUILD_NUMBER != null) ? versionBase + '.' + env.BUILD_NUMBER + '+' + env.JOB_NAME : versionBase + ' local development ' + startDateTimeString)
+
+    // Splash image for the JAR
+    splashImage = "org/terasology/launcher/images/splash.jpg"
 }
 
 // Declare remote repositories we're interested in - library files will be fetched from here
@@ -137,13 +127,8 @@ def convertGitBranch = { gitBranch ->
 }
 
 task createVersionInfoFile {
-    inputs.property('version', version)
-	
-    File versionInfoFileDir = new File('src/main/resources', 'org/terasology/launcher/version')
-    File versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
-	
-	outputs.file(versionInfoFile)
-
+    inputs.property('dateTime', startDateTimeString)
+    onlyIf { env.BUILD_URL != null }
     doLast {
         versionInfoFileDir.mkdirs()
         ant.propertyfile(file: versionInfoFile) {
@@ -159,8 +144,10 @@ task createVersionInfoFile {
         }
     }
 }
-
-processResources.dependsOn createVersionInfoFile
+createVersionInfoFile.dependsOn processResources
+jar.dependsOn createVersionInfoFile
+distZip.dependsOn createVersionInfoFile
+distTar.dependsOn createVersionInfoFile
 
 jar {
     // replace development "logback.xml" with productive "logback_jar.xml"
@@ -171,7 +158,8 @@ jar {
         attributes("Main-Class": mainClassName)
         attributes("Class-Path": manifestClasspath)
         attributes("Implementation-Title": project.name)
-        attributes("Implementation-Version": version)
+        attributes("Implementation-Version": versionBase)  // Use base version only to avoid re-creating identical jar
+        attributes("SplashScreen-Image": splashImage)
 
         // allow everything
         attributes('Permissions': 'all-permissions')
