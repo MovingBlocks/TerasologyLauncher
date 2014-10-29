@@ -34,8 +34,6 @@ import java.util.Date;
 
 /**
  * Appends to a log view.
- *
- * @author Martin Steiger
  */
 public class LogViewAppender extends AppenderBase<ILoggingEvent> {
 

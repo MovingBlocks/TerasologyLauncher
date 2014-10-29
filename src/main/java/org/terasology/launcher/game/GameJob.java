@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package org.terasology.launcher.game;
 
 public enum GameJob {
 
-    TerasologyStable("master", 15, 9, true, false, "STABLE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
+    TerasologyStable("master", 30, 9, true, false, "STABLE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
 
-    TerasologyLegacy("legacy", 1, 0, true, false, "STABLE", "infoHeader1_TerasologyLegacy", "settings_game_buildType_TerasologyLegacy"),
+    TerasologyLegacy("legacy", 1, 0, true, true, "STABLE", "infoHeader1_TerasologyLegacy", "settings_game_buildType_TerasologyLegacy"),
 
-    Terasology("develop", 245, 4, false, false, "NIGHTLY", "infoHeader1_Terasology", "settings_game_buildType_Terasology"),
+    Terasology("develop", 995, 4, false, false, "NIGHTLY", "infoHeader1_Terasology", "settings_game_buildType_Terasology"),
 
     TerasologyMulti("multiplayer", 1, 0, false, true, "NIGHTLY", "infoHeader1_TerasologyMulti", "settings_game_buildType_TerasologyMulti");
 

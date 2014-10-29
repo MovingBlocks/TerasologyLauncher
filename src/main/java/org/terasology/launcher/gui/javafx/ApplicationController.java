@@ -329,7 +329,40 @@ public class ApplicationController {
 
         gameStarter = new GameStarter();
 
-        updateJobBox();
+        populateJobBox();
+
+        downloadButton.managedProperty().bind(downloadButton.visibleProperty());
+        cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
+
+        updateGui();
+    }
+
+    private void populateJobBox() {
+        jobBox.getItems().clear();
+
+        for (GameJob job : GameJob.values()) {
+            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
+                boolean foundInstalled = false;
+                final List<TerasologyGameVersion> gameVersionList = gameVersions.getGameVersionList(job);
+                for (TerasologyGameVersion gameVersion : gameVersionList) {
+                    if (gameVersion.isInstalled()) {
+                        foundInstalled = true;
+                        break;
+                    }
+                }
+                if (!foundInstalled) {
+                    continue;
+                }
+            }
+
+            final JobItem jobItem = new JobItem(job);
+            jobBox.getItems().add(jobItem);
+            if (launcherSettings.getJob() == job) {
+                jobBox.getSelectionModel().select(jobItem);
+            }
+        }
+
+        updateBuildVersionBox();
 
         // add change listeners
         jobBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<JobItem>() {
@@ -338,10 +371,10 @@ public class ApplicationController {
                 if (jobBox.getItems().isEmpty()) {
                     return;
                 }
+                launcherSettings.setJob(newItem.getJob());
                 updateBuildVersionBox();
-                newLauncherSettings.setJob(newItem.getJob());
-                logger.debug("Selected gamejob: {} -- {}", newLauncherSettings.getJob(), newLauncherSettings.getBuildVersion(newLauncherSettings.getJob()));
                 updateGui();
+                logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
             }
         });
 
@@ -350,17 +383,12 @@ public class ApplicationController {
             public void changed(final ObservableValue<? extends VersionItem> observableValue, final VersionItem oldVersionItem, final VersionItem newVersionItem) {
                 if (newVersionItem != null) {
                     final Integer version = newVersionItem.getVersion();
-                    newLauncherSettings.setBuildVersion(version, newLauncherSettings.getJob());
-                    logger.debug("Selected gamejob: {} -- {}", newLauncherSettings.getJob(), newLauncherSettings.getBuildVersion(newLauncherSettings.getJob()));
+                    launcherSettings.setBuildVersion(version, launcherSettings.getJob());
+                    logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
                     updateGui();
                 }
             }
         });
-
-        downloadButton.managedProperty().bind(downloadButton.visibleProperty());
-        cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
-
-        updateGui();
     }
 
     /**

@@ -18,8 +18,6 @@ package org.terasology.launcher.util;
 
 /**
  * A dummy implementation of {@link ProgressListener} that does nothing.
- *
- * @author Martin Steiger
  */
 public class DummyProgressListener implements ProgressListener {
 
