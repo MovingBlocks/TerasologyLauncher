@@ -1,0 +1,167 @@
+/*
+ * Copyright 2014 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'de.undercouch:gradle-download-task:1.0'
+    }
+}
+
+import de.undercouch.gradle.tasks.download.Download
+
+class DistDef {
+    String name
+    String jreUrl
+    String jreSubdir
+}
+
+def dists = [
+        new DistDef(
+                name: "win32",
+                jreUrl: 'http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jre-8u25-windows-i586.tar.gz'
+        ),
+        new DistDef(
+                name: "win64",
+                jreUrl: 'http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jre-8u25-windows-x64.tar.gz'
+        ),
+        new DistDef(
+                name: "macosx",
+                jreUrl: 'http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jre-8u25-macosx-x64.tar.gz'
+        ),
+        new DistDef(
+                name: "linux64",
+                jreUrl: 'http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jre-8u25-linux-x64.tar.gz'
+        ),
+        new DistDef(
+                name: "linux32",
+                jreUrl: 'http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jre-8u25-linux-i586.tar.gz'
+        )
+]
+
+dists.each { dist ->
+    println "Setting up distribution ${dist.name}"
+
+    def distCap = dist.name.capitalize()
+
+    // Directory for the extracted and pre-processed JRE
+    def jreDir = new File(buildDir, "jre.${dist.name}")
+    def jreDownloadFile = new File(buildDir, "jre-${dist.name}.tar.gz")
+
+    def downloadTask = task("downloadJre${distCap}", type: Download) {
+        src dist.jreUrl
+        dest jreDownloadFile
+        onlyIfNewer true
+        header 'Cookie', 'oraclelicense=accept-securebackup-cookie'
+    }
+
+    def prepareTask = task("prepareJre${distCap}", dependsOn: downloadTask) {
+        outputs.dir jreDir
+    }
+    prepareTask << {
+        def jreTemp = new File(buildDir, "jre.tmp")
+        // Clean temporary output dir
+        if (jreTemp.exists()) {
+            assert jreTemp.deleteDir(), "Unable to delete temporary JRE directory $jreTemp"
+        }
+        // Extract the tar.gz into jre.tmp
+        copy {
+            from tarTree(resources.gzip(jreDownloadFile))
+            into jreTemp
+        }
+        // There should be a single directory inside jre.tmp (i.e. jre1.8.0_25.jre)
+        def jreTempSubdirs = jreTemp.listFiles({
+            File fnf -> fnf.isDirectory() && fnf.name.startsWith("jre")
+        } as FileFilter)
+        assert jreTempSubdirs.length == 1,
+                "The expanded JRE should contain a single directory starting with jre. Found: ${jreTempSubdirs}"
+        def originalJreDir = jreTempSubdirs[0]
+        if (dist.jreSubdir) {
+            originalJreDir = new File(originalJreDir, dist.jreSubdir)
+        }
+
+        // Delete all optional files (see JRE readme)
+        if (dist == "win32" || dist == "win64") {
+            delete fileTree(originalJreDir) {
+                include "bin/*.exe"
+                include "lib/jfr.jar"
+                include "lib/javaws.jar"
+                include "lib/deploy.jar"
+                include "lib/plugin.jar"
+                include "man/**/*"
+                exclude "man/**/java.1"
+            }
+            delete files(
+                    "$originalJreDir/lib/jfr",
+                    "$originalJreDir/bin/dtplugin",
+                    "$originalJreDir/bin/plugin2",
+                    "$originalJreDir/lib/deploy"
+            )
+        } else {
+            delete fileTree(originalJreDir) {
+                include "bin/*"
+                exclude "bin/java"
+                include "man/**/*"
+                exclude "man/**/java.1"
+            }
+            delete files(
+                "$originalJreDir/lib/jfr"
+            )
+        }
+        if (jreDir.exists()) {
+            assert jreDir.deleteDir(), "Unable to delete JRE directory $jreDir"
+        }
+        assert originalJreDir.renameTo(jreDir), "Unable to move JRE to final directory $originalJreDir -> $jreDir"
+        assert jreTemp.deleteDir(), "Unable to remove temporary JRE directory $jreTemp"
+    }
+
+    distributions {
+        "${dist.name}" {
+            contents {
+                into("jre") {
+                    from prepareTask
+                }
+                into("lib") {
+                    from configurations.runtime
+                    from jar
+                }
+                into ""
+                from "src/dist"
+            }
+        }
+    }
+
+    // Set up a special tar.bz2 task for linux
+    if (dist.name.startsWith("linux")) {
+        def installTask = tasks["install" + dist.name.capitalize() + "Dist"]
+        task(dist.name + "DistBz2", type: Tar, dependsOn: installTask) {
+            compression Compression.BZIP2
+            classifier dist.name
+            from(installTask.destinationDir) {
+                exclude "bin/*"
+                exclude "jre/bin/*"
+            }
+            from(installTask.destinationDir) {
+                include "bin/*"
+                include "jre/bin/*"
+                fileMode 0755
+            }
+        }
+    }
+
+}
