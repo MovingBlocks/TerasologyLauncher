@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 buildscript {
     repositories {
         mavenCentral()
@@ -22,6 +21,8 @@ buildscript {
         classpath 'de.undercouch:gradle-download-task:1.0'
     }
 }
+
+File jreDownloadDir = new File("$buildDir")
 
 import de.undercouch.gradle.tasks.download.Download
 
@@ -32,14 +33,6 @@ class DistDef {
 }
 
 def dists = [
-        new DistDef(
-                name: "win32",
-                jreUrl: 'http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jre-8u25-windows-i586.tar.gz'
-        ),
-        new DistDef(
-                name: "win64",
-                jreUrl: 'http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jre-8u25-windows-x64.tar.gz'
-        ),
         new DistDef(
                 name: "macosx",
                 jreUrl: 'http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jre-8u25-macosx-x64.tar.gz'
@@ -53,6 +46,107 @@ def dists = [
                 jreUrl: 'http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jre-8u25-linux-i586.tar.gz'
         )
 ]
+
+File winVmAssemblyDir = new File(buildDir, "jre-win")
+
+task downloadJreWin {
+    download {
+        src([
+            "http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jre-8u25-windows-x64.tar.gz",
+            "http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jre-8u25-windows-i586.tar.gz",
+            "http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jdk-8u25-windows-i586.exe"
+        ])
+        dest jreDownloadDir
+        onlyIfNewer true
+        header 'Cookie', 'oraclelicense=accept-securebackup-cookie'
+    }
+}
+
+task extractWinServerVm(type: ExtractServerVmTask, dependsOn: downloadJreWin) {
+    jdkInstaller = new File(jreDownloadDir, "jdk-8u25-windows-i586.exe")
+    outputDir = new File(buildDir, "jre-win32-server/bin.x86/server")
+}
+
+task extractWinVm(dependsOn: downloadJreWin) {
+    delete"$buildDir/jre-win32"
+    delete "$buildDir/jre-win64"
+    copy {
+        from tarTree(resources.gzip(new File(jreDownloadDir, "jre-8u25-windows-i586.tar.gz")))
+        into "$buildDir/jre-win32"
+    }
+    copy {
+        from tarTree(resources.gzip(new File(jreDownloadDir, "jre-8u25-windows-x64.tar.gz")))
+        into "$buildDir/jre-win64"
+    }
+}
+
+task fixupExtractedVm(dependsOn: extractWinVm) << {
+    ["jre-win32", "jre-win64"].each { winFlavor ->
+        File jreDir = new File(buildDir, winFlavor)
+        def files = jreDir.listFiles()
+        if (files.length != 1) {
+            throw new RuntimeException("Expected exactly one subdirectory in the JRE tar gz")
+        }
+        println "Moving ${files[0]} up"
+        files[0].listFiles().each { file ->
+            file.renameTo(new File(jreDir, file.getName()))
+        }
+        files[0].deleteDir()
+    }
+}
+
+task assembleWinVm(dependsOn: [fixupExtractedVm, extractWinServerVm]) << {
+
+    copy {
+        from "$buildDir/jre-win32/bin"
+        into "$buildDir/jre-win/bin.x86"
+        exclude "client"
+        exclude "dtplugin"
+        exclude "plugin2"
+        exclude "*.exe"
+        exclude "*.cpl"
+    }
+
+    copy {
+        from "$buildDir/jre-win64/bin"
+        into "$buildDir/jre-win/bin.x64"
+        exclude "dtplugin"
+        exclude "plugin2"
+        exclude "*.exe"
+        exclude "*.cpl"
+    }
+
+    copy {
+        from "$buildDir/jre-win32-server"
+        into "$buildDir/jre-win"
+    }
+
+    copy {
+        from "$buildDir/jre-win64/"
+        into "$buildDir/jre-win/"
+        exclude "bin"
+    }
+
+}
+
+task("prepareDistWin", type: Sync, dependsOn: assembleWinVm) {
+    destinationDir = new File("$buildDir/dist-win/full")
+    into("jre") {
+        from "$buildDir/jre-win/"
+    }
+    into("lib") {
+        from configurations.runtime
+        from jar
+    }
+    from "src/dist"
+    from "src/win/dist"
+}
+
+task("createBaselineWin", type:CreateUpdateBaselineTask, dependsOn:prepareDistWin) {
+    inputDir = prepareDistWin.destinationDir
+    outputDir = new File("$buildDir/dist-win/update")
+    productId = "win"
+}
 
 dists.each { dist ->
     println "Setting up distribution ${dist.name}"
@@ -96,7 +190,7 @@ dists.each { dist ->
         }
 
         // Delete all optional files (see JRE readme)
-        if (dist == "win32" || dist == "win64") {
+        if (dist.name == "win32" || dist.name == "win64") {
             delete fileTree(originalJreDir) {
                 include "bin/*.exe"
                 include "lib/jfr.jar"
@@ -107,10 +201,10 @@ dists.each { dist ->
                 exclude "man/**/java.1"
             }
             delete files(
-                    "$originalJreDir/lib/jfr",
-                    "$originalJreDir/bin/dtplugin",
-                    "$originalJreDir/bin/plugin2",
-                    "$originalJreDir/lib/deploy"
+                "$originalJreDir/lib/jfr",
+                "$originalJreDir/bin/dtplugin",
+                "$originalJreDir/bin/plugin2",
+                "$originalJreDir/lib/deploy"
             )
         } else {
             delete fileTree(originalJreDir) {
@@ -130,38 +224,50 @@ dists.each { dist ->
         assert jreTemp.deleteDir(), "Unable to remove temporary JRE directory $jreTemp"
     }
 
-    distributions {
-        "${dist.name}" {
-            contents {
-                into("jre") {
-                    from prepareTask
-                }
-                into("lib") {
-                    from configurations.runtime
-                    from jar
-                }
-                into ""
-                from "src/dist"
-            }
+    def prepareDistTask = task("prepareDist$distCap", type: Sync) {
+        destinationDir = new File("$buildDir/dist-${dist.name}/full")
+        into("jre") {
+            from prepareTask
         }
+        into("lib") {
+            from configurations.runtime
+            from jar
+        }
+        from "src/dist"
+        from "src/${dist.name}/dist"
     }
 
-    // Set up a special tar.bz2 task for linux
-    if (dist.name.startsWith("linux")) {
-        def installTask = tasks["install" + dist.name.capitalize() + "Dist"]
-        task(dist.name + "DistBz2", type: Tar, dependsOn: installTask) {
-            compression Compression.BZIP2
-            classifier dist.name
-            from(installTask.destinationDir) {
-                exclude "bin/*"
-                exclude "jre/bin/*"
-            }
-            from(installTask.destinationDir) {
-                include "bin/*"
-                include "jre/bin/*"
-                fileMode 0755
-            }
-        }
+    def updateBaselineTask = task("createBaseline$distCap", type:CreateUpdateBaselineTask, dependsOn:prepareDistTask) {
+        inputDir = prepareDistTask.destinationDir
+        outputDir = new File("$buildDir/dist-${dist.name}/update")
+        productId = dist.name
     }
+
+//    def manifestTask = task("buildManifest$distCap", type:BuildManifestTask) {
+//        dir = prepareDistTask.destinationDir
+//        productId = dist.name
+//    }
+//
+//    // Set up a special tar.bz2 task for linux
+//    if (dist.name.startsWith("linux")) {
+//        task(dist.name + "DistBz2", type: Tar, dependsOn: installTask) {
+//            compression Compression.BZIP2
+//            classifier dist.name
+//            from(installTask.destinationDir) {
+//                exclude "bin/*"
+//                exclude "jre/bin/*"
+//            }
+//            from(installTask.destinationDir) {
+//                include "bin/*"
+//                include "jre/bin/*"
+//                fileMode 0755
+//            }
+//        }
+//    }
+
+//    task("createUpdateBaseline" + dist.name.capitalize(), type:CreateUpdateBaselineTask, dependsOn:manifestTask) {
+//        inputDir = installTask.destinationDir
+//        outputDir = new File("$buildDir/updateBaselines/${dist.name}")
+//    }
 
 }

@@ -22,7 +22,16 @@
  * - Gradle Documentation: http://gradle.org/documentation
  * - View tasks for this project: $ gradlew tasks
  */
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'de.undercouch:gradle-download-task:1.0'
+    }
+}
 
+apply plugin: 'download-task'
 apply plugin: 'java'
 apply plugin: 'project-report'
 apply plugin: 'idea'
@@ -38,7 +47,7 @@ apply plugin: 'distribution'
 apply from: 'dist.gradle'
 
 // Test for right version of Java in use for running this script
-assert org.gradle.api.JavaVersion.current().isJava8Compatible()
+assert JavaVersion.current().isJava8Compatible()
 
 // gradle wrapper version
 wrapper {
