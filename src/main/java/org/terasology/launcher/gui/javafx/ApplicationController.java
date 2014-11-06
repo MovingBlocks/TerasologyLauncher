@@ -167,9 +167,18 @@ public class ApplicationController {
             Stage settingsStage = new Stage(StageStyle.UNDECORATED);
             settingsStage.initModality(Modality.APPLICATION_MODAL);
 
-            final FXMLLoader fxmlLoader = new FXMLLoader(BundleUtils.getFXMLUrl("settings"), ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle",
-                Languages.getCurrentLocale()));
-            Parent root = (Parent) fxmlLoader.load();
+            FXMLLoader fxmlLoader;
+            Parent root;
+            /* Fall back to default language if loading the FXML file files with the current locale */
+            try {
+                fxmlLoader = BundleUtils.getFXMLLoader("settings");
+                root = (Parent) fxmlLoader.load();
+            } catch (IOException e) {
+                fxmlLoader = BundleUtils.getFXMLLoader("settings");
+                fxmlLoader.setResources(ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", Languages.DEFAULT_LOCALE));
+                root = (Parent) fxmlLoader.load();
+            }
+
             final SettingsController settingsController = fxmlLoader.getController();
             settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, gameVersions, settingsStage);
 

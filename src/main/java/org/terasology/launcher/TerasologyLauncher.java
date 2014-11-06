@@ -133,9 +133,17 @@ public final class TerasologyLauncher extends Application {
         mainStage = new Stage(StageStyle.DECORATED);
 
         // launcher frame
-        final FXMLLoader fxmlLoader = new FXMLLoader(BundleUtils.getFXMLUrl("application"), ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle",
-            Languages.getCurrentLocale()));
-        final Parent root = (Parent) fxmlLoader.load();
+        FXMLLoader fxmlLoader;
+        Parent root;
+        /* Fall back to default language if loading the FXML file files with the current locale */
+        try {
+            fxmlLoader = BundleUtils.getFXMLLoader("application");
+            root = (Parent) fxmlLoader.load();
+        } catch (IOException e) {
+            fxmlLoader = BundleUtils.getFXMLLoader("application");
+            fxmlLoader.setResources(ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", Languages.DEFAULT_LOCALE));
+            root = (Parent) fxmlLoader.load();
+        }
         final ApplicationController controller = fxmlLoader.getController();
         controller.initialize(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(), launcherConfiguration.getTempDirectory(),
             launcherConfiguration.getLauncherSettings(), launcherConfiguration.getGameVersions(), mainStage);
