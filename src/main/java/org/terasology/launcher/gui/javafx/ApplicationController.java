@@ -673,6 +673,16 @@ public class ApplicationController {
             b.append("</ul>\n");
             b.append("</p>\n");
         }
+
+        /* Append changelogs of previous builds. */
+        int previousLogs = (gameVersion.getJob().isStable()) ? 1 : 10;
+        b.append("<hr/>");
+        for (String msg : gameVersions.getAggregatedChangelog(gameVersion, previousLogs)) {
+            b.append("<li>");
+            b.append(escapeHtml(msg));
+            b.append("</li>\n");
+        }
+
         return b.toString();
     }
 

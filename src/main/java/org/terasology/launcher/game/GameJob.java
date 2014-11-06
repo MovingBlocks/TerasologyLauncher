@@ -18,11 +18,11 @@ package org.terasology.launcher.game;
 
 public enum GameJob {
 
-    TerasologyStable("master", 30, 9, true, false, "STABLE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
+    TerasologyStable("master", 30, 5, true, false, "STABLE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
 
     TerasologyLegacy("legacy", 1, 0, true, true, "STABLE", "infoHeader1_TerasologyLegacy", "settings_game_buildType_TerasologyLegacy"),
 
-    Terasology("develop", 995, 4, false, false, "NIGHTLY", "infoHeader1_Terasology", "settings_game_buildType_Terasology"),
+    Terasology("develop", 995, 9, false, false, "NIGHTLY", "infoHeader1_Terasology", "settings_game_buildType_Terasology"),
 
     TerasologyMulti("multiplayer", 1, 0, false, true, "NIGHTLY", "infoHeader1_TerasologyMulti", "settings_game_buildType_TerasologyMulti");
 

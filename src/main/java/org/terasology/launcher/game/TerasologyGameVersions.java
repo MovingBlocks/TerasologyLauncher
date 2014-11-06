@@ -542,6 +542,20 @@ public final class TerasologyGameVersions {
         }
     }
 
+    public synchronized List<String> getAggregatedChangelog(TerasologyGameVersion gameVersion, int builds) {
+        List<String> aggregatedChangelog = new ArrayList<>();
+        List<TerasologyGameVersion> gameVersions = gameVersionLists.get(gameVersion.getJob());
+        int idx = gameVersions.indexOf(gameVersion) + 1;
+        int upper = Math.min(idx + builds, gameVersions.size());
+        for (int i = idx; i < upper; i++) {
+            final List<String> changelog = gameVersions.get(i).getChangeLog();
+            if (!(changelog.size() == 1 && BundleUtils.getLabel("message_noChangeLog").equals(changelog.get(0)))) {
+                aggregatedChangelog.addAll(gameVersions.get(i).getChangeLog());
+            }
+        }
+        return aggregatedChangelog;
+    }
+
     @Override
     public String toString() {
         return this.getClass().getName() + "[" + gameVersionLists + "]";
