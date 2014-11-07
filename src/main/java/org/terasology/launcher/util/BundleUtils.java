@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.util;
 
+import javafx.fxml.FXMLLoader;
 import javafx.scene.image.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,6 +106,10 @@ public final class BundleUtils {
     public static Image getFxImage(String key) throws MissingResourceException {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
         return new Image(BundleUtils.class.getResource(imagePath).toExternalForm());
+    }
+
+    public static FXMLLoader getFXMLLoader(String key) {
+        return new FXMLLoader(getFXMLUrl(key), ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", Languages.getCurrentLocale()));
     }
 
     public static URL getFXMLUrl(String key) {
