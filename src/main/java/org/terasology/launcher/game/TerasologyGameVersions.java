@@ -542,18 +542,25 @@ public final class TerasologyGameVersions {
         }
     }
 
-    public synchronized List<String> getAggregatedChangelog(TerasologyGameVersion gameVersion, int builds) {
-        List<String> aggregatedChangelog = new ArrayList<>();
+    public synchronized List<String> getAggregatedChangeLog(TerasologyGameVersion gameVersion, int builds) {
+        List<String> aggregatedChangeLog = new ArrayList<>();
         List<TerasologyGameVersion> gameVersions = gameVersionLists.get(gameVersion.getJob());
         int idx = gameVersions.indexOf(gameVersion) + 1;
         int upper = Math.min(idx + builds, gameVersions.size());
         for (int i = idx; i < upper; i++) {
-            final List<String> changelog = gameVersions.get(i).getChangeLog();
-            if (!(changelog.size() == 1 && BundleUtils.getLabel("message_noChangeLog").equals(changelog.get(0)))) {
-                aggregatedChangelog.addAll(gameVersions.get(i).getChangeLog());
+            final List<String> log = gameVersions.get(i).getChangeLog();
+
+            /* Don't include empty change logs (nothing changed) in the aggregate. */
+            if (log.size() == 1) {
+                final String msg = log.get(0);
+                if (BundleUtils.getLabel("message_noChangeLog").equals(msg)) {
+                    continue;
+                }
             }
+
+            aggregatedChangeLog.addAll(gameVersions.get(i).getChangeLog());
         }
-        return aggregatedChangelog;
+        return aggregatedChangeLog;
     }
 
     @Override
