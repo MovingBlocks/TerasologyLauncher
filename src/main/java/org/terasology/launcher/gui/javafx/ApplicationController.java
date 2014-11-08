@@ -199,7 +199,7 @@ public class ApplicationController {
         if ((gameVersion == null) || !gameVersion.isInstalled()) {
             logger.warn("The selected game version can not be started! '{}'", gameVersion);
             JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_gameStart"),
-                BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+                    BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
             // updateGui();
         } else if (gameStarter.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
@@ -673,6 +673,16 @@ public class ApplicationController {
             b.append("</ul>\n");
             b.append("</p>\n");
         }
+
+        /* Append changelogs of previous builds. */
+        int previousLogs = (gameVersion.getJob().isStable()) ? 1 : 10;
+        b.append("<hr/>");
+        for (String msg : gameVersions.getAggregatedChangeLog(gameVersion, previousLogs)) {
+            b.append("<li>");
+            b.append(escapeHtml(msg));
+            b.append("</li>\n");
+        }
+
         return b.toString();
     }
 
