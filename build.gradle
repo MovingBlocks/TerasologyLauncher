@@ -44,6 +44,7 @@ apply plugin: 'pmd'
 apply plugin: 'findbugs'
 apply plugin: 'distribution'
 
+apply from: 'dist-win.gradle'
 apply from: 'dist.gradle'
 
 // Test for right version of Java in use for running this script

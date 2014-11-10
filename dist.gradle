@@ -22,210 +22,107 @@ buildscript {
     }
 }
 
-File jreDownloadDir = new File("$buildDir")
-
 import de.undercouch.gradle.tasks.download.Download
 
-class DistDef {
-    String name
-    String jreUrl
-    String jreSubdir
-}
+enum Arch {
+    win32("http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jre-8u25-windows-i586.tar.gz"),
+    win64("http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jre-8u25-windows-x64.tar.gz"),
+    linux32("http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jre-8u25-linux-i586.tar.gz"),
+    linux64("http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jre-8u25-linux-x64.tar.gz"),
+    macosx("http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jre-8u25-macosx-x64.tar.gz");
 
-def dists = [
-        new DistDef(
-                name: "macosx",
-                jreUrl: 'http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jre-8u25-macosx-x64.tar.gz'
-        ),
-        new DistDef(
-                name: "linux64",
-                jreUrl: 'http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jre-8u25-linux-x64.tar.gz'
-        ),
-        new DistDef(
-                name: "linux32",
-                jreUrl: 'http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jre-8u25-linux-i586.tar.gz'
-        )
-]
-
-File winVmAssemblyDir = new File(buildDir, "jre-win")
-
-task downloadJreWin {
-    download {
-        src([
-            "http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jre-8u25-windows-x64.tar.gz",
-            "http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jre-8u25-windows-i586.tar.gz",
-            "http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jdk-8u25-windows-i586.exe"
-        ])
-        dest jreDownloadDir
-        onlyIfNewer true
-        header 'Cookie', 'oraclelicense=accept-securebackup-cookie'
+    Arch(String jreUrl) {
+        this.jreUrl = jreUrl
     }
+    def String jreUrl
 }
 
-task extractWinServerVm(type: ExtractServerVmTask, dependsOn: downloadJreWin) {
-    jdkInstaller = new File(jreDownloadDir, "jdk-8u25-windows-i586.exe")
-    outputDir = new File(buildDir, "jre-win32-server/bin.x86/server")
-}
-
-task extractWinVm(dependsOn: downloadJreWin) {
-    delete"$buildDir/jre-win32"
-    delete "$buildDir/jre-win64"
-    copy {
-        from tarTree(resources.gzip(new File(jreDownloadDir, "jre-8u25-windows-i586.tar.gz")))
-        into "$buildDir/jre-win32"
-    }
-    copy {
-        from tarTree(resources.gzip(new File(jreDownloadDir, "jre-8u25-windows-x64.tar.gz")))
-        into "$buildDir/jre-win64"
-    }
-}
-
-task fixupExtractedVm(dependsOn: extractWinVm) << {
-    ["jre-win32", "jre-win64"].each { winFlavor ->
-        File jreDir = new File(buildDir, winFlavor)
-        def files = jreDir.listFiles()
-        if (files.length != 1) {
-            throw new RuntimeException("Expected exactly one subdirectory in the JRE tar gz")
-        }
-        println "Moving ${files[0]} up"
-        files[0].listFiles().each { file ->
+def deleteOptionalJreFiles(File jreDir, Arch arch) {
+    // Move up anything relevant in the Mac OS app hierarchy
+    if (arch == Arch.macosx && new File(jreDir, "Contents/Home").exists()) {
+        new File(jreDir, "Contents/Home").eachFile { file ->
             file.renameTo(new File(jreDir, file.getName()))
         }
-        files[0].deleteDir()
+        new File(jreDir, "Contents").deleteDir()
+    }
+
+    if (arch == Arch.linux32 || arch == Arch.linux64 || arch == Arch.macosx) {
+        new File(jreDir, "bin").deleteDir()
+        new File(jreDir, "man").deleteDir()
+        new File(jreDir, "plugin").deleteDir()
+    } else {
+        new File(jreDir, "bin/client").deleteDir()
+        new File(jreDir, "bin/dtplugin").deleteDir()
+        new File(jreDir, "bin/plugin2").deleteDir()
+        new File(jreDir, "bin").eachFile { file ->
+            if (file.name.endsWith(".exe") || file.name.endsWith(".cpl") || file.name.startsWith("JavaAccessBridge")
+            || file.name.startsWith("JAWTAccessBridge") || file.name.startsWith("WindowsAccessBridge")) {
+                file.delete()
+            }
+        }
+        new File(jreDir, "lib/plugin.jar").delete()
+        new File(jreDir, "lib/javaws.jar").delete()
+        new File(jreDir, "lib/jfr.jar").delete()
+        new File(jreDir, "lib/deploy.jar").delete()
+        new File(jreDir, "lib/deploy").deleteDir()
+        new File(jreDir, "lib/jfr").deleteDir()
     }
 }
 
-task assembleWinVm(dependsOn: [fixupExtractedVm, extractWinServerVm]) << {
+Arch.values().each { arch ->
 
-    copy {
-        from "$buildDir/jre-win32/bin"
-        into "$buildDir/jre-win/bin.x86"
-        exclude "client"
-        exclude "dtplugin"
-        exclude "plugin2"
-        exclude "*.exe"
-        exclude "*.cpl"
-    }
+    String archCap = arch.name().capitalize()
 
-    copy {
-        from "$buildDir/jre-win64/bin"
-        into "$buildDir/jre-win/bin.x64"
-        exclude "dtplugin"
-        exclude "plugin2"
-        exclude "*.exe"
-        exclude "*.cpl"
-    }
+    def jreDownloadFile = new File(buildDir, "jre-${arch}.tar.gz")
 
-    copy {
-        from "$buildDir/jre-win32-server"
-        into "$buildDir/jre-win"
-    }
-
-    copy {
-        from "$buildDir/jre-win64/"
-        into "$buildDir/jre-win/"
-        exclude "bin"
-    }
-
-}
-
-task("prepareDistWin", type: Sync, dependsOn: assembleWinVm) {
-    destinationDir = new File("$buildDir/dist-win/full")
-    into("jre") {
-        from "$buildDir/jre-win/"
-    }
-    into("lib") {
-        from configurations.runtime
-        from jar
-    }
-    from "src/dist"
-    from "src/win/dist"
-}
-
-task("createBaselineWin", type:CreateUpdateBaselineTask, dependsOn:prepareDistWin) {
-    inputDir = prepareDistWin.destinationDir
-    outputDir = new File("$buildDir/dist-win/update")
-    productId = "win"
-}
-
-dists.each { dist ->
-    println "Setting up distribution ${dist.name}"
-
-    def distCap = dist.name.capitalize()
-
-    // Directory for the extracted and pre-processed JRE
-    def jreDir = new File(buildDir, "jre.${dist.name}")
-    def jreDownloadFile = new File(buildDir, "jre-${dist.name}.tar.gz")
-
-    def downloadTask = task("downloadJre${distCap}", type: Download) {
-        src dist.jreUrl
+    def downloadTask = task("downloadJre$archCap", type: Download) {
+        src arch.jreUrl
         dest jreDownloadFile
         onlyIfNewer true
         header 'Cookie', 'oraclelicense=accept-securebackup-cookie'
     }
 
-    def prepareTask = task("prepareJre${distCap}", dependsOn: downloadTask) {
-        outputs.dir jreDir
-    }
-    prepareTask << {
-        def jreTemp = new File(buildDir, "jre.tmp")
-        // Clean temporary output dir
-        if (jreTemp.exists()) {
-            assert jreTemp.deleteDir(), "Unable to delete temporary JRE directory $jreTemp"
-        }
-        // Extract the tar.gz into jre.tmp
-        copy {
-            from tarTree(resources.gzip(jreDownloadFile))
-            into jreTemp
-        }
-        // There should be a single directory inside jre.tmp (i.e. jre1.8.0_25.jre)
-        def jreTempSubdirs = jreTemp.listFiles({
-            File fnf -> fnf.isDirectory() && fnf.name.startsWith("jre")
-        } as FileFilter)
-        assert jreTempSubdirs.length == 1,
-                "The expanded JRE should contain a single directory starting with jre. Found: ${jreTempSubdirs}"
-        def originalJreDir = jreTempSubdirs[0]
-        if (dist.jreSubdir) {
-            originalJreDir = new File(originalJreDir, dist.jreSubdir)
-        }
+    def linuxJreDir = new File(buildDir, "jre-${arch}")
 
-        // Delete all optional files (see JRE readme)
-        if (dist.name == "win32" || dist.name == "win64") {
-            delete fileTree(originalJreDir) {
-                include "bin/*.exe"
-                include "lib/jfr.jar"
-                include "lib/javaws.jar"
-                include "lib/deploy.jar"
-                include "lib/plugin.jar"
-                include "man/**/*"
-                exclude "man/**/java.1"
+    def prepareTask = task("prepareJre$archCap", dependsOn: [downloadTask]) {
+        outputs.dir linuxJreDir
+        doLast {
+            def jreTemp = new File(buildDir, "jre.tmp")
+            // Clean temporary output dir
+            if (jreTemp.exists()) {
+                assert jreTemp.deleteDir(), "Unable to delete temporary JRE directory $jreTemp"
             }
-            delete files(
-                "$originalJreDir/lib/jfr",
-                "$originalJreDir/bin/dtplugin",
-                "$originalJreDir/bin/plugin2",
-                "$originalJreDir/lib/deploy"
-            )
-        } else {
-            delete fileTree(originalJreDir) {
-                include "bin/*"
-                exclude "bin/java"
-                include "man/**/*"
-                exclude "man/**/java.1"
+            // Extract the 32-bit tar.gz into jre.tmp
+            copy {
+                from tarTree(resources.gzip(jreDownloadFile))
+                into jreTemp
             }
-            delete files(
-                "$originalJreDir/lib/jfr"
-            )
+            // There should be a single directory inside jre.tmp (i.e. jre1.8.0_25.jre)
+            def jreTempSubdirs = jreTemp.listFiles({
+                File fnf -> fnf.isDirectory() && fnf.name.startsWith("jre")
+            } as FileFilter)
+            assert jreTempSubdirs.length == 1,
+                    "The expanded JRE should contain a single directory starting with jre. Found: ${jreTempSubdirs}"
+            def originalJreDir = jreTempSubdirs[0]
+
+            // Delete all optional files (see JRE readme)
+            deleteOptionalJreFiles(originalJreDir, arch)
+
+            if (linuxJreDir.exists()) {
+                assert linuxJreDir.deleteDir(), "Unable to delete JRE directory $linuxJreDir"
+            }
+            assert originalJreDir.renameTo(linuxJreDir), "Unable to move JRE to final directory $originalJreDir -> $linuxJreDir"
+            assert jreTemp.deleteDir(), "Unable to remove temporary JRE directory $jreTemp"
         }
-        if (jreDir.exists()) {
-            assert jreDir.deleteDir(), "Unable to delete JRE directory $jreDir"
-        }
-        assert originalJreDir.renameTo(jreDir), "Unable to move JRE to final directory $originalJreDir -> $jreDir"
-        assert jreTemp.deleteDir(), "Unable to remove temporary JRE directory $jreTemp"
     }
 
-    def prepareDistTask = task("prepareDist$distCap", type: Sync) {
-        destinationDir = new File("$buildDir/dist-${dist.name}/full")
+    def intoSuffix = ""
+    if (arch == Arch.macosx) {
+        intoSuffix = "/Terasology.app/Contents"
+    }
+
+    def prepareDistTask = task("prepareDist$archCap", type: Sync, dependsOn: prepareTask) {
+        destinationDir = new File("$buildDir/dist-$arch/full$intoSuffix")
         into("jre") {
             from prepareTask
         }
@@ -233,41 +130,54 @@ dists.each { dist ->
             from configurations.runtime
             from jar
         }
-        from "src/dist"
-        from "src/${dist.name}/dist"
+        from "dist/common"
+        from "dist/$arch"
     }
 
-    def updateBaselineTask = task("createBaseline$distCap", type:CreateUpdateBaselineTask, dependsOn:prepareDistTask) {
+    // Download the server vm as well
+    if (arch == Arch.win32) {
+        def jdkFile = new File(buildDir, "jdk-win32.exe")
+        task ("downloadServerVmWin32", type: Download) {
+            src([
+                    "http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jdk-8u25-windows-i586.exe"
+            ])
+            dest jdkFile
+            onlyIfNewer true
+            header 'Cookie', 'oraclelicense=accept-securebackup-cookie'
+        }
+        task ("extractServerVmWin32", type: ExtractServerVmTask, dependsOn: downloadServerVmWin32) {
+            jdkInstaller = jdkFile
+            outputDir = new File(linuxJreDir, "bin/server")
+        }
+        prepareDistTask.dependsOn extractServerVmWin32
+    }
+
+    def updateBaselineTask = task("updateBaseline$archCap", type: CreateUpdateBaselineTask, dependsOn: prepareDistTask) {
         inputDir = prepareDistTask.destinationDir
-        outputDir = new File("$buildDir/dist-${dist.name}/update")
-        productId = dist.name
+        outputDir = new File("$buildDir/dist-$arch/update")
+        productId = "$arch"
     }
 
-//    def manifestTask = task("buildManifest$distCap", type:BuildManifestTask) {
-//        dir = prepareDistTask.destinationDir
-//        productId = dist.name
-//    }
-//
-//    // Set up a special tar.bz2 task for linux
-//    if (dist.name.startsWith("linux")) {
-//        task(dist.name + "DistBz2", type: Tar, dependsOn: installTask) {
-//            compression Compression.BZIP2
-//            classifier dist.name
-//            from(installTask.destinationDir) {
-//                exclude "bin/*"
-//                exclude "jre/bin/*"
-//            }
-//            from(installTask.destinationDir) {
-//                include "bin/*"
-//                include "jre/bin/*"
-//                fileMode 0755
-//            }
-//        }
-//    }
-
-//    task("createUpdateBaseline" + dist.name.capitalize(), type:CreateUpdateBaselineTask, dependsOn:manifestTask) {
-//        inputDir = installTask.destinationDir
-//        outputDir = new File("$buildDir/updateBaselines/${dist.name}")
-//    }
-
+    task("distZip$archCap", type: Zip, dependsOn: updateBaselineTask) {
+        classifier arch.name()
+        if (arch == Arch.macosx) {
+            from(prepareDistTask.destinationDir) {
+                exclude "Terasology.app/Contents/MacOS/*"
+            }
+            from(prepareDistTask.destinationDir) {
+                include "Terasology.app/Contents/MacOS/*"
+                fileMode 0755
+            }
+        } else {
+            from(prepareDistTask.destinationDir) {
+                exclude "bin/*"
+                into("Terasology")
+            }
+            from(prepareDistTask.destinationDir) {
+                include "bin/*"
+                fileMode 0755
+                into("Terasology")
+            }
+        }
+    }
 }
