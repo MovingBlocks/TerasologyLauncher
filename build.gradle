@@ -44,7 +44,6 @@ apply plugin: 'pmd'
 apply plugin: 'findbugs'
 apply plugin: 'distribution'
 
-apply from: 'dist-win.gradle'
 apply from: 'dist.gradle'
 
 // Test for right version of Java in use for running this script
@@ -354,14 +353,6 @@ task copyHtml(type: Copy) {
     from('index.html')
 
     into "$buildDir/distributions"
-}
-
-task createRelease() {
-    dependsOn distZip
-
-    doLast {
-        println 'Created release: ' + displayVersion
-    }
 }
 
 task webstart {

@@ -24,6 +24,13 @@ buildscript {
 
 import de.undercouch.gradle.tasks.download.Download
 
+// This task is extended below by adding dependencies
+task createRelease() {
+    doLast {
+        println 'Created release: ' + displayVersion
+    }
+}
+
 enum Arch {
     win32("http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jre-8u25-windows-i586.tar.gz"),
     win64("http://download.oracle.com/otn-pub/java/jdk/8u25-b18/jre-8u25-windows-x64.tar.gz"),
@@ -158,7 +165,7 @@ Arch.values().each { arch ->
         productId = "$arch"
     }
 
-    task("distZip$archCap", type: Zip, dependsOn: updateBaselineTask) {
+    def zipTask = task("distZip$archCap", type: Zip, dependsOn: updateBaselineTask) {
         classifier arch.name()
         if (arch == Arch.macosx) {
             from(prepareDistTask.destinationDir) {
@@ -180,4 +187,6 @@ Arch.values().each { arch ->
             }
         }
     }
+
+    createRelease.dependsOn zipTask
 }
