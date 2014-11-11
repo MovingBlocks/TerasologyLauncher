@@ -22,18 +22,32 @@
  * - Gradle Documentation: http://gradle.org/documentation
  * - View tasks for this project: $ gradlew tasks
  */
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'de.undercouch:gradle-download-task:1.0'
+    }
+}
 
+apply plugin: 'download-task'
 apply plugin: 'java'
 apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'application'
+tasks.remove(distZip)
+tasks.remove(distTar)
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
+apply plugin: 'distribution'
+
+apply from: 'dist.gradle'
 
 // Test for right version of Java in use for running this script
-assert org.gradle.api.JavaVersion.current().isJava8Compatible()
+assert JavaVersion.current().isJava8Compatible()
 
 // gradle wrapper version
 wrapper {
@@ -339,14 +353,6 @@ task copyHtml(type: Copy) {
     from('index.html')
 
     into "$buildDir/distributions"
-}
-
-task createRelease() {
-    dependsOn distZip
-
-    doLast {
-        println 'Created release: ' + displayVersion
-    }
 }
 
 task webstart {
