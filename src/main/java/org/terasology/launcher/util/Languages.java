@@ -36,7 +36,8 @@ public final class Languages {
         final Locale czech = new Locale("cs");
         final Locale spanish = new Locale("es");
         final Locale french = new Locale("fr");
-        //final Locale russian = new Locale("it"); not yet translated, CrashReporter is translated, there is only empty file for translation
+        final Locale galician = new Locale("gl");
+        final Locale italian = new Locale("it");
         final Locale japanese = new Locale("ja");
         final Locale lithuanian = new Locale("lt");
         final Locale polish = new Locale("pl");
@@ -46,6 +47,7 @@ public final class Languages {
         supportedLocales.add(Locale.GERMAN);
         supportedLocales.add(Locale.ENGLISH);
         supportedLocales.add(french);
+        supportedLocales.add(galician);
         supportedLocales.add(spanish);
         supportedLocales.add(japanese);
         supportedLocales.add(lithuanian);
@@ -56,6 +58,7 @@ public final class Languages {
         settingsLabelKey.put(Locale.GERMAN, "settings_language_de");
         settingsLabelKey.put(Locale.ENGLISH, "settings_language_en");
         settingsLabelKey.put(french, "settings_language_fr");
+        settingsLabelKey.put(galician, "settings_language_gl");
         settingsLabelKey.put(spanish, "settings_language_es");
         settingsLabelKey.put(japanese, "settings_language_ja");
         settingsLabelKey.put(lithuanian, "settings_language_lt");
