@@ -48,6 +48,7 @@ public final class Languages {
         supportedLocales.add(Locale.ENGLISH);
         supportedLocales.add(french);
         supportedLocales.add(galician);
+		supportedLocales.add(italian);
         supportedLocales.add(spanish);
         supportedLocales.add(japanese);
         supportedLocales.add(lithuanian);
@@ -59,6 +60,7 @@ public final class Languages {
         settingsLabelKey.put(Locale.ENGLISH, "settings_language_en");
         settingsLabelKey.put(french, "settings_language_fr");
         settingsLabelKey.put(galician, "settings_language_gl");
+		settingsLabelKey.put(italian, "settings_language_it");
         settingsLabelKey.put(spanish, "settings_language_es");
         settingsLabelKey.put(japanese, "settings_language_ja");
         settingsLabelKey.put(lithuanian, "settings_language_lt");
