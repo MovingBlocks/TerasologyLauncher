@@ -81,11 +81,13 @@ Bundle.each { arch ->
             from ("launchers") {
                 include "run_linux.sh"
                 rename { "terasology_launcher.sh" }
+                fileMode 755
             }
         } else if (arch == Bundle.linux64) {
             from ("launchers") {
                 include "run_linux.sh"
                 rename { "terasology_launcher.sh" }
+                fileMode 755
             }
         } else if (arch == Bundle.macosx) {
             from ("macosx") {
