@@ -46,10 +46,11 @@ public final class Languages {
         final List<Locale> supportedLocales = new ArrayList<>();
         supportedLocales.add(Locale.GERMAN);
         supportedLocales.add(Locale.ENGLISH);
+        supportedLocales.add(czech);
+        supportedLocales.add(spanish);
         supportedLocales.add(french);
         supportedLocales.add(galician);
-		supportedLocales.add(italian);
-        supportedLocales.add(spanish);
+        supportedLocales.add(italian);
         supportedLocales.add(japanese);
         supportedLocales.add(lithuanian);
         supportedLocales.add(polish);
@@ -58,10 +59,11 @@ public final class Languages {
         final Map<Locale, String> settingsLabelKey = new HashMap<>();
         settingsLabelKey.put(Locale.GERMAN, "settings_language_de");
         settingsLabelKey.put(Locale.ENGLISH, "settings_language_en");
+        settingsLabelKey.put(czech, "settings_language_cs");
+        settingsLabelKey.put(spanish, "settings_language_es");
         settingsLabelKey.put(french, "settings_language_fr");
         settingsLabelKey.put(galician, "settings_language_gl");
-		settingsLabelKey.put(italian, "settings_language_it");
-        settingsLabelKey.put(spanish, "settings_language_es");
+        settingsLabelKey.put(italian, "settings_language_it");
         settingsLabelKey.put(japanese, "settings_language_ja");
         settingsLabelKey.put(lithuanian, "settings_language_lt");
         settingsLabelKey.put(polish, "settings_language_pl");
