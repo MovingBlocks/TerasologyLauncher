@@ -33,7 +33,6 @@ apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
-apply from: "http://dl.bintray.com/content/shemnon/javafx-gradle/0.4.0/javafx.plugin"
 
 // Test for right version of Java in use for running this script
 assert org.gradle.api.JavaVersion.current().isJava7Compatible()
@@ -95,10 +94,6 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 mainClassName = 'org.terasology.launcher.TerasologyLauncher'
-
-javafx {
-    mainClass = mainClassName
-}
 
 checkstyle {
     ignoreFailures = true
@@ -205,7 +200,6 @@ task signLibs(type: IncrementalSigningTask, dependsOn: copyLibs) {
 
     FileTree tree = fileTree(dir: "$buildDir/distributions")
     tree.include '*.jar'
-    tree.exclude 'jfxrt.jar'                 // no need to sign the JavaFX runtime - it's part of the JRE now
 
     inputs.files tree
 
