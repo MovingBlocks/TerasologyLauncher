@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-// gradle wrapper version
-wrapper {
-    gradleVersion '2.1'
-}
-
 enum Bundle {
     win32,
     win64,
@@ -33,7 +28,7 @@ task buildBundles {}
 
 task unzipBundle(type: Copy) {
     destinationDir buildDir
-    from (zipTree("${projectDir}/TerasologyLauncher.zip"))
+    from (zipTree("${projectDir}/build/distributions/TerasologyLauncher.zip"))
 }
 
 def launcherDir = "${buildDir}/TerasologyLauncher/"
@@ -78,23 +73,24 @@ Bundle.each { arch ->
                 rename { "TerasologyLauncher.exe" }
             }
         } else if (arch == Bundle.linux32) {
-            from ("launchers") {
+            from ("bundles/linux") {
                 include "run_linux.sh"
                 rename { "terasology_launcher.sh" }
                 fileMode 755
             }
         } else if (arch == Bundle.linux64) {
-            from ("launchers") {
+            from ("bundles/launchers") {
                 include "run_linux.sh"
                 rename { "terasology_launcher.sh" }
                 fileMode 755
             }
         } else if (arch == Bundle.macosx) {
-            from ("macosx") {
+            from ("bundles/macosx") {
                 include "**/*"
                 into "TerasologyLauncher.app/Contents"
             }
         }
     }
+
     buildBundles.dependsOn buildBundleTask
 }
