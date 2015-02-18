@@ -35,9 +35,6 @@ def launcherDir = "${buildDir}/TerasologyLauncher/"
 
 Bundle.each { arch ->
     arch.jreArchive = new File("${projectDir}/jres/${arch}.zip")
-    if (!arch.jreArchive.exists()) {
-        throw new RuntimeException("Dependency ${arch.jreArchive} is missing.")
-    }
 
     def zipBase = ""
     // Rebase everything in the zip file for MacOS X
