@@ -92,6 +92,7 @@ public final class TerasologyLauncher extends Application {
         logger.info("TerasologyLauncher is starting");
         logSystemInformation();
 
+        initProxy();
         initLanguage();
 
         final Task<LauncherConfiguration> launcherInitTask = new LauncherInitTask(initialStage);
@@ -114,6 +115,14 @@ public final class TerasologyLauncher extends Application {
             }
         });
         initThread.start();
+    }
+
+    /**
+     * Sets the system property as advised by the following website:
+     * http://docs.oracle.com/javase/7/docs/technotes/guides/net/proxies.html
+     */
+    private void initProxy() {
+        System.setProperty("java.net.useSystemProxies", "true");
     }
 
     /**
