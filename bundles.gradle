@@ -48,7 +48,7 @@ Bundle.each { arch ->
     def buildBundleTask = task("zip" + arch.name().capitalize(), type: Zip) {
         dependsOn unzipBundle
         archiveName "TerasologyLauncher-${arch}.zip"
-        destinationDir buildDir
+        destinationDir new File("${buildDir}/bundles/")
         from(zipTree(arch.jreArchive)) {
             into "${zipBase}jre"
         }
