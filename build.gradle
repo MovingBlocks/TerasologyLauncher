@@ -37,7 +37,7 @@ apply plugin: 'findbugs'
 apply from: 'bundles.gradle';
 
 // Test for right version of Java in use for running this script
-assert org.gradle.api.JavaVersion.current().isJava7Compatible()
+assert org.gradle.api.JavaVersion.current().isJava8Compatible()
 
 // gradle wrapper version
 wrapper {
@@ -92,8 +92,8 @@ dependencies {
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 mainClassName = 'org.terasology.launcher.TerasologyLauncher'
 
@@ -108,7 +108,7 @@ pmd {
 }
 
 findbugs {
-    toolVersion = '2.0.3'
+    toolVersion = '3.0.0'
     ignoreFailures = true
     effort = 'max'
     reportLevel = 'medium'
