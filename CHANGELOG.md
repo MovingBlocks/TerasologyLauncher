@@ -1,6 +1,10 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## 2.0.0 (2015-04-26
+* Launcher now retrieves the "Omega" zip which is base Terasology + the modules in the standard lineup
+* Structure of Terasology.zip changed, Terasology.jar is now inside the "libs" directory
+
 ## 1.4.2 (2014-10-11)
 * Fix for OS X when selecting game and launcher directory at first start
 * Small GUI change (removed "Mods" link)

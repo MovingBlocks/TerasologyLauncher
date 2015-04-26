@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 MovingBlocks
+ * Copyright 2015 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.terasology.launcher.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.game.GameJob;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -40,12 +41,15 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class DownloadUtils {
 
     public static final String TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME = "TerasologyLauncherNightly";
 
     public static final String FILE_TERASOLOGY_GAME_ZIP = "distributions/Terasology.zip";
+    public static final String FILE_TERASOLOGY_OMEGA_ZIP = "distros/omega/build/distributions/TerasologyOmega.zip";
     public static final String FILE_TERASOLOGY_LAUNCHER_ZIP = "distributions/TerasologyLauncher.zip";
     public static final String FILE_TERASOLOGY_GAME_VERSION_INFO = "resources/main/org/terasology/version/versionInfo.properties";
     public static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO = "resources/main/org/terasology/launcher/version/versionInfo.properties";
@@ -60,6 +64,7 @@ public final class DownloadUtils {
     private static final String ARTIFACT_BUILD = "/artifact/build/";
 
     private static final String API_JSON_RESULT = "/api/json?tree=result";
+    private static final String API_JSON_CAUSE = "/api/json?tree=actions[causes[upstreamBuild]]";
     private static final String API_XML_CHANGE_LOG = "/api/xml?xpath=//changeSet/item/msg[1]&wrapper=msgs";
 
     private static final int CONNECT_TIMEOUT = 1000 * 30;
@@ -186,6 +191,7 @@ public final class DownloadUtils {
         URL urlVersion = null;
         BufferedReader reader = null;
         try {
+            // The build number page in Jenkins simply contains the number and nothing else, so we can simply read and parse it
             urlVersion = new URL(JENKINS_JOB_URL + jobName + lastBuild + BUILD_NUMBER);
             reader = new BufferedReader(new InputStreamReader(urlVersion.openStream(), StandardCharsets.US_ASCII));
             buildNumber = Integer.parseInt(reader.readLine());
@@ -266,6 +272,47 @@ public final class DownloadUtils {
             throw new DownloadException("The change log could not be loaded! job=" + jobName + ", URL=" + urlChangeLog, e);
         }
         return changeLog;
+    }
+
+    /**
+     * Attempts to look up the cause for an Omega job in Jenkins to see if it was triggered directly by an engine job.
+     * @param job The GameJob we're working with, both for the engine job name and the Omega job name
+     * @param omegaBuildNumber The instance of the Omega build we care about
+     * @return The engine build number as an int or -1 if parsing failed (including the case of no engine-triggered cause)
+     * @throws DownloadException
+     */
+    public static int loadEngineTriggerJenkins(GameJob job, int omegaBuildNumber) throws DownloadException {
+        int engineBuildNumber = -1;
+        URL urlResult = null;
+        BufferedReader reader = null;
+        try {
+            urlResult = DownloadUtils.createUrlJenkins(job.getOmegaJobName(), omegaBuildNumber, API_JSON_CAUSE);
+            logger.info("The URL to check is {}", urlResult);
+            reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), StandardCharsets.US_ASCII));
+            final String jsonResult = reader.readLine();
+            if (jsonResult != null) {
+                logger.info("The json result from URL {} was {}", urlResult, jsonResult);
+                // We're looking for the number in something like [{"upstreamBuild":1401}]
+                String pattern = "upstreamBuild\":(\\d+)";
+                Pattern p = Pattern.compile(pattern);
+                Matcher m = p.matcher(jsonResult);
+                if (m.find()) {
+                    logger.info("Found value: " + m.group(1));
+                    engineBuildNumber = Integer.valueOf(m.group(1));
+                }
+            }
+        } catch (IOException | RuntimeException e) {
+            throw new DownloadException("The engine cause could not be loaded from url " + urlResult, e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    logger.warn("Closing BufferedReader for '{}' failed!", urlResult, e);
+                }
+            }
+        }
+        return engineBuildNumber;
     }
 
     public static String loadLauncherChangeLogJenkins(String jobName, Integer buildNumber) throws DownloadException {

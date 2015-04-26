@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 MovingBlocks
+ * Copyright 2015 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,34 +84,61 @@ public final class TerasologyGameVersions {
 
         final Map<GameJob, SortedSet<Integer>> buildNumbersMap = new HashMap<>();
         final Map<GameJob, Integer> lastBuildNumbers = new HashMap<>();
+
+        // Go over the job lines and figure out available build numbers
         for (GameJob job : GameJob.values()) {
             gameVersionMaps.put(job, new TreeMap<Integer, TerasologyGameVersion>());
             final SortedSet<Integer> buildNumbers = new TreeSet<>();
             buildNumbersMap.put(job, buildNumbers);
 
+            // ??
             loadSettingsBuildNumber(gameSettings, buildNumbers, job);
-            lastBuildNumbers.put(job, loadLastSuccessfulBuildNumber(getLastBuildNumberFromSettings(gameSettings, job), buildNumbers, job));
+
+            // See if we have a known build number in the settings already (?)
+            Integer lastBuildNumberFromSettings = getLastBuildNumberFromSettings(gameSettings, job);
+
+            // Go check Jenkins for the last successful build (so failures are skipped), then add more going backwards
+            Integer lastBuildNumberFromJenkins = loadLastSuccessfulBuildNumber(lastBuildNumberFromSettings, buildNumbers, job);
+
+             // Finally add the mapping to our storage
+            lastBuildNumbers.put(job, lastBuildNumberFromJenkins);
         }
 
+        // With the build numbers in hand we can go check for any existing installs locally
+        // TODO: Verify this actually can recognize new-style builds (with Terasology.jar moved)
         loadInstalledGames(gameDirectory, buildNumbersMap);
 
+        // For each job line now fill in the extra version details needed for each build
         for (GameJob job : GameJob.values()) {
             final SortedMap<Integer, TerasologyGameVersion> gameVersionMap = gameVersionMaps.get(job);
             final SortedSet<Integer> buildNumbers = buildNumbersMap.get(job);
             final Integer lastBuildNumber = lastBuildNumbers.get(job);
 
+            // Update the settings with the latest build number we know about (?)
             gameSettings.setLastBuildNumber(lastBuildNumber, job);
             if (job.isStable() && !job.isOnlyInstalled()) {
                 fillBuildNumbers(buildNumbers, job.getMinBuildNumber(), lastBuildNumber);
             }
+
+            // Add in more detailed info for any existing local game versions (?)
             SortedMap<Integer, TerasologyGameVersion> cachedGameVersions = null;
             if (cacheDirectory != null) {
                 cachedGameVersions = readFromCache(job, buildNumbers, cacheDirectory);
             }
+
+            // Add even more info including defaults if we didn't have a local copy (?)
             loadGameVersions(buildNumbers, job, gameVersionMap, cachedGameVersions);
+
+            // Now go back over the list of good builds and match them to Omega builds if possible
+            // TODO: Verify that this is a suitable stuff to add this new piece + find where to use it later
+            fillInOmegaBuilds(gameVersionMap, buildNumbers, job);
+
+            // Finally update the local cache if appropriate (?)
             if (cacheDirectory != null) {
                 writeToCache(job, cacheDirectory);
             }
+
+            // Prepare the list in memory for display to the user (?)
             final List<TerasologyGameVersion> gameVersionList = createList(lastBuildNumber, job, gameVersionMap);
             gameVersionLists.put(job, gameVersionList);
         }
@@ -192,6 +219,97 @@ public final class TerasologyGameVersions {
         return lastSuccessfulBuildNumber;
     }
 
+    /**
+     * Take an existing set of engine build numbers loaded from Jenkins and look for mapped Omega distributions to add.
+     * @param buildNumbers The engine build numbers we know exist
+     * @param job the job line we're working on
+     */
+    private void fillInOmegaBuilds(SortedMap<Integer, TerasologyGameVersion> gameVersionMap, SortedSet<Integer> buildNumbers, GameJob job) {
+        logger.info("Will try to load Omega build numbers from " + job.getOmegaJobName());
+
+        // We more or less redo the original process in looking up the Omega job then later going back in history to map to the engine job
+        Integer lastSuccessfulBuildNumber = null;
+        try {
+            lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumberJenkins(job.getOmegaJobName());
+        } catch (DownloadException e) {
+            logger.info("Retrieving last successful Omega build number failed, unable to load Omega distributions. '{}'", job, e);
+            return;
+        }
+
+        logger.info("Got the latest successful Omega build number: " + lastSuccessfulBuildNumber);
+
+        // Go through at the most twice as many Omega builds as we have engine builds to care about (not expecting many oddities)
+        int omegaRebuild = -1;
+        final Map<Integer, Integer> omegaMapping = new HashMap<>();
+        for (int i = 0; i < buildNumbers.size() * 2; i++) {
+            int omegaBuildNumber = lastSuccessfulBuildNumber - i;
+            if (omegaBuildNumber < 1) {
+                logger.warn("Searched past the beginning of an Omega line, maybe range is too long? Finishing loop.");
+                break;
+            }
+            try {
+                // See if the job exists and is successful. If not we don't care so try the next one
+                JobResult jobResult = DownloadUtils.loadJobResultJenkins(job.getOmegaJobName(), omegaBuildNumber);
+                if (jobResult != JobResult.SUCCESS) {
+                    logger.info("Retrieved an Omega result of {} for build number {}, skipping", jobResult, omegaBuildNumber);
+                    continue;
+                }
+            } catch (DownloadException e) {
+                logger.info("Cannot find build number '{}' for job '{}'.", omegaBuildNumber, job.getOmegaJobName());
+                continue;
+            }
+
+            // We have a successful Omega build. See if it was triggered directly by an engine build
+            int matchingEngineBuildNumber = -1;
+            try {
+                // See if the job exists and is successful. If not we don't care so try the next one
+                matchingEngineBuildNumber = DownloadUtils.loadEngineTriggerJenkins(job, omegaBuildNumber);
+                logger.info("Matching engine build number was {}", matchingEngineBuildNumber);
+                if (matchingEngineBuildNumber == -1) {
+                    // In this case we know there is a successful Omega build that didn't trigger from an engine build
+                    // By storing the Omega number we can keep looking
+                    logger.info("Parking omega build {} for claiming by a later engine", omegaBuildNumber);
+                    omegaRebuild = omegaBuildNumber;
+                } else {
+                    // We have a valid engine trigger. Pair the two together, considering if we had a parked rebuild
+                    if (omegaRebuild != -1) {
+                        logger.info("Mapping engine build {} with parked Omega build {}", matchingEngineBuildNumber, omegaRebuild);
+                        omegaMapping.put(matchingEngineBuildNumber, omegaRebuild);
+                        omegaRebuild = -1;
+                    } else {
+                        logger.info("Mapping engine build {} with exact Omega build {}", matchingEngineBuildNumber, omegaBuildNumber);
+                        omegaMapping.put(matchingEngineBuildNumber, omegaBuildNumber);
+                    }
+                }
+            } catch (DownloadException e) {
+                logger.info("Failed to retrieve a cause for job {} - ignoring.", job.getOmegaJobName());
+            }
+        }
+
+        int processed = 0;
+        // TODO: Is it safe to use the entries from buildNumbers as keys or can they go out of sync vs loaded game versions?
+        for (Integer engineBuildNumber : buildNumbers) {
+            logger.info("Going to check for engine build " + engineBuildNumber);
+
+            if (omegaMapping.containsKey(engineBuildNumber)) {
+                logger.info("We have an omega match: {}", omegaMapping.get(engineBuildNumber));
+            } else {
+                logger.warn("*WARNING:* No Omega distribution found for engine build {}", engineBuildNumber);
+                // TODO: Display some sort of warning for the user if this build gets selected
+            }
+
+            logger.info("Is there a game version for it? " + gameVersionMap.get(engineBuildNumber));
+            processed++;
+        }
+
+        logger.info("Processed " + processed + " out of " + gameVersionMap.size());
+    }
+
+    /**
+     * Given a job line and a set of build numbers see what if any existing builds we have installed locally.
+     * @param directory The game directory to search
+     * @param buildNumbersMap The set of build numbers to look for
+     */
     private void loadInstalledGames(File directory, Map<GameJob, SortedSet<Integer>> buildNumbersMap) {
         final File[] gameJar = directory.listFiles(new FileFilter() {
             @Override
@@ -272,26 +390,28 @@ public final class TerasologyGameVersions {
     private TerasologyGameVersionInfo loadInstalledGameVersionInfo(File gameJar) {
         TerasologyGameVersionInfo gameVersionInfo = null;
 
-        if (gameJar.exists() && gameJar.canRead() && gameJar.isFile()) {
-            final File libsDirectory = new File(gameJar.getParentFile(), DIR_LIBS);
-            if (libsDirectory.isDirectory() && libsDirectory.canRead()) {
-                final File[] engineJars = libsDirectory.listFiles(new FileFilter() {
-                    @Override
-                    public boolean accept(File file) {
-                        return file.isFile() && file.canRead() && file.getName().matches(FILE_ENGINE_JAR);
-                    }
-                }
-                );
-
-                if ((engineJars != null) && (engineJars.length == 1)) {
-                    gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(engineJars[0]);
+        //if (gameJar.exists() && gameJar.canRead() && gameJar.isFile()) {
+        // TODO: Check if this causes trouble elsewhere (better fix is possible, but may not be fast)
+        final File libsDirectory = new File(gameJar.getParentFile(), DIR_LIBS);
+        if (libsDirectory.isDirectory() && libsDirectory.canRead()) {
+            final File[] engineJars = libsDirectory.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File file) {
+                    return file.isFile() && file.canRead() && file.getName().matches(FILE_ENGINE_JAR);
                 }
             }
+            );
 
-            if (gameVersionInfo == null) {
-                gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(gameJar);
+            if ((engineJars != null) && (engineJars.length == 1)) {
+                gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(engineJars[0]);
             }
         }
+
+        if (gameVersionInfo == null) {
+            gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(gameJar);
+        }
+
+        //}
 
         return gameVersionInfo;
     }

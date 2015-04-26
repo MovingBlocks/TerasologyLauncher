@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2015 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,40 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Contains general information about a single retrieved build for Terasology.
+ */
 public final class TerasologyGameVersion implements Serializable {
 
     public static final int BUILD_VERSION_LATEST = -1;
 
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 4L;
 
+    /** Build number for the engine job in Jenkins (bare engine + Core) */
     private Integer buildNumber;
+
+    /** Build number for the Omega distribution job in Jenkins (includes extra modules) */
+    private Integer omegaNumber;
+
+    /** Which job line in Jenkins this build is part of */
     private GameJob job;
+
+    /** Detailed version information for the engine */
     private TerasologyGameVersionInfo gameVersionInfo;
+
+    /** What path the game has been installed to locally */
     private transient File installationPath;
+
+    /** Direct reference to the main game jar */
     private transient File gameJar;
+
+    /** Changes for this version */
     private List<String> changeLog;
+
+    /** Success status from Jenkins */
     private Boolean successful;
 
+    /** Whether or not this instance is the very latest in the job line or not */
     private boolean latest;
 
     public TerasologyGameVersion() {
@@ -41,6 +61,7 @@ public final class TerasologyGameVersion implements Serializable {
 
     public void copyTo(TerasologyGameVersion gameVersion) {
         gameVersion.setBuildNumber(buildNumber);
+        gameVersion.setOmegaNumber(omegaNumber);
         gameVersion.setJob(job);
         gameVersion.setGameVersionInfo(gameVersionInfo);
         gameVersion.setInstallationPath(installationPath);
@@ -66,6 +87,14 @@ public final class TerasologyGameVersion implements Serializable {
 
     void setBuildNumber(Integer buildNumber) {
         this.buildNumber = buildNumber;
+    }
+
+    public Integer getOmegaNumber() {
+        return buildNumber;
+    }
+
+    void setOmegaNumber(Integer omegaNumber) {
+        this.omegaNumber = omegaNumber;
     }
 
     public GameJob getJob() {

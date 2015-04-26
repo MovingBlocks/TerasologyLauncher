@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 MovingBlocks
+ * Copyright 2015 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package org.terasology.launcher.game;
 
+/**
+ * Enum for available job lines from Jenkins we track.
+ */
 public enum GameJob {
 
-    TerasologyStable("master", 30, 5, true, false, "STABLE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
+    TerasologyStable("master", "DistroOmegaRelease", 30, 5, true, false, "STABLE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
 
-    TerasologyLegacy("legacy", 1, 0, true, true, "STABLE", "infoHeader1_TerasologyLegacy", "settings_game_buildType_TerasologyLegacy"),
-
-    Terasology("develop", 995, 9, false, false, "NIGHTLY", "infoHeader1_Terasology", "settings_game_buildType_Terasology"),
-
-    TerasologyMulti("multiplayer", 1, 0, false, true, "NIGHTLY", "infoHeader1_TerasologyMulti", "settings_game_buildType_TerasologyMulti");
+    Terasology("develop", "DistroOmega", 995, 40, false, false, "NIGHTLY", "infoHeader1_Terasology", "settings_game_buildType_Terasology");
 
     private final String gitBranch;
+    private final String omegaJobName;
     private final int minBuildNumber;
     private final int prevBuildNumbers;
     private final boolean stable;
@@ -35,9 +35,10 @@ public enum GameJob {
     private final String infoMessageKey;
     private final String settingsKey;
 
-    private GameJob(String gitBranch, int minBuildNumber, int prevBuildNumbers, boolean stable, boolean onlyInstalled, String installationDirectory, String infoMessageKey,
+    GameJob(String gitBranch, String omegaJob, int minBuildNumber, int prevBuildNumbers, boolean stable, boolean onlyInstalled, String installationDirectory, String infoMessageKey,
                     String settingsKey) {
         this.gitBranch = gitBranch;
+        this.omegaJobName = omegaJob;
         this.minBuildNumber = minBuildNumber;
         this.prevBuildNumbers = prevBuildNumbers;
         this.stable = stable;
@@ -49,6 +50,10 @@ public enum GameJob {
 
     public final String getGitBranch() {
         return gitBranch;
+    }
+
+    public final String getOmegaJobName() {
+        return omegaJobName;
     }
 
     public int getMinBuildNumber() {

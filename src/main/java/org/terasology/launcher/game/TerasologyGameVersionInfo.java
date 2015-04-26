@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 MovingBlocks
+ * Copyright 2015 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+/***
+ * Contains version data for a single instance of a Terasology engine build, parsed out of the main jar.
+ */
 public final class TerasologyGameVersionInfo implements Serializable {
 
     private static final long serialVersionUID = 4L;
