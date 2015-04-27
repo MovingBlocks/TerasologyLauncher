@@ -619,7 +619,13 @@ public final class TerasologyGameVersions {
      */
     public synchronized boolean updateGameVersionsAfterInstallation(File terasologyDirectory) {
         File engineJar = null;
-        File[] files = terasologyDirectory.listFiles();
+        File libsDir = new File(terasologyDirectory, DIR_LIBS);
+        if (!libsDir.exists()) {
+            logger.error("Failed to find the libs dir in {} - cannot update game versions", terasologyDirectory);
+            return false;
+        }
+
+        File[] files = libsDir.listFiles();
         if (files == null) {
             logger.error("No files returned trying to scan directory {} for game versioning", terasologyDirectory);
             return false;
