@@ -112,7 +112,6 @@ public final class TerasologyGameVersions {
         }
 
         // With the build numbers in hand we can go check for any existing installs locally
-        // TODO: Verify this actually can recognize new-style builds (with Terasology.jar moved)
         loadInstalledGames(gameDirectory, buildNumbersMap);
 
         // For each job line now fill in the extra version details needed for each build
@@ -137,7 +136,6 @@ public final class TerasologyGameVersions {
             loadGameVersions(buildNumbers, job, gameVersionMap, cachedGameVersions);
 
             // Now go back over the list of good builds and match them to Omega builds if possible
-            // TODO: Verify that this is a suitable stuff to add this new piece + find where to use it later
             fillInOmegaBuilds(gameVersionMap, buildNumbers, job);
 
             // Finally update the local cache if appropriate (?)
