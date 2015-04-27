@@ -13,7 +13,7 @@ Terasology and related projects are developed by a group of software enthusiast 
 
 Usage
 -----
-*Terasology Launcher* requires Java 7.
+*Terasology Launcher* requires Java 7 or higher.
 
 1. Download and extract the ZIP file
    * [official releases][Download GitHub Releases] (recommended)
