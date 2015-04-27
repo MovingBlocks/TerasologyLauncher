@@ -33,11 +33,18 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -325,16 +332,26 @@ public final class TerasologyGameVersions {
      * @param buildNumbersMap The set of build numbers to look for
      */
     private void loadInstalledGames(File directory, Map<GameJob, SortedSet<Integer>> buildNumbersMap) {
-        final File[] gameJar = directory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isFile() && file.canRead() && FILE_TERASOLOGY_JAR.equals(file.getName());
-            }
+        final Set<File> candidateFiles = new HashSet<>();
+        try {
+            Files.walkFileTree(directory.toPath(), new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+                    if (path.toFile().getName().matches(FILE_ENGINE_JAR)) {
+                        logger.debug("Matched path to engine jar file: {}", path.toFile().getName());
+                        candidateFiles.add(path.toFile());
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            logger.error("Hit an error scanning for existing file directories: {}", e);
         }
-        );
 
-        if ((gameJar != null) && (gameJar.length == 1)) {
-            final TerasologyGameVersion gameVersion = loadInstalledGameVersion(gameJar[0]);
+        logger.info("We got the following engine candidates: {}", candidateFiles);
+
+        for (File engineJar : candidateFiles) {
+            final TerasologyGameVersion gameVersion = loadInstalledGameVersion(engineJar);
             if (gameVersion != null) {
                 final SortedMap<Integer, TerasologyGameVersion> gameVersionMap = gameVersionMaps.get(gameVersion.getJob());
                 final SortedSet<Integer> buildNumbers = buildNumbersMap.get(gameVersion.getJob());
@@ -342,38 +359,26 @@ public final class TerasologyGameVersions {
                 if (!gameVersionMap.containsKey(gameVersion.getBuildNumber())) {
                     gameVersionMap.put(gameVersion.getBuildNumber(), gameVersion);
                 } else {
-                    logger.info("Installed game already loaded. '{}'", gameJar[0]);
-                }
-            }
-        } else {
-            final File[] subDirectories = directory.listFiles(new FileFilter() {
-
-                @Override
-                public boolean accept(File file) {
-                    return file.isDirectory() && file.canRead();
-                }
-            });
-            if (subDirectories != null) {
-                for (File subDirectory : subDirectories) {
-                    loadInstalledGames(subDirectory, buildNumbersMap);
+                    logger.info("Installed game already loaded. '{}'", engineJar);
                 }
             }
         }
     }
 
-    private TerasologyGameVersion loadInstalledGameVersion(File gameJar) {
+    private TerasologyGameVersion loadInstalledGameVersion(File engineJar) {
         TerasologyGameVersion gameVersion = null;
-        final TerasologyGameVersionInfo gameVersionInfo = loadInstalledGameVersionInfo(gameJar);
+        final TerasologyGameVersionInfo gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(engineJar);
 
         if ((gameVersionInfo != null)
-            && (gameVersionInfo.getJobName() != null) && (gameVersionInfo.getJobName().length() > 0)
-            && (gameVersionInfo.getBuildNumber() != null) && (gameVersionInfo.getBuildNumber().length() > 0)) {
+                && (gameVersionInfo.getJobName() != null) && (gameVersionInfo.getJobName().length() > 0)
+                && (gameVersionInfo.getBuildNumber() != null) && (gameVersionInfo.getBuildNumber().length() > 0)) {
             GameJob installedJob = null;
             try {
                 installedJob = GameJob.valueOf(gameVersionInfo.getJobName());
             } catch (IllegalArgumentException e) {
-                logger.error("Unknown job '{}' found for game '{}'!", gameVersionInfo.getJobName(), gameJar);
+                logger.error("Unknown job '{}' found for game '{}'!", gameVersionInfo.getJobName(), engineJar);
             }
+
             Integer installedBuildNumber = null;
             try {
                 installedBuildNumber = Integer.parseInt(gameVersionInfo.getBuildNumber());
@@ -381,53 +386,29 @@ public final class TerasologyGameVersions {
                 logger.error("Could not parse build number '{}'!", gameVersionInfo.getBuildNumber());
             }
 
+            File terasologyJar = new File(engineJar.getParentFile(), FILE_TERASOLOGY_JAR);
+            if (!terasologyJar.exists()) {
+                logger.error("Expected game jar {} did not exist at {} ! ", FILE_TERASOLOGY_JAR, terasologyJar);
+            }
+
             if ((installedJob != null) && (installedBuildNumber != null)
                 && (gameVersionInfo.getGitBranch().endsWith(installedJob.getGitBranch())) && (installedJob.getMinBuildNumber() <= installedBuildNumber)) {
                 gameVersion = new TerasologyGameVersion();
                 gameVersion.setJob(installedJob);
                 gameVersion.setBuildNumber(installedBuildNumber);
-                gameVersion.setInstallationPath(gameJar.getParentFile());
-                gameVersion.setGameJar(gameJar);
+                gameVersion.setInstallationPath(engineJar.getParentFile());
+                gameVersion.setGameJar(terasologyJar);
                 gameVersion.setGameVersionInfo(gameVersionInfo);
                 gameVersion.setChangeLog(null);
                 gameVersion.setSuccessful(Boolean.TRUE);
                 gameVersion.setLatest(false);
             } else {
-                logger.warn("The game version info can not be used from the file '{}' or '{}'!", gameJar, FILE_ENGINE_JAR);
+                logger.warn("The game version info can not be used from the file '{}' !", engineJar);
             }
         } else {
-            logger.warn("The game version info can not be loaded from the file '{}' or '{}'!", gameJar, FILE_ENGINE_JAR);
+            logger.warn("The game version info can not be loaded from the file '{}' !", engineJar);
         }
         return gameVersion;
-    }
-
-    private TerasologyGameVersionInfo loadInstalledGameVersionInfo(File gameJar) {
-        TerasologyGameVersionInfo gameVersionInfo = null;
-
-        //if (gameJar.exists() && gameJar.canRead() && gameJar.isFile()) {
-        // TODO: Check if this causes trouble elsewhere (better fix is possible, but may not be fast)
-        final File libsDirectory = new File(gameJar.getParentFile(), DIR_LIBS);
-        if (libsDirectory.isDirectory() && libsDirectory.canRead()) {
-            final File[] engineJars = libsDirectory.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File file) {
-                    return file.isFile() && file.canRead() && file.getName().matches(FILE_ENGINE_JAR);
-                }
-            }
-            );
-
-            if ((engineJars != null) && (engineJars.length == 1)) {
-                gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(engineJars[0]);
-            }
-        }
-
-        if (gameVersionInfo == null) {
-            gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(gameJar);
-        }
-
-        //}
-
-        return gameVersionInfo;
     }
 
     private void fillBuildNumbers(SortedSet<Integer> buildNumbers, int minBuildNumber, Integer lastBuildNumber) {
@@ -631,9 +612,31 @@ public final class TerasologyGameVersions {
         }
     }
 
+    /**
+     * Re-checks version info after a game has been installed.
+     * @param terasologyDirectory The direction the game was installed to.
+     * @return boolean indicating success or failure.
+     */
     public synchronized boolean updateGameVersionsAfterInstallation(File terasologyDirectory) {
-        final File gameJar = new File(terasologyDirectory, FILE_TERASOLOGY_JAR);
-        final TerasologyGameVersion gameVersion = loadInstalledGameVersion(gameJar);
+        File engineJar = null;
+        File[] files = terasologyDirectory.listFiles();
+        if (files == null) {
+            logger.error("No files returned trying to scan directory {} for game versioning", terasologyDirectory);
+            return false;
+        }
+
+        for (File f : files) {
+            if (f.getName().matches(FILE_ENGINE_JAR)) {
+                engineJar = f;
+            }
+        }
+
+        if (engineJar == null) {
+            logger.error("Failed to find the engine jar in game install dir {} - cannot update game versions", terasologyDirectory);
+            return false;
+        }
+
+        final TerasologyGameVersion gameVersion = loadInstalledGameVersion(engineJar);
         if (gameVersion != null) {
             final List<TerasologyGameVersion> gameVersionList = getGameVersionList(gameVersion.getJob());
             for (TerasologyGameVersion currentGameVersion : gameVersionList) {

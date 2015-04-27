@@ -44,7 +44,7 @@ public final class TerasologyGameVersion implements Serializable {
     /** What path the game has been installed to locally. */
     private transient File installationPath;
 
-    /** Direct reference to the main game jar. */
+    /** Direct reference to the Terasology game jar. */
     private transient File gameJar;
 
     /** Changes for this version. */

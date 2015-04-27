@@ -76,7 +76,7 @@ public final class GameStarter {
         processParameters.add("java");
         processParameters.addAll(javaParameters);
         processParameters.add("-jar");
-        processParameters.add("libs/" + gameVersion.getGameJar().getName());
+        processParameters.add(gameVersion.getGameJar().getName());
         processParameters.add("-homedir=" + gameDataDirectory.getPath());
         processParameters.addAll(gameParameters);
 
