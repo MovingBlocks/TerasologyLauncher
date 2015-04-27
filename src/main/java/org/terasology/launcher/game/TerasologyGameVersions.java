@@ -228,7 +228,7 @@ public final class TerasologyGameVersions {
         logger.info("Will try to load Omega build numbers from " + job.getOmegaJobName());
 
         // We more or less redo the original process in looking up the Omega job then later going back in history to map to the engine job
-        Integer lastSuccessfulBuildNumber = null;
+        Integer lastSuccessfulBuildNumber;
         try {
             lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumberJenkins(job.getOmegaJobName());
         } catch (DownloadException e) {
@@ -236,7 +236,8 @@ public final class TerasologyGameVersions {
             return;
         }
 
-        logger.info("Got the latest successful Omega build number: " + lastSuccessfulBuildNumber);
+        int oldestEngine = buildNumbers.first();
+        logger.info("Latest successful Omega build number is {} and oldest engine we care about is {}", lastSuccessfulBuildNumber, oldestEngine);
 
         // Go through at the most twice as many Omega builds as we have engine builds to care about (not expecting many oddities)
         int omegaRebuild = -1;
@@ -264,7 +265,6 @@ public final class TerasologyGameVersions {
             try {
                 // See if the job exists and is successful. If not we don't care so try the next one
                 matchingEngineBuildNumber = DownloadUtils.loadEngineTriggerJenkins(job, omegaBuildNumber);
-                logger.info("Matching engine build number was {}", matchingEngineBuildNumber);
                 if (matchingEngineBuildNumber == -1) {
                     // In this case we know there is a successful Omega build that didn't trigger from an engine build
                     // By storing the Omega number we can keep looking
@@ -277,8 +277,14 @@ public final class TerasologyGameVersions {
                         omegaMapping.put(matchingEngineBuildNumber, omegaRebuild);
                         omegaRebuild = -1;
                     } else {
-                        logger.info("Mapping engine build {} with exact Omega build {}", matchingEngineBuildNumber, omegaBuildNumber);
+                        //logger.debug("Mapping engine build {} with exact Omega build {}", matchingEngineBuildNumber, omegaBuildNumber);
                         omegaMapping.put(matchingEngineBuildNumber, omegaBuildNumber);
+                    }
+
+                    // See if we've searched far enough the Omega line to have matched the oldest engine we care about
+                    if (matchingEngineBuildNumber <= oldestEngine) {
+                        logger.info("We've reached or passed the number of engine releases we're pairing with Omega, done here");
+                        break;
                     }
                 }
             } catch (DownloadException e) {
@@ -286,19 +292,27 @@ public final class TerasologyGameVersions {
             }
         }
 
+        logger.info("Now checking build number mappings with game versions");
         int processed = 0;
         // TODO: Is it safe to use the entries from buildNumbers as keys or can they go out of sync vs loaded game versions?
         for (Integer engineBuildNumber : buildNumbers) {
-            logger.info("Going to check for engine build " + engineBuildNumber);
-
-            if (omegaMapping.containsKey(engineBuildNumber)) {
-                logger.info("We have an omega match: {}", omegaMapping.get(engineBuildNumber));
+            Integer matchingOmega = omegaMapping.get(engineBuildNumber);
+            if (matchingOmega != null) {
+                //logger.info("Omega build {} matches engine build {}", matchingOmega, engineBuildNumber);
+                TerasologyGameVersion gameVersion = gameVersionMap.get(engineBuildNumber);
+                if (gameVersion == null) {
+                    logger.warn("Failed to find a game version entry for engine build {} !", engineBuildNumber);
+                    continue;
+                } else {
+                    //logger.debug("Updating game version for engine {} with omega mapping {}", engineBuildNumber, matchingOmega);
+                    gameVersion.setOmegaNumber(matchingOmega);
+                }
             } else {
                 logger.warn("*WARNING:* No Omega distribution found for engine build {}", engineBuildNumber);
                 // TODO: Display some sort of warning for the user if this build gets selected
             }
 
-            logger.info("Is there a game version for it? " + gameVersionMap.get(engineBuildNumber));
+            //logger.debug("Final game version object: {} ", gameVersionMap.get(engineBuildNumber));
             processed++;
         }
 

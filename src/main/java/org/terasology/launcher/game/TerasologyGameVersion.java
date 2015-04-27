@@ -29,31 +29,31 @@ public final class TerasologyGameVersion implements Serializable {
 
     private static final long serialVersionUID = 4L;
 
-    /** Build number for the engine job in Jenkins (bare engine + Core) */
+    /** Build number for the engine job in Jenkins (bare engine + Core). */
     private Integer buildNumber;
 
-    /** Build number for the Omega distribution job in Jenkins (includes extra modules) */
+    /** Build number for the Omega distribution job in Jenkins (includes extra modules). */
     private Integer omegaNumber;
 
-    /** Which job line in Jenkins this build is part of */
+    /** Which job line in Jenkins this build is part of. */
     private GameJob job;
 
-    /** Detailed version information for the engine */
+    /** Detailed version information for the engine. */
     private TerasologyGameVersionInfo gameVersionInfo;
 
-    /** What path the game has been installed to locally */
+    /** What path the game has been installed to locally. */
     private transient File installationPath;
 
-    /** Direct reference to the main game jar */
+    /** Direct reference to the main game jar. */
     private transient File gameJar;
 
-    /** Changes for this version */
+    /** Changes for this version. */
     private List<String> changeLog;
 
-    /** Success status from Jenkins */
+    /** Success status from Jenkins. */
     private Boolean successful;
 
-    /** Whether or not this instance is the very latest in the job line or not */
+    /** Whether or not this instance is the very latest in the job line or not. */
     private boolean latest;
 
     public TerasologyGameVersion() {
@@ -90,7 +90,7 @@ public final class TerasologyGameVersion implements Serializable {
     }
 
     public Integer getOmegaNumber() {
-        return buildNumber;
+        return omegaNumber;
     }
 
     void setOmegaNumber(Integer omegaNumber) {
@@ -155,6 +155,7 @@ public final class TerasologyGameVersion implements Serializable {
 
     @Override
     public String toString() {
-        return this.getClass().getName() + "[" + job + ", " + buildNumber + ", latest=" + latest + ", successful=" + successful + ", installed=" + isInstalled() + "]";
+        return this.getClass().getName() + "[" + job + ", engine=" + buildNumber + ", omega=" + omegaNumber + ", latest="
+                + latest + ", successful=" + successful + ", installed=" + isInstalled() + "]";
     }
 }

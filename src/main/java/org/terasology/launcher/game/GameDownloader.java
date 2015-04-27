@@ -57,7 +57,18 @@ public final class GameDownloader {
         if (downloadZipFile.exists() && (!downloadZipFile.isFile() || !downloadZipFile.delete())) {
             throw new IOException("Could not delete file! " + downloadZipFile);
         }
-        downloadURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_ZIP);
+
+        // If we have a matching Omega distribution for this game version then fetch that zip file instead
+        if (gameVersion.getOmegaNumber() != null) {
+            logger.info("Omega distribution {} is available for that engine build, downloading it", gameVersion.getOmegaNumber());
+            downloadURL = DownloadUtils.createFileDownloadUrlJenkins(gameVersion.getJob().getOmegaJobName(),
+                    gameVersion.getOmegaNumber(), DownloadUtils.FILE_TERASOLOGY_OMEGA_ZIP);
+        } else {
+            logger.warn("Engine build {} has no Omega zip available! Falling back to main zip without extra modules", buildNumber);
+            downloadURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_ZIP);
+        }
+        logger.info("The download URL is {}", downloadURL);
+
         final File gameJobDirectory = new File(new File(gameParentDirectory, gameVersion.getJob().getInstallationDirectory()), jobName);
         DirectoryUtils.checkDirectory(gameJobDirectory);
         gameDirectory = new File(gameJobDirectory, buildNumber.toString());

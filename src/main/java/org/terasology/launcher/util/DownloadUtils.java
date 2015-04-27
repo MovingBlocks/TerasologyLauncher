@@ -48,20 +48,19 @@ public final class DownloadUtils {
 
     public static final String TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME = "TerasologyLauncherNightly";
 
-    public static final String FILE_TERASOLOGY_GAME_ZIP = "distributions/Terasology.zip";
-    public static final String FILE_TERASOLOGY_OMEGA_ZIP = "distros/omega/build/distributions/TerasologyOmega.zip";
-    public static final String FILE_TERASOLOGY_LAUNCHER_ZIP = "distributions/TerasologyLauncher.zip";
-    public static final String FILE_TERASOLOGY_GAME_VERSION_INFO = "resources/main/org/terasology/version/versionInfo.properties";
-    public static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO = "resources/main/org/terasology/launcher/version/versionInfo.properties";
-    private static final String FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG = "distributions/CHANGELOG.txt";
+    public static final String FILE_TERASOLOGY_GAME_ZIP = "/artifact/build/distributions/Terasology.zip";
+    public static final String FILE_TERASOLOGY_OMEGA_ZIP = "/artifact/distros/omega/build/distributions/TerasologyOmega.zip";
+    public static final String FILE_TERASOLOGY_LAUNCHER_ZIP = "/artifact/build/distributions/TerasologyLauncher.zip";
+    public static final String FILE_TERASOLOGY_GAME_VERSION_INFO = "/artifact/build/resources/main/org/terasology/version/versionInfo.properties";
+    public static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO = "/artifact/build/resources/main/org/terasology/launcher/version/versionInfo.properties";
+    private static final String FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG = "/artifact/build/distributions/CHANGELOG.txt";
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
 
     private static final String JENKINS_JOB_URL = "http://jenkins.terasology.org/job/";
     private static final String LAST_STABLE_BUILD = "/lastStableBuild";
     private static final String LAST_SUCCESSFUL_BUILD = "/lastSuccessfulBuild";
-    private static final String BUILD_NUMBER = "/buildNumber/";
-    private static final String ARTIFACT_BUILD = "/artifact/build/";
+    private static final String BUILD_NUMBER = "/buildNumber";
 
     private static final String API_JSON_RESULT = "/api/json?tree=result";
     private static final String API_JSON_CAUSE = "/api/json?tree=actions[causes[upstreamBuild]]";
@@ -151,7 +150,6 @@ public final class DownloadUtils {
         urlBuilder.append(jobName);
         urlBuilder.append("/");
         urlBuilder.append(buildNumber);
-        urlBuilder.append(ARTIFACT_BUILD);
         urlBuilder.append(fileName);
 
         return new URL(urlBuilder.toString());
@@ -287,22 +285,24 @@ public final class DownloadUtils {
         BufferedReader reader = null;
         try {
             urlResult = DownloadUtils.createUrlJenkins(job.getOmegaJobName(), omegaBuildNumber, API_JSON_CAUSE);
-            logger.info("The URL to check is {}", urlResult);
+            //logger.debug("The Omega URL to check is {}", urlResult);
             reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), StandardCharsets.US_ASCII));
             final String jsonResult = reader.readLine();
             if (jsonResult != null) {
-                logger.info("The json result from URL {} was {}", urlResult, jsonResult);
+                //logger.debug("The json result was {}", jsonResult);
                 // We're looking for the number in something like [{"upstreamBuild":1401}]
                 String pattern = "upstreamBuild\":(\\d+)";
                 Pattern p = Pattern.compile(pattern);
                 Matcher m = p.matcher(jsonResult);
                 if (m.find()) {
-                    logger.info("Found value: " + m.group(1));
+                    //logger.debug("Found regex group believed to be build number: " + m.group(1));
                     engineBuildNumber = Integer.valueOf(m.group(1));
+                } else {
+                    logger.info("Failed to find a matching regex group for Omega build {}, probably no engine cause", omegaBuildNumber);
                 }
             }
         } catch (IOException | RuntimeException e) {
-            throw new DownloadException("The engine cause could not be loaded from url " + urlResult, e);
+            throw new DownloadException("There was an issue attempting to fetch the Omega url" + urlResult, e);
         } finally {
             if (reader != null) {
                 try {
