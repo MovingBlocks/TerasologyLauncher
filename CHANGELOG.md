@@ -1,10 +1,12 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 2.0.0 (2015-04-26
+## 2.0.0 (2015-05-02
 * Launcher now retrieves the "Omega" zip which is base Terasology + the modules in the standard lineup
 * Structure of Terasology.zip changed, Terasology.jar is now inside the "libs" directory
 * Substantial rework of how game and engine jars are detected and used 
+* Renamed "Nightly" to "Develop" and "Stable" to "Release" in various places
+* Lots of translation work including several new languages
 * Much much more to be added
 
 ## 1.4.2 (2014-10-11)

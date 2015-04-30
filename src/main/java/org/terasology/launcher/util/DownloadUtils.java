@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
 
 public final class DownloadUtils {
 
-    public static final String TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME = "TerasologyLauncherNightly";
+    public static final String TERASOLOGY_LAUNCHER_DEVELOP_JOB_NAME = "TerasologyLauncher";
 
     public static final String FILE_TERASOLOGY_GAME_ZIP = "/artifact/build/distributions/Terasology.zip";
     public static final String FILE_TERASOLOGY_OMEGA_ZIP = "/artifact/distros/omega/build/distributions/TerasologyOmega.zip";

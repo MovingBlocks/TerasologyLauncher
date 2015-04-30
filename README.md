@@ -17,8 +17,8 @@ Usage
 
 1. Download and extract the ZIP file
    * [official releases][Download GitHub Releases] (recommended)
-   * [latest stable ZIP][Download Jenkins STABLE]
-   * [latest nightly ZIP][Download Jenkins NIGHTLY] (only for testing)
+   * [latest release ZIP][Download Jenkins RELEASE]
+   * [latest develop ZIP][Download Jenkins DEVELOP] (only for testing)
 2. Start *Terasology Launcher*
    * TerasologyLauncher.exe (Windows)
    * bin/TerasologyLauncher.bat (Windows)
@@ -91,8 +91,8 @@ Contributors
 [GitHub TerasologyLauncher Issues]: https://github.com/MovingBlocks/TerasologyLauncher/issues/ "TerasologyLauncher issues"
 [GitHub TerasologyLauncher Contributors]: https://github.com/MovingBlocks/TerasologyLauncher/graphs/contributors/ "TerasologyLauncher contributors"
 [Download GitHub Releases]: https://github.com/MovingBlocks/TerasologyLauncher/releases/ "TerasologyLauncher download (official releases)"
-[Download Jenkins STABLE]: http://jenkins.terasology.org/job/TerasologyLauncherStable/lastStableBuild/artifact/build/distributions/TerasologyLauncher.zip "TerasologyLauncher STABLE download"
-[Download Jenkins NIGHTLY]: http://jenkins.terasology.org/job/TerasologyLauncherNightly/lastStableBuild/artifact/build/distributions/TerasologyLauncher.zip "TerasologyLauncher NIGHTLY download"
+[Download Jenkins RELEASE]: http://jenkins.terasology.org/job/TerasologyLauncherStable/lastStableBuild/artifact/build/distributions/TerasologyLauncher.zip "TerasologyLauncher RELEASE download"
+[Download Jenkins DEVELOP]: http://jenkins.terasology.org/job/TerasologyLauncher/lastStableBuild/artifact/build/distributions/TerasologyLauncher.zip "TerasologyLauncher DEVELOP download"
 [English forum]: http://forum.terasology.org/threads/terasologylauncher-mrbarsack.708/ "TerasologyLauncher forum thread"
 [German forum]: http://terasologyforum.de/board49-entwicklung/board53-sonstiges/578-terasology-launcher-v3-mrbarsack/ "TerasologyLauncher forum thread"
 [Apache License]: http://www.apache.org/licenses/LICENSE-2.0.html "Apache License, Version 2.0"

@@ -63,7 +63,7 @@ public final class LauncherUpdater {
             this.currentVersion = currentVersionInfo.getBuildNumber();
         }
         if ((currentVersionInfo.getJobName() == null) || (currentVersionInfo.getJobName().trim().length() == 0)) {
-            this.jobName = DownloadUtils.TERASOLOGY_LAUNCHER_NIGHTLY_JOB_NAME;
+            this.jobName = DownloadUtils.TERASOLOGY_LAUNCHER_DEVELOP_JOB_NAME;
         } else {
             this.jobName = currentVersionInfo.getJobName();
         }
