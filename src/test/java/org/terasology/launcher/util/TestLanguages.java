@@ -58,9 +58,15 @@ public final class TestLanguages {
     }
 
     @Test
+    public void testUpdateWithJapan() {
+        Languages.update(Locale.JAPANESE);
+        assertSame(Locale.JAPANESE, Languages.getCurrentLocale());
+    }
+
+    @Test
     public void testUpdateWithJapanese() {
         Languages.update(Languages.DEFAULT_LOCALE);
-        Languages.update(Locale.JAPANESE);
+        Languages.update(Locale.JAPAN);
         assertSame(Languages.DEFAULT_LOCALE, Languages.getCurrentLocale());
     }
 
@@ -91,8 +97,14 @@ public final class TestLanguages {
 
     @Test
     public void testInitWithJapanese() {
-        Languages.init(Languages.DEFAULT_LOCALE.toString());
         Languages.init(Locale.JAPANESE.toString());
+        assertSame(Locale.JAPANESE, Languages.getCurrentLocale());
+    }
+
+    @Test
+    public void testInitWithJapan() {
+        Languages.init(Languages.DEFAULT_LOCALE.toString());
+        Languages.init(Locale.JAPAN.toString());
         assertSame(Languages.DEFAULT_LOCALE, Languages.getCurrentLocale());
     }
 
