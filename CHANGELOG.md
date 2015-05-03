@@ -1,13 +1,20 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 2.0.0 (2015-05-02
+## 2.0.0 (2015-05-03
+* Shiny new look and feel using JavaFX
+* Retired old "Legacy" and "Multi" version lines - Legacy still available in Jenkins
 * Launcher now retrieves the "Omega" zip which is base Terasology + the modules in the standard lineup
-* Structure of Terasology.zip changed, Terasology.jar is now inside the "libs" directory
+* Structure of Terasology.zip changed, Terasology.jar is now inside the "libs" directory (no user action needed)
+* More options for customizing the game launch (command line parameters)
+* Changelogs are aggregated for older builds
 * Substantial rework of how game and engine jars are detected and used 
 * Renamed "Nightly" to "Develop" and "Stable" to "Release" in various places
 * Lots of translation work including several new languages
-* Much much more to be added
+* Experimental support for JRE bundling (more info later)
+* Support for using the OS proxy server config
+* Using Gradle 2.1 now and Java 8 for compiling (but not required at runtime yet)
+* Probably more stuff we forgot about :-)
 
 ## 1.4.2 (2014-10-11)
 * Fix for OS X when selecting game and launcher directory at first start
