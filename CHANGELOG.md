@@ -2,6 +2,7 @@ Terasology Launcher - ChangeLog
 ===============================
 
 ## 2.0.0 (2015-05-03
+* First new major release. *Not* backwards compatible.
 * Shiny new look and feel using JavaFX
 * Retired old "Legacy" and "Multi" version lines - Legacy still available in Jenkins
 * Launcher now retrieves the "Omega" zip which is base Terasology + the modules in the standard lineup
@@ -11,7 +12,7 @@ Terasology Launcher - ChangeLog
 * Substantial rework of how game and engine jars are detected and used 
 * Renamed "Nightly" to "Develop" and "Stable" to "Release" in various places
 * Lots of translation work including several new languages
-* Experimental support for JRE bundling (more info later)
+* Experimental support for JRE bundling and Java Webstart (more info later)
 * Support for using the OS proxy server config
 * Using Gradle 2.1 now and Java 8 for compiling (but not required at runtime yet)
 * Probably more stuff we forgot about :-)

@@ -20,7 +20,7 @@ Usage
    * [latest release ZIP][Download Jenkins RELEASE]
    * [latest develop ZIP][Download Jenkins DEVELOP] (only for testing)
 2. Start *Terasology Launcher*
-   * TerasologyLauncher.exe (Windows)
+   * TerasologyLauncher.x64.exe (Windows - or the x86 for 32-bit)
    * bin/TerasologyLauncher.bat (Windows)
    * bin/TerasologyLauncher (Unix, Linux, Mac OS X)
    * lib/TerasologyLauncher.jar (Java)
