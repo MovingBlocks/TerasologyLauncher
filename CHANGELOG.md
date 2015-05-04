@@ -1,6 +1,8 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## 2.0.1 (Unreleased)
+
 ## 2.0.0 (2015-05-03
 * First new major release. *Not* backwards compatible.
 * Shiny new look and feel using JavaFX
