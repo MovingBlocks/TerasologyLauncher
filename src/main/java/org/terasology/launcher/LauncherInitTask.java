@@ -16,6 +16,7 @@
 
 package org.terasology.launcher;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.stage.Window;
 import org.slf4j.Logger;
@@ -225,7 +226,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 BundleUtils.getLabel("message_dialog_title_chooseGameDirectory"));
             if (gameDirectory == null) {
                 logger.info("The new game directory is not approved. The TerasologyLauncher is terminated.");
-                throw new LauncherStartFailedException();
+                Platform.exit();
             }
         }
         try {
@@ -260,7 +261,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 BundleUtils.getLabel("message_dialog_title_chooseGameDataDirectory"));
             if (gameDataDirectory == null) {
                 logger.info("The new game data directory is not approved. The TerasologyLauncher is terminated.");
-                throw new LauncherStartFailedException();
+                Platform.exit();
             }
         }
         try {
