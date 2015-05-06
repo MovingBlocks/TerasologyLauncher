@@ -18,30 +18,51 @@ package org.terasology.launcher.util;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.scene.control.Alert;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.Window;
+import javafx.stage.Stage;
 
-import javax.swing.JOptionPane;
-import java.awt.Component;
 import java.io.File;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 public final class GuiUtils {
 
     private GuiUtils() {
     }
 
-    public static void showWarningMessageDialog(Component parentComponent, String message) {
-        // TODO: Java8 -- Use ControlsFX dialog
-        JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.WARNING_MESSAGE);
+    private static void showMessageDialog(Alert.AlertType type, String title, String message, Stage owner) {
+        FutureTask<Void> dialog = new FutureTask<>(() -> {
+            final Alert alert = new Alert(type);
+            alert.setTitle(title);
+            alert.setContentText(message);
+            alert.initOwner(owner);
+
+            alert.showAndWait();
+            return null;
+        });
+
+        Platform.runLater(dialog);
+        try {
+            dialog.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
-    public static void showErrorMessageDialog(Component parentComponent, String message) {
-        // TODO: Java8 -- Use ControlsFX dialog
-        JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+    public static void showWarningMessageDialog(Stage owner, String message) {
+        showMessageDialog(Alert.AlertType.WARNING, BundleUtils.getLabel("message_error_title"), message, owner);
     }
 
-    public static File chooseDirectoryDialog(Window parentWindow, final File directory, final String title) {
+    public static void showErrorMessageDialog(Stage owner, String message) {
+        showMessageDialog(Alert.AlertType.ERROR, BundleUtils.getLabel("message_error_title"), message, owner);
+    }
+
+    public static void showInfoMessageDialog(Stage owner, String message) {
+        showMessageDialog(Alert.AlertType.INFORMATION, BundleUtils.getLabel("message_information_title"), message, owner);
+    }
+
+    public static File chooseDirectoryDialog(Stage owner, final File directory, final String title) {
         if (!directory.isDirectory()) {
             directory.mkdir();
         }
@@ -52,7 +73,7 @@ public final class GuiUtils {
                 final DirectoryChooser directoryChooser = new DirectoryChooser();
                 directoryChooser.setInitialDirectory(directory);
                 directoryChooser.setTitle(title);
-                final File selected = directoryChooser.showDialog(parentWindow);
+                final File selected = directoryChooser.showDialog(owner);
                 return selected;
             }
         };

@@ -16,6 +16,13 @@
 
 package org.terasology.launcher.updater;
 
+import javafx.application.Platform;
+import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.TextArea;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
@@ -27,18 +34,12 @@ import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
-import javax.swing.BorderFactory;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 public final class LauncherUpdater {
 
@@ -116,13 +117,44 @@ public final class LauncherUpdater {
         logger.trace("Launcher installation directory: {}", launcherInstallationDirectory);
     }
 
-    public boolean showUpdateDialog(Component parentComponent) {
-        //TODO: Java8 -- ControlsFX Dialog
-        final JPanel msgPanel = new JPanel(new BorderLayout(0, 10));
-        final JTextArea msgLabel = new JTextArea(BundleUtils.getLabel("message_update_launcher"));
-        msgLabel.setBackground(msgPanel.getBackground());
-        msgLabel.setEditable(false);
+    public boolean showUpdateDialog(Stage parentStage) {
+        final String infoText = getUpdateInfo();
 
+        FutureTask<Boolean> dialog = new FutureTask<Boolean>(() -> {
+            Parent root = BundleUtils.getFXMLLoader("update_dialog").load();
+            ((TextArea)root.lookup("#infoTextArea")).setText(infoText);
+            ((TextArea)root.lookup("#changelogTextArea")).setText(changeLog);
+
+            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle(BundleUtils.getLabel("message_update_launcher_title"));
+            alert.setHeaderText(BundleUtils.getLabel("message_update_launcher"));
+            alert.getDialogPane().setContent(root);
+            alert.initOwner(parentStage);
+            alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setResizable(true);
+
+            return alert.showAndWait()
+                    .filter(response -> response == ButtonType.YES)
+                    .isPresent();
+        });
+
+        Platform.runLater(dialog);
+        boolean result = false;
+        try {
+            result = dialog.get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Uh oh, something went wrong with the update dialog!", e);
+        }
+        return result;
+    }
+
+    /**
+     * Assemble an information message about currently installed launcher version and possible update.
+     *
+     * @return a multi-line information message
+     */
+    private String getUpdateInfo() {
         final StringBuilder builder = new StringBuilder();
         builder.append("  ");
         builder.append(BundleUtils.getLabel("message_update_current"));
@@ -143,34 +175,7 @@ public final class LauncherUpdater {
         builder.append("  ");
         builder.append(launcherInstallationDirectory.getPath());
         builder.append("  ");
-
-        final JTextArea msgArea = new JTextArea();
-        msgArea.setText(builder.toString());
-        msgArea.setEditable(false);
-        msgArea.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-
-        final JTextArea changeLogArea = new JTextArea();
-        changeLogArea.setText(changeLog);
-        changeLogArea.setEditable(false);
-        changeLogArea.setRows(15);
-        changeLogArea.setBorder(BorderFactory.createEmptyBorder(1, 7, 1, 7));
-        final JScrollPane changeLogPane = new JScrollPane(changeLogArea);
-        changeLogPane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-
-        msgPanel.add(msgLabel, BorderLayout.NORTH);
-        msgPanel.add(msgArea, BorderLayout.CENTER);
-        msgPanel.add(changeLogPane, BorderLayout.SOUTH);
-
-        final Object[] options = {BundleUtils.getLabel("main_yes"), BundleUtils.getLabel("main_no")};
-
-        final int option = JOptionPane.showOptionDialog(parentComponent,
-            msgPanel,
-            BundleUtils.getLabel("message_update_launcher_title"),
-            JOptionPane.DEFAULT_OPTION,
-            JOptionPane.QUESTION_MESSAGE,
-            null, options, options[0]);
-
-        return (option == 0);
+        return builder.toString();
     }
 
     public boolean update(File downloadDirectory, File tempDirectory) {
