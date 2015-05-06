@@ -1,6 +1,8 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## 2.0.2 (Unreleased)
+
 ## 2.0.1 (2015-05-05)
 * Reverted to old exe file until JRE bundling is entirely ready
 * Marked Java 8 as *required* now - no more Java 7 (makes sense anyway since Terasology won't run on 7)
