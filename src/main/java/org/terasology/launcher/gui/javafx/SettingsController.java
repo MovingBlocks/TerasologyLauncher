@@ -41,7 +41,6 @@ import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 
-import javax.swing.JOptionPane;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -142,10 +141,7 @@ public class SettingsController {
             launcherSettings.store();
         } catch (IOException e) {
             logger.error("The launcher settings can not be stored! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
-            JOptionPane.showMessageDialog(null,
-                BundleUtils.getLabel("message_error_storeSettings"),
-                BundleUtils.getLabel("message_error_title"),
-                JOptionPane.ERROR_MESSAGE);
+            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_storeSettings"));
         } finally {
             ((Node) event.getSource()).getScene().getWindow().hide();
         }
@@ -158,10 +154,7 @@ public class SettingsController {
             Desktop.getDesktop().open(gameDirectory);
         } catch (IOException e) {
             logger.error("The game directory can not be opened! '{}'", gameDirectory, e);
-            JOptionPane.showMessageDialog(null,
-                BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory,
-                BundleUtils.getLabel("message_error_title"),
-                JOptionPane.ERROR_MESSAGE);
+            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
         }
     }
 
@@ -175,10 +168,7 @@ public class SettingsController {
                 updateDirectoryPathLabels();
             } catch (IOException e) {
                 logger.error("The game directory can not be created or used! '{}'", gameDirectory, e);
-                JOptionPane.showMessageDialog(null,
-                    BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory,
-                    BundleUtils.getLabel("message_error_title"),
-                    JOptionPane.ERROR_MESSAGE);
+                GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
             }
         }
     }
@@ -190,10 +180,7 @@ public class SettingsController {
             Desktop.getDesktop().open(gameDataDirectory);
         } catch (IOException e) {
             logger.error("The game data directory can not be opened! '{}'", gameDataDirectory, e);
-            JOptionPane.showMessageDialog(null,
-                BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory,
-                BundleUtils.getLabel("message_error_title"),
-                JOptionPane.ERROR_MESSAGE);
+            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
         }
     }
 
@@ -207,10 +194,7 @@ public class SettingsController {
                 updateDirectoryPathLabels();
             } catch (IOException e) {
                 logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
-                JOptionPane.showMessageDialog(null,
-                    BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory,
-                    BundleUtils.getLabel("message_error_title"),
-                    JOptionPane.ERROR_MESSAGE);
+                GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
             }
         }
     }
@@ -222,10 +206,7 @@ public class SettingsController {
             Desktop.getDesktop().open(launcherDirectory);
         } catch (IOException e) {
             logger.error("The game launcher directory can not be opened! '{}'", launcherDirectory, e);
-            JOptionPane.showMessageDialog(null,
-                BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory,
-                BundleUtils.getLabel("message_error_title"),
-                JOptionPane.ERROR_MESSAGE);
+            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory);
         }
     }
 
@@ -236,10 +217,7 @@ public class SettingsController {
             Desktop.getDesktop().open(downloadDirectory);
         } catch (IOException e) {
             logger.error("The game download directory can not be opened! '{}'", downloadDirectory, e);
-            JOptionPane.showMessageDialog(null,
-                BundleUtils.getLabel("message_error_downloadDirectory") + "\n" + downloadDirectory,
-                BundleUtils.getLabel("message_error_title"),
-                JOptionPane.ERROR_MESSAGE);
+            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_downloadDirectory") + "\n" + downloadDirectory);
         }
     }
 
