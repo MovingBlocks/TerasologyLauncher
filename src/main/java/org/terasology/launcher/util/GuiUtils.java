@@ -16,12 +16,15 @@
 
 package org.terasology.launcher.util;
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 
 import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.File;
+import java.util.concurrent.ExecutionException;
 
 public final class GuiUtils {
 
@@ -38,15 +41,30 @@ public final class GuiUtils {
         JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
     }
 
-    public static File chooseDirectoryDialog(Window parentWindow, File directory, String title) {
-        final DirectoryChooser directoryChooser = new DirectoryChooser();
+    public static File chooseDirectoryDialog(Window parentWindow, final File directory, final String title) {
         if (!directory.isDirectory()) {
             directory.mkdir();
         }
-        directoryChooser.setInitialDirectory(directory);
-        directoryChooser.setTitle(title);
 
-        final File selected = directoryChooser.showDialog(parentWindow);
+        final Task<File> chooseDirectory = new Task<File>() {
+            @Override
+            protected File call() throws Exception {
+                final DirectoryChooser directoryChooser = new DirectoryChooser();
+                directoryChooser.setInitialDirectory(directory);
+                directoryChooser.setTitle(title);
+                final File selected = directoryChooser.showDialog(parentWindow);
+                return selected;
+            }
+        };
+
+        Platform.runLater(chooseDirectory);
+        File selected = null;
+        try {
+            selected = chooseDirectory.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
         // directory proposal needs to be deleted if the user chose a different one
         if (!directory.equals(selected)) {
             directory.delete();

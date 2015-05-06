@@ -18,7 +18,6 @@ package org.terasology.launcher;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -116,7 +115,7 @@ public final class TerasologyLauncher extends Application {
             }
         });
 
-        Platform.runLater(initThread);
+        initThread.start();
     }
 
     /**
