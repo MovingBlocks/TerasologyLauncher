@@ -13,14 +13,14 @@ Terasology and related projects are developed by a group of software enthusiast 
 
 Usage
 -----
-*Terasology Launcher* requires Java 7 or higher.
+*Terasology Launcher* requires [Java 8](https://www.java.com).
 
 1. Download and extract the ZIP file
    * [official releases][Download GitHub Releases] (recommended)
    * [latest release ZIP][Download Jenkins RELEASE]
    * [latest develop ZIP][Download Jenkins DEVELOP] (only for testing)
 2. Start *Terasology Launcher*
-   * TerasologyLauncher.x64.exe (Windows - or the x86 for 32-bit)
+   * TerasologyLauncher.exe (Windows)
    * bin/TerasologyLauncher.bat (Windows)
    * bin/TerasologyLauncher (Unix, Linux, Mac OS X)
    * lib/TerasologyLauncher.jar (Java)

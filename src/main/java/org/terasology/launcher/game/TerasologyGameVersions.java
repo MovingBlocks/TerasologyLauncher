@@ -346,7 +346,7 @@ public final class TerasologyGameVersions {
             logger.error("Hit an error scanning for existing file directories: {}", e);
         }
 
-        logger.info("We got the following engine candidates: {}", candidateFiles);
+        logger.info("Found the following existing engine install dirs: {}", candidateFiles);
 
         for (File engineJar : candidateFiles) {
             final TerasologyGameVersion gameVersion = loadInstalledGameVersion(engineJar);

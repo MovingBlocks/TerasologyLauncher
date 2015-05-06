@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-
-
-
-
 /*
  * This is a Gradle build file:
  * - Gradle Homepage: http://gradle.org/
@@ -45,7 +41,6 @@ wrapper {
 }
 
 import org.apache.tools.ant.filters.FixCrLfFilter;
-import org.apache.tools.ant.taskdefs.condition.IsSigned;
 import java.text.SimpleDateFormat;
 
 def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
@@ -345,6 +340,9 @@ task copyHtml(type: Copy) {
 
     into "$buildDir/distributions"
 }
+
+// TODO: Temporary workaround for new exes / JRE bundling not quite being officially ready yet
+distZip.exclude("*.x*.exe")
 
 task createRelease() {
     dependsOn distZip

@@ -1,7 +1,11 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 2.0.1 (Unreleased)
+## 2.0.1 (2015-05-05)
+* Reverted to old exe file until JRE bundling is entirely ready
+* Marked Java 8 as *required* now - no more Java 7 (makes sense anyway since Terasology won't run on 7)
+* Fixed the JavaFX bug responsible for causing a stall before loading a file chooser dialog
+* Launcher should exit more gracefully if the user cancels out of choosing initial directories to use
 
 ## 2.0.0 (2015-05-03
 * First new major release. *Not* backwards compatible.
