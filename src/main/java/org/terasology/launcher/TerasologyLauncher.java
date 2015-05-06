@@ -18,6 +18,7 @@ package org.terasology.launcher;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -114,12 +115,14 @@ public final class TerasologyLauncher extends Application {
                 }
             }
         });
-        initThread.start();
+
+        Platform.runLater(initThread);
     }
 
     /**
-     * Sets the system property as advised by the following website:
-     * http://docs.oracle.com/javase/7/docs/technotes/guides/net/proxies.html
+     * Sets the system property as advised by Oracle.
+     *
+     * @see <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/net/proxies.html">Java Networking and Proxies</a>
      */
     private void initProxy() {
         System.setProperty("java.net.useSystemProxies", "true");

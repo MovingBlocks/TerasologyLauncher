@@ -41,7 +41,7 @@ assert org.gradle.api.JavaVersion.current().isJava8Compatible()
 
 // gradle wrapper version
 wrapper {
-    gradleVersion '2.1'
+    gradleVersion '2.3'
 }
 
 import org.apache.tools.ant.filters.FixCrLfFilter;
