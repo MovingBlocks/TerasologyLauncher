@@ -77,7 +77,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class ApplicationController {
@@ -272,19 +271,21 @@ public class ApplicationController {
             alert.setTitle(BundleUtils.getLabel("message_deleteGame_title"));
             alert.initOwner(stage);
 
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.get() == ButtonType.OK) {
-                logger.info("Delete installed game! '{}' '{}'", gameVersion, gameVersion.getInstallationPath());
-                try {
-                    FileUtils.delete(gameVersion.getInstallationPath());
-                } catch (IOException e) {
-                    logger.error("Could not delete installed game!", e);
-                    // TODO Show message dialog
-                    return;
-                }
-                gameVersions.removeInstallationInfo(gameVersion);
-                updateGui();
-            }
+            alert.showAndWait()
+                    .filter(response -> response == ButtonType.OK)
+                    .ifPresent(response -> {
+                        logger.info("Delete installed game! '{}' '{}'", gameVersion, gameVersion.getInstallationPath());
+                        try {
+                            FileUtils.delete(gameVersion.getInstallationPath());
+                        } catch (IOException e) {
+                            logger.error("Could not delete installed game!", e);
+                            // TODO: introduce new message label
+                            GuiUtils.showWarningMessageDialog(stage, "Could not delete installed game!");
+                            return;
+                        }
+                        gameVersions.removeInstallationInfo(gameVersion);
+                        updateGui();
+                    });
         } else {
             logger.warn("The selected game version can not be deleted! '{}'", gameVersion);
         }
