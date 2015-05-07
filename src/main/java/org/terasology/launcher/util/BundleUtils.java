@@ -21,10 +21,6 @@ import javafx.scene.image.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -84,16 +80,6 @@ public final class BundleUtils {
             logger.error("Could not create URI '{}' for key '{}'!", uriStr, key, e);
         }
         return null;
-    }
-
-    public static ImageIcon getImageIcon(String key) {
-        final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
-        return new ImageIcon(BundleUtils.class.getResource(imagePath));
-    }
-
-    public static BufferedImage getImage(String key) throws IOException {
-        final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
-        return ImageIO.read(BundleUtils.class.getResourceAsStream(imagePath));
     }
 
     /**

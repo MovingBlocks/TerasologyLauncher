@@ -16,9 +16,9 @@
 
 package org.terasology.launcher.util;
 
+import javafx.stage.DirectoryChooser;
 import org.terasology.launcher.util.windows.SavedGamesPathFinder;
 
-import javax.swing.JFileChooser;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
@@ -158,7 +158,7 @@ public final class DirectoryUtils {
                 }
             }
             if (path == null) {
-                path = new JFileChooser().getFileSystemView().getDefaultDirectory();
+                path = new DirectoryChooser().getInitialDirectory();
             }
 
             gameDataDirectory = new File(path, GAME_DATA_DIR_NAME + '\\');
