@@ -17,16 +17,19 @@
 package org.terasology.launcher.util;
 
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 public final class GuiUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(GuiUtils.class);
 
     private GuiUtils() {
     }
@@ -46,7 +49,7 @@ public final class GuiUtils {
         try {
             dialog.get();
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            logger.warn("Uh oh, something went wrong with the dialog!", e);
         }
     }
 
@@ -67,23 +70,20 @@ public final class GuiUtils {
             directory.mkdir();
         }
 
-        final Task<File> chooseDirectory = new Task<File>() {
-            @Override
-            protected File call() throws Exception {
-                final DirectoryChooser directoryChooser = new DirectoryChooser();
-                directoryChooser.setInitialDirectory(directory);
-                directoryChooser.setTitle(title);
-                final File selected = directoryChooser.showDialog(owner);
-                return selected;
-            }
-        };
+        final FutureTask<File> chooseDirectory = new FutureTask<>(() -> {
+            final DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setInitialDirectory(directory);
+            directoryChooser.setTitle(title);
+
+            return directoryChooser.showDialog(owner);
+        });
 
         Platform.runLater(chooseDirectory);
         File selected = null;
         try {
             selected = chooseDirectory.get();
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            logger.warn("Uh oh, something went wrong with the dialog!", e);
         }
 
         // directory proposal needs to be deleted if the user chose a different one
