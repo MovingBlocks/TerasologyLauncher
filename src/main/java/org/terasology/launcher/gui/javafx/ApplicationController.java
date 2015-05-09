@@ -29,7 +29,9 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -57,10 +59,10 @@ import org.terasology.launcher.log.LogViewAppender;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
-import javax.swing.JOptionPane;
 import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
@@ -198,19 +200,15 @@ public class ApplicationController {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if ((gameVersion == null) || !gameVersion.isInstalled()) {
             logger.warn("The selected game version can not be started! '{}'", gameVersion);
-            JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_gameStart"),
-                    BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
-            // updateGui();
+            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
         } else if (gameStarter.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
-            JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_information_gameRunning"),
-                BundleUtils.getLabel("message_information_title"), JOptionPane.INFORMATION_MESSAGE);
+            GuiUtils.showInfoMessageDialog(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
             final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
                 launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(), launcherSettings.getUserGameParameterList());
             if (!gameStarted) {
-                JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_gameStart"),
-                    BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+                GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
             } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
                 if (gameDownloadWorker == null) {
                     logger.info("Close launcher after game start.");
@@ -268,19 +266,26 @@ public class ApplicationController {
             } else {
                 msg = BundleUtils.getMessage("confirmDeleteGame_withoutData", gameVersion.getInstallationPath());
             }
-            final int option = JOptionPane.showConfirmDialog(null, msg, BundleUtils.getLabel("message_deleteGame_title"), JOptionPane.YES_NO_OPTION);
-            if (option == JOptionPane.YES_OPTION) {
-                logger.info("Delete installed game! '{}' '{}'", gameVersion, gameVersion.getInstallationPath());
-                try {
-                    FileUtils.delete(gameVersion.getInstallationPath());
-                } catch (IOException e) {
-                    logger.error("Could not delete installed game!", e);
-                    // TODO Show message dialog
-                    return;
-                }
-                gameVersions.removeInstallationInfo(gameVersion);
-                updateGui();
-            }
+            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setContentText(msg);
+            alert.setTitle(BundleUtils.getLabel("message_deleteGame_title"));
+            alert.initOwner(stage);
+
+            alert.showAndWait()
+                    .filter(response -> response == ButtonType.OK)
+                    .ifPresent(response -> {
+                        logger.info("Delete installed game! '{}' '{}'", gameVersion, gameVersion.getInstallationPath());
+                        try {
+                            FileUtils.delete(gameVersion.getInstallationPath());
+                        } catch (IOException e) {
+                            logger.error("Could not delete installed game!", e);
+                            // TODO: introduce new message label
+                            GuiUtils.showWarningMessageDialog(stage, "Could not delete installed game!");
+                            return;
+                        }
+                        gameVersions.removeInstallationInfo(gameVersion);
+                        updateGui();
+                    });
         } else {
             logger.warn("The selected game version can not be deleted! '{}'", gameVersion);
         }
@@ -695,15 +700,12 @@ public class ApplicationController {
         progressBar.setVisible(false);
         if (!cancelled) {
             if (!successfulDownloadAndExtract) {
-                JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_gameDownload_downloadExtract"),
-                    BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+                GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDownload_downloadExtract"));
             } else if (!successfulLoadVersion) {
                 if (gameDirectory != null) {
-                    JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_gameDownload_loadVersion") + "\n" + gameDirectory,
-                        BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+                    GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDownload_loadVersion") + "\n" + gameDirectory);
                 } else {
-                    JOptionPane.showMessageDialog(null, BundleUtils.getLabel("message_error_gameDownload_loadVersion"),
-                        BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+                    GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDownload_loadVersion"));
                 }
             }
         }

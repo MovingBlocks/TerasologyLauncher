@@ -18,7 +18,7 @@ package org.terasology.launcher;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.stage.Window;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
@@ -40,9 +40,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherInitTask.class);
 
-    private final Window owner;
+    private final Stage owner;
 
-    public LauncherInitTask(final Window newOwner) {
+    public LauncherInitTask(final Stage newOwner) {
         this.owner = newOwner;
     }
 
@@ -104,7 +104,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         if (os == OperatingSystem.UNKNOWN) {
             logger.error("The operating system is not supported! '{}' '{}' '{}'", System.getProperty("os.name"), System.getProperty("os.arch"),
                 System.getProperty("os.version"));
-            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_operatingSystem"));
+            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_operatingSystem"));
             throw new LauncherStartFailedException();
         }
         logger.debug("Operating system: {}", os);
@@ -118,7 +118,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             DirectoryUtils.checkDirectory(launcherDirectory);
         } catch (IOException e) {
             logger.error("The launcher directory can not be created or used! '{}'", launcherDirectory, e);
-            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory);
+            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory);
             throw new LauncherStartFailedException();
         }
         logger.debug("Launcher directory: {}", launcherDirectory);
@@ -132,7 +132,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             DirectoryUtils.checkDirectory(downloadDirectory);
         } catch (IOException e) {
             logger.error("The download directory can not be created or used! '{}'", downloadDirectory, e);
-            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_downloadDirectory") + "\n" + downloadDirectory);
+            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_downloadDirectory") + "\n" + downloadDirectory);
             throw new LauncherStartFailedException();
         }
         logger.debug("Download directory: {}", downloadDirectory);
@@ -146,7 +146,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             DirectoryUtils.checkDirectory(tempDirectory);
         } catch (IOException e) {
             logger.error("The temp directory can not be created or used! '{}'", tempDirectory, e);
-            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_tempDirectory") + "\n" + tempDirectory);
+            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_tempDirectory") + "\n" + tempDirectory);
             throw new LauncherStartFailedException();
         }
         try {
@@ -167,7 +167,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             launcherSettings.init();
         } catch (IOException e) {
             logger.error("The launcher settings can not be loaded or initialized! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
-            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_loadSettings") + "\n" + launcherSettings.getLauncherSettingsFilePath());
+            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_loadSettings") + "\n" + launcherSettings.getLauncherSettingsFilePath());
             throw new LauncherStartFailedException();
         }
         logger.debug("Launcher Settings: {}", launcherSettings);
@@ -188,11 +188,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 foundLauncherInstallationDirectory = true;
             } catch (URISyntaxException | IOException e) {
                 logger.error("The launcher installation directory can not be detected or used!", e);
-                GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
+                GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
                 // Run launcher without an update. Don't throw a LauncherStartFailedException.
             }
             if (foundLauncherInstallationDirectory) {
-                final boolean update = updater.showUpdateDialog(null);
+                final boolean update = updater.showUpdateDialog(owner);
                 if (update) {
                     if (saveDownloadedFiles) {
                         selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory);
@@ -213,7 +213,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 DirectoryUtils.checkDirectory(gameDirectory);
             } catch (IOException e) {
                 logger.warn("The game directory can not be created or used! '{}'", gameDirectory, e);
-                GuiUtils.showWarningMessageDialog(null, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
+                GuiUtils.showWarningMessageDialog(owner, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
 
                 // Set gameDirectory to 'null' -> user has to choose new game directory
                 gameDirectory = null;
@@ -233,7 +233,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             DirectoryUtils.checkDirectory(gameDirectory);
         } catch (IOException e) {
             logger.error("The game directory can not be created or used! '{}'", gameDirectory, e);
-            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
+            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
             throw new LauncherStartFailedException();
         }
         logger.debug("Game directory: {}", gameDirectory);
@@ -248,7 +248,8 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 DirectoryUtils.checkDirectory(gameDataDirectory);
             } catch (IOException e) {
                 logger.warn("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
-                GuiUtils.showWarningMessageDialog(null, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
+                GuiUtils.showWarningMessageDialog(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" +
+                        gameDataDirectory);
 
                 // Set gameDataDirectory to 'null' -> user has to choose new game data directory
                 gameDataDirectory = null;
@@ -268,7 +269,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             DirectoryUtils.checkDirectory(gameDataDirectory);
         } catch (IOException e) {
             logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
-            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
+            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
             throw new LauncherStartFailedException();
         }
         logger.debug("Game data directory: {}", gameDataDirectory);
@@ -296,7 +297,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             launcherSettings.store();
         } catch (IOException e) {
             logger.error("The launcher settings can not be stored! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
-            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_storeSettings"));
+            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_storeSettings"));
             throw new LauncherStartFailedException();
         }
         logger.debug("Launcher Settings stored: {}", launcherSettings);

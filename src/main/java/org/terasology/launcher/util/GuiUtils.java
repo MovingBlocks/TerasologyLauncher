@@ -16,37 +16,76 @@
 
 package org.terasology.launcher.util;
 
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.Window;
+import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.swing.JOptionPane;
-import java.awt.Component;
 import java.io.File;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 public final class GuiUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(GuiUtils.class);
 
     private GuiUtils() {
     }
 
-    public static void showWarningMessageDialog(Component parentComponent, String message) {
-        // TODO: Java8 -- Use ControlsFX dialog
-        JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.WARNING_MESSAGE);
+    private static void showMessageDialog(Alert.AlertType type, String title, String message, Stage owner) {
+        FutureTask<Void> dialog = new FutureTask<>(() -> {
+            final Alert alert = new Alert(type);
+            alert.setTitle(title);
+            alert.setContentText(message);
+            alert.initOwner(owner);
+
+            alert.showAndWait();
+            return null;
+        });
+
+        Platform.runLater(dialog);
+        try {
+            dialog.get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.warn("Uh oh, something went wrong with the dialog!", e);
+        }
     }
 
-    public static void showErrorMessageDialog(Component parentComponent, String message) {
-        // TODO: Java8 -- Use ControlsFX dialog
-        JOptionPane.showMessageDialog(parentComponent, message, BundleUtils.getLabel("message_error_title"), JOptionPane.ERROR_MESSAGE);
+    public static void showWarningMessageDialog(Stage owner, String message) {
+        showMessageDialog(Alert.AlertType.WARNING, BundleUtils.getLabel("message_error_title"), message, owner);
     }
 
-    public static File chooseDirectoryDialog(Window parentWindow, File directory, String title) {
-        final DirectoryChooser directoryChooser = new DirectoryChooser();
+    public static void showErrorMessageDialog(Stage owner, String message) {
+        showMessageDialog(Alert.AlertType.ERROR, BundleUtils.getLabel("message_error_title"), message, owner);
+    }
+
+    public static void showInfoMessageDialog(Stage owner, String message) {
+        showMessageDialog(Alert.AlertType.INFORMATION, BundleUtils.getLabel("message_information_title"), message, owner);
+    }
+
+    public static File chooseDirectoryDialog(Stage owner, final File directory, final String title) {
         if (!directory.isDirectory()) {
             directory.mkdir();
         }
-        directoryChooser.setInitialDirectory(directory);
-        directoryChooser.setTitle(title);
 
-        final File selected = directoryChooser.showDialog(parentWindow);
+        final FutureTask<File> chooseDirectory = new FutureTask<>(() -> {
+            final DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setInitialDirectory(directory);
+            directoryChooser.setTitle(title);
+
+            return directoryChooser.showDialog(owner);
+        });
+
+        Platform.runLater(chooseDirectory);
+        File selected = null;
+        try {
+            selected = chooseDirectory.get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.warn("Uh oh, something went wrong with the dialog!", e);
+        }
+
         // directory proposal needs to be deleted if the user chose a different one
         if (!directory.equals(selected)) {
             directory.delete();
