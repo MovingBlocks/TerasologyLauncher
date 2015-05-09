@@ -1,6 +1,8 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## 3.0.0 (Unreleased)
+
 ## 2.0.2 (2015-05-09)
 * Fixes Japanese 
 * Fixes loading bar stalling while processing available game versions
