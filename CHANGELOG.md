@@ -1,7 +1,9 @@
 Terasology Launcher - ChangeLog
 ===============================
 
-## 2.0.2 (Unreleased)
+## 2.0.2 (2015-05-09)
+* Fixes Japanese 
+* Fixes loading bar stalling while processing available game versions
 
 ## 2.0.1 (2015-05-05)
 * Reverted to old exe file until JRE bundling is entirely ready
