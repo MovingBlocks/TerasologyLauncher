@@ -2,6 +2,7 @@ Terasology Launcher - ChangeLog
 ===============================
 
 ## 3.0.0 (Unreleased)
+* More JavaFX improvements. Increases minimum Java 8 version to update 40
 
 ## 2.0.2 (2015-05-09)
 * Fixes Japanese 
