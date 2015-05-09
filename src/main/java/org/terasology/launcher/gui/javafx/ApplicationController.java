@@ -536,7 +536,6 @@ public class ApplicationController {
     }
 
     private void updateAboutTab() {
-
         aboutInfoAccordion.getPanes().clear();
 
         Collection<URL> files = new ArrayList<>();
@@ -588,11 +587,18 @@ public class ApplicationController {
                 AnchorPane.setTopAnchor(view, 0.0);
                 pane.getChildren().add(view);
 
-                aboutInfoAccordion.getPanes().add(new TitledPane(fname, pane));
+                final TitledPane titledPane = new TitledPane(fname, pane);
+                titledPane.setAnimated(false);
+
+                aboutInfoAccordion.getPanes().add(titledPane);
             } catch (MalformedURLException e) {
                 logger.warn("Could not load info file -- {}", url);
             } catch (IOException e) {
                 logger.warn("Failed to parse markdown file {}", url, e);
+            }
+
+            if (!aboutInfoAccordion.getPanes().isEmpty()) {
+                aboutInfoAccordion.setExpandedPane(aboutInfoAccordion.getPanes().get(0));
             }
         }
     }
