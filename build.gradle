@@ -34,6 +34,11 @@ apply from: 'bundles.gradle';
 
 // Test for right version of Java in use for running this script
 assert org.gradle.api.JavaVersion.current().isJava8Compatible()
+def javaVersion = System.properties['java.version']
+// make sure at least 8u40 is used for the build (required for JavaFX)
+if (javaVersion.startsWith("1.8") && javaVersion.split("_")[1].toInteger() < 40) {
+    throw new GradleException("Java version 1.8.0_40 or later required, but was $javaVersion")
+}
 
 // gradle wrapper version
 wrapper {
