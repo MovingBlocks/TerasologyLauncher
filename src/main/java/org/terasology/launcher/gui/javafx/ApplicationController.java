@@ -558,18 +558,20 @@ public class ApplicationController {
                 String ext = extIdx < 0 ? "" : url.getFile().substring(extIdx + 1).toLowerCase();
 
                 final WebView view = new WebView();
+                StringBuilder sb = new StringBuilder();
 
                 if (ext.equals("md") || ext.equals("markdown")) {
                     try (InputStream input = url.openStream()) {
-                        String html = Processor.process(input, Configuration.DEFAULT);
-                        view.getEngine().loadContent(html);
+                        sb.append("<body style='padding-left:24px;'>\n");
+                        sb.append(Processor.process(input, Configuration.DEFAULT));
+                        sb.append("</body>");
+                        view.getEngine().loadContent(sb.toString(), "text/html");
                     }
                 } else if (ext.equals("htm") || ext.equals("html")) {
                     view.getEngine().load(url.toExternalForm());
                 } else {
                     try (Reader isr = new InputStreamReader(url.openStream(), cs);
-                         BufferedReader br = new BufferedReader(isr)) {
-                        StringBuilder sb = new StringBuilder();
+                        BufferedReader br = new BufferedReader(isr)) {
                         String line = br.readLine();
 
                         while (line != null) {
@@ -577,12 +579,9 @@ public class ApplicationController {
                             sb.append(System.lineSeparator());
                             line = br.readLine();
                         }
-
-                        // msteiger: I suspect that the second parameter is the MIME type
                         view.getEngine().loadContent(sb.toString(), "text/plain");
                     }
                 }
-
 
                 view.getStylesheets().add(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
                 view.setContextMenuEnabled(false);
