@@ -21,6 +21,7 @@ import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -428,11 +429,16 @@ public class ApplicationController {
         if ((uri != null) && Desktop.isDesktopSupported()) {
             final Desktop desktop = Desktop.getDesktop();
             if (desktop.isSupported(Desktop.Action.BROWSE)) {
-                try {
-                    desktop.browse(uri);
-                } catch (IOException | RuntimeException e) {
-                    logger.error("Could not browse URI '{}' with desktop!", uri, e);
-                }
+                Platform.runLater(new Runnable(){
+                    @Override
+                    public void run() {
+                        try {
+                            desktop.browse(uri);
+                        } catch (IOException | RuntimeException e) {
+                            logger.error("Could not browse URI '{}' with desktop!", uri, e);
+                        }
+                    }
+                });
             }
         }
     }
