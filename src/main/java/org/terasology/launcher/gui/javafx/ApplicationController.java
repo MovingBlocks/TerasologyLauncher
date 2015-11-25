@@ -19,8 +19,10 @@ package org.terasology.launcher.gui.javafx;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
+import com.sun.javafx.application.HostServicesDelegate;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
+import javafx.application.HostServices;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -91,6 +93,7 @@ public class ApplicationController {
     private GameStarter gameStarter;
     private GameDownloadWorker gameDownloadWorker;
     private Stage stage;
+    private HostServices hostServies;
 
     @FXML
     private ChoiceBox<JobItem> jobBox;
@@ -322,13 +325,14 @@ public class ApplicationController {
     }
 
     public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final File newTempDirectory, final LauncherSettings newLauncherSettings,
-                           final TerasologyGameVersions newGameVersions, final Stage newStage) {
+                           final TerasologyGameVersions newGameVersions, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
         this.tempDirectory = newTempDirectory;
         this.launcherSettings = newLauncherSettings;
         this.gameVersions = newGameVersions;
         this.stage = newStage;
+        this.hostServies = hostServices;
 
         // add Logback view appender view to both the root logger and the tab
         Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -425,15 +429,8 @@ public class ApplicationController {
     }
 
     private void openUri(URI uri) {
-        if ((uri != null) && Desktop.isDesktopSupported()) {
-            final Desktop desktop = Desktop.getDesktop();
-            if (desktop.isSupported(Desktop.Action.BROWSE)) {
-                try {
-                    desktop.browse(uri);
-                } catch (IOException | RuntimeException e) {
-                    logger.error("Could not browse URI '{}' with desktop!", uri, e);
-                }
-            }
+        if (uri != null) {
+            hostServies.showDocument(uri.toString());
         }
     }
 

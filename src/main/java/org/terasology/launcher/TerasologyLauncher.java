@@ -18,6 +18,7 @@ package org.terasology.launcher;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -69,6 +70,7 @@ public final class TerasologyLauncher extends Application {
     private ProgressBar loadProgress;
     private Label progressText;
     private Stage mainStage;
+    private HostServices hostServices;
 
     public static void main(String[] args) {
         launch(args);
@@ -85,6 +87,7 @@ public final class TerasologyLauncher extends Application {
         progressText.setAlignment(Pos.CENTER);
         splashLayout.getStylesheets().add(BundleUtils.getStylesheet("css_splash"));
         splashLayout.setEffect(new DropShadow());
+        hostServices = getHostServices();
     }
 
     @Override
@@ -157,7 +160,7 @@ public final class TerasologyLauncher extends Application {
         }
         final ApplicationController controller = fxmlLoader.getController();
         controller.initialize(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(), launcherConfiguration.getTempDirectory(),
-            launcherConfiguration.getLauncherSettings(), launcherConfiguration.getGameVersions(), mainStage);
+            launcherConfiguration.getLauncherSettings(), launcherConfiguration.getGameVersions(), mainStage, hostServices);
 
         Scene scene = new Scene(root);
         scene.getStylesheets().add(BundleUtils.getStylesheet("css_terasology"));
