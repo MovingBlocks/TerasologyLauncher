@@ -488,7 +488,7 @@ public final class TerasologyGameVersions {
                     JobResult jobResult = DownloadUtils.loadJobResultJenkins(job.name(), buildNumber);
                     successful = (jobResult != null && ((jobResult == JobResult.SUCCESS) || (jobResult == JobResult.UNSTABLE)));
                 } catch (DownloadException e) {
-                    logger.debug("Load job result failed. '{}' '{}'", job, buildNumber, e);
+                    logger.warn("Failed to load job result (probably OK): '{}' '{}'", job, buildNumber);
                 }
                 gameVersion.setSuccessful(successful);
             }
@@ -509,7 +509,7 @@ public final class TerasologyGameVersions {
                         gameVersion.setChangeLog(Collections.unmodifiableList(changeLog));
                     }
                 } catch (DownloadException e) {
-                    logger.debug("Load change log failed. '{}' '{}'", job, buildNumber, e);
+                    logger.warn("Loading change log failed (probably OK). '{}' '{}'", job, buildNumber);
                 }
             }
         }
