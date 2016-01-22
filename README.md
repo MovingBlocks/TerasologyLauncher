@@ -13,9 +13,9 @@ Terasology and related projects are developed by a group of software enthusiast 
 
 Usage
 -----
-*Terasology Launcher* requires [Java 8](https://www.java.com). 
+*Terasology Launcher* requires [Java 8](https://www.java.com) and JavaFX. If you are using OpenJDK make sure you have
+the JavaFX runtime libraries installed, e.g., through an extra package often named `openjfx` (Ubuntu) or `java-openjfx` (ArchLinux).
 
-*Note:* As of v3.0.0 (unreleased as of this writing) Java 8 upgrade 40 is required. Goal is to bundle a newer Java before this is released so users don't have to worry about Java. 
 
 1. Download and extract the ZIP file
    * [official releases][Download GitHub Releases] (recommended)
