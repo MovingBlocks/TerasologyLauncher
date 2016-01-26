@@ -70,20 +70,29 @@ public final class GuiUtils {
             directory.mkdir();
         }
 
-        final FutureTask<File> chooseDirectory = new FutureTask<>(() -> {
+        File selected = null;
+
+        if (Platform.isFxApplicationThread()) {
             final DirectoryChooser directoryChooser = new DirectoryChooser();
             directoryChooser.setInitialDirectory(directory);
             directoryChooser.setTitle(title);
 
-            return directoryChooser.showDialog(owner);
-        });
+            selected = directoryChooser.showDialog(owner);
+        } else {
+            final FutureTask<File> chooseDirectory = new FutureTask<>(() -> {
+                final DirectoryChooser directoryChooser = new DirectoryChooser();
+                directoryChooser.setInitialDirectory(directory);
+                directoryChooser.setTitle(title);
 
-        Platform.runLater(chooseDirectory);
-        File selected = null;
-        try {
-            selected = chooseDirectory.get();
-        } catch (InterruptedException | ExecutionException e) {
-            logger.warn("Uh oh, something went wrong with the dialog!", e);
+                return directoryChooser.showDialog(owner);
+            });
+
+            Platform.runLater(chooseDirectory);
+            try {
+                selected = chooseDirectory.get();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.warn("Uh oh, something went wrong with the dialog!", e);
+            }
         }
 
         // directory proposal needs to be deleted if the user chose a different one
