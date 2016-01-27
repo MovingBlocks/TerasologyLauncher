@@ -21,6 +21,17 @@
  * - View tasks for this project: $ gradlew tasks
  */
 
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath group: "com.alexkasko.delta", name: "delta-diff", version: "1.1.3"
+        classpath group: 'de.undercouch', name: 'gradle-download-task', version: '2.1.0'
+    }
+}
+
 apply plugin: 'java'
 apply plugin: 'project-report'
 apply plugin: 'idea'
@@ -29,6 +40,8 @@ apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
+
+apply plugin: 'de.undercouch.download'
 
 apply from: 'bundles.gradle';
 
@@ -368,6 +381,57 @@ task webstart {
 
     doLast {
         println 'Created webstart release: ' + displayVersion
+    }
+}
+
+task createPatch(dependsOn: distZip) {
+    if (env.JOB_NAME == null) {
+        logger.warn("No JOB_NAME given, stopping ...")
+        return
+    }
+
+    doLast {
+        File patchDir = new File(buildDir, 'patch/')
+        File distDir = new File(buildDir, 'distributions/')
+
+        String lastSuccessfulBuildNumber = "http://jenkins.terasology.org/job/$env.JOB_NAME/lastSuccessfulBuild/buildNumber".toURL().getText()
+        String url = "http://jenkins.terasology.org/job/$env.JOB_NAME/lastSuccessfulBuild/artifact/build/distributions/TerasologyLauncher.zip"
+
+        File oldZip = new File(patchDir, 'old.zip')
+        File newZip = new File(distDir, 'TerasologyLauncher.zip')
+
+        // Download the last successful build artifact for the current job
+        download {
+            onlyIfNewer true
+            src url
+            dest oldZip
+        }
+
+        // Unzip the last successful build into the 'old' directory
+        copy {
+            from zipTree(oldZip)
+            into new File(patchDir, 'old/')
+        }
+
+        // Unzip the result of this build into the 'new' directory
+        copy {
+            from zipTree(newZip)
+            into new File(patchDir, 'new/')
+        }
+
+        File oldUnzipped = new File(patchDir, 'old/TerasologyLauncher/')
+        File newUnzipped = new File(patchDir, 'new/TerasologyLauncher/')
+
+        File patchZip = new File(patchDir, "$project.name-patch-$lastSuccessfulBuildNumber-$env.BUILD_NUMBER"+".zip")
+
+        logger.info("Creating patch file with: \n\told  : $oldUnzipped\n\tnew  : $newUnzipped\n\tpatch: $patchZip")
+        new com.alexkasko.delta.DirDeltaCreator().create(oldUnzipped, newUnzipped, patchZip)
+
+        // Copy the patch file artifact to the 'distributions' directory
+        copy {
+            from patchZip
+            into distDir
+        }
     }
 }
 
