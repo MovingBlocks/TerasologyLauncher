@@ -55,7 +55,7 @@ if (javaVersion.startsWith("1.8") && javaVersion.split("_")[1].toInteger() < 40)
 
 // gradle wrapper version
 wrapper {
-    gradleVersion '2.3'
+    gradleVersion '2.10'
 }
 
 import org.apache.tools.ant.filters.FixCrLfFilter;
@@ -385,8 +385,9 @@ task webstart {
 }
 
 task createPatch(dependsOn: distZip) {
+    description = 'Create a delta patch file w.r.t. last successful build of given JOB_NAME (must be set)'
     if (env.JOB_NAME == null) {
-        logger.warn("No JOB_NAME given, stopping ...")
+        logger.info("No JOB_NAME given, skipping ...")
         return
     }
 
@@ -422,7 +423,8 @@ task createPatch(dependsOn: distZip) {
         File oldUnzipped = new File(patchDir, 'old/TerasologyLauncher/')
         File newUnzipped = new File(patchDir, 'new/TerasologyLauncher/')
 
-        File patchZip = new File(patchDir, "$project.name-patch-$lastSuccessfulBuildNumber-$env.BUILD_NUMBER"+".zip")
+        String patchFileName = "$project.name-patch-$env.JOB_NAME-$lastSuccessfulBuildNumber-$env.BUILD_NUMBER"+".zip"
+        File patchZip = new File(patchDir, patchFileName)
 
         logger.info("Creating patch file with: \n\told  : $oldUnzipped\n\tnew  : $newUnzipped\n\tpatch: $patchZip")
         new com.alexkasko.delta.DirDeltaCreator().create(oldUnzipped, newUnzipped, patchZip)
@@ -432,6 +434,8 @@ task createPatch(dependsOn: distZip) {
             from patchZip
             into distDir
         }
+
+        println "Created patch: $patchFileName"
     }
 }
 
