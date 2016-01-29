@@ -21,7 +21,8 @@ package org.terasology.launcher.game;
  */
 public enum GameJob {
 
-    TerasologyStable("master", "DistroOmegaRelease", 49, 5, true, false, "RELEASE", "infoHeader1_TerasologyStable", "settings_game_buildType_TerasologyStable"),
+    TerasologyStable("master", "DistroOmegaRelease", 49, 5, true, false, "RELEASE", "infoHeader1_TerasologyStable",
+                     "settings_game_buildType_TerasologyStable"),
 
     Terasology("develop", "DistroOmega", 1355, 20, false, false, "DEVELOP", "infoHeader1_Terasology", "settings_game_buildType_Terasology");
 
@@ -35,8 +36,9 @@ public enum GameJob {
     private final String infoMessageKey;
     private final String settingsKey;
 
-    GameJob(String gitBranch, String omegaJob, int minBuildNumber, int prevBuildNumbers, boolean stable, boolean onlyInstalled, String installationDirectory, String infoMessageKey,
-                    String settingsKey) {
+    GameJob(String gitBranch, String omegaJob, int minBuildNumber, int prevBuildNumbers, boolean stable, boolean onlyInstalled,
+            String installationDirectory, String infoMessageKey,
+            String settingsKey) {
         this.gitBranch = gitBranch;
         this.omegaJobName = omegaJob;
         this.minBuildNumber = minBuildNumber;

@@ -19,12 +19,9 @@ package org.terasology.launcher;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.HostServices;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -177,28 +174,20 @@ public final class TerasologyLauncher extends Application {
     private void showSplashStage(final Stage initialStage, final Task<LauncherConfiguration> task) {
         progressText.textProperty().bind(task.messageProperty());
         loadProgress.progressProperty().bind(task.progressProperty());
-        task.stateProperty().addListener(new ChangeListener<Worker.State>() {
-            @Override
-            public void changed(ObservableValue<? extends Worker.State> observableValue, Worker.State oldState, Worker.State newState) {
-                if (newState == Worker.State.SUCCEEDED) {
-                    loadProgress.progressProperty().unbind();
-                    loadProgress.setProgress(1);
-                    if (mainStage != null) {
-                        mainStage.setIconified(false);
-                    }
-                    initialStage.toFront();
-                    FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), splashLayout);
-                    fadeSplash.setFromValue(1.0);
-                    fadeSplash.setToValue(0.0);
-                    fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent actionEvent) {
-                            initialStage.hide();
-                        }
-                    });
-                    fadeSplash.play();
-                } // todo add code to gracefully handle other task states.
-            }
+        task.stateProperty().addListener((observableValue, oldState, newState) -> {
+            if (newState == Worker.State.SUCCEEDED) {
+                loadProgress.progressProperty().unbind();
+                loadProgress.setProgress(1);
+                if (mainStage != null) {
+                    mainStage.setIconified(false);
+                }
+                initialStage.toFront();
+                FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), splashLayout);
+                fadeSplash.setFromValue(1.0);
+                fadeSplash.setToValue(0.0);
+                fadeSplash.setOnFinished(actionEvent -> initialStage.hide());
+                fadeSplash.play();
+            } // todo add code to gracefully handle other task states.
         });
 
         decorateStage(initialStage);

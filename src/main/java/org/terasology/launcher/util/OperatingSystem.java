@@ -36,7 +36,7 @@ public enum OperatingSystem {
 
     private final String identifier;
 
-    private OperatingSystem(String system) {
+    OperatingSystem(String system) {
         identifier = system.toLowerCase(Locale.ENGLISH);
     }
 

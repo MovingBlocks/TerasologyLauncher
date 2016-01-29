@@ -248,8 +248,8 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 DirectoryUtils.checkDirectory(gameDataDirectory);
             } catch (IOException e) {
                 logger.warn("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
-                GuiUtils.showWarningMessageDialog(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" +
-                        gameDataDirectory);
+                GuiUtils.showWarningMessageDialog(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n"
+                        + gameDataDirectory);
 
                 // Set gameDataDirectory to 'null' -> user has to choose new game data directory
                 gameDataDirectory = null;

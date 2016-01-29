@@ -54,6 +54,8 @@ public final class DirectoryUtils {
     }
 
     /**
+     * Checks whether the given directory contains any game data, e.g., save games or screenshots.
+     *
      * @param gameInstallationPath the game installation folder
      * @return true if game data is stored in the installation directory.
      */

@@ -111,6 +111,7 @@ targetCompatibility = 1.8
 mainClassName = 'org.terasology.launcher.TerasologyLauncher'
 
 checkstyle {
+    toolVersion = '6.14.1'
     ignoreFailures = true
     configProperties.samedir = checkstyle.configFile.parentFile
 }

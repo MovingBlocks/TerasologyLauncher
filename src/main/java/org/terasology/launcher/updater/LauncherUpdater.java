@@ -122,8 +122,8 @@ public final class LauncherUpdater {
 
         FutureTask<Boolean> dialog = new FutureTask<Boolean>(() -> {
             Parent root = BundleUtils.getFXMLLoader("update_dialog").load();
-            ((TextArea)root.lookup("#infoTextArea")).setText(infoText);
-            ((TextArea)root.lookup("#changelogTextArea")).setText(changeLog);
+            ((TextArea) root.lookup("#infoTextArea")).setText(infoText);
+            ((TextArea) root.lookup("#changelogTextArea")).setText(changeLog);
 
             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle(BundleUtils.getLabel("message_update_launcher_title"));

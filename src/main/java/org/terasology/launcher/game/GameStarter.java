@@ -47,7 +47,8 @@ public final class GameStarter {
         gameThread = null;
     }
 
-    public boolean startGame(TerasologyGameVersion gameVersion, File gameDataDirectory, JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize, List<String> userJavaParameters, List<String> userGameParameters) {
+    public boolean startGame(TerasologyGameVersion gameVersion, File gameDataDirectory, JavaHeapSize maxHeapSize,
+                             JavaHeapSize initialHeapSize, List<String> userJavaParameters, List<String> userGameParameters) {
         if (isRunning()) {
             logger.warn("The game can not be started because another game is already running! '{}'", gameThread);
             return false;
@@ -71,7 +72,8 @@ public final class GameStarter {
         return javaParameters;
     }
 
-    private List<String> createProcessParameters(TerasologyGameVersion gameVersion, File gameDataDirectory, List<String> javaParameters, List<String> gameParameters) {
+    private List<String> createProcessParameters(TerasologyGameVersion gameVersion, File gameDataDirectory, List<String> javaParameters,
+                                                 List<String> gameParameters) {
         final List<String> processParameters = new ArrayList<>();
         processParameters.add("java");
         processParameters.addAll(javaParameters);

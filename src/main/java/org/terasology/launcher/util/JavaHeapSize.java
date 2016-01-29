@@ -44,7 +44,7 @@ public enum JavaHeapSize {
     private final String sizeParameter;
     private final String labelKey;
 
-    private JavaHeapSize(String sizeParameter, String labelKey) {
+    JavaHeapSize(String sizeParameter, String labelKey) {
         this.sizeParameter = sizeParameter;
         this.labelKey = labelKey;
     }

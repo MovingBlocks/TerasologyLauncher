@@ -52,7 +52,8 @@ public final class DownloadUtils {
     public static final String FILE_TERASOLOGY_OMEGA_ZIP = "/artifact/distros/omega/build/distributions/TerasologyOmega.zip";
     public static final String FILE_TERASOLOGY_LAUNCHER_ZIP = "/artifact/build/distributions/TerasologyLauncher.zip";
     public static final String FILE_TERASOLOGY_GAME_VERSION_INFO = "/artifact/build/resources/main/org/terasology/version/versionInfo.properties";
-    public static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO = "/artifact/build/resources/main/org/terasology/launcher/version/versionInfo.properties";
+    public static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO =
+            "/artifact/build/resources/main/org/terasology/launcher/version/versionInfo.properties";
     private static final String FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG = "/artifact/build/distributions/CHANGELOG.txt";
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
@@ -115,7 +116,8 @@ public final class DownloadUtils {
         return connection;
     }
 
-    private static void downloadToFile(ProgressListener listener, long contentLength, BufferedInputStream in, BufferedOutputStream out) throws IOException {
+    private static void downloadToFile(ProgressListener listener, long contentLength, BufferedInputStream in,
+                                       BufferedOutputStream out) throws IOException {
         final byte[] buffer = new byte[2048];
         final float sizeFactor = 100f / contentLength;
         long writtenBytes = 0;
@@ -167,6 +169,13 @@ public final class DownloadUtils {
     }
 
     /**
+     * Get the build number of the last stable build on the Jenkins server.
+     * <p>
+     * Jenkins Terminology: "A build is stable if it was built successfully and no publisher reports it as unstable. A build is unstable
+     * if it was built successfully and one or more publishers report it unstable. For example if the JUnit publisher is configured and a
+     * test fails then the build will be marked unstable. "
+     * </p>
+     *
      * @param jobName the Jenkins job name
      * @return the <code>buildNumber</code> of the last <b>stable</b> build
      * @throws DownloadException if something goes wrong
@@ -176,6 +185,11 @@ public final class DownloadUtils {
     }
 
     /**
+     * Get the build number of the last successful build on the Jenkins server.
+     * <p>
+     * Jenkins Terminology: "A build is successful when the compilation reported no errors."
+     * </p>
+     *
      * @param jobName the Jenkins job name
      * @return the <code>buildNumber</code> of the last <b>successful</b> build
      * @throws DownloadException if something goes wrong
@@ -274,7 +288,8 @@ public final class DownloadUtils {
 
     /**
      * Attempts to look up the cause for an Omega job in Jenkins to see if it was triggered directly by an engine job.
-     * @param job The GameJob we're working with, both for the engine job name and the Omega job name
+     *
+     * @param job              The GameJob we're working with, both for the engine job name and the Omega job name
      * @param omegaBuildNumber The instance of the Omega build we care about
      * @return The engine build number as an int or -1 if parsing failed (including the case of no engine-triggered cause)
      * @throws DownloadException
