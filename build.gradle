@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 MovingBlocks
+ * Copyright 2016 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,8 +58,10 @@ wrapper {
     gradleVersion '2.10'
 }
 
-import org.apache.tools.ant.filters.FixCrLfFilter;
-import java.text.SimpleDateFormat;
+
+import org.apache.tools.ant.filters.FixCrLfFilter
+
+import java.text.SimpleDateFormat
 
 def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
