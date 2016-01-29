@@ -19,7 +19,6 @@ package org.terasology.launcher.gui.javafx;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
-import com.sun.javafx.application.HostServicesDelegate;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.application.HostServices;
@@ -65,7 +64,6 @@ import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
-import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -209,7 +207,7 @@ public class ApplicationController {
             GuiUtils.showInfoMessageDialog(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
             final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
-                launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(), launcherSettings.getUserGameParameterList());
+                    launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(), launcherSettings.getUserGameParameterList());
             if (!gameStarted) {
                 GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
             } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
@@ -235,7 +233,7 @@ public class ApplicationController {
         } else {
             try {
                 GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isSaveDownloadedFiles(),
-                    launcherSettings.getGameDirectory(), gameVersion, gameVersions);
+                        launcherSettings.getGameDirectory(), gameVersion, gameVersions);
                 gameDownloadWorker = new GameDownloadWorker(this, gameDownloader);
             } catch (IOException e) {
                 logger.error("Could not start game download!", e);
@@ -568,7 +566,7 @@ public class ApplicationController {
                     view.getEngine().load(url.toExternalForm());
                 } else {
                     try (Reader isr = new InputStreamReader(url.openStream(), cs);
-                        BufferedReader br = new BufferedReader(isr)) {
+                         BufferedReader br = new BufferedReader(isr)) {
                         String line = br.readLine();
 
                         while (line != null) {
@@ -638,13 +636,13 @@ public class ApplicationController {
             arguments[6] = 2;
         }
         if ((gameVersion.getGameVersionInfo() != null)
-            && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
+                && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
             arguments[7] = gameVersion.getGameVersionInfo().getDisplayVersion();
         } else {
             arguments[7] = "";
         }
         if ((gameVersion.getGameVersionInfo() != null)
-            && (gameVersion.getGameVersionInfo().getDateTime() != null)) {
+                && (gameVersion.getGameVersionInfo().getDateTime() != null)) {
             arguments[8] = gameVersion.getGameVersionInfo().getDateTime();
         } else {
             arguments[8] = "";

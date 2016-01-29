@@ -41,7 +41,6 @@ import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -149,13 +148,7 @@ public class SettingsController {
 
     @FXML
     protected void openGameDirectoryAction() {
-        try {
-            DirectoryUtils.checkDirectory(gameDirectory);
-            Desktop.getDesktop().open(gameDirectory);
-        } catch (IOException e) {
-            logger.error("The game directory can not be opened! '{}'", gameDirectory, e);
-            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
-        }
+        GuiUtils.openFileBrowser(stage, gameDirectory, BundleUtils.getLabel("message_error_gameDirectory"));
     }
 
     @FXML
@@ -175,13 +168,7 @@ public class SettingsController {
 
     @FXML
     protected void openGameDataDirectoryAction() {
-        try {
-            DirectoryUtils.checkDirectory(gameDataDirectory);
-            Desktop.getDesktop().open(gameDataDirectory);
-        } catch (IOException e) {
-            logger.error("The game data directory can not be opened! '{}'", gameDataDirectory, e);
-            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
-        }
+        GuiUtils.openFileBrowser(stage, gameDataDirectory, BundleUtils.getLabel("message_error_gameDataDirectory"));
     }
 
     @FXML
@@ -201,24 +188,12 @@ public class SettingsController {
 
     @FXML
     protected void openLauncherDirectoryAction() {
-        try {
-            DirectoryUtils.checkDirectory(launcherDirectory);
-            Desktop.getDesktop().open(launcherDirectory);
-        } catch (IOException e) {
-            logger.error("The game launcher directory can not be opened! '{}'", launcherDirectory, e);
-            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory);
-        }
+        GuiUtils.openFileBrowser(stage, launcherDirectory, BundleUtils.getLabel("message_error_launcherDirectory"));
     }
 
     @FXML
     protected void openDownloadDirectoryAction() {
-        try {
-            DirectoryUtils.checkDirectory(downloadDirectory);
-            Desktop.getDesktop().open(downloadDirectory);
-        } catch (IOException e) {
-            logger.error("The game download directory can not be opened! '{}'", downloadDirectory, e);
-            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_downloadDirectory") + "\n" + downloadDirectory);
-        }
+        GuiUtils.openFileBrowser(stage, downloadDirectory, BundleUtils.getLabel("message_error_downloadDirectory"));
     }
 
     @FXML
@@ -376,7 +351,7 @@ public class SettingsController {
         initialHeapSizeBox.getSelectionModel().select(launcherSettings.getInitialHeapSize());
     }
 
-    private void initUserParameterFields()  {
+    private void initUserParameterFields() {
         //if the VM parameters are left default do not display, the prompt message will show
         if (!launcherSettings.getUserJavaParameters().equals(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT)) {
             userJavaParametersField.setText(launcherSettings.getUserJavaParameters());

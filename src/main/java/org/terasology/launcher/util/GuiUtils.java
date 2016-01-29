@@ -23,7 +23,10 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.Desktop;
+import java.awt.EventQueue;
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -100,5 +103,24 @@ public final class GuiUtils {
             directory.delete();
         }
         return selected;
+    }
+
+    public static void openFileBrowser(Stage owner, final File directory, final String errorMsg) {
+        try {
+            DirectoryUtils.checkDirectory(directory);
+            EventQueue.invokeLater(() -> {
+                if (Desktop.isDesktopSupported()) {
+                    try {
+                        Desktop.getDesktop().open(directory);
+                    } catch (IOException e) {
+                        logger.error("The directory could not be opened! {}", directory, e);
+                        GuiUtils.showErrorMessageDialog(owner, errorMsg + "\n" + directory);
+                    }
+                }
+            });
+        } catch (IOException e) {
+            logger.error("The directory could not be opened! {}", directory, e);
+            GuiUtils.showErrorMessageDialog(owner, errorMsg + "\n" + directory);
+        }
     }
 }
