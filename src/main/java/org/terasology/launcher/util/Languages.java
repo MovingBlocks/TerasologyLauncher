@@ -38,7 +38,6 @@ public final class Languages {
         final Locale french = new Locale("fr");
         final Locale galician = new Locale("gl");
         final Locale italian = new Locale("it");
-        final Locale japanese = new Locale("ja");
         final Locale lithuanian = new Locale("lt");
         final Locale polish = new Locale("pl");
         final Locale russian = new Locale("ru");
@@ -52,7 +51,6 @@ public final class Languages {
         supportedLocales.add(french);
         supportedLocales.add(galician);
         supportedLocales.add(italian);
-        //supportedLocales.add(japanese);
         supportedLocales.add(Locale.JAPANESE);
         supportedLocales.add(lithuanian);
         supportedLocales.add(polish);
@@ -67,7 +65,6 @@ public final class Languages {
         settingsLabelKey.put(french, "settings_language_fr");
         settingsLabelKey.put(galician, "settings_language_gl");
         settingsLabelKey.put(italian, "settings_language_it");
-        //settingsLabelKey.put(japanese, "settings_language_ja");
         settingsLabelKey.put(Locale.JAPANESE, "settings_language_ja");
         settingsLabelKey.put(lithuanian, "settings_language_lt");
         settingsLabelKey.put(polish, "settings_language_pl");

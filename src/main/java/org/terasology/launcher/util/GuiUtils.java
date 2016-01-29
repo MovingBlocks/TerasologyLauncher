@@ -69,8 +69,11 @@ public final class GuiUtils {
     }
 
     public static File chooseDirectoryDialog(Stage owner, final File directory, final String title) {
-        if (!directory.isDirectory()) {
-            directory.mkdir();
+        try {
+            DirectoryUtils.checkDirectory(directory);
+        } catch (IOException e) {
+            logger.error("Could not use {} as default directory!", directory, e);
+            return null;
         }
 
         File selected = null;
@@ -99,8 +102,10 @@ public final class GuiUtils {
         }
 
         // directory proposal needs to be deleted if the user chose a different one
-        if (!directory.equals(selected)) {
-            directory.delete();
+        if (!directory.equals(selected) && !DirectoryUtils.containsFiles(directory)) {
+            if (!directory.delete()) {
+                logger.warn("Could not delete unused default directory! {}", directory);
+            }
         }
         return selected;
     }

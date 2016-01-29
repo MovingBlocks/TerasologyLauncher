@@ -91,12 +91,12 @@ public final class DirectoryUtils {
         final File[] files = directory.listFiles();
         if ((files != null) && (files.length > 0)) {
             for (File child : files) {
-                if (child.isDirectory()) {
+                if (child.isFile()) {
+                    return true;
+                } else if (child.isDirectory()) {
                     if (containsFiles(child)) {
                         return true;
                     }
-                } else if (child.isFile()) {
-                    return true;
                 }
             }
         }

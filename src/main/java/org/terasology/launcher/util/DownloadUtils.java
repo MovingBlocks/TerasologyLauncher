@@ -311,7 +311,7 @@ public final class DownloadUtils {
                 Matcher m = p.matcher(jsonResult);
                 if (m.find()) {
                     //logger.debug("Found regex group believed to be build number: " + m.group(1));
-                    engineBuildNumber = Integer.valueOf(m.group(1));
+                    engineBuildNumber = Integer.parseInt(m.group(1));
                 } else {
                     logger.info("Failed to find a matching regex group for Omega build {}, probably no engine cause", omegaBuildNumber);
                 }

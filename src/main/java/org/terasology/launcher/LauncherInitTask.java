@@ -70,7 +70,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isSaveDownloadedFiles());
                 if (selfUpdaterStarted) {
                     logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
-                    System.exit(0);
+                    return NullLauncherConfiguration.getInstance();
                 }
             }
 

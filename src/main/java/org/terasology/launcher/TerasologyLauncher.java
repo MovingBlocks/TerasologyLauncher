@@ -19,6 +19,7 @@ package org.terasology.launcher;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.HostServices;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
@@ -107,8 +108,12 @@ public final class TerasologyLauncher extends Application {
                     LauncherConfiguration config = launcherInitTask.getValue();
                     if (config == null) {
                         throw new LauncherStartFailedException("Launcher configuration was `null`.");
+                    } else if (config instanceof NullLauncherConfiguration) {
+                        logger.info("Closing the launcher ... (empty configuration, probably due to update)");
+                        Platform.exit();
+                    } else {
+                        showMainStage(config);
                     }
-                    showMainStage(config);
                 } catch (IOException | LauncherStartFailedException e) {
                     openCrashReporterAndExit(e);
                 }
