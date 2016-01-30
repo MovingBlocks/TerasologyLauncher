@@ -29,12 +29,12 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.JobItem;
 import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.game.VersionItem;
+import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.GuiUtils;
@@ -130,9 +130,15 @@ public class SettingsController {
         //save userParameters (java & game), if textfield is empty then set to defaults
         if (userJavaParametersField.getText().isEmpty()) {
             launcherSettings.setUserJavaParameters(BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+        } else {
+            logger.debug("User defined Java parameters: {}", userJavaParametersField.getText());
+            launcherSettings.setUserJavaParameters(userJavaParametersField.getText());
         }
         if (userGameParametersField.getText().isEmpty()) {
             launcherSettings.setUserGameParameters(BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
+        } else {
+            logger.debug("User defined game parameters: {}", userGameParametersField.getText());
+            launcherSettings.setUserGameParameters(userGameParametersField.getText());
         }
 
         // store changed settings
@@ -358,7 +364,7 @@ public class SettingsController {
         }
         //if the Game parameters are left default do not display, the prompt message will show
         if (!launcherSettings.getUserGameParameters().equals(BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT)) {
-            userJavaParametersField.setText(launcherSettings.getUserJavaParameters());
+            userGameParametersField.setText(launcherSettings.getUserGameParameters());
         }
     }
 }
