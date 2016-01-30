@@ -48,7 +48,7 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.LauncherSettings;
+import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.game.GameDownloader;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.GameStarter;
@@ -86,7 +86,7 @@ public class ApplicationController {
     private File launcherDirectory;
     private File downloadDirectory;
     private File tempDirectory;
-    private LauncherSettings launcherSettings;
+    private BaseLauncherSettings launcherSettings;
     private TerasologyGameVersions gameVersions;
     private GameStarter gameStarter;
     private GameDownloadWorker gameDownloadWorker;
@@ -232,8 +232,8 @@ public class ApplicationController {
             logger.warn("The selected game version can not be downloaded! '{}'", gameVersion);
         } else {
             try {
-                GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isSaveDownloadedFiles(),
-                        launcherSettings.getGameDirectory(), gameVersion, gameVersions);
+                GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles(),
+                    launcherSettings.getGameDirectory(), gameVersion, gameVersions);
                 gameDownloadWorker = new GameDownloadWorker(this, gameDownloader);
             } catch (IOException e) {
                 logger.error("Could not start game download!", e);
@@ -322,7 +322,7 @@ public class ApplicationController {
         openUri(BundleUtils.getURI("terasology_youtube"));
     }
 
-    public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final File newTempDirectory, final LauncherSettings newLauncherSettings,
+    public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final File newTempDirectory, final BaseLauncherSettings newLauncherSettings,
                            final TerasologyGameVersions newGameVersions, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;

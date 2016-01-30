@@ -29,7 +29,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.LauncherSettings;
+import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.JobItem;
 import org.terasology.launcher.game.TerasologyGameVersion;
@@ -52,7 +52,7 @@ public class SettingsController {
 
     private File launcherDirectory;
     private File downloadDirectory;
-    private LauncherSettings launcherSettings;
+    private BaseLauncherSettings launcherSettings;
     private TerasologyGameVersions gameVersions;
 
     private File gameDirectory;
@@ -125,14 +125,14 @@ public class SettingsController {
         launcherSettings.setCloseLauncherAfterGameStart(closeAfterStartBox.isSelected());
 
         // save saveDownloadedFiles
-        launcherSettings.setSaveDownloadedFiles(saveDownloadedFilesBox.isSelected());
+        launcherSettings.setKeepDownloadedFiles(saveDownloadedFilesBox.isSelected());
 
         //save userParameters (java & game), if textfield is empty then set to defaults
         if (userJavaParametersField.getText().isEmpty()) {
-            launcherSettings.setUserJavaParameters(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+            launcherSettings.setUserJavaParameters(BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
         }
         if (userGameParametersField.getText().isEmpty()) {
-            launcherSettings.setUserGameParameters(LauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
+            launcherSettings.setUserGameParameters(BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
         }
 
         // store changed settings
@@ -214,7 +214,7 @@ public class SettingsController {
         }
     }
 
-    public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final LauncherSettings newLauncherSettings,
+    public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
                            final TerasologyGameVersions newGameVersions, final Stage newStage) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
@@ -336,7 +336,7 @@ public class SettingsController {
     }
 
     private void populateSaveDownloadedFiles() {
-        saveDownloadedFilesBox.setSelected(launcherSettings.isSaveDownloadedFiles());
+        saveDownloadedFilesBox.setSelected(launcherSettings.isKeepDownloadedFiles());
     }
 
     private void updateDirectoryPathLabels() {
@@ -353,11 +353,11 @@ public class SettingsController {
 
     private void initUserParameterFields() {
         //if the VM parameters are left default do not display, the prompt message will show
-        if (!launcherSettings.getUserJavaParameters().equals(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT)) {
+        if (!launcherSettings.getUserJavaParameters().equals(BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT)) {
             userJavaParametersField.setText(launcherSettings.getUserJavaParameters());
         }
         //if the Game parameters are left default do not display, the prompt message will show
-        if (!launcherSettings.getUserGameParameters().equals(LauncherSettings.USER_GAME_PARAMETERS_DEFAULT)) {
+        if (!launcherSettings.getUserGameParameters().equals(BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT)) {
             userJavaParametersField.setText(launcherSettings.getUserJavaParameters());
         }
     }

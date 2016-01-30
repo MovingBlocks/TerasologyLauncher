@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.TerasologyGameVersions;
+import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
@@ -64,10 +65,10 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final File tempDirectory = getTempDirectory(launcherDirectory);
 
             // launcher settings
-            final LauncherSettings launcherSettings = getLauncherSettings(launcherDirectory);
+            final BaseLauncherSettings launcherSettings = getLauncherSettings(launcherDirectory);
 
             if (launcherSettings.isSearchForLauncherUpdates()) {
-                final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isSaveDownloadedFiles());
+                final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
                 if (selfUpdaterStarted) {
                     logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
                     return NullLauncherConfiguration.getInstance();
@@ -158,10 +159,10 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return tempDirectory;
     }
 
-    private LauncherSettings getLauncherSettings(File launcherDirectory) throws LauncherStartFailedException {
+    private BaseLauncherSettings getLauncherSettings(File launcherDirectory) throws LauncherStartFailedException {
         logger.trace("Init LauncherSettings...");
         updateMessage(BundleUtils.getLabel("splash_retrieveLauncherSettings"));
-        final LauncherSettings launcherSettings = new LauncherSettings(launcherDirectory);
+        final BaseLauncherSettings launcherSettings = new BaseLauncherSettings(launcherDirectory);
         try {
             launcherSettings.load();
             launcherSettings.init();
@@ -276,7 +277,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return gameDataDirectory;
     }
 
-    private TerasologyGameVersions getTerasologyGameVersions(File launcherDirectory, File gameDirectory, LauncherSettings launcherSettings) {
+    private TerasologyGameVersions getTerasologyGameVersions(File launcherDirectory, File gameDirectory, BaseLauncherSettings launcherSettings) {
         logger.trace("Init TerasologyGameVersions...");
         updateMessage(BundleUtils.getLabel("splash_loadGameVersions"));
         final TerasologyGameVersions gameVersions = new TerasologyGameVersions();
@@ -290,7 +291,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return gameVersions;
     }
 
-    private void storeLauncherSettingsAfterInit(LauncherSettings launcherSettings) throws LauncherStartFailedException {
+    private void storeLauncherSettingsAfterInit(BaseLauncherSettings launcherSettings) throws LauncherStartFailedException {
         logger.trace("Store LauncherSettings...");
         updateMessage(BundleUtils.getLabel("splash_storeLauncherSettings"));
         try {
