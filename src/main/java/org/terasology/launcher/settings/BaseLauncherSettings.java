@@ -16,14 +16,6 @@
 
 package org.terasology.launcher.settings;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.game.GameSettings;
-import org.terasology.launcher.game.TerasologyGameVersion;
-import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.Languages;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -34,6 +26,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.terasology.launcher.game.GameJob;
+import org.terasology.launcher.game.TerasologyGameVersion;
+import org.terasology.launcher.util.JavaHeapSize;
+import org.terasology.launcher.util.Languages;
 
 /**
  * Provides access to launcher settings.
@@ -56,24 +54,24 @@ public final class BaseLauncherSettings extends LauncherSettings {
     private static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
     private static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
 
-    private static final String PROPERTY_LOCALE = "locale";
-    private static final String PROPERTY_JOB = "job";
-    private static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
-    private static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
-    private static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
-    private static final String PROPERTY_PREFIX_LAST_BUILD_NUMBER = "lastBuildNumber_";
-    private static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
-    private static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
-    private static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
-    private static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
-    private static final String PROPERTY_SAVE_DOWNLOADED_FILES = "saveDownloadedFiles";
-    private static final String PROPERTY_USER_JAVA_PARAMETERS = "userJavaParameters";
-    private static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
+    protected static final String PROPERTY_LOCALE = "locale";
+    protected static final String PROPERTY_JOB = "job";
+    protected static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
+    protected static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
+    protected static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
+    protected static final String PROPERTY_PREFIX_LAST_BUILD_NUMBER = "lastBuildNumber_";
+    protected static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
+    protected static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
+    protected static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
+    protected static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
+    protected static final String PROPERTY_SAVE_DOWNLOADED_FILES = "saveDownloadedFiles";
+    protected static final String PROPERTY_USER_JAVA_PARAMETERS = "userJavaParameters";
+    protected static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
 
     private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
 
-    private final File launcherSettingsFile;
-    private final Properties properties;
+    protected final File launcherSettingsFile;
+    protected final Properties properties;
 
     public BaseLauncherSettings(File launcherDirectory) {
         launcherSettingsFile = new File(launcherDirectory, LAUNCHER_SETTINGS_FILE_NAME);
@@ -111,6 +109,10 @@ public final class BaseLauncherSettings extends LauncherSettings {
             logger.trace("Stored settings: {}", this);
         }
     }
+
+    // --------------------------------------------------------------------- //
+    // INIT
+    // --------------------------------------------------------------------- //
 
     protected void initLocale() {
         final String localeStr = properties.getProperty(PROPERTY_LOCALE);
@@ -274,19 +276,13 @@ public final class BaseLauncherSettings extends LauncherSettings {
         }
     }
 
+    // --------------------------------------------------------------------- //
+    // GETTERS
+    // --------------------------------------------------------------------- //
+
     @Override
     public Locale getLocale() {
         return Locale.forLanguageTag(properties.getProperty(PROPERTY_LOCALE));
-    }
-
-    @Override
-    public synchronized void setLocale(Locale locale) {
-        properties.setProperty(PROPERTY_LOCALE, locale.toString());
-    }
-
-    @Override
-    public synchronized void setJob(GameJob job) {
-        properties.setProperty(PROPERTY_JOB, job.name());
     }
 
     @Override
@@ -295,22 +291,8 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
-    public synchronized void setBuildVersion(int version, GameJob job) {
-        properties.setProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name(), String.valueOf(version));
-    }
-
-    @Override
-    public synchronized int getBuildVersion(GameJob job) {
+    public synchronized Integer getBuildVersion(GameJob job) {
         return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name()));
-    }
-
-    @Override
-    public synchronized void setLastBuildNumber(Integer lastBuildNumber, GameJob job) {
-        if ((lastBuildNumber != null) && (lastBuildNumber >= job.getMinBuildNumber())) {
-            properties.setProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name(), lastBuildNumber.toString());
-        } else {
-            properties.setProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name(), LAST_BUILD_NUMBER_DEFAULT);
-        }
     }
 
     @Override
@@ -323,18 +305,8 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
-    public synchronized void setMaxHeapSize(JavaHeapSize maxHeapSize) {
-        properties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxHeapSize.name());
-    }
-
-    @Override
     public synchronized JavaHeapSize getMaxHeapSize() {
         return JavaHeapSize.valueOf(properties.getProperty(PROPERTY_MAX_HEAP_SIZE));
-    }
-
-    @Override
-    public synchronized void setInitialHeapSize(JavaHeapSize initialHeapSize) {
-        properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialHeapSize.name());
     }
 
     @Override
@@ -343,58 +315,13 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
-    public synchronized void setUserJavaParameters(String userJavaParameters) {
-        properties.setProperty(PROPERTY_USER_JAVA_PARAMETERS, userJavaParameters);
-    }
-
-    @Override
     public synchronized String getUserJavaParameters() {
         return properties.getProperty(PROPERTY_USER_JAVA_PARAMETERS);
     }
 
     @Override
-    public synchronized void setUserGameParameters(String userGameParameters) {
-        properties.setProperty(PROPERTY_USER_GAME_PARAMETERS, userGameParameters);
-    }
-
-    @Override
     public synchronized String getUserGameParameters() {
         return properties.getProperty(PROPERTY_USER_GAME_PARAMETERS);
-    }
-
-    @Override
-    public synchronized void setSearchForLauncherUpdates(boolean searchForLauncherUpdates) {
-        properties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, Boolean.toString(searchForLauncherUpdates));
-    }
-
-    @Override
-    public synchronized boolean isSearchForLauncherUpdates() {
-        return Boolean.valueOf(properties.getProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES));
-    }
-
-    @Override
-    public synchronized void setCloseLauncherAfterGameStart(boolean closeLauncherAfterGameStart) {
-        properties.setProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START, Boolean.toString(closeLauncherAfterGameStart));
-    }
-
-    @Override
-    public synchronized boolean isCloseLauncherAfterGameStart() {
-        return Boolean.valueOf(properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START));
-    }
-
-    @Override
-    public synchronized void setKeepDownloadedFiles(boolean keepDownloadedFiles) {
-        properties.setProperty(PROPERTY_SAVE_DOWNLOADED_FILES, Boolean.toString(keepDownloadedFiles));
-    }
-
-    @Override
-    public synchronized boolean isKeepDownloadedFiles() {
-        return Boolean.valueOf(properties.getProperty(PROPERTY_SAVE_DOWNLOADED_FILES));
-    }
-
-    @Override
-    public synchronized void setGameDirectory(File gameDirectory) {
-        properties.setProperty(PROPERTY_GAME_DIRECTORY, gameDirectory.toURI().toString());
     }
 
     @Override
@@ -411,11 +338,6 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
-    public synchronized void setGameDataDirectory(File gameDataDirectory) {
-        properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toURI().toString());
-    }
-
-    @Override
     public synchronized File getGameDataDirectory() {
         final String gameDataDirectoryStr = properties.getProperty(PROPERTY_GAME_DATA_DIRECTORY);
         if ((gameDataDirectoryStr != null) && (gameDataDirectoryStr.trim().length() > 0)) {
@@ -426,6 +348,94 @@ public final class BaseLauncherSettings extends LauncherSettings {
             }
         }
         return null;
+    }
+
+    @Override
+    public synchronized boolean isSearchForLauncherUpdates() {
+        return Boolean.valueOf(properties.getProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES));
+    }
+
+    @Override
+    public synchronized boolean isCloseLauncherAfterGameStart() {
+        return Boolean.valueOf(properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START));
+    }
+
+    @Override
+    public synchronized boolean isKeepDownloadedFiles() {
+        return Boolean.valueOf(properties.getProperty(PROPERTY_SAVE_DOWNLOADED_FILES));
+    }
+
+    // --------------------------------------------------------------------- //
+    // SETTERS
+    // --------------------------------------------------------------------- //
+
+    @Override
+    public synchronized void setLocale(Locale locale) {
+        properties.setProperty(PROPERTY_LOCALE, locale.toString());
+    }
+
+    @Override
+    public synchronized void setJob(GameJob job) {
+        properties.setProperty(PROPERTY_JOB, job.name());
+    }
+
+    @Override
+    public synchronized void setBuildVersion(int version, GameJob job) {
+        properties.setProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name(), String.valueOf(version));
+    }
+
+    @Override
+    public synchronized void setLastBuildNumber(Integer lastBuildNumber, GameJob job) {
+        if ((lastBuildNumber != null) && (lastBuildNumber >= job.getMinBuildNumber())) {
+            properties.setProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name(), lastBuildNumber.toString());
+        } else {
+            properties.setProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name(), LAST_BUILD_NUMBER_DEFAULT);
+        }
+    }
+
+    @Override
+    public synchronized void setMaxHeapSize(JavaHeapSize maxHeapSize) {
+        properties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxHeapSize.name());
+    }
+
+    @Override
+    public synchronized void setInitialHeapSize(JavaHeapSize initialHeapSize) {
+        properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialHeapSize.name());
+    }
+
+    @Override
+    public synchronized void setUserJavaParameters(String userJavaParameters) {
+        properties.setProperty(PROPERTY_USER_JAVA_PARAMETERS, userJavaParameters);
+    }
+
+    @Override
+    public synchronized void setUserGameParameters(String userGameParameters) {
+        properties.setProperty(PROPERTY_USER_GAME_PARAMETERS, userGameParameters);
+    }
+
+    @Override
+    public synchronized void setSearchForLauncherUpdates(boolean searchForLauncherUpdates) {
+        properties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, Boolean.toString(searchForLauncherUpdates));
+    }
+
+    @Override
+    public synchronized void setCloseLauncherAfterGameStart(boolean closeLauncherAfterGameStart) {
+        properties.setProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START, Boolean.toString(closeLauncherAfterGameStart));
+    }
+
+    @Override
+    public synchronized void setKeepDownloadedFiles(boolean keepDownloadedFiles) {
+        properties.setProperty(PROPERTY_SAVE_DOWNLOADED_FILES, Boolean.toString(keepDownloadedFiles));
+    }
+
+    @Override
+    public synchronized void setGameDirectory(File gameDirectory) {
+        properties.setProperty(PROPERTY_GAME_DIRECTORY, gameDirectory.toURI().toString());
+    }
+
+    @Override
+    public synchronized void setGameDataDirectory(File gameDataDirectory) {
+        properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toURI().toString());
     }
 
     @Override

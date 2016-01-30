@@ -56,6 +56,10 @@ public abstract class LauncherSettings implements GameSettings {
         initUserGameParameters();
     }
 
+    // --------------------------------------------------------------------- //
+    // INIT
+    // --------------------------------------------------------------------- //
+
     protected abstract void initInitialHeapSize();
 
     protected abstract void initSearchForLauncherUpdates();
@@ -82,31 +86,21 @@ public abstract class LauncherSettings implements GameSettings {
 
     protected abstract void initBuildVersion();
 
+    // --------------------------------------------------------------------- //
+    // GETTERS
+    // --------------------------------------------------------------------- //
+
     public abstract Locale getLocale();
-
-    public abstract void setLocale(Locale locale);
-
-    public abstract void setJob(GameJob job);
 
     public abstract GameJob getJob();
 
-    public abstract void setBuildVersion(int version, GameJob job);
-
-    public abstract int getBuildVersion(GameJob job);
-
-    public abstract void setLastBuildNumber(Integer lastBuildNumber, GameJob job);
+    public abstract Integer getBuildVersion(GameJob job);
 
     public abstract Integer getLastBuildNumber(GameJob job);
 
-    public abstract void setMaxHeapSize(JavaHeapSize maxHeapSize);
-
     public abstract JavaHeapSize getMaxHeapSize();
 
-    public abstract void setInitialHeapSize(JavaHeapSize initialHeapSize);
-
     public abstract JavaHeapSize getInitialHeapSize();
-
-    public abstract void setUserJavaParameters(String userJavaParameters);
 
     public abstract String getUserJavaParameters();
 
@@ -114,31 +108,49 @@ public abstract class LauncherSettings implements GameSettings {
         return Arrays.asList(getUserJavaParameters().split("\\s+"));
     }
 
-    public abstract void setUserGameParameters(String userGameParameters);
-
     public abstract String getUserGameParameters();
 
     public synchronized List<String> getUserGameParameterList() {
         return Arrays.asList(getUserGameParameters().split("\\s+"));
     }
 
-    public abstract void setSearchForLauncherUpdates(boolean searchForLauncherUpdates);
+    public abstract File getGameDirectory();
+
+    public abstract File getGameDataDirectory();
 
     public abstract boolean isSearchForLauncherUpdates();
 
-    public abstract void setCloseLauncherAfterGameStart(boolean closeLauncherAfterGameStart);
-
     public abstract boolean isCloseLauncherAfterGameStart();
-
-    public abstract void setKeepDownloadedFiles(boolean keepDownloadedFiles);
 
     public abstract boolean isKeepDownloadedFiles();
 
+    // --------------------------------------------------------------------- //
+    // SETTERS
+    // --------------------------------------------------------------------- //
+
+    public abstract void setLocale(Locale locale);
+
+    public abstract void setJob(GameJob job);
+
+    public abstract void setBuildVersion(int version, GameJob job);
+
+    public abstract void setLastBuildNumber(Integer lastBuildNumber, GameJob job);
+
+    public abstract void setMaxHeapSize(JavaHeapSize maxHeapSize);
+
+    public abstract void setInitialHeapSize(JavaHeapSize initialHeapSize);
+
+    public abstract void setUserJavaParameters(String userJavaParameters);
+
+    public abstract void setUserGameParameters(String userGameParameters);
+
+    public abstract void setSearchForLauncherUpdates(boolean searchForLauncherUpdates);
+
+    public abstract void setCloseLauncherAfterGameStart(boolean closeLauncherAfterGameStart);
+
+    public abstract void setKeepDownloadedFiles(boolean keepDownloadedFiles);
+
     public abstract void setGameDirectory(File gameDirectory);
 
-    public abstract File getGameDirectory();
-
     public abstract void setGameDataDirectory(File gameDataDirectory);
-
-    public abstract File getGameDataDirectory();
 }

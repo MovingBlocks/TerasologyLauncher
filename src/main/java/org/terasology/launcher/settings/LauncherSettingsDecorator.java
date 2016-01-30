@@ -147,7 +147,7 @@ public class LauncherSettingsDecorator extends LauncherSettings {
     }
 
     @Override
-    public int getBuildVersion(GameJob job) {
+    public Integer getBuildVersion(GameJob job) {
         return (buildVersionMap.containsKey(job)) ? buildVersionMap.get(job) : settings.getBuildVersion(job);
     }
 
