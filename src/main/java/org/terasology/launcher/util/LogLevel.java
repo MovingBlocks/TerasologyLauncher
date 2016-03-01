@@ -18,6 +18,7 @@ package org.terasology.launcher.util;
 
 public enum LogLevel {
 
+    DEFAULT("DEFAULT", "logLevel_default"),
     ALL("ALL", "logLevel_all"),
     //TRACE("TRACE", logLevel_trace"), unused - effectively identical to ALL
     DEBUG("DEBUG", "logLevel_debug"),
