@@ -35,11 +35,7 @@ import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.game.VersionItem;
 import org.terasology.launcher.settings.BaseLauncherSettings;
-import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DirectoryUtils;
-import org.terasology.launcher.util.GuiUtils;
-import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.util.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,6 +84,8 @@ public class SettingsController {
     private TextField userJavaParametersField;
     @FXML
     private TextField userGameParametersField;
+    @FXML
+    private ComboBox<LogLevel> logLevelBox;
 
     @FXML
     protected void cancelSettingsAction(ActionEvent event) {
@@ -234,6 +232,8 @@ public class SettingsController {
         populateSearchForLauncherUpdates();
         populateCloseLauncherAfterGameStart();
         populateSaveDownloadedFiles();
+        populateLogLevel();
+
         gameDirectory = newLauncherSettings.getGameDirectory();
         gameDataDirectory = newLauncherSettings.getGameDataDirectory();
 
@@ -345,6 +345,14 @@ public class SettingsController {
         saveDownloadedFilesBox.setSelected(launcherSettings.isKeepDownloadedFiles());
     }
 
+    private void populateLogLevel() {
+        logLevelBox.getItems().clear();
+        for (LogLevel level : LogLevel.values()) {
+            logLevelBox.getItems().add(level);
+        }
+        updateLogLevelSelection();
+    }
+
     private void updateDirectoryPathLabels() {
         gameDirectoryPath.setText(gameDirectory.getPath());
         gameDataDirectoryPath.setText(gameDataDirectory.getPath());
@@ -355,6 +363,10 @@ public class SettingsController {
     private void updateHeapSizeSelection() {
         maxHeapSizeBox.getSelectionModel().select(launcherSettings.getMaxHeapSize());
         initialHeapSizeBox.getSelectionModel().select(launcherSettings.getInitialHeapSize());
+    }
+
+    private void updateLogLevelSelection() {
+        logLevelBox.getSelectionModel().select(launcherSettings.getLogLevel());
     }
 
     private void initUserParameterFields() {

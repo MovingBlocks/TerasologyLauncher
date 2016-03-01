@@ -102,7 +102,7 @@
                                                         </ComboBox>
                                                     </children>
                                                     <padding>
-                                                        <Insets left="8.0" right="8.0" fx:id="x1"/>
+                                                        <Insets left="8.0" right="8.0"/>
                                                     </padding>
                                                 </HBox>
                                                 <Label text="%settings_game_job" GridPane.columnIndex="0"
@@ -124,7 +124,7 @@
                                                         </ComboBox>
                                                     </children>
                                                     <padding>
-                                                        <Insets left="8.0" right="8.0" fx:id="x1"/>
+                                                        <Insets left="8.0" right="8.0"/>
                                                     </padding>
                                                 </HBox>
                                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0"
@@ -142,7 +142,7 @@
                                                         </ComboBox>
                                                     </children>
                                                     <padding>
-                                                        <Insets left="8.0" right="8.0" fx:id="x1"/>
+                                                        <Insets left="8.0" right="8.0"/>
                                                     </padding>
                                                 </HBox>
                                                 <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1"
@@ -172,7 +172,7 @@
                                                         </HBox>
                                                     </children>
                                                     <GridPane.margin>
-                                                        <Insets left="8.0" right="8.0" fx:id="x1"/>
+                                                        <Insets left="8.0" right="8.0"/>
                                                     </GridPane.margin>
                                                 </VBox>
                                                 <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1"
@@ -234,19 +234,19 @@
                                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0"
                                                       GridPane.columnIndex="1" GridPane.rowIndex="8">
                                                     <children>
-                                                    <ComboBox fx:id="logLevelBox" maxWidth="1.7976931348623157E308"
-                                                              HBox.hgrow="ALWAYS">
-                                                        <items>
-                                                            <FXCollections fx:factory="observableArrayList">
-                                                                <String fx:value="Item 1"/>
-                                                                <String fx:value="Item 2"/>
-                                                                <String fx:value="Item 3"/>
-                                                            </FXCollections>
-                                                        </items>
-                                                    </ComboBox>
+                                                        <ComboBox fx:id="logLevelBox" maxWidth="1.7976931348623157E308"
+                                                                  HBox.hgrow="ALWAYS">
+                                                            <items>
+                                                                <FXCollections fx:factory="observableArrayList">
+                                                                    <String fx:value="Item 1"/>
+                                                                    <String fx:value="Item 2"/>
+                                                                    <String fx:value="Item 3"/>
+                                                                </FXCollections>
+                                                            </items>
+                                                        </ComboBox>
                                                     </children>
                                                     <padding>
-                                                        <Insets left="8.0" right="8.0" fx:id="x8"/>
+                                                        <Insets left="8.0" right="8.0"/>
                                                     </padding>
                                                 </HBox>
                                             </children>
@@ -306,7 +306,7 @@
                                                         </ChoiceBox>
                                                     </children>
                                                     <padding>
-                                                        <Insets left="8.0" right="8.0" fx:id="x1"/>
+                                                        <Insets left="8.0" right="8.0"/>
                                                     </padding>
                                                 </HBox>
                                                 <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0"
@@ -317,7 +317,7 @@
                                                                   mnemonicParsing="false"/>
                                                     </children>
                                                     <padding>
-                                                        <Insets left="8.0" right="8.0" fx:id="x1"/>
+                                                        <Insets left="8.0" right="8.0"/>
                                                     </padding>
                                                 </HBox>
                                                 <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0"
@@ -328,7 +328,7 @@
                                                                   mnemonicParsing="false"/>
                                                     </children>
                                                     <padding>
-                                                        <Insets left="8.0" right="8.0" fx:id="x1"/>
+                                                        <Insets left="8.0" right="8.0"/>
                                                     </padding>
                                                 </HBox>
                                                 <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0"
@@ -345,7 +345,7 @@
                                                                 HBox.hgrow="SOMETIMES"/>
                                                     </children>
                                                     <padding>
-                                                        <Insets left="8.0" right="8.0" fx:id="x1"/>
+                                                        <Insets left="8.0" right="8.0"/>
                                                     </padding>
                                                 </HBox>
                                                 <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0"
@@ -363,7 +363,7 @@
                                                                 HBox.hgrow="SOMETIMES"/>
                                                     </children>
                                                     <padding>
-                                                        <Insets left="8.0" right="8.0" fx:id="x1"/>
+                                                        <Insets left="8.0" right="8.0"/>
                                                     </padding>
                                                 </HBox>
                                                 <Label text="%settings_launcher_searchForLauncherUpdates"
@@ -372,7 +372,7 @@
                                                           graphicTextGap="0.0" mnemonicParsing="false"
                                                           GridPane.columnIndex="1" GridPane.rowIndex="2">
                                                     <GridPane.margin>
-                                                        <Insets left="8.0" right="8.0" fx:id="x1"/>
+                                                        <Insets left="8.0" right="8.0"/>
                                                     </GridPane.margin>
                                                 </CheckBox>
                                             </children>

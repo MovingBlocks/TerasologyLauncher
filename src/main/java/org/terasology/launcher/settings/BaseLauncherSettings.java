@@ -32,6 +32,7 @@ import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.util.LogLevel;
 
 /**
  * Provides access to launcher settings.
@@ -53,6 +54,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
     private static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
     private static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
     private static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
+    private static final LogLevel LOG_LEVEL_DEFAULT = LogLevel.DEBUG;
 
     protected static final String PROPERTY_LOCALE = "locale";
     protected static final String PROPERTY_JOB = "job";
@@ -67,6 +69,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
     protected static final String PROPERTY_SAVE_DOWNLOADED_FILES = "saveDownloadedFiles";
     protected static final String PROPERTY_USER_JAVA_PARAMETERS = "userJavaParameters";
     protected static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
+    protected static final String PROPERTY_LOG_LEVEL = "logLevel";
 
     private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
 
@@ -215,6 +218,19 @@ public final class BaseLauncherSettings extends LauncherSettings {
         }
     }
 
+    protected void initLogLevel() {
+        final String logLevelStr = properties.getProperty(PROPERTY_LOG_LEVEL);
+        LogLevel logLevel = LOG_LEVEL_DEFAULT;
+        if (logLevelStr != null) {
+            try {
+                logLevel = LogLevel.valueOf(logLevelStr);
+            } catch (IllegalArgumentException e) {
+                logger.warn(WARN_MSG_INVALID_VALUE, logLevelStr, PROPERTY_LOG_LEVEL);
+            }
+        }
+        properties.setProperty(PROPERTY_LOG_LEVEL, logLevel.name());
+    }
+
     protected void initSearchForLauncherUpdates() {
         final String searchForLauncherUpdatesStr = properties.getProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES);
         boolean searchForLauncherUpdates = SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT;
@@ -322,6 +338,11 @@ public final class BaseLauncherSettings extends LauncherSettings {
     @Override
     public synchronized String getUserGameParameters() {
         return properties.getProperty(PROPERTY_USER_GAME_PARAMETERS);
+    }
+
+    @Override
+    public synchronized LogLevel getLogLevel() {
+        return LogLevel.valueOf(properties.getProperty(PROPERTY_LOG_LEVEL));
     }
 
     @Override
