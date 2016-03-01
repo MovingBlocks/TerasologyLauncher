@@ -435,6 +435,11 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
+    public synchronized void setLogLevel(LogLevel logLevel) {
+        properties.setProperty(PROPERTY_LOG_LEVEL, logLevel.name());
+    }
+
+    @Override
     public synchronized void setSearchForLauncherUpdates(boolean searchForLauncherUpdates) {
         properties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, Boolean.toString(searchForLauncherUpdates));
     }

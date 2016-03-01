@@ -260,6 +260,9 @@ public class LauncherSettingsDecorator extends LauncherSettings {
     }
 
     @Override
+    public void setLogLevel(LogLevel logLevel) { this.logLevel = logLevel; }
+
+    @Override
     public void setGameDirectory(File gameDirectory) {
         this.gameDirectory = gameDirectory;
     }

@@ -112,6 +112,9 @@ public class SettingsController {
         launcherSettings.setMaxHeapSize(maxHeapSizeBox.getSelectionModel().getSelectedItem());
         launcherSettings.setInitialHeapSize(initialHeapSizeBox.getSelectionModel().getSelectedItem());
 
+        // save log level settings
+        launcherSettings.setLogLevel(logLevelBox.getSelectionModel().getSelectedItem());
+
         // save languageBox settings
         Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectionModel().getSelectedIndex()));
         launcherSettings.setLocale(Languages.getCurrentLocale());

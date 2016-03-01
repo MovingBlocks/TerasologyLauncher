@@ -150,6 +150,8 @@ public abstract class LauncherSettings implements GameSettings {
 
     public abstract void setUserGameParameters(String userGameParameters);
 
+    public abstract void setLogLevel(LogLevel logLevel);
+
     public abstract void setSearchForLauncherUpdates(boolean searchForLauncherUpdates);
 
     public abstract void setCloseLauncherAfterGameStart(boolean closeLauncherAfterGameStart);
