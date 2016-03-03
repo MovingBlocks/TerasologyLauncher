@@ -21,11 +21,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +51,57 @@ public class SettingsController {
     private File gameDataDirectory;
 
     private Stage stage;
+
+    @FXML
+    private Tab gameTab;
+    @FXML
+    private Label maxHeapSizeLabel;
+    @FXML
+    private Label initialHeapSizeLabel;
+    @FXML
+    private Label jobLabel;
+    @FXML
+    private Label buildVersionLabel;
+    @FXML
+    private Button gameDirectoryOpenButton;
+    @FXML
+    private Button gameDirectoryEditButton;
+    @FXML
+    private Button gameDataDirectoryOpenButton;
+    @FXML
+    private Button gameDataDirectoryEditButton;
+    @FXML
+    private Label gameDirectoryLabel;
+    @FXML
+    private Label gameDataDirectoryLabel;
+    @FXML
+    private Label javaParametersLabel;
+    @FXML
+    private Label gameParametersLabel;
+    @FXML
+    private Label logLevelLabel;
+    @FXML
+    private Tab launcherTab;
+    @FXML
+    private Label chooseLanguageLabel;
+    @FXML
+    private Label closeLauncherLabel;
+    @FXML
+    private Label saveDownloadedFilesLabel;
+    @FXML
+    private Label launcherDirectoryLabel;
+    @FXML
+    private Label downloadDirectoryLabel;
+    @FXML
+    private Button launcherDirectoryOpenButton;
+    @FXML
+    private Button downloadDirectoryOpenButton;
+    @FXML
+    private Label searchForUpdatesLabel;
+    @FXML
+    private Button saveSettingsButton;
+    @FXML
+    private Button cancelSettingsButton;
 
     @FXML
     private ComboBox<JobItem> jobBox;
@@ -242,6 +289,50 @@ public class SettingsController {
 
         updateDirectoryPathLabels();
         initUserParameterFields();
+
+        setLabelStrings();
+    }
+
+    /**
+     * Used to assign localized label strings via BundleUtils
+     * Allows for fallback strings to be assigned if the localization-specific ones
+     * are absent/empty
+     */
+    private void setLabelStrings() {
+        // Game settings
+
+        gameTab.setText(BundleUtils.getLabel("settings_game_title"));
+        maxHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_maxHeapSize"));
+        initialHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_initialHeapSize"));
+        jobLabel.setText(BundleUtils.getLabel("settings_game_job"));
+        buildVersionLabel.setText(BundleUtils.getLabel("settings_game_buildVersion"));
+        gameDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_open"));
+        gameDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_edit"));
+        gameDataDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_open"));
+        gameDataDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_edit"));
+        gameDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDirectory"));
+        gameDataDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDataDirectory"));
+
+        userJavaParametersField.setPromptText(BundleUtils.getLabel("settings_game_javaParsPrompt"));
+        userGameParametersField.setPromptText(BundleUtils.getLabel("settings_game_gameParsPrompt"));
+
+        javaParametersLabel.setText(BundleUtils.getLabel("settings_game_javaParameters"));
+        gameParametersLabel.setText(BundleUtils.getLabel("settings_game_gameParameters"));
+        logLevelLabel.setText(BundleUtils.getLabel("settings_game_logLevel"));
+
+        // Launcher settings
+
+        launcherTab.setText(BundleUtils.getLabel("settings_launcher_title"));
+        chooseLanguageLabel.setText(BundleUtils.getLabel("settings_launcher_chooseLanguage"));
+        closeLauncherLabel.setText(BundleUtils.getLabel("settings_launcher_closeLauncherAfterGameStart"));
+        saveDownloadedFilesLabel.setText(BundleUtils.getLabel("settings_launcher_saveDownloadedFiles"));
+        launcherDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory"));
+        downloadDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory"));
+        launcherDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory_open"));
+        downloadDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory_open"));
+        searchForUpdatesLabel.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
+        saveSettingsButton.setText(BundleUtils.getLabel("settings_save"));
+        cancelSettingsButton.setText(BundleUtils.getLabel("settings_cancel"));
     }
 
     private void populateJobBox() {

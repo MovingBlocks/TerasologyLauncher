@@ -18,30 +18,11 @@
   ~ limitations under the License.
   -->
 
-<?import java.lang.*?>
-<?import java.net.*?>
 <?import javafx.collections.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.collections.FXCollections?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ChoiceBox?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
-<?import java.lang.String?>
+<?import java.lang.*?>
 <?import java.net.URL?>
 
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
@@ -53,7 +34,7 @@
             <children>
                 <TabPane prefHeight="600.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
                     <tabs>
-                        <Tab style="" text="%settings_game_title">
+                        <Tab style="" fx:id="gameTab">
                             <content>
                                 <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0"
                                             prefWidth="200.0">
@@ -62,9 +43,9 @@
                                                   AnchorPane.bottomAnchor="-0.5" AnchorPane.leftAnchor="16.0"
                                                   AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="0.5">
                                             <children>
-                                                <Label text="%settings_game_maxHeapSize" GridPane.columnIndex="0"
+                                                <Label fx:id="maxHeapSizeLabel" GridPane.columnIndex="0"
                                                        GridPane.rowIndex="4"/>
-                                                <Label text="%settings_game_initialHeapSize" GridPane.columnIndex="0"
+                                                <Label fx:id="initialHeapSizeLabel" GridPane.columnIndex="0"
                                                        GridPane.rowIndex="5"/>
                                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0"
                                                       spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
@@ -105,9 +86,9 @@
                                                         <Insets left="8.0" right="8.0"/>
                                                     </padding>
                                                 </HBox>
-                                                <Label text="%settings_game_job" GridPane.columnIndex="0"
+                                                <Label fx:id="jobLabel" GridPane.columnIndex="0"
                                                        GridPane.rowIndex="0"/>
-                                                <Label text="%settings_game_buildVersion" GridPane.columnIndex="0"
+                                                <Label fx:id="buildVersionLabel" GridPane.columnIndex="0"
                                                        GridPane.rowIndex="1"/>
                                                 <HBox alignment="CENTER" prefHeight="47.0" prefWidth="404.0"
                                                       spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
@@ -158,15 +139,15 @@
                                                         <HBox alignment="CENTER" prefHeight="63.0" prefWidth="259.0"
                                                               spacing="8.0">
                                                             <children>
-                                                                <Button maxWidth="1.7976931348623157E308"
+                                                                <Button fx:id="gameDirectoryOpenButton"
+                                                                        maxWidth="1.7976931348623157E308"
                                                                         mnemonicParsing="false"
                                                                         onAction="#openGameDirectoryAction"
-                                                                        text="%settings_game_gameDirectory_open"
                                                                         HBox.hgrow="ALWAYS"/>
-                                                                <Button maxWidth="1.7976931348623157E308"
+                                                                <Button fx:id="gameDirectoryEditButton"
+                                                                        maxWidth="1.7976931348623157E308"
                                                                         mnemonicParsing="false"
                                                                         onAction="#editGameDirectoryAction"
-                                                                        text="%settings_game_gameDirectory_edit"
                                                                         HBox.hgrow="ALWAYS"/>
                                                             </children>
                                                         </HBox>
@@ -185,15 +166,15 @@
                                                         <HBox alignment="CENTER" prefHeight="63.0" prefWidth="388.0"
                                                               spacing="8.0">
                                                             <children>
-                                                                <Button maxWidth="1.7976931348623157E308"
+                                                                <Button fx:id="gameDataDirectoryOpenButton"
+                                                                        maxWidth="1.7976931348623157E308"
                                                                         mnemonicParsing="false"
                                                                         onAction="#openGameDataDirectoryAction"
-                                                                        text="%settings_game_gameDataDirectory_open"
                                                                         HBox.hgrow="ALWAYS"/>
-                                                                <Button maxWidth="1.7976931348623157E308"
+                                                                <Button fx:id="gameDataDirectoryEditButton"
+                                                                        maxWidth="1.7976931348623157E308"
                                                                         mnemonicParsing="false"
                                                                         onAction="#editGameDataDirectoryAction"
-                                                                        text="%settings_game_gameDataDirectory_edit"
                                                                         HBox.hgrow="ALWAYS"/>
                                                             </children>
                                                         </HBox>
@@ -202,35 +183,33 @@
                                                 <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="0"
                                                       GridPane.rowIndex="2">
                                                     <children>
-                                                        <Label alignment="TOP_LEFT"
-                                                               text="%settings_game_gameDirectory"/>
+                                                        <Label fx:id="gameDirectoryLabel"
+                                                               alignment="TOP_LEFT"/>
                                                     </children>
                                                 </VBox>
                                                 <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="0"
                                                       GridPane.rowIndex="3">
                                                     <children>
-                                                        <Label text="%settings_game_gameDataDirectory"/>
+                                                        <Label fx:id="gameDataDirectoryLabel"/>
                                                     </children>
                                                 </VBox>
                                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0"
                                                       GridPane.columnIndex="1" GridPane.rowIndex="6">
                                                     <children>
                                                         <TextField fx:id="userJavaParametersField" prefHeight="31.0"
-                                                                   prefWidth="387.0"
-                                                                   promptText="%settings_game_javaParsPrompt"/>
+                                                                   prefWidth="387.0"/>
                                                     </children>
                                                 </HBox>
-                                                <Label text="%settings_game_javaParameters" GridPane.rowIndex="6"/>
-                                                <Label text="%settings_game_gameParameters" GridPane.rowIndex="7"/>
+                                                <Label fx:id="javaParametersLabel" GridPane.rowIndex="6"/>
+                                                <Label fx:id="gameParametersLabel" GridPane.rowIndex="7"/>
                                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0"
                                                       GridPane.columnIndex="1" GridPane.rowIndex="7">
                                                     <children>
                                                         <TextField fx:id="userGameParametersField" prefHeight="31.0"
-                                                                   prefWidth="389.0"
-                                                                   promptText="%settings_game_gameParsPrompt"/>
+                                                                   prefWidth="389.0"/>
                                                     </children>
                                                 </HBox>
-                                                <Label text="%settings_game_logLevel" GridPane.rowIndex="8"/>
+                                                <Label fx:id="logLevelLabel" GridPane.rowIndex="8"/>
                                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0"
                                                       GridPane.columnIndex="1" GridPane.rowIndex="8">
                                                     <children>
@@ -272,7 +251,7 @@
                                 </AnchorPane>
                             </content>
                         </Tab>
-                        <Tab text="%settings_launcher_title">
+                        <Tab fx:id="launcherTab">
                             <content>
                                 <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0"
                                             prefWidth="200.0">
@@ -281,15 +260,15 @@
                                                   AnchorPane.leftAnchor="16.0" AnchorPane.rightAnchor="16.0"
                                                   AnchorPane.topAnchor="0.0">
                                             <children>
-                                                <Label text="%settings_launcher_chooseLanguage" GridPane.columnIndex="0"
+                                                <Label fx:id="chooseLanguageLabel" GridPane.columnIndex="0"
                                                        GridPane.rowIndex="0"/>
-                                                <Label text="%settings_launcher_closeLauncherAfterGameStart"
+                                                <Label fx:id="closeLauncherLabel"
                                                        GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                                                <Label text="%settings_launcher_saveDownloadedFiles"
+                                                <Label fx:id="saveDownloadedFilesLabel"
                                                        GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                                                <Label text="%settings_launcher_launcherDirectory"
+                                                <Label fx:id="launcherDirectoryLabel"
                                                        GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                                                <Label text="%settings_launcher_downloadDirectory"
+                                                <Label fx:id="downloadDirectoryLabel"
                                                        GridPane.columnIndex="0" GridPane.rowIndex="5"/>
                                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0"
                                                       spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
@@ -337,11 +316,11 @@
                                                         <Label fx:id="launcherDirectoryPath"
                                                                maxWidth="1.7976931348623157E308" styleClass="boxed"
                                                                text="Label" HBox.hgrow="ALWAYS"/>
-                                                        <Button maxWidth="-Infinity" minWidth="-Infinity"
+                                                        <Button fx:id="launcherDirectoryOpenButton"
+                                                                maxWidth="-Infinity" minWidth="-Infinity"
                                                                 mnemonicParsing="false"
                                                                 onAction="#openLauncherDirectoryAction"
                                                                 prefWidth="128.0"
-                                                                text="%settings_launcher_launcherDirectory_open"
                                                                 HBox.hgrow="SOMETIMES"/>
                                                     </children>
                                                     <padding>
@@ -355,18 +334,18 @@
                                                                maxWidth="1.7976931348623157E308"
                                                                onDragDetected="#openDownloadDirectoryAction"
                                                                styleClass="boxed" text="Label" HBox.hgrow="ALWAYS"/>
-                                                        <Button maxWidth="-Infinity" minWidth="-Infinity"
+                                                        <Button fx:id="downloadDirectoryOpenButton"
+                                                                maxWidth="-Infinity" minWidth="-Infinity"
                                                                 mnemonicParsing="false"
                                                                 onAction="#openDownloadDirectoryAction"
                                                                 prefWidth="128.0"
-                                                                text="%settings_launcher_downloadDirectory_open"
                                                                 HBox.hgrow="SOMETIMES"/>
                                                     </children>
                                                     <padding>
                                                         <Insets left="8.0" right="8.0"/>
                                                     </padding>
                                                 </HBox>
-                                                <Label text="%settings_launcher_searchForLauncherUpdates"
+                                                <Label fx:id="searchForUpdatesLabel"
                                                        GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                                                 <CheckBox fx:id="searchForUpdatesBox" contentDisplay="GRAPHIC_ONLY"
                                                           graphicTextGap="0.0" mnemonicParsing="false"
@@ -399,10 +378,10 @@
                 <Separator prefWidth="200.0"/>
                 <HBox alignment="CENTER" prefHeight="51.0" prefWidth="692.0" spacing="64.0" VBox.vgrow="NEVER">
                     <children>
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#saveSettingsAction"
-                                text="%settings_save" textAlignment="CENTER" HBox.hgrow="ALWAYS"/>
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-                                onAction="#cancelSettingsAction" text="%settings_cancel" textAlignment="CENTER"
+                        <Button fx:id="saveSettingsButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                                onAction="#saveSettingsAction" textAlignment="CENTER" HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="cancelSettingsButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                                onAction="#cancelSettingsAction" textAlignment="CENTER"
                                 HBox.hgrow="ALWAYS"/>
                     </children>
                     <padding>
