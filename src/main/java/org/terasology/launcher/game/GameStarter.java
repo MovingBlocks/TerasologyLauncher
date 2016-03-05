@@ -18,7 +18,9 @@ package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.JavaHeapSize;
+import org.terasology.launcher.util.LogLevel;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,25 +50,28 @@ public final class GameStarter {
     }
 
     public boolean startGame(TerasologyGameVersion gameVersion, File gameDataDirectory, JavaHeapSize maxHeapSize,
-                             JavaHeapSize initialHeapSize, List<String> userJavaParameters, List<String> userGameParameters) {
+                             JavaHeapSize initialHeapSize, List<String> userJavaParameters, List<String> userGameParameters, LogLevel logLevel) {
         if (isRunning()) {
             logger.warn("The game can not be started because another game is already running! '{}'", gameThread);
             return false;
         }
 
-        final List<String> javaParameters = createJavaParameters(maxHeapSize, initialHeapSize, userJavaParameters);
+        final List<String> javaParameters = createJavaParameters(maxHeapSize, initialHeapSize, userJavaParameters, logLevel);
         final List<String> processParameters = createProcessParameters(gameVersion, gameDataDirectory, javaParameters, userGameParameters);
 
         return startProcess(gameVersion, processParameters);
     }
 
-    private List<String> createJavaParameters(JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize, List<String> userJavaParameters) {
+    private List<String> createJavaParameters(JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize, List<String> userJavaParameters, LogLevel logLevel) {
         final List<String> javaParameters = new ArrayList<>();
         if (initialHeapSize.isUsed()) {
             javaParameters.add("-Xms" + initialHeapSize.getSizeParameter());
         }
         if (maxHeapSize.isUsed()) {
             javaParameters.add("-Xmx" + maxHeapSize.getSizeParameter());
+        }
+        if (!logLevel.isDefault()) {
+            javaParameters.add("-DlogOverrideLevel=" + logLevel.name());
         }
         javaParameters.addAll(userJavaParameters);
         return javaParameters;

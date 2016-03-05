@@ -207,7 +207,7 @@ public class ApplicationController {
             GuiUtils.showInfoMessageDialog(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
             final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
-                    launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(), launcherSettings.getUserGameParameterList());
+                    launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(), launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
             if (!gameStarted) {
                 GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
             } else if (launcherSettings.isCloseLauncherAfterGameStart()) {

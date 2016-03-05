@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.GameSettings;
 import org.terasology.launcher.util.JavaHeapSize;
+import org.terasology.launcher.util.LogLevel;
 
 /**
  * Created by Skaldarnar on 30.01.2016.
@@ -54,6 +55,7 @@ public abstract class LauncherSettings implements GameSettings {
         initGameDataDirectory();
         initUserJavaParameters();
         initUserGameParameters();
+        initLogLevel();
     }
 
     // --------------------------------------------------------------------- //
@@ -75,6 +77,8 @@ public abstract class LauncherSettings implements GameSettings {
     protected abstract void initUserJavaParameters();
 
     protected abstract void initUserGameParameters();
+
+    protected abstract void initLogLevel();
 
     protected abstract void initMaxHeapSize();
 
@@ -114,6 +118,8 @@ public abstract class LauncherSettings implements GameSettings {
         return Arrays.asList(getUserGameParameters().split("\\s+"));
     }
 
+    public abstract LogLevel getLogLevel();
+
     public abstract File getGameDirectory();
 
     public abstract File getGameDataDirectory();
@@ -143,6 +149,8 @@ public abstract class LauncherSettings implements GameSettings {
     public abstract void setUserJavaParameters(String userJavaParameters);
 
     public abstract void setUserGameParameters(String userGameParameters);
+
+    public abstract void setLogLevel(LogLevel logLevel);
 
     public abstract void setSearchForLauncherUpdates(boolean searchForLauncherUpdates);
 

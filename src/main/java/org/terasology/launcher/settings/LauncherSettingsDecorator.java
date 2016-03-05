@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.util.JavaHeapSize;
+import org.terasology.launcher.util.LogLevel;
 
 /**
  * Created by Skaldarnar on 30.01.2016.
@@ -39,6 +40,7 @@ public class LauncherSettingsDecorator extends LauncherSettings {
     protected JavaHeapSize initialHeapSize;
     protected String userJavaParameters;
     protected String userGameParameters;
+    protected LogLevel logLevel;
     protected File gameDirectory;
     protected File gameDataDirectory;
 
@@ -104,6 +106,11 @@ public class LauncherSettingsDecorator extends LauncherSettings {
 
     @Override
     protected void initUserGameParameters() {
+
+    }
+
+    @Override
+    protected void initLogLevel() {
 
     }
 
@@ -179,6 +186,11 @@ public class LauncherSettingsDecorator extends LauncherSettings {
     }
 
     @Override
+    public LogLevel getLogLevel() {
+        return (logLevel != null) ? logLevel : settings.getLogLevel();
+    }
+
+    @Override
     public File getGameDirectory() {
         return (gameDirectory != null) ? gameDirectory : settings.getGameDirectory();
     }
@@ -246,6 +258,9 @@ public class LauncherSettingsDecorator extends LauncherSettings {
     public void setUserGameParameters(String userGameParameters) {
         this.userGameParameters = userGameParameters;
     }
+
+    @Override
+    public void setLogLevel(LogLevel logLevel) { this.logLevel = logLevel; }
 
     @Override
     public void setGameDirectory(File gameDirectory) {

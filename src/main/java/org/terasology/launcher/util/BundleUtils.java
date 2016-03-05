@@ -43,18 +43,17 @@ public final class BundleUtils {
     }
 
     public static String getLabel(String key) {
-        try {
-            return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.getCurrentLocale()).getString(key);
-        } catch (MissingResourceException e) {
-            logger.error("Missing label translation! key={}, locale={}", key, Languages.getCurrentLocale());
-            return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.DEFAULT_LOCALE).getString(key);
-        }
+        return getLabel(Languages.getCurrentLocale(), key);
     }
 
     public static String getLabel(Locale locale, String key) {
         try {
-            return ResourceBundle.getBundle(LABELS_BUNDLE, locale).getString(key);
-        } catch (MissingResourceException e) {
+            String label = ResourceBundle.getBundle(LABELS_BUNDLE, locale).getString(key);
+            if (label.length() == 0) {
+                throw new IllegalArgumentException();
+            }
+            return label;
+        } catch (MissingResourceException|IllegalArgumentException e) {
             logger.error("Missing label translation! key={}, locale={}", key, locale);
             return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.DEFAULT_LOCALE).getString(key);
         }
@@ -64,7 +63,10 @@ public final class BundleUtils {
         String pattern;
         try {
             pattern = ResourceBundle.getBundle(MESSAGE_BUNDLE, Languages.getCurrentLocale()).getString(key);
-        } catch (MissingResourceException e) {
+            if (pattern.length() == 0) {
+                throw new IllegalArgumentException();
+            }
+        } catch (MissingResourceException|IllegalArgumentException e) {
             logger.error("Missing message translation! key={}, locale={}", key, Languages.getCurrentLocale());
             pattern = ResourceBundle.getBundle(MESSAGE_BUNDLE, Languages.DEFAULT_LOCALE).getString(key);
         }
