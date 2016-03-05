@@ -54,7 +54,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
     private static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
     private static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
     private static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
-    private static final LogLevel LOG_LEVEL_DEFAULT = LogLevel.DEBUG;
+    private static final LogLevel LOG_LEVEL_DEFAULT = LogLevel.DEFAULT;
 
     protected static final String PROPERTY_LOCALE = "locale";
     protected static final String PROPERTY_JOB = "job";
