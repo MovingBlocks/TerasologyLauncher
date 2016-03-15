@@ -69,6 +69,8 @@ public final class DownloadUtils {
 
     private static final int CONNECT_TIMEOUT = 1000 * 30;
     private static final int READ_TIMEOUT = 1000 * 60 * 5;
+    private static final String URL = ", URL=";
+    private static final String CLOSING_BUFFERED_READER_FOR_FAILED = "Closing BufferedReader for '{}' failed!";
 
     private DownloadUtils() {
     }
@@ -208,13 +210,13 @@ public final class DownloadUtils {
             reader = new BufferedReader(new InputStreamReader(urlVersion.openStream(), StandardCharsets.US_ASCII));
             buildNumber = Integer.parseInt(reader.readLine());
         } catch (IOException | RuntimeException e) {
-            throw new DownloadException("The build number could not be loaded! job=" + jobName + ", URL=" + urlVersion, e);
+            throw new DownloadException("The build number could not be loaded! job=" + jobName + URL + urlVersion, e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    logger.warn("Closing BufferedReader for '{}' failed!", urlVersion, e);
+                    logger.warn(CLOSING_BUFFERED_READER_FOR_FAILED, urlVersion, e);
                 }
             }
         }
@@ -241,13 +243,13 @@ public final class DownloadUtils {
                 }
             }
         } catch (IOException | RuntimeException e) {
-            throw new DownloadException("The job result could not be loaded! job=" + jobName + ", URL=" + urlResult, e);
+            throw new DownloadException("The job result could not be loaded! job=" + jobName + URL + urlResult, e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    logger.warn("Closing BufferedReader for '{}' failed!", urlResult, e);
+                    logger.warn(CLOSING_BUFFERED_READER_FOR_FAILED, urlResult, e);
                 }
             }
         }
@@ -281,7 +283,7 @@ public final class DownloadUtils {
                 }
             }
         } catch (ParserConfigurationException | SAXException | IOException | RuntimeException e) {
-            throw new DownloadException("The change log could not be loaded! job=" + jobName + ", URL=" + urlChangeLog, e);
+            throw new DownloadException("The change log could not be loaded! job=" + jobName + URL + urlChangeLog, e);
         }
         return changeLog;
     }
@@ -323,7 +325,7 @@ public final class DownloadUtils {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    logger.warn("Closing BufferedReader for '{}' failed!", urlResult, e);
+                    logger.warn(CLOSING_BUFFERED_READER_FOR_FAILED, urlResult, e);
                 }
             }
         }
@@ -348,13 +350,13 @@ public final class DownloadUtils {
                 changeLog.append(line);
             }
         } catch (IOException | RuntimeException e) {
-            throw new DownloadException("The launcher change log could not be loaded! job=" + jobName + ", URL=" + urlChangeLog, e);
+            throw new DownloadException("The launcher change log could not be loaded! job=" + jobName + URL + urlChangeLog, e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    logger.warn("Closing BufferedReader for '{}' failed!", urlChangeLog, e);
+                    logger.warn(CLOSING_BUFFERED_READER_FOR_FAILED, urlChangeLog, e);
                 }
             }
         }

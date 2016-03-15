@@ -31,6 +31,7 @@ import java.util.zip.ZipInputStream;
 public final class FileUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
+    private static final String COULD_NOT_CREATE_DIRECTORY = "Could not create directory! ";
 
     private FileUtils() {
     }
@@ -91,7 +92,7 @@ public final class FileUtils {
             if (!outputLocation.exists()) {
                 boolean created = outputLocation.mkdir();
                 if (!created) {
-                    throw new IOException("Could not create directory! " + outputLocation);
+                    throw new IOException(COULD_NOT_CREATE_DIRECTORY + outputLocation);
                 }
             }
             final byte[] buffer = new byte[4096];
@@ -103,7 +104,7 @@ public final class FileUtils {
                     if (!extractedDir.exists()) {
                         boolean created = extractedDir.mkdirs();
                         if (!created) {
-                            throw new IOException("Could not create directory! " + extractedDir);
+                            throw new IOException(COULD_NOT_CREATE_DIRECTORY + extractedDir);
                         }
                     }
                     if (!ze.isDirectory()) {
@@ -150,7 +151,7 @@ public final class FileUtils {
             if (!destination.exists()) {
                 final boolean created = destination.mkdirs();
                 if (!created) {
-                    throw new IOException("Could not create directory! " + destination);
+                    throw new IOException(COULD_NOT_CREATE_DIRECTORY + destination);
                 }
             }
             final String[] files = source.list();
