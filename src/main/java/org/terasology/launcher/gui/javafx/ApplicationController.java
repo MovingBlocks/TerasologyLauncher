@@ -82,6 +82,7 @@ import java.util.ResourceBundle;
 public class ApplicationController {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
+    private static final String ABOUT = "about";
 
     private File launcherDirectory;
     private File downloadDirectory;
@@ -539,10 +540,10 @@ public class ApplicationController {
         aboutInfoAccordion.getPanes().clear();
 
         Collection<URL> files = new ArrayList<>();
-        files.add(BundleUtils.getFXMLUrl("about", "README.md"));
-        files.add(BundleUtils.getFXMLUrl("about", "CHANGELOG.md"));
-        files.add(BundleUtils.getFXMLUrl("about", "CONTRIBUTING.md"));
-        files.add(BundleUtils.getFXMLUrl("about", "LICENSE"));
+        files.add(BundleUtils.getFXMLUrl(ABOUT, "README.md"));
+        files.add(BundleUtils.getFXMLUrl(ABOUT, "CHANGELOG.md"));
+        files.add(BundleUtils.getFXMLUrl(ABOUT, "CONTRIBUTING.md"));
+        files.add(BundleUtils.getFXMLUrl(ABOUT, "LICENSE"));
         Charset cs = Charset.forName("UTF-8");
 
         for (URL url : files) {
