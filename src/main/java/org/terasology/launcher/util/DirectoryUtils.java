@@ -93,10 +93,8 @@ public final class DirectoryUtils {
             for (File child : files) {
                 if (child.isFile()) {
                     return true;
-                } else if (child.isDirectory()) {
-                    if (containsFiles(child)) {
-                        return true;
-                    }
+                } else if (child.isDirectory() && containsFiles(child)) {
+                    return true;
                 }
             }
         }

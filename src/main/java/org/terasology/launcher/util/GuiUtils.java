@@ -102,10 +102,8 @@ public final class GuiUtils {
         }
 
         // directory proposal needs to be deleted if the user chose a different one
-        if (!directory.equals(selected) && !DirectoryUtils.containsFiles(directory)) {
-            if (!directory.delete()) {
-                logger.warn("Could not delete unused default directory! {}", directory);
-            }
+        if (!directory.equals(selected) && !DirectoryUtils.containsFiles(directory) && !directory.delete()) {
+             logger.warn("Could not delete unused default directory! {}", directory);
         }
         return selected;
     }

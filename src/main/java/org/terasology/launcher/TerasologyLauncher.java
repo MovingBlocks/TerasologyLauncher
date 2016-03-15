@@ -128,7 +128,7 @@ public final class TerasologyLauncher extends Application {
      *
      * @see <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/net/proxies.html">Java Networking and Proxies</a>
      */
-    private void initProxy() {
+    private static void initProxy() {
         System.setProperty("java.net.useSystemProxies", "true");
     }
 
