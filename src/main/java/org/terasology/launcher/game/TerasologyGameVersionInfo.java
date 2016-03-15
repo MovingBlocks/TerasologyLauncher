@@ -28,7 +28,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /***
- * Contains version data for a single instance of a Terasology engine build, parsed out of the main jar.
+ * Contains version data for a single instance of a TERASOLOGY engine build, parsed out of the main jar.
  */
 public final class TerasologyGameVersionInfo implements Serializable {
 
