@@ -156,25 +156,25 @@ public final class LauncherUpdater {
      */
     private String getUpdateInfo() {
         final StringBuilder builder = new StringBuilder();
-        builder.append("  ");
-        builder.append(BundleUtils.getLabel("message_update_current"));
-        builder.append("  ");
-        builder.append(currentVersionInfo.getDisplayVersion());
-        builder.append("  \n");
-        builder.append("  ");
-        builder.append(BundleUtils.getLabel("message_update_latest"));
-        builder.append("  ");
+        builder.append("  ")
+               .append(BundleUtils.getLabel("message_update_current"))
+               .append("  ")
+               .append(currentVersionInfo.getDisplayVersion())
+               .append("  \n")
+               .append("  ")
+               .append(BundleUtils.getLabel("message_update_latest"))
+               .append("  ");
         if (versionInfo != null) {
             builder.append(versionInfo.getDisplayVersion());
         } else if (upstreamVersion != null) {
             builder.append(upstreamVersion);
         }
-        builder.append("  \n");
-        builder.append("  ");
-        builder.append(BundleUtils.getLabel("message_update_installationDirectory"));
-        builder.append("  ");
-        builder.append(launcherInstallationDirectory.getPath());
-        builder.append("  ");
+        builder.append("  \n")
+               .append("  ")
+               .append(BundleUtils.getLabel("message_update_installationDirectory"))
+               .append("  ")
+               .append(launcherInstallationDirectory.getPath())
+               .append("  ");
         return builder.toString();
     }
 

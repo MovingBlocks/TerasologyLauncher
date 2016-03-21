@@ -653,39 +653,39 @@ public class ApplicationController {
 
         final StringBuilder b = new StringBuilder();
         if ((infoHeader1 != null) && (infoHeader1.trim().length() > 0)) {
-            b.append("<h1>");
-            b.append(escapeHtml(infoHeader1));
-            b.append("</h1>\n");
+            b.append("<h1>")
+             .append(escapeHtml(infoHeader1))
+             .append("</h1>\n");
         }
         if ((infoHeader2 != null) && (infoHeader2.trim().length() > 0)) {
-            b.append("<h2>");
-            b.append(escapeHtml(infoHeader2));
-            b.append("</h2>\n");
+            b.append("<h2>")
+             .append(escapeHtml(infoHeader2))
+             .append("</h2>\n");
         }
-        b.append("<strong>\n");
-        b.append(BundleUtils.getLabel("infoHeader3"));
-        b.append("</strong>\n");
+        b.append("<strong>\n")
+         .append(BundleUtils.getLabel("infoHeader3"))
+         .append("</strong>\n");
 
         if ((gameVersion.getChangeLog() != null) && !gameVersion.getChangeLog().isEmpty()) {
-            b.append("<p>\n");
-            b.append(BundleUtils.getLabel("infoHeader4"));
-            b.append("<ul>\n");
+            b.append("<p>\n")
+             .append(BundleUtils.getLabel("infoHeader4"))
+             .append("<ul>\n");
             for (String msg : gameVersion.getChangeLog()) {
-                b.append("<li>");
-                b.append(escapeHtml(msg));
-                b.append("</li>\n");
+                b.append("<li>")
+                 .append(escapeHtml(msg))
+                 .append("</li>\n");
             }
-            b.append("</ul>\n");
-            b.append("</p>\n");
+            b.append("</ul>\n")
+             .append("</p>\n");
         }
 
         /* Append changelogs of previous builds. */
         int previousLogs = (gameVersion.getJob().isStable()) ? 1 : 10;
         b.append("<hr/>");
         for (String msg : gameVersions.getAggregatedChangeLog(gameVersion, previousLogs)) {
-            b.append("<li>");
-            b.append(escapeHtml(msg));
-            b.append("</li>\n");
+            b.append("<li>")
+             .append(escapeHtml(msg))
+             .append("</li>\n");
         }
 
         return b.toString();
