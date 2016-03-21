@@ -208,7 +208,7 @@ public final class TerasologyGameVersions {
             if ((lastSuccessfulBuildNumber != null) && (lastSuccessfulBuildNumber >= job.getMinBuildNumber())) {
                 buildNumbers.add(lastSuccessfulBuildNumber);
                 // add previous build numbers
-                for (int buildNumber = lastSuccessfulBuildNumber - 1; ((buildNumbers.size() <= job.getPrevBuildNumbers()) && buildNumber > job.getMinBuildNumber());
+                for (int buildNumber = lastSuccessfulBuildNumber - 1; (buildNumbers.size() <= job.getPrevBuildNumbers() && buildNumber > job.getMinBuildNumber());
                      buildNumber--) {
                     try {
                         // Skip unavailable builds
@@ -486,7 +486,7 @@ public final class TerasologyGameVersions {
                 Boolean successful = null;
                 try {
                     JobResult jobResult = DownloadUtils.loadJobResultJenkins(job.name(), buildNumber);
-                    successful = (jobResult != null && ((jobResult == JobResult.SUCCESS) || (jobResult == JobResult.UNSTABLE)));
+                    successful = jobResult != null && ((jobResult == JobResult.SUCCESS) || (jobResult == JobResult.UNSTABLE));
                 } catch (DownloadException e) {
                     logger.warn("Failed to load job result (probably OK): '{}' '{}'", job, buildNumber);
                 }

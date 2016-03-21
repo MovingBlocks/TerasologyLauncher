@@ -680,7 +680,7 @@ public class ApplicationController {
         }
 
         /* Append changelogs of previous builds. */
-        int previousLogs = (gameVersion.getJob().isStable()) ? 1 : 10;
+        int previousLogs = gameVersion.getJob().isStable() ? 1 : 10;
         b.append("<hr/>");
         for (String msg : gameVersions.getAggregatedChangeLog(gameVersion, previousLogs)) {
             b.append("<li>")
