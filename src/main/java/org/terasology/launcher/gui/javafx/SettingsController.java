@@ -294,7 +294,7 @@ public class SettingsController {
 
         populateJobBox();
         populateHeapSize();
-        populateLanguage();
+        populateLanguageValues();
         populateLanguageIcons();
         populateSearchForLauncherUpdates();
         populateCloseLauncherAfterGameStart();
@@ -311,7 +311,7 @@ public class SettingsController {
     }
 
     /**
-     * Used to assign localized label strings via BundleUtils
+     * Used to assign localized label strings via BundleUtils.
      * Allows for fallback strings to be assigned if the localization-specific ones
      * are absent/empty
      */
@@ -429,7 +429,7 @@ public class SettingsController {
         updateHeapSizeSelection();
     }
 
-    private void populateLanguage() {
+    private void populateLanguageValues() {
         languageBox.getItems().clear();
         for (Locale locale : Languages.SUPPORTED_LOCALES) {
             String item = locale.toLanguageTag() + " : " + BundleUtils.getLabel(locale, Languages.SETTINGS_LABEL_KEYS.get(locale));
@@ -452,21 +452,22 @@ public class SettingsController {
                     @Override
                     protected void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
-                        setText(item);
+                        this.setText(item);
                         if (item == null || empty) {
-                            setGraphic(null);
+                            this.setGraphic(null);
                         } else {
-                            Image icon;
+                            String id = "flag_" + this.getText().split(":")[0].trim();
                             try {
-                                String id = "flag_" + this.getText().split(":")[0].trim();
-                                icon = BundleUtils.getFxImage(id);
+                                Image icon = BundleUtils.getFxImage(id);
 
                                 ImageView iconImageView = new ImageView(icon);
                                 iconImageView.setFitHeight(11);
                                 iconImageView.setPreserveRatio(true);
-                                setGraphic(iconImageView);
+                                this.setGraphic(iconImageView);
                             } catch (MissingResourceException e) {
-                                logger.warn("Could not load icon image", e);
+                                logger.warn("ImageBundle key {} not found", id);
+                            } catch (NullPointerException e) {
+                                logger.warn("Flag icon in ImageBundle key {} missing or corrupt", id);
                             }
                         }
                     }
