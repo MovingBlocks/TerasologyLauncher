@@ -273,7 +273,7 @@
                                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0"
                                                       spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                                     <children>
-                                                        <ChoiceBox fx:id="languageBox" maxWidth="1.7976931348623157E308"
+                                                        <ComboBox fx:id="languageBox" maxWidth="1.7976931348623157E308"
                                                                    HBox.hgrow="ALWAYS">
                                                             <items>
                                                                 <FXCollections fx:factory="observableArrayList">
@@ -282,7 +282,7 @@
                                                                     <String fx:value="Item 3"/>
                                                                 </FXCollections>
                                                             </items>
-                                                        </ChoiceBox>
+                                                        </ComboBox>
                                                     </children>
                                                     <padding>
                                                         <Insets left="8.0" right="8.0"/>

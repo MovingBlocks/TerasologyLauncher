@@ -21,8 +21,18 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
@@ -31,12 +41,18 @@ import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.game.VersionItem;
 import org.terasology.launcher.settings.BaseLauncherSettings;
-import org.terasology.launcher.util.*;
+import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.util.JavaHeapSize;
+import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.util.LogLevel;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.MissingResourceException;
 
 public class SettingsController {
 
@@ -112,7 +128,7 @@ public class SettingsController {
     @FXML
     private ComboBox<JavaHeapSize> initialHeapSizeBox;
     @FXML
-    private ChoiceBox<String> languageBox;
+    private ComboBox<String> languageBox;
     @FXML
     private CheckBox saveDownloadedFilesBox;
     @FXML
@@ -279,6 +295,7 @@ public class SettingsController {
         populateJobBox();
         populateHeapSize();
         populateLanguage();
+        populateLanguageIcons();
         populateSearchForLauncherUpdates();
         populateCloseLauncherAfterGameStart();
         populateSaveDownloadedFiles();
@@ -425,6 +442,37 @@ public class SettingsController {
                 languageBox.getSelectionModel().select(item);
             }
         }
+    }
+
+    private void populateLanguageIcons() {
+        languageBox.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
+            @Override
+            public ListCell<String> call(ListView<String> p) {
+                return new ListCell<String>() {
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText(item);
+                        if (item == null || empty) {
+                            setGraphic(null);
+                        } else {
+                            Image icon;
+                            try {
+                                String id = "flag_" + this.getText().split(":")[0].trim();
+                                icon = BundleUtils.getFxImage(id);
+
+                                ImageView iconImageView = new ImageView(icon);
+                                iconImageView.setFitHeight(11);
+                                iconImageView.setPreserveRatio(true);
+                                setGraphic(iconImageView);
+                            } catch (MissingResourceException e) {
+                                logger.warn("Could not load icon image", e);
+                            }
+                        }
+                    }
+                };
+            }
+        });
     }
 
     private void populateSearchForLauncherUpdates() {
