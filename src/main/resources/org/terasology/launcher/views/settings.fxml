@@ -376,7 +376,7 @@
                     </tabs>
                 </TabPane>
                 <Separator prefWidth="200.0"/>
-                <HBox alignment="CENTER" prefHeight="51.0" prefWidth="692.0" spacing="64.0" VBox.vgrow="NEVER">
+                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="692.0" spacing="64.0" VBox.vgrow="NEVER">
                     <children>
                         <Button fx:id="saveSettingsButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
                                 onAction="#saveSettingsAction" textAlignment="CENTER" HBox.hgrow="ALWAYS"/>
