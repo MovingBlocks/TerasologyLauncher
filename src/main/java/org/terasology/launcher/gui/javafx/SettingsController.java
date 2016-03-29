@@ -443,7 +443,7 @@ public class SettingsController {
             }
         }
     }
-
+    
     private void populateLanguageIcons() {
         languageBox.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
             @Override
@@ -451,13 +451,19 @@ public class SettingsController {
                 return new ListCell<String>() {
                     @Override
                     protected void updateItem(String item, boolean empty) {
+                        // Pass along the locale text
                         super.updateItem(item, empty);
                         this.setText(item);
+
                         if (item == null || empty) {
                             this.setGraphic(null);
                         } else {
-                            String id = "flag_" + this.getText().split(":")[0].trim();
+                            // Get the key thar represents the locale in ImageBundle (flag_xx)
+                            String countryCode = this.getText().split(":")[0].trim();
+                            String id = "flag_" + countryCode;
+
                             try {
+                                // Get the appropriate flag icon via BundleUtils
                                 Image icon = BundleUtils.getFxImage(id);
 
                                 ImageView iconImageView = new ImageView(icon);
@@ -474,6 +480,9 @@ public class SettingsController {
                 };
             }
         });
+
+        // Make the icon visible in the control area for the selected locale
+        languageBox.setButtonCell(languageBox.getCellFactory().call(null));
     }
 
     private void populateSearchForLauncherUpdates() {
