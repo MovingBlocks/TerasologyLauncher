@@ -46,6 +46,13 @@
     <StackPane prefHeight="529.0" prefWidth="756.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <children>
         <ImageView fitHeight="582.875" fitWidth="1036.2221943113727" pickOnBounds="true" scaleX="1.5" scaleY="1.5">
+            <effect>
+              <GaussianBlur radius="13.730263157894736">
+                <input>
+                  <Glow />
+                </input>
+              </GaussianBlur>
+            </effect>
           <image>
             <Image url="@../images/background.jpg" preserveRatio="true" smooth="false" />
           </image>
