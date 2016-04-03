@@ -42,6 +42,7 @@ public final class Languages {
         final Locale polish = new Locale("pl");
         final Locale russian = new Locale("ru");
         final Locale turkish = new Locale("tr");
+        final Locale ukrainian = new Locale("uk");
 
         final List<Locale> supportedLocales = new ArrayList<>();
         supportedLocales.add(Locale.GERMAN);
@@ -56,6 +57,7 @@ public final class Languages {
         supportedLocales.add(polish);
         supportedLocales.add(russian);
         supportedLocales.add(turkish);
+        supportedLocales.add(ukrainian);
 
         final Map<Locale, String> settingsLabelKey = new HashMap<>();
         settingsLabelKey.put(Locale.GERMAN, "settings_language_de");
@@ -70,6 +72,7 @@ public final class Languages {
         settingsLabelKey.put(polish, "settings_language_pl");
         settingsLabelKey.put(russian, "settings_language_ru");
         settingsLabelKey.put(turkish, "settings_language_tr");
+        settingsLabelKey.put(ukrainian, "settings_language_uk");
 
         SUPPORTED_LOCALES = Collections.unmodifiableList(supportedLocales);
         SETTINGS_LABEL_KEYS = Collections.unmodifiableMap(settingsLabelKey);
