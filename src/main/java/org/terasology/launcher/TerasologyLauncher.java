@@ -170,7 +170,7 @@ public final class TerasologyLauncher extends Application {
         decorateStage(mainStage);
 
         mainStage.setScene(scene);
-        mainStage.setResizable(false);
+        mainStage.setResizable(true);
         mainStage.show();
 
         logger.info("The TerasologyLauncher was successfully started.");
