@@ -218,11 +218,7 @@
                         <Insets left="8.0" right="8.0" />
                       </padding>
                     </VBox>
-<<<<<<< 4442c32450126ebac38b26bfdd1122671a0cdf2d
                     <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" maxWidth="300.0" spacing="32" >
-=======
-
->>>>>>> fixed typo
                       <children >
                         <Button id="downloadButton" fx:id="cancelDownloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#cancelDownloadAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButtonCancel">
                           <graphic>
