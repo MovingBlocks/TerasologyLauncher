@@ -218,7 +218,7 @@
                         <Insets left="8.0" right="8.0" />
                       </padding>
                     </VBox>
-                    <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" maxWidth="500.0" spacing="60" >
+                    <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="668.1666259765625" spacing="60">
                       <children >
                         <Button id="downloadButton" fx:id="cancelDownloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#cancelDownloadAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButtonCancel">
                           <graphic>
