@@ -130,9 +130,9 @@
           <center>
             <AnchorPane prefHeight="200.0" prefWidth="200.0">
               <children>
-                <VBox alignment="BOTTOM_CENTER" prefHeight="399.0" prefWidth="969.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <VBox alignment="BOTTOM_CENTER" prefHeight="399.0" prefWidth="969.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="8.0">
                   <children>
-                    <TabPane id="contentTabPane" maxWidth="-Infinity" prefHeight="367.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="100.0">
+                    <TabPane id="contentTabPane" maxWidth="-Infinity" prefHeight="367.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="100.0" VBox.vgrow="ALWAYS">
                       <stylesheets>
                         <URL value="@terasology.css" />
                       </stylesheets>
@@ -144,7 +144,7 @@
                                 <WebView fx:id="changelogView" prefHeight="336.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0" />
                               </children>
                               <padding>
-                                <Insets />
+                                <Insets top="8.0" bottom="8.0" />
                               </padding>
                             </AnchorPane>
                           </content>
@@ -191,7 +191,7 @@
                     <Image url="@../images/logo.png" preserveRatio="false" smooth="false" />
                   </image>
                 </ImageView>
-                <HBox alignment="CENTER_RIGHT" prefHeight="96.0" prefWidth="668.1666259765625" spacing="8.0">
+                <HBox alignment="CENTER_RIGHT" prefHeight="96.0" prefWidth="668.1666259765625" spacing="8.0" HBox.hgrow="ALWAYS">
                   <children>
                     <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="8.0" HBox.hgrow="ALWAYS">
                       <children>
@@ -218,7 +218,7 @@
                         <Insets left="8.0" right="8.0" />
                       </padding>
                     </VBox>
-                    <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" maxWidth="500.0" spacing="60" >
+                    <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" maxWidth="300.0" spacing="32" >
                       <children >
                         <Button id="downloadButton" fx:id="cancelDownloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#cancelDownloadAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButtonCancel">
                           <graphic>
