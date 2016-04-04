@@ -191,7 +191,7 @@
                     <Image url="@../images/logo.png" preserveRatio="false" smooth="false" />
                   </image>
                 </ImageView>
-                <HBox alignment="CENTER_RIGHT" prefHeight="96.0" prefWidth="668.1666259765625" spacing="8.0" HBox.hgrow="ALWAYS">
+                <HBox alignment="CENTER_RIGHT" prefHeight="96.0" prefWidth="668.1666259765625" spacing="8.0">
                   <children>
                     <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="8.0" HBox.hgrow="ALWAYS">
                       <children>
