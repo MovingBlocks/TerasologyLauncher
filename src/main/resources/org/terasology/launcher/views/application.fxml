@@ -218,7 +218,11 @@
                         <Insets left="8.0" right="8.0" />
                       </padding>
                     </VBox>
+<<<<<<< d1ee0491e143bc0a38263f90930f57467762e1e2
                     <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" maxWidth="300.0" spacing="32" >
+=======
+                    <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" maxWidth="500.0" spacing="60" >
+>>>>>>> fixed merge conflict
                       <children >
                         <Button id="downloadButton" fx:id="cancelDownloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#cancelDownloadAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButtonCancel">
                           <graphic>
