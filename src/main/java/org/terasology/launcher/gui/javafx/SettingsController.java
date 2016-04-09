@@ -54,6 +54,7 @@ import java.text.Collator;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.Comparator;
 
 public class SettingsController {
 
@@ -435,20 +436,17 @@ public class SettingsController {
         for (Locale locale : Languages.SUPPORTED_LOCALES) {
             String item = locale.toLanguageTag() + " : " + BundleUtils.getLabel(locale, Languages.SETTINGS_LABEL_KEYS.get(locale));
 
-
             if (!locale.equals(Languages.getCurrentLocale())) {
                 item += " (" + BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale)) + ")";
             }
-
             languageBox.getItems().add(item);
 
             if (Languages.getCurrentLocale().equals(locale)) {
                 languageBox.getSelectionModel().select(item);
             }
-
+            Collator coll = Collator.getInstance(locale);
+            languageBox.getItems().sort(coll);
         }
-        Collator coll = Collator.getInstance();
-        languageBox.getItems().sort(coll);
 
 
     }
