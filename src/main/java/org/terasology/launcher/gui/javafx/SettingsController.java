@@ -54,6 +54,7 @@ import java.text.Collator;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.Comparator;
 
 public class SettingsController {
 
