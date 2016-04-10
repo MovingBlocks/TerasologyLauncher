@@ -436,9 +436,14 @@ public class SettingsController {
         for (Locale locale : Languages.SUPPORTED_LOCALES) {
             String item = locale.toLanguageTag() + " : " + BundleUtils.getLabel(locale, Languages.SETTINGS_LABEL_KEYS.get(locale));
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5be3b0d0413202bc5c6b99e8bdc33a78b19c94fb
             if (!locale.equals(Languages.getCurrentLocale())) {
                 item += " (" + BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale)) + ")";
             }
+
             languageBox.getItems().add(item);
 
 
