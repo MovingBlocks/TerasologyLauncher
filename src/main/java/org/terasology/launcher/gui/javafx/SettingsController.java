@@ -50,9 +50,11 @@ import org.terasology.launcher.util.LogLevel;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.Collator;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.Comparator;
 
 public class SettingsController {
 
@@ -433,17 +435,29 @@ public class SettingsController {
         languageBox.getItems().clear();
         for (Locale locale : Languages.SUPPORTED_LOCALES) {
             String item = locale.toLanguageTag() + " : " + BundleUtils.getLabel(locale, Languages.SETTINGS_LABEL_KEYS.get(locale));
+
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5be3b0d0413202bc5c6b99e8bdc33a78b19c94fb
             if (!locale.equals(Languages.getCurrentLocale())) {
                 item += " (" + BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale)) + ")";
             }
+
             languageBox.getItems().add(item);
+
 
             if (Languages.getCurrentLocale().equals(locale)) {
                 languageBox.getSelectionModel().select(item);
             }
+
         }
+        Collator coll = Collator.getInstance();
+        languageBox.getItems().sort(coll);
+
+
     }
-    
+
     private void populateLanguageIcons() {
         languageBox.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
             @Override
