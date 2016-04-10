@@ -440,27 +440,14 @@ public class SettingsController {
             }
             languageBox.getItems().add(item);
 
-<<<<<<< b592f74fef41c9827c79444d48567c2fb7289cc9
+
             if (Languages.getCurrentLocale().equals(locale)) {
                 languageBox.getSelectionModel().select(item);
             }
-            Collator coll = Collator.getInstance(locale);
-            languageBox.getItems().sort(coll);
-=======
-                if (!locale.equals(Languages.getCurrentLocale())) {
-                    item += " (" + BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale)) + ")";
-                }
-                Collator coll = Collator.getInstance(locale);
-                languageBox.getItems().add(item);
-                languageBox.getItems().sort(coll);
 
-                if (Languages.getCurrentLocale().equals(locale)) {
-                    languageBox.getSelectionModel().select(item);
-                }
-
-
->>>>>>> sort languages in settings dropdown menu
         }
+        Collator coll = Collator.getInstance();
+        languageBox.getItems().sort(coll);
 
 
     }
