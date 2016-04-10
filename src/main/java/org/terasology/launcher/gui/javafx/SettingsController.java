@@ -50,6 +50,7 @@ import org.terasology.launcher.util.LogLevel;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.Collator;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -442,8 +443,10 @@ public class SettingsController {
                 languageBox.getSelectionModel().select(item);
             }
         }
+        Collator coll = Collator.getInstance();
+        languageBox.getItems().sort(coll);
     }
-    
+
     private void populateLanguageIcons() {
         languageBox.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
             @Override
