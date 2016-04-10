@@ -436,23 +436,23 @@ public class SettingsController {
             String item = locale.toLanguageTag() + " : " + BundleUtils.getLabel(locale, Languages.SETTINGS_LABEL_KEYS.get(locale));
 
 
-                if (!locale.equals(Languages.getCurrentLocale())) {
-                    item += " (" + BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale)) + ")";
-                }
-                Collator coll = Collator.getInstance(locale);
-                languageBox.getItems().add(item);
-                languageBox.getItems().sort(coll);
+            if (!locale.equals(Languages.getCurrentLocale())) {
+                item += " (" + BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale)) + ")";
+            }
 
-                if (Languages.getCurrentLocale().equals(locale)) {
-                    languageBox.getSelectionModel().select(item);
-                }
+            languageBox.getItems().add(item);
 
+            if (Languages.getCurrentLocale().equals(locale)) {
+                languageBox.getSelectionModel().select(item);
+            }
 
         }
+        Collator coll = Collator.getInstance();
+        languageBox.getItems().sort(coll);
 
 
     }
-    
+
     private void populateLanguageIcons() {
         languageBox.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
             @Override
