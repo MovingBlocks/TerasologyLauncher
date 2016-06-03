@@ -19,20 +19,16 @@ package org.terasology.launcher.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public final class Languages {
 
     public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
     public static final List<Locale> SUPPORTED_LOCALES;
-    public static final Map<Locale, String> SETTINGS_LABEL_KEYS;
+    public static final TreeMap<Locale, String> SETTINGS_LABEL_KEYS;
 
     static {
+
         final Locale czech = new Locale("cs");
         final Locale spanish = new Locale("es");
         final Locale french = new Locale("fr");
@@ -44,9 +40,9 @@ public final class Languages {
         final Locale turkish = new Locale("tr");
 
         final List<Locale> supportedLocales = new ArrayList<>();
+
         supportedLocales.add(Locale.GERMAN);
         supportedLocales.add(Locale.ENGLISH);
-        supportedLocales.add(czech);
         supportedLocales.add(spanish);
         supportedLocales.add(french);
         supportedLocales.add(galician);
@@ -56,11 +52,13 @@ public final class Languages {
         supportedLocales.add(polish);
         supportedLocales.add(russian);
         supportedLocales.add(turkish);
+        supportedLocales.add(czech);
 
-        final Map<Locale, String> settingsLabelKey = new HashMap<>();
+        Comparator comparator = (Object o1, Object o2) -> o1.toString().compareTo(o2.toString());
+
+        final TreeMap<Locale, String> settingsLabelKey = new TreeMap<>(comparator);
         settingsLabelKey.put(Locale.GERMAN, "settings_language_de");
         settingsLabelKey.put(Locale.ENGLISH, "settings_language_en");
-        settingsLabelKey.put(czech, "settings_language_cs");
         settingsLabelKey.put(spanish, "settings_language_es");
         settingsLabelKey.put(french, "settings_language_fr");
         settingsLabelKey.put(galician, "settings_language_gl");
@@ -70,9 +68,12 @@ public final class Languages {
         settingsLabelKey.put(polish, "settings_language_pl");
         settingsLabelKey.put(russian, "settings_language_ru");
         settingsLabelKey.put(turkish, "settings_language_tr");
+        settingsLabelKey.put(czech, "settings_language_cs");
 
-        SUPPORTED_LOCALES = Collections.unmodifiableList(supportedLocales);
-        SETTINGS_LABEL_KEYS = Collections.unmodifiableMap(settingsLabelKey);
+        Collections.sort(supportedLocales,(o1, o2) -> o1.toString().compareTo(o2.toString()));
+
+        SUPPORTED_LOCALES = supportedLocales;
+        SETTINGS_LABEL_KEYS = settingsLabelKey;
     }
 
     private static Locale currentLocale = DEFAULT_LOCALE;
