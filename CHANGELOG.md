@@ -1,6 +1,16 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## 3.1.0 (2016-07-21)
+* Fix for Jenkins upgrade causing available game version scanning to fail
+* Sorts languages in drop-down menu for launcher settings
+* Assorted translations
+* Tiny flag icons for everybody woo!
+* Better UI alignment
+* Various code cleanup and refactoring
+* Allow setting the game log level from the launcher
+* Fix launcher hanging when the game data directory was edited on the settings page
+
 ## 3.0.0 (2015-12-16)
 * More JavaFX improvements. Increases minimum Java 8 version to update 40
 * Small freeze fix on some OSes
