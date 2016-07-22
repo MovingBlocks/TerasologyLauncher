@@ -43,6 +43,7 @@ public final class Languages {
         final Locale polish = new Locale("pl");
         final Locale russian = new Locale("ru");
         final Locale turkish = new Locale("tr");
+        final Locale ukrainian = new Locale("uk");
 
         final List<Locale> supportedLocales = new ArrayList<>();
 
@@ -57,6 +58,7 @@ public final class Languages {
         supportedLocales.add(polish);
         supportedLocales.add(russian);
         supportedLocales.add(turkish);
+        supportedLocales.add(ukrainian);
         supportedLocales.add(czech);
 
         Comparator comparator = (Object o1, Object o2) -> o1.toString().compareTo(o2.toString());
@@ -73,6 +75,7 @@ public final class Languages {
         settingsLabelKey.put(polish, "settings_language_pl");
         settingsLabelKey.put(russian, "settings_language_ru");
         settingsLabelKey.put(turkish, "settings_language_tr");
+        settingsLabelKey.put(ukrainian, "settings_language_uk");
         settingsLabelKey.put(czech, "settings_language_cs");
 
         Collections.sort(supportedLocales,(o1, o2) -> o1.toString().compareTo(o2.toString()));
