@@ -365,6 +365,15 @@ public class ApplicationController {
         updateGui();
     }
 
+    private void updateTooltipTexts() {
+        downloadButton.getTooltip().setText(BundleUtils.getLabel("launcher_download"));
+        cancelDownloadButton.getTooltip().setText(BundleUtils.getLabel("launcher_cancelDownload"));
+        deleteButton.getTooltip().setText(BundleUtils.getLabel("launcher_delete"));
+        startButton.getTooltip().setText(BundleUtils.getLabel("launcher_start"));
+        settingsButton.getTooltip().setText(BundleUtils.getLabel("launcher_settings"));
+        exitButton.getTooltip().setText(BundleUtils.getLabel("launcher_exit"));
+    }
+
     private void populateJobBox() {
         jobBox.getItems().clear();
 
@@ -447,6 +456,7 @@ public class ApplicationController {
     private void updateGui() {
         updateButtons();
         updateLabels();
+        updateTooltipTexts();
         updateChangeLog();
         updateAboutTab();
     }
