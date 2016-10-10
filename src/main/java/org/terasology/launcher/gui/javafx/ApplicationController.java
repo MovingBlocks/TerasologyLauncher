@@ -38,6 +38,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -115,6 +116,10 @@ public class ApplicationController {
     private Accordion aboutInfoAccordion;
     @FXML
     private TableView<ILoggingEvent> loggingView;
+    @FXML
+    private Button settingsButton;
+    @FXML
+    private Button exitButton;
 
     @FXML
     protected void handleExitButtonAction() {
@@ -350,7 +355,23 @@ public class ApplicationController {
         downloadButton.managedProperty().bind(downloadButton.visibleProperty());
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
 
+        downloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
+        cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
+        deleteButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_delete")));
+        startButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
+        settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
+        exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
+
         updateGui();
+    }
+
+    private void updateTooltipTexts() {
+        downloadButton.getTooltip().setText(BundleUtils.getLabel("launcher_download"));
+        cancelDownloadButton.getTooltip().setText(BundleUtils.getLabel("launcher_cancelDownload"));
+        deleteButton.getTooltip().setText(BundleUtils.getLabel("launcher_delete"));
+        startButton.getTooltip().setText(BundleUtils.getLabel("launcher_start"));
+        settingsButton.getTooltip().setText(BundleUtils.getLabel("launcher_settings"));
+        exitButton.getTooltip().setText(BundleUtils.getLabel("launcher_exit"));
     }
 
     private void populateJobBox() {
@@ -435,6 +456,7 @@ public class ApplicationController {
     private void updateGui() {
         updateButtons();
         updateLabels();
+        updateTooltipTexts();
         updateChangeLog();
         updateAboutTab();
     }
