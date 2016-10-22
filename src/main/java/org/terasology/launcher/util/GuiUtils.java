@@ -76,7 +76,7 @@ public final class GuiUtils {
             return null;
         }
 
-        File selected;
+        File selected = null;
 
         if (Platform.isFxApplicationThread()) {
             final DirectoryChooser directoryChooser = new DirectoryChooser();
