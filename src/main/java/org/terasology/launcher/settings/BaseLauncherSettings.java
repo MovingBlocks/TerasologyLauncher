@@ -16,6 +16,14 @@
 
 package org.terasology.launcher.settings;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.terasology.launcher.game.GameJob;
+import org.terasology.launcher.game.TerasologyGameVersion;
+import org.terasology.launcher.util.JavaHeapSize;
+import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.util.LogLevel;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,13 +34,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
 import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.game.TerasologyGameVersion;
-import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.LogLevel;
 
 /**
  * Provides access to launcher settings.
@@ -297,7 +298,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
     // --------------------------------------------------------------------- //
 
     @Override
-    public Locale getLocale() {
+    public synchronized Locale getLocale() {
         return Locale.forLanguageTag(properties.getProperty(PROPERTY_LOCALE));
     }
 
