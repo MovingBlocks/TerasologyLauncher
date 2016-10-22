@@ -47,7 +47,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
     private static final String LAUNCHER_SETTINGS_FILE_NAME = "TerasologyLauncherSettings.properties";
     private static final String COMMENT_SETTINGS = "Terasology Launcher - Settings";
 
-    private static final GameJob JOB_DEFAULT = GameJob.TerasologyStable;
+    private static final GameJob JOB_DEFAULT = GameJob.TERASOLOGY_STABLE;
     private static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     private static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     private static final String LAST_BUILD_NUMBER_DEFAULT = "";

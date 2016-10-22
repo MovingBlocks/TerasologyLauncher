@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Contains general information about a single retrieved build for Terasology.
+ * Contains general information about a single retrieved build for TERASOLOGY.
  */
 public final class TerasologyGameVersion implements Serializable {
 
@@ -44,7 +44,7 @@ public final class TerasologyGameVersion implements Serializable {
     /** What path the game has been installed to locally. */
     private transient File installationPath;
 
-    /** Direct reference to the Terasology game jar. */
+    /** Direct reference to the TERASOLOGY game jar. */
     private transient File gameJar;
 
     /** Changes for this version. */
