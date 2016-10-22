@@ -714,7 +714,7 @@ public class ApplicationController {
         return b.toString();
     }
 
-    private String escapeHtml(String text) {
+    private static String escapeHtml(String text) {
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#x27;").replace("/", "&#x2F;");
     }
 

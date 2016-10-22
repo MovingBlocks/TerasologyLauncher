@@ -409,7 +409,7 @@ public final class TerasologyGameVersions {
         return gameVersion;
     }
 
-    private void fillBuildNumbers(SortedSet<Integer> buildNumbers, int minBuildNumber, Integer lastBuildNumber) {
+    private static void fillBuildNumbers(SortedSet<Integer> buildNumbers, int minBuildNumber, Integer lastBuildNumber) {
         if ((buildNumbers != null) && !buildNumbers.isEmpty()) {
             int first = buildNumbers.first();
             if (first < minBuildNumber) {
