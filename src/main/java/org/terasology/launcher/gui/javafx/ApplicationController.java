@@ -195,7 +195,7 @@ public class ApplicationController {
             settingsStage.setScene(scene);
             settingsStage.showAndWait();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.warn("Exception in openSettingsAction: ", e);
         } finally {
             updateJobBox();
             updateGui();

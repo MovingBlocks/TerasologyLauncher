@@ -102,11 +102,6 @@ public class LogViewAppender extends AppenderBase<ILoggingEvent> {
     }
 
     @Override
-    public void start() {
-        super.start();
-    }
-
-    @Override
     public void append(ILoggingEvent event) {
         data.add(event);
     }
