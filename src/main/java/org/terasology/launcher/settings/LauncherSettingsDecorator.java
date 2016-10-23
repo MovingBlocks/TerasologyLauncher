@@ -16,18 +16,16 @@
 
 package org.terasology.launcher.settings;
 
+import org.terasology.launcher.game.GameJob;
+import org.terasology.launcher.util.JavaHeapSize;
+import org.terasology.launcher.util.LogLevel;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
-import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.LogLevel;
 
-/**
- * Created by Skaldarnar on 30.01.2016.
- */
 public class LauncherSettingsDecorator extends LauncherSettings {
 
     private LauncherSettings settings;
@@ -260,7 +258,9 @@ public class LauncherSettingsDecorator extends LauncherSettings {
     }
 
     @Override
-    public void setLogLevel(LogLevel logLevel) { this.logLevel = logLevel; }
+    public void setLogLevel(LogLevel logLevel) {
+        this.logLevel = logLevel;
+    }
 
     @Override
     public void setGameDirectory(File gameDirectory) {

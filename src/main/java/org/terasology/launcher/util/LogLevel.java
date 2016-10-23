@@ -35,7 +35,9 @@ public enum LogLevel {
         this.labelKey = labelKey;
     }
 
-    public final boolean isDefault() { return this == DEFAULT; }
+    public final boolean isDefault() {
+        return this == DEFAULT;
+    }
 
     public final String getLevelParameter() {
         return levelParameter;
