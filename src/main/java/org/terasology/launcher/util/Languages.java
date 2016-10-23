@@ -78,7 +78,7 @@ public final class Languages {
         settingsLabelKey.put(ukrainian, "settings_language_uk");
         settingsLabelKey.put(czech, "settings_language_cs");
 
-        Collections.sort(supportedLocales,(o1, o2) -> o1.toString().compareTo(o2.toString()));
+        Collections.sort(supportedLocales, (o1, o2) -> o1.toString().compareTo(o2.toString()));
 
         SUPPORTED_LOCALES = supportedLocales;
         SETTINGS_LABEL_KEYS = settingsLabelKey;

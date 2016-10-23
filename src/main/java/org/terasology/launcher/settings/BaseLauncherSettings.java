@@ -38,7 +38,7 @@ import java.util.Properties;
 /**
  * Provides access to launcher settings.
  */
-public final class BaseLauncherSettings extends LauncherSettings {
+public final class BaseLauncherSettings extends AbstractLauncherSettings {
 
     public static final String USER_JAVA_PARAMETERS_DEFAULT = "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=20 -XX:ParallelGCThreads=10";
     public static final String USER_GAME_PARAMETERS_DEFAULT = "";

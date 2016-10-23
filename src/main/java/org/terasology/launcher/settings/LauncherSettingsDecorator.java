@@ -26,9 +26,9 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
-public class LauncherSettingsDecorator extends LauncherSettings {
+public class LauncherSettingsDecorator extends AbstractLauncherSettings {
 
-    private LauncherSettings settings;
+    private AbstractLauncherSettings settings;
 
     protected Locale locale;
     protected GameJob gameJob;
@@ -46,7 +46,7 @@ public class LauncherSettingsDecorator extends LauncherSettings {
     protected Boolean keepDownloadedFiles;
     protected Boolean closeLauncherAfterGameStart;
 
-    public LauncherSettingsDecorator(LauncherSettings settings) {
+    public LauncherSettingsDecorator(AbstractLauncherSettings settings) {
         this.settings = settings;
 
         this.buildVersionMap = Collections.emptyMap();
@@ -174,13 +174,13 @@ public class LauncherSettingsDecorator extends LauncherSettings {
     @Override
     public String getUserJavaParameters() {
         // TODO: merge/prepend the additional arguments
-        return (userJavaParameters != null) ? userJavaParameters : settings.getUserJavaParameters() ;
+        return (userJavaParameters != null) ? userJavaParameters : settings.getUserJavaParameters();
     }
 
     @Override
     public String getUserGameParameters() {
         // TODO: merge/prepend the additional arguments
-        return (userGameParameters != null) ? userGameParameters : settings.getUserGameParameters() ;
+        return (userGameParameters != null) ? userGameParameters : settings.getUserGameParameters();
     }
 
     @Override

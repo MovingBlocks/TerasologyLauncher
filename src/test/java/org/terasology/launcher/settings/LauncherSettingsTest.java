@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 public class LauncherSettingsTest {
 
     protected BaseLauncherSettings baseLauncherSettings;
-    protected LauncherSettings settings;
+    protected AbstractLauncherSettings settings;
 
     @Before
     public void setUp() throws Exception {
