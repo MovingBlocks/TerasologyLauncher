@@ -451,36 +451,7 @@ public class SettingsController {
         languageBox.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
             @Override
             public ListCell<String> call(ListView<String> p) {
-                return new ListCell<String>() {
-                    @Override
-                    protected void updateItem(String item, boolean empty) {
-                        // Pass along the locale text
-                        super.updateItem(item, empty);
-                        this.setText(item);
-
-                        if (item == null || empty) {
-                            this.setGraphic(null);
-                        } else {
-                            // Get the key thar represents the locale in ImageBundle (flag_xx)
-                            String countryCode = this.getText().split(":")[0].trim();
-                            String id = "flag_" + countryCode;
-
-                            try {
-                                // Get the appropriate flag icon via BundleUtils
-                                Image icon = BundleUtils.getFxImage(id);
-
-                                ImageView iconImageView = new ImageView(icon);
-                                iconImageView.setFitHeight(11);
-                                iconImageView.setPreserveRatio(true);
-                                this.setGraphic(iconImageView);
-                            } catch (MissingResourceException e) {
-                                logger.warn("ImageBundle key {} not found", id);
-                            } catch (NullPointerException e) {
-                                logger.warn("Flag icon in ImageBundle key {} missing or corrupt", id);
-                            }
-                        }
-                    }
-                };
+                return new LanguageIconListCell();
             }
         });
 
@@ -532,6 +503,37 @@ public class SettingsController {
         //if the Game parameters are left default do not display, the prompt message will show
         if (!launcherSettings.getUserGameParameters().equals(BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT)) {
             userGameParametersField.setText(launcherSettings.getUserGameParameters());
+        }
+    }
+
+    private class LanguageIconListCell extends ListCell<String> {
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            // Pass along the locale text
+            super.updateItem(item, empty);
+            this.setText(item);
+
+            if (item == null || empty) {
+                this.setGraphic(null);
+            } else {
+                // Get the key that represents the locale in ImageBundle (flag_xx)
+                String countryCode = this.getText().split(":")[0].trim();
+                String id = "flag_" + countryCode;
+
+                try {
+                    // Get the appropriate flag icon via BundleUtils
+                    Image icon = BundleUtils.getFxImage(id);
+
+                    ImageView iconImageView = new ImageView(icon);
+                    iconImageView.setFitHeight(11);
+                    iconImageView.setPreserveRatio(true);
+                    this.setGraphic(iconImageView);
+                } catch (MissingResourceException e) {
+                    logger.warn("ImageBundle key {} not found", id);
+                } catch (NullPointerException e) {
+                    logger.warn("Flag icon in ImageBundle key {} missing or corrupt", id);
+                }
+            }
         }
     }
 }
