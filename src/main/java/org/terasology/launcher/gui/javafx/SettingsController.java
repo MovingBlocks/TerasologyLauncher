@@ -16,8 +16,6 @@
 
 package org.terasology.launcher.gui.javafx;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -26,13 +24,11 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
@@ -285,8 +281,8 @@ public class SettingsController {
         }
     }
 
-    public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
-                           final TerasologyGameVersions newGameVersions, final Stage newStage) {
+    void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
+                    final TerasologyGameVersions newGameVersions, final Stage newStage) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
         this.launcherSettings = newLauncherSettings;
@@ -381,26 +377,20 @@ public class SettingsController {
         updateBuildVersionBox();
 
         // add change listeners
-        jobBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<JobItem>() {
-            @Override
-            public void changed(final ObservableValue<? extends JobItem> observableValue, final JobItem oldItem, final JobItem newItem) {
-                if (jobBox.getItems().isEmpty()) {
-                    return;
-                }
-                launcherSettings.setJob(newItem.getJob());
-                updateBuildVersionBox();
-                logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
+        jobBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldItem, newItem) -> {
+            if (jobBox.getItems().isEmpty()) {
+                return;
             }
+            launcherSettings.setJob(newItem.getJob());
+            updateBuildVersionBox();
+            logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
         });
 
-        buildVersionBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<VersionItem>() {
-            @Override
-            public void changed(final ObservableValue<? extends VersionItem> observableValue, final VersionItem oldVersionItem, final VersionItem newVersionItem) {
-                if (newVersionItem != null) {
-                    final Integer version = newVersionItem.getVersion();
-                    launcherSettings.setBuildVersion(version, launcherSettings.getJob());
-                    logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
-                }
+        buildVersionBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldVersionItem, newVersionItem) -> {
+            if (newVersionItem != null) {
+                final Integer version = newVersionItem.getVersion();
+                launcherSettings.setBuildVersion(version, launcherSettings.getJob());
+                logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
             }
         });
     }
@@ -448,12 +438,7 @@ public class SettingsController {
     }
 
     private void populateLanguageIcons() {
-        languageBox.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
-            @Override
-            public ListCell<String> call(ListView<String> p) {
-                return new LanguageIconListCell();
-            }
-        });
+        languageBox.setCellFactory(p -> new LanguageIconListCell());
 
         // Make the icon visible in the control area for the selected locale
         languageBox.setButtonCell(languageBox.getCellFactory().call(null));
@@ -506,7 +491,7 @@ public class SettingsController {
         }
     }
 
-    private class LanguageIconListCell extends ListCell<String> {
+    private static class LanguageIconListCell extends ListCell<String> {
         @Override
         protected void updateItem(String item, boolean empty) {
             // Pass along the locale text

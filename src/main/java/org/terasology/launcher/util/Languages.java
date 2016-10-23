@@ -24,13 +24,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TreeMap;
 
 public final class Languages {
 
     public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
     public static final List<Locale> SUPPORTED_LOCALES;
-    public static final TreeMap<Locale, String> SETTINGS_LABEL_KEYS;
+    public static final Map<Locale, String> SETTINGS_LABEL_KEYS;
 
     static {
 
@@ -63,7 +64,7 @@ public final class Languages {
 
         Comparator comparator = (Object o1, Object o2) -> o1.toString().compareTo(o2.toString());
 
-        final TreeMap<Locale, String> settingsLabelKey = new TreeMap<>(comparator);
+        final Map<Locale, String> settingsLabelKey = new TreeMap<>(comparator);
         settingsLabelKey.put(Locale.GERMAN, "settings_language_de");
         settingsLabelKey.put(Locale.ENGLISH, "settings_language_en");
         settingsLabelKey.put(spanish, "settings_language_es");

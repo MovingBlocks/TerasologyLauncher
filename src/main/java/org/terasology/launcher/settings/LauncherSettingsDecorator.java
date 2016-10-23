@@ -26,27 +26,33 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
-public class LauncherSettingsDecorator extends AbstractLauncherSettings {
+/**
+ * The {@link LauncherSettingsDecorator} allows to decorate a {@link BaseLauncherSettings} object with temporary settings.
+ * <p>
+ * The main launcher settings which are stored in a Java properties file are separated from additional (temporary) settings.
+ * This enables "temporary settings", e.g., starting the launcher temporarily in offline mode or with a specific locale.
+ */
+class LauncherSettingsDecorator extends AbstractLauncherSettings {
 
     private AbstractLauncherSettings settings;
 
-    protected Locale locale;
-    protected GameJob gameJob;
-    protected Map<GameJob, Integer> buildVersionMap;
-    protected Map<GameJob, Integer> lastBuildNumberMap;
-    protected JavaHeapSize maxHeapSize;
-    protected JavaHeapSize initialHeapSize;
-    protected String userJavaParameters;
-    protected String userGameParameters;
-    protected LogLevel logLevel;
-    protected File gameDirectory;
-    protected File gameDataDirectory;
+    private Locale locale;
+    private GameJob gameJob;
+    private Map<GameJob, Integer> buildVersionMap;
+    private Map<GameJob, Integer> lastBuildNumberMap;
+    private JavaHeapSize maxHeapSize;
+    private JavaHeapSize initialHeapSize;
+    private String userJavaParameters;
+    private String userGameParameters;
+    private LogLevel logLevel;
+    private File gameDirectory;
+    private File gameDataDirectory;
 
-    protected Boolean searchForLauncherUpdates;
-    protected Boolean keepDownloadedFiles;
-    protected Boolean closeLauncherAfterGameStart;
+    private Boolean searchForLauncherUpdates;
+    private Boolean keepDownloadedFiles;
+    private Boolean closeLauncherAfterGameStart;
 
-    public LauncherSettingsDecorator(AbstractLauncherSettings settings) {
+    LauncherSettingsDecorator(AbstractLauncherSettings settings) {
         this.settings = settings;
 
         this.buildVersionMap = Collections.emptyMap();
