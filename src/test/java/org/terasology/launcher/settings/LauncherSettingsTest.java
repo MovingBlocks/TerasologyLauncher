@@ -16,17 +16,14 @@
 
 package org.terasology.launcher.settings;
 
-import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 import org.terasology.launcher.util.Languages;
 
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * Created by Skaldarnar on 30.01.2016.
- */
 public class LauncherSettingsTest {
 
     protected BaseLauncherSettings baseLauncherSettings;
