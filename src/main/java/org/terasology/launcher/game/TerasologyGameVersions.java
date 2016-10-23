@@ -107,7 +107,7 @@ public final class TerasologyGameVersions {
             // Go check Jenkins for the last successful build (so failures are skipped), then add more going backwards
             Integer lastBuildNumberFromJenkins = loadLastSuccessfulBuildNumber(lastBuildNumberFromSettings, buildNumbers, job);
 
-             // Finally add the mapping to our storage
+            // Finally add the mapping to our storage
             lastBuildNumbers.put(job, lastBuildNumberFromJenkins);
         }
 
@@ -208,7 +208,8 @@ public final class TerasologyGameVersions {
             if ((lastSuccessfulBuildNumber != null) && (lastSuccessfulBuildNumber >= job.getMinBuildNumber())) {
                 buildNumbers.add(lastSuccessfulBuildNumber);
                 // add previous build numbers
-                for (int buildNumber = lastSuccessfulBuildNumber - 1; (buildNumbers.size() <= job.getPrevBuildNumbers() && buildNumber > job.getMinBuildNumber());
+                for (int buildNumber = lastSuccessfulBuildNumber - 1; (buildNumbers.size() <= job.getPrevBuildNumbers() && buildNumber > job
+                        .getMinBuildNumber());
                      buildNumber--) {
                     try {
                         // Skip unavailable builds
@@ -226,8 +227,9 @@ public final class TerasologyGameVersions {
 
     /**
      * Take an existing set of engine build numbers loaded from Jenkins and look for mapped Omega distributions to add.
+     *
      * @param buildNumbers The engine build numbers we know exist
-     * @param job the job line we're working on
+     * @param job          the job line we're working on
      */
     private void fillInOmegaBuilds(SortedMap<Integer, TerasologyGameVersion> gameVersionMap, SortedSet<Integer> buildNumbers, GameJob job) {
         logger.info("Will try to load Omega build numbers from " + job.getOmegaJobName());
@@ -253,15 +255,9 @@ public final class TerasologyGameVersions {
                 logger.warn("Searched past the beginning of an Omega line, maybe range is too long? Finishing loop.");
                 break;
             }
-            try {
-                // See if the job exists and is successful. If not we don't care so try the next one
-                JobResult jobResult = DownloadUtils.loadJobResultJenkins(job.getOmegaJobName(), omegaBuildNumber);
-                if (jobResult != JobResult.SUCCESS) {
-                    logger.info("Retrieved an Omega result of {} for build number {}, skipping", jobResult, omegaBuildNumber);
-                    continue;
-                }
-            } catch (DownloadException e) {
-                logger.info("Cannot find build number '{}' for job '{}'.", omegaBuildNumber, job.getOmegaJobName());
+
+            // See if the job exists and is successful. If not we don't care so try the next one
+            if (!checkJobResult(job, omegaBuildNumber)) {
                 continue;
             }
 
@@ -325,8 +321,30 @@ public final class TerasologyGameVersions {
     }
 
     /**
+     * See if the job exists and is successful.
+     *
+     * @param job              the game job to test
+     * @param omegaBuildNumber the omega build number for this job
+     * @return true if the job exists and is successful, false if the result is not successful or the lookup failed
+     */
+    private boolean checkJobResult(GameJob job, int omegaBuildNumber) {
+        try {
+            JobResult jobResult = DownloadUtils.loadJobResultJenkins(job.getOmegaJobName(), omegaBuildNumber);
+            if (jobResult != JobResult.SUCCESS) {
+                logger.info("Retrieved an Omega result of {} for build number {}, skipping", jobResult, omegaBuildNumber);
+                return false;
+            }
+        } catch (DownloadException e) {
+            logger.info("Cannot find build number '{}' for job '{}'.", omegaBuildNumber, job.getOmegaJobName());
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Given a job line and a set of build numbers see what if any existing builds we have installed locally.
-     * @param directory The game directory to search
+     *
+     * @param directory       The game directory to search
      * @param buildNumbersMap The set of build numbers to look for
      */
     private void loadInstalledGames(File directory, Map<GameJob, SortedSet<Integer>> buildNumbersMap) {
@@ -367,9 +385,7 @@ public final class TerasologyGameVersions {
         TerasologyGameVersion gameVersion = null;
         final TerasologyGameVersionInfo gameVersionInfo = TerasologyGameVersionInfo.loadFromJar(engineJar);
 
-        if ((gameVersionInfo != null)
-                && (gameVersionInfo.getJobName() != null) && (gameVersionInfo.getJobName().length() > 0)
-                && (gameVersionInfo.getBuildNumber() != null) && (gameVersionInfo.getBuildNumber().length() > 0)) {
+        if (verifyGameVersionInfo(gameVersionInfo)) {
             GameJob installedJob = null;
             try {
                 installedJob = GameJob.valueOf(gameVersionInfo.getJobName());
@@ -390,7 +406,7 @@ public final class TerasologyGameVersions {
             }
 
             if ((installedJob != null) && (installedBuildNumber != null)
-                && (gameVersionInfo.getGitBranch().endsWith(installedJob.getGitBranch())) && (installedJob.getMinBuildNumber() <= installedBuildNumber)) {
+                    && (gameVersionInfo.getGitBranch().endsWith(installedJob.getGitBranch())) && (installedJob.getMinBuildNumber() <= installedBuildNumber)) {
                 gameVersion = new TerasologyGameVersion();
                 gameVersion.setJob(installedJob);
                 gameVersion.setBuildNumber(installedBuildNumber);
@@ -407,6 +423,12 @@ public final class TerasologyGameVersions {
             logger.warn("The game version info can not be loaded from the file '{}' !", engineJar);
         }
         return gameVersion;
+    }
+
+    private boolean verifyGameVersionInfo(TerasologyGameVersionInfo gameVersionInfo) {
+        return (gameVersionInfo != null)
+                && (gameVersionInfo.getJobName() != null) && (gameVersionInfo.getJobName().length() > 0)
+                && (gameVersionInfo.getBuildNumber() != null) && (gameVersionInfo.getBuildNumber().length() > 0);
     }
 
     private static void fillBuildNumbers(SortedSet<Integer> buildNumbers, int minBuildNumber, Integer lastBuildNumber) {
@@ -557,9 +579,9 @@ public final class TerasologyGameVersions {
             @Override
             public boolean accept(File pathname) {
                 return pathname.exists() && pathname.isFile()
-                    && pathname.canRead() && pathname.canWrite()
-                    && pathname.getName().endsWith(FILE_SUFFIX_CACHE)
-                    && pathname.lastModified() < (System.currentTimeMillis() - OUTDATED_CACHE_MILLI_SECONDS);
+                        && pathname.canRead() && pathname.canWrite()
+                        && pathname.getName().endsWith(FILE_SUFFIX_CACHE)
+                        && pathname.lastModified() < (System.currentTimeMillis() - OUTDATED_CACHE_MILLI_SECONDS);
             }
         });
         if ((cacheFiles != null) && (cacheFiles.length > 0)) {
@@ -612,8 +634,9 @@ public final class TerasologyGameVersions {
 
     /**
      * Re-checks version info after a game has been installed.
-     * @param terasologyDirectory The direction the game was installed to.
-     * @return boolean indicating success or failure.
+     *
+     * @param terasologyDirectory The directory the game was installed to
+     * @return boolean indicating success or failure of installation
      */
     public synchronized boolean updateGameVersionsAfterInstallation(File terasologyDirectory) {
         File engineJar = null;
