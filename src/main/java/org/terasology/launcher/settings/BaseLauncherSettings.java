@@ -38,7 +38,7 @@ import java.util.Properties;
 /**
  * Provides access to launcher settings.
  */
-public final class BaseLauncherSettings extends LauncherSettings {
+public final class BaseLauncherSettings extends AbstractLauncherSettings {
 
     public static final String USER_JAVA_PARAMETERS_DEFAULT = "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=20 -XX:ParallelGCThreads=10";
     public static final String USER_GAME_PARAMETERS_DEFAULT = "";
@@ -55,27 +55,27 @@ public final class BaseLauncherSettings extends LauncherSettings {
     private static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
     private static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
     private static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
-    private static final LogLevel LOG_LEVEL_DEFAULT = LogLevel.DEFAULT;
-
-    protected static final String PROPERTY_LOCALE = "locale";
-    protected static final String PROPERTY_JOB = "job";
-    protected static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
-    protected static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
-    protected static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
-    protected static final String PROPERTY_PREFIX_LAST_BUILD_NUMBER = "lastBuildNumber_";
-    protected static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
-    protected static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
-    protected static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
-    protected static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
-    protected static final String PROPERTY_SAVE_DOWNLOADED_FILES = "saveDownloadedFiles";
-    protected static final String PROPERTY_USER_JAVA_PARAMETERS = "userJavaParameters";
-    protected static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
-    protected static final String PROPERTY_LOG_LEVEL = "logLevel";
 
     private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
+    private static final LogLevel LOG_LEVEL_DEFAULT = LogLevel.DEFAULT;
 
-    protected final File launcherSettingsFile;
-    protected final Properties properties;
+    private static final String PROPERTY_LOCALE = "locale";
+    private static final String PROPERTY_JOB = "job";
+    private static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
+    private static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
+    private static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
+    private static final String PROPERTY_PREFIX_LAST_BUILD_NUMBER = "lastBuildNumber_";
+    private static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
+    private static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
+    private static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
+    private static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
+    private static final String PROPERTY_SAVE_DOWNLOADED_FILES = "saveDownloadedFiles";
+    private static final String PROPERTY_USER_JAVA_PARAMETERS = "userJavaParameters";
+    private static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
+    private static final String PROPERTY_LOG_LEVEL = "logLevel";
+
+    private final File launcherSettingsFile;
+    private final Properties properties;
 
     public BaseLauncherSettings(File launcherDirectory) {
         launcherSettingsFile = new File(launcherDirectory, LAUNCHER_SETTINGS_FILE_NAME);

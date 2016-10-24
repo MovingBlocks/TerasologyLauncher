@@ -49,7 +49,6 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.game.GameDownloader;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.GameStarter;
@@ -58,6 +57,7 @@ import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.game.VersionItem;
 import org.terasology.launcher.log.LogViewAppender;
+import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -181,11 +181,11 @@ public class ApplicationController {
             /* Fall back to default language if loading the FXML file files with the current locale */
             try {
                 fxmlLoader = BundleUtils.getFXMLLoader("settings");
-                root = (Parent) fxmlLoader.load();
+                root = fxmlLoader.load();
             } catch (IOException e) {
                 fxmlLoader = BundleUtils.getFXMLLoader("settings");
                 fxmlLoader.setResources(ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", Languages.DEFAULT_LOCALE));
-                root = (Parent) fxmlLoader.load();
+                root = fxmlLoader.load();
             }
 
             final SettingsController settingsController = fxmlLoader.getController();
@@ -213,7 +213,8 @@ public class ApplicationController {
             GuiUtils.showInfoMessageDialog(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
             final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
-                    launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(), launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
+                                                              launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
+                                                              launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
             if (!gameStarted) {
                 GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
             } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
@@ -239,7 +240,7 @@ public class ApplicationController {
         } else {
             try {
                 GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles(),
-                    launcherSettings.getGameDirectory(), gameVersion, gameVersions);
+                                                                   launcherSettings.getGameDirectory(), gameVersion, gameVersions);
                 gameDownloadWorker = new GameDownloadWorker(this, gameDownloader);
             } catch (IOException e) {
                 logger.error("Could not start game download!", e);
@@ -677,29 +678,29 @@ public class ApplicationController {
         final StringBuilder b = new StringBuilder();
         if ((infoHeader1 != null) && (infoHeader1.trim().length() > 0)) {
             b.append("<h1>")
-             .append(escapeHtml(infoHeader1))
-             .append("</h1>\n");
+                    .append(escapeHtml(infoHeader1))
+                    .append("</h1>\n");
         }
         if ((infoHeader2 != null) && (infoHeader2.trim().length() > 0)) {
             b.append("<h2>")
-             .append(escapeHtml(infoHeader2))
-             .append("</h2>\n");
+                    .append(escapeHtml(infoHeader2))
+                    .append("</h2>\n");
         }
         b.append("<strong>\n")
-         .append(BundleUtils.getLabel("infoHeader3"))
-         .append("</strong>\n");
+                .append(BundleUtils.getLabel("infoHeader3"))
+                .append("</strong>\n");
 
         if ((gameVersion.getChangeLog() != null) && !gameVersion.getChangeLog().isEmpty()) {
             b.append("<p>\n")
-             .append(BundleUtils.getLabel("infoHeader4"))
-             .append("<ul>\n");
+                    .append(BundleUtils.getLabel("infoHeader4"))
+                    .append("<ul>\n");
             for (String msg : gameVersion.getChangeLog()) {
                 b.append("<li>")
-                 .append(escapeHtml(msg))
-                 .append("</li>\n");
+                        .append(escapeHtml(msg))
+                        .append("</li>\n");
             }
             b.append("</ul>\n")
-             .append("</p>\n");
+                    .append("</p>\n");
         }
 
         /* Append changelogs of previous builds. */
@@ -707,8 +708,8 @@ public class ApplicationController {
         b.append("<hr/>");
         for (String msg : gameVersions.getAggregatedChangeLog(gameVersion, previousLogs)) {
             b.append("<li>")
-             .append(escapeHtml(msg))
-             .append("</li>\n");
+                    .append(escapeHtml(msg))
+                    .append("</li>\n");
         }
 
         return b.toString();

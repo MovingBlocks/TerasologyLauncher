@@ -16,39 +16,43 @@
 
 package org.terasology.launcher.settings;
 
+import org.terasology.launcher.game.GameJob;
+import org.terasology.launcher.util.JavaHeapSize;
+import org.terasology.launcher.util.LogLevel;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
-import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.LogLevel;
 
 /**
- * Created by Skaldarnar on 30.01.2016.
+ * The {@link LauncherSettingsDecorator} allows to decorate a {@link BaseLauncherSettings} object with temporary settings.
+ * <p>
+ * The main launcher settings which are stored in a Java properties file are separated from additional (temporary) settings.
+ * This enables "temporary settings", e.g., starting the launcher temporarily in offline mode or with a specific locale.
  */
-public class LauncherSettingsDecorator extends LauncherSettings {
+class LauncherSettingsDecorator extends AbstractLauncherSettings {
 
-    private LauncherSettings settings;
+    private AbstractLauncherSettings settings;
 
-    protected Locale locale;
-    protected GameJob gameJob;
-    protected Map<GameJob, Integer> buildVersionMap;
-    protected Map<GameJob, Integer> lastBuildNumberMap;
-    protected JavaHeapSize maxHeapSize;
-    protected JavaHeapSize initialHeapSize;
-    protected String userJavaParameters;
-    protected String userGameParameters;
-    protected LogLevel logLevel;
-    protected File gameDirectory;
-    protected File gameDataDirectory;
+    private Locale locale;
+    private GameJob gameJob;
+    private Map<GameJob, Integer> buildVersionMap;
+    private Map<GameJob, Integer> lastBuildNumberMap;
+    private JavaHeapSize maxHeapSize;
+    private JavaHeapSize initialHeapSize;
+    private String userJavaParameters;
+    private String userGameParameters;
+    private LogLevel logLevel;
+    private File gameDirectory;
+    private File gameDataDirectory;
 
-    protected Boolean searchForLauncherUpdates;
-    protected Boolean keepDownloadedFiles;
-    protected Boolean closeLauncherAfterGameStart;
+    private Boolean searchForLauncherUpdates;
+    private Boolean keepDownloadedFiles;
+    private Boolean closeLauncherAfterGameStart;
 
-    public LauncherSettingsDecorator(LauncherSettings settings) {
+    LauncherSettingsDecorator(AbstractLauncherSettings settings) {
         this.settings = settings;
 
         this.buildVersionMap = Collections.emptyMap();
@@ -176,13 +180,13 @@ public class LauncherSettingsDecorator extends LauncherSettings {
     @Override
     public String getUserJavaParameters() {
         // TODO: merge/prepend the additional arguments
-        return (userJavaParameters != null) ? userJavaParameters : settings.getUserJavaParameters() ;
+        return (userJavaParameters != null) ? userJavaParameters : settings.getUserJavaParameters();
     }
 
     @Override
     public String getUserGameParameters() {
         // TODO: merge/prepend the additional arguments
-        return (userGameParameters != null) ? userGameParameters : settings.getUserGameParameters() ;
+        return (userGameParameters != null) ? userGameParameters : settings.getUserGameParameters();
     }
 
     @Override
@@ -260,7 +264,9 @@ public class LauncherSettingsDecorator extends LauncherSettings {
     }
 
     @Override
-    public void setLogLevel(LogLevel logLevel) { this.logLevel = logLevel; }
+    public void setLogLevel(LogLevel logLevel) {
+        this.logLevel = logLevel;
+    }
 
     @Override
     public void setGameDirectory(File gameDirectory) {

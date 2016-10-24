@@ -16,11 +16,6 @@
 
 package org.terasology.launcher.settings;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
@@ -28,12 +23,15 @@ import org.terasology.launcher.game.GameSettings;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
-/**
- * Created by Skaldarnar on 30.01.2016.
- */
-public abstract class LauncherSettings implements GameSettings {
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
-    private static final Logger logger = LoggerFactory.getLogger(LauncherSettings.class);
+public abstract class AbstractLauncherSettings implements GameSettings {
+
+    private static final Logger logger = LoggerFactory.getLogger(AbstractLauncherSettings.class);
 
     public abstract void load() throws IOException;
 

@@ -53,7 +53,7 @@ public final class BundleUtils {
                 throw new IllegalArgumentException();
             }
             return label;
-        } catch (MissingResourceException|IllegalArgumentException e) {
+        } catch (MissingResourceException | IllegalArgumentException e) {
             logger.error("Missing label translation! key={}, locale={}", key, locale);
             return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.DEFAULT_LOCALE).getString(key);
         }
@@ -66,7 +66,7 @@ public final class BundleUtils {
             if (pattern.length() == 0) {
                 throw new IllegalArgumentException();
             }
-        } catch (MissingResourceException|IllegalArgumentException e) {
+        } catch (MissingResourceException | IllegalArgumentException e) {
             logger.error("Missing message translation! key={}, locale={}", key, Languages.getCurrentLocale());
             pattern = ResourceBundle.getBundle(MESSAGE_BUNDLE, Languages.DEFAULT_LOCALE).getString(key);
         }
