@@ -58,12 +58,12 @@ public final class LauncherUpdater {
     public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
         this.currentVersionInfo = currentVersionInfo;
 
-        if ((currentVersionInfo.getBuildNumber() == null) || (currentVersionInfo.getBuildNumber().trim().length() == 0)) {
+        if (currentVersionInfo.getBuildNumber() == null || currentVersionInfo.getBuildNumber().trim().length() == 0) {
             this.currentVersion = "0";
         } else {
             this.currentVersion = currentVersionInfo.getBuildNumber();
         }
-        if ((currentVersionInfo.getJobName() == null) || (currentVersionInfo.getJobName().trim().length() == 0)) {
+        if (currentVersionInfo.getJobName() == null || currentVersionInfo.getJobName().trim().length() == 0) {
             this.jobName = DownloadUtils.TERASOLOGY_LAUNCHER_DEVELOP_JOB_NAME;
         } else {
             this.jobName = currentVersionInfo.getJobName();
