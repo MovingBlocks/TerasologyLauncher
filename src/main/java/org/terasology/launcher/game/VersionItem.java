@@ -36,7 +36,7 @@ public final class VersionItem {
     @Override
     public String toString() {
         final StringBuilder b = new StringBuilder();
-        final boolean notSuccessful = (gameVersion.getSuccessful() == null) || !gameVersion.getSuccessful();
+        final boolean notSuccessful = gameVersion.getSuccessful() == null || !gameVersion.getSuccessful();
         if (notSuccessful) {
             b.append("[");
         }
@@ -49,9 +49,9 @@ public final class VersionItem {
             b.append("]");
         }
         if (!gameVersion.isLatest()) {
-            if ((gameVersion.getGameVersionInfo() != null)
-                && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)
-                && (gameVersion.getGameVersionInfo().getDisplayVersion().trim().length() > 0)) {
+            if (gameVersion.getGameVersionInfo() != null
+                && gameVersion.getGameVersionInfo().getDisplayVersion() != null
+                && gameVersion.getGameVersionInfo().getDisplayVersion().trim().length() > 0) {
                 b.append(" - ");
                 b.append(gameVersion.getGameVersionInfo().getDisplayVersion());
             }

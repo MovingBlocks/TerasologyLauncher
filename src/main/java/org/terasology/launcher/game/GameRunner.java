@@ -42,7 +42,7 @@ public class GameRunner implements Runnable {
                 do {
                     line = r.readLine();
                     logger.trace("Game output: {}", line);
-                } while (!Thread.currentThread().isInterrupted() && (line != null));
+                } while (!Thread.currentThread().isInterrupted() && line != null);
             }
             if (Thread.currentThread().isInterrupted()) {
                 logger.debug("Game thread interrupted.");

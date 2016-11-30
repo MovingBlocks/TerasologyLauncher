@@ -71,7 +71,7 @@ public final class TerasologyGameVersion implements Serializable {
     }
 
     public boolean isInstalled() {
-        return (installationPath != null) && (gameJar != null);
+        return installationPath != null && gameJar != null;
     }
 
     public Integer getBuildVersion() {
