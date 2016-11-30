@@ -21,7 +21,7 @@ package org.terasology.launcher.game;
  */
 public enum GameJob {
 
-    TERASOLOGY_STABLE("master", "DistroOmegaRelease", 49, 5, true, false, "RELEASE", "infoHeader1_TerasologyStable",
+    TERASOLOGYSTABLE("master", "DistroOmegaRelease", 49, 5, true, false, "RELEASE", "infoHeader1_TerasologyStable",
                      "settings_game_buildType_TerasologyStable"),
 
     TERASOLOGY("develop", "DistroOmega", 1355, 20, false, false, "DEVELOP", "infoHeader1_Terasology", "settings_game_buildType_Terasology");
