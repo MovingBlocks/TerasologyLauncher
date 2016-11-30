@@ -38,7 +38,7 @@ public final class GameStarter {
     }
 
     public boolean isRunning() {
-        return (gameThread != null) && gameThread.isAlive();
+        return gameThread != null && gameThread.isAlive();
     }
 
     public void dispose() {
