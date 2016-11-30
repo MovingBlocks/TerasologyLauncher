@@ -43,7 +43,7 @@ apply plugin: 'findbugs'
 
 apply plugin: 'de.undercouch.download'
 
-apply from: 'bundles.gradle';
+apply from: 'bundles.gradle'
 
 // Test for right version of Java in use for running this script
 assert org.gradle.api.JavaVersion.current().isJava8Compatible()
@@ -119,6 +119,7 @@ checkstyle {
 }
 
 pmd {
+    toolVersion = '5.5.2'
     ignoreFailures = true
     ruleSetFiles = files("config/pmd/pmd.xml")
 }
@@ -224,14 +225,14 @@ task signLibs(type: IncrementalSigningTask, dependsOn: copyLibs) {
     // assign only if the property exists
     // --> missing properties do not affect other tasks if not needed
 
-    certFile = project.hasProperty('certificateFile') ? certificateFile : 'MISSING';
-    certAlias = project.hasProperty('certificateAlias') ? certificateAlias : 'MISSING';
-    certStorePass = project.hasProperty('certificateStorePass') ? certificateStorePass : 'MISSING';
-    certKeyPass = project.hasProperty('certificateKeyPass') ? certificateKeyPass : 'MISSING';
+    certFile = project.hasProperty('certificateFile') ? certificateFile : 'MISSING'
+    certAlias = project.hasProperty('certificateAlias') ? certificateAlias : 'MISSING'
+    certStorePass = project.hasProperty('certificateStorePass') ? certificateStorePass : 'MISSING'
+    certKeyPass = project.hasProperty('certificateKeyPass') ? certificateKeyPass : 'MISSING'
 
     doFirst {
         if (!project.hasProperty('certificateFile')) {
-            throw new GradleException('Please set certificate properties in your ~/.gradle/gradle.properties file first');
+            throw new GradleException('Please set certificate properties in your ~/.gradle/gradle.properties file first')
         }
     }
 
@@ -254,7 +255,7 @@ class IncrementalSigningTask extends DefaultTask {
     String certKeyPass
 
     @OutputDirectory
-    def File outputDir
+     File outputDir
 
     @TaskAction
     void execute(IncrementalTaskInputs inputs) {
@@ -262,7 +263,7 @@ class IncrementalSigningTask extends DefaultTask {
         outputDir.mkdirs()
 
         inputs.outOfDate { change ->
-            logger.lifecycle("Signing ${change.file.name}");
+            logger.lifecycle("Signing ${change.file.name}")
 
             def target = new File(outputDir, change.file.name)
 
