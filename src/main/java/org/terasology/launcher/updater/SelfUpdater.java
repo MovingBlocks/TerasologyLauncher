@@ -46,7 +46,7 @@ public final class SelfUpdater {
 
     private static void deleteLauncherContent(File directory) {
         final File[] files = directory.listFiles();
-        if ((files != null) && (files.length > 0)) {
+        if (files != null && files.length > 0) {
             for (File child : files) {
                 if (child.isDirectory()) {
                     if (child.getName().equals("bin") || child.getName().equals("lib") || child.getName().equals("licenses")) {
@@ -101,7 +101,7 @@ public final class SelfUpdater {
 
         logger.info("Running self updater.");
 
-        if ((args == null) || (args.length != 2)) {
+        if (args == null || args.length != 2) {
             logger.error("Two arguments needed!");
             System.exit(1);
         }

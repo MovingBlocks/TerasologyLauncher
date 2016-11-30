@@ -171,7 +171,7 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
                     logger.warn(WARN_MSG_INVALID_VALUE, lastBuildNumberStr, key);
                 }
             }
-            if ((lastBuildNumber != null) && (lastBuildNumber >= j.getMinBuildNumber())) {
+            if (lastBuildNumber != null && lastBuildNumber >= j.getMinBuildNumber()) {
                 properties.setProperty(key, lastBuildNumber.toString());
             } else {
                 properties.setProperty(key, LAST_BUILD_NUMBER_DEFAULT);
@@ -262,7 +262,7 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     protected void initGameDirectory() {
         final String gameDirectoryStr = properties.getProperty(PROPERTY_GAME_DIRECTORY);
         File gameDirectory = null;
-        if ((gameDirectoryStr != null) && (gameDirectoryStr.trim().length() > 0)) {
+        if (gameDirectoryStr != null && gameDirectoryStr.trim().length() > 0) {
             try {
                 gameDirectory = new File(new URI(gameDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
@@ -279,7 +279,7 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     protected void initGameDataDirectory() {
         final String gameDataDirectoryStr = properties.getProperty(PROPERTY_GAME_DATA_DIRECTORY);
         File gameDataDirectory = null;
-        if ((gameDataDirectoryStr != null) && (gameDataDirectoryStr.trim().length() > 0)) {
+        if (gameDataDirectoryStr != null && gameDataDirectoryStr.trim().length() > 0) {
             try {
                 gameDataDirectory = new File(new URI(gameDataDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
@@ -349,7 +349,7 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     @Override
     public synchronized File getGameDirectory() {
         final String gameDirectoryStr = properties.getProperty(PROPERTY_GAME_DIRECTORY);
-        if ((gameDirectoryStr != null) && (gameDirectoryStr.trim().length() > 0)) {
+        if (gameDirectoryStr != null && gameDirectoryStr.trim().length() > 0) {
             try {
                 return new File(new URI(gameDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
@@ -362,7 +362,7 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     @Override
     public synchronized File getGameDataDirectory() {
         final String gameDataDirectoryStr = properties.getProperty(PROPERTY_GAME_DATA_DIRECTORY);
-        if ((gameDataDirectoryStr != null) && (gameDataDirectoryStr.trim().length() > 0)) {
+        if (gameDataDirectoryStr != null && gameDataDirectoryStr.trim().length() > 0) {
             try {
                 return new File(new URI(gameDataDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
@@ -408,7 +408,7 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
 
     @Override
     public synchronized void setLastBuildNumber(Integer lastBuildNumber, GameJob job) {
-        if ((lastBuildNumber != null) && (lastBuildNumber >= job.getMinBuildNumber())) {
+        if (lastBuildNumber != null && lastBuildNumber >= job.getMinBuildNumber()) {
             properties.setProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name(), lastBuildNumber.toString());
         } else {
             properties.setProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name(), LAST_BUILD_NUMBER_DEFAULT);

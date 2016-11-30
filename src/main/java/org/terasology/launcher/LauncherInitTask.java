@@ -284,7 +284,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         gameVersions.loadGameVersions(launcherSettings, launcherDirectory, gameDirectory);
         if (logger.isInfoEnabled()) {
             for (GameJob gameJob : GameJob.values()) {
-                logger.info("Game versions: {} {}", gameJob, gameVersions.getGameVersionList(gameJob).size() - 1);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Game versions: {} {}", gameJob, gameVersions.getGameVersionList(gameJob).size() - 1);
+                }
             }
         }
         logger.debug("Game versions: {}", gameVersions);
