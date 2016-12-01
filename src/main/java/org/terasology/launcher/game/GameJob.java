@@ -21,10 +21,11 @@ package org.terasology.launcher.game;
  */
 public enum GameJob {
 
-    TERASOLOGYSTABLE("master", "DistroOmegaRelease", 49, 5, true, false, "RELEASE", "infoHeader1_TerasologyStable",
+    // NOTE: These entries need to match the exact job names in Jenkins (http://jenkins.terasology.org) including capitalization!
+    TerasologyStable("master", "DistroOmegaRelease", 49, 5, true, false, "RELEASE", "infoHeader1_TerasologyStable",
                      "settings_game_buildType_TerasologyStable"),
 
-    TERASOLOGY("develop", "DistroOmega", 1355, 20, false, false, "DEVELOP", "infoHeader1_Terasology", "settings_game_buildType_Terasology");
+    Terasology("develop", "DistroOmega", 1355, 20, false, false, "DEVELOP", "infoHeader1_Terasology", "settings_game_buildType_Terasology");
 
     private final String gitBranch;
     private final String omegaJobName;
