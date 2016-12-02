@@ -31,7 +31,8 @@ task unzipBundle(type: Copy) {
     from (zipTree("${projectDir}/build/distributions/TerasologyLauncher.zip"))
 }
 
-def start = "${buildDir}/bundles"
+def start = "${buildDir}/starting_scripts/"
+def launcherDir = "${buildDir}/TerasologyLauncher"
 
 Bundle.each { arch ->
     arch.jreArchive = new File("${projectDir}/jres/${arch}.zip")
@@ -49,29 +50,35 @@ Bundle.each { arch ->
         from(zipTree(arch.jreArchive)) {
             into "${zipBase}jre"
         }
+		from(launcherDir) {
+             // Platform independent files
+             exclude "*.exe"
+             exclude "bin"
+             into zipBase
+        }
 		
         /*
             Copy only the files relevant to the platform we are bundling the JRE for.
             I.e only copy 32-bit natives for windows if we bundle the 32-bit JRE.
          */
         if (arch == Bundle.win32) {
-            from (start + "/windows_start") {
+            from (start + "windows_start") {
                 include "TerasologyLauncher.x86.exe"
                 rename { "TerasologyLauncher.exe" }
             }
         } else if (arch == Bundle.win64) {
-            from (start + "/windows_start") {
+            from (start + "windows_start") {
                 include "TerasologyLauncher.x64.exe"
                 rename { "TerasologyLauncher.exe" }
             }
         } else if (arch == Bundle.linux32) {
-            from (start + "/linux_start") {
+            from (start + "linux_start") {
                 include "run_linux.sh"
                 rename { "TerasologyLauncher.sh" }
                 fileMode 755
             }
         } else if (arch == Bundle.linux64) {
-            from (start + "/linux_start") {
+            from (start + "linux_start") {
                 include "run_linux.sh"
                 rename { "TerasologyLauncher.sh" }
                 fileMode 755
