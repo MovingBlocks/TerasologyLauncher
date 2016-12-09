@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Exec=sh -c 'bash "$(dirname "%k")"/bin/TerasologyLauncher'
+Name=Launcher
+StartupNotify=true
+GenericName[en_GB]=This is the Terasology Launcher for Linux
