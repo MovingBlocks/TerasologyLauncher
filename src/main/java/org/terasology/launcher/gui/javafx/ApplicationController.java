@@ -213,8 +213,8 @@ public class ApplicationController {
             GuiUtils.showInfoMessageDialog(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
             final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
-                                                              launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
-                                                              launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
+                    launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
+                    launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
             if (!gameStarted) {
                 GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
             } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
@@ -240,7 +240,7 @@ public class ApplicationController {
         } else {
             try {
                 GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles(),
-                                                                   launcherSettings.getGameDirectory(), gameVersion, gameVersions);
+                        launcherSettings.getGameDirectory(), gameVersion, gameVersions);
                 gameDownloadWorker = new GameDownloadWorker(this, gameDownloader);
             } catch (IOException e) {
                 logger.error("Could not start game download!", e);
@@ -293,6 +293,7 @@ public class ApplicationController {
                         }
                         gameVersions.removeInstallationInfo(gameVersion);
                         updateGui();
+                        updateBuildVersionBox();
                     });
         } else {
             logger.warn("The selected game version can not be deleted! '{}'", gameVersion);
@@ -734,6 +735,7 @@ public class ApplicationController {
             }
         }
         updateGui();
+        updateBuildVersionBox();
     }
 
     private TerasologyGameVersion getSelectedGameVersion() {
