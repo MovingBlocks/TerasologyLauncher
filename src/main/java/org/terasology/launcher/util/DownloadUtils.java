@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -102,6 +103,21 @@ public final class DownloadUtils {
                 throw new DownloadException("Wrong file length after download! " + file.length() + " != " + contentLength);
             }
             listener.update(100);
+        }
+    }
+
+    public static long getContentLength(URL downloadURL) throws DownloadException {
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) downloadURL.openConnection();
+            connection.setRequestMethod("HEAD");
+            return connection.getContentLengthLong();
+        } catch (IOException e) {
+            throw new DownloadException("Could not send HEAD request to HTTP-URL! URL=" + downloadURL, e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 
