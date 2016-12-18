@@ -119,6 +119,22 @@
                     </Button>
                   </children>
                 </HBox>
+                <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" prefHeight="64.0" spacing="8.0" StackPane.alignment="BOTTOM_LEFT">
+                  <HBox.margin>
+                      <Insets left="8.0" />
+                  </HBox.margin>
+                  <children>
+                    <Button id="" fx:id="warningButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#openLogs" styleClass="warningButton">
+                      <graphic>
+                        <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                          <image>
+                            <Image url="@../images/warn.png" preserveRatio="false" smooth="false" />
+                          </image>
+                        </ImageView>
+                      </graphic>
+                  </Button>
+                  </children>
+                </HBox>
                 <Label fx:id="versionInfo" text="2.0.0-rc1" textFill="#dfdfdf" StackPane.alignment="BOTTOM_RIGHT">
                   <font>
                     <Font name="System Bold" size="12.0" />
@@ -132,7 +148,7 @@
               <children>
                 <VBox alignment="BOTTOM_CENTER" prefHeight="399.0" prefWidth="969.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="8.0">
                   <children>
-                    <TabPane id="contentTabPane" maxWidth="-Infinity" prefHeight="367.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="100.0" VBox.vgrow="ALWAYS">
+                    <TabPane fx:id="contentTabPane" maxWidth="-Infinity" prefHeight="367.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="100.0" VBox.vgrow="ALWAYS">
                       <stylesheets>
                         <URL value="@terasology.css" />
                       </stylesheets>

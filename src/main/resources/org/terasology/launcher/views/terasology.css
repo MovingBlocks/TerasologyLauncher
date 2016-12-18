@@ -101,6 +101,6 @@
     -fx-effect: innershadow(three-pass-box, #980500, 64.0, 0.0, 0, 0);
 }
 
-.socialButton {
+.socialButton, .warningButton {
     -fx-background-color: transparent;
 }
