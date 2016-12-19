@@ -36,6 +36,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
@@ -102,6 +103,8 @@ public class ApplicationController {
     @FXML
     private ProgressBar progressBar;
     @FXML
+    private TabPane contentTabPane;
+    @FXML
     private Button downloadButton;
     @FXML
     private Button cancelDownloadButton;
@@ -109,6 +112,8 @@ public class ApplicationController {
     private Button startButton;
     @FXML
     private Button deleteButton;
+    @FXML
+    private Button warningButton;
     @FXML
     private WebView changelogView;
     @FXML
@@ -213,8 +218,8 @@ public class ApplicationController {
             GuiUtils.showInfoMessageDialog(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
             final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
-                                                              launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
-                                                              launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
+                    launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
+                    launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
             if (!gameStarted) {
                 GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
             } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
@@ -240,7 +245,7 @@ public class ApplicationController {
         } else {
             try {
                 GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles(),
-                                                                   launcherSettings.getGameDirectory(), gameVersion, gameVersions);
+                        launcherSettings.getGameDirectory(), gameVersion, gameVersions);
                 gameDownloadWorker = new GameDownloadWorker(this, gameDownloader);
             } catch (IOException e) {
                 logger.error("Could not start game download!", e);
@@ -293,6 +298,7 @@ public class ApplicationController {
                         }
                         gameVersions.removeInstallationInfo(gameVersion);
                         updateGui();
+                        updateBuildVersionBox();
                     });
         } else {
             logger.warn("The selected game version can not be deleted! '{}'", gameVersion);
@@ -327,6 +333,11 @@ public class ApplicationController {
     @FXML
     protected void openYoutube() {
         openUri(BundleUtils.getURI("terasology_youtube"));
+    }
+
+    @FXML
+    protected void openLogs() {
+        contentTabPane.getSelectionModel().select(2);
     }
 
     public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final File newTempDirectory, final BaseLauncherSettings newLauncherSettings,
@@ -500,6 +511,15 @@ public class ApplicationController {
         } else {
             downloadButton.setVisible(true);
             cancelDownloadButton.setVisible(false);
+        }
+
+        // if less than 200MB available
+        if (downloadDirectory.getUsableSpace() <= 200 * 1000000) {
+            warningButton.setVisible(true);
+            warningButton.setTooltip(new Tooltip(BundleUtils.getLabel("message_warning_lowOnSpace")));
+            logger.warn(BundleUtils.getLabel("message_warning_lowOnSpace"));
+        } else {
+            warningButton.setVisible(false);
         }
     }
 
@@ -734,6 +754,7 @@ public class ApplicationController {
             }
         }
         updateGui();
+        updateBuildVersionBox();
     }
 
     private TerasologyGameVersion getSelectedGameVersion() {

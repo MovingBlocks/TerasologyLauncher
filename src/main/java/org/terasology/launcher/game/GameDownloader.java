@@ -19,10 +19,12 @@ package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.ProgressListener;
 
 import java.io.File;
@@ -85,7 +87,14 @@ public final class GameDownloader {
     }
 
     public void download(ProgressListener listener) throws DownloadException {
-        DownloadUtils.downloadToFile(downloadURL, downloadZipFile, listener);
+        long contentLength = DownloadUtils.getContentLength(downloadURL);
+        long availableSpace = downloadZipFile.getParentFile().getUsableSpace();
+        if (availableSpace >= contentLength) {
+            DownloadUtils.downloadToFile(downloadURL, downloadZipFile, listener);
+        } else {
+            logger.error("Insufficient space in " + downloadZipFile.getParent());
+            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_insufficientSpace"));
+        }
     }
 
     public boolean extractAfterDownload() {
