@@ -43,36 +43,37 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     public static final String USER_JAVA_PARAMETERS_DEFAULT = "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=20 -XX:ParallelGCThreads=10";
     public static final String USER_GAME_PARAMETERS_DEFAULT = "";
 
+    public static final String PROPERTY_LOCALE = "locale";
+    public static final String PROPERTY_JOB = "job";
+    public static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
+    public static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
+    public static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
+    public static final String PROPERTY_PREFIX_LAST_BUILD_NUMBER = "lastBuildNumber_";
+    public static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
+    public static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
+    public static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
+    public static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
+    public static final String PROPERTY_SAVE_DOWNLOADED_FILES = "saveDownloadedFiles";
+    public static final String PROPERTY_USER_JAVA_PARAMETERS = "userJavaParameters";
+    public static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
+    public static final String PROPERTY_LOG_LEVEL = "logLevel";
+
+    public static final GameJob JOB_DEFAULT = GameJob.TerasologyStable;
+    public static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
+    public static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
+    public static final String LAST_BUILD_NUMBER_DEFAULT = "";
+    public static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
+    public static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
+    public static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
+
+    public static final String LAUNCHER_SETTINGS_FILE_NAME = "TerasologyLauncherSettings.properties";
+
     private static final Logger logger = LoggerFactory.getLogger(BaseLauncherSettings.class);
 
-    private static final String LAUNCHER_SETTINGS_FILE_NAME = "TerasologyLauncherSettings.properties";
     private static final String COMMENT_SETTINGS = "Terasology Launcher - Settings";
-
-    private static final GameJob JOB_DEFAULT = GameJob.TerasologyStable;
-    private static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
-    private static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
-    private static final String LAST_BUILD_NUMBER_DEFAULT = "";
-    private static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
-    private static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
-    private static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
 
     private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
     private static final LogLevel LOG_LEVEL_DEFAULT = LogLevel.DEFAULT;
-
-    private static final String PROPERTY_LOCALE = "locale";
-    private static final String PROPERTY_JOB = "job";
-    private static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
-    private static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
-    private static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
-    private static final String PROPERTY_PREFIX_LAST_BUILD_NUMBER = "lastBuildNumber_";
-    private static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
-    private static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
-    private static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
-    private static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
-    private static final String PROPERTY_SAVE_DOWNLOADED_FILES = "saveDownloadedFiles";
-    private static final String PROPERTY_USER_JAVA_PARAMETERS = "userJavaParameters";
-    private static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
-    private static final String PROPERTY_LOG_LEVEL = "logLevel";
 
     private final File launcherSettingsFile;
     private final Properties properties;
