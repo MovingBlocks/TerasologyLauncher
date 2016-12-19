@@ -86,6 +86,9 @@ public class ApplicationController {
     private static final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
     private static final String ABOUT = "about";
 
+    private static final long MB = 1024L * 1024;
+    private static final long MINIMUM_FREE_SPACE = 200 * MB;
+
     private File launcherDirectory;
     private File downloadDirectory;
     private File tempDirectory;
@@ -514,7 +517,7 @@ public class ApplicationController {
         }
 
         // if less than 200MB available
-        if (downloadDirectory.getUsableSpace() <= 200 * 1000000) {
+        if (downloadDirectory.getUsableSpace() <= MINIMUM_FREE_SPACE) {
             warningButton.setVisible(true);
             warningButton.setTooltip(new Tooltip(BundleUtils.getLabel("message_warning_lowOnSpace")));
             logger.warn(BundleUtils.getLabel("message_warning_lowOnSpace"));
