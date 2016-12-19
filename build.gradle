@@ -104,6 +104,7 @@ dependencies {
 
     // These dependencies are only needed for running tests
     testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
