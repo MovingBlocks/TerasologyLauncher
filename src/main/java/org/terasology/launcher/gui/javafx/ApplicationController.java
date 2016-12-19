@@ -36,6 +36,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
@@ -102,6 +103,8 @@ public class ApplicationController {
     @FXML
     private ProgressBar progressBar;
     @FXML
+    private TabPane contentTabPane;
+    @FXML
     private Button downloadButton;
     @FXML
     private Button cancelDownloadButton;
@@ -109,6 +112,8 @@ public class ApplicationController {
     private Button startButton;
     @FXML
     private Button deleteButton;
+    @FXML
+    private Button warningButton;
     @FXML
     private WebView changelogView;
     @FXML
@@ -330,6 +335,11 @@ public class ApplicationController {
         openUri(BundleUtils.getURI("terasology_youtube"));
     }
 
+    @FXML
+    protected void openLogs() {
+        contentTabPane.getSelectionModel().select(2);
+    }
+
     public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final File newTempDirectory, final BaseLauncherSettings newLauncherSettings,
                            final TerasologyGameVersions newGameVersions, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
@@ -501,6 +511,15 @@ public class ApplicationController {
         } else {
             downloadButton.setVisible(true);
             cancelDownloadButton.setVisible(false);
+        }
+
+        // if less than 200MB available
+        if (downloadDirectory.getUsableSpace() <= 200 * 1000000) {
+            warningButton.setVisible(true);
+            warningButton.setTooltip(new Tooltip(BundleUtils.getLabel("message_warning_lowOnSpace")));
+            logger.warn(BundleUtils.getLabel("message_warning_lowOnSpace"));
+        } else {
+            warningButton.setVisible(false);
         }
     }
 

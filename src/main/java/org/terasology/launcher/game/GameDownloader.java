@@ -90,9 +90,6 @@ public final class GameDownloader {
         long contentLength = DownloadUtils.getContentLength(downloadURL);
         long availableSpace = downloadZipFile.getParentFile().getUsableSpace();
         if (availableSpace >= contentLength) {
-            if (availableSpace <= contentLength * 2) {
-                GuiUtils.showWarningMessageDialog(null, BundleUtils.getLabel("message_warning_lowOnSpace"));
-            }
             DownloadUtils.downloadToFile(downloadURL, downloadZipFile, listener);
         } else {
             logger.error("Insufficient space in " + downloadZipFile.getParent());
