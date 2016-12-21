@@ -236,6 +236,11 @@ public final class TerasologyGameVersions {
             logger.info("Will try to load Omega build numbers from " + job.getOmegaJobName());
         }
 
+        if (buildNumbers.isEmpty()) {
+            logger.warn("No build numbers provided for job {}. Skipping omega build resolution,", job);
+            return;
+        }
+
         // We more or less redo the original process in looking up the Omega job then later going back in history to map to the engine job
         Integer lastSuccessfulBuildNumber;
         try {
