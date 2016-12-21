@@ -23,13 +23,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.nio.file.Files;
+import org.apache.commons.io.FilenameUtils;
 
 public final class FileUtils {
-
     private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
     private static final String COULD_NOT_CREATE_DIRECTORY = "Could not create directory! ";
 
@@ -86,6 +86,7 @@ public final class FileUtils {
      * @return true if successful
      */
     public static boolean extractZipTo(File archive, File outputLocation) {
+
         logger.trace("Extracting '{}' to '{}'.", archive, outputLocation);
 
         try {
@@ -99,7 +100,7 @@ public final class FileUtils {
             try (ZipInputStream zis = new ZipInputStream(new FileInputStream(archive))) {
                 ZipEntry ze;
                 while ((ze = zis.getNextEntry()) != null) {
-                    File extractedFile = new File(outputLocation, ze.getName());
+                    File extractedFile = new File(outputLocation, FilenameUtils.getBaseName(ze.getName()));
                     File extractedDir = extractedFile.getParentFile();
                     if (!extractedDir.exists()) {
                         boolean created = extractedDir.mkdirs();

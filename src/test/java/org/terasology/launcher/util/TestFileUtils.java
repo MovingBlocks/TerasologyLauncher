@@ -21,11 +21,15 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertArrayEquals;
@@ -76,29 +80,29 @@ public class TestFileUtils {
 
 //    Currently fails due to inconsistent File.getName() behaviour
 //
-//    @Test
-//    public void testExtract() throws IOException {
-//        File textFile = tempFolder.newFile();
-//        textFile.createNewFile();
-//        List<String> text = Arrays.asList(SAMPLE_TEXT);
-//        Files.write(textFile.toPath(), text, Charset.forName("UTF-8"));
-//
-//        FileInputStream textFileIS = new FileInputStream(textFile);
-//        File zipFile = tempFolder.newFile(FILE_NAME + ".zip");
-//        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
-//        out.putNextEntry(new ZipEntry(textFile.getPath()));
-//        byte[] b = new byte[1024];
-//        int count;
-//        while ((count = textFileIS.read(b)) > 0) {
-//            out.write(b, 0, count);
-//        }
-//        out.close();
-//        textFileIS.close();
-//
-//        File outputDir = tempFolder.newFolder();
-//        FileUtils.extractZipTo(zipFile, outputDir);
-//        File extractedTextFile = new File(outputDir, textFile.getName());
-//        assertArrayEquals(Files.readAllLines(textFile.toPath()).toArray(), Files.readAllLines(extractedTextFile.toPath()).toArray());
-//    }
+    @Test
+    public void testExtract() throws IOException {
+        File textFile = tempFolder.newFile();
+        textFile.createNewFile();
+        List<String> text = Arrays.asList(SAMPLE_TEXT);
+        Files.write(textFile.toPath(), text, Charset.forName("UTF-8"));
+
+        FileInputStream textFileIS = new FileInputStream(textFile);
+        File zipFile = tempFolder.newFile(FILE_NAME + ".zip");
+        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
+        out.putNextEntry(new ZipEntry(textFile.getPath()));
+        byte[] b = new byte[1024];
+        int count;
+        while ((count = textFileIS.read(b)) > 0) {
+            out.write(b, 0, count);
+        }
+        out.close();
+        textFileIS.close();
+
+        File outputDir = tempFolder.newFolder();
+        FileUtils.extractZipTo(zipFile, outputDir);
+        File extractedTextFile = new File(outputDir, textFile.getName());
+        assertArrayEquals(Files.readAllLines(textFile.toPath()).toArray(), Files.readAllLines(extractedTextFile.toPath()).toArray());
+    }
 
 }
