@@ -78,6 +78,11 @@ public final class LauncherUpdater {
      * @return whether an update is available
      */
     public boolean updateAvailable() {
+        if (this.currentVersionInfo.isEmpty()) {
+            logger.trace("Skipping update check - no version info file found (assuming development environment)");
+            return false;
+        }
+
         boolean updateAvailable = false;
         upstreamVersion = null;
         versionInfo = null;
@@ -92,21 +97,29 @@ public final class LauncherUpdater {
             logger.error("The current version '{}' could not be parsed!", currentVersion, e);
         }
         if (updateAvailable) {
-            URL urlVersionInfo = null;
-            try {
-                urlVersionInfo = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
-                versionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
-            } catch (IOException e) {
-                logger.warn("The launcher version info could not be loaded! '{}' '{}'", upstreamVersion, urlVersionInfo, e);
-            }
-            try {
-                changeLog = DownloadUtils.loadLauncherChangeLogJenkins(jobName, upstreamVersion);
-            } catch (DownloadException e) {
-                logger.warn("The launcher change log could not be loaded! '{}'", upstreamVersion, e);
-            }
+            this.setNewVersionInfo();
+            this.setNewChangeLog();
             logger.info("An update is available to the TerasologyLauncher. '{}' '{}'", upstreamVersion, versionInfo);
         }
         return updateAvailable;
+    }
+
+    private void setNewVersionInfo() {
+        URL urlVersionInfo = null;
+        try {
+            urlVersionInfo = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
+            versionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
+        } catch (IOException e) {
+            logger.warn("The launcher version info could not be loaded! '{}' '{}'", upstreamVersion, urlVersionInfo, e);
+        }
+    }
+
+    private void setNewChangeLog() {
+        try {
+            changeLog = DownloadUtils.loadLauncherChangeLogJenkins(jobName, upstreamVersion);
+        } catch (DownloadException e) {
+            logger.warn("The launcher change log could not be loaded! '{}'", upstreamVersion, e);
+        }
     }
 
     public void detectAndCheckLauncherInstallationDirectory() throws URISyntaxException, IOException {

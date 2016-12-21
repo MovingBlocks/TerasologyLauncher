@@ -43,6 +43,8 @@ public final class TerasologyLauncherVersionInfo {
 
     private static TerasologyLauncherVersionInfo instance;
 
+    // Indicates whether this version info is 'empty' (usually indicates that the launcher is being run in a development environment)
+    private final boolean isEmpty;
     private final String buildNumber;
     private final String buildId;
     private final String buildTag;
@@ -62,6 +64,7 @@ public final class TerasologyLauncherVersionInfo {
             properties = loadPropertiesFromInputStream(this.getClass().getResourceAsStream(VERSION_INFO_FILE));
         }
 
+        isEmpty = properties.isEmpty();
         buildNumber = properties.getProperty(BUILD_NUMBER, DEFAULT_VALUE);
         buildId = properties.getProperty(BUILD_ID, DEFAULT_VALUE);
         buildTag = properties.getProperty(BUILD_TAG, DEFAULT_VALUE);
@@ -109,7 +112,12 @@ public final class TerasologyLauncherVersionInfo {
         stringRepresentationBuilder.append(DISPLAY_VERSION);
         stringRepresentationBuilder.append("=");
         stringRepresentationBuilder.append(displayVersion);
+        stringRepresentationBuilder.append(", ");
+        stringRepresentationBuilder.append("isEmpty");
+        stringRepresentationBuilder.append("=");
+        stringRepresentationBuilder.append(isEmpty);
         stringRepresentationBuilder.append("]");
+
         stringRepresentation = stringRepresentationBuilder.toString();
     }
 
@@ -141,6 +149,10 @@ public final class TerasologyLauncherVersionInfo {
         }
 
         return properties;
+    }
+
+    public boolean isEmpty() {
+        return isEmpty;
     }
 
     public String getBuildNumber() {

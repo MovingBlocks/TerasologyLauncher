@@ -105,6 +105,10 @@ dependencies {
     // These dependencies are only needed for running tests
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+
+    // Don't upgrade either of these until https://github.com/powermock/powermock/issues/717 is resolved
+    testCompile 'org.powermock:powermock-module-junit4:1.6.4'
+    testCompile 'org.powermock:powermock-api-mockito:1.6.4'
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
