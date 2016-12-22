@@ -90,7 +90,7 @@ public class TestFileUtils {
         FileInputStream textFileIS = new FileInputStream(textFile);
         File zipFile = tempFolder.newFile(FILE_NAME + ".zip");
         ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
-        out.putNextEntry(new ZipEntry(textFile.getPath()));
+        out.putNextEntry(new ZipEntry(zipFile.getPath()));
         byte[] b = new byte[1024];
         int count;
         while ((count = textFileIS.read(b)) > 0) {
@@ -101,7 +101,7 @@ public class TestFileUtils {
 
         File outputDir = tempFolder.newFolder();
         FileUtils.extractZipTo(zipFile, outputDir);
-        File extractedTextFile = new File(outputDir, textFile.getName());
+        File extractedTextFile = new File(outputDir, FILE_NAME);
         assertArrayEquals(Files.readAllLines(textFile.toPath()).toArray(), Files.readAllLines(extractedTextFile.toPath()).toArray());
     }
 
