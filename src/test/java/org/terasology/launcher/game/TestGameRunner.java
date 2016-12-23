@@ -14,9 +14,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -29,7 +32,7 @@ public class TestGameRunner {
     private Process gameProcess;
 
     @Before
-    public void setup () throws Exception {
+    public void setup() throws Exception {
         mockStatic(LoggerFactory.class);
         mockStatic(Thread.class);
 
@@ -37,15 +40,16 @@ public class TestGameRunner {
         when(LoggerFactory.getLogger(any(Class.class))).thenReturn(logger);
 
         // Create fake game process to give to GameRunner
-        gameProcess = mock (Process.class);
+        gameProcess = mock(Process.class);
         resetGameProcess();
     }
 
     /**
      * Resets the simulated game process to "successful" behaviour for use in multiple tests.
+     *
      * @throws Exception
      */
-    private void resetGameProcess () throws Exception {
+    private void resetGameProcess() throws Exception {
         when(gameProcess.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[0]));
         when(gameProcess.waitFor()).thenReturn(0);
     }
@@ -130,7 +134,7 @@ public class TestGameRunner {
         resetGameProcess();
 
         // Simulate an invalid output stream (that throws an IOException when read from because it's unhappy with its life)
-        InputStream badStream = mock (InputStream.class);
+        InputStream badStream = mock(InputStream.class);
         when(badStream.read(any(byte[].class), anyInt(), anyInt())).thenThrow(new IOException("Unhappy with life!"));
 
         when(gameProcess.getInputStream()).thenReturn(badStream);
