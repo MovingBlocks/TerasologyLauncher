@@ -75,32 +75,32 @@ class LauncherSettingsDecorator extends AbstractLauncherSettings {
 
     @Override
     protected void initInitialHeapSize() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected void initSearchForLauncherUpdates() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected void initCloseLauncherAfterGameStart() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected void initSaveDownloadedFiles() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected void initGameDirectory() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected void initGameDataDirectory() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -110,37 +110,37 @@ class LauncherSettingsDecorator extends AbstractLauncherSettings {
 
     @Override
     protected void initUserGameParameters() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected void initLogLevel() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected void initMaxHeapSize() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected void initLastBuildNumber() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected void initLocale() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected void initJob() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected void initBuildVersion() {
-
+        throw new UnsupportedOperationException();
     }
 
     // --------------------------------------------------------------------- //
