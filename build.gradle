@@ -372,8 +372,34 @@ task copyHtml(type: Copy) {
 // TODO: Temporary workaround for new exes / JRE bundling not quite being officially ready yet
 distZip.exclude("*.x*.exe")
 
+task unpackZipForNSIS(type: Copy) {
+    dependsOn distZip
+
+    def zipFile = file("${buildDir}/distributions/TerasologyLauncher.zip")
+    def tmpDir = file("${buildDir}/tmp/distNSIS")
+    from zipTree(zipFile)
+    into tmpDir
+}
+
+task renderNSISScript(type: Copy) {
+    dependsOn unpackZipForNSIS
+
+    from("win-setup.nsi")
+    into("${buildDir}/tmp/distNSIS")
+    expand(appName: "TerasologyLauncher", appVersion: displayVersion, guiName: "Terasology Launcher",
+      outDir: "${buildDir}/distributions", licenseFile: "${projectDir}/LICENSE")
+}
+
+task distNSIS(type: Exec) {
+    dependsOn renderNSISScript
+
+    executable "makensis"
+    args "${buildDir}/tmp/distNSIS/win-setup.nsi"
+}
+
 task createRelease() {
     dependsOn distZip
+    dependsOn distNSIS
 
     doLast {
         println 'Created release: ' + displayVersion
