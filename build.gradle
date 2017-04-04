@@ -384,10 +384,10 @@ task unpackZipForNSIS(type: Copy) {
 task renderNSISScript(type: Copy) {
     dependsOn unpackZipForNSIS
 
-    from("win-setup.nsi")
+    from("win-setup/win-setup.nsi")
     into("${buildDir}/tmp/distNSIS")
     expand(appName: "TerasologyLauncher", appVersion: displayVersion, guiName: "Terasology Launcher",
-      outDir: "${buildDir}/distributions", licenseFile: "${projectDir}/LICENSE")
+      outDir: "${buildDir}/distributions", licenseFile: "${projectDir}/LICENSE", minJREVersion: "1.8")
 }
 
 task distNSIS(type: Exec) {

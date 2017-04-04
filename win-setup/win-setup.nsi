@@ -3,7 +3,7 @@
 ;--------------------------------
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
-!include "LogicLib.nsh"
+!include "WordFunc.nsh" ;For VersionCompare
 
 ;Name and file
 Name "<% print guiName %>"
@@ -35,11 +35,61 @@ RequestExecutionLevel admin
 !insertmacro MUI_LANGUAGE "English"
 
 ;--------------------------------
+;JRE detection
+Function detectJavaVersion
+	Var /GLOBAL regKey
+	Var /GLOBAL installedVersion
+	Var /GLOBAL versionComparison
+	Pop \$regKey
+	ClearErrors
+	ReadRegStr \$installedVersion HKLM \$regKey "CurrentVersion"
+	IfErrors fail
+	\${VersionCompare} "<% print minJREVersion %>" \$installedVersion \$versionComparison
+	IntCmp \$versionComparison 1 fail ;if min is newer than installed, jump to JRE_old
+	ClearErrors
+	Return
+	fail:
+		SetErrors
+		Return
+FunctionEnd
+
+!macro detectJavaVersion regKey
+	Push "\${regKey}"
+	Call detectJavaVersion
+!macroend
+
+Function detectJRE
+	!insertmacro detectJavaVersion "SOFTWARE\\JavaSoft\\Java Runtime Environment"
+	IfErrors checkForJDK
+	Return
+	checkForJDK:
+		!insertmacro detectJavaVersion "SOFTWARE\\JavaSoft\\Java Development Kit"
+		IfErrors checkForJRE32
+		Return
+	checkForJRE32:
+		!insertmacro detectJavaVersion "SOFTWARE\\WOW6432Node\\JavaSoft\\Java Runtime Environment"
+		IfErrors checkForJDK32
+		Goto archWarning
+	checkForJDK32:
+		!insertmacro detectJavaVersion "SOFTWARE\\WOW6432Node\\JavaSoft\\Java Development Kit"
+		IfErrors noJava
+	archWarning:
+		MessageBox MB_OK|MB_ICONEXCLAMATION "This is a 64-bit system, however only a 32-bit suitable Java installation has been found. This may limit the performance of this program; you can install a 64-bit Java version from https://www.java.com. This program requires Java <% print minJREVersion %> or later to run."
+		Return
+	noJava:
+		MessageBox MB_OK|MB_ICONSTOP "A suitable Java installation was not found on this system; this program requires Java <% print minJREVersion %> or later to run. Please visit  https://www.java.com to download the latest version now. Once you installed it, run this installer again to install <% print appName %>."
+		SetErrorLevel 1
+		Quit
+FunctionEnd
+
+;--------------------------------
 ;Installer Sections
 
 Section "<% print guiName %>" SecMain
 	;Installation of core files can't be disabled
 	SectionIn RO
+	; Check for JRE
+	Call detectJRE
 	;Install application's files
 	SetOutPath "\$INSTDIR"
 	File /r "<% print appName %>\\*.*"
