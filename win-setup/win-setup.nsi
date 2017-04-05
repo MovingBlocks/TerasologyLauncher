@@ -1,9 +1,15 @@
 ;Forked from NSIS Modern User Interface, Basic Example Script by Joost Verburg
 ; http://nsis.sourceforge.net/Examples/Modern%20UI/Basic.nsi
+;Useful clarifications from https://nsis-dev.github.io/NSIS-Forums/html/t-356394.html
 ;--------------------------------
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
+!include 'LogicLib.nsh'
+!include 'x64.nsh'
 !include "WordFunc.nsh" ;For VersionCompare
+
+!define TRUE 1
+!define FALSE 0
 
 ;Name and file
 Name "<% print guiName %>"
@@ -36,10 +42,13 @@ RequestExecutionLevel admin
 
 ;--------------------------------
 ;JRE detection
+ ;Unfortunately, NSIS only has global variables
+Var regKey
+Var installedVersion
+Var versionComparison
+Var javaIsWOW64
+
 Function detectJavaVersion
-	Var /GLOBAL regKey
-	Var /GLOBAL installedVersion
-	Var /GLOBAL versionComparison
 	Pop \$regKey
 	ClearErrors
 	ReadRegStr \$installedVersion HKLM \$regKey "CurrentVersion"
@@ -53,33 +62,61 @@ Function detectJavaVersion
 		Return
 FunctionEnd
 
-!macro detectJavaVersion regKey
-	Push "\${regKey}"
-	Call detectJavaVersion
-!macroend
+Function noJava
+	MessageBox MB_OK|MB_ICONSTOP "A suitable Java installation to run this program has not been found. This program requires Java Runtime Environment at least <% print minJREVersion %>; \\
+		you can download the latest available version from https://www.java.com. Once you downloaded and installed it, run this installer again to install <% print guiName %>. The installer will now quit."
+	SetErrorLevel 1
+	Quit
+FunctionEnd
+
+Function checkWOW64Java
+	;Show performance warning if flag for 32-bit Java on 64-bit OS was setup
+	;and set RegView back to 64, otherwise new keys will be put under WOW6432Node
+	\${If} \$javaIsWOW64 = \${TRUE}
+		MessageBox MB_OK|MB_ICONEXCLAMATION "This is a 64-bit system, but only a 32-bit Java installation suitable for this program was found. \\
+			This will limit the performance of the program you are installing (it won't be able to use more than 4GB of memory). \\
+			You can install a 64-bit Java Runtime Environment from https://www.java.com. This program requires at least version <% print minJREVersion %>."
+		SetRegView 64
+	\${EndIf}
+FunctionEnd
 
 Function detectJRE
-	!insertmacro detectJavaVersion "SOFTWARE\\JavaSoft\\Java Runtime Environment"
-	IfErrors checkForJDK
-	Return
-	checkForJDK:
+	!macro detectJavaVersion regKey
+		Push "\${regKey}"
+		Call detectJavaVersion
+		\${IfNot} \${Errors}
+			Call checkWOW64Java
+			Return
+		\${EndIf}
+	!macroend
+	!macro detectJRE
+		!insertmacro detectJavaVersion "SOFTWARE\\JavaSoft\\Java Runtime Environment"
+	!macroend
+	!macro detectJDK
 		!insertmacro detectJavaVersion "SOFTWARE\\JavaSoft\\Java Development Kit"
-		IfErrors checkForJRE32
-		Return
-	checkForJRE32:
-		!insertmacro detectJavaVersion "SOFTWARE\\WOW6432Node\\JavaSoft\\Java Runtime Environment"
-		IfErrors checkForJDK32
-		Goto archWarning
-	checkForJDK32:
-		!insertmacro detectJavaVersion "SOFTWARE\\WOW6432Node\\JavaSoft\\Java Development Kit"
-		IfErrors noJava
-	archWarning:
-		MessageBox MB_OK|MB_ICONEXCLAMATION "This is a 64-bit system, however only a 32-bit suitable Java installation has been found. This may limit the performance of this program; you can install a 64-bit Java version from https://www.java.com. This program requires Java <% print minJREVersion %> or later to run."
-		Return
-	noJava:
-		MessageBox MB_OK|MB_ICONSTOP "A suitable Java installation was not found on this system; this program requires Java <% print minJREVersion %> or later to run. Please visit  https://www.java.com to download the latest version now. Once you installed it, run this installer again to install <% print appName %>."
-		SetErrorLevel 1
-		Quit
+	!macroend
+	StrCpy \$javaIsWOW64 \${FALSE}
+	\${If} \${RunningX64}
+    ;We are running on a 64-bit Windows installation
+		DetailPrint "Running on a 64-Bit Windows installation."
+		SetRegView 64
+		!insertmacro detectJRE
+		!insertmacro detectJDK ;The previous one returns from the function if JRE found
+		;If we get here, no native (64-bit) JRE or JDK were found
+		SetRegView 32 ;Look for the same keys, but will be redirected to the ones under WOW6432Node
+		StrCpy \$javaIsWOW64 \${TRUE} ;flag to show warning message
+		!insertmacro detectJRE
+		!insertmacro detectJDK
+		;If here, neither 64-bit or 32-bit JREs nor JDKs were found
+		SetRegView 64
+	\${Else}
+    ;We are running on a 32-bit Windows installation
+		DetailPrint "Running on a 32-Bit Windows installation."
+		!insertmacro detectJRE
+		!insertmacro detectJDK ;The previous one returns from the function if JRE found
+		;If we get here, neither JRE nor JDK were found
+	\${EndIf}
+	Call noJava
 FunctionEnd
 
 ;--------------------------------
@@ -139,6 +176,9 @@ LangString DESC_SecDesktopShortcut \${LANG_ENGLISH} "Shortcut to launch <% print
 
 Section "Uninstall"
 	SetShellVarContext all
+	\${If} \${RunningX64}
+		SetRegView 64
+	\${EndIf}
 	RMDir /r "\$INSTDIR"
 	DeleteRegKey /ifempty HKLM "Software\\<% print appName %>"
 	DeleteRegKey HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>"
