@@ -1,7 +1,27 @@
-;Forked from NSIS Modern User Interface, Basic Example Script by Joost Verburg
-; http://nsis.sourceforge.net/Examples/Modern%20UI/Basic.nsi
-;Useful clarifications from https://nsis-dev.github.io/NSIS-Forums/html/t-356394.html
-;--------------------------------
+/*
+ * Copyright 2016 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+
+ * Credits:
+ * Forked from NSIS Modern User Interface, Basic Example Script by Joost Verburg
+ * http://nsis.sourceforge.net/Examples/Modern%20UI/Basic.nsi
+ */
+
+ ; This file by itself is NOT a valid NSIS script; it's a template which is rendered to a
+ ; NSIS script during the Gradle build, when some values fill the variables of the template
+ ; See the renderNSISScript task in build.gradle for more relevant information.
+
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
 !include 'LogicLib.nsh'
@@ -23,6 +43,9 @@ RequestExecutionLevel admin
 ;--------------------------------
 ;Interface Settings
 !define MUI_ABORTWARNING
+!define MUI_ICON "icon.ico"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "img.bmp"
+!define MUI_FINISHPAGE_RUN "<% print appName %>.exe"
 
 ;--------------------------------
 ;Pages
@@ -42,7 +65,7 @@ RequestExecutionLevel admin
 
 ;--------------------------------
 ;JRE detection
- ;Unfortunately, NSIS only has global variables
+;Unfortunately, NSIS only has global variables
 Var regKey
 Var installedVersion
 Var versionComparison
@@ -70,8 +93,8 @@ Function noJava
 FunctionEnd
 
 Function checkWOW64Java
-	;Show performance warning if flag for 32-bit Java on 64-bit OS was setup
-	;and set RegView back to 64, otherwise new keys will be put under WOW6432Node
+	;Show performance warning if flag for 32-bit Java on 64-bit OS was set
+	;and set RegView back to 64, otherwise new keys would be put under WOW6432Node
 	\${If} \$javaIsWOW64 = \${TRUE}
 		MessageBox MB_OK|MB_ICONEXCLAMATION "This is a 64-bit system, but only a 32-bit Java installation suitable for this program was found. \\
 			This will limit the performance of the program you are installing (it won't be able to use more than 4GB of memory). \\
@@ -134,16 +157,21 @@ Section "<% print guiName %>" SecMain
 	WriteRegStr HKLM "Software\\<% print appName %>" "" \$INSTDIR
 	; Show in add/remove programs
 	WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "DisplayName" "<% print guiName %>"
-	WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "DisplayVersion" "<% print appVersion %>"
+	WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "DisplayVersion" "<% print verString %>"
 	WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "UninstallString" "\$\"\$INSTDIR\\Uninstall.exe\$\""
 	WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "QuietUninstallString" "\$\"\$INSTDIR\\Uninstall.exe\$\" /S"
+	WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "DisplayIcon" "\$\"\$INSTDIR\\<% print appName %>.exe\$\""
+	WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "Publisher" "<% print publisher %>"
+	WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "NoModify" 1
+	WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "NoRepair" 1
+	WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "VersionMajor" <% print verMajor %>
+	WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "VersionMinor" <% print verMinor %>
 	\${GetSize} "\$INSTDIR" "/S=0K" \$0 \$1 \$2 ; Compute EstimatedSize
 	IntFmt \$0 "0x%08X" \$0
 	WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "EstimatedSize" "\$0"
 	;Create uninstaller
 	WriteUninstaller "\$INSTDIR\\Uninstall.exe"
 SectionEnd
-
 
 Section "Start menu shortcut" SecStartShortcut
 	SetShellVarContext all

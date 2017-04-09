@@ -76,6 +76,8 @@ ext {
     versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasology/launcher/version')
     versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
     versionBase = rootProject.file("version.txt").text.trim()
+    versionMajor = versionBase.tokenize('.')[0]
+    versionMinor = versionBase.tokenize('.')[1]
     displayVersion = (env.JOB_NAME == 'TerasologyLauncherStable') ? versionBase : ((env.JOB_NAME != null && env.BUILD_NUMBER != null) ? versionBase + '.' + env.BUILD_NUMBER + '+' + env.JOB_NAME : versionBase + ' local development ' + startDateTimeString)
 
     // Splash image for the JAR
@@ -386,12 +388,19 @@ task renderNSISScript(type: Copy) {
 
     from("win-setup/win-setup.nsi")
     into("${buildDir}/tmp/distNSIS")
-    expand(appName: "TerasologyLauncher", appVersion: displayVersion, guiName: "Terasology Launcher",
+    expand(appName: "TerasologyLauncher", guiName: "Terasology Launcher", publisher: "MovingBlocks",
+      verString: displayVersion, verMajor: versionMajor, verMinor: versionMinor,
       outDir: "${buildDir}/distributions", licenseFile: "${projectDir}/LICENSE", minJREVersion: "1.8")
+}
+
+task copyNSISresources(type: Copy) {
+    from("win-setup/resources")
+    into("${buildDir}/tmp/distNSIS")
 }
 
 task distNSIS(type: Exec) {
     dependsOn renderNSISScript
+    dependsOn copyNSISresources
 
     executable "makensis"
     args "${buildDir}/tmp/distNSIS/win-setup.nsi"
