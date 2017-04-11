@@ -18,7 +18,10 @@ package org.terasology.launcher.gui.javafx;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -28,6 +31,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +54,7 @@ import java.text.Collator;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 public class SettingsController {
 
@@ -106,9 +111,13 @@ public class SettingsController {
     @FXML
     private Label downloadDirectoryLabel;
     @FXML
+    private Label cleanupDirectoriesLabel;
+    @FXML
     private Button launcherDirectoryOpenButton;
     @FXML
     private Button downloadDirectoryOpenButton;
+    @FXML
+    private Button cleanupDirectoriesOpenButton;
     @FXML
     private Label searchForUpdatesLabel;
     @FXML
@@ -264,6 +273,35 @@ public class SettingsController {
     }
 
     @FXML
+    public void cleanupDirectoriesAction() {
+        try {
+            Stage cleanupStage = new Stage();
+            cleanupStage.initModality(Modality.APPLICATION_MODAL);
+
+            FXMLLoader fxmlLoader;
+            Parent root;
+            /* Fall back to default language if loading the FXML file files with the current locale */
+            try {
+                fxmlLoader = BundleUtils.getFXMLLoader("cleanup");
+                root = fxmlLoader.load();
+            } catch (IOException e) {
+                fxmlLoader = BundleUtils.getFXMLLoader("cleanup");
+                fxmlLoader.setResources(ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", Languages.DEFAULT_LOCALE));
+                root = fxmlLoader.load();
+            }
+
+            final CleanupController cleanupController = fxmlLoader.getController();
+            cleanupController.initialize(launcherSettings, cleanupStage);
+
+            Scene scene = new Scene(root);
+            cleanupStage.setScene(scene);
+            cleanupStage.showAndWait();
+        } catch (IOException e) {
+            logger.warn("Exception in cleanupDirectoriesAction: ", e);
+        }
+    }
+
+    @FXML
     protected void updateMaxHeapSizeBox() {
         final JavaHeapSize initialHeapSize = initialHeapSizeBox.getSelectionModel().getSelectedItem();
         final JavaHeapSize maxHeapSize = maxHeapSizeBox.getSelectionModel().getSelectedItem();
@@ -342,8 +380,10 @@ public class SettingsController {
         saveDownloadedFilesLabel.setText(BundleUtils.getLabel("settings_launcher_saveDownloadedFiles"));
         launcherDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory"));
         downloadDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory"));
+        cleanupDirectoriesLabel.setText(BundleUtils.getLabel("settings_launcher_cleanupDirectories"));
         launcherDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory_open"));
         downloadDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory_open"));
+        cleanupDirectoriesOpenButton.setText(BundleUtils.getLabel("settings_launcher_cleanupDirectories_open"));
         searchForUpdatesLabel.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
         saveSettingsButton.setText(BundleUtils.getLabel("settings_save"));
         cancelSettingsButton.setText(BundleUtils.getLabel("settings_cancel"));

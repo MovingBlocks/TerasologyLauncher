@@ -204,6 +204,10 @@ class LauncherSettingsDecorator extends AbstractLauncherSettings {
         return (gameDataDirectory != null) ? gameDataDirectory : settings.getGameDataDirectory();
     }
 
+    public File getLauncherSettingsFile() {
+        return settings.getLauncherSettingsFile();
+    }
+
     @Override
     public boolean isSearchForLauncherUpdates() {
         return (searchForLauncherUpdates != null) ? searchForLauncherUpdates : settings.isSearchForLauncherUpdates();

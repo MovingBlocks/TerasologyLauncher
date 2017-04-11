@@ -270,6 +270,8 @@
                                                        GridPane.columnIndex="0" GridPane.rowIndex="4"/>
                                                 <Label fx:id="downloadDirectoryLabel"
                                                        GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                                                <Label fx:id="cleanupDirectoriesLabel"
+                                                       GridPane.columnIndex="0" GridPane.rowIndex="6"/>
                                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0"
                                                       spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                                     <children>
@@ -345,6 +347,19 @@
                                                         <Insets left="8.0" right="8.0"/>
                                                     </padding>
                                                 </HBox>
+                                                <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0"
+                                                      spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                                                    <children>
+                                                        <Button fx:id="cleanupDirectoriesOpenButton"
+                                                                maxWidth="Infinity"
+                                                                mnemonicParsing="false"
+                                                                onAction="#cleanupDirectoriesAction"
+                                                                HBox.hgrow="ALWAYS"/>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets left="8.0" right="8.0"/>
+                                                    </padding>
+                                                </HBox>
                                                 <Label fx:id="searchForUpdatesLabel"
                                                        GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                                                 <CheckBox fx:id="searchForUpdatesBox" contentDisplay="GRAPHIC_ONLY"
@@ -361,6 +376,7 @@
                                                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
                                             </columnConstraints>
                                             <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
                                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
                                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
                                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>

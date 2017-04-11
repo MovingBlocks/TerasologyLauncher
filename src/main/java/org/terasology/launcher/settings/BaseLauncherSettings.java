@@ -83,6 +83,10 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
         properties = new Properties();
     }
 
+    public File getLauncherSettingsFile() {
+        return launcherSettingsFile;
+    }
+
     public String getLauncherSettingsFilePath() {
         return launcherSettingsFile.getPath();
     }

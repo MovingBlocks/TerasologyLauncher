@@ -122,6 +122,8 @@ public abstract class AbstractLauncherSettings implements GameSettings {
 
     public abstract File getGameDataDirectory();
 
+    public abstract File getLauncherSettingsFile();
+
     public abstract boolean isSearchForLauncherUpdates();
 
     public abstract boolean isCloseLauncherAfterGameStart();
