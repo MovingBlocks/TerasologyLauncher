@@ -277,6 +277,7 @@ public class SettingsController {
         try {
             Stage cleanupStage = new Stage();
             cleanupStage.initModality(Modality.APPLICATION_MODAL);
+            cleanupStage.setResizable(false);
 
             FXMLLoader fxmlLoader;
             Parent root;

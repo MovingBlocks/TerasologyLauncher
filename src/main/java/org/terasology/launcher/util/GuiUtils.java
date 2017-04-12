@@ -18,6 +18,8 @@ package org.terasology.launcher.util;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -27,6 +29,7 @@ import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -66,6 +69,18 @@ public final class GuiUtils {
 
     public static void showInfoMessageDialog(Stage owner, String message) {
         showMessageDialog(Alert.AlertType.INFORMATION, BundleUtils.getLabel("message_information_title"), message, owner);
+    }
+
+    public static boolean showBinaryChoicheDialog(String title, String message, String btnTrue, String btnFalse) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setContentText(message);
+        alert.setHeaderText(null);
+        ButtonType buttonTypeTrue = new ButtonType(btnTrue, ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeFalse = new ButtonType(btnFalse, ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(buttonTypeTrue, buttonTypeFalse);
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.get() == buttonTypeTrue;
     }
 
     public static File chooseDirectoryDialog(Stage owner, final File directory, final String title) {

@@ -19,31 +19,31 @@ package org.terasology.launcher.util;
 import org.terasology.launcher.settings.AbstractLauncherSettings;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Utilities to remove directories created by the launcher.
  */
 public final class CleanupUtils {
 
+    public enum Directory {
+        LAUNCHER,
+        GAME,
+        GAME_DATA
+    }
+
     private CleanupUtils() {
     }
 
-    public static void deleteLauncherDirectory(AbstractLauncherSettings launcherSettings) throws IOException {
-        File launcherDirectory = launcherSettings.getLauncherSettingsFile().getParentFile();
-        if (launcherDirectory != null) {
-            FileUtils.delete(launcherDirectory);
-        } else {
-            throw new IOException("Failed to retrieve the path to launcher's directory");
+    public static File getDirectory(AbstractLauncherSettings launcherSettings, Directory directory) {
+        switch (directory) {
+            case LAUNCHER:
+                return launcherSettings.getLauncherSettingsFile().getParentFile();
+            case GAME:
+                return launcherSettings.getGameDirectory();
+            case GAME_DATA:
+                return launcherSettings.getGameDataDirectory();
         }
-    }
-
-    public static void deleteGameDirectory(AbstractLauncherSettings launcherSettings) throws IOException {
-        FileUtils.delete(launcherSettings.getGameDirectory());
-    }
-
-    public static void deleteGameDatairectory(AbstractLauncherSettings launcherSettings) throws IOException {
-        FileUtils.delete(launcherSettings.getGameDataDirectory());
+        throw new IllegalArgumentException("Requested invalid directory");
     }
 
 }

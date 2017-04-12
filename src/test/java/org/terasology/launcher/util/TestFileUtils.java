@@ -20,20 +20,19 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 public class TestFileUtils {
     @Rule
@@ -60,6 +59,36 @@ public class TestFileUtils {
         FileUtils.deleteDirectoryContent(directory);
         assertFalse(file.exists());
         assertTrue(directory.exists());
+    }
+
+    @Test
+    public void testComputeTotalSize() throws IOException {
+        File directory = tempFolder.newFolder();
+        RandomAccessFile f = new RandomAccessFile(new File(directory, "1"), "rw");
+        f.setLength(10);
+        f.close();
+        File subDirectory = new File(directory, "subDir");
+        subDirectory.mkdir();
+        f = new RandomAccessFile(new File(subDirectory, "2"), "rw");
+        f.setLength(20);
+        f.close();
+        f = new RandomAccessFile(new File(subDirectory, "3"), "rw");
+        f.setLength(12);
+        f.close();
+        assertEquals(42, FileUtils.computeTotalSize(directory));
+    }
+
+    @Test
+    public void testFormatByteCount() {
+        Locale defaultLocale = Locale.getDefault();
+        Locale.setDefault(new Locale("en"));
+        assertEquals("0.00 B", FileUtils.formatByteCount(0L));
+        assertEquals("5.00 B", FileUtils.formatByteCount(5L));
+        assertEquals("1.00 kB", FileUtils.formatByteCount(1000L));
+        assertEquals("1.50 MB", FileUtils.formatByteCount(1500003L));
+        assertEquals("2.04 GB", FileUtils.formatByteCount(2040000200L));
+        assertEquals("3.00 TB", FileUtils.formatByteCount(3000000000200L));
+        Locale.setDefault(defaultLocale);
     }
 
     @Test

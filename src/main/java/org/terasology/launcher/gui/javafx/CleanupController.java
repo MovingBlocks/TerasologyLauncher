@@ -29,7 +29,10 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.settings.AbstractLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.CleanupUtils;
+import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.GuiUtils;
 
+import java.io.File;
 import java.io.IOException;
 
 public class CleanupController {
@@ -56,33 +59,58 @@ public class CleanupController {
         setLabelStrings();
     }
 
+    private String formatWithPathAndSize(String prefix, File file) {
+        return String.format("%s (%s, %s)", prefix, file.getAbsolutePath(), FileUtils.formatByteCount(FileUtils.computeTotalSize(file)));
+    }
+
     private void setLabelStrings() {
         descriptionLabel.setText(BundleUtils.getLabel("cleanup_description"));
-        deleteGameBox.setText(BundleUtils.getLabel("cleanup_delete_game"));
-        deleteGameDataBox.setText(BundleUtils.getLabel("cleanup_delete_gameData"));
-        deleteLauncherBox.setText(BundleUtils.getLabel("cleanup_delete_launcher"));
+        deleteGameBox.setText(formatWithPathAndSize(BundleUtils.getLabel("cleanup_delete_game"),
+                CleanupUtils.getDirectory(launcherSettings, CleanupUtils.Directory.GAME)));
+        deleteGameDataBox.setText(formatWithPathAndSize(BundleUtils.getLabel("cleanup_delete_gameData"),
+                CleanupUtils.getDirectory(launcherSettings, CleanupUtils.Directory.GAME_DATA)));
+        deleteLauncherBox.setText(formatWithPathAndSize(BundleUtils.getLabel("cleanup_delete_launcher"),
+                CleanupUtils.getDirectory(launcherSettings, CleanupUtils.Directory.LAUNCHER)));
         okButton.setText(BundleUtils.getLabel("cleanup_ok"));
         cancelButton.setText(BundleUtils.getLabel("cleanup_cancel"));
     }
 
+    private boolean tryDeleteDirectory(CleanupUtils.Directory directory) {
+        boolean retry;
+        File f = CleanupUtils.getDirectory(launcherSettings, directory);
+        do {
+            try {
+                logger.info("Deleting {0} - {1}", directory.toString(), f.getAbsolutePath());
+                FileUtils.delete(f);
+                return true;
+            } catch (IOException e) {
+                logger.warn("Failed to delete {0}", f.getAbsolutePath());
+                retry = GuiUtils.showBinaryChoicheDialog(BundleUtils.getMessage("cleanup_error"),
+                        BundleUtils.getMessage("cleanup_delete_failed", f.getAbsolutePath(), e.getMessage()),
+                        BundleUtils.getLabel("cleanup_retry"), BundleUtils.getLabel("cleanup_ignore"));
+            }
+        } while (retry);
+        return false;
+    }
+
     @FXML
-    public void doCleanupAction(ActionEvent event) throws IOException {  //TODO: catch and show a message instead of throwing
+    public void doCleanupAction() {
+        boolean success = true;
         if (deleteGameBox.isSelected()) {
-            CleanupUtils.deleteGameDirectory(launcherSettings);
+            success = tryDeleteDirectory(CleanupUtils.Directory.GAME);
         }
         if (deleteGameDataBox.isSelected()) {
-            CleanupUtils.deleteGameDatairectory(launcherSettings);
+            success &= tryDeleteDirectory(CleanupUtils.Directory.GAME_DATA);
         }
         if (deleteLauncherBox.isSelected()) {
-            CleanupUtils.deleteLauncherDirectory(launcherSettings);
+            success &= tryDeleteDirectory(CleanupUtils.Directory.LAUNCHER);
         }
         Platform.exit();
-        System.exit(0);
+        System.exit(success ? 0 : 1);
     }
 
     @FXML
     public void cancelCleanupAction(ActionEvent event) {
-        //TODO: is this the right way to close?
         ((Node) event.getSource()).getScene().getWindow().hide();
     }
 }

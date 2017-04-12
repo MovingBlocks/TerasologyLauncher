@@ -68,6 +68,44 @@ public final class FileUtils {
     }
 
     /**
+     * Computes the total size of the given file or directory.
+     * @param file file or directory to compute size of
+     * @return if the given filesystem object is a file, the same value of {@link File#delete()};
+     *      if it's a directory, the recursively computed size of it's contents.
+     */
+    public static long computeTotalSize(File file) {
+        if (file.isDirectory()) {
+            long size = 0;
+            final File[] files = file.listFiles();
+            if ((files != null) && (files.length > 0)) {
+                for (File child : files) {
+                    size += FileUtils.computeTotalSize(child);
+                }
+            }
+            return size;
+        } else {
+            return file.length();
+        }
+    }
+
+    /**
+     * Formats the specified number of bytes in a string using SI units.
+     * @param byteCount The number of bytes to format. Must be >= 0.
+     * @return The readable string representation of the argument expressed in SI unit, rounded to two decimal places.
+     */
+    public static String formatByteCount(long byteCount) {
+        if (byteCount < 0) {
+            throw new IllegalArgumentException("Negative byte sizes are not supported.");
+        }
+        if (byteCount == 0) {
+            return String.format("%.2f B", 0F);
+        }
+        final String[] units = new String[] {"", "k", "M", "G", "T"};
+        int unitIndex = (int) (Math.log(byteCount) / Math.log(1000)); //log base 1000 of byteSize, truncated to int
+        return String.format("%.2f %sB", byteCount / Math.pow(1000, unitIndex), units[unitIndex]);
+    }
+
+    /**
      * Extracts the given ZIP file to its parent folder.
      *
      * @param archive - the ZIP file to extract
