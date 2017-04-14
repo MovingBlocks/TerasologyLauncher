@@ -292,7 +292,7 @@ public class SettingsController {
             }
 
             final CleanupController cleanupController = fxmlLoader.getController();
-            cleanupController.initialize(launcherSettings, cleanupStage);
+            cleanupController.initialize(launcherSettings);
 
             Scene scene = new Scene(root);
             cleanupStage.setScene(scene);

@@ -23,7 +23,6 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -39,17 +38,24 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.crashreporter.CrashReporter;
 import org.terasology.launcher.gui.javafx.ApplicationController;
+import org.terasology.launcher.gui.javafx.CleanupController;
 import org.terasology.launcher.log.TempLogFilePropertyDefiner;
+import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.util.CleanupUtils;
+import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.LauncherStartFailedException;
+import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -96,31 +102,89 @@ public final class TerasologyLauncher extends Application {
         initProxy();
         initLanguage();
 
+        if (getParameters().getRaw().contains("--cleanup")) {
+            cleanupStart(initialStage);
+        } else {
+            normalStart(initialStage);
+        }
+    }
+
+    private void normalStart(Stage initialStage) {
         final Task<LauncherConfiguration> launcherInitTask = new LauncherInitTask(initialStage);
 
         showSplashStage(initialStage, launcherInitTask);
         Thread initThread = new Thread(launcherInitTask);
 
-        launcherInitTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(final WorkerStateEvent workerStateEvent) {
-                try {
-                    LauncherConfiguration config = launcherInitTask.getValue();
-                    if (config == null) {
-                        throw new LauncherStartFailedException("Launcher configuration was `null`.");
-                    } else if (config instanceof NullLauncherConfiguration) {
-                        logger.info("Closing the launcher ... (empty configuration, probably due to update)");
-                        Platform.exit();
-                    } else {
-                        showMainStage(config);
-                    }
-                } catch (IOException | LauncherStartFailedException e) {
-                    openCrashReporterAndExit(e);
+        launcherInitTask.setOnSucceeded((final WorkerStateEvent workerStateEvent) -> {
+            try {
+                LauncherConfiguration config = launcherInitTask.getValue();
+                if (config == null) {
+                    throw new LauncherStartFailedException("Launcher configuration was `null`.");
+                } else if (config instanceof NullLauncherConfiguration) {
+                    logger.info("Closing the launcher ... (empty configuration, probably due to update)");
+                    Platform.exit();
+                } else {
+                    showMainStage(config);
                 }
+            } catch (IOException | LauncherStartFailedException e) {
+                openCrashReporterAndExit(e);
             }
         });
 
         initThread.start();
+    }
+
+    private void cleanupStart(Stage stage) {
+        logger.info("Starting cleanup tool because --cleanup argument was specified");
+        final OperatingSystem os = OperatingSystem.getOS();
+        if (os == OperatingSystem.UNKNOWN) {
+            logger.error("The operating system is not supported! '{}' '{}' '{}'", System.getProperty("os.name"), System.getProperty("os.arch"),
+                    System.getProperty("os.version"));
+            Platform.exit();
+            System.exit(1);
+        }
+
+        try {
+            final File launcherDirectory = DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME);
+            final BaseLauncherSettings launcherSettings = new BaseLauncherSettings(launcherDirectory);
+            launcherSettings.load();
+            launcherSettings.init();
+
+            if (!CleanupUtils.getDirectory(launcherSettings, CleanupUtils.Directory.LAUNCHER).exists()) {
+                logger.info("Launcher directory does not exist, no cleanup is necessary");
+                Platform.exit();
+                //successful exit (there is no launcher directory, so the launcher has never been started and no cleanup is necessary)
+                System.exit(0);
+            }
+
+            stage.setResizable(false);
+            FXMLLoader fxmlLoader;
+            Parent root;
+            try {
+                fxmlLoader = BundleUtils.getFXMLLoader("cleanup");
+                root = fxmlLoader.load();
+            } catch (IOException e) {
+                fxmlLoader = BundleUtils.getFXMLLoader("cleanup");
+                fxmlLoader.setResources(ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", Languages.DEFAULT_LOCALE));
+                root = fxmlLoader.load();
+            }
+
+            final CleanupController cleanupController = fxmlLoader.getController();
+            cleanupController.initialize(launcherSettings);
+
+            Scene scene = new Scene(root);
+            decorateStage(stage);
+            stage.setScene(scene);
+            stage.setOnHiding((final WindowEvent event) -> {
+                Platform.exit();
+                // The "hide" event will only fire when the cleanup is cancelled (when confirmed System.exit is called in the controller);
+                // we report that the cleanup was cancelled by exiting with a nonzero exit code
+                System.exit(1);
+            });
+            stage.show();
+        } catch (IOException e) {
+            logger.error("IOException in cleanupStart: ", e.getMessage());
+        }
     }
 
     /**
@@ -154,11 +218,11 @@ public final class TerasologyLauncher extends Application {
         /* Fall back to default language if loading the FXML file files with the current locale */
         try {
             fxmlLoader = BundleUtils.getFXMLLoader("application");
-            root = (Parent) fxmlLoader.load();
+            root = fxmlLoader.load();
         } catch (IOException e) {
             fxmlLoader = BundleUtils.getFXMLLoader("application");
             fxmlLoader.setResources(ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", Languages.DEFAULT_LOCALE));
-            root = (Parent) fxmlLoader.load();
+            root = fxmlLoader.load();
         }
         final ApplicationController controller = fxmlLoader.getController();
         controller.initialize(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(), launcherConfiguration.getTempDirectory(),

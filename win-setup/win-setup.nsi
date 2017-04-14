@@ -24,8 +24,8 @@
 
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
-!include 'LogicLib.nsh'
-!include 'x64.nsh'
+!include "LogicLib.nsh"
+!include "x64.nsh"
 !include "WordFunc.nsh" ;For VersionCompare
 
 !define TRUE 1
@@ -34,16 +34,29 @@
 ;Name and file
 Name "<% print guiName %>"
 OutFile "<% print outDir %>/<% print appName %>-setup.exe"
-;Default installation folder
-InstallDir "\$PROGRAMFILES\\<% print appName %>"
-;Get installation folder from registry if available
-InstallDirRegKey HKLM "Software\\<% print appName %>" ""
 RequestExecutionLevel admin
 
+; Install folder
+Function .onInit
+	;Default installation folder
+	\${If} \${RunningX64}
+		StrCpy \$INSTDIR "\$PROGRAMFILES64\\<% print appName %>"
+		SetRegView 64
+	\${Else}
+		StrCpy \$INSTDIR "\$PROGRAMFILES\\<% print appName %>"
+	\${EndIf}
+	;Get installation folder from registry if available
+	ReadRegStr \$0 HKLM "Software\\<% print appName %>" ""
+	\${IfNot} \${Errors}
+		StrCpy \$INSTDIR \$0
+	\${EndIf}
+	ClearErrors
+FunctionEnd
 ;--------------------------------
 ;Interface Settings
 !define MUI_ABORTWARNING
 !define MUI_ICON "icon.ico"
+!define MUI_UNICON "icon.ico"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "img.bmp"
 !define MUI_FINISHPAGE_RUN "<% print appName %>.exe"
 
@@ -200,9 +213,16 @@ LangString DESC_SecDesktopShortcut \${LANG_ENGLISH} "Shortcut to launch <% print
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;--------------------------------
-;Uninstaller Section
+;Uninstaller
 
 Section "Uninstall"
+	ExecWait '"\$INSTDIR\\<% print appName %>.exe" --cleanup'
+	\${If} \${Errors}
+		MessageBox MB_YESNO|MB_ICONEXCLAMATION "The cleanup tool wasn't executed successfully. Some files (launcher configuration, game assets and game data) may not have been removed. Do you want to uninstall anyway?" IDYES continue
+		SetErrorLevel 1
+		Quit
+		continue:
+	\${EndIf}
 	SetShellVarContext all
 	\${If} \${RunningX64}
 		SetRegView 64

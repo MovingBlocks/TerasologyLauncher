@@ -23,7 +23,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.settings.AbstractLauncherSettings;
@@ -54,7 +53,7 @@ public class CleanupController {
     @FXML
     private Button cancelButton;
 
-    void initialize(final AbstractLauncherSettings newLauncherSettings, final Stage newStage) {
+    public void initialize(final AbstractLauncherSettings newLauncherSettings) {
         this.launcherSettings = newLauncherSettings;
         setLabelStrings();
     }
@@ -80,11 +79,15 @@ public class CleanupController {
         File f = CleanupUtils.getDirectory(launcherSettings, directory);
         do {
             try {
-                logger.info("Deleting {0} - {1}", directory.toString(), f.getAbsolutePath());
-                FileUtils.delete(f);
+                if (f.exists()) {
+                    logger.info("Deleting {} ({})", directory.toString(), f.getAbsolutePath());
+                    FileUtils.delete(f);
+                } else {
+                    logger.info("Skipping {} ({}) because it doesn't exist", directory.toString(), f.getAbsolutePath());
+                }
                 return true;
             } catch (IOException e) {
-                logger.warn("Failed to delete {0}", f.getAbsolutePath());
+                logger.warn("Failed to delete {}", f.getAbsolutePath());
                 retry = GuiUtils.showBinaryChoicheDialog(BundleUtils.getMessage("cleanup_error"),
                         BundleUtils.getMessage("cleanup_delete_failed", f.getAbsolutePath(), e.getMessage()),
                         BundleUtils.getLabel("cleanup_retry"), BundleUtils.getLabel("cleanup_ignore"));
