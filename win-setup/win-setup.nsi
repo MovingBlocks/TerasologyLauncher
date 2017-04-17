@@ -34,31 +34,20 @@
 ;Name and file
 Name "<% print guiName %>"
 OutFile "<% print outDir %>/<% print appName %>-setup.exe"
+Unicode true
 RequestExecutionLevel admin
 
-; Install folder
-Function .onInit
-	;Default installation folder
-	\${If} \${RunningX64}
-		StrCpy \$INSTDIR "\$PROGRAMFILES64\\<% print appName %>"
-		SetRegView 64
-	\${Else}
-		StrCpy \$INSTDIR "\$PROGRAMFILES\\<% print appName %>"
-	\${EndIf}
-	;Get installation folder from registry if available
-	ReadRegStr \$0 HKLM "Software\\<% print appName %>" ""
-	\${IfNot} \${Errors}
-		StrCpy \$INSTDIR \$0
-	\${EndIf}
-	ClearErrors
-FunctionEnd
 ;--------------------------------
-;Interface Settings
+;MUI2 Settings
 !define MUI_ABORTWARNING
 !define MUI_ICON "icon.ico"
 !define MUI_UNICON "icon.ico"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "img.bmp"
 !define MUI_FINISHPAGE_RUN "<% print appName %>.exe"
+!define MUI_LANGDLL_REGISTRY_ROOT "HKLM"
+!define MUI_LANGDLL_REGISTRY_KEY "Software\\<% print appName %>"
+!define MUI_LANGDLL_REGISTRY_VALUENAME "InstallerLanguage"
+!define MUI_LANGDLL_ALWAYSSHOW
 
 ;--------------------------------
 ;Pages
@@ -74,7 +63,51 @@ FunctionEnd
 
 ;--------------------------------
 ;Languages
-!insertmacro MUI_LANGUAGE "English"
+
+<%
+		/* Groovy snippet to insert language strings */
+		def languageFiles = new File(stringBundlesDir).listFiles();
+		languageFiles.each {f ->
+				Properties props = new Properties()
+				props.load(new FileInputStream(f))
+				def langName = props.getProperty("nsisLangName")
+				/* load translations for NSIS built-in strings */
+				println("!insertmacro MUI_LANGUAGE \"${langName}\"")
+				/* load the custom strings */
+				props.remove("nsisLangName")
+				langName = langName.toUpperCase()
+				props.each { k, v ->
+						v = v.replaceAll("%guiName%", guiName).replaceAll("%minJREVersion%", minJREVersion)
+						println("LangString ${k} \${LANG_${langName}} \"${v}\"")
+				}
+		}
+%>
+
+;--------------------------------
+;Init functions
+
+!insertmacro MUI_RESERVEFILE_LANGDLL
+
+Function .onInit
+	;Default installation folder
+	\${If} \${RunningX64}
+		StrCpy \$INSTDIR "\$PROGRAMFILES64\\<% print appName %>"
+		SetRegView 64
+	\${Else}
+		StrCpy \$INSTDIR "\$PROGRAMFILES\\<% print appName %>"
+	\${EndIf}
+	;Get installation folder from registry if available
+	ReadRegStr \$0 HKLM "Software\\<% print appName %>" ""
+	\${IfNot} \${Errors}
+		StrCpy \$INSTDIR \$0
+	\${EndIf}
+	ClearErrors
+	!insertmacro MUI_LANGDLL_DISPLAY
+FunctionEnd
+
+Function un.onInit
+	!insertmacro MUI_UNGETLANGUAGE
+FunctionEnd
 
 ;--------------------------------
 ;JRE detection
@@ -99,8 +132,7 @@ Function detectJavaVersion
 FunctionEnd
 
 Function noJava
-	MessageBox MB_OK|MB_ICONSTOP "A suitable Java installation to run this program has not been found. This program requires Java Runtime Environment at least <% print minJREVersion %>; \\
-		you can download the latest available version from https://www.java.com. Once you downloaded and installed it, run this installer again to install <% print guiName %>. The installer will now quit."
+	MessageBox MB_OK|MB_ICONSTOP \$(noJava)
 	SetErrorLevel 1
 	Quit
 FunctionEnd
@@ -109,9 +141,7 @@ Function checkWOW64Java
 	;Show performance warning if flag for 32-bit Java on 64-bit OS was set
 	;and set RegView back to 64, otherwise new keys would be put under WOW6432Node
 	\${If} \$javaIsWOW64 = \${TRUE}
-		MessageBox MB_OK|MB_ICONEXCLAMATION "This is a 64-bit system, but only a 32-bit Java installation suitable for this program was found. \\
-			This will limit the performance of the program you are installing (it won't be able to use more than 4GB of memory). \\
-			You can install a 64-bit Java Runtime Environment from https://www.java.com. This program requires at least version <% print minJREVersion %>."
+		MessageBox MB_OK|MB_ICONEXCLAMATION \$(wow64Java)
 		SetRegView 64
 	\${EndIf}
 FunctionEnd
@@ -134,7 +164,6 @@ Function detectJRE
 	StrCpy \$javaIsWOW64 \${FALSE}
 	\${If} \${RunningX64}
     ;We are running on a 64-bit Windows installation
-		DetailPrint "Running on a 64-Bit Windows installation."
 		SetRegView 64
 		!insertmacro detectJRE
 		!insertmacro detectJDK ;The previous one returns from the function if JRE found
@@ -147,7 +176,6 @@ Function detectJRE
 		SetRegView 64
 	\${Else}
     ;We are running on a 32-bit Windows installation
-		DetailPrint "Running on a 32-Bit Windows installation."
 		!insertmacro detectJRE
 		!insertmacro detectJDK ;The previous one returns from the function if JRE found
 		;If we get here, neither JRE nor JDK were found
@@ -186,7 +214,7 @@ Section "<% print guiName %>" SecMain
 	WriteUninstaller "\$INSTDIR\\Uninstall.exe"
 SectionEnd
 
-Section "Start menu shortcut" SecStartShortcut
+Section \$(startMenuShortcut) SecStartShortcut
 	SetShellVarContext all
 	SetOutPath "\$INSTDIR"
 	CreateDirectory "\$SMPROGRAMS\\<% print guiName %>"
@@ -194,22 +222,17 @@ Section "Start menu shortcut" SecStartShortcut
 	CreateShortCut "\$SMPROGRAMS\\<% print guiName %>\\Uninstall.lnk" "\$INSTDIR\\Uninstall.exe"
 SectionEnd
 
-Section "Desktop shortcut" SecDesktopShortcut
+Section \$(desktopShortcut) SecDesktopShortcut
 	SetShellVarContext all
 	SetOutPath "\$INSTDIR"
 	CreateShortCut "\$DESKTOP\\<% print guiName %>.lnk" "\$INSTDIR\\<% print appName %>.exe"
 SectionEnd
 
-;Language strings
-LangString DESC_SecMain \${LANG_ENGLISH} "<% print guiName %> core files."
-LangString DESC_SecStartShortcut \${LANG_ENGLISH} "Folder in the start menu with links to launch <% print guiName %> and to uninstall it."
-LangString DESC_SecDesktopShortcut \${LANG_ENGLISH} "Shortcut to launch <% print guiName %> from your desktop."
-
 ;Assign language strings to sections
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-!insertmacro MUI_DESCRIPTION_TEXT \${SecMain} \$(DESC_SecMain)
-!insertmacro MUI_DESCRIPTION_TEXT \${SecStartShortcut} \$(DESC_SecStartShortcut)
-!insertmacro MUI_DESCRIPTION_TEXT \${SecDesktopShortcut} \$(DESC_SecDesktopShortcut)
+!insertmacro MUI_DESCRIPTION_TEXT \${SecMain} \$(desc_core)
+!insertmacro MUI_DESCRIPTION_TEXT \${SecStartShortcut} \$(desc_startMenuShortcut)
+!insertmacro MUI_DESCRIPTION_TEXT \${SecDesktopShortcut} \$(desc_desktopShortcut)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;--------------------------------
@@ -218,7 +241,7 @@ LangString DESC_SecDesktopShortcut \${LANG_ENGLISH} "Shortcut to launch <% print
 Section "Uninstall"
 	ExecWait '"\$INSTDIR\\<% print appName %>.exe" --cleanup'
 	\${If} \${Errors}
-		MessageBox MB_YESNO|MB_ICONEXCLAMATION "The cleanup tool wasn't executed successfully. Some files (launcher configuration, game assets and game data) may not have been removed. Do you want to uninstall anyway?" IDYES continue
+		MessageBox MB_YESNO|MB_ICONEXCLAMATION \$(cleanupWarning) IDYES continue
 		SetErrorLevel 1
 		Quit
 		continue:

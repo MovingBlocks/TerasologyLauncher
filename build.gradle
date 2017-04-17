@@ -160,7 +160,7 @@ createExe {
     textVersion = displayVersion
     companyName = orgName
     jreMinVersion = "${targetCompatibility}.0" // launch4j requires it's in the form x.x.x, thus this currently renders to 1.8.0
-    icon = "${projectDir}/win-setup/resources/icon.ico"
+    icon = "${projectDir}/win-setup/resources/images/icon.ico"
 }
 
 distributions {
@@ -415,11 +415,12 @@ task renderNSISScript(type: Copy) {
     into("${buildDir}/tmp/distNSIS")
     expand(appName: "TerasologyLauncher", guiName: "Terasology Launcher", publisher: orgName,
       verString: displayVersion, verMajor: versionMajor, verMinor: versionMinor,
-      outDir: "${buildDir}/distributions", licenseFile: "${projectDir}/LICENSE", minJREVersion: targetCompatibility)
+      stringBundlesDir: "${projectDir}/win-setup/resources/strings", outDir: "${buildDir}/distributions",
+      licenseFile: "${projectDir}/LICENSE", minJREVersion: targetCompatibility.toString())
 }
 
 task copyNSISresources(type: Copy) {
-    from("win-setup/resources")
+    from("win-setup/resources/images")
     into("${buildDir}/tmp/distNSIS")
 }
 
