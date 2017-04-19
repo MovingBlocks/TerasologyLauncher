@@ -37,7 +37,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -52,6 +51,7 @@ public final class DownloadUtils {
     public static final String FILE_TERASOLOGY_GAME_ZIP = "/artifact/build/distributions/Terasology.zip";
     public static final String FILE_TERASOLOGY_OMEGA_ZIP = "/artifact/distros/omega/build/distributions/TerasologyOmega.zip";
     public static final String FILE_TERASOLOGY_LAUNCHER_ZIP = "/artifact/build/distributions/TerasologyLauncher.zip";
+    public static final String FILE_TERASOLOGY_LAUNCHER_WIN_INSTALLER = "/artifact/build/distributions/TerasologyLauncher-setup.exe";
     public static final String FILE_TERASOLOGY_GAME_VERSION_INFO = "/artifact/build/resources/main/org/terasology/version/versionInfo.properties";
     public static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO =
             "/artifact/build/resources/main/org/terasology/launcher/version/versionInfo.properties";

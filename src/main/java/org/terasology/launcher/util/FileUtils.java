@@ -19,10 +19,7 @@ package org.terasology.launcher.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -203,5 +200,16 @@ public final class FileUtils {
         } else {
             FileUtils.copyFile(source, destination);
         }
+    }
+
+    public static String readSingleLine(File f) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(f));
+        String result = reader.readLine();
+        if (reader.readLine() != null) {
+            reader.close();
+            throw new IOException("The file was expected to contain a single line, but it contains more.");
+        }
+        reader.close();
+        return result;
     }
 }

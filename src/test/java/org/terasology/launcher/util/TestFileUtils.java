@@ -134,4 +134,24 @@ public class TestFileUtils {
         assertArrayEquals(Files.readAllLines(textFile.toPath()).toArray(), Files.readAllLines(extractedTextFile.toPath()).toArray());
     }
 
+    @Test
+    public void testReadSingleLine() throws IOException {
+        File textFile = tempFolder.newFile();
+        textFile.createNewFile();
+        FileWriter writer = new FileWriter(textFile);
+        writer.write("test");
+        writer.close();
+        assertEquals("test", FileUtils.readSingleLine(textFile));
+    }
+
+    @Test(expected = IOException.class)
+    public void testReadSingleLineException() throws IOException {
+        File textFile = tempFolder.newFile();
+        textFile.createNewFile();
+        FileWriter writer = new FileWriter(textFile);
+        writer.write("test1\ntest2");
+        writer.close();
+        FileUtils.readSingleLine(textFile);
+    }
+
 }

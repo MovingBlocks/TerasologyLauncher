@@ -24,7 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.settings.BaseLauncherSettings;
-import org.terasology.launcher.updater.LauncherUpdater;
+import org.terasology.launcher.updater.AbstractLauncherUpdater;
+import org.terasology.launcher.updater.LauncherUpdaterFactory;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -179,27 +180,24 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         logger.trace("Check for launcher updates...");
         boolean selfUpdaterStarted = false;
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
-        final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
+        final AbstractLauncherUpdater updater;
+        try {
+            updater = LauncherUpdaterFactory.getUpdater(TerasologyLauncherVersionInfo.getInstance());
+        }  catch (URISyntaxException | IOException e) {
+            logger.error("The launcher installation directory can not be detected or used!", e);
+            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
+            // Run launcher without an update. Don't throw a LauncherStartFailedException.
+            return false;
+        }
         if (updater.updateAvailable()) {
             logger.trace("Launcher update available!");
             updateMessage(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
-            boolean foundLauncherInstallationDirectory = false;
-            try {
-                updater.detectAndCheckLauncherInstallationDirectory();
-                foundLauncherInstallationDirectory = true;
-            } catch (URISyntaxException | IOException e) {
-                logger.error("The launcher installation directory can not be detected or used!", e);
-                GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
-                // Run launcher without an update. Don't throw a LauncherStartFailedException.
-            }
-            if (foundLauncherInstallationDirectory) {
-                final boolean update = updater.showUpdateDialog(owner);
-                if (update) {
-                    if (saveDownloadedFiles) {
-                        selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory);
-                    } else {
-                        selfUpdaterStarted = updater.update(tempDirectory, tempDirectory);
-                    }
+            final boolean update = updater.showUpdateDialog(owner);
+            if (update) {
+                if (saveDownloadedFiles) {
+                    selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory);
+                } else {
+                    selfUpdaterStarted = updater.update(tempDirectory, tempDirectory);
                 }
             }
         }

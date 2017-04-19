@@ -33,7 +33,7 @@ import java.lang.reflect.Field;
 import java.util.Properties;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( { DownloadUtils.class, LauncherUpdater.class })
+@PrepareForTest( { DownloadUtils.class, AbstractLauncherUpdater.class, SelfLauncherUpdater.class })
 public final class TestLancherUpdater {
 
     private static String BUILD_NUMBER;
@@ -53,7 +53,7 @@ public final class TestLancherUpdater {
     public void testUpdateUnavailableInDevelopment() throws Exception {
         // Pass in null to ensure that 'versionInfo.properties' isn't accidentally used
         TerasologyLauncherVersionInfo info = TerasologyLauncherVersionInfo.loadFromInputStream(null);
-        LauncherUpdater updater = this.getLauncherUpdater(1, info);
+        AbstractLauncherUpdater updater = this.getLauncherUpdater(1, info);
 
         assertFalse("Update should not be available!", updater.updateAvailable());
     }
@@ -63,7 +63,7 @@ public final class TestLancherUpdater {
         Properties properties = new Properties();
         properties.setProperty(BUILD_NUMBER, "2");
         TerasologyLauncherVersionInfo info = this.createVersionWithProperties(properties);
-        LauncherUpdater updater = this.getLauncherUpdater(3, info);
+        AbstractLauncherUpdater updater = this.getLauncherUpdater(3, info);
 
         assertTrue("Update should be available!", updater.updateAvailable());
     }
@@ -73,7 +73,7 @@ public final class TestLancherUpdater {
         Properties properties = new Properties();
         properties.setProperty(BUILD_NUMBER, "3");
         TerasologyLauncherVersionInfo info = this.createVersionWithProperties(properties);
-        LauncherUpdater updater = this.getLauncherUpdater(1, info);
+        AbstractLauncherUpdater updater = this.getLauncherUpdater(1, info);
 
         assertFalse("Update should not be available!", updater.updateAvailable());
     }
@@ -82,9 +82,9 @@ public final class TestLancherUpdater {
         return propertiesConstructor.newInstance(properties);
     }
 
-    private LauncherUpdater getLauncherUpdater(int buildNum, TerasologyLauncherVersionInfo info) throws Exception {
+    private AbstractLauncherUpdater getLauncherUpdater(int buildNum, TerasologyLauncherVersionInfo info) throws Exception {
         TestingUtils.mockBuildVersion(DownloadUtils.TERASOLOGY_LAUNCHER_DEVELOP_JOB_NAME, buildNum);
-        LauncherUpdater updater = PowerMockito.spy(new LauncherUpdater(info));
+        AbstractLauncherUpdater updater = PowerMockito.spy(LauncherUpdaterFactory.getUpdater(info));
 
         // Simulates version info and changelog being unavailable
         PowerMockito.doNothing().when(updater, "setNewVersionInfo");

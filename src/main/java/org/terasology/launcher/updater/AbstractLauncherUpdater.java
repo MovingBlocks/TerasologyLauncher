@@ -26,24 +26,19 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
-import org.terasology.launcher.util.DummyProgressListener;
-import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
-public final class LauncherUpdater {
+public abstract class AbstractLauncherUpdater {
 
-    private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractLauncherUpdater.class);
 
     private final TerasologyLauncherVersionInfo currentVersionInfo;
     private final String currentVersion;
@@ -55,7 +50,11 @@ public final class LauncherUpdater {
 
     private File launcherInstallationDirectory;
 
-    public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
+
+    // constructor and getters are for use by subclasses (default access level -> access allowed only in the updater package)
+
+    AbstractLauncherUpdater(File launcherInstallationDirectory, TerasologyLauncherVersionInfo currentVersionInfo) {
+        this.launcherInstallationDirectory = launcherInstallationDirectory;
         this.currentVersionInfo = currentVersionInfo;
 
         if (currentVersionInfo.getBuildNumber() == null || currentVersionInfo.getBuildNumber().trim().length() == 0) {
@@ -68,6 +67,18 @@ public final class LauncherUpdater {
         } else {
             this.jobName = currentVersionInfo.getJobName();
         }
+    }
+
+    String getJobName() {
+        return jobName;
+    }
+
+    Integer getUpstreamVersion() {
+        return upstreamVersion;
+    }
+
+    File getLauncherInstallationDirectory() {
+        return launcherInstallationDirectory;
     }
 
     /**
@@ -120,14 +131,6 @@ public final class LauncherUpdater {
         } catch (DownloadException e) {
             logger.warn("The launcher change log could not be loaded! '{}'", upstreamVersion, e);
         }
-    }
-
-    public void detectAndCheckLauncherInstallationDirectory() throws URISyntaxException, IOException {
-        final File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-        logger.trace("Launcher location: {}", launcherLocation);
-        launcherInstallationDirectory = launcherLocation.getParentFile().getParentFile();
-        DirectoryUtils.checkDirectory(launcherInstallationDirectory);
-        logger.trace("Launcher installation directory: {}", launcherInstallationDirectory);
     }
 
     public boolean showUpdateDialog(Stage parentStage) {
@@ -191,42 +194,6 @@ public final class LauncherUpdater {
         return builder.toString();
     }
 
-    public boolean update(File downloadDirectory, File tempDirectory) {
-        try {
-            logger.trace("Downloading launcher...");
-            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
+    public abstract boolean update(File downloadDirectory, File tempDirectory);
 
-            // Download launcher ZIP file
-            final URL updateURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
-            logger.trace("Update URL: {}", updateURL);
-
-            final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
-            logger.trace("Download ZIP file: {}", downloadedZipFile);
-
-            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new DummyProgressListener());
-
-            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
-
-            // Extract launcher ZIP file
-            final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
-            if (!extracted) {
-                throw new IOException("Could not extract ZIP file! " + downloadedZipFile);
-            }
-            logger.trace("ZIP file extracted");
-
-            final File tempLauncherDirectory = new File(tempDirectory, "TerasologyLauncher");
-            DirectoryUtils.checkDirectory(tempLauncherDirectory);
-
-            logger.info("Current launcher path: {}", launcherInstallationDirectory.getPath());
-            logger.info("New files temporarily located in: {}", tempLauncherDirectory.getPath());
-
-            // Start SelfUpdater
-            SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
-        } catch (DownloadException | IOException | RuntimeException e) {
-            logger.error("Launcher update failed! Aborting update process!", e);
-            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("update_launcher_updateFailed"));
-            return false;
-        }
-        return true;
-    }
 }

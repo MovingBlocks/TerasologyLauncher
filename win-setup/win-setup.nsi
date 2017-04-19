@@ -191,10 +191,14 @@ Section "<% print guiName %>" SecMain
 	SectionIn RO
 	; Check for JRE
 	Call detectJRE
-	;Install application's files
+	; Install application's files
 	SetOutPath "\$INSTDIR"
 	File /r "<% print appName %>\\*.*"
-	;Store installation folder
+	; Instruct the launcher that if a new version is found, the update must take place via the new installer (not by self replacing files)
+	FileOpen \$4 "\$INSTDIR\\updateStrategy" w
+	FileWrite \$4 "WIN_INSTALLER"
+	FileClose \$4
+	; Store installation folder
 	WriteRegStr HKLM "Software\\<% print appName %>" "" \$INSTDIR
 	; Show in add/remove programs
 	WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\<% print appName %>" "DisplayName" "<% print guiName %>"
