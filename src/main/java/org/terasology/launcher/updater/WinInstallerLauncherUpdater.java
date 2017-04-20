@@ -17,6 +17,7 @@
 package org.terasology.launcher.updater;
 
 import com.sun.jna.platform.win32.Shell32;
+import com.sun.jna.platform.win32.WinDef;
 import org.terasology.launcher.util.*;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
@@ -45,15 +46,20 @@ final class WinInstallerLauncherUpdater extends AbstractLauncherUpdater {
             DownloadUtils.downloadToFile(updateURL, downloadedInstaller, new DummyProgressListener());
 
             // Start the installer
-            // Note about last paramater (nShowCmd): 1 is SW_SHOWNORMAL (see https://msdn.microsoft.com/en-us/library/windows/desktop/bb762153(v=vs.85).aspx)
-            Shell32.INSTANCE.ShellExecute(null, "runas", downloadedInstaller.getAbsolutePath(), null, null, 1);
-            logger.trace("Installer started");
+            // Note about last parameter (nShowCmd): 1 is SW_SHOWNORMAL (see https://msdn.microsoft.com/en-us/library/windows/desktop/bb762153(v=vs.85).aspx)
+            WinDef.INT_PTR result = Shell32.INSTANCE.ShellExecute(null, "runas", downloadedInstaller.getAbsolutePath(), null, null, 1);
+            if (result.intValue() > 32) { //ShellExecute success
+                logger.info("Installer started");
+                return true;
+            } else {
+                logger.warn("Failed to start installer, ShellExecute returned " + result.toString());
+                return false;
+            }
         } catch (DownloadException | IOException | RuntimeException e) {
             logger.error("Launcher update failed! Aborting update process!", e);
             GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("update_launcher_updateFailed"));
             return false;
         }
-        return true;
     }
 
 }

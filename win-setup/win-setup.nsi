@@ -65,22 +65,22 @@ RequestExecutionLevel admin
 ;Languages
 
 <%
-		/* Groovy snippet to insert language strings */
-		def languageFiles = new File(stringBundlesDir).listFiles();
-		languageFiles.each {f ->
-				Properties props = new Properties()
-				props.load(new FileInputStream(f))
-				def langName = props.getProperty("nsisLangName")
-				/* load translations for NSIS built-in strings */
-				println("!insertmacro MUI_LANGUAGE \"${langName}\"")
-				/* load the custom strings */
-				props.remove("nsisLangName")
-				langName = langName.toUpperCase()
-				props.each { k, v ->
-						v = v.replaceAll("%guiName%", guiName).replaceAll("%minJREVersion%", minJREVersion)
-						println("LangString ${k} \${LANG_${langName}} \"${v}\"")
-				}
+	/* Groovy snippet to insert language strings */
+	def languageFiles = new File(stringBundlesDir).listFiles();
+	languageFiles.each {f ->
+		Properties props = new Properties()
+		props.load(new FileInputStream(f))
+		def langName = props.getProperty("nsisLangName")
+		/* load translations for NSIS built-in strings */
+		println("!insertmacro MUI_LANGUAGE \"${langName}\"")
+		/* load the custom strings */
+		props.remove("nsisLangName")
+		langName = langName.toUpperCase()
+		props.each { k, v ->
+			v = v.replaceAll("%guiName%", guiName).replaceAll("%minJREVersion%", minJREVersion)
+			println("LangString ${k} \${LANG_${langName}} \"${v}\"")
 		}
+	}
 %>
 
 ;--------------------------------
