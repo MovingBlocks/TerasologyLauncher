@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -31,6 +30,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
@@ -78,31 +78,36 @@ public class TestFileUtils {
         assertArrayEquals(Files.readAllLines(fileInSource.toPath()).toArray(), Files.readAllLines(fileInDestination.toPath()).toArray());
     }
 
-//    Currently fails due to inconsistent File.getName() behaviour
-//
     @Test
     public void testExtract() throws IOException {
-        File textFile = tempFolder.newFile();
-        textFile.createNewFile();
-        List<String> text = Arrays.asList(SAMPLE_TEXT);
-        Files.write(textFile.toPath(), text, Charset.forName("UTF-8"));
-
-        FileInputStream textFileIS = new FileInputStream(textFile);
+        final String FILE_IN_ROOT = "fileInRoot";
+        final String FILE_IN_FOLDER = "folder/fileInFolder";
+        final String FILE1_CONTENTS = SAMPLE_TEXT + "1";
+        final String FILE2_CONTENTS = SAMPLE_TEXT + "2";
+        /* An archive with this structure is created:
+         * <zip root>
+         * +-- fileInRoot
+         * +-- folder
+         * |   +-- fileInFolder
+         */
         File zipFile = tempFolder.newFile(FILE_NAME + ".zip");
-        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
-        out.putNextEntry(new ZipEntry(zipFile.getPath()));
-        byte[] b = new byte[1024];
-        int count;
-        while ((count = textFileIS.read(b)) > 0) {
-            out.write(b, 0, count);
-        }
-        out.close();
-        textFileIS.close();
+        ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFile));
+        zipOutputStream.putNextEntry(new ZipEntry(FILE_IN_ROOT));
+        zipOutputStream.write(FILE1_CONTENTS.getBytes());
+        zipOutputStream.closeEntry();
+        zipOutputStream.putNextEntry(new ZipEntry(FILE_IN_FOLDER));
+        zipOutputStream.write(FILE2_CONTENTS.getBytes());
+        zipOutputStream.closeEntry();
+        zipOutputStream.close();
 
         File outputDir = tempFolder.newFolder();
         FileUtils.extractZipTo(zipFile, outputDir);
-        File extractedTextFile = new File(outputDir, FILE_NAME);
-        assertArrayEquals(Files.readAllLines(textFile.toPath()).toArray(), Files.readAllLines(extractedTextFile.toPath()).toArray());
+        File extractedFileInRoot = new File(outputDir, FILE_IN_ROOT);
+        File extractedFileInFolder = new File(outputDir, FILE_IN_FOLDER);
+        assertTrue(extractedFileInRoot.exists());
+        assertTrue(extractedFileInFolder.exists());
+        assertEquals(FILE1_CONTENTS, Files.readAllLines(extractedFileInRoot.toPath()).get(0));
+        assertEquals(FILE2_CONTENTS, Files.readAllLines(extractedFileInFolder.toPath()).get(0));
     }
 
 }
