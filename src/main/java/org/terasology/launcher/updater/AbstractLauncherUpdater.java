@@ -50,9 +50,6 @@ public abstract class AbstractLauncherUpdater {
 
     private File launcherInstallationDirectory;
 
-
-    // constructor and getters are for use by subclasses (default access level -> access allowed only in the updater package)
-
     AbstractLauncherUpdater(File launcherInstallationDirectory, TerasologyLauncherVersionInfo currentVersionInfo) {
         this.launcherInstallationDirectory = launcherInstallationDirectory;
         this.currentVersionInfo = currentVersionInfo;

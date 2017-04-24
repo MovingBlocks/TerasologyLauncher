@@ -74,7 +74,7 @@ public class CleanupController {
         cancelButton.setText(BundleUtils.getLabel("cleanup_cancel"));
     }
 
-    private boolean tryDeleteDirectory(CleanupUtils.Directory directory) {
+    private boolean deleteDirectory(CleanupUtils.Directory directory) {
         boolean retry;
         File f = CleanupUtils.getDirectory(launcherSettings, directory);
         do {
@@ -88,7 +88,7 @@ public class CleanupController {
                 return true;
             } catch (IOException e) {
                 logger.warn("Failed to delete {}", f.getAbsolutePath());
-                retry = GuiUtils.showBinaryChoicheDialog(BundleUtils.getMessage("cleanup_error"),
+                retry = GuiUtils.showBinaryChoiceDialog(BundleUtils.getMessage("cleanup_error"),
                         BundleUtils.getMessage("cleanup_delete_failed", f.getAbsolutePath(), e.getMessage()),
                         BundleUtils.getLabel("cleanup_retry"), BundleUtils.getLabel("cleanup_ignore"));
             }
@@ -100,13 +100,13 @@ public class CleanupController {
     public void doCleanupAction() {
         boolean success = true;
         if (deleteGameBox.isSelected()) {
-            success = tryDeleteDirectory(CleanupUtils.Directory.GAME);
+            success = deleteDirectory(CleanupUtils.Directory.GAME);
         }
         if (deleteGameDataBox.isSelected()) {
-            success &= tryDeleteDirectory(CleanupUtils.Directory.GAME_DATA);
+            success &= deleteDirectory(CleanupUtils.Directory.GAME_DATA);
         }
         if (deleteLauncherBox.isSelected()) {
-            success &= tryDeleteDirectory(CleanupUtils.Directory.LAUNCHER);
+            success &= deleteDirectory(CleanupUtils.Directory.LAUNCHER);
         }
         Platform.exit();
         System.exit(success ? 0 : 1);

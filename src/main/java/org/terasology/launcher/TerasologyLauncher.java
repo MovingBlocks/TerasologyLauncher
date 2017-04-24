@@ -135,7 +135,7 @@ public final class TerasologyLauncher extends Application {
     }
 
     private void cleanupStart(Stage stage) {
-        logger.info("Starting cleanup tool because --cleanup argument was specified");
+        logger.info("Starting in cleanup mode");
         final OperatingSystem os = OperatingSystem.getOS();
         if (os == OperatingSystem.UNKNOWN) {
             logger.error("The operating system is not supported! '{}' '{}' '{}'", System.getProperty("os.name"), System.getProperty("os.arch"),

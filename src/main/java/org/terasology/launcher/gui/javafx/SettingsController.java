@@ -381,10 +381,10 @@ public class SettingsController {
         saveDownloadedFilesLabel.setText(BundleUtils.getLabel("settings_launcher_saveDownloadedFiles"));
         launcherDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory"));
         downloadDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory"));
-        cleanupDirectoriesLabel.setText(BundleUtils.getLabel("settings_launcher_cleanupDirectories"));
+        cleanupDirectoriesLabel.setText(BundleUtils.getLabel("settings_launcher_cleanup"));
         launcherDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory_open"));
         downloadDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory_open"));
-        cleanupDirectoriesOpenButton.setText(BundleUtils.getLabel("settings_launcher_cleanupDirectories_open"));
+        cleanupDirectoriesOpenButton.setText(BundleUtils.getLabel("settings_launcher_cleanup_open"));
         searchForUpdatesLabel.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
         saveSettingsButton.setText(BundleUtils.getLabel("settings_save"));
         cancelSettingsButton.setText(BundleUtils.getLabel("settings_cancel"));

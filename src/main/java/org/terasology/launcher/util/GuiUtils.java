@@ -71,7 +71,7 @@ public final class GuiUtils {
         showMessageDialog(Alert.AlertType.INFORMATION, BundleUtils.getLabel("message_information_title"), message, owner);
     }
 
-    public static boolean showBinaryChoicheDialog(String title, String message, String btnTrue, String btnFalse) {
+    public static boolean showBinaryChoiceDialog(String title, String message, String btnTrue, String btnFalse) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle(title);
         alert.setContentText(message);
