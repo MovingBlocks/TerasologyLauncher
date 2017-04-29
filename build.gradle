@@ -87,6 +87,7 @@ ext {
 
     // For metadata in exes/installer
     orgName = "MovingBlocks"
+    minRuntimeVersion = "1.8.0_40"
 }
 
 // Declare remote repositories we're interested in - library files will be fetched from here
@@ -159,7 +160,7 @@ createExe {
     version = "${versionMajor}.${versionMinor}"
     textVersion = displayVersion
     companyName = orgName
-    jreMinVersion = "${targetCompatibility}.0" // launch4j requires it's in the form x.x.x, thus this currently renders to 1.8.0
+    jreMinVersion = minRuntimeVersion
     icon = "${projectDir}/win-setup/resources/images/icon.ico"
 }
 
@@ -416,11 +417,12 @@ task renderNSISScript(type: Copy) {
     expand(appName: "TerasologyLauncher", guiName: "Terasology Launcher", publisher: orgName,
       verString: displayVersion, verMajor: versionMajor, verMinor: versionMinor,
       stringBundlesDir: "${projectDir}/win-setup/resources/strings", outDir: "${buildDir}/distributions",
-      licenseFile: "${projectDir}/LICENSE", minJREVersion: targetCompatibility.toString())
+      licenseFile: "${projectDir}/LICENSE", minJREVersion: minRuntimeVersion)
 }
 
 task copyNSISresources(type: Copy) {
     from("win-setup/resources/images")
+    from("win-setup/resources/jvm-version-check.jar")
     into("${buildDir}/tmp/distNSIS")
 }
 

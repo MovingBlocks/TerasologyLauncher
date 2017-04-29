@@ -17,10 +17,11 @@
  * Forked from NSIS Modern User Interface, Basic Example Script by Joost Verburg
  * http://nsis.sourceforge.net/Examples/Modern%20UI/Basic.nsi
  */
-
- ; This file by itself is NOT a valid NSIS script; it's a template which is rendered to a
- ; NSIS script during the Gradle build, when some values fill the variables of the template
- ; See the renderNSISScript task in build.gradle for more relevant information.
+<%
+	/*This file by itself is NOT a valid NSIS script; it's a template which is rendered to a
+	NSIS script during the Gradle build, when some values fill the variables of the template
+	See the renderNSISScript task in build.gradle for more relevant information.*/
+%>
 
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
@@ -48,6 +49,7 @@ RequestExecutionLevel admin
 !define MUI_LANGDLL_REGISTRY_KEY "Software\\<% print appName %>"
 !define MUI_LANGDLL_REGISTRY_VALUENAME "InstallerLanguage"
 !define MUI_LANGDLL_ALWAYSSHOW
+!define MUI_FINISHPAGE_NOAUTOCLOSE
 
 ;--------------------------------
 ;Pages
@@ -112,26 +114,32 @@ FunctionEnd
 ;--------------------------------
 ;JRE detection
 ;Unfortunately, NSIS only has global variables
+Var jvmVersionCheckerPath
 Var regKey
-Var installedVersion
-Var versionComparison
 Var javaIsWOW64
 
-Function detectJavaVersion
-	Pop \$regKey
-	ClearErrors
-	ReadRegStr \$installedVersion HKLM \$regKey "CurrentVersion"
-	IfErrors fail
-	\${VersionCompare} "<% print minJREVersion %>" \$installedVersion \$versionComparison
-	IntCmp \$versionComparison 1 fail ;if min is newer than installed, jump to JRE_old
-	ClearErrors
-	Return
-	fail:
+Function checkJavaVersion
+	Pop \$regKey ;can be "SOFTWARE\\JavaSoft\\Java Runtime Environment", "SOFTWARE\\JavaSoft\\Java Development Kit", or their WOW6432Node equivalents
+	StrCpy \$0 0 ;\$0=loop index
+	cJV_loop:
+	  EnumRegKey \$1 HKLM \$regKey \$0 ;\$1=subkey
+	  StrCmp \$1 "" cJV_fail ;exit if we enumerated all the subkeys
+		IntOp \$0 \$0 + 1 ;increment counter
+	  ReadRegStr \$2 HKLM "\$regKey\\\$1" "JavaHome" ;\$2=home directory ov the JVM being analyzed
+		DetailPrint "Processing JVM registry key \$regKey\\\$1..."
+		DetailPrint "Checking version of JVM \$2..."
+		ClearErrors
+		ExecWait '"\$2\\bin\\java.exe" -jar "\$jvmVersionCheckerPath" "<% print minJREVersion %>"'
+		IfErrors cJV_loop ;if command failed (nonzero exit code, outdated JVM) check for the next JVM in this key
+		;if we get here, the JVM version is OK
+		Return
+	cJV_fail:
 		SetErrors
 		Return
 FunctionEnd
 
 Function noJava
+	Delete "\$jvmVersionCheckerPath"
 	MessageBox MB_OK|MB_ICONSTOP \$(noJava)
 	SetErrorLevel 1
 	Quit
@@ -149,7 +157,7 @@ FunctionEnd
 Function detectJRE
 	!macro detectJavaVersion regKey
 		Push "\${regKey}"
-		Call detectJavaVersion
+		Call checkJavaVersion
 		\${IfNot} \${Errors}
 			Call checkWOW64Java
 			Return
@@ -190,7 +198,10 @@ Section "<% print guiName %>" SecMain
 	;Installation of core files can't be disabled
 	SectionIn RO
 	; Check for JRE
+	GetTempFileName \$jvmVersionCheckerPath
+	File "/oname=\$jvmVersionCheckerPath" jvm-version-check.jar
 	Call detectJRE
+	Delete "\$jvmVersionCheckerPath"
 	; Install application's files
 	SetOutPath "\$INSTDIR"
 	File /r "<% print appName %>\\*.*"
@@ -243,6 +254,7 @@ SectionEnd
 ;Uninstaller
 
 Section "Uninstall"
+	ClearErrors
 	ExecWait '"\$INSTDIR\\<% print appName %>.exe" --cleanup'
 	\${If} \${Errors}
 		MessageBox MB_YESNO|MB_ICONEXCLAMATION \$(cleanupWarning) IDYES continue
