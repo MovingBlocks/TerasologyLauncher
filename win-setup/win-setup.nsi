@@ -12,10 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-
+ *
  * Credits:
  * Forked from NSIS Modern User Interface, Basic Example Script by Joost Verburg
  * http://nsis.sourceforge.net/Examples/Modern%20UI/Basic.nsi
+ *
+ * All the material from the NSIS wiki/site is licensed under the following zlib/libpng license (http://nsis.sourceforge.net/License):
+ *
+ * This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software.
+ * Permission is granted to anyone to use this software for any purpose, including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:
+ * 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
  */
 <%
 	/*This file by itself is NOT a valid NSIS script; it's a template which is rendered to a
@@ -27,16 +35,20 @@
 !include "FileFunc.nsh"
 !include "LogicLib.nsh"
 !include "x64.nsh"
-!include "WordFunc.nsh" ;For VersionCompare
 
 !define TRUE 1
 !define FALSE 0
 
+;--------------------------------
 ;Name and file
 Name "<% print guiName %>"
 OutFile "<% print outDir %>/<% print appName %>-setup.exe"
 Unicode true
 RequestExecutionLevel admin
+
+;--------------------------------
+;Include functions
+!include "dirUtils.nsh"
 
 ;--------------------------------
 ;MUI2 Settings
@@ -56,6 +68,7 @@ RequestExecutionLevel admin
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "<% print licenseFile %>"
 !insertmacro MUI_PAGE_COMPONENTS
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE verifyInstDir
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -87,10 +100,12 @@ RequestExecutionLevel admin
 
 ;--------------------------------
 ;Init functions
+Var foundPreviousInstallation
 
 !insertmacro MUI_RESERVEFILE_LANGDLL
 
-Function .onInit
+!macro getInstDir
+	StrCpy \$foundPreviousInstallation \${FALSE}
 	;Default installation folder
 	\${If} \${RunningX64}
 		StrCpy \$INSTDIR "\$PROGRAMFILES64\\<% print appName %>"
@@ -102,18 +117,23 @@ Function .onInit
 	ReadRegStr \$0 HKLM "Software\\<% print appName %>" ""
 	\${IfNot} \${Errors}
 		StrCpy \$INSTDIR \$0
+		StrCpy \$foundPreviousInstallation \${TRUE}
 	\${EndIf}
 	ClearErrors
+!macroend
+
+Function .onInit
+	!insertmacro getInstDir
 	!insertmacro MUI_LANGDLL_DISPLAY
 FunctionEnd
 
 Function un.onInit
+	!insertmacro getInstDir
 	!insertmacro MUI_UNGETLANGUAGE
 FunctionEnd
 
 ;--------------------------------
 ;JRE detection
-;Unfortunately, NSIS only has global variables
 Var jvmVersionCheckerPath
 Var regKey
 Var javaIsWOW64
@@ -192,10 +212,35 @@ Function detectJRE
 FunctionEnd
 
 ;--------------------------------
+;Install directory validation
+
+Function verifyInstDir
+	\${If} \$foundPreviousInstallation = \${TRUE}
+		;If the program is already installed, the new installation must overwrite the previous one
+		ReadRegStr \$0 HKLM "Software\\<% print appName %>" ""
+		\${If} \$0 != \$INSTDIR
+			MessageBox MB_OK "\$(mustReplace)"
+			Abort
+		\${EndIf}
+	\${Else}
+		;If the program isn't already installed, the install directory must not exist or be empty
+		\${If} \${DirExists} "\$INSTDIR"
+			Push "\$INSTDIR"
+			Call isEmptyDir
+			Pop \$0
+			\${If} \$0 = 0
+				MessageBox MB_OK "\$(badInstDir)"
+				Abort
+			\${EndIf}
+		\${EndIf}
+	\${EndIf}
+FunctionEnd
+
+;--------------------------------
 ;Installer Sections
 
 Section "<% print guiName %>" SecMain
-	;Installation of core files can't be disabled
+	; Installation of core files can't be disabled
 	SectionIn RO
 	; Check for JRE
 	GetTempFileName \$jvmVersionCheckerPath

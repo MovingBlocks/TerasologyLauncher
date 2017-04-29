@@ -422,6 +422,7 @@ task renderNSISScript(type: Copy) {
 
 task copyNSISresources(type: Copy) {
     from("win-setup/resources/images")
+    from("win-setup/resources/include")
     from("win-setup/resources/jvm-version-check.jar")
     into("${buildDir}/tmp/distNSIS")
 }
