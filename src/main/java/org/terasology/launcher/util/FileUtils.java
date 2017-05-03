@@ -134,7 +134,7 @@ public final class FileUtils {
             try (ZipInputStream zis = new ZipInputStream(new FileInputStream(archive))) {
                 ZipEntry ze;
                 while ((ze = zis.getNextEntry()) != null) {
-                    File extractedFile = new File(outputLocation, com.google.common.io.Files.getNameWithoutExtension(ze.getName()));
+                    File extractedFile = new File(outputLocation, ze.getName());
                     File extractedDir = extractedFile.getParentFile();
                     if (!extractedDir.exists()) {
                         boolean created = extractedDir.mkdirs();
