@@ -114,7 +114,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
     private File getLauncherDirectory(OperatingSystem os) throws LauncherStartFailedException {
         logger.trace("Init LauncherDirectory...");
-        final File launcherDirectory = DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME);
+        final File launcherDirectory = DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME).toFile();
         try {
             DirectoryUtils.checkDirectory(launcherDirectory);
         } catch (IOException e) {
@@ -223,7 +223,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         if (gameDirectory == null) {
             logger.trace("Choose installation directory for the game...");
             updateMessage(BundleUtils.getLabel("splash_chooseGameDirectory"));
-            gameDirectory = GuiUtils.chooseDirectoryDialog(owner, DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.GAME_APPLICATION_DIR_NAME),
+            gameDirectory = GuiUtils.chooseDirectoryDialog(owner, DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.GAME_APPLICATION_DIR_NAME).toFile(),
                 BundleUtils.getLabel("message_dialog_title_chooseGameDirectory"));
             if (gameDirectory == null) {
                 logger.info("The new game directory is not approved. The TerasologyLauncher is terminated.");
