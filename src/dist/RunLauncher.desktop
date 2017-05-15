@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=3.10
+Type=Application
+Terminal=true
+Exec=sh -c 'bash "$(dirname "%k")"/bin/TerasologyLauncher'
+Path=
+Icon=
+Name=Terasology Launcher
+Comment=This is the Terasology Launcher
+StartupNotify=true
+GenericName[en_GB]=Game Launcher
+Categories=Game;Java
