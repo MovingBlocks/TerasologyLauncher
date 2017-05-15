@@ -42,7 +42,7 @@ Depending on the system it may be necessary to call "./gradlew" instead of "grad
 
 Compile the source code, run tests and build a jar
 
-    gradlew install
+    gradlew installApp
 
 Create a runnable installation (./build/install/TerasologyLauncher/)
 
