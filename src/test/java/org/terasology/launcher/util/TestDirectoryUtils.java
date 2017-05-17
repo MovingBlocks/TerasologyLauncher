@@ -23,24 +23,16 @@ import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.terasology.launcher.util.windows.SavedGamesPathFinder;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.terasology.launcher.util.DirectoryUtils.checkDirectory;
-import static org.terasology.launcher.util.DirectoryUtils.containsFiles;
-import static org.terasology.launcher.util.DirectoryUtils.containsGameData;
-import static org.terasology.launcher.util.DirectoryUtils.getApplicationDirectory;
+import static org.terasology.launcher.util.DirectoryUtils.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(DirectoryUtils.class)
@@ -131,7 +123,7 @@ public class TestDirectoryUtils {
 
     @Test
     public void testApplicationDirectoryUnix() {
-        Path expectedApplicationPath = Paths.get("/home/test/.Unit Test");
+        Path expectedApplicationPath = Paths.get("/home/test/.unit test");
         PowerMockito.mockStatic(System.class);
 
         when(System.getProperty("user.home", ".")).thenReturn("/home/test");
