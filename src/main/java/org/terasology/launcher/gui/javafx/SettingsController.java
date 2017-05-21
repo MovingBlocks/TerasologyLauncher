@@ -46,6 +46,7 @@ import org.terasology.launcher.util.LogLevel;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.Collator;
 import java.util.List;
 import java.util.Locale;
@@ -215,16 +216,16 @@ public class SettingsController {
 
     @FXML
     protected void openGameDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, gameDirectory, BundleUtils.getLabel("message_error_gameDirectory"));
+        GuiUtils.openFileBrowser(stage, gameDirectory.toPath(), BundleUtils.getLabel("message_error_gameDirectory"));
     }
 
     @FXML
     protected void editGameDirectoryAction() {
-        final File selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDirectory, BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
+        final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDirectory.toPath(), BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
         if (selectedFile != null) {
             try {
                 DirectoryUtils.checkDirectory(selectedFile);
-                gameDirectory = selectedFile;
+                gameDirectory = selectedFile.toFile();
                 updateDirectoryPathLabels();
             } catch (IOException e) {
                 logger.error("The game directory can not be created or used! '{}'", gameDirectory, e);
@@ -235,16 +236,16 @@ public class SettingsController {
 
     @FXML
     protected void openGameDataDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, gameDataDirectory, BundleUtils.getLabel("message_error_gameDataDirectory"));
+        GuiUtils.openFileBrowser(stage, gameDataDirectory.toPath(), BundleUtils.getLabel("message_error_gameDataDirectory"));
     }
 
     @FXML
     protected void editGameDataDirectoryAction() {
-        final File selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
+        final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDataDirectory.toPath(), BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
         if (selectedFile != null) {
             try {
                 DirectoryUtils.checkDirectory(selectedFile);
-                gameDataDirectory = selectedFile;
+                gameDataDirectory = selectedFile.toFile();
                 updateDirectoryPathLabels();
             } catch (IOException e) {
                 logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
@@ -255,12 +256,12 @@ public class SettingsController {
 
     @FXML
     protected void openLauncherDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, launcherDirectory, BundleUtils.getLabel("message_error_launcherDirectory"));
+        GuiUtils.openFileBrowser(stage, launcherDirectory.toPath(), BundleUtils.getLabel("message_error_launcherDirectory"));
     }
 
     @FXML
     protected void openDownloadDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, downloadDirectory, BundleUtils.getLabel("message_error_downloadDirectory"));
+        GuiUtils.openFileBrowser(stage, downloadDirectory.toPath(), BundleUtils.getLabel("message_error_downloadDirectory"));
     }
 
     @FXML

@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -126,7 +127,7 @@ public final class LauncherUpdater {
         final File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         logger.trace("Launcher location: {}", launcherLocation);
         launcherInstallationDirectory = launcherLocation.getParentFile().getParentFile();
-        DirectoryUtils.checkDirectory(launcherInstallationDirectory);
+        DirectoryUtils.checkDirectory(launcherInstallationDirectory.toPath());
         logger.trace("Launcher installation directory: {}", launcherInstallationDirectory);
     }
 
@@ -214,14 +215,14 @@ public final class LauncherUpdater {
             }
             logger.trace("ZIP file extracted");
 
-            final File tempLauncherDirectory = new File(tempDirectory, "TerasologyLauncher");
+            final Path tempLauncherDirectory = tempDirectory.toPath().resolve("TerasologyLauncher");
             DirectoryUtils.checkDirectory(tempLauncherDirectory);
 
             logger.info("Current launcher path: {}", launcherInstallationDirectory.getPath());
-            logger.info("New files temporarily located in: {}", tempLauncherDirectory.getPath());
+            logger.info("New files temporarily located in: {}", tempLauncherDirectory.toAbsolutePath());
 
             // Start SelfUpdater
-            SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
+            SelfUpdater.runUpdate(tempLauncherDirectory.toFile(), launcherInstallationDirectory);
         } catch (DownloadException | IOException | RuntimeException e) {
             logger.error("Launcher update failed! Aborting update process!", e);
             GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("update_launcher_updateFailed"));

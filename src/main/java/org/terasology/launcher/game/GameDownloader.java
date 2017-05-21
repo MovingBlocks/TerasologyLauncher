@@ -27,9 +27,9 @@ import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.ProgressListener;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class GameDownloader {
@@ -38,12 +38,12 @@ public final class GameDownloader {
 
     private final TerasologyGameVersions gameVersions;
 
-    private final File downloadZipFile;
+    private final Path downloadZipFile;
     private final URL downloadURL;
     private final Path gameDirectory;
     private final boolean saveDownloadedFiles;
 
-    public GameDownloader(File downloadDirectory, File tempDirectory, boolean saveDownloadedFiles, File gameParentDirectory, TerasologyGameVersion gameVersion,
+    public GameDownloader(Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles, Path gameParentDirectory, TerasologyGameVersion gameVersion,
                           TerasologyGameVersions gameVersions) throws IOException {
         this.gameVersions = gameVersions;
         this.saveDownloadedFiles = saveDownloadedFiles;
@@ -53,11 +53,11 @@ public final class GameDownloader {
 
         DirectoryUtils.checkDirectory(tempDirectory);
         if (saveDownloadedFiles) {
-            downloadZipFile = new File(downloadDirectory, jobName + "_" + buildNumber.toString() + "_" + System.currentTimeMillis() + ".zip");
+            downloadZipFile = downloadDirectory.resolve(jobName + "_" + buildNumber.toString() + "_" + System.currentTimeMillis() + ".zip");
         } else {
-            downloadZipFile = new File(tempDirectory, jobName + "_" + buildNumber.toString() + "_" + System.currentTimeMillis() + ".zip");
+            downloadZipFile = tempDirectory.resolve(jobName + "_" + buildNumber.toString() + "_" + System.currentTimeMillis() + ".zip");
         }
-        if (downloadZipFile.exists() && (!downloadZipFile.isFile() || !downloadZipFile.delete())) {
+        if (Files.exists(downloadZipFile) && (!Files.isRegularFile(downloadZipFile) || !Files.deleteIfExists(downloadZipFile))) {
             throw new IOException("Could not delete file! " + downloadZipFile);
         }
 
@@ -72,7 +72,7 @@ public final class GameDownloader {
         }
         logger.info("The download URL is {}", downloadURL);
 
-        final Path gameJobDirectory = gameParentDirectory.toPath().resolve(gameVersion.getJob().getInstallationDirectory()).resolve(jobName);
+        final Path gameJobDirectory = gameParentDirectory.resolve(gameVersion.getJob().getInstallationDirectory()).resolve(jobName);
         DirectoryUtils.checkDirectory(gameJobDirectory);
         gameDirectory = gameJobDirectory.resolve(buildNumber.toString());
         DirectoryUtils.checkDirectory(gameDirectory);
@@ -89,9 +89,9 @@ public final class GameDownloader {
 
     public void download(ProgressListener listener) throws DownloadException {
         long contentLength = DownloadUtils.getContentLength(downloadURL);
-        long availableSpace = downloadZipFile.getParentFile().getUsableSpace();
+        long availableSpace = downloadZipFile.toFile().getParentFile().getUsableSpace();
         if (availableSpace >= contentLength) {
-            DownloadUtils.downloadToFile(downloadURL, downloadZipFile.toPath(), listener);
+            DownloadUtils.downloadToFile(downloadURL, downloadZipFile, listener);
         } else {
             logger.error("Insufficient space in " + downloadZipFile.getParent());
             GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("message_error_insufficientSpace"));
@@ -99,22 +99,28 @@ public final class GameDownloader {
     }
 
     public boolean extractAfterDownload() {
-        return FileUtils.extractZipTo(downloadZipFile.toPath(), gameDirectory);
+        return FileUtils.extractZipTo(downloadZipFile, gameDirectory);
     }
 
     public void deleteSilentAfterExtract() {
         if (!saveDownloadedFiles) {
-            final boolean deleted = downloadZipFile.delete();
-            if (!deleted) {
-                logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile);
+            try {
+                if (!Files.deleteIfExists(downloadZipFile)) {
+                    logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile);
+                }
+            } catch (IOException e) {
+                logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile, e);
             }
         }
     }
 
     public void deleteSilentAfterCancel() {
-        final boolean deleted = downloadZipFile.delete();
-        if (!deleted) {
-            logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile);
+        try {
+            if (!Files.deleteIfExists(downloadZipFile)) {
+                logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile);
+            }
+        } catch (IOException e) {
+            logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile, e);
         }
     }
 

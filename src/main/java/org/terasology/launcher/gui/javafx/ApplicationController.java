@@ -248,8 +248,8 @@ public class ApplicationController {
             logger.warn("The selected game version can not be downloaded! '{}'", gameVersion);
         } else {
             try {
-                GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles(),
-                        launcherSettings.getGameDirectory(), gameVersion, gameVersions);
+                GameDownloader gameDownloader = new GameDownloader(downloadDirectory.toPath(), tempDirectory.toPath(), launcherSettings.isKeepDownloadedFiles(),
+                        launcherSettings.getGameDirectory().toPath(), gameVersion, gameVersions);
                 gameDownloadWorker = new GameDownloadWorker(this, gameDownloader);
             } catch (IOException e) {
                 logger.error("Could not start game download!", e);

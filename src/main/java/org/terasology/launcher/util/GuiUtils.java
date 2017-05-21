@@ -23,10 +23,11 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.Desktop;
-import java.awt.EventQueue;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -68,7 +69,7 @@ public final class GuiUtils {
         showMessageDialog(Alert.AlertType.INFORMATION, BundleUtils.getLabel("message_information_title"), message, owner);
     }
 
-    public static File chooseDirectoryDialog(Stage owner, final File directory, final String title) {
+    public static Path chooseDirectoryDialog(Stage owner, final Path directory, final String title) {
         try {
             DirectoryUtils.checkDirectory(directory);
         } catch (IOException e) {
@@ -76,18 +77,18 @@ public final class GuiUtils {
             return null;
         }
 
-        File selected = null;
+        Path selected = null;
 
         if (Platform.isFxApplicationThread()) {
             final DirectoryChooser directoryChooser = new DirectoryChooser();
-            directoryChooser.setInitialDirectory(directory);
+            directoryChooser.setInitialDirectory(directory.toFile());
             directoryChooser.setTitle(title);
 
-            selected = directoryChooser.showDialog(owner);
+            selected = directoryChooser.showDialog(owner).toPath();
         } else {
             final FutureTask<File> chooseDirectory = new FutureTask<>(() -> {
                 final DirectoryChooser directoryChooser = new DirectoryChooser();
-                directoryChooser.setInitialDirectory(directory);
+                directoryChooser.setInitialDirectory(directory.toFile());
                 directoryChooser.setTitle(title);
 
                 return directoryChooser.showDialog(owner);
@@ -95,28 +96,30 @@ public final class GuiUtils {
 
             Platform.runLater(chooseDirectory);
             try {
-                selected = chooseDirectory.get();
+                selected = chooseDirectory.get().toPath();
             } catch (InterruptedException | ExecutionException e) {
                 logger.warn("Uh oh, something went wrong with the dialog!", e);
             }
         }
 
         // directory proposal needs to be deleted if the user chose a different one
-        if (!directory.equals(selected) && !DirectoryUtils.containsFiles(directory)) {
-            if (!directory.delete()) {
+        try {
+            if (!Files.isSameFile(directory, selected) && !DirectoryUtils.containsFiles(directory) && !Files.deleteIfExists(directory)) {
                 logger.warn("Could not delete unused default directory! {}", directory);
             }
+        } catch (IOException e) {
+            logger.error("Failed to delete unused default directory! {}", directory, e);
         }
         return selected;
     }
 
-    public static void openFileBrowser(Stage owner, final File directory, final String errorMsg) {
+    public static void openFileBrowser(Stage owner, final Path directory, final String errorMsg) {
         try {
             DirectoryUtils.checkDirectory(directory);
             EventQueue.invokeLater(() -> {
                 if (Desktop.isDesktopSupported()) {
                     try {
-                        Desktop.getDesktop().open(directory);
+                        Desktop.getDesktop().open(directory.toFile());
                     } catch (IOException e) {
                         logger.error("The directory could not be opened! {}", directory, e);
                         GuiUtils.showErrorMessageDialog(owner, errorMsg + "\n" + directory);

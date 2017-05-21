@@ -15,9 +15,6 @@
  */
 package org.terasology.launcher.game;
 
-import static org.mockito.Matchers.any;
-import static org.powermock.api.mockito.PowerMockito.spy;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,13 +25,16 @@ import org.terasology.launcher.TestingUtils;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.DownloadUtils;
 
-import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
+
+import static org.mockito.Matchers.any;
+import static org.powermock.api.mockito.PowerMockito.spy;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest( { DownloadUtils.class, TerasologyGameVersions.class })
@@ -171,10 +171,10 @@ public class TestGameVersions {
     }
 
     private void loadGameVersions(TerasologyGameVersions gameVersions) throws Exception {
-        File launcherDir = Files.createTempDirectory("terasology-launcher-dir").toAbsolutePath().toFile();
-        File gameDirectory = Files.createTempDirectory("terasology-game-dir").toAbsolutePath().toFile();
+        Path launcherDir = Files.createTempDirectory("terasology-launcher-dir").toAbsolutePath();
+        Path gameDirectory = Files.createTempDirectory("terasology-game-dir").toAbsolutePath();
 
-        BaseLauncherSettings settings = new BaseLauncherSettings(launcherDir);
+        BaseLauncherSettings settings = new BaseLauncherSettings(launcherDir.toFile());
         settings.init();
 
         gameVersions.loadGameVersions(settings, launcherDir, gameDirectory);

@@ -116,8 +116,8 @@ public final class SelfUpdater {
             logger.info("New files temporarily located in: {}", tempLauncherDirectory.getPath());
 
             // Check both directories
-            DirectoryUtils.checkDirectory(launcherInstallationDirectory);
-            DirectoryUtils.checkDirectory(tempLauncherDirectory);
+            DirectoryUtils.checkDirectory(launcherInstallationDirectory.toPath());
+            DirectoryUtils.checkDirectory(tempLauncherDirectory.toPath());
 
             logger.info("Delete launcher installation directory: {}", launcherInstallationDirectory);
             SelfUpdater.deleteLauncherContent(launcherInstallationDirectory);

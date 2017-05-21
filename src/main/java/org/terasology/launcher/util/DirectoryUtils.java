@@ -46,11 +46,6 @@ public final class DirectoryUtils {
     private DirectoryUtils() {
     }
 
-    @Deprecated
-    public static void checkDirectory(File directory) throws IOException {
-        checkDirectory(directory.toPath());
-    }
-
     public static void checkDirectory(Path directory) throws IOException {
         if (!Files.exists(directory)) {
             Files.createDirectories(directory);
@@ -63,17 +58,6 @@ public final class DirectoryUtils {
         if (!Files.isReadable(directory) || !Files.isWritable(directory)) {
             throw new IOException("Can not read from or write into directory! " + directory);
         }
-    }
-
-    /**
-     * Checks whether the given directory contains any game data, e.g., save games or screenshots.
-     *
-     * @param gameInstallationPath the game installation folder
-     * @return true if game data is stored in the installation directory.
-     */
-    @Deprecated
-    public static boolean containsGameData(File gameInstallationPath) {
-        return containsGameData(gameInstallationPath.toPath());
     }
 
     public static boolean containsGameData(final Path gameInstallationPath) {
@@ -94,11 +78,6 @@ public final class DirectoryUtils {
     private static boolean isGameDataDirectoryName(String directoryName) {
         return Arrays.stream(GameDataDirectoryNames.values())
                 .anyMatch(gameDataDirectoryNames -> gameDataDirectoryNames.getName().equals(directoryName));
-    }
-
-    @Deprecated
-    public static boolean containsFiles(File directory) {
-        return containsFiles(directory.toPath());
     }
 
     public static boolean containsFiles(Path directory) {

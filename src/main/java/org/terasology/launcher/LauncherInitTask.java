@@ -33,9 +33,9 @@ import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
@@ -61,9 +61,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             // init directories
             updateMessage(BundleUtils.getLabel("splash_initLauncherDirs"));
-            final File launcherDirectory = getLauncherDirectory(os);
-            final File downloadDirectory = getDownloadDirectory(launcherDirectory);
-            final File tempDirectory = getTempDirectory(launcherDirectory);
+            final Path launcherDirectory = getLauncherDirectory(os);
+            final Path downloadDirectory = getDownloadDirectory(launcherDirectory);
+            final Path tempDirectory = getTempDirectory(launcherDirectory);
 
             // launcher settings
             final BaseLauncherSettings launcherSettings = getLauncherSettings(launcherDirectory);
@@ -78,21 +78,21 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             // game directories
             updateMessage(BundleUtils.getLabel("splash_initGameDirs"));
-            final File gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory());
-            final File gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory());
+            final Path gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory().toPath());
+            final Path gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory().toPath());
 
             final TerasologyGameVersions gameVersions = getTerasologyGameVersions(launcherDirectory, gameDirectory, launcherSettings);
 
             logger.trace("Change LauncherSettings...");
-            launcherSettings.setGameDirectory(gameDirectory);
-            launcherSettings.setGameDataDirectory(gameDataDirectory);
+            launcherSettings.setGameDirectory(gameDirectory.toFile());
+            launcherSettings.setGameDataDirectory(gameDataDirectory.toFile());
             gameVersions.fixSettingsBuildVersion(launcherSettings);
 
             storeLauncherSettingsAfterInit(launcherSettings);
 
             logger.trace("Creating launcher frame...");
 
-            return new LauncherConfiguration(launcherDirectory, downloadDirectory, tempDirectory, launcherSettings, gameVersions);
+            return new LauncherConfiguration(launcherDirectory.toFile(), downloadDirectory.toFile(), tempDirectory.toFile(), launcherSettings, gameVersions);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
         }
@@ -105,7 +105,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         final OperatingSystem os = OperatingSystem.getOS();
         if (os == OperatingSystem.UNKNOWN) {
             logger.error("The operating system is not supported! '{}' '{}' '{}'", System.getProperty("os.name"), System.getProperty("os.arch"),
-                System.getProperty("os.version"));
+                    System.getProperty("os.version"));
             GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_operatingSystem"));
             throw new LauncherStartFailedException();
         }
@@ -113,9 +113,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return os;
     }
 
-    private File getLauncherDirectory(OperatingSystem os) throws LauncherStartFailedException {
+    private Path getLauncherDirectory(OperatingSystem os) throws LauncherStartFailedException {
         logger.trace("Init LauncherDirectory...");
-        final File launcherDirectory = DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME).toFile();
+        final Path launcherDirectory = DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME);
         try {
             DirectoryUtils.checkDirectory(launcherDirectory);
         } catch (IOException e) {
@@ -127,9 +127,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return launcherDirectory;
     }
 
-    private File getDownloadDirectory(File launcherDirectory) throws LauncherStartFailedException {
+    private Path getDownloadDirectory(Path launcherDirectory) throws LauncherStartFailedException {
         logger.trace("Init DownloadDirectory...");
-        final File downloadDirectory = new File(launcherDirectory, DirectoryUtils.DOWNLOAD_DIR_NAME);
+        final Path downloadDirectory = launcherDirectory.resolve(DirectoryUtils.DOWNLOAD_DIR_NAME);
         try {
             DirectoryUtils.checkDirectory(downloadDirectory);
         } catch (IOException e) {
@@ -141,9 +141,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return downloadDirectory;
     }
 
-    private File getTempDirectory(File launcherDirectory) throws LauncherStartFailedException {
+    private Path getTempDirectory(Path launcherDirectory) throws LauncherStartFailedException {
         logger.trace("Init TempDirectory...");
-        final Path tempDirectory = launcherDirectory.toPath().resolve(DirectoryUtils.TEMP_DIR_NAME);
+        final Path tempDirectory = launcherDirectory.resolve(DirectoryUtils.TEMP_DIR_NAME);
         try {
             DirectoryUtils.checkDirectory(tempDirectory);
         } catch (IOException e) {
@@ -157,13 +157,13 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             logger.warn("The content of the temp directory can not be deleted! '{}'", tempDirectory, e);
         }
         logger.debug("Temp directory: {}", tempDirectory);
-        return tempDirectory.toFile();
+        return tempDirectory;
     }
 
-    private BaseLauncherSettings getLauncherSettings(File launcherDirectory) throws LauncherStartFailedException {
+    private BaseLauncherSettings getLauncherSettings(Path launcherDirectory) throws LauncherStartFailedException {
         logger.trace("Init LauncherSettings...");
         updateMessage(BundleUtils.getLabel("splash_retrieveLauncherSettings"));
-        final BaseLauncherSettings launcherSettings = new BaseLauncherSettings(launcherDirectory);
+        final BaseLauncherSettings launcherSettings = new BaseLauncherSettings(launcherDirectory.toFile());
         try {
             launcherSettings.load();
             launcherSettings.init();
@@ -176,7 +176,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return launcherSettings;
     }
 
-    private boolean checkForLauncherUpdates(File downloadDirectory, File tempDirectory, boolean saveDownloadedFiles) {
+    private boolean checkForLauncherUpdates(Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
         logger.trace("Check for launcher updates...");
         boolean selfUpdaterStarted = false;
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
@@ -197,9 +197,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 final boolean update = updater.showUpdateDialog(owner);
                 if (update) {
                     if (saveDownloadedFiles) {
-                        selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory);
+                        selfUpdaterStarted = updater.update(downloadDirectory.toFile(), tempDirectory.toFile());
                     } else {
-                        selfUpdaterStarted = updater.update(tempDirectory, tempDirectory);
+                        selfUpdaterStarted = updater.update(tempDirectory.toFile(), tempDirectory.toFile());
                     }
                 }
             }
@@ -207,9 +207,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return selfUpdaterStarted;
     }
 
-    private File getGameDirectory(OperatingSystem os, File settingsGameDirectory) throws LauncherStartFailedException {
+    private Path getGameDirectory(OperatingSystem os, Path settingsGameDirectory) throws LauncherStartFailedException {
         logger.trace("Init GameDirectory...");
-        File gameDirectory = settingsGameDirectory;
+        Path gameDirectory = settingsGameDirectory;
         if (gameDirectory != null) {
             try {
                 DirectoryUtils.checkDirectory(gameDirectory);
@@ -224,9 +224,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         if (gameDirectory == null) {
             logger.trace("Choose installation directory for the game...");
             updateMessage(BundleUtils.getLabel("splash_chooseGameDirectory"));
-            gameDirectory = GuiUtils.chooseDirectoryDialog(owner, DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.GAME_APPLICATION_DIR_NAME).toFile(),
-                BundleUtils.getLabel("message_dialog_title_chooseGameDirectory"));
-            if (gameDirectory == null) {
+            gameDirectory = GuiUtils.chooseDirectoryDialog(owner, DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.GAME_APPLICATION_DIR_NAME),
+                    BundleUtils.getLabel("message_dialog_title_chooseGameDirectory"));
+            if (Files.notExists(gameDirectory)) {
                 logger.info("The new game directory is not approved. The TerasologyLauncher is terminated.");
                 Platform.exit();
             }
@@ -242,9 +242,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return gameDirectory;
     }
 
-    private File getGameDataDirectory(OperatingSystem os, File settingsGameDataDirectory) throws LauncherStartFailedException {
+    private Path getGameDataDirectory(OperatingSystem os, Path settingsGameDataDirectory) throws LauncherStartFailedException {
         logger.trace("Init GameDataDirectory...");
-        File gameDataDirectory = settingsGameDataDirectory;
+        Path gameDataDirectory = settingsGameDataDirectory;
         if (gameDataDirectory != null) {
             try {
                 DirectoryUtils.checkDirectory(gameDataDirectory);
@@ -260,9 +260,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         if (gameDataDirectory == null) {
             logger.trace("Choose data directory for the game...");
             updateMessage(BundleUtils.getLabel("splash_chooseGameDataDirectory"));
-            gameDataDirectory = GuiUtils.chooseDirectoryDialog(owner, DirectoryUtils.getGameDataDirectory(os),
-                BundleUtils.getLabel("message_dialog_title_chooseGameDataDirectory"));
-            if (gameDataDirectory == null) {
+            gameDataDirectory = GuiUtils.chooseDirectoryDialog(owner, DirectoryUtils.getGameDataDirectory(os).toPath(),
+                    BundleUtils.getLabel("message_dialog_title_chooseGameDataDirectory"));
+            if (Files.notExists(gameDataDirectory)) {
                 logger.info("The new game data directory is not approved. The TerasologyLauncher is terminated.");
                 Platform.exit();
             }
@@ -278,16 +278,14 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return gameDataDirectory;
     }
 
-    private TerasologyGameVersions getTerasologyGameVersions(File launcherDirectory, File gameDirectory, BaseLauncherSettings launcherSettings) {
+    private TerasologyGameVersions getTerasologyGameVersions(Path launcherDirectory, Path gameDirectory, BaseLauncherSettings launcherSettings) {
         logger.trace("Init TerasologyGameVersions...");
         updateMessage(BundleUtils.getLabel("splash_loadGameVersions"));
         final TerasologyGameVersions gameVersions = new TerasologyGameVersions();
         gameVersions.loadGameVersions(launcherSettings, launcherDirectory, gameDirectory);
         if (logger.isInfoEnabled()) {
             for (GameJob gameJob : GameJob.values()) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("Game versions: {} {}", gameJob, gameVersions.getGameVersionList(gameJob).size() - 1);
-                }
+                logger.info("Game versions: {} {}", gameJob, gameVersions.getGameVersionList(gameJob).size() - 1);
             }
         }
         logger.debug("Game versions: {}", gameVersions);
