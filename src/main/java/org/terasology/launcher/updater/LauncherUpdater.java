@@ -203,7 +203,7 @@ public final class LauncherUpdater {
             final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
             logger.trace("Download ZIP file: {}", downloadedZipFile);
 
-            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new DummyProgressListener());
+            DownloadUtils.downloadToFile(updateURL, downloadedZipFile.toPath(), new DummyProgressListener());
 
             //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 

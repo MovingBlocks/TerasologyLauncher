@@ -30,16 +30,15 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -71,12 +70,11 @@ public final class DownloadUtils {
     private static final int CONNECT_TIMEOUT = 1000 * 30;
     private static final int READ_TIMEOUT = 1000 * 60 * 5;
     private static final String URL = ", URL=";
-    private static final String CLOSING_BUFFERED_READER_FOR_FAILED = "Closing BufferedReader for '{}' failed!";
 
     private DownloadUtils() {
     }
 
-    public static void downloadToFile(URL downloadURL, File file, ProgressListener listener) throws DownloadException {
+    public static void downloadToFile(URL downloadURL, Path file, ProgressListener listener) throws DownloadException {
         listener.update(0);
 
         final HttpURLConnection connection = getConnectedDownloadConnection(downloadURL);
@@ -90,7 +88,7 @@ public final class DownloadUtils {
         }
 
         try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+             BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))) {
             downloadToFile(listener, contentLength, in, out);
         } catch (IOException e) {
             throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
@@ -99,8 +97,12 @@ public final class DownloadUtils {
         }
 
         if (!listener.isCancelled()) {
-            if (file.length() != contentLength) {
-                throw new DownloadException("Wrong file length after download! " + file.length() + " != " + contentLength);
+            try {
+                if (Files.size(file) != contentLength) {
+                    throw new DownloadException("Wrong file length after download! " + Files.size(file) + " != " + contentLength);
+                }
+            } catch (IOException e) {
+                throw new DownloadException("Failed to read the file length after download!", e);
             }
             listener.update(100);
         }
@@ -218,34 +220,30 @@ public final class DownloadUtils {
 
     private static int loadBuildNumberJenkins(String jobName, String lastBuild) throws DownloadException {
         int buildNumber;
-        URL urlVersion = null;
-        BufferedReader reader = null;
+        // The build number page in Jenkins simply contains the number and nothing else, so we can simply read and parse it
+        URL urlVersion;
         try {
-            // The build number page in Jenkins simply contains the number and nothing else, so we can simply read and parse it
             urlVersion = new URL(JENKINS_JOB_URL + jobName + lastBuild + BUILD_NUMBER);
-            reader = new BufferedReader(new InputStreamReader(urlVersion.openStream(), StandardCharsets.US_ASCII));
+        } catch (MalformedURLException e) {
+            throw new DownloadException("Failed to create jenkins download url", e);
+        }
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlVersion.openStream(), StandardCharsets.US_ASCII))) {
             buildNumber = Integer.parseInt(reader.readLine());
         } catch (IOException | RuntimeException e) {
             throw new DownloadException("The build number could not be loaded! job=" + jobName + URL + urlVersion, e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    logger.warn(CLOSING_BUFFERED_READER_FOR_FAILED, urlVersion, e);
-                }
-            }
         }
         return buildNumber;
     }
 
     public static JobResult loadJobResultJenkins(String jobName, int buildNumber) throws DownloadException {
         JobResult jobResult = null;
-        URL urlResult = null;
-        BufferedReader reader = null;
+        URL urlResult;
         try {
             urlResult = DownloadUtils.createUrlJenkins(jobName, buildNumber, API_JSON_RESULT);
-            reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), StandardCharsets.US_ASCII));
+        } catch (MalformedURLException e) {
+            throw new DownloadException("Failed to create jenkins download url", e);
+        }
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), StandardCharsets.US_ASCII))) {
             final String jsonResult = reader.readLine();
             if (jsonResult != null) {
                 for (JobResult result : JobResult.values()) {
@@ -260,14 +258,6 @@ public final class DownloadUtils {
             }
         } catch (IOException | RuntimeException e) {
             throw new DownloadException("The job result could not be loaded! job=" + jobName + URL + urlResult, e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    logger.warn(CLOSING_BUFFERED_READER_FOR_FAILED, urlResult, e);
-                }
-            }
         }
         return jobResult;
     }
@@ -314,12 +304,14 @@ public final class DownloadUtils {
      */
     public static int loadEngineTriggerJenkins(GameJob job, int omegaBuildNumber) throws DownloadException {
         int engineBuildNumber = -1;
-        URL urlResult = null;
-        BufferedReader reader = null;
+        URL urlResult;
         try {
             urlResult = DownloadUtils.createUrlJenkins(job.getOmegaJobName(), omegaBuildNumber, API_JSON_CAUSE);
+        } catch (MalformedURLException e) {
+            throw new DownloadException("Failed to create jenkins download url", e);
+        }
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), StandardCharsets.US_ASCII))) {
             //logger.debug("The Omega URL to check is {}", urlResult);
-            reader = new BufferedReader(new InputStreamReader(urlResult.openStream(), StandardCharsets.US_ASCII));
             final String jsonResult = reader.readLine();
             if (jsonResult != null) {
                 //logger.debug("The json result was {}", jsonResult);
@@ -336,25 +328,19 @@ public final class DownloadUtils {
             }
         } catch (IOException | RuntimeException e) {
             throw new DownloadException("There was an issue attempting to fetch the Omega url" + urlResult, e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    logger.warn(CLOSING_BUFFERED_READER_FOR_FAILED, urlResult, e);
-                }
-            }
         }
         return engineBuildNumber;
     }
 
     public static String loadLauncherChangeLogJenkins(String jobName, Integer buildNumber) throws DownloadException {
-        URL urlChangeLog = null;
-        BufferedReader reader = null;
-        final StringBuilder changeLog = new StringBuilder();
+        URL urlChangeLog;
         try {
             urlChangeLog = DownloadUtils.createFileDownloadUrlJenkins(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG);
-            reader = new BufferedReader(new InputStreamReader(urlChangeLog.openStream(), StandardCharsets.US_ASCII));
+        } catch (MalformedURLException e) {
+            throw new DownloadException("Failed to create the changelog url", e);
+        }
+        final StringBuilder changeLog = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlChangeLog.openStream(), StandardCharsets.US_ASCII))) {
             while (true) {
                 String line = reader.readLine();
                 if (line == null) {
@@ -367,14 +353,6 @@ public final class DownloadUtils {
             }
         } catch (IOException | RuntimeException e) {
             throw new DownloadException("The launcher change log could not be loaded! job=" + jobName + URL + urlChangeLog, e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    logger.warn(CLOSING_BUFFERED_READER_FOR_FAILED, urlChangeLog, e);
-                }
-            }
         }
         return changeLog.toString();
     }
