@@ -30,6 +30,7 @@ import org.terasology.launcher.util.ProgressListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 
 public final class GameDownloader {
 
@@ -39,7 +40,7 @@ public final class GameDownloader {
 
     private final File downloadZipFile;
     private final URL downloadURL;
-    private final File gameDirectory;
+    private final Path gameDirectory;
     private final boolean saveDownloadedFiles;
 
     public GameDownloader(File downloadDirectory, File tempDirectory, boolean saveDownloadedFiles, File gameParentDirectory, TerasologyGameVersion gameVersion,
@@ -71,9 +72,9 @@ public final class GameDownloader {
         }
         logger.info("The download URL is {}", downloadURL);
 
-        final File gameJobDirectory = new File(new File(gameParentDirectory, gameVersion.getJob().getInstallationDirectory()), jobName);
+        final Path gameJobDirectory = gameParentDirectory.toPath().resolve(gameVersion.getJob().getInstallationDirectory()).resolve(jobName);
         DirectoryUtils.checkDirectory(gameJobDirectory);
-        gameDirectory = new File(gameJobDirectory, buildNumber.toString());
+        gameDirectory = gameJobDirectory.resolve(buildNumber.toString());
         DirectoryUtils.checkDirectory(gameDirectory);
         FileUtils.deleteDirectoryContent(gameDirectory);
     }
@@ -82,7 +83,7 @@ public final class GameDownloader {
         return downloadURL;
     }
 
-    public File getGameDirectory() {
+    public Path getGameDirectory() {
         return gameDirectory;
     }
 
@@ -98,7 +99,7 @@ public final class GameDownloader {
     }
 
     public boolean extractAfterDownload() {
-        return FileUtils.extractZipTo(downloadZipFile, gameDirectory);
+        return FileUtils.extractZipTo(downloadZipFile.toPath(), gameDirectory);
     }
 
     public void deleteSilentAfterExtract() {
@@ -118,6 +119,6 @@ public final class GameDownloader {
     }
 
     public boolean updateAfterDownload() {
-        return gameVersions.updateGameVersionsAfterInstallation(gameDirectory);
+        return gameVersions.updateGameVersionsAfterInstallation(gameDirectory.toFile());
     }
 }

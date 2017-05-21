@@ -39,22 +39,6 @@ public final class FileUtils {
     }
 
     /**
-     * Deletes the specified file or directory (directories are removed recursively).
-     *
-     * @param file - file to delete
-     * @throws IOException if something goes wrong
-     */
-    @Deprecated
-    public static void delete(File file) throws IOException {
-        delete(file.toPath());
-    }
-
-    @Deprecated
-    public static void deleteDirectoryContent(File directory) throws IOException {
-        deleteDirectoryContent(directory.toPath());
-    }
-
-    /**
      * Deletes the specified file or directory. If the path is a directory it is removed recursively.
      *
      * @param path Path to delete
@@ -87,18 +71,6 @@ public final class FileUtils {
     }
 
     /**
-     * Extracts the specified ZIP file to the specified location.
-     *
-     * @param archive        - the ZIP file to extract
-     * @param outputLocation - where to extract to
-     * @return true if successful
-     */
-    @Deprecated
-    public static boolean extractZipTo(File archive, File outputLocation) {
-        return extractZipTo(archive.toPath(), outputLocation.toPath());
-    }
-
-    /**
      * Extracts the specified ZIP file to the specified location
      *
      * @param archive        the ZIP file to extract
@@ -124,11 +96,6 @@ public final class FileUtils {
         }
     }
 
-    @Deprecated
-    private static void copyFile(File source, File destination) throws IOException {
-        copyFile(source.toPath(), destination.toPath());
-    }
-
     /**
      * Copy file from the source path to the destination. If the source file does not exists nothing happens.
      *
@@ -142,18 +109,6 @@ public final class FileUtils {
             return;
         }
         Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    /**
-     * Copy the whole folder recursively to the specified destination.
-     *
-     * @param source      - the folder to copy
-     * @param destination - where to copy to
-     * @throws IOException if something goes wrong
-     */
-    @Deprecated
-    public static void copyFolder(File source, File destination) throws IOException {
-        copyFolder(source.toPath(), destination.toPath());
     }
 
     /**

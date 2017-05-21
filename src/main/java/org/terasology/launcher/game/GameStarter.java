@@ -82,7 +82,7 @@ public final class GameStarter {
         processParameters.add("java");
         processParameters.addAll(javaParameters);
         processParameters.add("-jar");
-        processParameters.add(gameVersion.getGameJar().getName());
+        processParameters.add(gameVersion.getGameJar().getFileName().toString());
         processParameters.add("-homedir=" + gameDataDirectory.getPath());
         processParameters.addAll(gameParameters);
 
@@ -92,7 +92,7 @@ public final class GameStarter {
     private boolean startProcess(TerasologyGameVersion gameVersion, List<String> processParameters) {
         final ProcessBuilder pb = new ProcessBuilder(processParameters);
         pb.redirectErrorStream(true);
-        pb.directory(gameVersion.getInstallationPath());
+        pb.directory(gameVersion.getInstallationPath().toFile());
         logger.debug("Starting game process with '{}' in '{}' for '{}'", processParameters, gameVersion.getInstallationPath(), gameVersion);
         try {
             final Process p = pb.start();

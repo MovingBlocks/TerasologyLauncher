@@ -208,7 +208,7 @@ public final class LauncherUpdater {
             //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 
             // Extract launcher ZIP file
-            final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
+            final boolean extracted = FileUtils.extractZipTo(downloadedZipFile.toPath(), tempDirectory.toPath());
             if (!extracted) {
                 throw new IOException("Could not extract ZIP file! " + downloadedZipFile);
             }

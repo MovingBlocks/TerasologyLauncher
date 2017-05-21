@@ -123,7 +123,7 @@ public final class SelfUpdater {
             SelfUpdater.deleteLauncherContent(launcherInstallationDirectory);
 
             logger.info("Copy new files: {}", tempLauncherDirectory);
-            FileUtils.copyFolder(tempLauncherDirectory, launcherInstallationDirectory);
+            FileUtils.copyFolder(tempLauncherDirectory.toPath(), launcherInstallationDirectory.toPath());
         } catch (IOException | RuntimeException e) {
             logger.error("Auto updating the launcher failed!", e);
             System.exit(1);

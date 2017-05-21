@@ -419,8 +419,8 @@ public final class TerasologyGameVersions {
                 gameVersion = new TerasologyGameVersion();
                 gameVersion.setJob(installedJob);
                 gameVersion.setBuildNumber(installedBuildNumber);
-                gameVersion.setInstallationPath(engineJar.getParentFile());
-                gameVersion.setGameJar(terasologyJar);
+                gameVersion.setInstallationPath(engineJar.toPath().getParent());
+                gameVersion.setGameJar(terasologyJar.toPath());
                 gameVersion.setGameVersionInfo(gameVersionInfo);
                 gameVersion.setChangeLog(null);
                 gameVersion.setSuccessful(Boolean.TRUE);

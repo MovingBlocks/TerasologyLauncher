@@ -36,6 +36,7 @@ import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
 
@@ -142,7 +143,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
     private File getTempDirectory(File launcherDirectory) throws LauncherStartFailedException {
         logger.trace("Init TempDirectory...");
-        final File tempDirectory = new File(launcherDirectory, DirectoryUtils.TEMP_DIR_NAME);
+        final Path tempDirectory = launcherDirectory.toPath().resolve(DirectoryUtils.TEMP_DIR_NAME);
         try {
             DirectoryUtils.checkDirectory(tempDirectory);
         } catch (IOException e) {
@@ -156,7 +157,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             logger.warn("The content of the temp directory can not be deleted! '{}'", tempDirectory, e);
         }
         logger.debug("Temp directory: {}", tempDirectory);
-        return tempDirectory;
+        return tempDirectory.toFile();
     }
 
     private BaseLauncherSettings getLauncherSettings(File launcherDirectory) throws LauncherStartFailedException {
