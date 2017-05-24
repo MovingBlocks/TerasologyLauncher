@@ -437,7 +437,6 @@ task distNSIS(type: Exec) {
 
 task createRelease() {
     dependsOn distZip
-    dependsOn distNSIS
 
     doLast {
         println 'Created release: ' + displayVersion
