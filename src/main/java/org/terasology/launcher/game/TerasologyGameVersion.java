@@ -16,7 +16,6 @@
 
 package org.terasology.launcher.game;
 
-import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.List;

@@ -27,12 +27,12 @@ import java.nio.file.spi.FileSystemProvider;
 
 /**
  * Visitor for copying files from an archive to disk and preserving the archive structure.
- * It works for coping between different {@link FileSystemProvider}.
+ * It works for copying between different {@link FileSystemProvider}.
  */
 public class ArchiveCopyVisitor extends SimpleFileVisitor<Path> {
 
     /**
-     * Directory to which the files are copied
+     * Directory to which the files are copied.
      */
     private final Path targetLocation;
 

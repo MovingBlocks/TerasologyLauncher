@@ -56,10 +56,7 @@ public final class SelfUpdater {
                         logger.info("Skip directory: {}", child);
                     }
                 } else if (!child.getName().contains(".log")) {
-                    final boolean deleted = child.delete();
-                    if (!deleted) {
-                        logger.error("Could not delete file! {}", child);
-                    }
+                    FileUtils.deleteFileSilently(child.toPath());
                 }
             }
         }

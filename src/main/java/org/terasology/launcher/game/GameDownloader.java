@@ -104,24 +104,12 @@ public final class GameDownloader {
 
     public void deleteSilentAfterExtract() {
         if (!saveDownloadedFiles) {
-            try {
-                if (!Files.deleteIfExists(downloadZipFile)) {
-                    logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile);
-                }
-            } catch (IOException e) {
-                logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile, e);
-            }
+            FileUtils.deleteFileSilently(downloadZipFile);
         }
     }
 
     public void deleteSilentAfterCancel() {
-        try {
-            if (!Files.deleteIfExists(downloadZipFile)) {
-                logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile);
-            }
-        } catch (IOException e) {
-            logger.error("Could not delete downloaded ZIP file '{}'!", downloadZipFile, e);
-        }
+        FileUtils.deleteFileSilently(downloadZipFile);
     }
 
     public boolean updateAfterDownload() {

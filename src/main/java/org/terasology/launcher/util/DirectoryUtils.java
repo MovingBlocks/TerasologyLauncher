@@ -46,6 +46,12 @@ public final class DirectoryUtils {
     private DirectoryUtils() {
     }
 
+    /**
+     * Checks if the given path exists, is a directory and can be read and written by the program.
+     *
+     * @param directory Path to check
+     * @throws IOException Reading the path fails in some way
+     */
     public static void checkDirectory(Path directory) throws IOException {
         if (!Files.exists(directory)) {
             Files.createDirectories(directory);
@@ -60,14 +66,20 @@ public final class DirectoryUtils {
         }
     }
 
+    /**
+     * Checks whether the given directory contains any game data, e.g., save games or screenshots.
+     *
+     * @param gameInstallationPath the game installation folder
+     * @return true if game data is stored in the installation directory.
+     */
     public static boolean containsGameData(final Path gameInstallationPath) {
         boolean containsGameData = false;
-        if (gameInstallationPath != null && Files.exists(gameInstallationPath) &&
-                Files.isDirectory(gameInstallationPath) && Files.isReadable(gameInstallationPath)) {
+        if (gameInstallationPath != null && Files.exists(gameInstallationPath)
+                && Files.isDirectory(gameInstallationPath) && Files.isReadable(gameInstallationPath)) {
             try {
                 containsGameData = Files.list(gameInstallationPath)
-                        .anyMatch(child -> Files.isDirectory(child) &&
-                                isGameDataDirectoryName(child.getFileName().toString()) && containsFiles(child));
+                        .anyMatch(child -> Files.isDirectory(child)
+                                && isGameDataDirectoryName(child.getFileName().toString()) && containsFiles(child));
             } catch (IOException e) {
                 logger.error("Failed to check if folder contains game data", e);
             }
@@ -75,11 +87,23 @@ public final class DirectoryUtils {
         return containsGameData;
     }
 
+    /**
+     * Checks if the directory name is a Terasology game data directory.
+     *
+     * @param directoryName name to check
+     * @return true if the directory name is a Terasology game data directory
+     */
     private static boolean isGameDataDirectoryName(String directoryName) {
         return Arrays.stream(GameDataDirectoryNames.values())
                 .anyMatch(gameDataDirectoryNames -> gameDataDirectoryNames.getName().equals(directoryName));
     }
 
+    /**
+     * Checks if a directory and all subdirectories are containing files.
+     *
+     * @param directory directory to check
+     * @return true if the directory contains one or more files
+     */
     public static boolean containsFiles(Path directory) {
         if (directory == null || !Files.exists(directory) || !Files.isDirectory(directory)) {
             return false;

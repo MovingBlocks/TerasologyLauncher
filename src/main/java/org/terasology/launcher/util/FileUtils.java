@@ -22,7 +22,6 @@ import org.terasology.launcher.util.visitor.ArchiveCopyVisitor;
 import org.terasology.launcher.util.visitor.DeleteFileVisitor;
 import org.terasology.launcher.util.visitor.LocalCopyVisitor;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -49,7 +48,23 @@ public final class FileUtils {
     }
 
     /**
-     * Deletes the content of the directory without removing the directory itself
+     * Deletes the specified file. If deletion of the file fails or a exception happens it will be logged.
+     * Directories are not handled by this deletion.
+     * @param file File to delete
+     */
+    public static void deleteFileSilently(final Path file) {
+        try {
+            final boolean deleted = Files.deleteIfExists(file);
+            if (!deleted) {
+                logger.error("Could not silently delete file '{}'!", file);
+            }
+        } catch (IOException e) {
+            logger.error("Could not silently delete file '{}'!", file, e);
+        }
+    }
+
+    /**
+     * Deletes the content of the directory without removing the directory itself.
      *
      * @param directory Directory which content has to be deleted
      * @throws IOException if something goes wrong
@@ -71,7 +86,7 @@ public final class FileUtils {
     }
 
     /**
-     * Extracts the specified ZIP file to the specified location
+     * Extracts the specified ZIP file to the specified location.
      *
      * @param archive        the ZIP file to extract
      * @param outputLocation where to extract to
@@ -101,7 +116,7 @@ public final class FileUtils {
      *
      * @param source      File to copy
      * @param destination Destination for the copy
-     * @throws IOException If coping the file fails
+     * @throws IOException If copying the file fails
      */
     private static void copyFile(final Path source, final Path destination) throws IOException {
         if (Files.notExists(source)) {
@@ -116,7 +131,7 @@ public final class FileUtils {
      *
      * @param source      the folder to copy
      * @param destination where to copy to
-     * @throws IOException if coping fails
+     * @throws IOException if copying fails
      */
     public static void copyFolder(final Path source, final Path destination) throws IOException {
         if (Files.notExists(source)) {

@@ -84,10 +84,10 @@ public class TestFileUtils {
 
     @Test
     public void testExtract() throws IOException {
-        final String FILE_IN_ROOT = "fileInRoot";
-        final String FILE_IN_FOLDER = "folder/fileInFolder";
-        final String FILE1_CONTENTS = SAMPLE_TEXT + "1";
-        final String FILE2_CONTENTS = SAMPLE_TEXT + "2";
+        final String fileInRoot = "fileInRoot";
+        final String fileInFolder = "folder/fileInFolder";
+        final String file1Contents = SAMPLE_TEXT + "1";
+        final String file2Contents = SAMPLE_TEXT + "2";
         /* An archive with this structure is created:
          * <zip root>
          * +-- fileInRoot
@@ -96,22 +96,52 @@ public class TestFileUtils {
          */
         Path zipFile = tempFolder.newFile(FILE_NAME + ".zip").toPath();
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile))) {
-            zipOutputStream.putNextEntry(new ZipEntry(FILE_IN_ROOT));
-            zipOutputStream.write(FILE1_CONTENTS.getBytes());
+            zipOutputStream.putNextEntry(new ZipEntry(fileInRoot));
+            zipOutputStream.write(file1Contents.getBytes());
             zipOutputStream.closeEntry();
-            zipOutputStream.putNextEntry(new ZipEntry(FILE_IN_FOLDER));
-            zipOutputStream.write(FILE2_CONTENTS.getBytes());
+            zipOutputStream.putNextEntry(new ZipEntry(fileInFolder));
+            zipOutputStream.write(file2Contents.getBytes());
             zipOutputStream.closeEntry();
         }
 
         Path outputDir = tempFolder.newFolder().toPath();
         FileUtils.extractZipTo(zipFile, outputDir);
-        Path extractedFileInRoot = outputDir.resolve(FILE_IN_ROOT);
-        Path extractedFileInFolder = outputDir.resolve(FILE_IN_FOLDER);
+        Path extractedFileInRoot = outputDir.resolve(fileInRoot);
+        Path extractedFileInFolder = outputDir.resolve(fileInFolder);
         assertTrue(Files.exists(extractedFileInRoot));
         assertTrue(Files.exists(extractedFileInFolder));
-        assertEquals(FILE1_CONTENTS, Files.readAllLines(extractedFileInRoot).get(0));
-        assertEquals(FILE2_CONTENTS, Files.readAllLines(extractedFileInFolder).get(0));
+        assertEquals(file1Contents, Files.readAllLines(extractedFileInRoot).get(0));
+        assertEquals(file2Contents, Files.readAllLines(extractedFileInFolder).get(0));
+    }
+
+    @Test
+    public void testDeleteFileSilently() throws IOException {
+        Path tempFile = tempFolder.newFile(FILE_NAME).toPath();
+        assertTrue(Files.exists(tempFile));
+
+        FileUtils.deleteFileSilently(tempFile);
+        assertTrue(Files.notExists(tempFile));
+    }
+
+    @Test
+    public void testDeleteFileSilentlyWithEmptyDirectory() throws IOException {
+        Path tempDirectory = this.tempFolder.newFolder().toPath();
+        assertTrue(Files.exists(tempDirectory));
+
+        FileUtils.deleteFileSilently(tempDirectory);
+        assertTrue(Files.notExists(tempDirectory));
+    }
+
+    @Test
+    public void testDeleteFileSilentlyWithNonEmptyDirectory() throws IOException {
+        Path tempDirectory = tempFolder.newFolder().toPath();
+        Path tempFile = tempDirectory.resolve(FILE_NAME);
+        Files.createFile(tempFile);
+        assertTrue(Files.exists(tempFile));
+
+        // DirectoryNotEmptyException will be logged but not thrown
+        FileUtils.deleteFileSilently(tempDirectory);
+        assertTrue(Files.exists(tempDirectory));
     }
 
 }
