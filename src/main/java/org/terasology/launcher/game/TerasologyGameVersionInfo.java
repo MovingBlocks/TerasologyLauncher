@@ -19,13 +19,14 @@ package org.terasology.launcher.game;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /***
  * Contains version data for a single instance of a Terasology engine build, parsed out of the main jar.
@@ -148,14 +149,14 @@ public final class TerasologyGameVersionInfo implements Serializable {
         return properties;
     }
 
-    public static TerasologyGameVersionInfo loadFromJar(File terasologyGameJar) {
+    public static TerasologyGameVersionInfo loadFromJar(Path terasologyGameJar) {
         final Properties properties = new Properties();
         try {
-            if (terasologyGameJar.exists() && terasologyGameJar.isFile() && terasologyGameJar.canRead()) {
-                try (ZipFile zipFile = new ZipFile(terasologyGameJar)) {
-                    final ZipEntry zipEntry = zipFile.getEntry(VERSION_INFO_FILE);
-                    if (zipEntry != null) {
-                        properties.load(zipFile.getInputStream(zipEntry));
+            if (Files.exists(terasologyGameJar) && Files.isRegularFile(terasologyGameJar) && Files.isReadable(terasologyGameJar)) {
+                try (FileSystem fileSystem = FileSystems.newFileSystem(terasologyGameJar, null)) {
+                    Path versionInfo = fileSystem.getPath(VERSION_INFO_FILE);
+                    try (InputStream versionInput = Files.newInputStream(versionInfo)) {
+                        properties.load(versionInput);
                     }
                 }
             }

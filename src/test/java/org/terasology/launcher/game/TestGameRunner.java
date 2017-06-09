@@ -1,3 +1,18 @@
+/*
+ * Copyright 2017 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.terasology.launcher.game;
 
 import org.junit.Before;
@@ -59,8 +74,8 @@ public class TestGameRunner {
         resetGameProcess();
 
         // Simulate game process outputting TEST_STRING
-        String TEST_STRING = "LineOne\nLineTwo";
-        when(gameProcess.getInputStream()).thenReturn(new ByteArrayInputStream(TEST_STRING.getBytes()));
+        String testString = "LineOne\nLineTwo";
+        when(gameProcess.getInputStream()).thenReturn(new ByteArrayInputStream(testString.getBytes()));
 
         // Run game process
         GameRunner gameRunner = new GameRunner(gameProcess);
@@ -69,13 +84,13 @@ public class TestGameRunner {
         // Make sure GameRunner logs TEST_STRING line 1
         verify((Logger) Whitebox.getInternalState(gameRunner, "logger")).trace(
                 "Game output: {}",
-                TEST_STRING.substring(0, TEST_STRING.indexOf("\n"))
+                testString.substring(0, testString.indexOf("\n"))
         );
 
         // Make sure GameRunner logs TEST_STRING line 2
         verify((Logger) Whitebox.getInternalState(gameRunner, "logger")).trace(
                 "Game output: {}",
-                TEST_STRING.substring(TEST_STRING.indexOf("\n") + 1)
+                testString.substring(testString.indexOf("\n") + 1)
         );
     }
 

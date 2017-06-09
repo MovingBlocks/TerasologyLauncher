@@ -20,8 +20,8 @@ import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
@@ -45,8 +45,8 @@ class LauncherSettingsDecorator extends AbstractLauncherSettings {
     private String userJavaParameters;
     private String userGameParameters;
     private LogLevel logLevel;
-    private File gameDirectory;
-    private File gameDataDirectory;
+    private Path gameDirectory;
+    private Path gameDataDirectory;
 
     private Boolean searchForLauncherUpdates;
     private Boolean keepDownloadedFiles;
@@ -195,12 +195,12 @@ class LauncherSettingsDecorator extends AbstractLauncherSettings {
     }
 
     @Override
-    public File getGameDirectory() {
+    public Path getGameDirectory() {
         return (gameDirectory != null) ? gameDirectory : settings.getGameDirectory();
     }
 
     @Override
-    public File getGameDataDirectory() {
+    public Path getGameDataDirectory() {
         return (gameDataDirectory != null) ? gameDataDirectory : settings.getGameDataDirectory();
     }
 
@@ -269,12 +269,12 @@ class LauncherSettingsDecorator extends AbstractLauncherSettings {
     }
 
     @Override
-    public void setGameDirectory(File gameDirectory) {
+    public void setGameDirectory(Path gameDirectory) {
         this.gameDirectory = gameDirectory;
     }
 
     @Override
-    public void setGameDataDirectory(File gameDataDirectory) {
+    public void setGameDataDirectory(Path gameDataDirectory) {
         this.gameDataDirectory = gameDataDirectory;
     }
 

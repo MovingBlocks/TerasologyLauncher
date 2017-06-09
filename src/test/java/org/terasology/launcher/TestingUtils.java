@@ -15,23 +15,24 @@
  */
 package org.terasology.launcher;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-
-import org.junit.Assert;
 import org.powermock.api.mockito.PowerMockito;
 import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.JobResult;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
-public class TestingUtils {
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+
+public final class TestingUtils {
+
+    private TestingUtils() {
+
+    }
 
     public static void mockBuildVersion(GameJob job, int version) throws Exception {
         VersionInformation information = new VersionInformation();
@@ -46,7 +47,7 @@ public class TestingUtils {
     }
 
     /**
-     * Mocks out various methods in DownloadUtils to respond using the giving job map
+     * Mocks out various methods in DownloadUtils to respond using the giving job map.
      *
      * @param buildValues A map from {@link GameJob} names to a map of omega build number to normal build numbers
      *
@@ -57,16 +58,16 @@ public class TestingUtils {
 
         // Cache the greatest normal build number (the values of each sub-map) for each job name to use as the 'latest' value
         Map<String, Integer> latestBuilds = new HashMap<>();
-        for (Map.Entry<String, Map<Integer, Integer>> entry: buildValues.getMap().entrySet()) {
+        for (Map.Entry<String, Map<Integer, Integer>> entry : buildValues.getMap().entrySet()) {
             latestBuilds.put(entry.getKey(), Collections.max(entry.getValue().keySet()));
         }
 
         PowerMockito.doAnswer((i) -> latestBuilds.get(i.getArgumentAt(0, String.class))).
-                when(DownloadUtils.class,"loadBuildNumberJenkins", anyString(), anyString());
+                when(DownloadUtils.class, "loadBuildNumberJenkins", anyString(), anyString());
 
         PowerMockito.doAnswer((i) ->
                 buildValues.hasEntry(i.getArgumentAt(0, String.class), i.getArgumentAt(1, Integer.class)) ? JobResult.SUCCESS : JobResult.NOT_BUILT)
-        .when(DownloadUtils.class, "loadJobResultJenkins", anyString(), anyInt());
+                .when(DownloadUtils.class, "loadJobResultJenkins", anyString(), anyInt());
 
         PowerMockito.doReturn(null).when(DownloadUtils.class, "loadChangeLogJenkins", anyString(), anyInt());
 
@@ -76,8 +77,7 @@ public class TestingUtils {
             GameJob job = i.getArgumentAt(0, GameJob.class);
             int omegaBuildNumber = i.getArgumentAt(1, int.class);
             return buildValues.getNormalFromOmega(job.name(), omegaBuildNumber);
-        }).
-                when(DownloadUtils.class, "loadEngineTriggerJenkins", anyObject(), anyInt());
+        }).when(DownloadUtils.class, "loadEngineTriggerJenkins", anyObject(), anyInt());
     }
 
     /**

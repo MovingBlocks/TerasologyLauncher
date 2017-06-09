@@ -44,7 +44,6 @@ import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LogLevel;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.Collator;
@@ -56,13 +55,13 @@ public class SettingsController {
 
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
 
-    private File launcherDirectory;
-    private File downloadDirectory;
+    private Path launcherDirectory;
+    private Path downloadDirectory;
     private BaseLauncherSettings launcherSettings;
     private TerasologyGameVersions gameVersions;
 
-    private File gameDirectory;
-    private File gameDataDirectory;
+    private Path gameDirectory;
+    private Path gameDataDirectory;
 
     private Stage stage;
 
@@ -216,16 +215,16 @@ public class SettingsController {
 
     @FXML
     protected void openGameDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, gameDirectory.toPath(), BundleUtils.getLabel("message_error_gameDirectory"));
+        GuiUtils.openFileBrowser(stage, gameDirectory, BundleUtils.getLabel("message_error_gameDirectory"));
     }
 
     @FXML
     protected void editGameDirectoryAction() {
-        final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDirectory.toPath(), BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
+        final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDirectory, BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
         if (selectedFile != null) {
             try {
                 DirectoryUtils.checkDirectory(selectedFile);
-                gameDirectory = selectedFile.toFile();
+                gameDirectory = selectedFile;
                 updateDirectoryPathLabels();
             } catch (IOException e) {
                 logger.error("The game directory can not be created or used! '{}'", gameDirectory, e);
@@ -236,16 +235,16 @@ public class SettingsController {
 
     @FXML
     protected void openGameDataDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, gameDataDirectory.toPath(), BundleUtils.getLabel("message_error_gameDataDirectory"));
+        GuiUtils.openFileBrowser(stage, gameDataDirectory, BundleUtils.getLabel("message_error_gameDataDirectory"));
     }
 
     @FXML
     protected void editGameDataDirectoryAction() {
-        final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDataDirectory.toPath(), BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
+        final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
         if (selectedFile != null) {
             try {
                 DirectoryUtils.checkDirectory(selectedFile);
-                gameDataDirectory = selectedFile.toFile();
+                gameDataDirectory = selectedFile;
                 updateDirectoryPathLabels();
             } catch (IOException e) {
                 logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
@@ -256,12 +255,12 @@ public class SettingsController {
 
     @FXML
     protected void openLauncherDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, launcherDirectory.toPath(), BundleUtils.getLabel("message_error_launcherDirectory"));
+        GuiUtils.openFileBrowser(stage, launcherDirectory, BundleUtils.getLabel("message_error_launcherDirectory"));
     }
 
     @FXML
     protected void openDownloadDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, downloadDirectory.toPath(), BundleUtils.getLabel("message_error_downloadDirectory"));
+        GuiUtils.openFileBrowser(stage, downloadDirectory, BundleUtils.getLabel("message_error_downloadDirectory"));
     }
 
     @FXML
@@ -282,7 +281,7 @@ public class SettingsController {
         }
     }
 
-    void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
+    void initialize(final Path newLauncherDirectory, final Path newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
                     final TerasologyGameVersions newGameVersions, final Stage newStage) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
@@ -466,10 +465,10 @@ public class SettingsController {
     }
 
     private void updateDirectoryPathLabels() {
-        gameDirectoryPath.setText(gameDirectory.getPath());
-        gameDataDirectoryPath.setText(gameDataDirectory.getPath());
-        launcherDirectoryPath.setText(launcherDirectory.getPath());
-        downloadDirectoryPath.setText(downloadDirectory.getPath());
+        gameDirectoryPath.setText(gameDirectory.toString());
+        gameDataDirectoryPath.setText(gameDataDirectory.toString());
+        launcherDirectoryPath.setText(launcherDirectory.toString());
+        downloadDirectoryPath.setText(downloadDirectory.toString());
     }
 
     private void updateHeapSizeSelection() {

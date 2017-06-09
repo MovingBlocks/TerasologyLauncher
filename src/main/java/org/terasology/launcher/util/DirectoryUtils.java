@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.windows.SavedGamesPathFinder;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -156,7 +155,7 @@ public final class DirectoryUtils {
      * @param os the operating system
      * @return the gama data directory
      */
-    public static File getGameDataDirectory(OperatingSystem os) {
+    public static Path getGameDataDirectory(OperatingSystem os) {
         final Path userHome = Paths.get(System.getProperty(PROPERTY_USER_HOME, "."));
         final Path gameDataDirectory;
 
@@ -187,6 +186,6 @@ public final class DirectoryUtils {
             gameDataDirectory = userHome.resolve(GAME_DATA_DIR_NAME);
         }
 
-        return gameDataDirectory.toFile();
+        return gameDataDirectory;
     }
 }

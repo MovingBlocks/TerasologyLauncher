@@ -34,11 +34,11 @@ import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -54,7 +54,7 @@ public final class LauncherUpdater {
     private TerasologyLauncherVersionInfo versionInfo;
     private String changeLog;
 
-    private File launcherInstallationDirectory;
+    private Path launcherInstallationDirectory;
 
     public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
         this.currentVersionInfo = currentVersionInfo;
@@ -124,10 +124,10 @@ public final class LauncherUpdater {
     }
 
     public void detectAndCheckLauncherInstallationDirectory() throws URISyntaxException, IOException {
-        final File launcherLocation = new File(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        final Path launcherLocation = Paths.get(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         logger.trace("Launcher location: {}", launcherLocation);
-        launcherInstallationDirectory = launcherLocation.getParentFile().getParentFile();
-        DirectoryUtils.checkDirectory(launcherInstallationDirectory.toPath());
+        launcherInstallationDirectory = launcherLocation.getParent().getParent();
+        DirectoryUtils.checkDirectory(launcherInstallationDirectory);
         logger.trace("Launcher installation directory: {}", launcherInstallationDirectory);
     }
 
@@ -187,12 +187,12 @@ public final class LauncherUpdater {
                .append("  ")
                .append(BundleUtils.getLabel("message_update_installationDirectory"))
                .append("  ")
-               .append(launcherInstallationDirectory.getPath())
+               .append(launcherInstallationDirectory.toString())
                .append("  ");
         return builder.toString();
     }
 
-    public boolean update(File downloadDirectory, File tempDirectory) {
+    public boolean update(Path downloadDirectory, Path tempDirectory) {
         try {
             logger.trace("Downloading launcher...");
             //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
@@ -201,28 +201,28 @@ public final class LauncherUpdater {
             final URL updateURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
             logger.trace("Update URL: {}", updateURL);
 
-            final File downloadedZipFile = new File(downloadDirectory, jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
+            final Path downloadedZipFile = downloadDirectory.resolve( jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
             logger.trace("Download ZIP file: {}", downloadedZipFile);
 
-            DownloadUtils.downloadToFile(updateURL, downloadedZipFile.toPath(), new DummyProgressListener());
+            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new DummyProgressListener());
 
             //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 
             // Extract launcher ZIP file
-            final boolean extracted = FileUtils.extractZipTo(downloadedZipFile.toPath(), tempDirectory.toPath());
+            final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
             if (!extracted) {
                 throw new IOException("Could not extract ZIP file! " + downloadedZipFile);
             }
             logger.trace("ZIP file extracted");
 
-            final Path tempLauncherDirectory = tempDirectory.toPath().resolve("TerasologyLauncher");
+            final Path tempLauncherDirectory = tempDirectory.resolve("TerasologyLauncher");
             DirectoryUtils.checkDirectory(tempLauncherDirectory);
 
-            logger.info("Current launcher path: {}", launcherInstallationDirectory.getPath());
+            logger.info("Current launcher path: {}", launcherInstallationDirectory.toString());
             logger.info("New files temporarily located in: {}", tempLauncherDirectory.toAbsolutePath());
 
             // Start SelfUpdater
-            SelfUpdater.runUpdate(tempLauncherDirectory.toFile(), launcherInstallationDirectory);
+            SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
         } catch (DownloadException | IOException | RuntimeException e) {
             logger.error("Launcher update failed! Aborting update process!", e);
             GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("update_launcher_updateFailed"));

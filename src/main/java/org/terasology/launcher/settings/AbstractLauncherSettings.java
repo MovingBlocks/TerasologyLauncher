@@ -23,8 +23,8 @@ import org.terasology.launcher.game.GameSettings;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -118,9 +118,9 @@ public abstract class AbstractLauncherSettings implements GameSettings {
 
     public abstract LogLevel getLogLevel();
 
-    public abstract File getGameDirectory();
+    public abstract Path getGameDirectory();
 
-    public abstract File getGameDataDirectory();
+    public abstract Path getGameDataDirectory();
 
     public abstract boolean isSearchForLauncherUpdates();
 
@@ -156,7 +156,7 @@ public abstract class AbstractLauncherSettings implements GameSettings {
 
     public abstract void setKeepDownloadedFiles(boolean keepDownloadedFiles);
 
-    public abstract void setGameDirectory(File gameDirectory);
+    public abstract void setGameDirectory(Path gameDirectory);
 
-    public abstract void setGameDataDirectory(File gameDataDirectory);
+    public abstract void setGameDataDirectory(Path gameDataDirectory);
 }

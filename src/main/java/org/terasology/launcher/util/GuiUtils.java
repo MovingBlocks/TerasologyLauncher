@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.Desktop;
 import java.awt.EventQueue;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -87,17 +86,17 @@ public final class GuiUtils {
 
             selected = directoryChooser.showDialog(owner).toPath();
         } else {
-            final FutureTask<File> chooseDirectory = new FutureTask<>(() -> {
+            final FutureTask<Path> chooseDirectory = new FutureTask<>(() -> {
                 final DirectoryChooser directoryChooser = new DirectoryChooser();
                 directoryChooser.setInitialDirectory(directory.toFile());
                 directoryChooser.setTitle(title);
 
-                return directoryChooser.showDialog(owner);
+                return directoryChooser.showDialog(owner).toPath();
             });
 
             Platform.runLater(chooseDirectory);
             try {
-                selected = chooseDirectory.get().toPath();
+                selected = chooseDirectory.get();
             } catch (InterruptedException | ExecutionException e) {
                 logger.warn("Uh oh, something went wrong with the dialog!", e);
             }

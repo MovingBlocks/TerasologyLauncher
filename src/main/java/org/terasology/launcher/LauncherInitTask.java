@@ -78,21 +78,21 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             // game directories
             updateMessage(BundleUtils.getLabel("splash_initGameDirs"));
-            final Path gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory().toPath());
-            final Path gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory().toPath());
+            final Path gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory());
+            final Path gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory());
 
             final TerasologyGameVersions gameVersions = getTerasologyGameVersions(launcherDirectory, gameDirectory, launcherSettings);
 
             logger.trace("Change LauncherSettings...");
-            launcherSettings.setGameDirectory(gameDirectory.toFile());
-            launcherSettings.setGameDataDirectory(gameDataDirectory.toFile());
+            launcherSettings.setGameDirectory(gameDirectory);
+            launcherSettings.setGameDataDirectory(gameDataDirectory);
             gameVersions.fixSettingsBuildVersion(launcherSettings);
 
             storeLauncherSettingsAfterInit(launcherSettings);
 
             logger.trace("Creating launcher frame...");
 
-            return new LauncherConfiguration(launcherDirectory.toFile(), downloadDirectory.toFile(), tempDirectory.toFile(), launcherSettings, gameVersions);
+            return new LauncherConfiguration(launcherDirectory, downloadDirectory, tempDirectory, launcherSettings, gameVersions);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
         }
@@ -163,7 +163,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
     private BaseLauncherSettings getLauncherSettings(Path launcherDirectory) throws LauncherStartFailedException {
         logger.trace("Init LauncherSettings...");
         updateMessage(BundleUtils.getLabel("splash_retrieveLauncherSettings"));
-        final BaseLauncherSettings launcherSettings = new BaseLauncherSettings(launcherDirectory.toFile());
+        final BaseLauncherSettings launcherSettings = new BaseLauncherSettings(launcherDirectory);
         try {
             launcherSettings.load();
             launcherSettings.init();
@@ -197,9 +197,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 final boolean update = updater.showUpdateDialog(owner);
                 if (update) {
                     if (saveDownloadedFiles) {
-                        selfUpdaterStarted = updater.update(downloadDirectory.toFile(), tempDirectory.toFile());
+                        selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory);
                     } else {
-                        selfUpdaterStarted = updater.update(tempDirectory.toFile(), tempDirectory.toFile());
+                        selfUpdaterStarted = updater.update(tempDirectory, tempDirectory);
                     }
                 }
             }
@@ -260,7 +260,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         if (gameDataDirectory == null) {
             logger.trace("Choose data directory for the game...");
             updateMessage(BundleUtils.getLabel("splash_chooseGameDataDirectory"));
-            gameDataDirectory = GuiUtils.chooseDirectoryDialog(owner, DirectoryUtils.getGameDataDirectory(os).toPath(),
+            gameDataDirectory = GuiUtils.chooseDirectoryDialog(owner, DirectoryUtils.getGameDataDirectory(os),
                     BundleUtils.getLabel("message_dialog_title_chooseGameDataDirectory"));
             if (Files.notExists(gameDataDirectory)) {
                 logger.info("The new game data directory is not approved. The TerasologyLauncher is terminated.");

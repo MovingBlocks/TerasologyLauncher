@@ -15,9 +15,6 @@
  */
 package org.terasology.launcher.updater;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,11 +29,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( { DownloadUtils.class, LauncherUpdater.class })
+@PrepareForTest({DownloadUtils.class, LauncherUpdater.class})
 public final class TestLancherUpdater {
 
-    private static String BUILD_NUMBER;
+    private static String buildNumber;
     private static Constructor<TerasologyLauncherVersionInfo> propertiesConstructor;
 
     @BeforeClass
@@ -44,9 +44,9 @@ public final class TestLancherUpdater {
         propertiesConstructor = TerasologyLauncherVersionInfo.class.getDeclaredConstructor(Properties.class);
         propertiesConstructor.setAccessible(true);
 
-        Field buildNumber = TerasologyLauncherVersionInfo.class.getDeclaredField("BUILD_NUMBER");
-        buildNumber.setAccessible(true);
-        BUILD_NUMBER = (String) buildNumber.get(null);
+        Field buildNumberField = TerasologyLauncherVersionInfo.class.getDeclaredField("BUILD_NUMBER");
+        buildNumberField.setAccessible(true);
+        TestLancherUpdater.buildNumber = (String) buildNumberField.get(null);
     }
 
     @Test
@@ -61,7 +61,7 @@ public final class TestLancherUpdater {
     @Test
     public void testUpdateGreaterVersion() throws Exception {
         Properties properties = new Properties();
-        properties.setProperty(BUILD_NUMBER, "2");
+        properties.setProperty(buildNumber, "2");
         TerasologyLauncherVersionInfo info = this.createVersionWithProperties(properties);
         LauncherUpdater updater = this.getLauncherUpdater(3, info);
 
@@ -71,7 +71,7 @@ public final class TestLancherUpdater {
     @Test
     public void testUpdateLesserVersion() throws Exception {
         Properties properties = new Properties();
-        properties.setProperty(BUILD_NUMBER, "3");
+        properties.setProperty(buildNumber, "3");
         TerasologyLauncherVersionInfo info = this.createVersionWithProperties(properties);
         LauncherUpdater updater = this.getLauncherUpdater(1, info);
 

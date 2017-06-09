@@ -67,7 +67,6 @@ import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -90,9 +89,9 @@ public class ApplicationController {
     private static final long MB = 1024L * 1024;
     private static final long MINIMUM_FREE_SPACE = 200 * MB;
 
-    private File launcherDirectory;
-    private File downloadDirectory;
-    private File tempDirectory;
+    private Path launcherDirectory;
+    private Path downloadDirectory;
+    private Path tempDirectory;
     private BaseLauncherSettings launcherSettings;
     private TerasologyGameVersions gameVersions;
     private GameStarter gameStarter;
@@ -248,8 +247,8 @@ public class ApplicationController {
             logger.warn("The selected game version can not be downloaded! '{}'", gameVersion);
         } else {
             try {
-                GameDownloader gameDownloader = new GameDownloader(downloadDirectory.toPath(), tempDirectory.toPath(), launcherSettings.isKeepDownloadedFiles(),
-                        launcherSettings.getGameDirectory().toPath(), gameVersion, gameVersions);
+                GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles(),
+                        launcherSettings.getGameDirectory(), gameVersion, gameVersions);
                 gameDownloadWorker = new GameDownloadWorker(this, gameDownloader);
             } catch (IOException e) {
                 logger.error("Could not start game download!", e);
@@ -344,7 +343,7 @@ public class ApplicationController {
         contentTabPane.getSelectionModel().select(2);
     }
 
-    public void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final File newTempDirectory, final BaseLauncherSettings newLauncherSettings,
+    public void initialize(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
                            final TerasologyGameVersions newGameVersions, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
@@ -518,7 +517,7 @@ public class ApplicationController {
         }
 
         // if less than 200MB available
-        if (downloadDirectory.getUsableSpace() <= MINIMUM_FREE_SPACE) {
+        if (downloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
             warningButton.setVisible(true);
             warningButton.setTooltip(new Tooltip(BundleUtils.getLabel("message_warning_lowOnSpace")));
             logger.warn(BundleUtils.getLabel("message_warning_lowOnSpace"));

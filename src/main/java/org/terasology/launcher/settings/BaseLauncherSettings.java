@@ -24,14 +24,14 @@ import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LogLevel;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -75,25 +75,25 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
     private static final LogLevel LOG_LEVEL_DEFAULT = LogLevel.DEFAULT;
 
-    private final File launcherSettingsFile;
+    private final Path launcherSettingsFile;
     private final Properties properties;
 
-    public BaseLauncherSettings(File launcherDirectory) {
-        launcherSettingsFile = new File(launcherDirectory, LAUNCHER_SETTINGS_FILE_NAME);
+    public BaseLauncherSettings(Path launcherDirectory) {
+        launcherSettingsFile = launcherDirectory.resolve(LAUNCHER_SETTINGS_FILE_NAME);
         properties = new Properties();
     }
 
     public String getLauncherSettingsFilePath() {
-        return launcherSettingsFile.getPath();
+        return launcherSettingsFile.toString();
     }
 
     @Override
     public synchronized void load() throws IOException {
-        if (launcherSettingsFile.exists()) {
+        if (Files.exists(launcherSettingsFile)) {
             logger.debug("Load the launcher settings from the file '{}'.", launcherSettingsFile);
 
             // load settings
-            try (InputStream inputStream = new FileInputStream(launcherSettingsFile)) {
+            try (InputStream inputStream = Files.newInputStream(launcherSettingsFile)) {
                 properties.load(inputStream);
             }
         }
@@ -104,12 +104,12 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
         logger.trace("Store the launcher settings into the file '{}'.", launcherSettingsFile);
 
         // create directory
-        if (!launcherSettingsFile.getParentFile().exists() && !launcherSettingsFile.getParentFile().mkdirs()) {
-            throw new IOException("Could not create directory! " + launcherSettingsFile.getParentFile());
+        if (Files.notExists(launcherSettingsFile.getParent())) {
+            Files.createDirectories(launcherSettingsFile.getParent());
         }
 
         // store settings
-        try (OutputStream outputStream = new FileOutputStream(launcherSettingsFile)) {
+        try (OutputStream outputStream = Files.newOutputStream(launcherSettingsFile)) {
             properties.store(outputStream, COMMENT_SETTINGS);
             logger.trace("Stored settings: {}", this);
         }
@@ -262,16 +262,16 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
 
     protected void initGameDirectory() {
         final String gameDirectoryStr = properties.getProperty(PROPERTY_GAME_DIRECTORY);
-        File gameDirectory = null;
+        Path gameDirectory = null;
         if (gameDirectoryStr != null && gameDirectoryStr.trim().length() > 0) {
             try {
-                gameDirectory = new File(new URI(gameDirectoryStr));
+                gameDirectory = Paths.get(new URI(gameDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
                 logger.warn(WARN_MSG_INVALID_VALUE, gameDirectoryStr, PROPERTY_GAME_DIRECTORY);
             }
         }
         if (gameDirectory != null) {
-            properties.setProperty(PROPERTY_GAME_DIRECTORY, gameDirectory.toURI().toString());
+            properties.setProperty(PROPERTY_GAME_DIRECTORY, gameDirectory.toUri().toString());
         } else {
             properties.setProperty(PROPERTY_GAME_DIRECTORY, "");
         }
@@ -279,16 +279,16 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
 
     protected void initGameDataDirectory() {
         final String gameDataDirectoryStr = properties.getProperty(PROPERTY_GAME_DATA_DIRECTORY);
-        File gameDataDirectory = null;
+        Path gameDataDirectory = null;
         if (gameDataDirectoryStr != null && gameDataDirectoryStr.trim().length() > 0) {
             try {
-                gameDataDirectory = new File(new URI(gameDataDirectoryStr));
+                gameDataDirectory = Paths.get(new URI(gameDataDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
                 logger.warn(WARN_MSG_INVALID_VALUE, gameDataDirectoryStr, PROPERTY_GAME_DATA_DIRECTORY);
             }
         }
         if (gameDataDirectory != null) {
-            properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toURI().toString());
+            properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toUri().toString());
         } else {
             properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, "");
         }
@@ -348,11 +348,11 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     }
 
     @Override
-    public synchronized File getGameDirectory() {
+    public synchronized Path getGameDirectory() {
         final String gameDirectoryStr = properties.getProperty(PROPERTY_GAME_DIRECTORY);
         if (gameDirectoryStr != null && gameDirectoryStr.trim().length() > 0) {
             try {
-                return new File(new URI(gameDirectoryStr));
+                return Paths.get(new URI(gameDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
                 logger.error(WARN_MSG_INVALID_VALUE, gameDirectoryStr, PROPERTY_GAME_DIRECTORY);
             }
@@ -361,11 +361,11 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     }
 
     @Override
-    public synchronized File getGameDataDirectory() {
+    public synchronized Path getGameDataDirectory() {
         final String gameDataDirectoryStr = properties.getProperty(PROPERTY_GAME_DATA_DIRECTORY);
         if (gameDataDirectoryStr != null && gameDataDirectoryStr.trim().length() > 0) {
             try {
-                return new File(new URI(gameDataDirectoryStr));
+                return Paths.get(new URI(gameDataDirectoryStr));
             } catch (URISyntaxException | RuntimeException e) {
                 logger.error(WARN_MSG_INVALID_VALUE, gameDataDirectoryStr, PROPERTY_GAME_DATA_DIRECTORY);
             }
@@ -457,13 +457,13 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     }
 
     @Override
-    public synchronized void setGameDirectory(File gameDirectory) {
-        properties.setProperty(PROPERTY_GAME_DIRECTORY, gameDirectory.toURI().toString());
+    public synchronized void setGameDirectory(Path gameDirectory) {
+        properties.setProperty(PROPERTY_GAME_DIRECTORY, gameDirectory.toUri().toString());
     }
 
     @Override
-    public synchronized void setGameDataDirectory(File gameDataDirectory) {
-        properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toURI().toString());
+    public synchronized void setGameDataDirectory(Path gameDataDirectory) {
+        properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toUri().toString());
     }
 
     @Override

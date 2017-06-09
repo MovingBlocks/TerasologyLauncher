@@ -113,6 +113,6 @@ public final class GameDownloader {
     }
 
     public boolean updateAfterDownload() {
-        return gameVersions.updateGameVersionsAfterInstallation(gameDirectory.toFile());
+        return gameVersions.updateGameVersionsAfterInstallation(gameDirectory);
     }
 }

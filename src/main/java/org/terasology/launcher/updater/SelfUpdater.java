@@ -21,8 +21,11 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,30 +38,32 @@ public final class SelfUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(SelfUpdater.class);
 
-    private static final String TERASOLOGY_LAUNCHER_JAR = "lib" + File.separator + "TerasologyLauncher.jar";
+    private static final String TERASOLOGY_LAUNCHER_JAR = "lib/TerasologyLauncher.jar";
 
     private SelfUpdater() {
     }
 
     private static String getJavaProgramFile() {
-        return System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+        return System.getProperty("java.home") + "/bin/java";
     }
 
-    private static void deleteLauncherContent(File directory) {
-        final File[] files = directory.listFiles();
-        if (files != null && files.length > 0) {
-            for (File child : files) {
-                if (child.isDirectory()) {
-                    if (child.getName().equals("bin") || child.getName().equals("lib") || child.getName().equals("licenses")) {
-                        logger.info("Delete directory content: {}", child);
-                        SelfUpdater.deleteLauncherContent(child);
+    private static void deleteLauncherContent(Path directory) {
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directory)) {
+            directoryStream.forEach(p -> {
+                if (Files.isDirectory(p)) {
+                    String directoryName = p.toString();
+                    if (directoryName.equals("bin") || directoryName.equals("lib") || directoryName.equals("licenses")) {
+                        logger.info("Delete directory content: {}", p);
+                        SelfUpdater.deleteLauncherContent(p);
                     } else {
-                        logger.info("Skip directory: {}", child);
+                        logger.info("Skip directory: {}", p);
                     }
-                } else if (!child.getName().contains(".log")) {
-                    FileUtils.deleteFileSilently(child.toPath());
+                } else if (!p.getFileName().toString().contains(".log")) {
+                    FileUtils.deleteFileSilently(p);
                 }
-            }
+            });
+        } catch (IOException e) {
+            logger.error("Failed to delete launcher content", e);
         }
     }
 
@@ -68,7 +73,7 @@ public final class SelfUpdater {
      * @param launcherInstallationDirectory  the installation folder
      * @throws IOException if something goes wrong
      */
-    public static void runUpdate(File tempLauncherDirectory, File launcherInstallationDirectory) throws IOException {
+    public static void runUpdate(Path tempLauncherDirectory, Path launcherInstallationDirectory) throws IOException {
         final List<String> arguments = new ArrayList<>();
         // Set 'java' executable as programme to run
         arguments.add(getJavaProgramFile());
@@ -78,14 +83,14 @@ public final class SelfUpdater {
         // Specify class with main method to run
         arguments.add(SelfUpdater.class.getCanonicalName());
         // Arguments for update locations
-        arguments.add(launcherInstallationDirectory.getPath());
-        arguments.add(tempLauncherDirectory.getPath());
+        arguments.add(launcherInstallationDirectory.toString());
+        arguments.add(tempLauncherDirectory.toString());
 
         logger.info("Running launcher self update: {}", arguments);
 
         final ProcessBuilder pb = new ProcessBuilder();
         pb.command(arguments);
-        pb.directory(tempLauncherDirectory);
+        pb.directory(tempLauncherDirectory.toFile());
         pb.start();
     }
 
@@ -105,22 +110,22 @@ public final class SelfUpdater {
 
         final String launcherInstallationDirectoryArg = args[0];
         final String tempLauncherDirectoryArg = args[1];
-        final File launcherInstallationDirectory = new File(launcherInstallationDirectoryArg);
-        final File tempLauncherDirectory = new File(tempLauncherDirectoryArg);
+        final Path launcherInstallationDirectory = Paths.get(launcherInstallationDirectoryArg);
+        final Path tempLauncherDirectory = Paths.get(tempLauncherDirectoryArg);
 
         try {
-            logger.info("Current launcher path: {}", launcherInstallationDirectory.getPath());
-            logger.info("New files temporarily located in: {}", tempLauncherDirectory.getPath());
+            logger.info("Current launcher path: {}", launcherInstallationDirectory);
+            logger.info("New files temporarily located in: {}", tempLauncherDirectory);
 
             // Check both directories
-            DirectoryUtils.checkDirectory(launcherInstallationDirectory.toPath());
-            DirectoryUtils.checkDirectory(tempLauncherDirectory.toPath());
+            DirectoryUtils.checkDirectory(launcherInstallationDirectory);
+            DirectoryUtils.checkDirectory(tempLauncherDirectory);
 
             logger.info("Delete launcher installation directory: {}", launcherInstallationDirectory);
             SelfUpdater.deleteLauncherContent(launcherInstallationDirectory);
 
             logger.info("Copy new files: {}", tempLauncherDirectory);
-            FileUtils.copyFolder(tempLauncherDirectory.toPath(), launcherInstallationDirectory.toPath());
+            FileUtils.copyFolder(tempLauncherDirectory, launcherInstallationDirectory);
         } catch (IOException | RuntimeException e) {
             logger.error("Auto updating the launcher failed!", e);
             System.exit(1);
@@ -137,7 +142,7 @@ public final class SelfUpdater {
         try {
             final ProcessBuilder pb = new ProcessBuilder();
             pb.command(arguments);
-            pb.directory(launcherInstallationDirectory);
+            pb.directory(launcherInstallationDirectory.toFile());
             pb.start();
             System.exit(0);
         } catch (IOException | RuntimeException e) {
