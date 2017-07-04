@@ -275,12 +275,13 @@ public class ApplicationController {
     protected void deleteAction() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if ((gameVersion != null) && gameVersion.isInstalled()) {
-            final boolean containsGameData = DirectoryUtils.containsGameData(gameVersion.getInstallationPath());
+            final Path topLevelGameDirectory = gameVersion.getInstallationPath().getParent();
+            final boolean containsGameData = DirectoryUtils.containsGameData(topLevelGameDirectory);
             final String msg;
             if (containsGameData) {
-                msg = BundleUtils.getMessage("confirmDeleteGame_withData", gameVersion.getInstallationPath());
+                msg = BundleUtils.getMessage("confirmDeleteGame_withData", topLevelGameDirectory);
             } else {
-                msg = BundleUtils.getMessage("confirmDeleteGame_withoutData", gameVersion.getInstallationPath());
+                msg = BundleUtils.getMessage("confirmDeleteGame_withoutData", topLevelGameDirectory);
             }
             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setContentText(msg);
@@ -290,9 +291,9 @@ public class ApplicationController {
             alert.showAndWait()
                     .filter(response -> response == ButtonType.OK)
                     .ifPresent(response -> {
-                        logger.info("Delete installed game! '{}' '{}'", gameVersion, gameVersion.getInstallationPath());
+                        logger.info("Delete installed game! '{}' '{}'", gameVersion, topLevelGameDirectory);
                         try {
-                            FileUtils.delete(gameVersion.getInstallationPath());
+                            FileUtils.delete(topLevelGameDirectory);
                         } catch (IOException e) {
                             logger.error("Could not delete installed game!", e);
                             // TODO: introduce new message label

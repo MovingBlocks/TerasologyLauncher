@@ -21,12 +21,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.windows.SavedGamesPathFinder;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 public final class DirectoryUtils {
 
@@ -73,12 +75,11 @@ public final class DirectoryUtils {
      */
     public static boolean containsGameData(final Path gameInstallationPath) {
         boolean containsGameData = false;
-        if (gameInstallationPath != null && Files.exists(gameInstallationPath)
-                && Files.isDirectory(gameInstallationPath) && Files.isReadable(gameInstallationPath)) {
-            try {
-                containsGameData = Files.list(gameInstallationPath)
-                        .anyMatch(child -> Files.isDirectory(child)
-                                && isGameDataDirectoryName(child.getFileName().toString()) && containsFiles(child));
+        if (gameInstallationPath != null && Files.exists(gameInstallationPath) &&
+                Files.isDirectory(gameInstallationPath) && Files.isReadable(gameInstallationPath)) {
+            try (Stream<Path> stream = Files.list(gameInstallationPath)) {
+                containsGameData = stream.anyMatch(child -> Files.isDirectory(child)
+                        && isGameDataDirectoryName(child.getFileName().toString()) && containsFiles(child));
             } catch (IOException e) {
                 logger.error("Failed to check if folder contains game data", e);
             }
