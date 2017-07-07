@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +48,7 @@ public final class GameStarter {
         gameThread = null;
     }
 
-    public boolean startGame(TerasologyGameVersion gameVersion, File gameDataDirectory, JavaHeapSize maxHeapSize,
+    public boolean startGame(TerasologyGameVersion gameVersion, Path gameDataDirectory, JavaHeapSize maxHeapSize,
                              JavaHeapSize initialHeapSize, List<String> userJavaParameters, List<String> userGameParameters, LogLevel logLevel) {
         if (isRunning()) {
             logger.warn("The game can not be started because another game is already running! '{}'", gameThread);
@@ -76,14 +76,14 @@ public final class GameStarter {
         return javaParameters;
     }
 
-    private List<String> createProcessParameters(TerasologyGameVersion gameVersion, File gameDataDirectory, List<String> javaParameters,
+    private List<String> createProcessParameters(TerasologyGameVersion gameVersion, Path gameDataDirectory, List<String> javaParameters,
                                                  List<String> gameParameters) {
         final List<String> processParameters = new ArrayList<>();
         processParameters.add("java");
         processParameters.addAll(javaParameters);
         processParameters.add("-jar");
-        processParameters.add(gameVersion.getGameJar().getName());
-        processParameters.add("-homedir=" + gameDataDirectory.getPath());
+        processParameters.add(gameVersion.getGameJar().getFileName().toString());
+        processParameters.add("-homedir=" + gameDataDirectory.toAbsolutePath().toString());
         processParameters.addAll(gameParameters);
 
         return processParameters;
@@ -92,7 +92,7 @@ public final class GameStarter {
     private boolean startProcess(TerasologyGameVersion gameVersion, List<String> processParameters) {
         final ProcessBuilder pb = new ProcessBuilder(processParameters);
         pb.redirectErrorStream(true);
-        pb.directory(gameVersion.getInstallationPath());
+        pb.directory(gameVersion.getInstallationPath().toFile());
         logger.debug("Starting game process with '{}' in '{}' for '{}'", processParameters, gameVersion.getInstallationPath(), gameVersion);
         try {
             final Process p = pb.start();

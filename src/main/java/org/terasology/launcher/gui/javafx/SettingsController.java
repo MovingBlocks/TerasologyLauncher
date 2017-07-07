@@ -44,8 +44,8 @@ import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LogLevel;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.Collator;
 import java.util.List;
 import java.util.Locale;
@@ -55,13 +55,13 @@ public class SettingsController {
 
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
 
-    private File launcherDirectory;
-    private File downloadDirectory;
+    private Path launcherDirectory;
+    private Path downloadDirectory;
     private BaseLauncherSettings launcherSettings;
     private TerasologyGameVersions gameVersions;
 
-    private File gameDirectory;
-    private File gameDataDirectory;
+    private Path gameDirectory;
+    private Path gameDataDirectory;
 
     private Stage stage;
 
@@ -220,7 +220,7 @@ public class SettingsController {
 
     @FXML
     protected void editGameDirectoryAction() {
-        final File selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDirectory, BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
+        final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDirectory, BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
         if (selectedFile != null) {
             try {
                 DirectoryUtils.checkDirectory(selectedFile);
@@ -240,7 +240,7 @@ public class SettingsController {
 
     @FXML
     protected void editGameDataDirectoryAction() {
-        final File selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
+        final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
         if (selectedFile != null) {
             try {
                 DirectoryUtils.checkDirectory(selectedFile);
@@ -281,7 +281,7 @@ public class SettingsController {
         }
     }
 
-    void initialize(final File newLauncherDirectory, final File newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
+    void initialize(final Path newLauncherDirectory, final Path newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
                     final TerasologyGameVersions newGameVersions, final Stage newStage) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
@@ -465,10 +465,10 @@ public class SettingsController {
     }
 
     private void updateDirectoryPathLabels() {
-        gameDirectoryPath.setText(gameDirectory.getPath());
-        gameDataDirectoryPath.setText(gameDataDirectory.getPath());
-        launcherDirectoryPath.setText(launcherDirectory.getPath());
-        downloadDirectoryPath.setText(downloadDirectory.getPath());
+        gameDirectoryPath.setText(gameDirectory.toString());
+        gameDataDirectoryPath.setText(gameDataDirectory.toString());
+        launcherDirectoryPath.setText(launcherDirectory.toString());
+        downloadDirectoryPath.setText(downloadDirectory.toString());
     }
 
     private void updateHeapSizeSelection() {

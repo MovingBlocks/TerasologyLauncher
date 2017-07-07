@@ -18,152 +18,131 @@ package org.terasology.launcher.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.util.visitor.ArchiveCopyVisitor;
+import org.terasology.launcher.util.visitor.DeleteFileVisitor;
+import org.terasology.launcher.util.visitor.LocalCopyVisitor;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.StandardCopyOption;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.stream.Stream;
 
 public final class FileUtils {
+
     private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
-    private static final String COULD_NOT_CREATE_DIRECTORY = "Could not create directory! ";
 
     private FileUtils() {
     }
 
     /**
-     * Deletes the specified file or directory (directories are removed recursively).
+     * Deletes the specified file or directory. If the path is a directory it is removed recursively.
      *
-     * @param file - file to delete
+     * @param path Path to delete
      * @throws IOException if something goes wrong
      */
-    public static void delete(File file) throws IOException {
-        if (file.isDirectory()) {
-            final File[] files = file.listFiles();
-            if ((files != null) && (files.length > 0)) {
-                for (File child : files) {
-                    FileUtils.delete(child);
-                }
-            }
-        }
-        final boolean deleted = file.delete();
-        if (!deleted) {
-            throw new IOException("Could not delete file! " + file);
-        }
+    public static void delete(final Path path) throws IOException {
+        Files.walkFileTree(path, new DeleteFileVisitor());
     }
 
-    public static void deleteDirectoryContent(File directory) throws IOException {
-        if (directory.isDirectory()) {
-            final File[] files = directory.listFiles();
-            if ((files != null) && (files.length > 0)) {
-                for (File child : files) {
-                    FileUtils.delete(child);
-                }
+    /**
+     * Deletes the specified file. If deletion of the file fails or a exception happens it will be logged.
+     * Directories are not handled by this deletion.
+     * @param file File to delete
+     */
+    public static void deleteFileSilently(final Path file) {
+        try {
+            final boolean deleted = Files.deleteIfExists(file);
+            if (!deleted) {
+                logger.error("Could not silently delete file '{}'!", file);
             }
+        } catch (IOException e) {
+            logger.error("Could not silently delete file '{}'!", file, e);
         }
     }
 
     /**
-     * Extracts the given ZIP file to its parent folder.
+     * Deletes the content of the directory without removing the directory itself.
      *
-     * @param archive - the ZIP file to extract
-     * @return true if successful
+     * @param directory Directory which content has to be deleted
+     * @throws IOException if something goes wrong
      */
-    public static boolean extractZip(File archive) {
-        return FileUtils.extractZipTo(archive, archive.getParentFile());
+    public static void deleteDirectoryContent(final Path directory) throws IOException {
+        try (Stream<Path> stream = Files.list(directory)) {
+            stream.forEach(path -> {
+                try {
+                    if (Files.isDirectory(path)) {
+                        Files.walkFileTree(directory, new DeleteFileVisitor());
+                    } else {
+                        Files.delete(path);
+                    }
+                } catch (IOException e) {
+                    logger.error("Failed to delete '{}'", directory, e);
+                }
+            });
+        }
     }
 
     /**
      * Extracts the specified ZIP file to the specified location.
      *
-     * @param archive        - the ZIP file to extract
-     * @param outputLocation - where to extract to
+     * @param archive        the ZIP file to extract
+     * @param outputLocation where to extract to
      * @return true if successful
      */
-    public static boolean extractZipTo(File archive, File outputLocation) {
-
-        logger.trace("Extracting '{}' to '{}'.", archive, outputLocation);
+    public static boolean extractZipTo(final Path archive, final Path outputLocation) {
+        logger.trace("Extracting '{}' to '{}'", archive, outputLocation);
 
         try {
-            if (!outputLocation.exists()) {
-                boolean created = outputLocation.mkdir();
-                if (!created) {
-                    throw new IOException(COULD_NOT_CREATE_DIRECTORY + outputLocation);
-                }
+            if (Files.notExists(outputLocation)) {
+                Files.createDirectories(outputLocation);
             }
-            final byte[] buffer = new byte[4096];
-            try (ZipInputStream zis = new ZipInputStream(new FileInputStream(archive))) {
-                ZipEntry ze;
-                while ((ze = zis.getNextEntry()) != null) {
-                    File extractedFile = new File(outputLocation, ze.getName());
-                    File extractedDir = extractedFile.getParentFile();
-                    if (!extractedDir.exists()) {
-                        boolean created = extractedDir.mkdirs();
-                        if (!created) {
-                            throw new IOException(COULD_NOT_CREATE_DIRECTORY + extractedDir);
-                        }
-                    }
-                    if (!ze.isDirectory()) {
-                        try (FileOutputStream fos = new FileOutputStream(extractedFile)) {
-                            int c;
-                            while ((c = zis.read(buffer)) > 0) {
-                                fos.write(buffer, 0, c);
-                            }
-                            fos.flush();
-                        }
-                    }
+            try (FileSystem fileSystem = FileSystems.newFileSystem(archive, null)) {
+                for (Path rootDirectory : fileSystem.getRootDirectories()) {
+                    Files.walkFileTree(rootDirectory, new ArchiveCopyVisitor(outputLocation));
                 }
             }
             return true;
         } catch (IOException e) {
             logger.error("Could not extract zip archive '{}' to '{}'!", archive, outputLocation, e);
+            return false;
         }
-        return false;
     }
 
-    private static void copyFile(File source, File destination) throws IOException {
-        if (!source.exists()) {
+    /**
+     * Copy file from the source path to the destination. If the source file does not exists nothing happens.
+     *
+     * @param source      File to copy
+     * @param destination Destination for the copy
+     * @throws IOException If copying the file fails
+     */
+    private static void copyFile(final Path source, final Path destination) throws IOException {
+        if (Files.notExists(source)) {
             logger.error("Source file doesn't exists! '{}'", source);
             return;
         }
-
-        Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**
      * Copy the whole folder recursively to the specified destination.
      *
-     * @param source      - the folder to copy
-     * @param destination - where to copy to
-     * @throws IOException if something goes wrong
+     * @param source      the folder to copy
+     * @param destination where to copy to
+     * @throws IOException if copying fails
      */
-    public static void copyFolder(File source, File destination) throws IOException {
-        if (!source.exists()) {
+    public static void copyFolder(final Path source, final Path destination) throws IOException {
+        if (Files.notExists(source)) {
             logger.error("Source file doesn't exists! '{}'", source);
             return;
         }
 
-        if (source.isDirectory()) {
-            if (!destination.exists()) {
-                final boolean created = destination.mkdirs();
-                if (!created) {
-                    throw new IOException(COULD_NOT_CREATE_DIRECTORY + destination);
-                }
-            }
-            final String[] files = source.list();
-            if ((files != null) && (files.length > 0)) {
-                for (String file : files) {
-                    final File srcFile = new File(source, file);
-                    final File destFile = new File(destination, file);
-                    FileUtils.copyFolder(srcFile, destFile);
-                }
-            }
+        if (Files.isDirectory(source)) {
+            Files.walkFileTree(source, new LocalCopyVisitor(source, destination));
         } else {
-            FileUtils.copyFile(source, destination);
+            copyFile(source, destination);
         }
     }
 }

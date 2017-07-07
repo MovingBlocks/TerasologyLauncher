@@ -17,11 +17,18 @@
 package org.terasology.launcher.util;
 
 import javafx.stage.DirectoryChooser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.windows.SavedGamesPathFinder;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 public final class DirectoryUtils {
 
@@ -35,20 +42,27 @@ public final class DirectoryUtils {
     private static final String PROPERTY_USER_HOME = "user.home";
     private static final String ENV_APPDATA = "APPDATA";
     private static final String MAC_PATH = "Library/Application Support/";
+    private static final Logger logger = LoggerFactory.getLogger(DirectoryUtils.class);
 
     private DirectoryUtils() {
     }
 
-    public static void checkDirectory(File directory) throws IOException {
-        if (!directory.exists() && !directory.mkdirs()) {
-            throw new IOException("Could not create directory! " + directory);
+    /**
+     * Checks if the given path exists, is a directory and can be read and written by the program.
+     *
+     * @param directory Path to check
+     * @throws IOException Reading the path fails in some way
+     */
+    public static void checkDirectory(Path directory) throws IOException {
+        if (!Files.exists(directory)) {
+            Files.createDirectories(directory);
         }
 
-        if (!directory.isDirectory()) {
+        if (!Files.isDirectory(directory)) {
             throw new IOException("Directory is not a directory! " + directory);
         }
 
-        if (!directory.canRead() || !directory.canWrite()) {
+        if (!Files.isReadable(directory) || !Files.isWritable(directory)) {
             throw new IOException("Can not read from or write into directory! " + directory);
         }
     }
@@ -59,76 +73,78 @@ public final class DirectoryUtils {
      * @param gameInstallationPath the game installation folder
      * @return true if game data is stored in the installation directory.
      */
-    public static boolean containsGameData(File gameInstallationPath) {
+    public static boolean containsGameData(final Path gameInstallationPath) {
         boolean containsGameData = false;
-        if ((gameInstallationPath != null) && gameInstallationPath.exists() && gameInstallationPath.isDirectory() && gameInstallationPath.canRead()) {
-            final File[] files = gameInstallationPath.listFiles();
-            if ((files != null) && (files.length > 0)) {
-                for (File child : files) {
-                    if (child.isDirectory() && isGameDataDirectoryName(child.getName()) && containsFiles(child)) {
-                        containsGameData = true;
-                        break;
-                    }
-                }
+        if (gameInstallationPath != null && Files.exists(gameInstallationPath) &&
+                Files.isDirectory(gameInstallationPath) && Files.isReadable(gameInstallationPath)) {
+            try (Stream<Path> stream = Files.list(gameInstallationPath)) {
+                containsGameData = stream.anyMatch(child -> Files.isDirectory(child)
+                        && isGameDataDirectoryName(child.getFileName().toString()) && containsFiles(child));
+            } catch (IOException e) {
+                logger.error("Failed to check if folder contains game data", e);
             }
         }
         return containsGameData;
     }
 
+    /**
+     * Checks if the directory name is a Terasology game data directory.
+     *
+     * @param directoryName name to check
+     * @return true if the directory name is a Terasology game data directory
+     */
     private static boolean isGameDataDirectoryName(String directoryName) {
-        return directoryName.equals("SAVED_WORLDS")
-            || directoryName.equals("worlds")
-            || directoryName.equals("saves")
-            || directoryName.equals("screens")
-            || directoryName.equals("screenshots");
+        return Arrays.stream(GameDataDirectoryNames.values())
+                .anyMatch(gameDataDirectoryNames -> gameDataDirectoryNames.getName().equals(directoryName));
     }
 
-    public static boolean containsFiles(File directory) {
-        if ((directory == null) || !directory.exists() || !directory.isDirectory()) {
+    /**
+     * Checks if a directory and all subdirectories are containing files.
+     *
+     * @param directory directory to check
+     * @return true if the directory contains one or more files
+     */
+    public static boolean containsFiles(Path directory) {
+        if (directory == null || !Files.exists(directory) || !Files.isDirectory(directory)) {
             return false;
         }
 
-        final File[] files = directory.listFiles();
-        if ((files != null) && (files.length > 0)) {
-            for (File child : files) {
-                if (child.isFile()) {
-                    return true;
-                } else if (child.isDirectory() && containsFiles(child)) {
-                    return true;
-                }
-            }
+        try {
+            return Files.list(directory)
+                    .anyMatch(file -> Files.isRegularFile(file) || Files.isDirectory(file) && containsFiles(file));
+        } catch (IOException e) {
+            return false;
         }
-
-        return false;
     }
 
     /**
      * Should only be executed once at the start.
-     * @param os the operating system
+     *
+     * @param os              the operating system
      * @param applicationName the name of the application
      * @return the app. folder
      */
-    public static File getApplicationDirectory(OperatingSystem os, String applicationName) {
-        final File userHome = new File(System.getProperty(PROPERTY_USER_HOME, "."));
-        final File applicationDirectory;
+    public static Path getApplicationDirectory(OperatingSystem os, String applicationName) {
+        final Path userHome = Paths.get(System.getProperty(PROPERTY_USER_HOME, "."));
+        final Path applicationDirectory;
 
         if (os.isWindows()) {
             final String envAppData = System.getenv(ENV_APPDATA);
             if ((envAppData != null) && (envAppData.length() > 0)) {
-                applicationDirectory = new File(envAppData, applicationName + '\\');
+                applicationDirectory = Paths.get(envAppData).resolve(applicationName);
             } else {
-                applicationDirectory = new File(userHome, applicationName + '\\');
+                applicationDirectory = userHome.resolve(applicationName);
                 // Alternatives :
                 //   System.getenv("HOME")
                 //   System.getenv("USERPROFILE")
                 //   System.getenv("HOMEDRIVE") + System.getenv("HOMEPATH")
             }
         } else if (os.isUnix()) {
-            applicationDirectory = new File(userHome, '.' + applicationName.toLowerCase(Locale.ENGLISH) + '/');
+            applicationDirectory = userHome.resolve('.' + applicationName.toLowerCase(Locale.ENGLISH));
         } else if (os.isMac()) {
-            applicationDirectory = new File(userHome, MAC_PATH + applicationName + '/');
+            applicationDirectory = userHome.resolve(MAC_PATH + applicationName);
         } else {
-            applicationDirectory = new File(userHome, applicationName + '/');
+            applicationDirectory = userHome.resolve(applicationName);
         }
 
         return applicationDirectory;
@@ -136,38 +152,39 @@ public final class DirectoryUtils {
 
     /**
      * Should only be executed once at the start.
+     *
      * @param os the operating system
      * @return the gama data directory
      */
-    public static File getGameDataDirectory(OperatingSystem os) {
-        final File userHome = new File(System.getProperty(PROPERTY_USER_HOME, "."));
-        final File gameDataDirectory;
+    public static Path getGameDataDirectory(OperatingSystem os) {
+        final Path userHome = Paths.get(System.getProperty(PROPERTY_USER_HOME, "."));
+        final Path gameDataDirectory;
 
         if (os.isWindows()) {
-            File path = null;
+            Path path = null;
 
             final String savedGamesPath = SavedGamesPathFinder.findSavedGamesPath();
             if (savedGamesPath != null) {
-                path = new File(savedGamesPath);
+                path = Paths.get(savedGamesPath);
             }
 
             if (path == null) {
                 final String documentsPath = SavedGamesPathFinder.findDocumentsPath();
                 if (documentsPath != null) {
-                    path = new File(documentsPath);
+                    path = Paths.get(documentsPath);
                 }
             }
             if (path == null) {
-                path = new DirectoryChooser().getInitialDirectory();
+                path = new DirectoryChooser().getInitialDirectory().toPath();
             }
 
-            gameDataDirectory = new File(path, GAME_DATA_DIR_NAME + '\\');
+            gameDataDirectory = path.resolve(GAME_DATA_DIR_NAME);
         } else if (os.isUnix()) {
-            gameDataDirectory = new File(userHome, '.' + GAME_DATA_DIR_NAME.toLowerCase(Locale.ENGLISH) + '/');
+            gameDataDirectory = userHome.resolve('.' + GAME_DATA_DIR_NAME.toLowerCase(Locale.ENGLISH));
         } else if (os.isMac()) {
-            gameDataDirectory = new File(userHome, MAC_PATH + GAME_DATA_DIR_NAME + '/');
+            gameDataDirectory = userHome.resolve(MAC_PATH + GAME_DATA_DIR_NAME);
         } else {
-            gameDataDirectory = new File(userHome, GAME_DATA_DIR_NAME + '/');
+            gameDataDirectory = userHome.resolve(GAME_DATA_DIR_NAME);
         }
 
         return gameDataDirectory;

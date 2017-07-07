@@ -16,8 +16,8 @@
 
 package org.terasology.launcher.game;
 
-import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -42,10 +42,10 @@ public final class TerasologyGameVersion implements Serializable {
     private TerasologyGameVersionInfo gameVersionInfo;
 
     /** What path the game has been installed to locally. */
-    private transient File installationPath;
+    private transient Path installationPath;
 
     /** Direct reference to the Terasology game jar. */
-    private transient File gameJar;
+    private transient Path gameJar;
 
     /** Changes for this version. */
     private List<String> changeLog;
@@ -113,19 +113,19 @@ public final class TerasologyGameVersion implements Serializable {
         this.gameVersionInfo = gameVersionInfo;
     }
 
-    public File getInstallationPath() {
+    public Path getInstallationPath() {
         return installationPath;
     }
 
-    void setInstallationPath(File installationPath) {
+    void setInstallationPath(Path installationPath) {
         this.installationPath = installationPath;
     }
 
-    public File getGameJar() {
+    public Path getGameJar() {
         return gameJar;
     }
 
-    void setGameJar(File gameJar) {
+    void setGameJar(Path gameJar) {
         this.gameJar = gameJar;
     }
 

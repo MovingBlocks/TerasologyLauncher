@@ -19,70 +19,135 @@ package org.terasology.launcher.util;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.terasology.launcher.util.DirectoryUtils.checkDirectory;
-import static org.terasology.launcher.util.DirectoryUtils.containsFiles;
-import static org.terasology.launcher.util.DirectoryUtils.containsGameData;
+import static org.terasology.launcher.util.DirectoryUtils.*;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(DirectoryUtils.class)
 public class TestDirectoryUtils {
+
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Test(expected = IOException.class)
     public void testCannotCreateDirectory() throws IOException {
-        File directory = mock(File.class);
-        when(directory.exists()).thenReturn(false);
-        when(directory.mkdirs()).thenReturn(false);
+        PowerMockito.mockStatic(Files.class);
+
+        final Path directory = mock(Path.class);
+        when(Files.exists(directory)).thenReturn(false);
+        when(Files.createDirectories(directory)).thenThrow(new IOException("Failed to create directories"));
 
         checkDirectory(directory);
     }
 
     @Test(expected = IOException.class)
     public void testNotDirectory() throws IOException {
-        File directory = mock(File.class);
-        when(directory.exists()).thenReturn(true);
-        when(directory.isDirectory()).thenReturn(false);
+        PowerMockito.mockStatic(Files.class);
+
+        final Path directory = mock(Path.class);
+        when(Files.exists(directory)).thenReturn(true);
+        when(Files.isDirectory(directory)).thenReturn(false);
 
         checkDirectory(directory);
     }
 
     @Test(expected = IOException.class)
     public void testNoPerms() throws IOException {
-        File directory = mock(File.class);
-        when(directory.canRead()).thenReturn(false);
-        when(directory.canWrite()).thenReturn(false);
+        PowerMockito.mockStatic(Files.class);
+
+        final Path directory = mock(Path.class);
+        when(Files.isReadable(directory)).thenReturn(false);
+        when(Files.isWritable(directory)).thenReturn(false);
 
         checkDirectory(directory);
     }
 
     @Test
     public void testDirectoryWithFiles() throws IOException {
-        File directory = tempFolder.newFolder();
-        File file = new File(directory, "File");
-        assertTrue(file.createNewFile());
+        Path directory = tempFolder.newFolder().toPath();
+        Path file = directory.resolve("File");
+        assertNotNull(Files.createFile(file));
         assertTrue(containsFiles(directory));
     }
 
     @Test
     public void testEmptyDirectory() throws IOException {
-        File directory = tempFolder.newFolder();
+        Path directory = tempFolder.newFolder().toPath();
         assertFalse(containsFiles(directory));
     }
 
     @Test
     public void testGameDirectory() throws IOException {
-        File gameDirectory = tempFolder.newFolder();
-        File savesDirectory = new File(gameDirectory, "saves");
-        File saveFile = new File(savesDirectory, "saveFile");
-        assertTrue(savesDirectory.mkdir());
-        assertTrue(saveFile.createNewFile());
+        Path gameDirectory = tempFolder.newFolder().toPath();
+        Path savesDirectory = gameDirectory.resolve(GameDataDirectoryNames.SAVES.getName());
+        Path saveFile = savesDirectory.resolve("saveFile");
+
+        Files.createDirectories(savesDirectory);
+        Files.createFile(saveFile);
         assertTrue(containsGameData(gameDirectory));
+    }
+
+    @Test
+    public void testApplicationDirectoryWindows() {
+        Path expectedApplicationPath = Paths.get("C:/Users/Test/AppData/Roaming/Unit Test");
+        PowerMockito.mockStatic(System.class);
+
+        when(System.getenv("APPDATA")).thenReturn("C:/Users/Test/AppData/Roaming");
+        when(System.getProperty("user.home", ".")).thenReturn("C:/Users/Test");
+
+        assertEquals(expectedApplicationPath, getApplicationDirectory(OperatingSystem.WINDOWS_8, "Unit Test"));
+    }
+
+    @Test
+    public void testApplicationDirectoryWindowsNoAppData() {
+        Path expectedApplicationPath = Paths.get("C:/Users/Test/Unit Test");
+        PowerMockito.mockStatic(System.class);
+
+        when(System.getenv("APPDATA")).thenReturn(null);
+        when(System.getProperty("user.home", ".")).thenReturn("C:/Users/Test");
+
+        assertEquals(expectedApplicationPath, getApplicationDirectory(OperatingSystem.WINDOWS_8, "Unit Test"));
+    }
+
+    @Test
+    public void testApplicationDirectoryUnix() {
+        Path expectedApplicationPath = Paths.get("/home/test/.unit test");
+        PowerMockito.mockStatic(System.class);
+
+        when(System.getProperty("user.home", ".")).thenReturn("/home/test");
+
+        assertEquals(expectedApplicationPath, getApplicationDirectory(OperatingSystem.UNIX, "Unit Test"));
+    }
+
+    @Test
+    public void testApplicationDirectoryMac() {
+        Path expectedApplicationPath = Paths.get("/home/test/Library/Application Support/Unit Test");
+        PowerMockito.mockStatic(System.class);
+
+        when(System.getProperty("user.home", ".")).thenReturn("/home/test");
+
+        assertEquals(expectedApplicationPath, getApplicationDirectory(OperatingSystem.MAC_OSX, "Unit Test"));
+    }
+
+    @Test
+    public void testApplicationDirectoryUnknown() {
+        Path expectedApplicationPath = Paths.get("/Users/test/Unit Test");
+        PowerMockito.mockStatic(System.class);
+
+        when(System.getProperty("user.home", ".")).thenReturn("/Users/test");
+
+        assertEquals(expectedApplicationPath, getApplicationDirectory(OperatingSystem.UNKNOWN, "Unit Test"));
     }
 }

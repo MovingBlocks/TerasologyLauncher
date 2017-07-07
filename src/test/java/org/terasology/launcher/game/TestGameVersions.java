@@ -15,9 +15,6 @@
  */
 package org.terasology.launcher.game;
 
-import static org.mockito.Matchers.any;
-import static org.powermock.api.mockito.PowerMockito.spy;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,16 +25,19 @@ import org.terasology.launcher.TestingUtils;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.DownloadUtils;
 
-import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+import static org.mockito.Matchers.any;
+import static org.powermock.api.mockito.PowerMockito.spy;
+
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( { DownloadUtils.class, TerasologyGameVersions.class })
+@PrepareForTest({DownloadUtils.class, TerasologyGameVersions.class})
 public class TestGameVersions {
 
     // These functions are common assertions, to be used with requireAssertions
@@ -46,7 +46,7 @@ public class TestGameVersions {
     private static final BiConsumer<TerasologyGameVersion, Integer> REQUIRES_MIN_BUILD_PLUS_ONE =
             (version, i) -> Assert.assertEquals(String.format("Build number mismatch!: %s", version), version.getJob().getMinBuildNumber() + 1, (long) version.getBuildNumber());
     private static final BiConsumer<TerasologyGameVersion, Integer> REQUIRES_OMEGA_SAME_NUMBER =
-            (version, i)  -> Assert.assertEquals(String.format("Omega build should have the same number as regular build: %s", version),
+            (version, i) -> Assert.assertEquals(String.format("Omega build should have the same number as regular build: %s", version),
                     version.getBuildNumber(),
                     version.getOmegaNumber());
 
@@ -57,14 +57,14 @@ public class TestGameVersions {
 
     @Test
     public void testGetSingleVersion() throws Exception {
-        TerasologyGameVersions gameVersions = this.getGameVersions(true,false);
+        TerasologyGameVersions gameVersions = this.getGameVersions(true, false);
         this.loadGameVersions(gameVersions);
         this.runAssertions(gameVersions, 2, REQUIRES_NULL_OMEGA.andThen(REQUIRES_MIN_BUILD_PLUS_ONE).andThen(REQUIRES_SUCCESSFUL));
     }
 
     @Test
     public void testGetMultipleSequentialVersions() throws Exception {
-        TerasologyGameVersions gameVersions = this.getGameVersions(false,false);
+        TerasologyGameVersions gameVersions = this.getGameVersions(false, false);
 
         int minStable = GameJob.TerasologyStable.getMinBuildNumber() + 1;
         int minUnstable = GameJob.Terasology.getMinBuildNumber() + 1;
@@ -97,7 +97,7 @@ public class TestGameVersions {
 
     @Test
     public void testGetMultipleNonSequentialVersions() throws Exception {
-        TerasologyGameVersions gameVersions = this.getGameVersions(false,false);
+        TerasologyGameVersions gameVersions = this.getGameVersions(false, false);
 
         int minStable = GameJob.TerasologyStable.getMinBuildNumber() + 1;
         int minUnstable = GameJob.Terasology.getMinBuildNumber() + 1;
@@ -142,7 +142,7 @@ public class TestGameVersions {
     }
 
     private int[] getBuildArray(int start, int stop) {
-        int[] buildArray = new int[(stop-start) + 2]; // add 1 to include the end, and add 1 for the duplicate first build
+        int[] buildArray = new int[(stop - start) + 2]; // add 1 to include the end, and add 1 for the duplicate first build
         buildArray[0] = stop;  // Duplicate, to account for virtual 'latest' version
         for (int i = buildArray.length - 1; i > 0; i--) {
             buildArray[i] = start++;
@@ -151,7 +151,7 @@ public class TestGameVersions {
     }
 
     private void runAssertions(TerasologyGameVersions gameVersions, int expected, BiConsumer<TerasologyGameVersion, Integer> additionalAssertions) {
-        for (GameJob job: GameJob.values()) {
+        for (GameJob job : GameJob.values()) {
             List<TerasologyGameVersion> versions = gameVersions.getGameVersionList(job);
             Assert.assertEquals("Unexpected number of versions for " + job.name(), expected, versions.size());
 
@@ -171,8 +171,8 @@ public class TestGameVersions {
     }
 
     private void loadGameVersions(TerasologyGameVersions gameVersions) throws Exception {
-        File launcherDir = Files.createTempDirectory("terasology-launcher-dir").toAbsolutePath().toFile();
-        File gameDirectory = Files.createTempDirectory("terasology-game-dir").toAbsolutePath().toFile();
+        Path launcherDir = Files.createTempDirectory("terasology-launcher-dir").toAbsolutePath();
+        Path gameDirectory = Files.createTempDirectory("terasology-game-dir").toAbsolutePath();
 
         BaseLauncherSettings settings = new BaseLauncherSettings(launcherDir);
         settings.init();
