@@ -1,6 +1,18 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## 3.2.0 (2017-07-08)
+* Assorted translations (Polish, Hungarian, Ukrainian, German, Russian)
+* Added tooltips to buttons (#376)
+* Various code cleanup and refactoring (Checkstyle, PMD, Findbugs, Sonar)
+* Added CREDITS and updated icons
+* Added more Unit tests (#393, #394, #396) 
+* Replaced 'gradle install' with 'gradle installApp'
+* 4K background image (#402)
+* Switch file handling to Java NIO (#407)
+* Removed guava dependency (#411)
+* Fixed file and zip handling (#395, #403)
+
 ## 3.1.0 (2016-07-21)
 * Fix for Jenkins upgrade causing available game version scanning to fail
 * Sorts languages in drop-down menu for launcher settings

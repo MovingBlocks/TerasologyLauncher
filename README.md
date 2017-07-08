@@ -86,7 +86,19 @@ Contributors
 * Anthony Kireev [@small-jeeper](https://github.com/small-jeeper)
 * Piotr Halama [@Halamix2](https://github.com/Halamix2)
 * Martin van Kuik [mtjvankuik](https://github.com/mtjvankuik)
-* Many users of the [german forum][German forum] (ideas, testing, suggestions, bug reports)
+* Aaron Hill [@Aaron1011](https://github.com/Aaron1011)
+* Avalancs [@Avalancs](https://github.com/Avalancs)
+* Bryan Ngo [@bryngo](https://github.com/bryngo)
+* Gianluca Nitti [@gianluca-nitti](https://github.com/gianluca-nitti)
+* Malanius Privierre [@Malanius](https://github.com/Malanius)
+* Max Borsch [@MaxBorsch](https://github.com/MaxBorsch)
+* Rostyslav Zatserkovnyi [@rzats](https://github.com/rzats)
+* Scott M Sunarto [@smsunarto](https://github.com/smsunarto)
+* Zeeshan Asghar [@zeeshanasghar](https://github.com/zeeshanasghar)
+* iojw [@iojw](https://github.com/iojw)
+* theobisproject [@theobisproject](https://github.com/theobisproject)
+
+.. and many users of the German Terasology Forum (ideas, testing, suggestions, bug reports).
 
 [GitHub MovingBlocks]: https://github.com/MovingBlocks/ "MovingBlocks"
 [GitHub Terasology]: https://github.com/MovingBlocks/Terasology/ "Terasology"
