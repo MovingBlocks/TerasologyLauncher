@@ -654,8 +654,8 @@ public final class TerasologyGameVersions {
             return false;
         }
 
-        try {
-            Optional<Path> foundJar = Files.list(libsDir).filter(f -> f.getFileName().toString().matches(FILE_ENGINE_JAR)).findAny();
+        try (Stream<Path> stream = Files.list(libsDir)) {
+            Optional<Path> foundJar = stream.filter(f -> f.getFileName().toString().matches(FILE_ENGINE_JAR)).findAny();
             if (foundJar.isPresent()) {
                 engineJar = foundJar.get();
             }
