@@ -119,7 +119,7 @@
                     </Button>
                   </children>
                 </HBox>
-                <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" prefHeight="64.0" spacing="8.0" StackPane.alignment="BOTTOM_LEFT">
+                <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="64.0" prefWidth="64.0" spacing="8.0" StackPane.alignment="BOTTOM_LEFT">
                   <HBox.margin>
                       <Insets left="8.0" />
                   </HBox.margin>
