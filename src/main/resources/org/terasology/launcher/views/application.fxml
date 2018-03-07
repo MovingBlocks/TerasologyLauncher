@@ -257,6 +257,19 @@
                             </ImageView>
                           </graphic>
                         </Button>
+                        <Button fx:id="startAndDownloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#startAndDownloadAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
+                          <graphic></graphic>
+                          <ImageView fx:id="downloadImage" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                              <Image url="@../images/download.png" preserveRatio="false" smooth="false" />
+                            </image>
+                          </ImageView>
+                          <ImageView fx:id="playImage" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                              <Image url="@../images/play.png" preserveRatio="false" smooth="false" />
+                            </image>
+                          </ImageView>
+                        </Button>
                         <Button fx:id="deleteButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#deleteAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
                           <graphic>
                             <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
