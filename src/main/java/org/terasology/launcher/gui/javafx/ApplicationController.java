@@ -221,8 +221,8 @@ public class ApplicationController {
         }
     }
 
-    @FXML
-    protected void startGameAction() {
+    //@FXML
+    private void startGameAction() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if ((gameVersion == null) || !gameVersion.isInstalled()) {
             logger.warn("The selected game version can not be started! '{}'", gameVersion);
@@ -247,8 +247,8 @@ public class ApplicationController {
         }
     }
 
-    @FXML
-    protected void downloadAction() {
+    //@FXML
+    private void downloadAction() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if (gameDownloadWorker != null) {
             // Cancel download
