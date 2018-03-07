@@ -248,6 +248,7 @@
                             <Insets />
                           </HBox.margin>
                         </Button>
+                        <!--
                         <Button fx:id="downloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#downloadAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
                           <graphic>
                             <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
@@ -257,6 +258,7 @@
                             </ImageView>
                           </graphic>
                         </Button>
+                        -->
                         <Button fx:id="startAndDownloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#startAndDownloadAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
                           <graphic></graphic>
                           <ImageView fx:id="downloadImage" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
@@ -279,6 +281,7 @@
                             </ImageView>
                           </graphic>
                         </Button>
+                        <!--
                         <Button fx:id="startButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#startGameAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
                           <graphic>
                             <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
@@ -288,6 +291,7 @@
                             </ImageView>
                           </graphic>
                         </Button>
+                        -->
                         <Button fx:id="settingsButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#openSettingsAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
                           <graphic>
                             <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
