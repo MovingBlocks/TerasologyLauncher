@@ -108,12 +108,16 @@ public class ApplicationController {
     private ProgressBar progressBar;
     @FXML
     private TabPane contentTabPane;
+    /*
     @FXML
     private Button downloadButton;
+    */
     @FXML
     private Button cancelDownloadButton;
+    /*
     @FXML
     private Button startButton;
+    */
     @FXML
     private Button deleteButton;
     @FXML
@@ -388,14 +392,14 @@ public class ApplicationController {
 
         populateJobBox();
 
-        downloadButton.managedProperty().bind(downloadButton.visibleProperty());
+        //downloadButton.managedProperty().bind(downloadButton.visibleProperty());
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
         startAndDownloadButton.managedProperty().bind(startAndDownloadButton.visibleProperty());
 
-        downloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
+        //downloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
         cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
         deleteButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_delete")));
-        startButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
+        //startButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
         settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
         exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
         startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
@@ -404,10 +408,10 @@ public class ApplicationController {
     }
 
     private void updateTooltipTexts() {
-        downloadButton.getTooltip().setText(BundleUtils.getLabel("launcher_download"));
+        //downloadButton.getTooltip().setText(BundleUtils.getLabel("launcher_download"));
         cancelDownloadButton.getTooltip().setText(BundleUtils.getLabel("launcher_cancelDownload"));
         deleteButton.getTooltip().setText(BundleUtils.getLabel("launcher_delete"));
-        startButton.getTooltip().setText(BundleUtils.getLabel("launcher_start"));
+        //startButton.getTooltip().setText(BundleUtils.getLabel("launcher_start"));
         settingsButton.getTooltip().setText(BundleUtils.getLabel("launcher_settings"));
         exitButton.getTooltip().setText(BundleUtils.getLabel("launcher_exit"));
 
@@ -518,26 +522,26 @@ public class ApplicationController {
     private void updateButtons() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if (gameVersion == null) {
-            downloadButton.setDisable(true);
-            startButton.setDisable(true);
+            //downloadButton.setDisable(true);
+            //startButton.setDisable(true);
             deleteButton.setDisable(true);
             startAndDownloadButton.setGraphic(downloadImage);
             startAndDownloadButton.setDisable(true);
         } else if (gameVersion.isInstalled()) {
-            downloadButton.setDisable(true);
-            startButton.setDisable(false);
+            //downloadButton.setDisable(true);
+            //startButton.setDisable(false);
             deleteButton.setDisable(false);
             startAndDownloadButton.setGraphic(playImage);
             startAndDownloadButton.setDisable(false);
         } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful() && (gameVersion.getBuildNumber() != null) && (gameDownloadWorker == null)) {
-            downloadButton.setDisable(false);
-            startButton.setDisable(true);
+            //downloadButton.setDisable(false);
+            //startButton.setDisable(true);
             deleteButton.setDisable(true);
             startAndDownloadButton.setGraphic(downloadImage);
             startAndDownloadButton.setDisable(false);
         } else {
-            downloadButton.setDisable(true);
-            startButton.setDisable(true);
+            //downloadButton.setDisable(true);
+            //startButton.setDisable(true);
             deleteButton.setDisable(true);
             startAndDownloadButton.setGraphic(downloadImage);
             startAndDownloadButton.setDisable(true);
@@ -545,11 +549,11 @@ public class ApplicationController {
 
         // Cancel download
         if (gameDownloadWorker != null) {
-            downloadButton.setVisible(false);
+            //downloadButton.setVisible(false);
             cancelDownloadButton.setVisible(true);
             startAndDownloadButton.setVisible(false);
         } else {
-            downloadButton.setVisible(true);
+            //downloadButton.setVisible(true);
             cancelDownloadButton.setVisible(false);
             startAndDownloadButton.setVisible(true);
         }
