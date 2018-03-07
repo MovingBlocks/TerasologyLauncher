@@ -41,6 +41,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.BlendMode;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
@@ -129,6 +130,12 @@ public class ApplicationController {
     private Button settingsButton;
     @FXML
     private Button exitButton;
+    @FXML
+    private Button startAndDownloadButton;
+    @FXML
+    private ImageView playImage;
+    @FXML
+    private ImageView downloadImage;
 
     @FXML
     protected void handleExitButtonAction() {
@@ -263,6 +270,18 @@ public class ApplicationController {
     }
 
     @FXML
+    protected void startAndDownloadAction() {
+        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+        if(gameVersion == null || !gameVersion.isInstalled()) {
+            logger.info("Download Game Action!");
+            downloadAction();
+        } else {
+            logger.info("Start Game Action!");
+            startGameAction();
+        }
+    }
+
+    @FXML
     protected void cancelDownloadAction() {
         // Cancel download
         logger.info("Cancel game download!");
@@ -371,6 +390,7 @@ public class ApplicationController {
 
         downloadButton.managedProperty().bind(downloadButton.visibleProperty());
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
+        startAndDownloadButton.managedProperty().bind(startAndDownloadButton.visibleProperty());
 
         downloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
         cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
@@ -378,6 +398,7 @@ public class ApplicationController {
         startButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
         settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
         exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
+        startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
 
         updateGui();
     }
@@ -389,6 +410,12 @@ public class ApplicationController {
         startButton.getTooltip().setText(BundleUtils.getLabel("launcher_start"));
         settingsButton.getTooltip().setText(BundleUtils.getLabel("launcher_settings"));
         exitButton.getTooltip().setText(BundleUtils.getLabel("launcher_exit"));
+
+        if(startAndDownloadButton.getGraphic() == downloadImage) {
+            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
+        } else {
+            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
+        }
     }
 
     private void populateJobBox() {
@@ -494,27 +521,37 @@ public class ApplicationController {
             downloadButton.setDisable(true);
             startButton.setDisable(true);
             deleteButton.setDisable(true);
+            startAndDownloadButton.setGraphic(downloadImage);
+            startAndDownloadButton.setDisable(true);
         } else if (gameVersion.isInstalled()) {
             downloadButton.setDisable(true);
             startButton.setDisable(false);
             deleteButton.setDisable(false);
+            startAndDownloadButton.setGraphic(playImage);
+            startAndDownloadButton.setDisable(false);
         } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful() && (gameVersion.getBuildNumber() != null) && (gameDownloadWorker == null)) {
             downloadButton.setDisable(false);
             startButton.setDisable(true);
             deleteButton.setDisable(true);
+            startAndDownloadButton.setGraphic(downloadImage);
+            startAndDownloadButton.setDisable(false);
         } else {
             downloadButton.setDisable(true);
             startButton.setDisable(true);
             deleteButton.setDisable(true);
+            startAndDownloadButton.setGraphic(downloadImage);
+            startAndDownloadButton.setDisable(true);
         }
 
         // Cancel download
         if (gameDownloadWorker != null) {
             downloadButton.setVisible(false);
             cancelDownloadButton.setVisible(true);
+            startAndDownloadButton.setVisible(false);
         } else {
             downloadButton.setVisible(true);
             cancelDownloadButton.setVisible(false);
+            startAndDownloadButton.setVisible(true);
         }
 
         // if less than 200MB available
