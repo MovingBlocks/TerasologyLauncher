@@ -12,6 +12,7 @@ Terasology Launcher - ChangeLog
 * Switch file handling to Java NIO (#407)
 * Removed guava dependency (#411)
 * Fixed file and zip handling (#395, #403)
+* Merged download and play button (#397)
 
 ## 3.1.0 (2016-07-21)
 * Fix for Jenkins upgrade causing available game version scanning to fail
