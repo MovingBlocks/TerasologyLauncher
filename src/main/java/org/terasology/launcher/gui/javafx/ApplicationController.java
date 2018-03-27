@@ -266,7 +266,7 @@ public class ApplicationController {
     @FXML
     protected void startAndDownloadAction() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-        if(gameVersion == null || !gameVersion.isInstalled()) {
+        if (gameVersion == null || !gameVersion.isInstalled()) {
             logger.info("Download Game Action!");
             downloadAction();
         } else {
@@ -400,7 +400,7 @@ public class ApplicationController {
         settingsButton.getTooltip().setText(BundleUtils.getLabel("launcher_settings"));
         exitButton.getTooltip().setText(BundleUtils.getLabel("launcher_exit"));
 
-        if(startAndDownloadButton.getGraphic() == downloadImage) {
+        if (startAndDownloadButton.getGraphic() == downloadImage) {
             startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
         } else {
             startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
