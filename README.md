@@ -97,6 +97,7 @@ Contributors
 * Zeeshan Asghar [@zeeshanasghar](https://github.com/zeeshanasghar)
 * iojw [@iojw](https://github.com/iojw)
 * theobisproject [@theobisproject](https://github.com/theobisproject)
+* bpas247 [@bpas247](https://github.com/bpas247)
 
 .. and many users of the German Terasology Forum (ideas, testing, suggestions, bug reports).
 
