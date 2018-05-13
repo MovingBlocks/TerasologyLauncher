@@ -41,6 +41,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.BlendMode;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
@@ -108,11 +109,7 @@ public class ApplicationController {
     @FXML
     private TabPane contentTabPane;
     @FXML
-    private Button downloadButton;
-    @FXML
     private Button cancelDownloadButton;
-    @FXML
-    private Button startButton;
     @FXML
     private Button deleteButton;
     @FXML
@@ -129,6 +126,12 @@ public class ApplicationController {
     private Button settingsButton;
     @FXML
     private Button exitButton;
+    @FXML
+    private Button startAndDownloadButton;
+    @FXML
+    private ImageView playImage;
+    @FXML
+    private ImageView downloadImage;
 
     @FXML
     protected void handleExitButtonAction() {
@@ -210,8 +213,7 @@ public class ApplicationController {
         }
     }
 
-    @FXML
-    protected void startGameAction() {
+    private void startGameAction() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if ((gameVersion == null) || !gameVersion.isInstalled()) {
             logger.warn("The selected game version can not be started! '{}'", gameVersion);
@@ -236,8 +238,7 @@ public class ApplicationController {
         }
     }
 
-    @FXML
-    protected void downloadAction() {
+    private void downloadAction() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if (gameDownloadWorker != null) {
             // Cancel download
@@ -260,6 +261,18 @@ public class ApplicationController {
             new Thread(gameDownloadWorker).start();
         }
         updateGui();
+    }
+
+    @FXML
+    protected void startAndDownloadAction() {
+        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+        if (gameVersion == null || !gameVersion.isInstalled()) {
+            logger.info("Download Game Action!");
+            downloadAction();
+        } else {
+            logger.info("Start Game Action!");
+            startGameAction();
+        }
     }
 
     @FXML
@@ -369,26 +382,29 @@ public class ApplicationController {
 
         populateJobBox();
 
-        downloadButton.managedProperty().bind(downloadButton.visibleProperty());
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
+        startAndDownloadButton.managedProperty().bind(startAndDownloadButton.visibleProperty());
 
-        downloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
         cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
         deleteButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_delete")));
-        startButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
         settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
         exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
+        startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
 
         updateGui();
     }
 
     private void updateTooltipTexts() {
-        downloadButton.getTooltip().setText(BundleUtils.getLabel("launcher_download"));
         cancelDownloadButton.getTooltip().setText(BundleUtils.getLabel("launcher_cancelDownload"));
         deleteButton.getTooltip().setText(BundleUtils.getLabel("launcher_delete"));
-        startButton.getTooltip().setText(BundleUtils.getLabel("launcher_start"));
         settingsButton.getTooltip().setText(BundleUtils.getLabel("launcher_settings"));
         exitButton.getTooltip().setText(BundleUtils.getLabel("launcher_exit"));
+
+        if (startAndDownloadButton.getGraphic() == downloadImage) {
+            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
+        } else {
+            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
+        }
     }
 
     private void populateJobBox() {
@@ -491,30 +507,30 @@ public class ApplicationController {
     private void updateButtons() {
         final TerasologyGameVersion gameVersion = getSelectedGameVersion();
         if (gameVersion == null) {
-            downloadButton.setDisable(true);
-            startButton.setDisable(true);
             deleteButton.setDisable(true);
+            startAndDownloadButton.setGraphic(downloadImage);
+            startAndDownloadButton.setDisable(true);
         } else if (gameVersion.isInstalled()) {
-            downloadButton.setDisable(true);
-            startButton.setDisable(false);
             deleteButton.setDisable(false);
+            startAndDownloadButton.setGraphic(playImage);
+            startAndDownloadButton.setDisable(false);
         } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful() && (gameVersion.getBuildNumber() != null) && (gameDownloadWorker == null)) {
-            downloadButton.setDisable(false);
-            startButton.setDisable(true);
             deleteButton.setDisable(true);
+            startAndDownloadButton.setGraphic(downloadImage);
+            startAndDownloadButton.setDisable(false);
         } else {
-            downloadButton.setDisable(true);
-            startButton.setDisable(true);
             deleteButton.setDisable(true);
+            startAndDownloadButton.setGraphic(downloadImage);
+            startAndDownloadButton.setDisable(true);
         }
 
         // Cancel download
         if (gameDownloadWorker != null) {
-            downloadButton.setVisible(false);
             cancelDownloadButton.setVisible(true);
+            startAndDownloadButton.setVisible(false);
         } else {
-            downloadButton.setVisible(true);
             cancelDownloadButton.setVisible(false);
+            startAndDownloadButton.setVisible(true);
         }
 
         // if less than 200MB available
