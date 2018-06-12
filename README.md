@@ -9,7 +9,7 @@ The *Terasology Launcher* provides easy access to the different game versions an
 Terasology and related projects are developed by a group of software enthusiast volunteers under the organization name [MovingBlocks][GitHub MovingBlocks].
 
 [![Build Status](http://jenkins.terasology.org/view/Launcher/job/TerasologyLauncherStable/badge/icon)](http://jenkins.terasology.org/view/Launcher/job/TerasologyLauncherStable/)
-[![Translation status](http://translate.terasology.org/widgets/terasologylauncher-shields-badge.svg)](http://translate.terasology.org/engage/terasologylauncher/?utm_source=widget)
+[![Translation status](http://translate.terasology.org/widgets/launcher-shields-badge.svg)](http://translate.terasology.org/engage/launcher/?utm_source=widget)
 
 Usage
 -----
