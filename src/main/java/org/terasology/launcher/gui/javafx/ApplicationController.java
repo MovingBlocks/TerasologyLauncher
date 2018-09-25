@@ -78,8 +78,11 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class ApplicationController {
@@ -602,15 +605,20 @@ public class ApplicationController {
     private void updateAboutTab() {
         aboutInfoAccordion.getPanes().clear();
 
-        Collection<URL> files = new ArrayList<>();
-        files.add(BundleUtils.getFXMLUrl(ABOUT, "README.md"));
-        files.add(BundleUtils.getFXMLUrl(ABOUT, "CHANGELOG.md"));
-        files.add(BundleUtils.getFXMLUrl(ABOUT, "CONTRIBUTING.md"));
-        files.add(BundleUtils.getFXMLUrl(ABOUT, "LICENSE"));
+        List<String> fileNames = Arrays.asList("README.md", "CHANGELOG.md", "CONTRIBUTING.md", "LICENSE");
+        Map<String, URL> files = new HashMap<>();
+        for(String filename : fileNames) {
+           files.put(filename, BundleUtils.getFXMLUrl(ABOUT, filename));
+        }
         Charset cs = Charset.forName("UTF-8");
 
-        for (URL url : files) {
+        for (String fileName : files.keySet()) {
             try {
+                URL url = files.get(fileName);
+                if(url == null) { // probably need to run gradlew build, that copies the files to the required place
+                    logger.error("updateAboutTab(): The file {} was not found", fileName);
+                    continue;
+                }
                 int fnameIdx = url.getFile().lastIndexOf('/');
                 int extIdx = url.getFile().lastIndexOf('.');
                 String fname = url.getFile().substring(fnameIdx + 1);
@@ -655,9 +663,9 @@ public class ApplicationController {
 
                 aboutInfoAccordion.getPanes().add(titledPane);
             } catch (MalformedURLException e) {
-                logger.warn("Could not load info file -- {}", url);
+                logger.warn("Could not load info file -- {}", fileName);
             } catch (IOException e) {
-                logger.warn("Failed to parse markdown file {}", url, e);
+                logger.warn("Failed to parse markdown file {}", fileName, e);
             }
 
             if (!aboutInfoAccordion.getPanes().isEmpty()) {
