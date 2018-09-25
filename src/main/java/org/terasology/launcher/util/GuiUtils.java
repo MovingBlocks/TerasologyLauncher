@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.Desktop;
 import java.awt.EventQueue;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -84,14 +85,16 @@ public final class GuiUtils {
             directoryChooser.setInitialDirectory(directory.toFile());
             directoryChooser.setTitle(title);
 
-            selected = directoryChooser.showDialog(owner).toPath();
+            File selectedFile = directoryChooser.showDialog(owner);
+            selected = selectedFile != null ? selectedFile.toPath() : null;
         } else {
             final FutureTask<Path> chooseDirectory = new FutureTask<>(() -> {
                 final DirectoryChooser directoryChooser = new DirectoryChooser();
                 directoryChooser.setInitialDirectory(directory.toFile());
                 directoryChooser.setTitle(title);
 
-                return directoryChooser.showDialog(owner).toPath();
+                File selectedFile = directoryChooser.showDialog(owner);
+                return selectedFile != null ? selectedFile.toPath() : null;
             });
 
             Platform.runLater(chooseDirectory);
@@ -104,7 +107,7 @@ public final class GuiUtils {
 
         // directory proposal needs to be deleted if the user chose a different one
         try {
-            if (!Files.isSameFile(directory, selected) && !DirectoryUtils.containsFiles(directory) && !Files.deleteIfExists(directory)) {
+            if (selected != null && !Files.isSameFile(directory, selected) && !DirectoryUtils.containsFiles(directory) && !Files.deleteIfExists(directory)) {
                 logger.warn("Could not delete unused default directory! {}", directory);
             }
         } catch (IOException e) {
