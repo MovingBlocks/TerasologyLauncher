@@ -95,8 +95,8 @@ repositories {
 // Primary dependencies definition
 dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.7'
-    compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
-    compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.1.0'
+    compile group: 'net.java.dev.jna', name: 'jna', version: '4.5.2'
+    compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.5.2'
     compile group: 'org.terasology', name: 'CrashReporter', version: '1.2.+'
     compile group: 'com.github.rjeschke', name: 'txtmark', version: '0.11'
 

@@ -16,6 +16,10 @@
 
 package org.terasology.launcher.util;
 
+import com.sun.jna.Native;
+import com.sun.jna.Platform;
+import com.sun.jna.platform.win32.Kernel32;
+import com.sun.jna.platform.win32.WinBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
@@ -75,36 +79,49 @@ public final class DownloadUtils {
     }
 
     public static void downloadToFile(URL downloadURL, Path file, ProgressListener listener) throws DownloadException {
-        listener.update(0);
-
-        final HttpURLConnection connection = getConnectedDownloadConnection(downloadURL);
-
-        final long contentLength = connection.getContentLengthLong();
-        if (contentLength <= 0) {
-            throw new DownloadException("Wrong content length! URL=" + downloadURL + ", contentLength=" + contentLength);
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Download file '{}' ({}; {}) from URL '{}'.", file, contentLength, connection.getContentType(), downloadURL);
+        // prevent Windows from going to sleep while the download is running
+        int originalExectuionState = 0;
+        if(Platform.isWindows()) {
+            originalExectuionState = Kernel32.INSTANCE.SetThreadExecutionState(WinBase.ES_CONTINUOUS | WinBase.ES_SYSTEM_REQUIRED | WinBase.ES_AWAYMODE_REQUIRED);
         }
 
-        try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-             BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))) {
-            downloadToFile(listener, contentLength, in, out);
-        } catch (IOException e) {
-            throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
-        } finally {
-            connection.disconnect();
-        }
+        try {
+            listener.update(0);
 
-        if (!listener.isCancelled()) {
-            try {
-                if (Files.size(file) != contentLength) {
-                    throw new DownloadException("Wrong file length after download! " + Files.size(file) + " != " + contentLength);
-                }
-            } catch (IOException e) {
-                throw new DownloadException("Failed to read the file length after download!", e);
+            final HttpURLConnection connection = getConnectedDownloadConnection(downloadURL);
+
+            final long contentLength = connection.getContentLengthLong();
+            if (contentLength <= 0) {
+                throw new DownloadException("Wrong content length! URL=" + downloadURL + ", contentLength=" + contentLength);
             }
-            listener.update(100);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Download file '{}' ({}; {}) from URL '{}'.", file, contentLength, connection.getContentType(), downloadURL);
+            }
+
+            try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+                 BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))) {
+                downloadToFile(listener, contentLength, in, out);
+            } catch (IOException e) {
+                throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
+            } finally {
+                connection.disconnect();
+            }
+
+            if (!listener.isCancelled()) {
+                try {
+                    if (Files.size(file) != contentLength) {
+                        throw new DownloadException("Wrong file length after download! " + Files.size(file) + " != " + contentLength);
+                    }
+                } catch (IOException e) {
+                    throw new DownloadException("Failed to read the file length after download!", e);
+                }
+                listener.update(100);
+            }
+        } finally {
+            // reset thread so pc can go to sleep if the download is finished
+            if(Platform.isWindows() && originalExectuionState != 0) { // originalExectuionState is 0 if the previous call failed
+                Kernel32.INSTANCE.SetThreadExecutionState(originalExectuionState);
+            }
         }
     }
 
