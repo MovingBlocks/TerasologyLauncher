@@ -37,6 +37,7 @@ import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.game.VersionItem;
 import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.GuiUtils;
@@ -60,6 +61,7 @@ public class SettingsController {
     private BaseLauncherSettings launcherSettings;
     private TerasologyGameVersions gameVersions;
 
+    private LauncherSettingsValidator validator;
     private Path gameDirectory;
     private Path gameDataDirectory;
 
@@ -202,8 +204,9 @@ public class SettingsController {
             launcherSettings.setUserGameParameters(userGameParametersField.getText());
         }
 
-        // store changed settings
+        // validate and store changed settings
         try {
+            validator.validate(launcherSettings);
             launcherSettings.store();
         } catch (IOException e) {
             logger.error("The launcher settings can not be stored! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
@@ -288,6 +291,8 @@ public class SettingsController {
         this.launcherSettings = newLauncherSettings;
         this.gameVersions = newGameVersions;
         this.stage = newStage;
+
+        validator = new LauncherSettingsValidator();
 
         populateJobBox();
         populateHeapSize();
