@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2019 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * This file is licensed under the MIT license.
- * See the LICENSE file in project root for details.
- */
-
 package org.terasology.launcher.settings;
 
 import org.slf4j.Logger;
@@ -28,7 +23,7 @@ import org.terasology.launcher.util.JavaHeapSize;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_MAX_HEAP_SIZE;
 
 /**
- * Provides methods to validate launcher settings
+ * Provides methods to validate launcher settings.
  */
 public class LauncherSettingsValidator {
     private static final Logger logger = LoggerFactory.getLogger(LauncherSettingsValidator.class);
