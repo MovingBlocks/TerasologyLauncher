@@ -33,7 +33,7 @@ import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_MAX
 public class LauncherSettingsValidator {
     private static final Logger logger = LoggerFactory.getLogger(LauncherSettingsValidator.class);
 
-    public AbstractLauncherSettings validate(BaseLauncherSettings settings) {
+    public boolean validateMaxHeapSize(BaseLauncherSettings settings) {
         final JavaHeapSize currentMaxJavaHeapSize = settings.getMaxHeapSize();
 
         // Checks if JVM is 32 bit
@@ -48,11 +48,18 @@ public class LauncherSettingsValidator {
             logger.warn("Proceeding with '{}' as the '{}'.",
                     JavaHeapSize.GB_1_5.getSizeParameter(), PROPERTY_MAX_HEAP_SIZE);
 
-            if (settings.getInitialHeapSize().compareTo(currentMaxJavaHeapSize) > 0) {
-                settings.setInitialHeapSize(currentMaxJavaHeapSize);
-            }
+            return true;
         }
+        return false;
+    }
 
-        return settings;
+    public boolean validateInitialHeapSize(BaseLauncherSettings settings) {
+        final JavaHeapSize currentMaxJavaHeapSize = settings.getMaxHeapSize();
+
+        if (settings.getInitialHeapSize().compareTo(currentMaxJavaHeapSize) > 0) {
+            settings.setInitialHeapSize(currentMaxJavaHeapSize);
+            return true;
+        }
+        return false;
     }
 }

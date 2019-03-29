@@ -206,7 +206,13 @@ public class SettingsController {
 
         // validate and store changed settings
         try {
-            validator.validate(launcherSettings);
+            if (validator.validateMaxHeapSize(launcherSettings)) {
+                updateMaxHeapSizeBox();
+            }
+            if (validator.validateInitialHeapSize(launcherSettings)) {
+                updateInitialHeapSizeBox();
+            }
+
             launcherSettings.store();
         } catch (IOException e) {
             logger.error("The launcher settings can not be stored! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
