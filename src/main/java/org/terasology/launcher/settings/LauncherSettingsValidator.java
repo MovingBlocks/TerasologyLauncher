@@ -20,41 +20,51 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.JavaHeapSize;
 
-import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_MAX_HEAP_SIZE;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * Provides methods to validate launcher settings.
+ * Provides methods to check launcher settings and correct if invalid.
  */
 public class LauncherSettingsValidator {
+    private final List<SettingsValidationRule> validationRules;
+
     private static final Logger logger = LoggerFactory.getLogger(LauncherSettingsValidator.class);
 
-    public boolean validateMaxHeapSize(BaseLauncherSettings settings) {
-        final JavaHeapSize currentMaxJavaHeapSize = settings.getMaxHeapSize();
-
-        // Checks if JVM is 32 bit
-        if (System.getProperty("sun.arch.data.model").equals("32")
-                && currentMaxJavaHeapSize.compareTo(JavaHeapSize.GB_1_5) > 0) {
-
-            logger.warn("Cannot set '{}' as '{}' for a 32-bit JVM.",
-                    currentMaxJavaHeapSize.getSizeParameter(), PROPERTY_MAX_HEAP_SIZE);
-
-            settings.setMaxHeapSize(JavaHeapSize.GB_1_5);
-
-            logger.warn("Proceeding with '{}' as the '{}'.",
-                    JavaHeapSize.GB_1_5.getSizeParameter(), PROPERTY_MAX_HEAP_SIZE);
-
-            return true;
-        }
-        return false;
+    public LauncherSettingsValidator() {
+        validationRules = new ArrayList<>();
+        setupRules();
     }
 
-    public boolean validateInitialHeapSize(BaseLauncherSettings settings) {
-        final JavaHeapSize currentMaxJavaHeapSize = settings.getMaxHeapSize();
+    private void setupRules() {
+        // Rule for max heap size
+        SettingsValidationRule maxHeapSizeRule = new SettingsValidationRule(
+                s -> !System.getProperty("os.arch").equals("x86")
+                        || s.getMaxHeapSize().compareTo(JavaHeapSize.GB_1_5) < 0,
+                "Max heap size cannot be greater than 1.5 GB for a 32-bit JVM",
+                s -> s.setMaxHeapSize(JavaHeapSize.GB_1_5)
+        );
 
-        if (settings.getInitialHeapSize().compareTo(currentMaxJavaHeapSize) > 0) {
-            settings.setInitialHeapSize(currentMaxJavaHeapSize);
-            return true;
+        // Rule for initial heap size
+        SettingsValidationRule initialHeapSizeRule = new SettingsValidationRule(
+                s -> s.getInitialHeapSize().compareTo(s.getMaxHeapSize()) < 0,
+                "Initial heap size cannot be greater than max heap size",
+                s -> s.setInitialHeapSize(s.getMaxHeapSize())
+        );
+
+        // Add all rules to the list
+        validationRules.addAll(Arrays.asList(
+                maxHeapSizeRule, initialHeapSizeRule
+        ));
+    }
+
+    public void validate(AbstractLauncherSettings settings) {
+        for (SettingsValidationRule rule : validationRules) {
+            if (rule.isBrokenBy(settings)) {
+                logger.warn(rule.getInvalidationMessage());
+                rule.correct(settings);
+            }
         }
-        return false;
     }
 }
