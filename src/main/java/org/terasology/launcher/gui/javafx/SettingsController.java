@@ -47,6 +47,7 @@ import org.terasology.launcher.util.LogLevel;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.Collator;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -413,7 +414,13 @@ public class SettingsController {
     private void populateHeapSize() {
         maxHeapSizeBox.getItems().clear();
         initialHeapSizeBox.getItems().clear();
-        for (JavaHeapSize heapSize : JavaHeapSize.values()) {
+
+        // Limit items till 1.5 GB for 32-bit JVM
+        final JavaHeapSize[] heapSizeRange = System.getProperty("os.arch").equals("x86")
+                ? Arrays.copyOfRange(JavaHeapSize.values(), 0, JavaHeapSize.GB_1_5.ordinal() + 1)
+                : JavaHeapSize.values();
+        
+        for (JavaHeapSize heapSize : heapSizeRange) {
             maxHeapSizeBox.getItems().add(heapSize);
             initialHeapSizeBox.getItems().add(heapSize);
         }

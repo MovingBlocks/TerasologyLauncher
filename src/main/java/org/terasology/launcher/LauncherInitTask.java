@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
@@ -67,6 +68,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             // launcher settings
             final BaseLauncherSettings launcherSettings = getLauncherSettings(launcherDirectory);
+
+            // validate the settings
+            LauncherSettingsValidator.validate(launcherSettings);
 
             if (launcherSettings.isSearchForLauncherUpdates()) {
                 final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
