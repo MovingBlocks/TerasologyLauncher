@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2019 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-/**
- * This file is licensed under the MIT license.
- * See the LICENSE file in project root for details.
- */
-
 package org.terasology.launcher.settings;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * Provides methods to check settings value and correct invalid values.
+ * Provides methods to check settings values and correct the invalid ones.
  */
 public class SettingsValidationRule {
     private final Predicate<AbstractLauncherSettings> condition;

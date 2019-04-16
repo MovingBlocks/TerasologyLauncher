@@ -19,48 +19,42 @@ package org.terasology.launcher.settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.JavaHeapSize;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * Provides methods to check launcher settings and correct if invalid.
  */
-public class LauncherSettingsValidator {
-    private final List<SettingsValidationRule> validationRules;
-
+public final class LauncherSettingsValidator {
     private static final Logger logger = LoggerFactory.getLogger(LauncherSettingsValidator.class);
 
-    public LauncherSettingsValidator() {
-        validationRules = new ArrayList<>();
-        setupRules();
+    private static final List<SettingsValidationRule> RULES = Arrays.asList(
+            // Rule for max heap size
+            new SettingsValidationRule(
+                    s -> !(System.getProperty("os.arch").equals("x86") && s.getMaxHeapSize().compareTo(JavaHeapSize.GB_1_5) > 0),
+                    "Max heap size cannot be greater than 1.5 GB for a 32-bit JVM",
+                    s -> s.setMaxHeapSize(JavaHeapSize.GB_1_5)
+            ),
+
+            // Rule for initial heap size
+            new SettingsValidationRule(
+                    s -> s.getInitialHeapSize().compareTo(s.getMaxHeapSize()) < 0,
+                    "Initial heap size cannot be greater than max heap size",
+                    s -> s.setInitialHeapSize(s.getMaxHeapSize())
+            )
+    );
+
+    private LauncherSettingsValidator() {
     }
 
-    private void setupRules() {
-        // Rule for max heap size
-        SettingsValidationRule maxHeapSizeRule = new SettingsValidationRule(
-                s -> !System.getProperty("os.arch").equals("x86")
-                        || s.getMaxHeapSize().compareTo(JavaHeapSize.GB_1_5) < 0,
-                "Max heap size cannot be greater than 1.5 GB for a 32-bit JVM",
-                s -> s.setMaxHeapSize(JavaHeapSize.GB_1_5)
-        );
-
-        // Rule for initial heap size
-        SettingsValidationRule initialHeapSizeRule = new SettingsValidationRule(
-                s -> s.getInitialHeapSize().compareTo(s.getMaxHeapSize()) < 0,
-                "Initial heap size cannot be greater than max heap size",
-                s -> s.setInitialHeapSize(s.getMaxHeapSize())
-        );
-
-        // Add all rules to the list
-        validationRules.addAll(Arrays.asList(
-                maxHeapSizeRule, initialHeapSizeRule
-        ));
-    }
-
-    public void validate(AbstractLauncherSettings settings) {
-        for (SettingsValidationRule rule : validationRules) {
+    /**
+     * Validates an {@link AbstractLauncherSettings} instance against a list of rules.
+     * Also applies a correction to the settings if it breaks any rule.
+     *
+     * @param settings  the settings to be validated
+     */
+    public static void validate(AbstractLauncherSettings settings) {
+        for (SettingsValidationRule rule : RULES) {
             if (rule.isBrokenBy(settings)) {
                 logger.warn(rule.getInvalidationMessage());
                 rule.correct(settings);

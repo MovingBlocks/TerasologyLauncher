@@ -69,7 +69,8 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // launcher settings
             final BaseLauncherSettings launcherSettings = getLauncherSettings(launcherDirectory);
 
-            new LauncherSettingsValidator().validate(launcherSettings);
+            // validate the settings
+            LauncherSettingsValidator.validate(launcherSettings);
 
             if (launcherSettings.isSearchForLauncherUpdates()) {
                 final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
