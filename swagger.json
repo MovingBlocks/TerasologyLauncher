@@ -1,0 +1,1147 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Terasology FacadeServer API",
+    "description": "Specification of HTTP API to interact with a Terasology server running with FacadeServer (https://github.com/MovingBlocks/FacadeServer). Also available over WebSocket (see docs.md)",
+    "version": "1.0.0"
+  },
+  "components": {
+    "parameters": {
+      "Session-Token": {
+        "in": "header",
+        "name": "Session-Token",
+        "schema": {
+          "type": "string"
+        },
+        "description": "If performing an authenticated request, must be the token received as the Session-Token response header of the first authentication handshake request to GET /auth."
+      }
+    },
+    "schemas": {
+      "BigInteger": {
+        "type": "string",
+        "description": "An integer represented as a big-endian byte array of it's two's complement representation encoded as a base64 string."
+      },
+      "PublicIdentityCertificate": {
+        "description": "A public certificate which identifies either a client or a server.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "An UUID v4 which identifies the client. For a client certificate, it's the same value referred to as \"clientId\" or \"client identifier\" in this API specification."
+          },
+          "modulus": {
+            "$ref": "#/components/schemas/BigInteger"
+          },
+          "exponent": {
+            "$ref": "#/components/schemas/BigInteger"
+          },
+          "signature": {
+            "$ref": "#/components/schemas/BigInteger"
+          }
+        }
+      },
+      "HandshakeHello": {
+        "description": "A message sent as part of the authentication handshake.",
+        "properties": {
+          "random": {
+            "type": "string",
+            "description": "A base64-encoded string of random bytes."
+          },
+          "certificate": {
+            "$ref": "#/components/schemas/PublicIdentityCertificate"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "On the server it's obtained by encoding an 8-byte array representing the number of milliseconds from January 1, 1970 UTC (in Java, System.currentTimeMillis()) as a base64 string. When building the hello message on the client, it's not strictly necessary to use the same format as long as it's a base64 string, and to preserve the robustness of the authentication protocol it should depend on the current time."
+          }
+        }
+      },
+      "NameVersion": {
+        "description": "Metadata to identify a module.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "GameManifest": {
+        "description": "Contains metadata about a certain game.",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "seed": {
+            "type": "string"
+          },
+          "time": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "modules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NameVersion"
+            }
+          }
+        }
+      },
+      "GameInfo": {
+        "description": "Contains data about a savegame file.",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Savegame's last write time."
+          },
+          "manifest": {
+            "$ref": "#/components/schemas/GameManifest"
+          }
+        }
+      },
+      "EngineStateMetadata": {
+        "description": "Contains data about the engine's state.",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "IDLE",
+              "LOADING",
+              "RUNNING"
+            ]
+          },
+          "gameName": {
+            "type": "string",
+            "description": "Name of the currently running or loading game. Not defined if \"state\" is IDLE."
+          }
+        }
+      },
+      "I18nMap": {
+        "description": "Collection of localized strings.",
+        "properties": {
+          "en": {
+            "type": "string",
+            "description": "English string of the I18n map."
+          }
+        },
+        "additionalProperties": {
+          "type": "string",
+          "description": "Other translations of the string. the keys are IETF BCP 47 language identifiers, and the values the string translation."
+        }
+      },
+      "ModuleMetadata": {
+        "description": "Data describing a module.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the module."
+          },
+          "version": {
+            "type": "string",
+            "description": "String containing module version information, in the format \"MAJOR.MINOR.PATCH[-SNAPSHOT]\"."
+          },
+          "displayName": {
+            "$ref": "#/components/schemas/I18nMap"
+          },
+          "description": {
+            "$ref": "#/components/schemas/I18nMap"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "ID of the dependent module."
+                },
+                "minVersion": {
+                  "type": "string",
+                  "description": "Minimum version of the module to satisfy the dependency."
+                },
+                "maxVersion": {
+                  "type": "string",
+                  "description": "If specified, first version of the dependent module that no longer satisfies the dependency."
+                },
+                "optional": {
+                  "type": "boolean",
+                  "description": "If true, the dependency isn't mandatory."
+                }
+              }
+            }
+          }
+        }
+      },
+      "IdPermissionPair": {
+        "description": "Contains information on the permissions of an admin.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the client."
+          },
+          "permissions": {
+            "type": "object",
+            "description": "Permissions of the client.",
+            "properties": {
+              "NO_PERMISSION": {
+                "type": "boolean",
+                "description": "Dummy permission for use in the backend."
+              },
+              "CONSOLE_CHEAT": {
+                "type": "boolean",
+                "description": "Whether or not the client can perform console cheat commands."
+              },
+              "CONSOLE_USER_MANAGEMENT": {
+                "type": "boolean",
+                "description": "Whether or not the client can perform console user management commands."
+              },
+              "CONSOLE_SERVER_MANAGEMENT": {
+                "type": "boolean",
+                "description": "Whether or not the client can perform console server management commands."
+              },
+              "CONSOLE_DEBUG": {
+                "type": "boolean",
+                "description": "Whether or not the client can perform console debug commands."
+              },
+              "INSTALL_MODULES": {
+                "type": "boolean",
+                "description": "Whether or not the client can install modules."
+              },
+              "CREATE_BACKUP_RENAME_GAMES": {
+                "type": "boolean",
+                "description": "Whether or not the client can create, backup, or rename games."
+              },
+              "DELETE_GAMES": {
+                "type": "boolean",
+                "description": "Whether or not the client can delete games."
+              },
+              "START_STOP_GAMES": {
+                "type": "boolean",
+                "description": "Whether or not the client can start or stop games."
+              },
+              "CHANGE_SETTINGS": {
+                "type": "boolean",
+                "description": "Whether or not the client can change server settings."
+              },
+              "ADMIN_MANAGEMENT": {
+                "type": "boolean",
+                "description": "Whether or not the client can add, remove, or modify permissions of admins."
+              }
+            }
+          }
+        }
+      },
+      "SystemMetadata": {
+        "description": "Contains information on the machine running the server.",
+        "properties": {
+          "cpuUsage": {
+            "type": "number",
+            "description": "The current percentage of CPU usage in the server machine"
+          },
+          "memoryUsed": {
+            "type": "integer",
+            "description": "Current RAM memory in use by the system"
+          },
+          "MemoryMax": {
+            "type": "integer",
+            "description": "Maximum RAM memory available for use by the system"
+          },
+          "serverUptime": {
+            "type": "integer",
+            "description": "Time in milliseconds of how long the server has been running"
+          },
+          "jvmMemoryUsed": {
+            "type": "integer",
+            "description": "Current RAM memory used by the JVM"
+          },
+          "jvmMemoryMax": {
+            "type": "integer",
+            "description": "Maximum available RAM memory for the JVM"
+          }
+        }
+      },
+      "WorldMapInput": {
+        "description": "Describes the format for the frontend to use when requesting world map data",
+        "properties": {
+          "center": {
+            "type": "object",
+            "description": "the coordinates of the center block",
+            "properties": {
+              "x": {
+                "type": "integer",
+                "description": "the x coordinate of the center block"
+              },
+              "y": {
+                "type": "integer",
+                "description": "(optional) the y coordinate of the center block"
+              },
+              "z": {
+                "type": "integer",
+                "description": "the z coordinate of the center block"
+              }
+            }
+          },
+          "mapBlockWidth": {
+            "type": "number",
+            "description": "the width of the map"
+          },
+          "mapBlockLength": {
+            "type": "number",
+            "description": "the length of the map"
+          },
+          "surface": {
+            "type": "boolean",
+            "description": "whether or not to display the surface of the world"
+          }
+        }
+      }
+    },
+    "responses": {
+      "GameNotFound": {
+        "description": "No game with the specified title exists on this server."
+      },
+      "ForbiddenNotAdmin": {
+        "description": "The client is not allowed to access this resource because it doesn't have server administration privileges."
+      },
+      "ForbiddenNotAuthenticated": {
+        "description": "The client is not allowed to access this resource because it's not authenticated."
+      }
+    }
+  },
+  "paths": {
+    "/auth": {
+      "get": {
+        "summary": "Initiates an authentication handshake",
+        "responses": {
+          "200": {
+            "description": "This response contains data which is necessary to authenticate to the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandshakeHello"
+                }
+              }
+            },
+            "headers": {
+              "Session-Token": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "A token that must be sent by the client to answer the handshake and to perform further requests if the authentication succeeds."
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Session-Token"
+          }
+        ],
+        "summary": "Finishes an authentication handshake",
+        "requestBody": {
+          "description": "To authenticate, the client must prove it's knowledge of the public and private identity certificates by performing the following steps. 1) Build an handshake hello message with the required information. The certificate must be the client public certificate. This must be sent as the \"clientHello\" property in the request payload object. 2) Concatenate the binary representations of the server hello (received with the response to the previously SENT \"GET /auth\" request) with the binary representation of the client hello (built at step 1). The binary representation of a handshake hello is a byte array obtained by concatenating it this order the \"random\" field (after decoding from base64), the certificate ID as Unicode, the certificate modulus, exponent and signature in their big-endian binary representation, and the timestamp. 3) Sign the obtained byte array with the SHA1withRSA algorithm, using the private certificate (generated when a user connects using the regular game client and stored in the game client configuration file) as the signing private key. 4) Encode the signed data in a base64 string, which must be sent as the \"signature\" field of the payload.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "clientHello": {
+                    "$ref": "#/components/schemas/HandshakeHello"
+                  },
+                  "signature": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The client is succesfully authenticated. To perform further requests, the Session-Token header sent by the previous handshake step must always be sent."
+          },
+          "403": {
+            "description": "The authentication request failed."
+          }
+        }
+      }
+    },
+    "/events": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns and drains the event queue for an authenticated client",
+        "responses": {
+          "200": {
+            "description": "An array of objects describing events happened after between the previous request of this endpoint and this one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "resourcePath": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "The path to the resource which emitted the event, like [\"console\"] for the console resource or [\"foo\", \"bar\"] for an hypothetical /resources/foo/bar resource."
+                      },
+                      "eventData": {
+                        "type": "object",
+                        "description": "The object type depends on the resource which emitted the event. For now, only the console resource emits events, which have two string keys; \"type\" which can be CONSOLE, CHAT, ERROR or NOTIFICATION depending on the type of the message and \"message\" which contains the actual message."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resources/onlinePlayers": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns a list of the currently online players",
+        "responses": {
+          "200": {
+            "description": "A JSON array of objects carrying information about each player.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "color": {
+                        "type": "object",
+                        "properties": {
+                          "r": {
+                            "type": "integer"
+                          },
+                          "g": {
+                            "type": "integer"
+                          },
+                          "b": {
+                            "type": "integer"
+                          },
+                          "a": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resources/console": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns a list of console commands that can be run on a server",
+        "responses": {
+          "200": {
+            "description": "The console commands that are designated by the console as runnable on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Executes a console command",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "description": "Command string, as you would type in the in-game console (must contain command name and arguments where applicable)."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The command has been executed. Note that there is no concept of \"command result\"; the command will probably produce output, but it will be sent as an event (for HTTP, see the GET /events endpoint; for WebSocket, it is sent directly from the server to the client)."
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenNotAuthenticated"
+          }
+        }
+      }
+    },
+    "/resources/games": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns a list of the savegames in the server's data directory",
+        "responses": {
+          "200": {
+            "description": "An array of objects describing each game.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Creates a new game.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "gameName": {
+                    "type": "string",
+                    "description": "The title for the new game."
+                  },
+                  "seed": {
+                    "type": "string",
+                    "description": "The seed to use for world generation."
+                  },
+                  "modules": {
+                    "type": "array",
+                    "description": "List of names of the modules to enable for this game.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "worldGenerator": {
+                    "type": "string",
+                    "description": "The URI (a moduleName:worldgeneratorName string) of the world generator to use. See GET /resources/worldGenerators to get a list of the generators available from the currently installed modules."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The game has been created."
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenNotAdmin"
+          }
+        }
+      }
+    },
+    "/resources/games/{gameName}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        },
+        {
+          "in": "path",
+          "name": "gameName",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Name/title of the existing game to select, as returned in the \"title\" field of a game manifest."
+        }
+      ],
+      "get": {
+        "summary": "Returns information about the game with the specified title",
+        "responses": {
+          "200": {
+            "description": "An object describing the game.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/GameNotFound"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Renames the game, replacing the current name with the new one specified in the request payload",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "gameName": {
+                    "type": "string",
+                    "description": "The new name."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The game has been renamed."
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenNotAdmin"
+          },
+          "404": {
+            "$ref": "#/components/responses/GameNotFound"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes the game with the specified name",
+        "responses": {
+          "200": {
+            "description": "The game has been renamed."
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenNotAdmin"
+          },
+          "404": {
+            "$ref": "#/components/responses/GameNotFound"
+          }
+        }
+      }
+    },
+    "/resources/games/{gameName}/backup": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        },
+        {
+          "in": "path",
+          "name": "gameName",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Name/title of the existing game to select, as returned in the \"title\" field of a game manifest."
+        }
+      ],
+      "post": {
+        "summary": "Create a backup of the specified game",
+        "description": "Create a backup of the specified game, which is saved as another game with the same name folleowed by a the timestamp of the request.",
+        "responses": {
+          "200": {
+            "description": "The backup has been created."
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenNotAdmin"
+          },
+          "404": {
+            "$ref": "#/components/responses/GameNotFound"
+          }
+        }
+      }
+    },
+    "/resources/engineState": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns information about the current state of this server's Terasology engine",
+        "responses": {
+          "200": {
+            "description": "An object containing data about the engine's current state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngineStateMetadata"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Switch the engine's state (i.e. start or stop games)",
+        "requestBody": {
+          "description": "An EngineStateMetadata object describing the state to switch the engine to. The \"state\" property can only be IDLE (stop the currently running game, if any) or LOADING (start the game with the name specified in the \"gameName\" property).",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EngineStateMetadata"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The state has been switched according to the request."
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenNotAdmin"
+          }
+        }
+      }
+    },
+    "/resources/modules/available": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns a list of the currently installed modules, available for use in existing and new games",
+        "responses": {
+          "200": {
+            "description": "An array of objects describing each module.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ModuleMetadata"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resources/modules/available/{moduleId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        },
+        {
+          "in": "path",
+          "name": "moduleId",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the module to select."
+        }
+      ],
+      "get": {
+        "summary": "Returns information about the module with the specified ID, if installed",
+        "responses": {
+          "200": {
+            "description": "An object describing the module.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModuleMetadata"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No module with the specified ID is installed."
+          }
+        }
+      }
+    },
+    "/resources/modules/installer": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns an informational message about the current module installer status",
+        "responses": {
+          "200": {
+            "description": "The message describing the current module installer status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Starts or enqueues the installation of the specified modules",
+        "requestBody": {
+          "description": "An array of identifiers of the modules to install. A list of all the modules that can be installed can be obtained using the Meta Server API (http://meta.terasology.org/home).",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The installation has been succesfully started or enqueued. Perform a GET /resources/modules/installer to obtain information about the installer status."
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenNotAdmin"
+          },
+          "500": {
+            "description": "It's not possible to install the specified modules because some of them depend on modules that can't be retrieved."
+          }
+        }
+      }
+    },
+    "/resources/worldGenerators": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns a list of the currently available world generators.",
+        "responses": {
+          "200": {
+            "description": "An array of objects containing metadata about each world generator provided by the installed modules.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "uri": {
+                        "type": "string"
+                      },
+                      "displayName": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resources/config/serverPort": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns the game server network port",
+        "responses": {
+          "200": {
+            "description": "The currently set server listen port.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Sets the game server network port",
+        "requestBody": {
+          "description": "The new value for the port setting.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The value of the port setting has been updated."
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenNotAdmin"
+          }
+        }
+      }
+    },
+    "/resources/config/MOTD": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns the game server Message Of The Day (MOTD)",
+        "responses": {
+          "200": {
+            "description": "The currently set server MOTD.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Sets the game server Message Of The Day (MOTD)",
+        "requestBody": {
+          "description": "The new value for the MOTD setting.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The value of the MOTD setting has been updated."
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenNotAdmin"
+          }
+        }
+      }
+    },
+    "/resources/serverAdmins": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns a list of the client IDs with server administration privileges.",
+        "description": "Returns a list of the client IDs with server administration privileges. Note that an empty list means that the access is not restricted (see the description of this pull request for more information https://github.com/MovingBlocks/FacadeServer/pull/8).",
+        "responses": {
+          "200": {
+            "description": "An array of strings representing the administrator's client IDs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resources/serverAdmins/{clientId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        },
+        {
+          "in": "path",
+          "name": "clientId",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Client ID to add or remove to the list."
+        }
+      ],
+      "post": {
+        "summary": "Adds the specified client ID to the server administrators list.",
+        "responses": {
+          "200": {
+            "description": "The specified client ID has been added to the server administrator list, if it wasn't already present."
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenNotAdmin"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Removes, if present, the specified client ID from the server administrators list.",
+        "responses": {
+          "200": {
+            "description": "The specified client ID has either been removed from server administrator list, or already wasn't in the list."
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenNotAdmin"
+          }
+        }
+      }
+    },
+    "/resources/serverAdmins/{clientId}/permissions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        },
+        {
+          "in": "path",
+          "name": "clientId",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the client to get or change the permissions of."
+        }
+      ],
+      "get": {
+        "summary": "Returns the specified client ID's administrator permissions.",
+        "responses": {
+          "200": {
+            "description": "The permissions of the client ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdPermissionPair"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Changes the administrator permissions of the client.",
+        "responses": {
+          "200": {
+            "description": "The specified client ID's permissions have been changed."
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenNotAdmin"
+          }
+        }
+      }
+    },
+    "/resources/serverAdminPermissions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns a list of all admin ids on the server and their permissions.",
+        "responses": {
+          "200": {
+            "description": "A list of all admin permissions with their ids.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IdPermissionPair"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resources/system": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "get": {
+        "summary": "Returns information on the system running the server.",
+        "responses": {
+          "200": {
+            "description": "System status, including the cpu usage, memory usage, system uptime, and jvm memory usage.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemMetadata"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resources/worldMap": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Session-Token"
+        }
+      ],
+      "put": {
+        "summary": "Returns a base64 encoded image of a specified part of the world map (Warning: this may be changed in the future to a get request!)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorldMapInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A base 64 encoded image of the map",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
