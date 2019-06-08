@@ -1,6 +1,12 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## 3.3.0 (2019-06-08)
+* Added missing try-catch for NIO operations (#412)
+* Fixed UI layouts (#417)
+* Combined _start_ and _download_ button (#418)
+* Validate launcher settings for 32-bit JVM (#425)
+
 ## 3.2.0 (2017-07-08)
 * Assorted translations (Polish, Hungarian, Ukrainian, German, Russian)
 * Added tooltips to buttons (#376)

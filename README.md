@@ -98,6 +98,7 @@ Contributors
 * iojw [@iojw](https://github.com/iojw)
 * theobisproject [@theobisproject](https://github.com/theobisproject)
 * bpas247 [@bpas247](https://github.com/bpas247)
+* Priyadarshi Raj [@praj-foss](https://github.com/praj-foss)
 
 .. and many users of the German Terasology Forum (ideas, testing, suggestions, bug reports).
 
