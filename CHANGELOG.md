@@ -1,6 +1,8 @@
 Terasology Launcher - ChangeLog
 ===============================
 
+## 4.0.0 (not released)
+
 ## 3.3.0 (2019-06-08)
 * Added missing try-catch for NIO operations (#412)
 * Fixed UI layouts (#417)
