@@ -1,3 +1,5 @@
 rootProject.name = 'TerasologyLauncher'
 
-include 'web-api-client'
+if (new File('web-api-client').exists()) {
+    include 'web-api-client'
+}

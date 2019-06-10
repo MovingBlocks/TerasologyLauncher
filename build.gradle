@@ -108,7 +108,9 @@ dependencies {
 
     // For Web API
     swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.5'
-    compile project(':web-api-client')
+    if (new File('web-api-client').exists()) {
+        compile project(':web-api-client')
+    }
 
     // These dependencies are only needed for running tests
     testCompile group: 'junit', name: 'junit', version: '4.11'

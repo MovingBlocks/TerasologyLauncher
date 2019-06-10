@@ -16,38 +16,20 @@
 
 package org.terasology.launcher;
 
-import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.HostServices;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.concurrent.Worker;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.crashreporter.CrashReporter;
-import org.terasology.launcher.gui.javafx.ApplicationController;
+import org.terasology.launcher.gui.javafx.MainController;
 import org.terasology.launcher.log.TempLogFilePropertyDefiner;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
@@ -55,72 +37,35 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 public final class TerasologyLauncher extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncher.class);
-
-    private static final int SPLASH_WIDTH = 800;
-    private static final int SPLASH_HEIGHT = 223;
-
-    private Pane splashLayout;
-    private ProgressBar loadProgress;
-    private Label progressText;
-    private Stage mainStage;
-    private HostServices hostServices;
 
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
-    public void init() throws Exception {
-        ImageView splash = new ImageView(BundleUtils.getFxImage("splash"));
-        loadProgress = new ProgressBar();
-        loadProgress.setPrefWidth(SPLASH_WIDTH);
-        progressText = new Label();
-        splashLayout = new VBox();
-        splashLayout.getChildren().addAll(splash, loadProgress, progressText);
-        progressText.setAlignment(Pos.CENTER);
-        splashLayout.getStylesheets().add(BundleUtils.getStylesheet("css_splash"));
-        splashLayout.setEffect(new DropShadow());
-        hostServices = getHostServices();
-    }
-
-    @Override
-    public void start(final Stage initialStage) {
+    public void start(final Stage mainStage) throws IOException {
         logger.info("TerasologyLauncher is starting");
-        logSystemInformation();
 
+        logSystemInformation();
         initProxy();
         initLanguage();
 
-        final Task<LauncherConfiguration> launcherInitTask = new LauncherInitTask(initialStage);
+        FXMLLoader fxmlLoader = BundleUtils.getFXMLLoader("main_view");
+        Parent root = fxmlLoader.load();
+        MainController controller = fxmlLoader.getController();
 
-        showSplashStage(initialStage, launcherInitTask);
-        Thread initThread = new Thread(launcherInitTask);
+        decorateStage(mainStage);
+        mainStage.setScene(new Scene(root));
+        mainStage.setMinWidth(800.0);
+        mainStage.setMinHeight(450.0);
+        mainStage.setResizable(true);
+        mainStage.show();
 
-        launcherInitTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(final WorkerStateEvent workerStateEvent) {
-                try {
-                    LauncherConfiguration config = launcherInitTask.getValue();
-                    if (config == null) {
-                        throw new LauncherStartFailedException("Launcher configuration was `null`.");
-                    } else if (config instanceof NullLauncherConfiguration) {
-                        logger.info("Closing the launcher ... (empty configuration, probably due to update)");
-                        Platform.exit();
-                    } else {
-                        showMainStage(config);
-                    }
-                } catch (IOException | LauncherStartFailedException e) {
-                    openCrashReporterAndExit(e);
-                }
-            }
-        });
-
-        initThread.start();
+        logger.info("TerasologyLauncher has started successfully.");
     }
 
     /**
@@ -143,67 +88,6 @@ public final class TerasologyLauncher extends Application {
         Path logFile = TempLogFilePropertyDefiner.getInstance().getLogFile();
         CrashReporter.report(e, logFile);
         System.exit(1);
-    }
-
-    private void showMainStage(final LauncherConfiguration launcherConfiguration) throws IOException {
-        mainStage = new Stage(StageStyle.DECORATED);
-
-        // launcher frame
-        FXMLLoader fxmlLoader;
-        Parent root;
-        /* Fall back to default language if loading the FXML file files with the current locale */
-        try {
-            fxmlLoader = BundleUtils.getFXMLLoader("application");
-            root = (Parent) fxmlLoader.load();
-        } catch (IOException e) {
-            fxmlLoader = BundleUtils.getFXMLLoader("application");
-            fxmlLoader.setResources(ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", Languages.DEFAULT_LOCALE));
-            root = (Parent) fxmlLoader.load();
-        }
-        final ApplicationController controller = fxmlLoader.getController();
-        controller.initialize(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(), launcherConfiguration.getTempDirectory(),
-            launcherConfiguration.getLauncherSettings(), launcherConfiguration.getGameVersions(), mainStage, hostServices);
-
-        Scene scene = new Scene(root);
-        scene.getStylesheets().add(BundleUtils.getStylesheet("css_terasology"));
-
-        decorateStage(mainStage);
-
-        mainStage.setScene(scene);
-        mainStage.setResizable(true);
-        mainStage.show();
-
-        logger.info("The TerasologyLauncher was successfully started.");
-    }
-
-    private void showSplashStage(final Stage initialStage, final Task<LauncherConfiguration> task) {
-        progressText.textProperty().bind(task.messageProperty());
-        loadProgress.progressProperty().bind(task.progressProperty());
-        task.stateProperty().addListener((observableValue, oldState, newState) -> {
-            if (newState == Worker.State.SUCCEEDED) {
-                loadProgress.progressProperty().unbind();
-                loadProgress.setProgress(1);
-                if (mainStage != null) {
-                    mainStage.setIconified(false);
-                }
-                initialStage.toFront();
-                FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), splashLayout);
-                fadeSplash.setFromValue(1.0);
-                fadeSplash.setToValue(0.0);
-                fadeSplash.setOnFinished(actionEvent -> initialStage.hide());
-                fadeSplash.play();
-            } // todo add code to gracefully handle other task states.
-        });
-
-        decorateStage(initialStage);
-
-        Scene splashScene = new Scene(splashLayout);
-        initialStage.initStyle(StageStyle.UNDECORATED);
-        final Rectangle2D bounds = Screen.getPrimary().getBounds();
-        initialStage.setScene(splashScene);
-        initialStage.setX(bounds.getMinX() + bounds.getWidth() / 2 - SPLASH_WIDTH / 2);
-        initialStage.setY(bounds.getMinY() + bounds.getHeight() / 2 - SPLASH_HEIGHT / 2);
-        initialStage.show();
     }
 
     private void logSystemInformation() {
