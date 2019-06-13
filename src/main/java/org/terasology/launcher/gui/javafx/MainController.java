@@ -32,8 +32,7 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        System.out.println("init main window");
-        System.out.println(serverManagerController);
+        logger.trace("Initialized Main view");
     }
 
 }

@@ -17,12 +17,16 @@
 package org.terasology.launcher.gui.javafx;
 
 import javafx.fxml.FXML;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServerManagerController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ServerManagerController.class);
+
     @FXML
     public void initialize() {
-        System.out.println("init server mgr");
+        logger.trace("Initialized Server Manager view");
     }
 
 }
