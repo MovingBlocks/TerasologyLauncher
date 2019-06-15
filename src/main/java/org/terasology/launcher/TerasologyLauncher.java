@@ -18,6 +18,11 @@ package org.terasology.launcher;
 
 import javafx.application.Application;
 import javafx.application.HostServices;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -29,7 +34,9 @@ import org.terasology.crashreporter.CrashReporter;
 import org.terasology.launcher.gui.javafx.MainController;
 import org.terasology.launcher.log.TempLogFilePropertyDefiner;
 import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
@@ -42,12 +49,29 @@ public final class TerasologyLauncher extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncher.class);
 
+    private final LauncherInitTask initTask = new LauncherInitTask();
+    private LauncherConfiguration initialConfig;
+    private MainController mainController;
+
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
-    public void start(final Stage mainStage) throws IOException {
+    public void init() {
+        initTask.setOnSucceeded(event -> {
+            if (mainController != null) {
+                mainController.update(initTask.getValue());
+            } else {
+                initialConfig = initTask.getValue();
+            }
+        });
+        initTask.setOnFailed(event -> openCrashReporterAndExit((Exception) initTask.getException()));
+        new Thread(initTask).start();
+    }
+
+    @Override
+    public void start(Stage mainStage) throws IOException {
         logger.info("TerasologyLauncher is starting");
 
         logSystemInformation();
@@ -56,13 +80,24 @@ public final class TerasologyLauncher extends Application {
 
         FXMLLoader fxmlLoader = BundleUtils.getFXMLLoader("main_view");
         Parent root = fxmlLoader.load();
-        MainController controller = fxmlLoader.getController();
+        mainController = fxmlLoader.getController();
+        mainController.setStage(mainStage);
+        if (initialConfig != null) {
+            mainController.update(initialConfig);
+        }
 
         decorateStage(mainStage);
         mainStage.setScene(new Scene(root));
         mainStage.setMinWidth(800.0);
         mainStage.setMinHeight(450.0);
         mainStage.setResizable(true);
+
+        mainStage.setOnCloseRequest(event -> {
+            if (!initTask.isDone()) {
+                initTask.cancel();
+            }
+            Platform.exit();
+        });
         mainStage.show();
 
         logger.info("TerasologyLauncher has started successfully.");

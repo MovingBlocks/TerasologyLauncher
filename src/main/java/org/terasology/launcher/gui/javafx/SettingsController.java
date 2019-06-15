@@ -18,31 +18,19 @@ package org.terasology.launcher.gui.javafx;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.game.JobItem;
-import org.terasology.launcher.game.TerasologyGameVersion;
-import org.terasology.launcher.game.TerasologyGameVersions;
-import org.terasology.launcher.game.VersionItem;
+import org.terasology.launcher.LauncherConfiguration;
+import org.terasology.launcher.game.*;
 import org.terasology.launcher.settings.BaseLauncherSettings;
-import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DirectoryUtils;
-import org.terasology.launcher.util.GuiUtils;
-import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.LogLevel;
+import org.terasology.launcher.util.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -55,67 +43,6 @@ import java.util.MissingResourceException;
 public class SettingsController {
 
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
-
-    private Path launcherDirectory;
-    private Path downloadDirectory;
-    private BaseLauncherSettings launcherSettings;
-    private TerasologyGameVersions gameVersions;
-
-    private Path gameDirectory;
-    private Path gameDataDirectory;
-
-    private Stage stage;
-
-    @FXML
-    private Tab gameTab;
-    @FXML
-    private Label maxHeapSizeLabel;
-    @FXML
-    private Label initialHeapSizeLabel;
-    @FXML
-    private Label jobLabel;
-    @FXML
-    private Label buildVersionLabel;
-    @FXML
-    private Button gameDirectoryOpenButton;
-    @FXML
-    private Button gameDirectoryEditButton;
-    @FXML
-    private Button gameDataDirectoryOpenButton;
-    @FXML
-    private Button gameDataDirectoryEditButton;
-    @FXML
-    private Label gameDirectoryLabel;
-    @FXML
-    private Label gameDataDirectoryLabel;
-    @FXML
-    private Label javaParametersLabel;
-    @FXML
-    private Label gameParametersLabel;
-    @FXML
-    private Label logLevelLabel;
-    @FXML
-    private Tab launcherTab;
-    @FXML
-    private Label chooseLanguageLabel;
-    @FXML
-    private Label closeLauncherLabel;
-    @FXML
-    private Label saveDownloadedFilesLabel;
-    @FXML
-    private Label launcherDirectoryLabel;
-    @FXML
-    private Label downloadDirectoryLabel;
-    @FXML
-    private Button launcherDirectoryOpenButton;
-    @FXML
-    private Button downloadDirectoryOpenButton;
-    @FXML
-    private Label searchForUpdatesLabel;
-    @FXML
-    private Button saveSettingsButton;
-    @FXML
-    private Button cancelSettingsButton;
 
     @FXML
     private ComboBox<JobItem> jobBox;
@@ -134,23 +61,31 @@ public class SettingsController {
     @FXML
     private CheckBox closeAfterStartBox;
     @FXML
-    private Label gameDirectoryPath;
-    @FXML
-    private Label gameDataDirectoryPath;
-    @FXML
-    private Label launcherDirectoryPath;
-    @FXML
-    private Label downloadDirectoryPath;
-    @FXML
     private TextField userJavaParametersField;
     @FXML
     private TextField userGameParametersField;
     @FXML
     private ComboBox<LogLevel> logLevelBox;
+    @FXML
+    private TextField gameDirectoryPath;
+    @FXML
+    private TextField gameDataDirectoryPath;
+    @FXML
+    private TextField launcherDirectoryPath;
+    @FXML
+    private TextField downloadDirectoryPath;
+
+    private Stage stage;
+    private Path launcherDirectory;
+    private Path downloadDirectory;
+    private BaseLauncherSettings launcherSettings;
+    private TerasologyGameVersions gameVersions;
+    private Path gameDirectory;
+    private Path gameDataDirectory;
 
     @FXML
     protected void cancelSettingsAction(ActionEvent event) {
-        ((Node) event.getSource()).getScene().getWindow().hide();
+        // TODO: Cancel all changes and return to previous state (use MVVM)
     }
 
     @FXML
@@ -206,17 +141,12 @@ public class SettingsController {
         // store changed settings
         try {
             launcherSettings.store();
+            logger.info("Successfully saved current launcher settings");
+            // TODO: Save current state and disable Save button (use MVVM)
         } catch (IOException e) {
             logger.error("The launcher settings can not be stored! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
             GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_storeSettings"));
-        } finally {
-            ((Node) event.getSource()).getScene().getWindow().hide();
         }
-    }
-
-    @FXML
-    protected void openGameDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, gameDirectory, BundleUtils.getLabel("message_error_gameDirectory"));
     }
 
     @FXML
@@ -235,11 +165,6 @@ public class SettingsController {
     }
 
     @FXML
-    protected void openGameDataDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, gameDataDirectory, BundleUtils.getLabel("message_error_gameDataDirectory"));
-    }
-
-    @FXML
     protected void editGameDataDirectoryAction() {
         final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
         if (selectedFile != null) {
@@ -252,16 +177,6 @@ public class SettingsController {
                 GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
             }
         }
-    }
-
-    @FXML
-    protected void openLauncherDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, launcherDirectory, BundleUtils.getLabel("message_error_launcherDirectory"));
-    }
-
-    @FXML
-    protected void openDownloadDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, downloadDirectory, BundleUtils.getLabel("message_error_downloadDirectory"));
     }
 
     @FXML
@@ -282,13 +197,11 @@ public class SettingsController {
         }
     }
 
-    void initialize(final Path newLauncherDirectory, final Path newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
-                    final TerasologyGameVersions newGameVersions, final Stage newStage) {
-        this.launcherDirectory = newLauncherDirectory;
-        this.downloadDirectory = newDownloadDirectory;
-        this.launcherSettings = newLauncherSettings;
-        this.gameVersions = newGameVersions;
-        this.stage = newStage;
+    void update(final LauncherConfiguration config) {
+        this.launcherDirectory = config.getLauncherDirectory();
+        this.downloadDirectory = config.getDownloadDirectory();
+        this.launcherSettings = config.getLauncherSettings();
+        this.gameVersions = config.getGameVersions();
 
         populateJobBox();
         populateHeapSize();
@@ -299,55 +212,11 @@ public class SettingsController {
         populateSaveDownloadedFiles();
         populateLogLevel();
 
-        gameDirectory = newLauncherSettings.getGameDirectory();
-        gameDataDirectory = newLauncherSettings.getGameDataDirectory();
+        gameDirectory = launcherSettings.getGameDirectory();
+        gameDataDirectory = launcherSettings.getGameDataDirectory();
 
         updateDirectoryPathLabels();
         initUserParameterFields();
-
-        setLabelStrings();
-    }
-
-    /**
-     * Used to assign localized label strings via BundleUtils.
-     * Allows for fallback strings to be assigned if the localization-specific ones
-     * are absent/empty
-     */
-    private void setLabelStrings() {
-        // Game settings
-
-        gameTab.setText(BundleUtils.getLabel("settings_game_title"));
-        maxHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_maxHeapSize"));
-        initialHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_initialHeapSize"));
-        jobLabel.setText(BundleUtils.getLabel("settings_game_job"));
-        buildVersionLabel.setText(BundleUtils.getLabel("settings_game_buildVersion"));
-        gameDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_open"));
-        gameDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_edit"));
-        gameDataDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_open"));
-        gameDataDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_edit"));
-        gameDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDirectory"));
-        gameDataDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDataDirectory"));
-
-        userJavaParametersField.setPromptText(BundleUtils.getLabel("settings_game_javaParsPrompt"));
-        userGameParametersField.setPromptText(BundleUtils.getLabel("settings_game_gameParsPrompt"));
-
-        javaParametersLabel.setText(BundleUtils.getLabel("settings_game_javaParameters"));
-        gameParametersLabel.setText(BundleUtils.getLabel("settings_game_gameParameters"));
-        logLevelLabel.setText(BundleUtils.getLabel("settings_game_logLevel"));
-
-        // Launcher settings
-
-        launcherTab.setText(BundleUtils.getLabel("settings_launcher_title"));
-        chooseLanguageLabel.setText(BundleUtils.getLabel("settings_launcher_chooseLanguage"));
-        closeLauncherLabel.setText(BundleUtils.getLabel("settings_launcher_closeLauncherAfterGameStart"));
-        saveDownloadedFilesLabel.setText(BundleUtils.getLabel("settings_launcher_saveDownloadedFiles"));
-        launcherDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory"));
-        downloadDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory"));
-        launcherDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory_open"));
-        downloadDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory_open"));
-        searchForUpdatesLabel.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
-        saveSettingsButton.setText(BundleUtils.getLabel("settings_save"));
-        cancelSettingsButton.setText(BundleUtils.getLabel("settings_cancel"));
     }
 
     private void populateJobBox() {
@@ -419,7 +288,7 @@ public class SettingsController {
         final JavaHeapSize[] heapSizeRange = System.getProperty("os.arch").equals("x86")
                 ? Arrays.copyOfRange(JavaHeapSize.values(), 0, JavaHeapSize.GB_1_5.ordinal() + 1)
                 : JavaHeapSize.values();
-        
+
         for (JavaHeapSize heapSize : heapSizeRange) {
             maxHeapSizeBox.getItems().add(heapSize);
             initialHeapSizeBox.getItems().add(heapSize);
@@ -445,7 +314,7 @@ public class SettingsController {
     }
 
     private void populateLanguageIcons() {
-        languageBox.setCellFactory(p -> new LanguageIconListCell());
+        languageBox.setCellFactory(p -> new SettingsController.LanguageIconListCell());
 
         // Make the icon visible in the control area for the selected locale
         languageBox.setButtonCell(languageBox.getCellFactory().call(null));
@@ -496,6 +365,10 @@ public class SettingsController {
         if (!launcherSettings.getUserGameParameters().equals(BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT)) {
             userGameParametersField.setText(launcherSettings.getUserGameParameters());
         }
+    }
+
+    void setStage(Stage stage) {
+        this.stage = stage;
     }
 
     private static class LanguageIconListCell extends ListCell<String> {

@@ -18,8 +18,10 @@ package org.terasology.launcher.gui.javafx;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.LauncherConfiguration;
 
 public class MainController {
 
@@ -29,10 +31,18 @@ public class MainController {
     private Label statusLabel;
     @FXML
     private ServerManagerController serverManagerController;
-
     @FXML
-    public void initialize() {
-        logger.trace("Initialized Main view");
+    private SettingsController settingsController;
+
+    private Stage stage;
+
+    public void update(LauncherConfiguration config) {
+        settingsController.update(config);
+        logger.trace("Updated Main view");
     }
 
+    public void setStage(Stage stage) {
+        this.stage = stage;
+        settingsController.setStage(stage);
+    }
 }
