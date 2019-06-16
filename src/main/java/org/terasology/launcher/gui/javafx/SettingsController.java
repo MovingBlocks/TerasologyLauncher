@@ -24,7 +24,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -67,7 +66,7 @@ public class SettingsController {
     private Stage stage;
 
     @FXML
-    private Tab gameTab;
+    private Label gameSettingsTitle;
     @FXML
     private Label maxHeapSizeLabel;
     @FXML
@@ -95,13 +94,13 @@ public class SettingsController {
     @FXML
     private Label logLevelLabel;
     @FXML
-    private Tab launcherTab;
+    private Label launcherSettingsTitle;
     @FXML
     private Label chooseLanguageLabel;
     @FXML
-    private Label closeLauncherLabel;
+    private CheckBox closeAfterStartBox;
     @FXML
-    private Label saveDownloadedFilesLabel;
+    private CheckBox saveDownloadedFilesBox;
     @FXML
     private Label launcherDirectoryLabel;
     @FXML
@@ -111,12 +110,11 @@ public class SettingsController {
     @FXML
     private Button downloadDirectoryOpenButton;
     @FXML
-    private Label searchForUpdatesLabel;
+    private CheckBox searchForUpdatesBox;
     @FXML
     private Button saveSettingsButton;
     @FXML
     private Button cancelSettingsButton;
-
     @FXML
     private ComboBox<JobItem> jobBox;
     @FXML
@@ -128,19 +126,13 @@ public class SettingsController {
     @FXML
     private ComboBox<String> languageBox;
     @FXML
-    private CheckBox saveDownloadedFilesBox;
+    private TextField gameDirectoryPath;
     @FXML
-    private CheckBox searchForUpdatesBox;
+    private TextField gameDataDirectoryPath;
     @FXML
-    private CheckBox closeAfterStartBox;
+    private TextField launcherDirectoryPath;
     @FXML
-    private Label gameDirectoryPath;
-    @FXML
-    private Label gameDataDirectoryPath;
-    @FXML
-    private Label launcherDirectoryPath;
-    @FXML
-    private Label downloadDirectoryPath;
+    private TextField downloadDirectoryPath;
     @FXML
     private TextField userJavaParametersField;
     @FXML
@@ -316,7 +308,7 @@ public class SettingsController {
     private void setLabelStrings() {
         // Game settings
 
-        gameTab.setText(BundleUtils.getLabel("settings_game_title"));
+        gameSettingsTitle.setText(BundleUtils.getLabel("settings_game_title"));
         maxHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_maxHeapSize"));
         initialHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_initialHeapSize"));
         jobLabel.setText(BundleUtils.getLabel("settings_game_job"));
@@ -337,15 +329,15 @@ public class SettingsController {
 
         // Launcher settings
 
-        launcherTab.setText(BundleUtils.getLabel("settings_launcher_title"));
+        launcherSettingsTitle.setText(BundleUtils.getLabel("settings_launcher_title"));
         chooseLanguageLabel.setText(BundleUtils.getLabel("settings_launcher_chooseLanguage"));
-        closeLauncherLabel.setText(BundleUtils.getLabel("settings_launcher_closeLauncherAfterGameStart"));
-        saveDownloadedFilesLabel.setText(BundleUtils.getLabel("settings_launcher_saveDownloadedFiles"));
+        closeAfterStartBox.setText(BundleUtils.getLabel("settings_launcher_closeLauncherAfterGameStart"));
+        saveDownloadedFilesBox.setText(BundleUtils.getLabel("settings_launcher_saveDownloadedFiles"));
         launcherDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory"));
         downloadDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory"));
         launcherDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory_open"));
         downloadDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory_open"));
-        searchForUpdatesLabel.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
+        searchForUpdatesBox.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
         saveSettingsButton.setText(BundleUtils.getLabel("settings_save"));
         cancelSettingsButton.setText(BundleUtils.getLabel("settings_cancel"));
     }
