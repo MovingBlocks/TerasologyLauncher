@@ -17,12 +17,7 @@
 package org.terasology.launcher;
 
 import javafx.application.Application;
-import javafx.application.HostServices;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.concurrent.Worker;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -34,9 +29,7 @@ import org.terasology.crashreporter.CrashReporter;
 import org.terasology.launcher.gui.javafx.MainController;
 import org.terasology.launcher.log.TempLogFilePropertyDefiner;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
@@ -82,6 +75,8 @@ public final class TerasologyLauncher extends Application {
         Parent root = fxmlLoader.load();
         mainController = fxmlLoader.getController();
         mainController.setStage(mainStage);
+        mainController.bindStatus(initTask.messageProperty());
+
         if (initialConfig != null) {
             mainController.update(initialConfig);
         }

@@ -18,12 +18,11 @@ package org.terasology.launcher.gui.javafx;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.TextField;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +43,8 @@ public class SettingsController {
 
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
 
+    @FXML
+    private Pane overlay;
     @FXML
     private ComboBox<JobItem> jobBox;
     @FXML
@@ -202,6 +203,7 @@ public class SettingsController {
         this.downloadDirectory = config.getDownloadDirectory();
         this.launcherSettings = config.getLauncherSettings();
         this.gameVersions = config.getGameVersions();
+        //root.setDisable(false);
 
         populateJobBox();
         populateHeapSize();
@@ -217,6 +219,9 @@ public class SettingsController {
 
         updateDirectoryPathLabels();
         initUserParameterFields();
+
+        overlay.setVisible(false);
+        logger.trace("Updated Settings view");
     }
 
     private void populateJobBox() {

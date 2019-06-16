@@ -16,8 +16,10 @@
 
 package org.terasology.launcher.gui.javafx;
 
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,8 @@ public class MainController {
     @FXML
     private Label statusLabel;
     @FXML
+    private ProgressIndicator statusProgress;
+    @FXML
     private ServerManagerController serverManagerController;
     @FXML
     private SettingsController settingsController;
@@ -38,6 +42,7 @@ public class MainController {
 
     public void update(LauncherConfiguration config) {
         settingsController.update(config);
+        unbindStatus();
         logger.trace("Updated Main view");
     }
 
@@ -45,4 +50,16 @@ public class MainController {
         this.stage = stage;
         settingsController.setStage(stage);
     }
+
+    public void bindStatus(ReadOnlyStringProperty stringProperty) {
+        statusLabel.textProperty().bind(stringProperty);
+        statusProgress.setVisible(true);
+    }
+
+    public void unbindStatus() {
+        statusLabel.textProperty().unbind();
+        statusLabel.setText("");
+        statusProgress.setVisible(false);
+    }
+
 }

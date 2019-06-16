@@ -20,6 +20,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
@@ -93,6 +94,7 @@
       </TabPane>
       <HBox alignment="CENTER" prefHeight="40.0" spacing="10.0" VBox.vgrow="NEVER">
          <children>
+            <ProgressIndicator fx:id="statusProgress" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="26.0" />
             <Label fx:id="statusLabel" text="Status message" />
             <Pane minWidth="50.0" HBox.hgrow="ALWAYS" />
             <Button mnemonicParsing="false" text="Icon" />

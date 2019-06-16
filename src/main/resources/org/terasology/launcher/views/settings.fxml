@@ -28,129 +28,136 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox xmlns="http://javafx.com/javafx/8.0.202" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.terasology.launcher.gui.javafx.SettingsController">
+<StackPane xmlns="http://javafx.com/javafx/8.0.202" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.terasology.launcher.gui.javafx.SettingsController">
    <children>
-      <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
-         <content>
-            <GridPane hgap="10.0">
-              <columnConstraints>
-                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="1.7976931348623157E308" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="40.0" valignment="BOTTOM" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <Label text="Game settings">
-                     <font>
-                        <Font name="System Bold" size="16.0" />
-                     </font>
-                  </Label>
-                  <Label text="Build type" GridPane.rowIndex="1" />
-                  <Label text="Build version" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <ComboBox fx:id="jobBox" prefWidth="150.0" GridPane.rowIndex="2" />
-                  <ComboBox fx:id="buildVersionBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Label text="Installation directory" GridPane.rowIndex="3" />
-                  <Label text="Data directory" GridPane.rowIndex="5" />
-                  <Label text="Maximum memory" GridPane.rowIndex="7" />
-                  <Label text="Initial memory" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                  <ComboBox fx:id="maxHeapSizeBox" onAction="#updateMaxHeapSizeBox" prefWidth="150.0" GridPane.rowIndex="8" />
-                  <ComboBox fx:id="initialHeapSizeBox" onAction="#updateInitialHeapSizeBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                  <TextField fx:id="gameDirectoryPath" editable="false" GridPane.rowIndex="4" />
-                  <TextField fx:id="gameDataDirectoryPath" editable="false" GridPane.rowIndex="6" />
-                  <Button mnemonicParsing="false" onAction="#editGameDirectoryAction" text="Browse" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <Button mnemonicParsing="false" onAction="#editGameDataDirectoryAction" text="Browse" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                  <TitledPane animated="false" text="Advanced options" GridPane.columnSpan="2147483647" GridPane.rowIndex="9" GridPane.vgrow="SOMETIMES">
-                    <content>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                           <children>
-                              <VBox layoutX="231.0" layoutY="-13.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <children>
-                                    <Label text="JVM arguments" />
-                                    <TextField fx:id="userJavaParametersField" maxWidth="300.0" />
-                                    <Label text="Game arguments">
-                                       <VBox.margin>
-                                          <Insets top="10.0" />
-                                       </VBox.margin>
-                                    </Label>
-                                    <TextField fx:id="userGameParametersField" maxWidth="300.0" />
-                                    <Label text="Logging level">
-                                       <VBox.margin>
-                                          <Insets top="10.0" />
-                                       </VBox.margin>
-                                    </Label>
-                                    <ComboBox fx:id="logLevelBox" prefWidth="150.0" />
-                                 </children>
-                              </VBox>
-                           </children>
-                        </AnchorPane>
-                    </content>
-                     <GridPane.margin>
-                        <Insets top="15.0" />
-                     </GridPane.margin>
-                  </TitledPane>
-                  <Label text="Launcher settings" GridPane.rowIndex="10">
-                     <font>
-                        <Font name="System Bold" size="16.0" />
-                     </font>
-                  </Label>
-                  <Label text="Language" GridPane.rowIndex="11" />
-                  <ComboBox fx:id="languageBox" prefWidth="150.0" GridPane.rowIndex="12" />
-                  <Label text="Data directory" GridPane.rowIndex="13" />
-                  <TextField fx:id="launcherDirectoryPath" editable="false" GridPane.rowIndex="14" />
-                  <Button mnemonicParsing="false" text="Browse" GridPane.columnIndex="1" GridPane.rowIndex="14" />
-                  <Label text="Download directory" GridPane.rowIndex="15" />
-                  <Label text="Updates" GridPane.rowIndex="17" />
-                  <Label text="Other" GridPane.rowIndex="20" />
-                  <Button mnemonicParsing="false" text="Check now" GridPane.rowIndex="18" />
-                  <Button mnemonicParsing="false" text="Browse" GridPane.columnIndex="1" GridPane.rowIndex="16" />
-                  <Label text="Last checked on dd/mm/yyyy" GridPane.columnIndex="1" GridPane.rowIndex="18" />
-                  <CheckBox fx:id="searchForUpdatesBox" mnemonicParsing="false" text="Check on startup" GridPane.columnSpan="2147483647" GridPane.rowIndex="19" />
-                  <CheckBox fx:id="closeAfterStartBox" mnemonicParsing="false" text="Close after game starts" GridPane.rowIndex="21" />
-                  <CheckBox fx:id="saveDownloadedFilesBox" mnemonicParsing="false" text="Save downloaded files" GridPane.rowIndex="22" />
-                  <TextField fx:id="downloadDirectoryPath" editable="false" GridPane.rowIndex="16" />
-               </children>
-            </GridPane>
-         </content>
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
-      </ScrollPane>
-      <HBox alignment="CENTER_RIGHT" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="36.0" spacing="8.0" VBox.vgrow="NEVER">
+      <VBox>
          <children>
-            <Button mnemonicParsing="false" onAction="#saveSettingsAction" prefWidth="80.0" text="Save" />
-            <Button mnemonicParsing="false" onAction="#cancelSettingsAction" prefWidth="80.0" text="Cancel" />
-            <Button mnemonicParsing="false" prefWidth="80.0" text="Reset" />
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+               <content>
+                  <GridPane hgap="10.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="1.7976931348623157E308" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="40.0" valignment="BOTTOM" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="Game settings">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <Label text="Build type" GridPane.rowIndex="1" />
+                        <Label text="Build version" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <ComboBox fx:id="jobBox" prefWidth="150.0" GridPane.rowIndex="2" />
+                        <ComboBox fx:id="buildVersionBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label text="Installation directory" GridPane.rowIndex="3" />
+                        <Label text="Data directory" GridPane.rowIndex="5" />
+                        <Label text="Maximum memory" GridPane.rowIndex="7" />
+                        <Label text="Initial memory" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                        <ComboBox fx:id="maxHeapSizeBox" onAction="#updateMaxHeapSizeBox" prefWidth="150.0" GridPane.rowIndex="8" />
+                        <ComboBox fx:id="initialHeapSizeBox" onAction="#updateInitialHeapSizeBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                        <TextField fx:id="gameDirectoryPath" editable="false" GridPane.rowIndex="4" />
+                        <TextField fx:id="gameDataDirectoryPath" editable="false" GridPane.rowIndex="6" />
+                        <Button mnemonicParsing="false" onAction="#editGameDirectoryAction" text="Browse" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Button mnemonicParsing="false" onAction="#editGameDataDirectoryAction" text="Browse" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                        <TitledPane animated="false" text="Advanced options" GridPane.columnSpan="2147483647" GridPane.rowIndex="9" GridPane.vgrow="SOMETIMES">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <VBox layoutX="231.0" layoutY="-13.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <children>
+                                          <Label text="JVM arguments" />
+                                          <TextField fx:id="userJavaParametersField" maxWidth="300.0" />
+                                          <Label text="Game arguments">
+                                             <VBox.margin>
+                                                <Insets top="10.0" />
+                                             </VBox.margin>
+                                          </Label>
+                                          <TextField fx:id="userGameParametersField" maxWidth="300.0" />
+                                          <Label text="Logging level">
+                                             <VBox.margin>
+                                                <Insets top="10.0" />
+                                             </VBox.margin>
+                                          </Label>
+                                          <ComboBox fx:id="logLevelBox" prefWidth="150.0" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </AnchorPane>
+                          </content>
+                           <GridPane.margin>
+                              <Insets top="15.0" />
+                           </GridPane.margin>
+                        </TitledPane>
+                        <Label text="Launcher settings" GridPane.rowIndex="10">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <Label text="Language" GridPane.rowIndex="11" />
+                        <ComboBox fx:id="languageBox" prefWidth="150.0" GridPane.rowIndex="12" />
+                        <Label text="Data directory" GridPane.rowIndex="13" />
+                        <TextField fx:id="launcherDirectoryPath" editable="false" GridPane.rowIndex="14" />
+                        <Button mnemonicParsing="false" text="Browse" GridPane.columnIndex="1" GridPane.rowIndex="14" />
+                        <Label text="Download directory" GridPane.rowIndex="15" />
+                        <Label text="Updates" GridPane.rowIndex="17" />
+                        <Label text="Other" GridPane.rowIndex="20" />
+                        <Button disable="true" mnemonicParsing="false" text="Check now" GridPane.rowIndex="18" />
+                        <Button mnemonicParsing="false" text="Browse" GridPane.columnIndex="1" GridPane.rowIndex="16" />
+                        <Label text="Last checked on dd/mm/yyyy" GridPane.columnIndex="1" GridPane.rowIndex="18" />
+                        <CheckBox fx:id="searchForUpdatesBox" mnemonicParsing="false" text="Check on startup" GridPane.columnSpan="2147483647" GridPane.rowIndex="19" />
+                        <CheckBox fx:id="closeAfterStartBox" mnemonicParsing="false" text="Close after game starts" GridPane.rowIndex="21" />
+                        <CheckBox fx:id="saveDownloadedFilesBox" mnemonicParsing="false" text="Save downloaded files" GridPane.rowIndex="22" />
+                        <TextField fx:id="downloadDirectoryPath" editable="false" GridPane.rowIndex="16" />
+                     </children>
+                  </GridPane>
+               </content>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </ScrollPane>
+            <HBox alignment="CENTER_RIGHT" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="36.0" spacing="8.0" VBox.vgrow="NEVER">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#saveSettingsAction" prefWidth="80.0" text="Save" />
+                  <Button mnemonicParsing="false" onAction="#cancelSettingsAction" prefWidth="80.0" text="Cancel" />
+                  <Button mnemonicParsing="false" prefWidth="80.0" text="Reset" />
+               </children>
+               <padding>
+                  <Insets left="8.0" right="8.0" />
+               </padding>
+            </HBox>
          </children>
-         <padding>
-            <Insets left="8.0" right="8.0" />
-         </padding>
-      </HBox>
+      </VBox>
+      <Pane fx:id="overlay" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: rgba(189, 195, 199, 0.5);" />
    </children>
-</VBox>
+</StackPane>
