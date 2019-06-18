@@ -30,12 +30,12 @@ import java.nio.file.spi.FileSystemProvider;
 public class LocalCopyVisitor extends SimpleFileVisitor<Path> {
 
     /**
-     * Directory to copy from
+     * Directory to copy from.
      */
     private final Path sourceDirectory;
 
     /**
-     * Directory to copy to
+     * Directory to copy to.
      */
     private final Path targetDirectory;
 
