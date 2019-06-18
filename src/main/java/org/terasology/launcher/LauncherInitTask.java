@@ -35,9 +35,13 @@ import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
 
@@ -72,7 +76,8 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
 
-            if (launcherSettings.isSearchForLauncherUpdates()) {
+            final boolean serverAvailable = isServerAvailable();
+            if (serverAvailable && launcherSettings.isSearchForLauncherUpdates()) {
                 final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
                 if (selfUpdaterStarted) {
                     logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
@@ -85,6 +90,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory());
             final Path gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory());
 
+            // TODO: Fix this for server unavailability
             final TerasologyGameVersions gameVersions = getTerasologyGameVersions(launcherDirectory, gameDirectory, launcherSettings);
 
             logger.trace("Change LauncherSettings...");
@@ -178,6 +184,31 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }
         logger.debug("Launcher Settings: {}", launcherSettings);
         return launcherSettings;
+    }
+
+    private boolean isServerAvailable() {
+        logger.trace("Checking Jenkins availability...");
+        final int timeout = 3000; // in milliseconds
+        HttpURLConnection connection = null;
+        try {
+            final URL serverURL = Objects.requireNonNull(BundleUtils.getURI("terasology_jenkins")).toURL();
+            connection = (HttpURLConnection) serverURL.openConnection();
+            connection.setConnectTimeout(timeout);
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                logger.trace("Jenkins is available. All online checks can continue.");
+                return true;
+            } else {
+                throw new ConnectException();
+            }
+        } catch (IOException e) {
+            logger.warn("Could not connect to Jenkins. All online checks will be skipped.");
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+
+        return false;
     }
 
     private boolean checkForLauncherUpdates(Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
