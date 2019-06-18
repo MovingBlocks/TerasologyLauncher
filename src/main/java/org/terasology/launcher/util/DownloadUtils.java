@@ -33,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -58,6 +59,8 @@ public final class DownloadUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
 
+    private static final String JENKINS_URL = "http://jenkins.terasology.org";
+    private static final int JENKINS_TIMEOUT = 3000; // milliseconds
     private static final String JENKINS_JOB_URL = "http://jenkins.terasology.org/job/";
     private static final String LAST_STABLE_BUILD = "/lastStableBuild";
     private static final String LAST_SUCCESSFUL_BUILD = "/lastSuccessfulBuild";
@@ -186,6 +189,25 @@ public final class DownloadUtils {
         urlBuilder.append(subPath);
 
         return new URL(urlBuilder.toString());
+    }
+
+    public static boolean isJenkinsAvailable() {
+        logger.trace("Checking Jenkins availability...");
+        try {
+            HttpURLConnection conn = (HttpURLConnection) new URL(JENKINS_URL).openConnection();
+            try (AutoCloseable ac = conn::disconnect) {
+                conn.setConnectTimeout(JENKINS_TIMEOUT);
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    logger.trace("Jenkins is available at {}", JENKINS_URL);
+                    return true;
+                } else {
+                    throw new ConnectException();
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Could not connect to Jenkins at {}", JENKINS_URL);
+        }
+        return false;
     }
 
     /**
