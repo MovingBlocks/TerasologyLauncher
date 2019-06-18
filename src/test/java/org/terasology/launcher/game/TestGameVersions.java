@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.stream.IntStream;
 
 import static org.mockito.Matchers.any;
 import static org.powermock.api.mockito.PowerMockito.spy;
@@ -142,12 +143,9 @@ public class TestGameVersions {
     }
 
     private int[] getBuildArray(int start, int stop) {
-        int[] buildArray = new int[(stop - start) + 2]; // add 1 to include the end, and add 1 for the duplicate first build
-        buildArray[0] = stop;  // Duplicate, to account for virtual 'latest' version
-        for (int i = buildArray.length - 1; i > 0; i--) {
-            buildArray[i] = start++;
-        }
-        return buildArray;
+        return IntStream.concat(IntStream.of(stop), // Duplicate, to account for virtual 'latest' version
+                IntStream.iterate(stop, i -> i - 1).limit(stop - start + 1)
+        ).toArray();
     }
 
     private void runAssertions(TerasologyGameVersions gameVersions, int expected, BiConsumer<TerasologyGameVersion, Integer> additionalAssertions) {

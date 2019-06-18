@@ -28,6 +28,7 @@ import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.LauncherStartFailedException;
@@ -72,7 +73,8 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
 
-            if (launcherSettings.isSearchForLauncherUpdates()) {
+            final boolean serverAvailable = DownloadUtils.isJenkinsAvailable();
+            if (serverAvailable && launcherSettings.isSearchForLauncherUpdates()) {
                 final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
                 if (selfUpdaterStarted) {
                     logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
@@ -85,6 +87,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory());
             final Path gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory());
 
+            // TODO: Fix this for server unavailability
             final TerasologyGameVersions gameVersions = getTerasologyGameVersions(launcherDirectory, gameDirectory, launcherSettings);
 
             logger.trace("Change LauncherSettings...");
