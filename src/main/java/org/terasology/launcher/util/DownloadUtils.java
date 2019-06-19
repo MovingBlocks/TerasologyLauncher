@@ -204,8 +204,11 @@ public final class DownloadUtils {
                     throw new ConnectException();
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
+            e.printStackTrace();
             logger.warn("Could not connect to Jenkins at {}", JENKINS_URL);
+        } catch (Exception e) {
+            logger.warn("Failed to disconnect an HttpURLConnection to Jenkins at {}", JENKINS_URL);
         }
         return false;
     }
