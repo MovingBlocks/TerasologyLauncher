@@ -43,8 +43,10 @@ import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.crashreporter.CrashReporter;
+import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.gui.javafx.ApplicationController;
 import org.terasology.launcher.log.TempLogFilePropertyDefiner;
+import org.terasology.launcher.net.Network;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LauncherStartFailedException;
@@ -95,6 +97,8 @@ public final class TerasologyLauncher extends Application {
 
         initProxy();
         initLanguage();
+
+        Network.foo();
 
         final Task<LauncherConfiguration> launcherInitTask = new LauncherInitTask(initialStage);
 
