@@ -200,12 +200,10 @@ public final class DownloadUtils {
                 if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     logger.trace("Jenkins is available at {}", JENKINS_URL);
                     return true;
-                } else {
-                    throw new ConnectException();
                 }
             }
         } catch (Exception e) {
-            logger.warn("Could not connect to Jenkins at {}", JENKINS_URL);
+            logger.warn("Could not connect to Jenkins at {} - {}", JENKINS_URL, e.getMessage());
         }
         return false;
     }
