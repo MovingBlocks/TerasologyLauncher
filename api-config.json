@@ -1,0 +1,10 @@
+{
+  "groupId": "org.terasology",
+  "artifactId": "web-api-client",
+  "artifactVersion": "0.0.1",
+
+  "apiPackage": "org.terasology.web.client.api",
+  "modelPackage": "org.terasology.web.client.model",
+  "invokerPackage": "org.terasology.web.client",
+  "dateLibrary": "java8"
+}
