@@ -60,6 +60,17 @@ wrapper {
     gradleVersion '5.4.1'
 }
 
+sourceSets {
+    main {
+        scala {
+            srcDirs = ['src/main/scala', 'src/main/java']
+        }
+        java {
+            srcDirs = []
+        }
+    }
+}
+
 
 import org.apache.tools.ant.filters.FixCrLfFilter
 
@@ -103,9 +114,9 @@ dependencies {
     compile group: 'com.github.rjeschke', name: 'txtmark', version: '0.11'
 
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
-    
+
     implementation "org.scala-lang:scala-library:2.12.8"
-    
+
     implementation 'org.scala-lang.modules:scala-java8-compat_2.12:0.9.0'
     implementation "com.softwaremill.sttp:akka-http-backend_2.12:1.6.0"
     implementation "com.softwaremill.sttp:json4s_2.12:1.6.0"
