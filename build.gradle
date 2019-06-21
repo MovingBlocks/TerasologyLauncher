@@ -127,7 +127,9 @@ if (project.hasProperty('bundleJre')) {
         doLast {
             unixScript.text = unixScript.text.replaceFirst(/(?s)# Determine the Java.*(?=\R# Increase)/,
                     '# Use bundled JRE\nJAVACMD=\\$APP_HOME/jre/bin/java\n')
-            // TODO: Handle Windows script
+
+            windowsScript.text = windowsScript.text.replaceFirst(/(?s)@rem Find java.*:init/,
+                    '@rem Use bundled JRE\nset JAVA_EXE=' + /%APP_HOME%\\jre\\bin\\java.exe/ + '\n')
         }
     }
 }
