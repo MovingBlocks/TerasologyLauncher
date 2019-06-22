@@ -117,6 +117,24 @@ targetCompatibility = 1.8
 
 mainClassName = 'org.terasology.launcher.TerasologyLauncher'
 
+// Bundle JRE (Use gradle argument: -PbundleJre=/path/to/jre)
+if (project.hasProperty('bundleJre')) {
+    applicationDistribution.from("$bundleJre") {
+        into 'jre'
+    }
+
+    startScripts {
+        doLast {
+            unixScript.text = unixScript.text.replaceFirst(/(?s)# Determine the Java.*(?=\R# Increase)/,
+                    '# Use bundled JRE\nJAVACMD=\\$APP_HOME/jre/bin/java\n')
+
+            windowsScript.text = windowsScript.text.replaceFirst(/(?s)@rem Find java.*:init/,
+                    '@rem Use bundled JRE\nset JAVA_EXE=' + /%APP_HOME%\\jre\\bin\\java.exe/ + '\n')
+        }
+    }
+}
+
+
 checkstyle {
     toolVersion = '6.14.1'
     ignoreFailures = true
