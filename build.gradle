@@ -40,7 +40,7 @@ plugins {
     id 'application'
     id 'checkstyle'
     id 'pmd'
-    id 'com.github.spotbugs' version '2.0.0'
+    id 'com.github.spotbugs' version '1.6.9'
     id 'de.undercouch.download' version '3.4.3'
 }
 
@@ -131,10 +131,14 @@ pmd {
 }
 
 spotbugs {
-    toolVersion = '4.0.0-beta2'
+    toolVersion = '3.1.11'
     ignoreFailures = true
     effort = 'max'
     reportLevel = 'medium'
+}
+
+test {
+    ignoreFailures = true
 }
 
 def convertGitBranch = { gitBranch ->
