@@ -79,7 +79,7 @@ public final class GameStarter {
     private List<String> createProcessParameters(TerasologyGameVersion gameVersion, Path gameDataDirectory, List<String> javaParameters,
                                                  List<String> gameParameters) {
         final List<String> processParameters = new ArrayList<>();
-        processParameters.add("java");
+        processParameters.add(System.getProperty("java.home") + "/bin/java"); // Use the current java
         processParameters.addAll(javaParameters);
         processParameters.add("-jar");
         processParameters.add(gameVersion.getGameJar().getFileName().toString());

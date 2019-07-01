@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2019 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,16 +34,17 @@ buildscript {
     }
 }
 
-apply plugin: 'java'
-apply plugin: 'project-report'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-apply plugin: 'application'
-apply plugin: 'checkstyle'
-apply plugin: 'pmd'
-apply plugin: 'findbugs'
-
-apply plugin: 'de.undercouch.download'
+plugins {
+    id 'java'
+    id 'project-report'
+    id 'idea'
+    id 'eclipse'
+    id 'application'
+    id 'checkstyle'
+    id 'pmd'
+    id 'com.github.spotbugs' version '1.6.9'
+    id 'de.undercouch.download' version '3.4.3'
+}
 
 apply from: 'bundles.gradle'
 apply plugin: "org.hidetake.swagger.generator"
@@ -58,7 +59,7 @@ if (javaVersion.startsWith("1.8") && javaVersion.split("_")[1].toInteger() < 40)
 
 // gradle wrapper version
 wrapper {
-    gradleVersion '2.10'
+    gradleVersion '5.4.1'
 }
 
 
@@ -140,6 +141,24 @@ swaggerSources {
 generateSwaggerCodeClient.outputDir = file('web-api-client')
 
 
+// Bundle JRE (Use gradle argument: -PbundleJre=/path/to/jre)
+if (project.hasProperty('bundleJre')) {
+    applicationDistribution.from("$bundleJre") {
+        into 'jre'
+    }
+
+    startScripts {
+        doLast {
+            unixScript.text = unixScript.text.replaceFirst(/(?s)# Determine the Java.*(?=\R# Increase)/,
+                    '# Use bundled JRE\nJAVACMD=\\$APP_HOME/jre/bin/java\n')
+
+            windowsScript.text = windowsScript.text.replaceFirst(/(?s)@rem Find java.*:init/,
+                    '@rem Use bundled JRE\nset JAVA_EXE=' + /%APP_HOME%\\jre\\bin\\java.exe/ + '\n')
+        }
+    }
+}
+
+
 // Checkstyle
 checkstyle {
     toolVersion = '6.14.1'
@@ -153,11 +172,15 @@ pmd {
     ruleSetFiles = files("config/pmd/pmd.xml")
 }
 
-findbugs {
-    toolVersion = '3.0.0'
+spotbugs {
+    toolVersion = '3.1.11'
     ignoreFailures = true
     effort = 'max'
     reportLevel = 'medium'
+}
+
+test {
+    ignoreFailures = true
 }
 
 def convertGitBranch = { gitBranch ->
