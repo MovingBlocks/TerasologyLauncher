@@ -131,14 +131,23 @@ mainClassName = 'org.terasology.launcher.TerasologyLauncher'
 // Swagger config
 swaggerSources {
     client {
-        inputFile = file('swagger.json')
+        inputFile = file("$buildDir/swagger.json")
         code {
             language = 'java'
             configFile = file('api-config.json')
         }
     }
 }
-generateSwaggerCodeClient.outputDir = file('web-api-client')
+
+generateSwaggerCodeClient {
+    doFirst {
+        download {
+            src 'https://raw.githubusercontent.com/MovingBlocks/FacadeServer/develop/src/main/resources/web/swagger.json'
+            dest "$buildDir/swagger.json"
+        }
+    }
+    outputDir = file('web-api-client')
+}
 
 
 // Bundle JRE (Use gradle argument: -PbundleJre=/path/to/jre)
