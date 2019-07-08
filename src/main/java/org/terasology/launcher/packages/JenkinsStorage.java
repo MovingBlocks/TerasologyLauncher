@@ -38,7 +38,7 @@ public class JenkinsStorage implements Storage {
 
     private static final Logger logger = LoggerFactory.getLogger(JenkinsStorage.class);
 
-    private static final String JENKINS_JOB_URL = "http://jenkins.terasology.org/";
+    private static final String JENKINS_JOB_URL = "http://jenkins.terasology.org/job/";
     private static final String API_PATH = "/api/json?tree=builds[number,result]";
     private static final int LIMIT_VERSIONS = 20;
 

@@ -16,37 +16,28 @@
 
 package org.terasology.launcher.packages;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.nio.file.Path;
 
 /**
  * Handles installation, removal and update of game packages.
  */
 public class PackageManager {
-    private final List<Storage> onlineStorages;
+    private final Storage onlineStorage;
     private final LocalStorage localStorage;
 
-    public PackageManager() {
-        onlineStorages = new ArrayList<>();
-        onlineStorages.add(new JenkinsStorage());
-
-        localStorage = new LocalStorage();
+    public PackageManager(Path localDir) {
+        onlineStorage = new JenkinsStorage();
+        localStorage = new LocalStorage(localDir);
     }
 
     public void sync() {
-        // TODO: Cache list of available packages
+        for (GamePackageType pkgType : GamePackageType.values()) {
+            localStorage.updateCache(pkgType, onlineStorage.getPackageVersions(pkgType));
+        }
     }
 
     public void install(GamePackageType pkgType, int version) {
         // TODO: Install via cache
-        for (Storage storage : onlineStorages) {
-            Optional<GamePackage> pkg = storage.getPackage(pkgType, version);
-            if (pkg.isPresent()) {
-                localStorage.install(pkg.get());
-                break;
-            }
-        }
     }
 
     public void remove(GamePackageType pkgType, int version) {
