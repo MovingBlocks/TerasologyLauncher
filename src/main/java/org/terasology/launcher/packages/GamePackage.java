@@ -16,5 +16,9 @@
 
 package org.terasology.launcher.packages;
 
+/**
+ * Model of a game package.
+ */
 public class GamePackage {
+    // TODO: Implement this
 }

@@ -16,13 +16,24 @@
 
 package org.terasology.launcher.packages;
 
-import java.util.List;
-import java.util.Optional;
-
 /**
- * Interface for anything that can store game packages.
+ * Enum for types of game package available now.
  */
-public interface Storage {
-    List<Integer> getPackageVersions(GamePackageType pkgType);
-    Optional<GamePackage> getPackage(GamePackageType pkgType, int version);
+public enum GamePackageType {
+    STABLE("TerasologyStable"),
+    UNSTABLE("Terasology"),
+    OMEGA_STABLE("DistroOmegaRelease"),
+    OMEGA_UNSTABLE("DistroOmega");
+
+    // TODO: Remove this enum when 3rd-party package types are supported
+
+    private final String jobName;
+
+    GamePackageType(String jobName) {
+        this.jobName = jobName;
+    }
+
+    public String getJobName() {
+        return jobName;
+    }
 }

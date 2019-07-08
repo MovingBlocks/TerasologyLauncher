@@ -20,22 +20,28 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Provides game packages from the local filesystem.
+ */
 public class LocalStorage implements Storage {
+
+    void install(GamePackage pkg) {
+        // TODO: Implement this
+    }
+
+    void remove(GamePackage pkg) {
+        // TODO: Implement this
+    }
+
     @Override
-    public List<GamePackage> getPackageList() {
+    public List<Integer> getPackageVersions(GamePackageType pkgType) {
+        // TODO: Implement this
         return Collections.emptyList();
     }
 
     @Override
-    public Optional<GamePackage> getPackage(String name) {
+    public Optional<GamePackage> getPackage(GamePackageType pkgType, int version) {
+        // TODO: Implement this
         return Optional.empty();
-    }
-
-    void install(GamePackage pkg) {
-        // TODO: Install
-    }
-
-    void remove(GamePackage pkg) {
-        // TODO: Remove
     }
 }

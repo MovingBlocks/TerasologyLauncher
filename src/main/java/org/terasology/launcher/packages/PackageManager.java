@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Handles installation, removal and update of game packages.
+ */
 public class PackageManager {
     private final List<Storage> onlineStorages;
     private final LocalStorage localStorage;
@@ -32,14 +35,13 @@ public class PackageManager {
     }
 
     public void sync() {
-        // TODO: Update a cached list of available packages
-
-        onlineStorages.forEach(storage -> System.out.println(storage.getPackageList()));
+        // TODO: Cache list of available packages
     }
 
-    public void intstall(String name) {
+    public void install(GamePackageType pkgType, int version) {
+        // TODO: Install via cache
         for (Storage storage : onlineStorages) {
-            Optional<GamePackage> pkg = storage.getPackage(name);
+            Optional<GamePackage> pkg = storage.getPackage(pkgType, version);
             if (pkg.isPresent()) {
                 localStorage.install(pkg.get());
                 break;
@@ -47,8 +49,8 @@ public class PackageManager {
         }
     }
 
-    public void remove(String name) {
-        localStorage.getPackage(name)
+    public void remove(GamePackageType pkgType, int version) {
+        localStorage.getPackage(pkgType, version)
                 .ifPresent(localStorage::remove);
     }
 }
