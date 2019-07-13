@@ -25,10 +25,12 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
         classpath group: "com.alexkasko.delta", name: "delta-diff", version: "1.1.3"
         classpath group: 'de.undercouch', name: 'gradle-download-task', version: '2.1.0'
+        classpath "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.1"
     }
 }
 
@@ -45,6 +47,7 @@ plugins {
 }
 
 apply from: 'bundles.gradle'
+apply plugin: "org.hidetake.swagger.generator"
 
 // Test for right version of Java in use for running this script
 assert org.gradle.api.JavaVersion.current().isJava8Compatible()
@@ -91,6 +94,7 @@ repositories {
     maven {
         url "http://artifactory.terasology.org/artifactory/virtual-repo-live"
     }
+    jcenter()
 }
 
 // Primary dependencies definition
@@ -102,6 +106,12 @@ dependencies {
     compile group: 'com.github.rjeschke', name: 'txtmark', version: '0.11'
 
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
+
+    // For Web API
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.5'
+    if (new File('web-api-client').exists()) {
+        compile project(':web-api-client')
+    }
 
     // These dependencies are only needed for running tests
     testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -117,6 +127,28 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 mainClassName = 'org.terasology.launcher.TerasologyLauncher'
+
+// Swagger config
+swaggerSources {
+    client {
+        inputFile = file("$buildDir/swagger.json")
+        code {
+            language = 'java'
+            configFile = file('api-config.json')
+        }
+    }
+}
+
+generateSwaggerCodeClient {
+    doFirst {
+        download {
+            src 'https://raw.githubusercontent.com/MovingBlocks/FacadeServer/develop/src/main/resources/web/swagger.json'
+            dest "$buildDir/swagger.json"
+        }
+    }
+    outputDir = file('web-api-client')
+}
+
 
 // Bundle JRE (Use gradle argument: -PbundleJre=/path/to/jre)
 if (project.hasProperty('bundleJre')) {
@@ -136,6 +168,7 @@ if (project.hasProperty('bundleJre')) {
 }
 
 
+// Checkstyle
 checkstyle {
     toolVersion = '6.14.1'
     ignoreFailures = true
