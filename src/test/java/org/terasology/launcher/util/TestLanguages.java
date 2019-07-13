@@ -60,13 +60,13 @@ public final class TestLanguages {
     }
 
     @Test
-    public void testUpdateWithJapan() {
+    public void testUpdateWithJapanese() {
         Languages.update(Locale.JAPANESE);
         assertSame(Locale.JAPANESE, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testUpdateWithJapanese() {
+    public void testUpdateWithJapan() {
         Languages.update(Languages.DEFAULT_LOCALE);
         Languages.update(Locale.JAPAN);
         assertSame(Languages.DEFAULT_LOCALE, Languages.getCurrentLocale());
