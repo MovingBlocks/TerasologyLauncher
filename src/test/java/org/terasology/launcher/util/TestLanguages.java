@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.util;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import java.util.Locale;
@@ -112,5 +113,10 @@ public final class TestLanguages {
     @Test
     public void testSize() {
         assertEquals(Languages.SUPPORTED_LOCALES.size(), Languages.SETTINGS_LABEL_KEYS.size());
+    }
+
+    @AfterClass
+    public static void resetLanguages() {
+        Languages.init(Languages.DEFAULT_LOCALE.toString());
     }
 }
