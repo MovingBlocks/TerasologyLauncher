@@ -39,47 +39,45 @@ public class LocalStorage implements Storage {
 
     private static final String VERSIONS_CACHE_FILENAME = "versions.cache";
 
+    private final Path gameDirectory;
+    private final Path cacheDirectory;
     private final Path versionsCache;
     private final Map<GamePackageType, List<Integer>> cachedVersions;
 
-    LocalStorage(Path localDir) {
-        versionsCache = localDir.resolve(VERSIONS_CACHE_FILENAME);
-
-        final Map<GamePackageType, List<Integer>> cache = loadCache();
-        if (!cache.isEmpty()) {
-            cachedVersions = cache;
-        } else {
-            cachedVersions = new EnumMap<>(GamePackageType.class);
-            for (GamePackageType pkgType : GamePackageType.values()) {
-                cachedVersions.put(pkgType, Collections.emptyList());
-            }
-        }
+    LocalStorage(Path gameDirectory, Path cacheDirectory) {
+        this.gameDirectory = gameDirectory;
+        this.cacheDirectory = cacheDirectory;
+        versionsCache = cacheDirectory.resolve(VERSIONS_CACHE_FILENAME);
+        cachedVersions = new EnumMap<>(GamePackageType.class);
     }
 
     void updateCache(GamePackageType pkgType, List<Integer> versions) {
         cachedVersions.put(pkgType, versions);
         logger.trace("Updating cached version list for {} ...", pkgType);
-        saveCache();
     }
 
-    private void saveCache() {
+    void saveCache() {
         try (ObjectOutputStream out = new ObjectOutputStream(
                 Files.newOutputStream(versionsCache))) {
             out.writeObject(cachedVersions);
+            logger.info("Saved cache file: {}", versionsCache.toAbsolutePath());
         } catch (IOException e) {
-            logger.warn("Failed to write cache file: {}", versionsCache.toAbsolutePath());
+            logger.warn("Failed to save cache file: {}", versionsCache.toAbsolutePath());
         }
     }
 
-    private Map<GamePackageType, List<Integer>> loadCache() {
+    void loadCache() {
         // TODO: Do this in a background thread
-        try (ObjectInputStream in = new ObjectInputStream(
-                Files.newInputStream(versionsCache))) {
-            return (Map<GamePackageType, List<Integer>>) in.readObject();
-        } catch (ClassNotFoundException | IOException e) {
-            logger.warn("Failed to load cache file: {}", versionsCache.toAbsolutePath());
+        if (Files.exists(versionsCache)) {
+            try (ObjectInputStream in = new ObjectInputStream(
+                    Files.newInputStream(versionsCache))) {
+                cachedVersions.putAll(
+                        (Map<GamePackageType, List<Integer>>) in.readObject());
+                logger.info("Loaded cache file: {}", versionsCache.toAbsolutePath());
+            } catch (ClassNotFoundException | IOException e) {
+                logger.warn("Failed to load cache file: {}", versionsCache.toAbsolutePath());
+            }
         }
-        return Collections.emptyMap();
     }
 
     void install(GamePackage pkg) {
@@ -92,8 +90,7 @@ public class LocalStorage implements Storage {
 
     @Override
     public List<Integer> getPackageVersions(GamePackageType pkgType) {
-        // TODO: Implement this
-        return Collections.emptyList();
+        return cachedVersions.getOrDefault(pkgType, Collections.emptyList());
     }
 
     @Override

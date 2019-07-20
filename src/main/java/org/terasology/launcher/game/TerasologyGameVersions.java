@@ -18,6 +18,7 @@ package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
@@ -62,10 +63,12 @@ public final class TerasologyGameVersions {
 
     private final Map<GameJob, List<TerasologyGameVersion>> gameVersionLists;
     private final Map<GameJob, SortedMap<Integer, TerasologyGameVersion>> gameVersionMaps;
+    private final PackageManager packageManager;
 
     public TerasologyGameVersions() {
         gameVersionLists = new EnumMap<>(GameJob.class);
         gameVersionMaps = new EnumMap<>(GameJob.class);
+        packageManager = new PackageManager();
     }
 
     public synchronized List<TerasologyGameVersion> getGameVersionList(GameJob job) {
@@ -81,6 +84,13 @@ public final class TerasologyGameVersions {
         }
         logger.warn("GameVersion not found for '{}' '{}'.", job, buildVersion);
         return null;
+    }
+
+    public synchronized void loadGameVersionsFromPackageManager(GameSettings gameSettings, Path launcherDirectory, Path gameDirectory) {
+        packageManager.initLocalStorage(gameDirectory, launcherDirectory.resolve(DirectoryUtils.CACHE_DIR_NAME));
+
+        packageManager.sync();
+        // TODO: Check available versions from PackageManager and fill gameVersionLists
     }
 
     public synchronized void loadGameVersions(GameSettings gameSettings, Path launcherDirectory, Path gameDirectory) {
