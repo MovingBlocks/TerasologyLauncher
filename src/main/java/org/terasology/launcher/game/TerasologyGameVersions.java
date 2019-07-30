@@ -18,6 +18,7 @@ package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.packages.GamePackageType;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
@@ -49,6 +50,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class TerasologyGameVersions {
@@ -88,9 +90,32 @@ public final class TerasologyGameVersions {
 
     public synchronized void loadGameVersionsFromPackageManager(GameSettings gameSettings, Path launcherDirectory, Path gameDirectory) {
         packageManager.initLocalStorage(gameDirectory, launcherDirectory.resolve(DirectoryUtils.CACHE_DIR_NAME));
-
         packageManager.sync();
-        // TODO: Check available versions from PackageManager and fill gameVersionLists
+
+        for (GameJob job : GameJob.values()) {
+            final List<TerasologyGameVersion> gameVersionList =
+                    packageManager.getPackageVersions(GamePackageType.byJobName(job.name()))
+                                  .stream()
+                                  .map(buildNumber -> getGameVersion(buildNumber, job))
+                                  .collect(Collectors.toList());
+
+            // TODO: Add entry for latest item
+            // TODO: Add caching support
+            // TODO: Detect already installed games
+
+            gameVersionLists.put(job, gameVersionList);
+        }
+    }
+
+    private TerasologyGameVersion getGameVersion(int buildNumber, GameJob job) {
+        final TerasologyGameVersion gameVersion = new TerasologyGameVersion();
+        gameVersion.setJob(job);
+        gameVersion.setBuildNumber(buildNumber);
+        loadAndSetGameVersionInfo(gameVersion, null, job, buildNumber);
+        loadAndSetChangeLog(gameVersion, null, job, buildNumber);
+        loadAndSetSuccessful(gameVersion, null, job, buildNumber);
+
+        return gameVersion;
     }
 
     public synchronized void loadGameVersions(GameSettings gameSettings, Path launcherDirectory, Path gameDirectory) {

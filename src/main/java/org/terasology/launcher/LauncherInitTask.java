@@ -93,7 +93,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             logger.trace("Change LauncherSettings...");
             launcherSettings.setGameDirectory(gameDirectory);
             launcherSettings.setGameDataDirectory(gameDataDirectory);
-            gameVersions.fixSettingsBuildVersion(launcherSettings);
+            // TODO: Rewrite gameVersions.fixSettingsBuildVersion(launcherSettings);
 
             storeLauncherSettingsAfterInit(launcherSettings);
 
@@ -289,7 +289,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         logger.trace("Init TerasologyGameVersions...");
         updateMessage(BundleUtils.getLabel("splash_loadGameVersions"));
         final TerasologyGameVersions gameVersions = new TerasologyGameVersions();
-        gameVersions.loadGameVersions(launcherSettings, launcherDirectory, gameDirectory);
+        gameVersions.loadGameVersionsFromPackageManager(launcherSettings, launcherDirectory, gameDirectory);
         if (logger.isInfoEnabled()) {
             for (GameJob gameJob : GameJob.values()) {
                 logger.info("Game versions: {} {}", gameJob, gameVersions.getGameVersionList(gameJob).size() - 1);

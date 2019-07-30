@@ -36,4 +36,13 @@ public enum GamePackageType {
     public String getJobName() {
         return jobName;
     }
+
+    public static GamePackageType byJobName(String jobName) {
+        for (GamePackageType packageType : values()) {
+            if (packageType.jobName.equals(jobName)) {
+                return packageType;
+            }
+        }
+        throw new IllegalArgumentException("Invalid job name: " + jobName);
+    }
 }

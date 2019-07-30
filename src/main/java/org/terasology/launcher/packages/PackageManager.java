@@ -18,13 +18,10 @@ package org.terasology.launcher.packages;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.util.DirectoryUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -57,7 +54,9 @@ public class PackageManager {
         Objects.requireNonNull(localStorage, "Local storage uninitialized");
 
         for (GamePackageType pkgType : GamePackageType.values()) {
-            localStorage.updateCache(pkgType, onlineStorage.getPackageVersions(pkgType));
+            final List<Integer> versions = onlineStorage.getPackageVersions(pkgType);
+            logger.debug("Versions for job {}: {}", pkgType.getJobName(), versions.toString());
+            localStorage.updateCache(pkgType, versions);
         }
         localStorage.saveCache();
     }

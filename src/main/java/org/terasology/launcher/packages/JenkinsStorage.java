@@ -40,7 +40,7 @@ public class JenkinsStorage implements Storage {
 
     private static final String JENKINS_JOB_URL = "http://jenkins.terasology.org/job/";
     private static final String API_PATH = "/api/json?tree=builds[number,result]";
-    private static final int LIMIT_VERSIONS = 20;
+    private static final int LIMIT_VERSIONS = 5;
 
     private Gson gson = new Gson();
 
