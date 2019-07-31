@@ -16,9 +16,11 @@
 
 package org.terasology.launcher.game;
 
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.GamePackageType;
+import org.terasology.launcher.packages.JenkinsStorage;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
@@ -66,11 +68,13 @@ public final class TerasologyGameVersions {
     private final Map<GameJob, List<TerasologyGameVersion>> gameVersionLists;
     private final Map<GameJob, SortedMap<Integer, TerasologyGameVersion>> gameVersionMaps;
     private final PackageManager packageManager;
+    private final Gson gson;
 
     public TerasologyGameVersions() {
         gameVersionLists = new EnumMap<>(GameJob.class);
         gameVersionMaps = new EnumMap<>(GameJob.class);
         packageManager = new PackageManager();
+        gson = new Gson();
     }
 
     public synchronized List<TerasologyGameVersion> getGameVersionList(GameJob job) {
@@ -89,25 +93,39 @@ public final class TerasologyGameVersions {
     }
 
     public synchronized void loadGameVersionsFromPackageManager(GameSettings gameSettings, Path launcherDirectory, Path gameDirectory) {
-        packageManager.initLocalStorage(gameDirectory, launcherDirectory.resolve(DirectoryUtils.CACHE_DIR_NAME));
-        packageManager.sync();
+        final Path cacheDirectory = launcherDirectory.resolve(DirectoryUtils.CACHE_DIR_NAME);
+        packageManager.initLocalStorage(gameDirectory, cacheDirectory);
+        packageManager.sync(); // TODO: Make it optional
 
         for (GameJob job : GameJob.values()) {
             final List<TerasologyGameVersion> gameVersionList =
                     packageManager.getPackageVersions(GamePackageType.byJobName(job.name()))
                                   .stream()
-                                  .map(buildNumber -> getGameVersion(buildNumber, job))
+                                  .map(buildNumber -> getGameVersion(buildNumber, job, cacheDirectory))
                                   .collect(Collectors.toList());
 
             // TODO: Add entry for latest item
-            // TODO: Add caching support
             // TODO: Detect already installed games
 
             gameVersionLists.put(job, gameVersionList);
         }
     }
 
-    private TerasologyGameVersion getGameVersion(int buildNumber, GameJob job) {
+    private TerasologyGameVersion getGameVersion(int buildNumber, GameJob job, Path cacheDirectory) {
+        // Return cached version if it exists
+        final Path cacheFile = createCacheFile(job, buildNumber, cacheDirectory);
+        try {
+            if (Files.exists(cacheFile) && Files.isReadable(cacheFile) && Files.isRegularFile(cacheFile)) {
+                logger.debug("Found cached version for build {} of job {}", buildNumber, job);
+                try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(cacheFile))) {
+                    return (TerasologyGameVersion) ois.readObject();
+                }
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            logger.debug("Could not load cached version: {}", cacheFile.getFileName());
+        }
+
+        // Else create a new one
         final TerasologyGameVersion gameVersion = new TerasologyGameVersion();
         gameVersion.setJob(job);
         gameVersion.setBuildNumber(buildNumber);
