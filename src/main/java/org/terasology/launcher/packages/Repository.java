@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Interface for anything that can store game packages.
+ * Interface for anything that can provide game packages.
  */
-public interface Storage {
+public interface Repository {
     List<Integer> getPackageVersions(GamePackageType pkgType);
     Optional<GamePackage> getPackage(GamePackageType pkgType, int version);
 }

@@ -33,9 +33,9 @@ import java.util.Optional;
 /**
  * Provides game packages from the local filesystem.
  */
-public class LocalStorage implements Storage {
+public class LocalRepository implements Repository {
 
-    private static final Logger logger = LoggerFactory.getLogger(LocalStorage.class);
+    private static final Logger logger = LoggerFactory.getLogger(LocalRepository.class);
 
     private static final String VERSIONS_CACHE_FILENAME = "versions.cache";
 
@@ -44,7 +44,7 @@ public class LocalStorage implements Storage {
     private final Path versionsCache;
     private final Map<GamePackageType, List<Integer>> cachedVersions;
 
-    LocalStorage(Path gameDirectory, Path cacheDirectory) {
+    LocalRepository(Path gameDirectory, Path cacheDirectory) {
         this.gameDirectory = gameDirectory;
         this.cacheDirectory = cacheDirectory;
         versionsCache = cacheDirectory.resolve(VERSIONS_CACHE_FILENAME);

@@ -34,9 +34,9 @@ import java.util.stream.Collectors;
 /**
  * Provides game packages from our Jenkins server.
  */
-public class JenkinsStorage implements Storage {
+public class JenkinsRepository implements Repository {
 
-    private static final Logger logger = LoggerFactory.getLogger(JenkinsStorage.class);
+    private static final Logger logger = LoggerFactory.getLogger(JenkinsRepository.class);
 
     private static final String JENKINS_JOB_URL = "http://jenkins.terasology.org/job/";
     private static final String API_PATH = "/api/json?tree=builds[number,result]";
