@@ -40,6 +40,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -96,17 +97,33 @@ public final class TerasologyGameVersions {
         packageManager.initLocalStorage(gameDirectory, cacheDirectory);
         packageManager.sync(); // TODO: Make it optional
 
+        // Get list of installed games
+        final List<TerasologyGameVersion> allInstalledGames = getInstalledGames(gameDirectory);
+
         for (GameJob job : GameJob.values()) {
-            final List<TerasologyGameVersion> gameVersionList =
-                    packageManager.getPackageVersions(GamePackageType.byJobName(job.name()))
-                                  .stream()
-                                  .map(buildNumber -> getGameVersion(buildNumber, job, cacheDirectory))
-                                  .collect(Collectors.toList());
+            // Get installed games for current job
+            final List<TerasologyGameVersion> installedGames = allInstalledGames.stream()
+                    .filter(gameVersion -> gameVersion.getJob().equals(job))
+                    .collect(Collectors.toList());
+
+            final List<Integer> installedBuildNumbers = installedGames.stream()
+                    .map(TerasologyGameVersion::getBuildNumber)
+                    .collect(Collectors.toList());
+
+            // Get available games that are not installed
+            final List<TerasologyGameVersion> availableGames = packageManager.getPackageVersions(GamePackageType.byJobName(job.name()))
+                    .stream()
+                    .filter(buildNumber -> !installedBuildNumbers.contains(buildNumber))
+                    .map(buildNumber -> getGameVersion(buildNumber, job, cacheDirectory))
+                    .collect(Collectors.toList());
+
+            // Add the installed games and sort by build numbers (in descending order)
+            availableGames.addAll(installedGames);
+            availableGames.sort(Comparator.comparing(TerasologyGameVersion::getBuildNumber).reversed());
 
             // TODO: Add entry for latest item
-            // TODO: Detect already installed games
 
-            gameVersionLists.put(job, gameVersionList);
+            gameVersionLists.put(job, availableGames);
         }
     }
 
@@ -133,6 +150,20 @@ public final class TerasologyGameVersions {
         loadAndSetSuccessful(gameVersion, null, job, buildNumber);
 
         return gameVersion;
+    }
+
+    private List<TerasologyGameVersion> getInstalledGames(Path gameDirectory) {
+        try {
+            final int maxDepth = 5;
+            return Files.find(gameDirectory, maxDepth, (path, attributes) ->
+                             path.getFileName().toString().matches(FILE_ENGINE_JAR))
+                        .map(this::loadInstalledGameVersion)
+                        .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Hit an error scanning for existing file directories: {}", e.getMessage());
+        }
+
+        return Collections.emptyList();
     }
 
     public synchronized void loadGameVersions(GameSettings gameSettings, Path launcherDirectory, Path gameDirectory) {

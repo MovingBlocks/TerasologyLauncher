@@ -54,7 +54,6 @@ public class JenkinsRepository implements Repository {
 
             final Job result = gson.fromJson(reader, Job.class);
             return Arrays.stream(result.builds)
-                    .filter(build -> build.result.equals(JobResult.SUCCESS.name()))
                     .map(build -> build.number)
                     .limit(LIMIT_VERSIONS)
                     .collect(Collectors.toList());
