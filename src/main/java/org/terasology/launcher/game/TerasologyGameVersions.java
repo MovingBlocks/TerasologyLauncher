@@ -121,7 +121,8 @@ public final class TerasologyGameVersions {
             availableGames.addAll(installedGames);
             availableGames.sort(Comparator.comparing(TerasologyGameVersion::getBuildNumber).reversed());
 
-            // TODO: Add entry for latest item
+            // Add extra item denoting the latest version
+            availableGames.add(0, makeLatestFrom(availableGames.get(0)));
 
             gameVersionLists.put(job, availableGames);
         }
@@ -164,6 +165,13 @@ public final class TerasologyGameVersions {
         }
 
         return Collections.emptyList();
+    }
+
+    private TerasologyGameVersion makeLatestFrom(TerasologyGameVersion gameVersion) {
+        final TerasologyGameVersion latestGame = new TerasologyGameVersion();
+        gameVersion.copyTo(latestGame);
+        latestGame.setLatest(true);
+        return latestGame;
     }
 
     public synchronized void loadGameVersions(GameSettings gameSettings, Path launcherDirectory, Path gameDirectory) {
