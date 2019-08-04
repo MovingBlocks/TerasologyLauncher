@@ -101,24 +101,26 @@ public final class TerasologyGameVersions {
         final List<TerasologyGameVersion> allInstalledGames = getInstalledGames(gameDirectory);
 
         for (GameJob job : GameJob.values()) {
-            // Get installed games for current job
-            final List<TerasologyGameVersion> installedGames = allInstalledGames.stream()
-                    .filter(gameVersion -> gameVersion.getJob().equals(job))
-                    .collect(Collectors.toList());
-
-            final List<Integer> installedBuildNumbers = installedGames.stream()
-                    .map(TerasologyGameVersion::getBuildNumber)
-                    .collect(Collectors.toList());
-
-            // Get available games that are not installed
+            // Get all available games from Jenkins or cache
             final List<TerasologyGameVersion> availableGames = packageManager.getPackageVersions(GamePackageType.byJobName(job.name()))
                     .stream()
-                    .filter(buildNumber -> !installedBuildNumbers.contains(buildNumber))
                     .map(buildNumber -> getGameVersion(buildNumber, job, cacheDirectory))
                     .collect(Collectors.toList());
 
+            // Copy installation data for the games that are already installed
+            allInstalledGames.stream()
+                    .filter(gameVersion -> gameVersion.getJob().equals(job))
+                    .forEach(installedGame -> {
+                        for (TerasologyGameVersion availableGame : availableGames) {
+                            if (availableGame.getBuildNumber().equals(installedGame.getBuildNumber())) {
+                                availableGame.setInstallationPath(installedGame.getInstallationPath());
+                                availableGame.setGameJar(installedGame.getGameJar());
+                                break;
+                            }
+                        }
+                    });
+
             // Add the installed games and sort by build numbers (in descending order)
-            availableGames.addAll(installedGames);
             availableGames.sort(Comparator.comparing(TerasologyGameVersion::getBuildNumber).reversed());
 
             // Add extra item denoting the latest version
