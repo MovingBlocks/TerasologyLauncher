@@ -16,8 +16,11 @@
 
 package org.terasology.launcher.game;
 
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.packages.PackageBuild;
+import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
@@ -37,6 +40,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,6 +52,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class TerasologyGameVersions {
@@ -62,10 +67,14 @@ public final class TerasologyGameVersions {
 
     private final Map<GameJob, List<TerasologyGameVersion>> gameVersionLists;
     private final Map<GameJob, SortedMap<Integer, TerasologyGameVersion>> gameVersionMaps;
+    private final PackageManager packageManager;
+    private final Gson gson;
 
     public TerasologyGameVersions() {
         gameVersionLists = new EnumMap<>(GameJob.class);
         gameVersionMaps = new EnumMap<>(GameJob.class);
+        packageManager = new PackageManager();
+        gson = new Gson();
     }
 
     public synchronized List<TerasologyGameVersion> getGameVersionList(GameJob job) {
@@ -81,6 +90,90 @@ public final class TerasologyGameVersions {
         }
         logger.warn("GameVersion not found for '{}' '{}'.", job, buildVersion);
         return null;
+    }
+
+    public synchronized void loadGameVersionsFromPackageManager(GameSettings gameSettings, Path launcherDirectory, Path gameDirectory) {
+        final Path cacheDirectory = launcherDirectory.resolve(DirectoryUtils.CACHE_DIR_NAME);
+        packageManager.initLocalStorage(gameDirectory, cacheDirectory);
+        packageManager.sync(); // TODO: Make it optional
+
+        // Get list of installed games
+        final List<TerasologyGameVersion> allInstalledGames = getInstalledGames(gameDirectory);
+
+        for (GameJob job : GameJob.values()) {
+            // Get all available games from Jenkins or cache
+            final List<TerasologyGameVersion> availableGames = packageManager.getPackageVersions(PackageBuild.byJobName(job.name()))
+                    .stream()
+                    .map(buildNumber -> getGameVersion(buildNumber, job, cacheDirectory))
+                    .collect(Collectors.toList());
+
+            // Copy installation data for the games that are already installed
+            allInstalledGames.stream()
+                    .filter(gameVersion -> gameVersion.getJob().equals(job))
+                    .forEach(installedGame -> {
+                        for (TerasologyGameVersion availableGame : availableGames) {
+                            if (availableGame.getBuildNumber().equals(installedGame.getBuildNumber())) {
+                                availableGame.setInstallationPath(installedGame.getInstallationPath());
+                                availableGame.setGameJar(installedGame.getGameJar());
+                                break;
+                            }
+                        }
+                    });
+
+            // Add the installed games and sort by build numbers (in descending order)
+            availableGames.sort(Comparator.comparing(TerasologyGameVersion::getBuildNumber).reversed());
+
+            // Add extra item denoting the latest version
+            availableGames.add(0, makeLatestFrom(availableGames.get(0)));
+
+            gameVersionLists.put(job, availableGames);
+        }
+    }
+
+    private TerasologyGameVersion getGameVersion(int buildNumber, GameJob job, Path cacheDirectory) {
+        // Return cached version if it exists
+        final Path cacheFile = createCacheFile(job, buildNumber, cacheDirectory);
+        try {
+            if (Files.exists(cacheFile) && Files.isReadable(cacheFile) && Files.isRegularFile(cacheFile)) {
+                logger.debug("Found cached version for build {} of job {}", buildNumber, job);
+                try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(cacheFile))) {
+                    return (TerasologyGameVersion) ois.readObject();
+                }
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            logger.debug("Could not load cached version: {}", cacheFile.getFileName());
+        }
+
+        // Else create a new one
+        final TerasologyGameVersion gameVersion = new TerasologyGameVersion();
+        gameVersion.setJob(job);
+        gameVersion.setBuildNumber(buildNumber);
+        loadAndSetGameVersionInfo(gameVersion, null, job, buildNumber);
+        loadAndSetChangeLog(gameVersion, null, job, buildNumber);
+        loadAndSetSuccessful(gameVersion, null, job, buildNumber);
+
+        return gameVersion;
+    }
+
+    private List<TerasologyGameVersion> getInstalledGames(Path gameDirectory) {
+        try {
+            final int maxDepth = 5;
+            return Files.find(gameDirectory, maxDepth, (path, attributes) ->
+                             path.getFileName().toString().matches(FILE_ENGINE_JAR))
+                        .map(this::loadInstalledGameVersion)
+                        .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Hit an error scanning for existing file directories: {}", e.getMessage());
+        }
+
+        return Collections.emptyList();
+    }
+
+    private TerasologyGameVersion makeLatestFrom(TerasologyGameVersion gameVersion) {
+        final TerasologyGameVersion latestGame = new TerasologyGameVersion();
+        gameVersion.copyTo(latestGame);
+        latestGame.setLatest(true);
+        return latestGame;
     }
 
     public synchronized void loadGameVersions(GameSettings gameSettings, Path launcherDirectory, Path gameDirectory) {
