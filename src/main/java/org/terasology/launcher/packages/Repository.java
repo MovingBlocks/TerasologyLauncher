@@ -23,6 +23,6 @@ import java.util.Optional;
  * Interface for anything that can provide game packages.
  */
 public interface Repository {
-    List<Integer> getPackageVersions(GamePackageType pkgType);
-    Optional<GamePackage> getPackage(GamePackageType pkgType, int version);
+    List<Integer> getPackageVersions(PackageBuild pkgBuild);
+    Optional<Package> getPackage(PackageBuild pkgBuild, int version);
 }

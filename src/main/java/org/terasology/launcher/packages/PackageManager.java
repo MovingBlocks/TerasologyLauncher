@@ -39,6 +39,12 @@ public class PackageManager {
         onlineRepository = new JenkinsRepository();
     }
 
+    /**
+     * Sets up local storage for working with game packages and cache files.
+     *
+     * @param gameDirectory directory path for storing game packages
+     * @param cacheDirectory directory path for storing cache files
+     */
     public void initLocalStorage(Path gameDirectory, Path cacheDirectory) {
         try {
             DirectoryUtils.checkDirectory(gameDirectory);
@@ -50,29 +56,52 @@ public class PackageManager {
         }
     }
 
+    /**
+     * Synchronizes the cached game version list with the list of game versions
+     * available online.
+     */
     public void sync() {
         Objects.requireNonNull(localRepository, "Local storage uninitialized");
 
-        for (GamePackageType pkgType : GamePackageType.values()) {
-            final List<Integer> versions = onlineRepository.getPackageVersions(pkgType);
-            logger.debug("Versions for job {}: {}", pkgType.getJobName(), versions.toString());
-            localRepository.updateCache(pkgType, versions);
+        for (PackageBuild pkgBuild : PackageBuild.values()) {
+            final List<Integer> versions = onlineRepository.getPackageVersions(pkgBuild);
+            logger.debug("Versions for job {}: {}", pkgBuild.getJobName(), versions.toString());
+            localRepository.updateCache(pkgBuild, versions);
         }
         localRepository.saveCache();
     }
 
-    public void install(GamePackageType pkgType, int version) {
+    /**
+     * Installs the mentioned package into the local repository.
+     *
+     * @param pkgBuild the build of the game package
+     * @param version the version of the game package
+     */
+    public void install(PackageBuild pkgBuild, int version) {
         // TODO: Install via cache
     }
 
-    public void remove(GamePackageType pkgType, int version) {
+    /**
+     * Removes the mentioned package from the local repository.
+     *
+     * @param pkgBuild the build of the game package
+     * @param version the version of the game package
+     */
+    public void remove(PackageBuild pkgBuild, int version) {
         Objects.requireNonNull(localRepository, "Local storage uninitialized")
-                .getPackage(pkgType, version)
+                .getPackage(pkgBuild, version)
                 .ifPresent(localRepository::remove);
     }
 
-    public List<Integer> getPackageVersions(GamePackageType pkgType) {
+    /**
+     * Provides the list of package versions available for a build by querying
+     * the cached version list.
+     *
+     * @param pkgBuild the build of the game packages
+     * @return the list of versions available for that package
+     */
+    public List<Integer> getPackageVersions(PackageBuild pkgBuild) {
         return Objects.requireNonNull(localRepository, "Local storage uninitialized")
-                .getPackageVersions(pkgType);
+                .getPackageVersions(pkgBuild);
     }
 }

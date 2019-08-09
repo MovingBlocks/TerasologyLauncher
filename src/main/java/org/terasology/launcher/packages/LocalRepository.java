@@ -34,6 +34,7 @@ import java.util.Optional;
  * Provides game packages from the local filesystem.
  */
 public class LocalRepository implements Repository {
+    // TODO: Extract cache-related operations into a separate class
 
     private static final Logger logger = LoggerFactory.getLogger(LocalRepository.class);
 
@@ -42,16 +43,16 @@ public class LocalRepository implements Repository {
     private final Path gameDirectory;
     private final Path cacheDirectory;
     private final Path versionsCache;
-    private final Map<GamePackageType, List<Integer>> cachedVersions;
+    private final Map<PackageBuild, List<Integer>> cachedVersions;
 
     LocalRepository(Path gameDirectory, Path cacheDirectory) {
         this.gameDirectory = gameDirectory;
         this.cacheDirectory = cacheDirectory;
         versionsCache = cacheDirectory.resolve(VERSIONS_CACHE_FILENAME);
-        cachedVersions = new EnumMap<>(GamePackageType.class);
+        cachedVersions = new EnumMap<>(PackageBuild.class);
     }
 
-    void updateCache(GamePackageType pkgType, List<Integer> versions) {
+    void updateCache(PackageBuild pkgType, List<Integer> versions) {
         cachedVersions.put(pkgType, versions);
         logger.trace("Updating cached version list for {} ...", pkgType);
     }
@@ -72,7 +73,7 @@ public class LocalRepository implements Repository {
             try (ObjectInputStream in = new ObjectInputStream(
                     Files.newInputStream(versionsCache))) {
                 cachedVersions.putAll(
-                        (Map<GamePackageType, List<Integer>>) in.readObject());
+                        (Map<PackageBuild, List<Integer>>) in.readObject());
                 logger.info("Loaded cache file: {}", versionsCache.toAbsolutePath());
             } catch (ClassNotFoundException | IOException e) {
                 logger.warn("Failed to load cache file: {}", versionsCache.toAbsolutePath());
@@ -80,21 +81,21 @@ public class LocalRepository implements Repository {
         }
     }
 
-    void install(GamePackage pkg) {
+    void install(Package pkg) {
         // TODO: Implement this
     }
 
-    void remove(GamePackage pkg) {
+    void remove(Package pkg) {
         // TODO: Implement this
     }
 
     @Override
-    public List<Integer> getPackageVersions(GamePackageType pkgType) {
-        return cachedVersions.getOrDefault(pkgType, Collections.emptyList());
+    public List<Integer> getPackageVersions(PackageBuild pkgBuild) {
+        return cachedVersions.getOrDefault(pkgBuild, Collections.emptyList());
     }
 
     @Override
-    public Optional<GamePackage> getPackage(GamePackageType pkgType, int version) {
+    public Optional<Package> getPackage(PackageBuild pkgBuild, int version) {
         // TODO: Implement this
         return Optional.empty();
     }

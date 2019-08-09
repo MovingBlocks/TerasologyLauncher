@@ -19,7 +19,7 @@ package org.terasology.launcher.game;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.packages.GamePackageType;
+import org.terasology.launcher.packages.PackageBuild;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
@@ -102,7 +102,7 @@ public final class TerasologyGameVersions {
 
         for (GameJob job : GameJob.values()) {
             // Get all available games from Jenkins or cache
-            final List<TerasologyGameVersion> availableGames = packageManager.getPackageVersions(GamePackageType.byJobName(job.name()))
+            final List<TerasologyGameVersion> availableGames = packageManager.getPackageVersions(PackageBuild.byJobName(job.name()))
                     .stream()
                     .map(buildNumber -> getGameVersion(buildNumber, job, cacheDirectory))
                     .collect(Collectors.toList());

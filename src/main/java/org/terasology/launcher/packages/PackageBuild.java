@@ -17,9 +17,9 @@
 package org.terasology.launcher.packages;
 
 /**
- * Enum for types of game package available now.
+ * Enum for different builds of game package available now.
  */
-public enum GamePackageType {
+public enum PackageBuild {
     STABLE("TerasologyStable"),
     UNSTABLE("Terasology"),
     OMEGA_STABLE("DistroOmegaRelease"),
@@ -29,7 +29,7 @@ public enum GamePackageType {
 
     private final String jobName;
 
-    GamePackageType(String jobName) {
+    PackageBuild(String jobName) {
         this.jobName = jobName;
     }
 
@@ -37,8 +37,8 @@ public enum GamePackageType {
         return jobName;
     }
 
-    public static GamePackageType byJobName(String jobName) {
-        for (GamePackageType packageType : values()) {
+    public static PackageBuild byJobName(String jobName) {
+        for (PackageBuild packageType : values()) {
             if (packageType.jobName.equals(jobName)) {
                 return packageType;
             }

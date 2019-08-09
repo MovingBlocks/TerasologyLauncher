@@ -19,7 +19,6 @@ package org.terasology.launcher.packages;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.util.JobResult;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,7 +44,7 @@ public class JenkinsRepository implements Repository {
     private Gson gson = new Gson();
 
     @Override
-    public List<Integer> getPackageVersions(GamePackageType pkgType) {
+    public List<Integer> getPackageVersions(PackageBuild pkgType) {
         final String jobApiPath = JENKINS_JOB_URL + pkgType.getJobName() + API_PATH;
 
         try (BufferedReader reader = new BufferedReader(
@@ -65,7 +64,7 @@ public class JenkinsRepository implements Repository {
     }
 
     @Override
-    public Optional<GamePackage> getPackage(GamePackageType pkgType, int version) {
+    public Optional<Package> getPackage(PackageBuild pkgBuild, int version) {
         // TODO: Implement this
         return Optional.empty();
     }
