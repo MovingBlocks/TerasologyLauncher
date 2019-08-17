@@ -16,20 +16,17 @@
 
 package org.terasology.launcher.packages;
 
-import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Model of a package handled by the PackageManager.
+ * Handles fetching of packages from a Jenkins-based repository.
  */
-public class Package implements Serializable {
-    private String name;
-    private String version;
+class JenkinsHandler implements RepositoryHandler {
+    @Override
+    public List<Package> getPackages(String url) {
+        // TODO: Prepare this
 
-    public String getName() {
-        return name;
-    }
-
-    public String getVersion() {
-        return version;
+        return Collections.emptyList();
     }
 }

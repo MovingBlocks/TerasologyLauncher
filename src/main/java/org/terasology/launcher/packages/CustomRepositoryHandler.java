@@ -16,20 +16,18 @@
 
 package org.terasology.launcher.packages;
 
-import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Model of a package handled by the PackageManager.
+ * Handles fetching of packages from any custom repository.
+ * Should be used to handle any third party repository.
  */
-public class Package implements Serializable {
-    private String name;
-    private String version;
+class CustomRepositoryHandler implements RepositoryHandler {
+    @Override
+    public List<Package> getPackages(String url) {
+        // TODO: Fetch packages using a specific pattern
 
-    public String getName() {
-        return name;
-    }
-
-    public String getVersion() {
-        return version;
+        return Collections.emptyList();
     }
 }

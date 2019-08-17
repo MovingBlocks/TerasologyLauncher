@@ -16,20 +16,19 @@
 
 package org.terasology.launcher.packages;
 
-import java.io.Serializable;
+import java.util.List;
 
 /**
- * Model of a package handled by the PackageManager.
+ * Provides method to fetch all packages from a repository.
  */
-public class Package implements Serializable {
-    private String name;
-    private String version;
+interface RepositoryHandler {
+    List<Package> getPackages(String url);
 
-    public String getName() {
-        return name;
-    }
-
-    public String getVersion() {
-        return version;
+    static RepositoryHandler ofType(String type) {
+        switch (type) {
+            case "Jenkins": return new JenkinsHandler();
+            case "Custom" : return new CustomRepositoryHandler();
+            default: return null;
+        }
     }
 }
