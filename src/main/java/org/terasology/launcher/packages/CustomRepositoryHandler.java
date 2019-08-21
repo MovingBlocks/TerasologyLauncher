@@ -25,7 +25,7 @@ import java.util.List;
  */
 class CustomRepositoryHandler implements RepositoryHandler {
     @Override
-    public List<Package> getPackages(String url) {
+    public List<Package> getPackages(PackageDatabase.Repository source) {
         // TODO: Fetch packages using a specific pattern
 
         return Collections.emptyList();

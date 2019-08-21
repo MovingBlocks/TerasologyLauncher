@@ -22,7 +22,7 @@ import java.util.List;
  * Provides method to fetch all packages from a repository.
  */
 interface RepositoryHandler {
-    List<Package> getPackages(String url);
+    List<Package> getPackages(PackageDatabase.Repository source);
 
     static RepositoryHandler ofType(String type) {
         switch (type) {

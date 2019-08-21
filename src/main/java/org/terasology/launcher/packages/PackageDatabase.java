@@ -74,7 +74,7 @@ class PackageDatabase {
 
     private List<Package> getPackages(Repository source) {
         return Objects.requireNonNull(RepositoryHandler.ofType(source.type))
-                .getPackages(source.url);
+                .getPackages(source);
     }
 
     private Map<Repository, List<Package>> loadDatabase() {
@@ -98,8 +98,17 @@ class PackageDatabase {
         }
     }
 
-    private static class Repository implements Serializable {
+    static class Repository implements Serializable {
         private String url;
         private String type;
+        private String[] trackedPackages;
+
+        String getUrl() {
+            return url;
+        }
+
+        String[] getTrackedPackages() {
+            return trackedPackages;
+        }
     }
 }

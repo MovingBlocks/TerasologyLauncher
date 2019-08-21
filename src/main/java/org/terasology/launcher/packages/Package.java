@@ -22,8 +22,15 @@ import java.io.Serializable;
  * Model of a package handled by the PackageManager.
  */
 public class Package implements Serializable {
-    private String name;
-    private String version;
+    private final String name;
+    private final String version;
+    private final String location;
+
+    Package(String name, String version, String location) {
+        this.name = name;
+        this.version = version;
+        this.location = location;
+    }
 
     public String getName() {
         return name;
@@ -31,5 +38,9 @@ public class Package implements Serializable {
 
     public String getVersion() {
         return version;
+    }
+
+    public String getLocation() {
+        return location;
     }
 }
