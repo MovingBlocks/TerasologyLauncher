@@ -24,10 +24,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Handles fetching of packages from a Jenkins-based repository.
@@ -44,37 +43,32 @@ class JenkinsHandler implements RepositoryHandler {
     private final Gson gson = new Gson();
 
     @Override
-    public List<Package> getPackages(PackageDatabase.Repository source) {
-        final List<Package> packages = new ArrayList<>();
-        for (String packageName : source.getTrackedPackages()) {
-            final String apiUrl = source.getUrl() + JOB + packageName + API_FILTER;
+    public List<Package> getPackageList(PackageDatabase.Repository source) {
+        final List<Package> pkgList = new LinkedList<>();
+        for (String pkgName : source.getTrackedPackages()) {
+            final String apiUrl = source.getUrl() + JOB + pkgName + API_FILTER;
 
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(
                             new URL(apiUrl).openStream())
             )) {
                 final ApiResult result = gson.fromJson(reader, ApiResult.class);
-
-                packages.addAll(Arrays.stream(result.builds)
-                                      .map(build -> packageOf(packageName, build))
-                                      .collect(Collectors.toList()));
+                for (Build build : result.builds) {
+                    Arrays.stream(build.artifacts)
+                            .filter(art -> art.fileName.matches(TERASOLOGY_ZIP_PATTERN))
+                            .findFirst()
+                            .ifPresent(art -> pkgList.add(new Package(
+                                    pkgName,                                  // Package name
+                                    build.number,                             // Package version
+                                    build.url + ARTIFACT + art.relativePath   // Full URL
+                            )));
+                }
             } catch (IOException e) {
                 logger.warn("Failed to fetch packages from: {}", apiUrl);
             }
         }
 
-        return packages;
-    }
-
-    private Package packageOf(String packageName, Build build) {
-        return Arrays.stream(build.artifacts)
-                .filter(artifact -> artifact.fileName.matches(TERASOLOGY_ZIP_PATTERN))
-                .findFirst()
-                .map(artifact -> new Package(
-                        packageName,
-                        build.number,
-                        build.url + ARTIFACT + artifact.relativePath
-                )).orElse(null);
+        return pkgList;
     }
 
     private static class ApiResult {

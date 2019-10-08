@@ -28,9 +28,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -46,46 +45,53 @@ class PackageDatabase {
     private final Path sourcesFile;
     private final Path databaseFile;
     private final Gson gson;
-    private final Map<Repository, List<Package>> database;
+    private final List<Package> database;
 
     PackageDatabase(Path launcherDir) {
         sourcesFile = launcherDir.resolve(PACKAGES_DIRECTORY).resolve(SOURCES_FILENAME);
         databaseFile = launcherDir.resolve(PACKAGES_DIRECTORY).resolve(DATABASE_FILENAME);
         gson = new Gson();
-
-        database = Files.exists(databaseFile) ? loadDatabase() : new HashMap<>();
+        database = loadDatabase();
     }
 
     /**
-     * Fetches package metadata from all repositories specified in {@link #sourcesFile}.
+     * Fetches details of all packages for each repository specified
+     * in {@link #sourcesFile}.
      */
     void sync() {
+        database.clear();
+
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(Files.newInputStream(sourcesFile))
         )) {
             for (Repository source : gson.fromJson(reader, Repository[].class)) {
-                database.put(source, getPackages(source));
+                database.addAll(packageListOf(source));
             }
         } catch (IOException e) {
             logger.error("Failed to read sources: {}", sourcesFile.toAbsolutePath());
             logger.warn("Aborting database synchronisation");
+        } finally {
+            saveDatabase();
         }
     }
 
-    private List<Package> getPackages(Repository source) {
-        return Objects.requireNonNull(RepositoryHandler.ofType(source.type))
-                .getPackages(source);
+    private List<Package> packageListOf(Repository source) {
+        return Objects.requireNonNull(RepositoryHandler.ofType(source.type), "Invalid repository type")
+                .getPackageList(source);
     }
 
-    private Map<Repository, List<Package>> loadDatabase() {
-        try (ObjectInputStream in = new ObjectInputStream(
-                Files.newInputStream(databaseFile)
-        )) {
-            return (Map<Repository, List<Package>>) in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            logger.error("Failed to load database file: {}", databaseFile.toAbsolutePath());
+    private List<Package> loadDatabase() {
+        if (Files.exists(databaseFile)) {
+            try (ObjectInputStream in = new ObjectInputStream(
+                    Files.newInputStream(databaseFile)
+            )) {
+                return (List<Package>) in.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                logger.error("Failed to load database file: {}", databaseFile.toAbsolutePath());
+            }
         }
-        return new HashMap<>();
+        logger.info("Using empty database");
+        return new LinkedList<>();
     }
 
     private void saveDatabase() {

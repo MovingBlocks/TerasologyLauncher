@@ -74,23 +74,30 @@ public class PackageManager {
     /**
      * Installs the mentioned package into the local repository.
      *
-     * @param pkgBuild the build of the game package
-     * @param version the version of the game package
+     * @param target the package to be installed
      */
-    public void install(PackageBuild pkgBuild, int version) {
-        // TODO: Install via cache
+    public void install(Package target) {
+        // TODO: Implement this
     }
 
     /**
      * Removes the mentioned package from the local repository.
      *
-     * @param pkgBuild the build of the game package
-     * @param version the version of the game package
+     * @param target the package to be removed
      */
-    public void remove(PackageBuild pkgBuild, int version) {
-        Objects.requireNonNull(localRepository, "Local storage uninitialized")
-                .getPackage(pkgBuild, version)
-                .ifPresent(localRepository::remove);
+    public void remove(Package target) {
+        // TODO: Implement this
+    }
+
+    /**
+     * Provides a list of downloadable packages by querying the
+     * package database.
+     *
+     * @return the list of downloadable packages
+     */
+    public List<Package> getUpstreamPackages() {
+        // TODO: Implement this
+        return null;
     }
 
     /**
