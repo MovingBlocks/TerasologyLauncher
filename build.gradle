@@ -276,31 +276,6 @@ class IncrementalCopy extends Copy {
     }
 }
 
-// Sign the jar files so they can get full rights in a browser
-task signLibs(type: IncrementalSigningTask, dependsOn: copyLibs) {
-
-    FileTree tree = fileTree(dir: "$buildDir/distributions")
-    tree.include '*.jar'
-
-    inputs.files tree
-
-    // assign only if the property exists
-    // --> missing properties do not affect other tasks if not needed
-
-    certFile = project.hasProperty('certificateFile') ? certificateFile : 'MISSING'
-    certAlias = project.hasProperty('certificateAlias') ? certificateAlias : 'MISSING'
-    certStorePass = project.hasProperty('certificateStorePass') ? certificateStorePass : 'MISSING'
-    certKeyPass = project.hasProperty('certificateKeyPass') ? certificateKeyPass : 'MISSING'
-
-    doFirst {
-        if (!project.hasProperty('certificateFile')) {
-            throw new GradleException('Please set certificate properties in your ~/.gradle/gradle.properties file first')
-        }
-    }
-
-    outputDir = file("$buildDir/distributions/signed")
-}
-
 
 class IncrementalSigningTask extends DefaultTask {
 
@@ -342,33 +317,6 @@ class IncrementalSigningTask extends DefaultTask {
         inputs.removed { change ->
             println "removed: ${change.file.name}"
         }
-    }
-}
-
-task updateJnlp(dependsOn: signLibs) {
-
-    inputs.file 'webstart-template.jnlp'
-    outputs.file "$buildDir/distributions/webstart.jnlp"
-
-    doFirst {
-        def mainJar = 'TerasologyLauncher.jar'
-        def root = new XmlParser().parse('webstart-template.jnlp')
-        root.@codebase = (env.BUILD_URL != null) ? 'http://jenkins.terasology.org/job/' + env.JOB_NAME + '/lastSuccessfulBuild/artifact/build/distributions/' : '.'
-
-        // Adding signed jars to resources
-        def resources = root.resources[0]
-        def collection = files { file("$buildDir/distributions/signed").listFiles() }
-        collection.each {
-            def resource = [href: "signed/$it.name"]
-            if (mainJar == it.name) {
-                resource = [href: "signed/$it.name", main: 'true']
-            }
-            resources.appendNode('jar', resource)
-        }
-
-        // Writing the jnlp file filled
-        File jnlpFile = new File("$buildDir/distributions/webstart.jnlp")
-        new XmlNodePrinter(new PrintWriter(jnlpFile)).print(root)
     }
 }
 
@@ -419,12 +367,6 @@ task copyIconsIntoResources(type: Copy) {
 
 processResources.dependsOn copyIconsIntoResources
 
-task copyHtml(type: Copy) {
-    from('index.html')
-
-    into "$buildDir/distributions"
-}
-
 // TODO: Temporary workaround for new exes / JRE bundling not quite being officially ready yet
 distZip.exclude("*.x*.exe")
 
@@ -433,20 +375,6 @@ task createRelease() {
 
     doLast {
         println 'Created release: ' + displayVersion
-    }
-}
-
-task webstart {
-    description "Prepare WebStart launcher files"
-
-    dependsOn signLibs
-    dependsOn copyExtra
-    dependsOn createVersionInfoFile
-    dependsOn updateJnlp
-    dependsOn copyHtml
-
-    doLast {
-        println 'Created webstart release: ' + displayVersion
     }
 }
 
