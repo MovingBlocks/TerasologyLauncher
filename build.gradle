@@ -72,6 +72,16 @@ import java.text.SimpleDateFormat
 def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
 
+def getDisplayVersion = { env, versionBase ->
+    if (env.JOB_NAME == "TerasologyLauncherStable") {
+        versionBase
+    } else if (env.JOB_NAME != null && env.BUILD_NUMBER != null) {
+        versionBase + '.' + env.BUILD_NUMBER + '+' + env.JOB_NAME
+    } else {
+        versionBase + ' local development ' + startDateTimeString
+    }
+}
+
 // Declare "extra properties" (variables) for the project - a Gradle thing that makes them special.
 ext {
     // Read environment variables, including variables passed by jenkins continuous integration server
@@ -82,16 +92,7 @@ ext {
     versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasology/launcher/version')
     versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
     versionBase = rootProject.file("version.txt").text.trim()
-
-    // TODO: create and use gradle functions
-    displayVersion =
-        (env.JOB_NAME == 'TerasologyLauncherStable')
-            ? versionBase
-            : (
-                (env.JOB_NAME != null && env.BUILD_NUMBER != null)
-                ? versionBase + '.' + env.BUILD_NUMBER + '+' + env.JOB_NAME
-                : versionBase + ' local development ' + startDateTimeString
-            )
+    displayVersion = getDisplayVersion(env, versionBase)
 
     // Splash image for the JAR
     splashImage = "org/terasology/launcher/images/splash.jpg"
