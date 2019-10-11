@@ -46,7 +46,7 @@ plugins {
     id 'de.undercouch.download' version '3.4.3'
 }
 
-apply from: 'bundles.gradle'
+apply from: "./config/gradle/bundles.gradle"
 apply plugin: "org.hidetake.swagger.generator"
 
 // Test for right version of Java in use for running this script
