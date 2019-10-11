@@ -1,0 +1,169 @@
+/*
+ * Copyright 2019 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * This is a Gradle build file:
+ * - Gradle Homepage: http://gradle.org/
+ * - Gradle Documentation: http://gradle.org/documentation
+ * - View tasks for this project: $ gradlew tasks
+ */
+
+idea {
+    project {
+        jdkName = '1.8'
+        languageLevel = 'JDK_1_8'
+
+        ipr {
+            withXml { xmlProvider ->
+                def iprNode = xmlProvider.asNode()
+
+                ideaActivateGradle(iprNode)
+                ideaActivateGit(iprNode)
+                ideaActivateCheckstyle(iprNode)
+                ideaActivateCopyright(iprNode)
+            }
+        }
+    }
+
+    module {
+        // Exclude Gradle dir
+        excludeDirs += file('gradle')
+
+        // Exclude Eclipse dirs
+        excludeDirs += file('bin')
+        excludeDirs += file('.settings')
+    }
+
+    workspace {
+        iws {
+            withXml { xmlProvider ->
+                def iwsNode = xmlProvider.asNode()
+
+                ideaMakeAutomatically(iwsNode)
+                ideaRunConfig(iwsNode)
+            }
+        }
+    }
+}
+
+ext {
+    // Activate 'Gradle' plugin
+    ideaActivateGradle = { Node iprNode ->
+        def gradleSettings = iprNode.component.find { it.'@name' == 'GradleSettings' }
+        if (gradleSettings == null) {
+            gradleSettings = iprNode.appendNode('component', [name: 'GradleSettings'])
+            gradleSettings.appendNode('option', [name: 'linkedProjectPath', value: '$PROJECT_DIR$/build.gradle'])
+        }
+    }
+
+    // Activate 'git' as VCS
+    ideaActivateGit = { Node iprNode ->
+        def vcsMappings = iprNode.component.find { it.'@name' == 'VcsDirectoryMappings' }
+        vcsMappings.mapping.@vcs = 'Git'
+    }
+
+    // Activate and config 'Checkstyle' plugin
+    ideaActivateCheckstyle = { Node iprNode ->
+        def checkstyle = iprNode.component.find { it.'@name' == 'CheckStyle-IDEA' }
+        if (checkstyle == null) {
+            // Create new CheckStyle component
+            checkstyle = iprNode.appendNode('component', [name: 'CheckStyle-IDEA'])
+            // use NodeBuilder to create the config block in the xml structure
+            def builder = new NodeBuilder()
+            def option = builder.option(name: 'configuration') {
+                map {
+                    entry(key: 'active-configuration',
+                            value: 'PROJECT_RELATIVE:$PROJECT_DIR$/config/checkstyle/checkstyle.xml:TerasologyLauncher CheckStyle')
+                    entry(key: 'check-nonjava-files', value: false)
+                    entry(key: 'check-test-classes', value: true)
+                    entry(key: 'location-0',
+                            value: 'CLASSPATH:/sun_checks.xml:The default CheckStyle rules')
+                    entry(key: 'location-1',
+                            value: 'PROJECT_RELATIVE:$PROJECT_DIR$/config/checkstyle/checkstyle.xml:TerasologyLauncher CheckStyle')
+                    entry(key: 'property-1.samedir', value: 'config/checkstyle')
+                    entry(key: 'suppress-errors', value: false)
+                    entry(key: 'thirdparty-classpath', value: '')
+                }
+            }
+            // Add result from NodeBuilder
+            checkstyle.append option
+        }
+    }
+
+    // Activate copyright conventions
+    ideaActivateCopyright = { Node iprNode ->
+        def copyrightManager = iprNode.component.find { it.'@name' == 'CopyrightManager' }
+        copyrightManager.'@default' = "TerasologyLauncher"
+        def copyright = copyrightManager.copyright.find { it.option.find { it.'@name' == "myName" }?.'@value' == "TerasologyLauncher" }
+        if (copyright == null) {
+            copyrightManager.append(new XmlParser().parseText('''
+                <copyright>
+                    <option name="notice" value="Copyright 2016 MovingBlocks&#10;&#10;Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);&#10;you may not use this file except in compliance with the License.&#10;You may obtain a copy of the License at&#10;&#10;     http://www.apache.org/licenses/LICENSE-2.0&#10;&#10;Unless required by applicable law or agreed to in writing, software&#10;distributed under the License is distributed on an &quot;AS IS&quot; BASIS,&#10;WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.&#10;See the License for the specific language governing permissions and&#10;limitations under the License." />
+                    <option name="keyword" value="Copyright" />
+                    <option name="allowReplaceKeyword" value="" />
+                    <option name="myName" value="TerasologyLauncher" />
+                    <option name="myLocal" value="true" />
+                </copyright>
+            '''))
+        }
+    }
+
+    // Enable "make project automatically"
+    ideaMakeAutomatically = { Node iwsNode ->
+        def compilerWsConf = iwsNode.find { it.'@name' == 'CompilerWorkspaceConfiguration' }
+        if (compilerWsConf == null) {
+            compilerWsConf = iwsNode.appendNode('component', [name: 'CompilerWorkspaceConfiguration'])
+            compilerWsConf.appendNode("option", [name: "MAKE_PROJECT_ON_SAVE", value: "true"])
+        }
+    }
+
+    // Generate a run configuration for the primary PC facade way of running the game
+    ideaRunConfig = { Node iwsNode ->
+
+        // Adds our run config
+        def runManager = iwsNode.component.find { it.'@name' == 'RunManager' }
+        runManager.append(new XmlParser().parseText('''
+            <configuration default="false" name="TerasologyLauncher" type="Application" factoryName="Application" singleton="true">
+              <extension name="coverage" enabled="false" merge="false" />
+              <option name="MAIN_CLASS_NAME" value="org.terasology.launcher.TerasologyLauncher" />
+              <option name="VM_PARAMETERS" value="-splash:src/main/resources/org/terasology/launcher/images/splash.jpg" />
+              <option name="PROGRAM_PARAMETERS" value="" />
+              <option name='WORKING_DIRECTORY' value='file://\$PROJECT_DIR\$' />
+              <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+              <option name="ALTERNATIVE_JRE_PATH" value="" />
+              <option name="ENABLE_SWING_INSPECTOR" value="false" />
+              <option name="ENV_VARIABLES" />
+              <option name="PASS_PARENT_ENVS" value="true" />
+              <module name="TerasologyLauncher" />
+              <envs />
+              <RunnerSettings RunnerId="Run" />
+              <ConfigurationWrapper RunnerId="Run" />
+              <method />
+            </configuration>
+        '''))
+
+        // This part puts the added run config into the actual "Run" drop-down
+        runManager.append(new XmlParser().parseText('''
+            <list size="1">
+                <item index="0" class="java.lang.String" itemvalue="Application.TerasologyLauncher"/>
+            </list>
+        '''))
+
+        // Makes the added run config the selected item
+        runManager.'@selected' = 'Application.TerasologyLauncher'
+    }
+
+}
