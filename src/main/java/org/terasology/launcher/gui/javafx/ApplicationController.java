@@ -24,6 +24,8 @@ import javafx.animation.Transition;
 import javafx.application.HostServices;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -34,6 +36,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TabPane;
@@ -59,6 +62,8 @@ import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.game.TerasologyGameVersions;
 import org.terasology.launcher.game.VersionItem;
 import org.terasology.launcher.log.LogViewAppender;
+import org.terasology.launcher.packages.Package;
+import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryUtils;
@@ -94,16 +99,16 @@ public class ApplicationController {
     private Path downloadDirectory;
     private Path tempDirectory;
     private BaseLauncherSettings launcherSettings;
-    private TerasologyGameVersions gameVersions;
+    private PackageManager packageManager;
     private GameStarter gameStarter;
     private GameDownloadWorker gameDownloadWorker;
     private Stage stage;
     private HostServices hostServies;
 
     @FXML
-    private ChoiceBox<JobItem> jobBox;
+    private ComboBox<PackageItem> jobBox;
     @FXML
-    private ChoiceBox<VersionItem> buildVersionBox;
+    private ComboBox<String> buildVersionBox;
     @FXML
     private ProgressBar progressBar;
     @FXML
@@ -200,7 +205,7 @@ public class ApplicationController {
             }
 
             final SettingsController settingsController = fxmlLoader.getController();
-            settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, gameVersions, settingsStage);
+            settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, packageManager, settingsStage);
 
             Scene scene = new Scene(root);
             settingsStage.setScene(scene);
@@ -239,28 +244,28 @@ public class ApplicationController {
     }
 
     private void downloadAction() {
-        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-        if (gameDownloadWorker != null) {
-            // Cancel download
-            logger.info("Cancel game download!");
-            gameDownloadWorker.cancel(false);
-        } else if ((gameVersion == null) || gameVersion.isInstalled() || (gameVersion.getSuccessful() == null) || !gameVersion.getSuccessful()) {
-            logger.warn("The selected game version can not be downloaded! '{}'", gameVersion);
-        } else {
-            try {
-                GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles(),
-                        launcherSettings.getGameDirectory(), gameVersion, gameVersions);
-                gameDownloadWorker = new GameDownloadWorker(this, gameDownloader);
-            } catch (IOException e) {
-                logger.error("Could not start game download!", e);
-                finishedGameDownload(false, false, false, null);
-                return;
-            }
-            progressBar.progressProperty().bind(gameDownloadWorker.progressProperty());
-            progressBar.setVisible(true);
-            new Thread(gameDownloadWorker).start();
-        }
-        updateGui();
+//        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+//        if (gameDownloadWorker != null) {
+//            // Cancel download
+//            logger.info("Cancel game download!");
+//            gameDownloadWorker.cancel(false);
+//        } else if ((gameVersion == null) || gameVersion.isInstalled() || (gameVersion.getSuccessful() == null) || !gameVersion.getSuccessful()) {
+//            logger.warn("The selected game version can not be downloaded! '{}'", gameVersion);
+//        } else {
+//            try {
+//                GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles(),
+//                        launcherSettings.getGameDirectory(), gameVersion, packageManager);
+//                gameDownloadWorker = new GameDownloadWorker(this, gameDownloader);
+//            } catch (IOException e) {
+//                logger.error("Could not start game download!", e);
+//                finishedGameDownload(false, false, false, null);
+//                return;
+//            }
+//            progressBar.progressProperty().bind(gameDownloadWorker.progressProperty());
+//            progressBar.setVisible(true);
+//            new Thread(gameDownloadWorker).start();
+//        }
+//        updateGui();
     }
 
     @FXML
@@ -286,40 +291,40 @@ public class ApplicationController {
 
     @FXML
     protected void deleteAction() {
-        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-        if ((gameVersion != null) && gameVersion.isInstalled()) {
-            final Path topLevelGameDirectory = gameVersion.getInstallationPath().getParent();
-            final boolean containsGameData = DirectoryUtils.containsGameData(topLevelGameDirectory);
-            final String msg;
-            if (containsGameData) {
-                msg = BundleUtils.getMessage("confirmDeleteGame_withData", topLevelGameDirectory);
-            } else {
-                msg = BundleUtils.getMessage("confirmDeleteGame_withoutData", topLevelGameDirectory);
-            }
-            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setContentText(msg);
-            alert.setTitle(BundleUtils.getLabel("message_deleteGame_title"));
-            alert.initOwner(stage);
-
-            alert.showAndWait()
-                    .filter(response -> response == ButtonType.OK)
-                    .ifPresent(response -> {
-                        logger.info("Delete installed game! '{}' '{}'", gameVersion, topLevelGameDirectory);
-                        try {
-                            FileUtils.delete(topLevelGameDirectory);
-                        } catch (IOException e) {
-                            logger.error("Could not delete installed game!", e);
-                            // TODO: introduce new message label
-                            GuiUtils.showWarningMessageDialog(stage, "Could not delete installed game!");
-                            return;
-                        }
-                        gameVersions.removeInstallationInfo(gameVersion);
-                        updateGui();
-                        updateBuildVersionBox();
-                    });
-        } else {
-            logger.warn("The selected game version can not be deleted! '{}'", gameVersion);
-        }
+//        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
+//        if ((gameVersion != null) && gameVersion.isInstalled()) {
+//            final Path topLevelGameDirectory = gameVersion.getInstallationPath().getParent();
+//            final boolean containsGameData = DirectoryUtils.containsGameData(topLevelGameDirectory);
+//            final String msg;
+//            if (containsGameData) {
+//                msg = BundleUtils.getMessage("confirmDeleteGame_withData", topLevelGameDirectory);
+//            } else {
+//                msg = BundleUtils.getMessage("confirmDeleteGame_withoutData", topLevelGameDirectory);
+//            }
+//            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+//            alert.setContentText(msg);
+//            alert.setTitle(BundleUtils.getLabel("message_deleteGame_title"));
+//            alert.initOwner(stage);
+//
+//            alert.showAndWait()
+//                    .filter(response -> response == ButtonType.OK)
+//                    .ifPresent(response -> {
+//                        logger.info("Delete installed game! '{}' '{}'", gameVersion, topLevelGameDirectory);
+//                        try {
+//                            FileUtils.delete(topLevelGameDirectory);
+//                        } catch (IOException e) {
+//                            logger.error("Could not delete installed game!", e);
+//                            // TODO: introduce new message label
+//                            GuiUtils.showWarningMessageDialog(stage, "Could not delete installed game!");
+//                            return;
+//                        }
+//                        packageManager.removeInstallationInfo(gameVersion);
+//                        updateGui();
+//                        updateBuildVersionBox();
+//                    });
+//        } else {
+//            logger.warn("The selected game version can not be deleted! '{}'", gameVersion);
+//        }
     }
 
     @FXML
@@ -358,12 +363,12 @@ public class ApplicationController {
     }
 
     public void initialize(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
-                           final TerasologyGameVersions newGameVersions, final Stage newStage, final HostServices hostServices) {
+                           final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
         this.tempDirectory = newTempDirectory;
         this.launcherSettings = newLauncherSettings;
-        this.gameVersions = newGameVersions;
+        this.packageManager = newPackageManager;
         this.stage = newStage;
         this.hostServies = hostServices;
 
@@ -380,6 +385,16 @@ public class ApplicationController {
 
         gameStarter = new GameStarter();
 
+        packageItems = FXCollections.observableArrayList();
+        onSync();
+
+        jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            buildVersionBox.setItems(newVal.versionList);
+            buildVersionBox.getSelectionModel().select(0);
+        });
+        jobBox.setItems(packageItems);
+        jobBox.getSelectionModel().select(0);
+
         populateJobBox();
 
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
@@ -392,6 +407,41 @@ public class ApplicationController {
         startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
 
         updateGui();
+    }
+
+    private ObservableList<PackageItem> packageItems;
+
+    private static class PackageItem {
+        private final String name;
+        private final ObservableList<String> versionList;
+
+        PackageItem(String name) {
+            this.name = name;
+            versionList = FXCollections.observableArrayList();
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    // To be called after database sync is done
+    private void onSync() {
+        packageItems.clear();
+
+        String currentPkgName = null;
+        PackageItem currentItem = null;
+        for (Package pkg : packageManager.getPackages()) {
+            if (pkg.getName().equals(currentPkgName)) {
+                currentItem.versionList.add(pkg.getVersion());
+            } else {
+                currentPkgName = pkg.getName();
+                currentItem = new PackageItem(currentPkgName);
+                currentItem.versionList.add(pkg.getVersion());
+                packageItems.add(currentItem);
+            }
+        }
     }
 
     private void updateTooltipTexts() {
@@ -408,57 +458,57 @@ public class ApplicationController {
     }
 
     private void populateJobBox() {
-        jobBox.getItems().clear();
-
-        for (GameJob job : GameJob.values()) {
-            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
-                boolean foundInstalled = false;
-                final List<TerasologyGameVersion> gameVersionList = gameVersions.getGameVersionList(job);
-                for (TerasologyGameVersion gameVersion : gameVersionList) {
-                    if (gameVersion.isInstalled()) {
-                        foundInstalled = true;
-                        break;
-                    }
-                }
-                if (!foundInstalled) {
-                    continue;
-                }
-            }
-
-            final JobItem jobItem = new JobItem(job);
-            jobBox.getItems().add(jobItem);
-            if (launcherSettings.getJob() == job) {
-                jobBox.getSelectionModel().select(jobItem);
-            }
-        }
-
-        updateBuildVersionBox();
-
-        // add change listeners
-        jobBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<JobItem>() {
-            @Override
-            public void changed(final ObservableValue<? extends JobItem> observableValue, final JobItem oldItem, final JobItem newItem) {
-                if (jobBox.getItems().isEmpty()) {
-                    return;
-                }
-                launcherSettings.setJob(newItem.getJob());
-                updateBuildVersionBox();
-                updateGui();
-                logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
-            }
-        });
-
-        buildVersionBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<VersionItem>() {
-            @Override
-            public void changed(final ObservableValue<? extends VersionItem> observableValue, final VersionItem oldVersionItem, final VersionItem newVersionItem) {
-                if (newVersionItem != null) {
-                    final Integer version = newVersionItem.getVersion();
-                    launcherSettings.setBuildVersion(version, launcherSettings.getJob());
-                    logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
-                    updateGui();
-                }
-            }
-        });
+//        jobBox.getItems().clear();
+//
+//        for (GameJob job : GameJob.values()) {
+//            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
+//                boolean foundInstalled = false;
+//                final List<TerasologyGameVersion> gameVersionList = packageManager.getGameVersionList(job);
+//                for (TerasologyGameVersion gameVersion : gameVersionList) {
+//                    if (gameVersion.isInstalled()) {
+//                        foundInstalled = true;
+//                        break;
+//                    }
+//                }
+//                if (!foundInstalled) {
+//                    continue;
+//                }
+//            }
+//
+//            final JobItem jobItem = new JobItem(job);
+//            jobBox.getItems().add(jobItem);
+//            if (launcherSettings.getJob() == job) {
+//                jobBox.getSelectionModel().select(jobItem);
+//            }
+//        }
+//
+//        updateBuildVersionBox();
+//
+//        // add change listeners
+//        jobBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<JobItem>() {
+//            @Override
+//            public void changed(final ObservableValue<? extends JobItem> observableValue, final JobItem oldItem, final JobItem newItem) {
+//                if (jobBox.getItems().isEmpty()) {
+//                    return;
+//                }
+//                launcherSettings.setJob(newItem.getJob());
+//                updateBuildVersionBox();
+//                updateGui();
+//                logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
+//            }
+//        });
+//
+//        buildVersionBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<VersionItem>() {
+//            @Override
+//            public void changed(final ObservableValue<? extends VersionItem> observableValue, final VersionItem oldVersionItem, final VersionItem newVersionItem) {
+//                if (newVersionItem != null) {
+//                    final Integer version = newVersionItem.getVersion();
+//                    launcherSettings.setBuildVersion(version, launcherSettings.getJob());
+//                    logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
+//                    updateGui();
+//                }
+//            }
+//        });
     }
 
     /**
@@ -544,45 +594,45 @@ public class ApplicationController {
     }
 
     private void updateJobBox() {
-        jobBox.getItems().clear();
-        for (GameJob job : GameJob.values()) {
-            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
-                boolean foundInstalled = false;
-                final List<TerasologyGameVersion> gameVersionList = gameVersions.getGameVersionList(job);
-                for (TerasologyGameVersion gameVersion : gameVersionList) {
-                    if (gameVersion.isInstalled()) {
-                        foundInstalled = true;
-                        break;
-                    }
-                }
-                if (!foundInstalled) {
-                    continue;
-                }
-            }
-
-            final JobItem jobItem = new JobItem(job);
-            jobBox.getItems().add(jobItem);
-            if (launcherSettings.getJob() == job) {
-                jobBox.getSelectionModel().select(jobItem);
-            }
-        }
-
-        updateBuildVersionBox();
+//        jobBox.getItems().clear();
+//        for (GameJob job : GameJob.values()) {
+//            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
+//                boolean foundInstalled = false;
+//                final List<TerasologyGameVersion> gameVersionList = packageManager.getGameVersionList(job);
+//                for (TerasologyGameVersion gameVersion : gameVersionList) {
+//                    if (gameVersion.isInstalled()) {
+//                        foundInstalled = true;
+//                        break;
+//                    }
+//                }
+//                if (!foundInstalled) {
+//                    continue;
+//                }
+//            }
+//
+//            final JobItem jobItem = new JobItem(job);
+//            jobBox.getItems().add(jobItem);
+//            if (launcherSettings.getJob() == job) {
+//                jobBox.getSelectionModel().select(jobItem);
+//            }
+//        }
+//
+//        updateBuildVersionBox();
     }
 
     private void updateBuildVersionBox() {
-        buildVersionBox.getItems().clear();
-
-        final JobItem jobItem = jobBox.getSelectionModel().getSelectedItem();
-        final int buildVersion = launcherSettings.getBuildVersion(jobItem.getJob());
-
-        for (TerasologyGameVersion version : gameVersions.getGameVersionList(jobItem.getJob())) {
-            final VersionItem versionItem = new VersionItem(version);
-            buildVersionBox.getItems().add(versionItem);
-            if (versionItem.getVersion() == buildVersion) {
-                buildVersionBox.getSelectionModel().select(versionItem);
-            }
-        }
+//        buildVersionBox.getItems().clear();
+//
+//        final JobItem jobItem = jobBox.getSelectionModel().getSelectedItem();
+//        final int buildVersion = launcherSettings.getBuildVersion(jobItem.getJob());
+//
+//        for (TerasologyGameVersion version : packageManager.getGameVersionList(jobItem.getJob())) {
+//            final VersionItem versionItem = new VersionItem(version);
+//            buildVersionBox.getItems().add(versionItem);
+//            if (versionItem.getVersion() == buildVersion) {
+//                buildVersionBox.getSelectionModel().select(versionItem);
+//            }
+//        }
     }
 
     private void updateChangeLog() {
@@ -667,92 +717,93 @@ public class ApplicationController {
     }
 
     private String getGameInfoText(TerasologyGameVersion gameVersion) {
-        logger.debug("Display game version: {} {}", gameVersion, gameVersion.getGameVersionInfo());
-
-        final Object[] arguments = new Object[9];
-        arguments[0] = gameVersion.getJob().name();
-        if (gameVersion.getJob().isStable()) {
-            arguments[1] = 1;
-        } else {
-            arguments[1] = 0;
-        }
-        arguments[2] = gameVersion.getJob().getGitBranch();
-        arguments[3] = gameVersion.getBuildNumber();
-        if (gameVersion.isLatest()) {
-            arguments[4] = 1;
-        } else {
-            arguments[4] = 0;
-        }
-        if (gameVersion.isInstalled()) {
-            arguments[5] = 1;
-        } else {
-            arguments[5] = 0;
-        }
-        if (gameVersion.getSuccessful() != null) {
-            if (!gameVersion.getSuccessful()) {
-                // faulty
-                arguments[6] = 0;
-            } else {
-                arguments[6] = 1;
-            }
-        } else {
-            // unknown
-            arguments[6] = 2;
-        }
-        if ((gameVersion.getGameVersionInfo() != null)
-                && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
-            arguments[7] = gameVersion.getGameVersionInfo().getDisplayVersion();
-        } else {
-            arguments[7] = "";
-        }
-        if ((gameVersion.getGameVersionInfo() != null)
-                && (gameVersion.getGameVersionInfo().getDateTime() != null)) {
-            arguments[8] = gameVersion.getGameVersionInfo().getDateTime();
-        } else {
-            arguments[8] = "";
-        }
-
-        final String infoHeader1 = BundleUtils.getMessage(gameVersion.getJob().getInfoMessageKey(), arguments);
-        final String infoHeader2 = BundleUtils.getMessage("infoHeader2", arguments);
-
-        final StringBuilder b = new StringBuilder();
-        if ((infoHeader1 != null) && (infoHeader1.trim().length() > 0)) {
-            b.append("<h1>")
-                    .append(escapeHtml(infoHeader1))
-                    .append("</h1>\n");
-        }
-        if ((infoHeader2 != null) && (infoHeader2.trim().length() > 0)) {
-            b.append("<h2>")
-                    .append(escapeHtml(infoHeader2))
-                    .append("</h2>\n");
-        }
-        b.append("<strong>\n")
-                .append(BundleUtils.getLabel("infoHeader3"))
-                .append("</strong>\n");
-
-        if ((gameVersion.getChangeLog() != null) && !gameVersion.getChangeLog().isEmpty()) {
-            b.append("<p>\n")
-                    .append(BundleUtils.getLabel("infoHeader4"))
-                    .append("<ul>\n");
-            for (String msg : gameVersion.getChangeLog()) {
-                b.append("<li>")
-                        .append(escapeHtml(msg))
-                        .append("</li>\n");
-            }
-            b.append("</ul>\n")
-                    .append("</p>\n");
-        }
-
-        /* Append changelogs of previous builds. */
-        int previousLogs = gameVersion.getJob().isStable() ? 1 : 10;
-        b.append("<hr/>");
-        for (String msg : gameVersions.getAggregatedChangeLog(gameVersion, previousLogs)) {
-            b.append("<li>")
-                    .append(escapeHtml(msg))
-                    .append("</li>\n");
-        }
-
-        return b.toString();
+//        logger.debug("Display game version: {} {}", gameVersion, gameVersion.getGameVersionInfo());
+//
+//        final Object[] arguments = new Object[9];
+//        arguments[0] = gameVersion.getJob().name();
+//        if (gameVersion.getJob().isStable()) {
+//            arguments[1] = 1;
+//        } else {
+//            arguments[1] = 0;
+//        }
+//        arguments[2] = gameVersion.getJob().getGitBranch();
+//        arguments[3] = gameVersion.getBuildNumber();
+//        if (gameVersion.isLatest()) {
+//            arguments[4] = 1;
+//        } else {
+//            arguments[4] = 0;
+//        }
+//        if (gameVersion.isInstalled()) {
+//            arguments[5] = 1;
+//        } else {
+//            arguments[5] = 0;
+//        }
+//        if (gameVersion.getSuccessful() != null) {
+//            if (!gameVersion.getSuccessful()) {
+//                // faulty
+//                arguments[6] = 0;
+//            } else {
+//                arguments[6] = 1;
+//            }
+//        } else {
+//            // unknown
+//            arguments[6] = 2;
+//        }
+//        if ((gameVersion.getGameVersionInfo() != null)
+//                && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
+//            arguments[7] = gameVersion.getGameVersionInfo().getDisplayVersion();
+//        } else {
+//            arguments[7] = "";
+//        }
+//        if ((gameVersion.getGameVersionInfo() != null)
+//                && (gameVersion.getGameVersionInfo().getDateTime() != null)) {
+//            arguments[8] = gameVersion.getGameVersionInfo().getDateTime();
+//        } else {
+//            arguments[8] = "";
+//        }
+//
+//        final String infoHeader1 = BundleUtils.getMessage(gameVersion.getJob().getInfoMessageKey(), arguments);
+//        final String infoHeader2 = BundleUtils.getMessage("infoHeader2", arguments);
+//
+//        final StringBuilder b = new StringBuilder();
+//        if ((infoHeader1 != null) && (infoHeader1.trim().length() > 0)) {
+//            b.append("<h1>")
+//                    .append(escapeHtml(infoHeader1))
+//                    .append("</h1>\n");
+//        }
+//        if ((infoHeader2 != null) && (infoHeader2.trim().length() > 0)) {
+//            b.append("<h2>")
+//                    .append(escapeHtml(infoHeader2))
+//                    .append("</h2>\n");
+//        }
+//        b.append("<strong>\n")
+//                .append(BundleUtils.getLabel("infoHeader3"))
+//                .append("</strong>\n");
+//
+//        if ((gameVersion.getChangeLog() != null) && !gameVersion.getChangeLog().isEmpty()) {
+//            b.append("<p>\n")
+//                    .append(BundleUtils.getLabel("infoHeader4"))
+//                    .append("<ul>\n");
+//            for (String msg : gameVersion.getChangeLog()) {
+//                b.append("<li>")
+//                        .append(escapeHtml(msg))
+//                        .append("</li>\n");
+//            }
+//            b.append("</ul>\n")
+//                    .append("</p>\n");
+//        }
+//
+//        /* Append changelogs of previous builds. */
+//        int previousLogs = gameVersion.getJob().isStable() ? 1 : 10;
+//        b.append("<hr/>");
+//        for (String msg : packageManager.getAggregatedChangeLog(gameVersion, previousLogs)) {
+//            b.append("<li>")
+//                    .append(escapeHtml(msg))
+//                    .append("</li>\n");
+//        }
+//
+//        return b.toString();
+        return "WIP";
     }
 
     private static String escapeHtml(String text) {
@@ -778,7 +829,8 @@ public class ApplicationController {
     }
 
     private TerasologyGameVersion getSelectedGameVersion() {
-        return gameVersions.getGameVersionForBuildVersion(launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
+//        return packageManager.getGameVersionForBuildVersion(launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
+        return null;
     }
 
     /**

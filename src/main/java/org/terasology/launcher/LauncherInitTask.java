@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.TerasologyGameVersions;
+import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.updater.LauncherUpdater;
@@ -88,7 +89,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory());
 
             // TODO: Fix this for server unavailability
-            final TerasologyGameVersions gameVersions = getTerasologyGameVersions(launcherDirectory, gameDirectory, launcherSettings);
+
+            logger.trace("Setting up Package Manager");
+            final PackageManager packageManager = new PackageManager();
+            packageManager.initDatabase(launcherDirectory);
+            packageManager.syncDatabase();
 
             logger.trace("Change LauncherSettings...");
             launcherSettings.setGameDirectory(gameDirectory);
@@ -99,7 +104,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             logger.trace("Creating launcher frame...");
 
-            return new LauncherConfiguration(launcherDirectory, downloadDirectory, tempDirectory, launcherSettings, gameVersions);
+            return new LauncherConfiguration(launcherDirectory, downloadDirectory, tempDirectory, launcherSettings, packageManager);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
         }

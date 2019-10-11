@@ -21,7 +21,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
@@ -211,7 +211,7 @@
                   <children>
                     <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="8.0" HBox.hgrow="ALWAYS">
                       <children>
-                        <ChoiceBox fx:id="jobBox" maxWidth="1.7976931348623157E308">
+                        <ComboBox fx:id="jobBox" maxWidth="1.7976931348623157E308">
                           <items>
                             <FXCollections fx:factory="observableArrayList">
                               <String fx:value="Item 1" />
@@ -219,8 +219,8 @@
                               <String fx:value="Item 3" />
                             </FXCollections>
                           </items>
-                        </ChoiceBox>
-                        <ChoiceBox fx:id="buildVersionBox" maxWidth="1.7976931348623157E308">
+                        </ComboBox>
+                        <ComboBox fx:id="buildVersionBox" maxWidth="1.7976931348623157E308">
                           <items>
                             <FXCollections fx:factory="observableArrayList">
                               <String fx:value="Item 1" />
@@ -228,7 +228,7 @@
                               <String fx:value="Item 3" />
                             </FXCollections>
                           </items>
-                        </ChoiceBox>
+                        </ComboBox>
                       </children>
                       <padding>
                         <Insets left="8.0" right="8.0" />

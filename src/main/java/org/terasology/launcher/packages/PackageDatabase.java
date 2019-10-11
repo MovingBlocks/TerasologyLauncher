@@ -28,6 +28,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -65,6 +66,7 @@ class PackageDatabase {
                 new InputStreamReader(Files.newInputStream(sourcesFile))
         )) {
             for (Repository source : gson.fromJson(reader, Repository[].class)) {
+                logger.trace("Fetching package list from: {}", source.url);
                 database.addAll(packageListOf(source));
             }
         } catch (IOException e) {
@@ -99,9 +101,14 @@ class PackageDatabase {
                 Files.newOutputStream(databaseFile)
         )) {
             out.writeObject(database);
+            logger.info("Saved database file: {}", databaseFile.toAbsolutePath());
         } catch (IOException e) {
             logger.error("Failed to write database file: {}", databaseFile.toAbsolutePath());
         }
+    }
+
+    List<Package> getPackages() {
+        return Collections.unmodifiableList(database);
     }
 
     static class Repository implements Serializable {

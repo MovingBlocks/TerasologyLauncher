@@ -34,6 +34,7 @@ public class PackageManager {
 
     private final Repository onlineRepository;
     private LocalRepository localRepository;
+    private PackageDatabase database;
 
     public PackageManager() {
         onlineRepository = new JenkinsRepository();
@@ -71,6 +72,17 @@ public class PackageManager {
         localRepository.saveCache();
     }
 
+    // TODO: Move to constructor
+    public void initDatabase(Path launcherDir) {
+        database = new PackageDatabase(launcherDir);
+    }
+
+    // TODO: Replace similar methods
+    public void syncDatabase() {
+        Objects.requireNonNull(database)
+                .sync();
+    }
+
     /**
      * Installs the mentioned package into the local repository.
      *
@@ -90,14 +102,14 @@ public class PackageManager {
     }
 
     /**
-     * Provides a list of downloadable packages by querying the
-     * package database.
+     * Provides a list of all packages tracked by the package
+     * database.
      *
-     * @return the list of downloadable packages
+     * @return the list of all packages
      */
-    public List<Package> getUpstreamPackages() {
-        // TODO: Implement this
-        return null;
+    public List<Package> getPackages() {
+        return Objects.requireNonNull(database)
+                .getPackages();
     }
 
     /**

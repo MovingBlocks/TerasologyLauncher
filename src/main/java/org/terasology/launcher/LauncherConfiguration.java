@@ -16,7 +16,7 @@
 
 package org.terasology.launcher;
 
-import org.terasology.launcher.game.TerasologyGameVersions;
+import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 
 import java.nio.file.Path;
@@ -27,15 +27,15 @@ public class LauncherConfiguration {
     private final Path downloadDirectory;
     private final Path tempDirectory;
     private final BaseLauncherSettings launcherSettings;
-    private final TerasologyGameVersions gameVersions;
+    private final PackageManager packageManager;
 
     public LauncherConfiguration(final Path launcherDirectory, final Path downloadDirectory, final Path tempDirectory, final BaseLauncherSettings launcherSettings,
-                                 final TerasologyGameVersions gameVersions) {
+                                 final PackageManager packageManager) {
         this.launcherDirectory = launcherDirectory;
         this.downloadDirectory = downloadDirectory;
         this.tempDirectory = tempDirectory;
         this.launcherSettings = launcherSettings;
-        this.gameVersions = gameVersions;
+        this.packageManager = packageManager;
     }
 
     public Path getLauncherDirectory() {
@@ -54,7 +54,7 @@ public class LauncherConfiguration {
         return launcherSettings;
     }
 
-    public TerasologyGameVersions getGameVersions() {
-        return gameVersions;
+    public PackageManager getPackageManager() {
+        return packageManager;
     }
 }
