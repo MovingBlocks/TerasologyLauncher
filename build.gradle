@@ -102,12 +102,7 @@ repositories {
     // Main Maven repo
     mavenCentral()
     // MovingBlocks Artifactory instance(s) for libs not readily available elsewhere plus our own libs
-    // TODO figure out why we need two URLs here
     maven { url "http://artifactory.terasology.org/artifactory/virtual-repo-live" }
-    maven {
-        // our vendored JREs are published to `libs-release-local`
-        url "http://artifactory.terasology.org/artifactory/libs-release-local" 
-    }
     jcenter()
 }
 
