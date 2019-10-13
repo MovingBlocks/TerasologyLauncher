@@ -47,6 +47,8 @@ plugins {
 }
 
 apply from: "./config/gradle/jre.gradle"
+// TODO salvage useful bits and remove this
+//apply from: "./config/gradle/bundles.gradle"
 apply from: "./config/gradle/quality.gradle"
 apply from: "./config/gradle/swagger.gradle"
 apply from: "./config/gradle/environment.gradle"
