@@ -28,9 +28,8 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
+        //TODO: replace with google/archive-patcher?
         classpath group: "com.alexkasko.delta", name: "delta-diff", version: "1.1.3"
-        classpath group: 'de.undercouch', name: 'gradle-download-task', version: '2.1.0'
-        classpath "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.1"
     }
 }
 
@@ -43,11 +42,15 @@ plugins {
     id 'checkstyle'
     id 'pmd'
     id 'com.github.spotbugs' version '1.6.9'
+    // TODO: upgrade to latest version (191011: 4.0.0)
     id 'de.undercouch.download' version '3.4.3'
+    id 'org.hidetake.swagger.generator' version '2.18.1'
 }
 
-apply from: 'bundles.gradle'
-apply plugin: "org.hidetake.swagger.generator"
+apply from: "./config/gradle/bundles.gradle"
+apply from: "./config/gradle/quality.gradle"
+apply from: "./config/gradle/swagger.gradle"
+apply from: "./config/gradle/environment.gradle"
 
 // Test for right version of Java in use for running this script
 assert org.gradle.api.JavaVersion.current().isJava8Compatible()
@@ -62,13 +65,22 @@ wrapper {
     gradleVersion '5.4.1'
 }
 
-
 import org.apache.tools.ant.filters.FixCrLfFilter
 
 import java.text.SimpleDateFormat
 
 def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+def getDisplayVersion = { env, versionBase ->
+    if (env.JOB_NAME == "TerasologyLauncherStable") {
+        versionBase
+    } else if (env.JOB_NAME != null && env.BUILD_NUMBER != null) {
+        versionBase + '.' + env.BUILD_NUMBER + '+' + env.JOB_NAME
+    } else {
+        versionBase + ' local development ' + startDateTimeString
+    }
+}
 
 // Declare "extra properties" (variables) for the project - a Gradle thing that makes them special.
 ext {
@@ -80,7 +92,7 @@ ext {
     versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasology/launcher/version')
     versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
     versionBase = rootProject.file("version.txt").text.trim()
-    displayVersion = (env.JOB_NAME == 'TerasologyLauncherStable') ? versionBase : ((env.JOB_NAME != null && env.BUILD_NUMBER != null) ? versionBase + '.' + env.BUILD_NUMBER + '+' + env.JOB_NAME : versionBase + ' local development ' + startDateTimeString)
+    displayVersion = getDisplayVersion(env, versionBase)
 
     // Splash image for the JAR
     splashImage = "org/terasology/launcher/images/splash.jpg"
@@ -109,6 +121,7 @@ dependencies {
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
 
     // For Web API
+    // TODO: extract swagger dependencies into swagger.gradle
     swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.5'
     if (new File('web-api-client').exists()) {
         compile project(':web-api-client')
@@ -129,28 +142,6 @@ targetCompatibility = 1.8
 
 mainClassName = 'org.terasology.launcher.TerasologyLauncher'
 
-// Swagger config
-swaggerSources {
-    client {
-        inputFile = file("$buildDir/swagger.json")
-        code {
-            language = 'java'
-            configFile = file('api-config.json')
-        }
-    }
-}
-
-generateSwaggerCodeClient {
-    doFirst {
-        download {
-            src 'https://raw.githubusercontent.com/MovingBlocks/FacadeServer/develop/src/main/resources/web/swagger.json'
-            dest "$buildDir/swagger.json"
-        }
-    }
-    outputDir = file('web-api-client')
-}
-
-
 // Bundle JRE (Use gradle argument: -PbundleJre=/path/to/jre)
 if (project.hasProperty('bundleJre')) {
     applicationDistribution.from("$bundleJre") {
@@ -166,31 +157,6 @@ if (project.hasProperty('bundleJre')) {
                     '@rem Use bundled JRE\nset JAVA_EXE=' + /%APP_HOME%\\jre\\bin\\java.exe/ + '\n')
         }
     }
-}
-
-
-// Checkstyle
-checkstyle {
-    toolVersion = '6.14.1'
-    ignoreFailures = true
-    configProperties.samedir = checkstyle.configFile.parentFile
-}
-
-pmd {
-    toolVersion = '5.5.2'
-    ignoreFailures = true
-    ruleSetFiles = files("config/pmd/pmd.xml")
-}
-
-spotbugs {
-    toolVersion = '3.1.11'
-    ignoreFailures = true
-    effort = 'max'
-    reportLevel = 'medium'
-}
-
-test {
-    ignoreFailures = true
 }
 
 def convertGitBranch = { gitBranch ->
@@ -283,7 +249,6 @@ task copyExtraIntoResources(type: Copy) {
 
     into('src/main/resources/org/terasology/launcher/about')
 }
-
 processResources.dependsOn copyExtraIntoResources
 
 task copyIconsIntoResources(type: Copy) {
@@ -291,7 +256,6 @@ task copyIconsIntoResources(type: Copy) {
 
     into('src/main/resources/org/terasology/launcher/icons')
 }
-
 processResources.dependsOn copyIconsIntoResources
 
 // TODO: Temporary workaround for new exes / JRE bundling not quite being officially ready yet
@@ -358,152 +322,4 @@ task createPatch(dependsOn: distZip) {
 
         println "Created patch: $patchFileName"
     }
-}
-
-// Setup IntelliJ-IDEA
-idea {
-    project {
-        jdkName = '1.8'
-        languageLevel = 'JDK_1_8'
-
-        ipr {
-            withXml { xmlProvider ->
-                def iprNode = xmlProvider.asNode()
-
-                ideaActivateGradle(iprNode)
-                ideaActivateGit(iprNode)
-                ideaActivateCheckstyle(iprNode)
-                ideaActivateCopyright(iprNode)
-            }
-        }
-    }
-
-    module {
-        // Exclude Gradle dir
-        excludeDirs += file('gradle')
-
-        // Exclude Eclipse dirs
-        excludeDirs += file('bin')
-        excludeDirs += file('.settings')
-    }
-
-    workspace {
-        iws {
-            withXml { xmlProvider ->
-                def iwsNode = xmlProvider.asNode()
-
-                ideaMakeAutomatically(iwsNode)
-                ideaRunConfig(iwsNode)
-            }
-        }
-    }
-}
-
-ext {
-    // Activate 'Gradle' plugin
-    ideaActivateGradle = { Node iprNode ->
-        def gradleSettings = iprNode.component.find { it.'@name' == 'GradleSettings' }
-        if (gradleSettings == null) {
-            gradleSettings = iprNode.appendNode('component', [name: 'GradleSettings'])
-            gradleSettings.appendNode('option', [name: 'linkedProjectPath', value: '$PROJECT_DIR$/build.gradle'])
-        }
-    }
-
-    // Activate 'git' as VCS
-    ideaActivateGit = { Node iprNode ->
-        def vcsMappings = iprNode.component.find { it.'@name' == 'VcsDirectoryMappings' }
-        vcsMappings.mapping.@vcs = 'Git'
-    }
-
-    // Activate and config 'Checkstyle' plugin
-    ideaActivateCheckstyle = { Node iprNode ->
-        def checkstyle = iprNode.component.find { it.'@name' == 'CheckStyle-IDEA' }
-        if (checkstyle == null) {
-            // Create new CheckStyle component
-            checkstyle = iprNode.appendNode('component', [name: 'CheckStyle-IDEA'])
-            // use NodeBuilder to create the config block in the xml structure
-            def builder = new NodeBuilder()
-            def option = builder.option(name: 'configuration') {
-                map {
-                    entry(key: 'active-configuration',
-                            value: 'PROJECT_RELATIVE:$PROJECT_DIR$/config/checkstyle/checkstyle.xml:TerasologyLauncher CheckStyle')
-                    entry(key: 'check-nonjava-files', value: false)
-                    entry(key: 'check-test-classes', value: true)
-                    entry(key: 'location-0',
-                            value: 'CLASSPATH:/sun_checks.xml:The default CheckStyle rules')
-                    entry(key: 'location-1',
-                            value: 'PROJECT_RELATIVE:$PROJECT_DIR$/config/checkstyle/checkstyle.xml:TerasologyLauncher CheckStyle')
-                    entry(key: 'property-1.samedir', value: 'config/checkstyle')
-                    entry(key: 'suppress-errors', value: false)
-                    entry(key: 'thirdparty-classpath', value: '')
-                }
-            }
-            // Add result from NodeBuilder
-            checkstyle.append option
-        }
-    }
-
-    // Activate copyright conventions
-    ideaActivateCopyright = { Node iprNode ->
-        def copyrightManager = iprNode.component.find { it.'@name' == 'CopyrightManager' }
-        copyrightManager.'@default' = "TerasologyLauncher"
-        def copyright = copyrightManager.copyright.find { it.option.find { it.'@name' == "myName" }?.'@value' == "TerasologyLauncher" }
-        if (copyright == null) {
-            copyrightManager.append(new XmlParser().parseText('''
-                <copyright>
-                    <option name="notice" value="Copyright 2016 MovingBlocks&#10;&#10;Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);&#10;you may not use this file except in compliance with the License.&#10;You may obtain a copy of the License at&#10;&#10;     http://www.apache.org/licenses/LICENSE-2.0&#10;&#10;Unless required by applicable law or agreed to in writing, software&#10;distributed under the License is distributed on an &quot;AS IS&quot; BASIS,&#10;WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.&#10;See the License for the specific language governing permissions and&#10;limitations under the License." />
-                    <option name="keyword" value="Copyright" />
-                    <option name="allowReplaceKeyword" value="" />
-                    <option name="myName" value="TerasologyLauncher" />
-                    <option name="myLocal" value="true" />
-                </copyright>
-            '''))
-        }
-    }
-
-    // Enable "make project automatically"
-    ideaMakeAutomatically = { Node iwsNode ->
-        def compilerWsConf = iwsNode.find { it.'@name' == 'CompilerWorkspaceConfiguration' }
-        if (compilerWsConf == null) {
-            compilerWsConf = iwsNode.appendNode('component', [name: 'CompilerWorkspaceConfiguration'])
-            compilerWsConf.appendNode("option", [name: "MAKE_PROJECT_ON_SAVE", value: "true"])
-        }
-    }
-
-    // Generate a run configuration for the primary PC facade way of running the game
-    ideaRunConfig = { Node iwsNode ->
-
-        // Adds our run config
-        def runManager = iwsNode.component.find { it.'@name' == 'RunManager' }
-        runManager.append(new XmlParser().parseText('''
-            <configuration default="false" name="TerasologyLauncher" type="Application" factoryName="Application" singleton="true">
-              <extension name="coverage" enabled="false" merge="false" />
-              <option name="MAIN_CLASS_NAME" value="org.terasology.launcher.TerasologyLauncher" />
-              <option name="VM_PARAMETERS" value="-splash:src/main/resources/org/terasology/launcher/images/splash.jpg" />
-              <option name="PROGRAM_PARAMETERS" value="" />
-              <option name='WORKING_DIRECTORY' value='file://\$PROJECT_DIR\$' />
-              <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-              <option name="ALTERNATIVE_JRE_PATH" value="" />
-              <option name="ENABLE_SWING_INSPECTOR" value="false" />
-              <option name="ENV_VARIABLES" />
-              <option name="PASS_PARENT_ENVS" value="true" />
-              <module name="TerasologyLauncher" />
-              <envs />
-              <RunnerSettings RunnerId="Run" />
-              <ConfigurationWrapper RunnerId="Run" />
-              <method />
-            </configuration>
-        '''))
-
-        // This part puts the added run config into the actual "Run" drop-down
-        runManager.append(new XmlParser().parseText('''
-            <list size="1">
-                <item index="0" class="java.lang.String" itemvalue="Application.TerasologyLauncher"/>
-            </list>
-        '''))
-
-        // Makes the added run config the selected item
-        runManager.'@selected' = 'Application.TerasologyLauncher'
-    }
-
 }
