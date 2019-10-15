@@ -74,13 +74,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 public class ApplicationController {
 
@@ -601,68 +600,65 @@ public class ApplicationController {
 
     private void updateAboutTab() {
         aboutInfoAccordion.getPanes().clear();
-
-        Collection<URL> files = new ArrayList<>();
-        files.add(BundleUtils.getFXMLUrl(ABOUT, "README.md"));
-        files.add(BundleUtils.getFXMLUrl(ABOUT, "CHANGELOG.md"));
-        files.add(BundleUtils.getFXMLUrl(ABOUT, "CONTRIBUTING.md"));
-        files.add(BundleUtils.getFXMLUrl(ABOUT, "LICENSE"));
         Charset cs = Charset.forName("UTF-8");
 
-        for (URL url : files) {
-            try {
-                int fnameIdx = url.getFile().lastIndexOf('/');
-                int extIdx = url.getFile().lastIndexOf('.');
-                String fname = url.getFile().substring(fnameIdx + 1);
-                String ext = extIdx < 0 ? "" : url.getFile().substring(extIdx + 1).toLowerCase();
+        Stream.of("README.md", "CHANGELOG.md", "CONTRIBUTING.md", "LICENSE")
+                .map(filename -> BundleUtils.getFXMLUrl(ABOUT, filename))
+                .filter(Objects::nonNull)
+                .forEach(url -> {
+                    try {
+                        int fnameIdx = url.getFile().lastIndexOf('/');
+                        int extIdx = url.getFile().lastIndexOf('.');
+                        String fname = url.getFile().substring(fnameIdx + 1);
+                        String ext = extIdx < 0 ? "" : url.getFile().substring(extIdx + 1).toLowerCase();
 
-                final WebView view = new WebView();
-                StringBuilder sb = new StringBuilder();
+                        final WebView view = new WebView();
+                        StringBuilder sb = new StringBuilder();
 
-                if (ext.equals("md") || ext.equals("markdown")) {
-                    try (InputStream input = url.openStream()) {
-                        sb.append("<body style='padding-left:24px;'>\n");
-                        sb.append(Processor.process(input, Configuration.DEFAULT));
-                        sb.append("</body>");
-                        view.getEngine().loadContent(sb.toString(), "text/html");
-                    }
-                } else if (ext.equals("htm") || ext.equals("html")) {
-                    view.getEngine().load(url.toExternalForm());
-                } else {
-                    try (Reader isr = new InputStreamReader(url.openStream(), cs);
-                         BufferedReader br = new BufferedReader(isr)) {
-                        String line = br.readLine();
+                        if (ext.equals("md") || ext.equals("markdown")) {
+                            try (InputStream input = url.openStream()) {
+                                sb.append("<body style='padding-left:24px;'>\n");
+                                sb.append(Processor.process(input, Configuration.DEFAULT));
+                                sb.append("</body>");
+                                view.getEngine().loadContent(sb.toString(), "text/html");
+                            }
+                        } else if (ext.equals("htm") || ext.equals("html")) {
+                            view.getEngine().load(url.toExternalForm());
+                        } else {
+                            try (Reader isr = new InputStreamReader(url.openStream(), cs);
+                                 BufferedReader br = new BufferedReader(isr)) {
+                                String line = br.readLine();
 
-                        while (line != null) {
-                            sb.append(line);
-                            sb.append(System.lineSeparator());
-                            line = br.readLine();
+                                while (line != null) {
+                                    sb.append(line);
+                                    sb.append(System.lineSeparator());
+                                    line = br.readLine();
+                                }
+                                view.getEngine().loadContent(sb.toString(), "text/plain");
+                            }
                         }
-                        view.getEngine().loadContent(sb.toString(), "text/plain");
+
+                        view.getStylesheets().add(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
+                        view.setContextMenuEnabled(false);
+
+                        final AnchorPane pane = new AnchorPane();
+                        AnchorPane.setBottomAnchor(view, 0.0);
+                        AnchorPane.setTopAnchor(view, 0.0);
+                        pane.getChildren().add(view);
+
+                        final TitledPane titledPane = new TitledPane(fname, pane);
+                        titledPane.setAnimated(false);
+
+                        aboutInfoAccordion.getPanes().add(titledPane);
+                    } catch (MalformedURLException e) {
+                        logger.warn("Could not load info file -- {}", url);
+                    } catch (IOException e) {
+                        logger.warn("Failed to parse markdown file {}", url, e);
                     }
-                }
+                });
 
-                view.getStylesheets().add(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
-                view.setContextMenuEnabled(false);
-
-                final AnchorPane pane = new AnchorPane();
-                AnchorPane.setBottomAnchor(view, 0.0);
-                AnchorPane.setTopAnchor(view, 0.0);
-                pane.getChildren().add(view);
-
-                final TitledPane titledPane = new TitledPane(fname, pane);
-                titledPane.setAnimated(false);
-
-                aboutInfoAccordion.getPanes().add(titledPane);
-            } catch (MalformedURLException e) {
-                logger.warn("Could not load info file -- {}", url);
-            } catch (IOException e) {
-                logger.warn("Failed to parse markdown file {}", url, e);
-            }
-
-            if (!aboutInfoAccordion.getPanes().isEmpty()) {
-                aboutInfoAccordion.setExpandedPane(aboutInfoAccordion.getPanes().get(0));
-            }
+        if (!aboutInfoAccordion.getPanes().isEmpty()) {
+            aboutInfoAccordion.setExpandedPane(aboutInfoAccordion.getPanes().get(0));
         }
     }
 
