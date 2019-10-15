@@ -25,9 +25,11 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.Desktop;
 import java.awt.EventQueue;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -84,14 +86,14 @@ public final class GuiUtils {
             directoryChooser.setInitialDirectory(directory.toFile());
             directoryChooser.setTitle(title);
 
-            selected = directoryChooser.showDialog(owner).toPath();
+            selected = Optional.ofNullable(directoryChooser.showDialog(owner)).map(File::toPath).orElse(null);
         } else {
             final FutureTask<Path> chooseDirectory = new FutureTask<>(() -> {
                 final DirectoryChooser directoryChooser = new DirectoryChooser();
                 directoryChooser.setInitialDirectory(directory.toFile());
                 directoryChooser.setTitle(title);
 
-                return directoryChooser.showDialog(owner).toPath();
+                return Optional.ofNullable(directoryChooser.showDialog(owner)).map(File::toPath).orElse(null);
             });
 
             Platform.runLater(chooseDirectory);
@@ -104,13 +106,20 @@ public final class GuiUtils {
 
         // directory proposal needs to be deleted if the user chose a different one
         try {
-            if (!Files.isSameFile(directory, selected) && !DirectoryUtils.containsFiles(directory) && !Files.deleteIfExists(directory)) {
+            if (deleteProposedDirectoryIfUnused(directory, selected)) {
                 logger.warn("Could not delete unused default directory! {}", directory);
             }
         } catch (IOException e) {
             logger.error("Failed to delete unused default directory! {}", directory, e);
         }
         return selected;
+    }
+
+    private static boolean deleteProposedDirectoryIfUnused(Path proposed, Path selected) throws IOException {
+        return selected != null
+                && !Files.isSameFile(proposed, selected)
+                && !DirectoryUtils.containsFiles(proposed)
+                && !Files.deleteIfExists(proposed);
     }
 
     public static void openFileBrowser(Stage owner, final Path directory, final String errorMsg) {

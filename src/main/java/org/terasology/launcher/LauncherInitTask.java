@@ -230,7 +230,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             updateMessage(BundleUtils.getLabel("splash_chooseGameDirectory"));
             gameDirectory = GuiUtils.chooseDirectoryDialog(owner, DirectoryUtils.getApplicationDirectory(os, DirectoryUtils.GAME_APPLICATION_DIR_NAME),
                     BundleUtils.getLabel("message_dialog_title_chooseGameDirectory"));
-            if (Files.notExists(gameDirectory)) {
+            if (gameDirectory == null || Files.notExists(gameDirectory)) {
                 logger.info("The new game directory is not approved. The TerasologyLauncher is terminated.");
                 Platform.exit();
             }
