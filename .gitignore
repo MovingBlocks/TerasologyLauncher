@@ -52,3 +52,6 @@ certum.jks
 
 # Ignore generated Web API sources
 web-api-client/
+
+# Ignore donwloaded JREs
+jres/**

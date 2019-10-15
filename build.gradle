@@ -34,20 +34,21 @@ buildscript {
 }
 
 plugins {
-    id 'java'
-    id 'project-report'
-    id 'idea'
-    id 'eclipse'
     id 'application'
     id 'checkstyle'
-    id 'pmd'
     id 'com.github.spotbugs' version '1.6.9'
-    // TODO: upgrade to latest version (191011: 4.0.0)
-    id 'de.undercouch.download' version '3.4.3'
+    id 'de.undercouch.download' version '3.4.3' // TODO: upgrade to latest version (191011: 4.0.0)
+    id 'eclipse'
+    id 'idea'
+    id 'java'
     id 'org.hidetake.swagger.generator' version '2.18.1'
+    id 'pmd'
+    id 'project-report'
 }
 
-apply from: "./config/gradle/bundles.gradle"
+apply from: "./config/gradle/jre.gradle"
+// TODO salvage useful bits and remove this
+//apply from: "./config/gradle/bundles.gradle"
 apply from: "./config/gradle/quality.gradle"
 apply from: "./config/gradle/swagger.gradle"
 apply from: "./config/gradle/environment.gradle"
@@ -102,10 +103,8 @@ ext {
 repositories {
     // Main Maven repo
     mavenCentral()
-    // MovingBlocks Artifactory instance for libs not readily available elsewhere plus our own libs
-    maven {
-        url "http://artifactory.terasology.org/artifactory/virtual-repo-live"
-    }
+    // MovingBlocks Artifactory instance(s) for libs not readily available elsewhere plus our own libs
+    maven { url "http://artifactory.terasology.org/artifactory/virtual-repo-live" }
     jcenter()
 }
 
