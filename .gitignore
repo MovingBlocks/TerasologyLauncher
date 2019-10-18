@@ -19,8 +19,6 @@
 /bin/
 
 # Ignore Linux
-.*
-!.gitignore
 *~
 
 # Ignore OSX
