@@ -34,6 +34,10 @@ public class Package implements Serializable {
         installed = false;
     }
 
+    public String zipName() {
+        return name + "-" + version + ".zip";
+    }
+
     public String getName() {
         return name;
     }

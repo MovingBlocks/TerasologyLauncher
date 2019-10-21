@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
@@ -39,18 +40,17 @@ import java.util.Objects;
 class PackageDatabase {
 
     private static final Logger logger = LoggerFactory.getLogger(PackageDatabase.class);
-    private static final String PACKAGES_DIRECTORY = "packages";
-    private static final String SOURCES_FILENAME = "sources.json";
-    private static final String DATABASE_FILENAME = "packages.db";
 
     private final Path sourcesFile;
     private final Path databaseFile;
+    private final Path installDir;
     private final Gson gson;
     private final List<Package> database;
 
-    PackageDatabase(Path launcherDir) {
-        sourcesFile = launcherDir.resolve(PACKAGES_DIRECTORY).resolve(SOURCES_FILENAME);
-        databaseFile = launcherDir.resolve(PACKAGES_DIRECTORY).resolve(DATABASE_FILENAME);
+    PackageDatabase(Path sourcesFile, Path databaseFile, Path installDir) {
+        this.sourcesFile = sourcesFile;
+        this.databaseFile = databaseFile;
+        this.installDir = installDir;
         gson = new Gson();
         database = loadDatabase();
     }
@@ -68,6 +68,19 @@ class PackageDatabase {
             for (Repository source : gson.fromJson(reader, Repository[].class)) {
                 logger.trace("Fetching package list from: {}", source.url);
                 database.addAll(packageListOf(source));
+            }
+
+            // Mark the installed packages
+            if (Files.exists(installDir)) {
+                for (File pkgDir : Objects.requireNonNull(installDir.toFile().listFiles())) {
+                    for (File versionDir : Objects.requireNonNull(pkgDir.listFiles())) {
+                        database.stream()
+                                .filter(pkg -> pkg.getName().equals(pkgDir.getName())
+                                            && pkg.getVersion().equals(versionDir.getName()))
+                                .findFirst()
+                                .ifPresent(pkg -> pkg.setInstalled(true));
+                    }
+                }
             }
         } catch (IOException e) {
             logger.error("Failed to read sources: {}", sourcesFile.toAbsolutePath());

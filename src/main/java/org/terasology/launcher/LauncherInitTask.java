@@ -92,7 +92,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             logger.trace("Setting up Package Manager");
             final PackageManager packageManager = new PackageManager();
-            packageManager.initDatabase(launcherDirectory);
+            packageManager.initDatabase(launcherDirectory, gameDirectory);
             packageManager.syncDatabase();
 
             logger.trace("Change LauncherSettings...");

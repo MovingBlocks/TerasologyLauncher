@@ -22,20 +22,17 @@ import com.github.rjeschke.txtmark.Processor;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.application.HostServices;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -54,22 +51,17 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.game.GameDownloader;
-import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.game.GameStarter;
-import org.terasology.launcher.game.JobItem;
 import org.terasology.launcher.game.TerasologyGameVersion;
-import org.terasology.launcher.game.TerasologyGameVersions;
-import org.terasology.launcher.game.VersionItem;
 import org.terasology.launcher.log.LogViewAppender;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DirectoryUtils;
-import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.util.ProgressListener;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.BufferedReader;
@@ -86,6 +78,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ApplicationController {
 
@@ -94,6 +88,50 @@ public class ApplicationController {
 
     private static final long MB = 1024L * 1024;
     private static final long MINIMUM_FREE_SPACE = 200 * MB;
+
+    private static final class DownloadTask extends Task<Void> implements ProgressListener {
+        private static final Logger logger = LoggerFactory.getLogger(DownloadTask.class);
+
+        private final PackageManager packageManager;
+        private final Package target;
+        private Runnable cleanup;
+
+        DownloadTask(PackageManager packageManager, Package target) {
+            this.packageManager = packageManager;
+            this.target = target;
+        }
+
+        @Override
+        protected Void call() {
+            try {
+                packageManager.install(target, this);
+            } catch (IOException | DownloadException e) {
+                logger.error("Failed to download package: {}-{}", target.getName(), target.getVersion());
+                logger.error(e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        public void update() {
+        }
+
+        @Override
+        public void update(int progress) {
+            updateProgress(progress, 100);
+        }
+
+        @Override
+        protected void done() {
+            if (cleanup != null) {
+                Platform.runLater(cleanup);
+            }
+        }
+
+        public void onDone(Runnable cleanupCallback) {
+            cleanup = cleanupCallback;
+        }
+    }
 
     private Path launcherDirectory;
     private Path downloadDirectory;
@@ -104,6 +142,9 @@ public class ApplicationController {
     private GameDownloadWorker gameDownloadWorker;
     private Stage stage;
     private HostServices hostServies;
+
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private DownloadTask downloadTask;
 
     @FXML
     private ComboBox<PackageItem> jobBox;
@@ -244,34 +285,27 @@ public class ApplicationController {
     }
 
     private void downloadAction() {
-//        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-//        if (gameDownloadWorker != null) {
-//            // Cancel download
-//            logger.info("Cancel game download!");
-//            gameDownloadWorker.cancel(false);
-//        } else if ((gameVersion == null) || gameVersion.isInstalled() || (gameVersion.getSuccessful() == null) || !gameVersion.getSuccessful()) {
-//            logger.warn("The selected game version can not be downloaded! '{}'", gameVersion);
-//        } else {
-//            try {
-//                GameDownloader gameDownloader = new GameDownloader(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles(),
-//                        launcherSettings.getGameDirectory(), gameVersion, packageManager);
-//                gameDownloadWorker = new GameDownloadWorker(this, gameDownloader);
-//            } catch (IOException e) {
-//                logger.error("Could not start game download!", e);
-//                finishedGameDownload(false, false, false, null);
-//                return;
-//            }
-//            progressBar.progressProperty().bind(gameDownloadWorker.progressProperty());
-//            progressBar.setVisible(true);
-//            new Thread(gameDownloadWorker).start();
-//        }
-//        updateGui();
+        downloadTask = new DownloadTask(packageManager, selectedPackage);
+
+        progressBar.progressProperty().bind(downloadTask.progressProperty());
+        progressBar.setVisible(true);
+        startAndDownloadButton.setVisible(false);
+        cancelDownloadButton.setVisible(true);
+
+        downloadTask.onDone(() -> {
+            progressBar.progressProperty().unbind();
+            progressBar.setVisible(false);
+            startAndDownloadButton.setVisible(true);
+            cancelDownloadButton.setVisible(false);
+            downloadTask = null;
+        });
+
+        executor.submit(downloadTask);
     }
 
     @FXML
     protected void startAndDownloadAction() {
-        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-        if (gameVersion == null || !gameVersion.isInstalled()) {
+        if (!selectedPackage.isInstalled()) {
             logger.info("Download Game Action!");
             downloadAction();
         } else {
@@ -284,9 +318,7 @@ public class ApplicationController {
     protected void cancelDownloadAction() {
         // Cancel download
         logger.info("Cancel game download!");
-        gameDownloadWorker.cancel(false);
-
-        updateGui();
+        downloadTask.cancel(false);
     }
 
     @FXML
@@ -388,27 +420,12 @@ public class ApplicationController {
         packageItems = FXCollections.observableArrayList();
         onSync();
 
-        jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            buildVersionBox.setItems(newVal.versionList);
-            buildVersionBox.getSelectionModel().select(0);
-        });
-        jobBox.setItems(packageItems);
-        jobBox.getSelectionModel().select(0);
-
-        populateJobBox();
-
-        cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
-        startAndDownloadButton.managedProperty().bind(startAndDownloadButton.visibleProperty());
-
-        cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
-        deleteButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_delete")));
-        settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
-        exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
-        startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
-
-        updateGui();
+        initComboBoxes();
+        initButtons();
     }
 
+    private Package selectedPackage;
+    private List<Package> packages;
     private ObservableList<PackageItem> packageItems;
 
     private static class PackageItem {
@@ -429,10 +446,11 @@ public class ApplicationController {
     // To be called after database sync is done
     private void onSync() {
         packageItems.clear();
+        packages = packageManager.getPackages();
 
         String currentPkgName = null;
         PackageItem currentItem = null;
-        for (Package pkg : packageManager.getPackages()) {
+        for (Package pkg : packages) {
             if (pkg.getName().equals(currentPkgName)) {
                 currentItem.versionList.add(pkg.getVersion());
             } else {
@@ -442,6 +460,44 @@ public class ApplicationController {
                 packageItems.add(currentItem);
             }
         }
+    }
+
+    private void initComboBoxes() {
+        jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            buildVersionBox.setItems(newVal.versionList);
+            buildVersionBox.getSelectionModel().select(0);
+        });
+
+        buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            final String pkgName = jobBox.getSelectionModel().getSelectedItem().name;
+            final String pkgVer  = newVal;
+
+            selectedPackage = packages.stream()
+                    .filter(pkg -> pkg.getName().equals(pkgName)
+                                && pkg.getVersion().equals(pkgVer))
+                    .findAny()
+                    .orElse(null);
+
+            startAndDownloadButton.setGraphic(
+                    selectedPackage != null && selectedPackage.isInstalled() ? playImage : downloadImage);
+        });
+
+        jobBox.setItems(packageItems);
+        jobBox.getSelectionModel().select(0);
+    }
+
+    private void initButtons() {
+        cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
+        cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
+        cancelDownloadButton.setVisible(false);
+
+        startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
+        startAndDownloadButton.managedProperty().bind(startAndDownloadButton.visibleProperty());
+        startAndDownloadButton.setGraphic(downloadImage);
+
+        deleteButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_delete")));
+        settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
+        exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
     }
 
     private void updateTooltipTexts() {
@@ -525,6 +581,12 @@ public class ApplicationController {
             gameDownloadWorker.cancel(false);
         }
         gameStarter.dispose();
+
+        // TODO: Improve close request handling
+        if (downloadTask != null) {
+            downloadTask.cancel(true);
+        }
+        executor.shutdownNow();
 
         logger.debug("Closing the launcher ...");
         stage.close();

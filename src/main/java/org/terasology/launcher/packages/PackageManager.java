@@ -19,8 +19,14 @@ package org.terasology.launcher.packages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.DownloadException;
+import org.terasology.launcher.util.DownloadUtils;
+import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.ProgressListener;
 
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -31,10 +37,17 @@ import java.util.Objects;
 public class PackageManager {
 
     private static final Logger logger = LoggerFactory.getLogger(PackageManager.class);
+    private static final String INSTALL_DIRECTORY = "games";
+    private static final String PACKAGES_DIRECTORY = "packages";
+    private static final String SOURCES_FILENAME = "sources.json";
+    private static final String DATABASE_FILENAME = "packages.db";
+    private static final String CACHE_DIRECTORY = "cache";
 
     private final Repository onlineRepository;
     private LocalRepository localRepository;
     private PackageDatabase database;
+    private Path cacheDir;
+    private Path installDir;
 
     public PackageManager() {
         onlineRepository = new JenkinsRepository();
@@ -73,8 +86,14 @@ public class PackageManager {
     }
 
     // TODO: Move to constructor
-    public void initDatabase(Path launcherDir) {
-        database = new PackageDatabase(launcherDir);
+    public void initDatabase(Path launcherDir, Path gameDir) {
+        cacheDir = launcherDir.resolve(CACHE_DIRECTORY);
+        installDir = gameDir.resolve(INSTALL_DIRECTORY);
+        database = new PackageDatabase(
+                launcherDir.resolve(PACKAGES_DIRECTORY).resolve(SOURCES_FILENAME),
+                launcherDir.resolve(PACKAGES_DIRECTORY).resolve(DATABASE_FILENAME),
+                installDir
+        );
     }
 
     // TODO: Replace similar methods
@@ -87,9 +106,35 @@ public class PackageManager {
      * Installs the mentioned package into the local repository.
      *
      * @param target the package to be installed
+     * @param listener the object which is to be informed about task progress
      */
-    public void install(Package target) {
-        // TODO: Implement this
+    public void install(Package target, ProgressListener listener) throws IOException, DownloadException {
+        final Path cachedZip = cacheDir.resolve(target.zipName());
+
+        // TODO: Properly validate cache and handle exceptions
+        Files.deleteIfExists(cachedZip);
+        download(target, cachedZip, listener);
+
+        final Path extractDir = installDir.resolve(target.getName()).resolve(target.getVersion());
+        FileUtils.extractZipTo(cachedZip, extractDir);
+        target.setInstalled(true);
+        logger.info("Finished installing package: {}-{}", target.getName(), target.getVersion());
+    }
+
+    private void download(Package target, Path cacheZip, ProgressListener listener) throws DownloadException, IOException {
+        final URL downloadUrl = new URL(target.getUrl());
+
+        final long contentLength = DownloadUtils.getContentLength(downloadUrl);
+        final long availableSpace = cacheZip.getParent().toFile().getUsableSpace();
+
+        if (availableSpace >= contentLength) {
+            DownloadUtils.downloadToFile(downloadUrl, cacheZip, listener);
+        } else {
+            throw new DownloadException("Insufficient space for downloading package");
+        }
+
+        logger.info("Finished downloading package: {}-{}", target.getName(), target.getVersion());
+        // TODO: Implement download functionality locally
     }
 
     /**
