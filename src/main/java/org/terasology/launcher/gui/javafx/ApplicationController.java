@@ -32,7 +32,9 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -106,8 +108,7 @@ public class ApplicationController {
             try {
                 packageManager.install(target, this);
             } catch (IOException | DownloadException e) {
-                logger.error("Failed to download package: {}-{}", target.getName(), target.getVersion());
-                logger.error(e.getMessage());
+                logger.error("Failed to download package: {}-{}", target.getName(), target.getVersion(), e);
             }
             return null;
         }
@@ -119,6 +120,40 @@ public class ApplicationController {
         @Override
         public void update(int progress) {
             updateProgress(progress, 100);
+        }
+
+        @Override
+        protected void done() {
+            if (cleanup != null) {
+                Platform.runLater(cleanup);
+            }
+        }
+
+        public void onDone(Runnable cleanupCallback) {
+            cleanup = cleanupCallback;
+        }
+    }
+
+    private static final class DeleteTask extends Task<Void> {
+        private static final Logger logger = LoggerFactory.getLogger(DeleteTask.class);
+
+        private final PackageManager packageManager;
+        private final Package target;
+        private Runnable cleanup;
+
+        DeleteTask(PackageManager packageManager, Package target) {
+            this.packageManager = packageManager;
+            this.target = target;
+        }
+
+        @Override
+        protected Void call() {
+            try {
+                packageManager.remove(target);
+            } catch (IOException e) {
+                logger.error("Failed to remove package: {}-{}", target.getName(), target.getVersion(), e);
+            }
+            return null;
         }
 
         @Override
@@ -330,40 +365,29 @@ public class ApplicationController {
 
     @FXML
     protected void deleteAction() {
-//        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-//        if ((gameVersion != null) && gameVersion.isInstalled()) {
-//            final Path topLevelGameDirectory = gameVersion.getInstallationPath().getParent();
-//            final boolean containsGameData = DirectoryUtils.containsGameData(topLevelGameDirectory);
-//            final String msg;
-//            if (containsGameData) {
-//                msg = BundleUtils.getMessage("confirmDeleteGame_withData", topLevelGameDirectory);
-//            } else {
-//                msg = BundleUtils.getMessage("confirmDeleteGame_withoutData", topLevelGameDirectory);
-//            }
-//            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-//            alert.setContentText(msg);
-//            alert.setTitle(BundleUtils.getLabel("message_deleteGame_title"));
-//            alert.initOwner(stage);
-//
-//            alert.showAndWait()
-//                    .filter(response -> response == ButtonType.OK)
-//                    .ifPresent(response -> {
-//                        logger.info("Delete installed game! '{}' '{}'", gameVersion, topLevelGameDirectory);
-//                        try {
-//                            FileUtils.delete(topLevelGameDirectory);
-//                        } catch (IOException e) {
-//                            logger.error("Could not delete installed game!", e);
-//                            // TODO: introduce new message label
-//                            GuiUtils.showWarningMessageDialog(stage, "Could not delete installed game!");
-//                            return;
-//                        }
-//                        packageManager.removeInstallationInfo(gameVersion);
-//                        updateGui();
-//                        updateBuildVersionBox();
-//                    });
-//        } else {
-//            logger.warn("The selected game version can not be deleted! '{}'", gameVersion);
-//        }
+        final Path gameDir = packageManager.resolveInstallDir(selectedPackage);
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setContentText(BundleUtils.getMessage("confirmDeleteGame_withoutData", gameDir));
+        alert.setTitle(BundleUtils.getLabel("message_deleteGame_title"));
+        alert.initOwner(stage);
+
+        alert.showAndWait()
+                .filter(response -> response == ButtonType.OK)
+                .ifPresent(response -> {
+                    logger.info("Removing game: {}-{}", selectedPackage.getName(), selectedPackage.getVersion());
+
+                    deleteButton.setDisable(true);
+                    final DeleteTask deleteTask = new DeleteTask(packageManager, selectedPackage);
+                    deleteTask.onDone(() -> {
+                        if (!selectedPackage.isInstalled()) {
+                            startAndDownloadButton.setGraphic(downloadImage);
+                        } else {
+                            deleteButton.setDisable(false);
+                        }
+                    });
+
+                    executor.submit(deleteTask);
+                });
     }
 
     @FXML

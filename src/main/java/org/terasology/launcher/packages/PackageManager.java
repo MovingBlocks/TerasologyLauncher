@@ -24,11 +24,13 @@ import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.ProgressListener;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -152,8 +154,15 @@ public class PackageManager {
      *
      * @param target the package to be removed
      */
-    public void remove(Package target) {
-        // TODO: Implement this
+    public void remove(Package target) throws IOException {
+        // Recursively delete all files
+        Files.walk(resolveInstallDir(target))
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+
+        target.setInstalled(false);
+        logger.info("Finished removing package: {}-{}", target.getName(), target.getVersion());
     }
 
     /**
