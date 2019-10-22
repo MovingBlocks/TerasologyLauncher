@@ -18,6 +18,7 @@ package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
@@ -48,7 +49,7 @@ public final class GameStarter {
         gameThread = null;
     }
 
-    public boolean startGame(TerasologyGameVersion gameVersion, Path gameDataDirectory, JavaHeapSize maxHeapSize,
+    public boolean startGame(Package gamePkg, Path gamePath, Path gameDataDirectory, JavaHeapSize maxHeapSize,
                              JavaHeapSize initialHeapSize, List<String> userJavaParameters, List<String> userGameParameters, LogLevel logLevel) {
         if (isRunning()) {
             logger.warn("The game can not be started because another game is already running! '{}'", gameThread);
@@ -56,9 +57,9 @@ public final class GameStarter {
         }
 
         final List<String> javaParameters = createJavaParameters(maxHeapSize, initialHeapSize, userJavaParameters, logLevel);
-        final List<String> processParameters = createProcessParameters(gameVersion, gameDataDirectory, javaParameters, userGameParameters);
+        final List<String> processParameters = createProcessParameters(gamePath, gameDataDirectory, javaParameters, userGameParameters);
 
-        return startProcess(gameVersion, processParameters);
+        return startProcess(gamePkg, gamePath, processParameters);
     }
 
     private List<String> createJavaParameters(JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize, List<String> userJavaParameters, LogLevel logLevel) {
@@ -76,29 +77,29 @@ public final class GameStarter {
         return javaParameters;
     }
 
-    private List<String> createProcessParameters(TerasologyGameVersion gameVersion, Path gameDataDirectory, List<String> javaParameters,
+    private List<String> createProcessParameters(Path gamePath, Path gameDataDirectory, List<String> javaParameters,
                                                  List<String> gameParameters) {
         final List<String> processParameters = new ArrayList<>();
         processParameters.add(System.getProperty("java.home") + "/bin/java"); // Use the current java
         processParameters.addAll(javaParameters);
         processParameters.add("-jar");
-        processParameters.add(gameVersion.getGameJar().getFileName().toString());
+        processParameters.add(gamePath.resolve("libs/Terasology.jar").toString());
         processParameters.add("-homedir=" + gameDataDirectory.toAbsolutePath().toString());
         processParameters.addAll(gameParameters);
 
         return processParameters;
     }
 
-    private boolean startProcess(TerasologyGameVersion gameVersion, List<String> processParameters) {
+    private boolean startProcess(Package gamePkg, Path gamePath, List<String> processParameters) {
         final ProcessBuilder pb = new ProcessBuilder(processParameters);
         pb.redirectErrorStream(true);
-        pb.directory(gameVersion.getInstallationPath().toFile());
-        logger.debug("Starting game process with '{}' in '{}' for '{}'", processParameters, gameVersion.getInstallationPath(), gameVersion);
+        pb.directory(gamePath.toFile());
+        logger.debug("Starting game process with '{}' in '{}' for '{}-{}'", processParameters, gamePath.toFile(), gamePkg.getName(), gamePkg.getVersion());
         try {
             final Process p = pb.start();
 
             gameThread = new Thread(new GameRunner(p));
-            gameThread.setName("game" + gameVersion.getBuildNumber());
+            gameThread.setName("game" + gamePkg.getName() + "-" + gamePkg.getVersion());
             gameThread.start();
 
             Thread.sleep(PROCESS_START_SLEEP_TIME);
@@ -111,7 +112,7 @@ public final class GameStarter {
                 logger.info("The game is successfully launched.");
             }
         } catch (InterruptedException | IOException | RuntimeException e) {
-            logger.error("The game could not be started due to an error! Parameters '{}' for '{}'!", processParameters, gameVersion, e);
+            logger.error("The game could not be started due to an error! Parameters '{}' for '{}-{}'!", processParameters, gamePkg.getName(), gamePkg.getVersion(), e);
             return false;
         }
         return true;

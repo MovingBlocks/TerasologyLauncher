@@ -168,4 +168,8 @@ public class PackageManager {
         return Objects.requireNonNull(localRepository, "Local storage uninitialized")
                 .getPackageVersions(pkgBuild);
     }
+
+    public Path resolveInstallDir(Package target) {
+        return installDir.resolve(target.getName()).resolve(target.getVersion());
+    }
 }

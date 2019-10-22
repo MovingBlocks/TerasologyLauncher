@@ -260,15 +260,13 @@ public class ApplicationController {
     }
 
     private void startGameAction() {
-        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-        if ((gameVersion == null) || !gameVersion.isInstalled()) {
-            logger.warn("The selected game version can not be started! '{}'", gameVersion);
-            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
-        } else if (gameStarter.isRunning()) {
+        final Path gamePath = packageManager.resolveInstallDir(selectedPackage);
+
+        if (gameStarter.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
             GuiUtils.showInfoMessageDialog(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
-            final boolean gameStarted = gameStarter.startGame(gameVersion, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
+            final boolean gameStarted = gameStarter.startGame(selectedPackage, gamePath, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
                     launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
                     launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
             if (!gameStarted) {
