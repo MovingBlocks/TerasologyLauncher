@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
 
@@ -112,13 +113,16 @@ public class PackageManager {
         final Path cachedZip = cacheDir.resolve(target.zipName());
 
         // TODO: Properly validate cache and handle exceptions
-        Files.deleteIfExists(cachedZip);
-        download(target, cachedZip, listener);
+        if (Files.notExists(cachedZip)) {
+            download(target, cachedZip, listener);
+        }
 
-        final Path extractDir = installDir.resolve(target.getName()).resolve(target.getVersion());
-        FileUtils.extractZipTo(cachedZip, extractDir);
-        target.setInstalled(true);
-        logger.info("Finished installing package: {}-{}", target.getName(), target.getVersion());
+        if (!listener.isCancelled()) {
+            final Path extractDir = installDir.resolve(target.getName()).resolve(target.getVersion());
+            FileUtils.extractZipTo(cachedZip, extractDir);
+            target.setInstalled(true);
+            logger.info("Finished installing package: {}-{}", target.getName(), target.getVersion());
+        }
     }
 
     private void download(Package target, Path cacheZip, ProgressListener listener) throws DownloadException, IOException {
@@ -128,7 +132,13 @@ public class PackageManager {
         final long availableSpace = cacheZip.getParent().toFile().getUsableSpace();
 
         if (availableSpace >= contentLength) {
-            DownloadUtils.downloadToFile(downloadUrl, cacheZip, listener);
+            final Path cacheZipPart = cacheZip.resolveSibling(target.zipName() + ".part");
+            Files.deleteIfExists(cacheZipPart);
+            DownloadUtils.downloadToFile(downloadUrl, cacheZipPart, listener);
+
+            if (!listener.isCancelled()) {
+                Files.move(cacheZipPart, cacheZip, StandardCopyOption.ATOMIC_MOVE);
+            }
         } else {
             throw new DownloadException("Insufficient space for downloading package");
         }

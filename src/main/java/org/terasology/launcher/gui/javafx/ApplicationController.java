@@ -285,16 +285,25 @@ public class ApplicationController {
     private void downloadAction() {
         downloadTask = new DownloadTask(packageManager, selectedPackage);
 
+        jobBox.setDisable(true);
+        buildVersionBox.setDisable(true);
         progressBar.progressProperty().bind(downloadTask.progressProperty());
         progressBar.setVisible(true);
         startAndDownloadButton.setVisible(false);
         cancelDownloadButton.setVisible(true);
 
         downloadTask.onDone(() -> {
+            jobBox.setDisable(false);
+            buildVersionBox.setDisable(false);
             progressBar.progressProperty().unbind();
             progressBar.setVisible(false);
             startAndDownloadButton.setVisible(true);
             cancelDownloadButton.setVisible(false);
+
+            if (selectedPackage.isInstalled()) {
+                startAndDownloadButton.setGraphic(playImage);
+                deleteButton.setDisable(false);
+            }
             downloadTask = null;
         });
 
@@ -476,8 +485,13 @@ public class ApplicationController {
                     .findAny()
                     .orElse(null);
 
-            startAndDownloadButton.setGraphic(
-                    selectedPackage != null && selectedPackage.isInstalled() ? playImage : downloadImage);
+            if (selectedPackage != null && selectedPackage.isInstalled()) {
+                startAndDownloadButton.setGraphic(playImage);
+                deleteButton.setDisable(false);
+            } else {
+                startAndDownloadButton.setGraphic(downloadImage);
+                deleteButton.setDisable(true);
+            }
         });
 
         jobBox.setItems(packageItems);
