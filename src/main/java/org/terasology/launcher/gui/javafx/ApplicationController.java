@@ -281,16 +281,13 @@ public class ApplicationController {
             }
 
             final SettingsController settingsController = fxmlLoader.getController();
-            settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, packageManager, settingsStage);
+            settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, packageManager, settingsStage, this);
 
             Scene scene = new Scene(root);
             settingsStage.setScene(scene);
             settingsStage.showAndWait();
         } catch (IOException e) {
             logger.warn("Exception in openSettingsAction: ", e);
-        } finally {
-            updateJobBox();
-            updateGui();
         }
     }
 
@@ -459,7 +456,7 @@ public class ApplicationController {
     private List<Package> packages;
     private ObservableList<PackageItem> packageItems;
 
-    private static class PackageItem {
+    static class PackageItem {
         private final String name;
         private final ObservableList<String> versionList;
 
@@ -471,6 +468,10 @@ public class ApplicationController {
         @Override
         public String toString() {
             return name;
+        }
+
+        ObservableList<String> getVersionList() {
+            return versionList;
         }
     }
 
@@ -945,5 +946,13 @@ public class ApplicationController {
         scaleTransition.setToX(factor);
         scaleTransition.setToY(factor);
         return scaleTransition;
+    }
+
+    ComboBox<PackageItem> getJobBox() {
+        return jobBox;
+    }
+
+    ComboBox<String> getBuildVersionBox() {
+        return buildVersionBox;
     }
 }
