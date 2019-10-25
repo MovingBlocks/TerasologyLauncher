@@ -83,7 +83,7 @@ class PackageDatabase {
                 }
             }
         } catch (IOException e) {
-            logger.error("Failed to read sources: {}", sourcesFile.toAbsolutePath());
+            logger.error("Failed to read sources: {}", sourcesFile);
             logger.warn("Aborting database synchronisation");
         } finally {
             saveDatabase();
@@ -102,7 +102,7 @@ class PackageDatabase {
             )) {
                 return (List<Package>) in.readObject();
             } catch (IOException | ClassNotFoundException e) {
-                logger.error("Failed to load database file: {}", databaseFile.toAbsolutePath());
+                logger.error("Failed to load database file: {}", databaseFile);
             }
         }
         logger.info("Using empty database");
@@ -114,9 +114,9 @@ class PackageDatabase {
                 Files.newOutputStream(databaseFile)
         )) {
             out.writeObject(database);
-            logger.info("Saved database file: {}", databaseFile.toAbsolutePath());
+            logger.info("Saved database file: {}", databaseFile);
         } catch (IOException e) {
-            logger.error("Failed to write database file: {}", databaseFile.toAbsolutePath());
+            logger.error("Failed to write database file: {}", databaseFile);
         }
     }
 

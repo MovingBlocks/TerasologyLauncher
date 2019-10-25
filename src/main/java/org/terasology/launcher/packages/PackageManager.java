@@ -41,7 +41,6 @@ public class PackageManager {
 
     private static final Logger logger = LoggerFactory.getLogger(PackageManager.class);
     private static final String INSTALL_DIRECTORY = "games";
-    private static final String PACKAGES_DIRECTORY = "packages";
     private static final String SOURCES_FILENAME = "sources.json";
     private static final String DATABASE_FILENAME = "packages.db";
     private static final String CACHE_DIRECTORY = "cache";
@@ -92,9 +91,21 @@ public class PackageManager {
     public void initDatabase(Path launcherDir, Path gameDir) {
         cacheDir = launcherDir.resolve(CACHE_DIRECTORY);
         installDir = gameDir.resolve(INSTALL_DIRECTORY);
+        final Path sourcesFile = launcherDir.resolve(SOURCES_FILENAME);
+
+        // Copy default sources file if necessary
+        if (Files.notExists(sourcesFile)) {
+            logger.info("Sources file not found. Copying default file to {}", sourcesFile);
+            try {
+                Files.copy(getClass().getResourceAsStream(SOURCES_FILENAME), sourcesFile);
+            } catch (IOException e) {
+                logger.error("Failed to copy default sources file to {}", sourcesFile);
+            }
+        }
+
         database = new PackageDatabase(
-                launcherDir.resolve(PACKAGES_DIRECTORY).resolve(SOURCES_FILENAME),
-                launcherDir.resolve(PACKAGES_DIRECTORY).resolve(DATABASE_FILENAME),
+                sourcesFile,
+                launcherDir.resolve(DATABASE_FILENAME),
                 installDir
         );
     }

@@ -1,0 +1,12 @@
+[
+  {
+    "url" : "http://jenkins.terasology.org",
+    "type" : "Jenkins",
+    "trackedPackages" : [
+      "DistroOmegaRelease",
+      "DistroOmega",
+      "TerasologyStable",
+      "Terasology"
+    ]
+  }
+]
