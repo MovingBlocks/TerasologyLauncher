@@ -332,8 +332,8 @@ public class ApplicationController {
     }
 
     @FXML
-    protected void openGPlus() {
-        openUri(BundleUtils.getURI("terasology_gplus"));
+    protected void openDiscord() {
+        openUri(BundleUtils.getURI("terasology_discord"));
     }
 
     @FXML
