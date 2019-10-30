@@ -2,5 +2,7 @@
 
 *.{cmd,[cC][mM][dD]} 	text eol=crlf
 *.{bat,[bB][aA][tT]} 	text eol=crlf
+*.{png,[pP][nN][gG]}	binary
+*.{jpg,[jJ][pP][gG]}	binary
 
 gradlew 		text eol=lf
