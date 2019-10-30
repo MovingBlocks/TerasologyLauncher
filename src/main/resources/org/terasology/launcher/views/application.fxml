@@ -81,11 +81,11 @@
                         </ImageView>
                       </graphic>
                     </Button>
-                    <Button id="" fx:id="gplusButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#openGPlus" onMouseEntered="#handleSocialButtonMouseEntered" onMouseExited="#handleSocialButtonMouseExited" onMousePressed="#handleSocialButtonMousePressed" onMouseReleased="#handleSocialButtonMouseReleased" styleClass="socialButton">
+                    <Button id="" fx:id="discordButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#openDiscord" onMouseEntered="#handleSocialButtonMouseEntered" onMouseExited="#handleSocialButtonMouseExited" onMousePressed="#handleSocialButtonMousePressed" onMouseReleased="#handleSocialButtonMouseReleased" styleClass="socialButton">
                       <graphic>
                         <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
                           <image>
-                            <Image url="@../images/gplus.png" preserveRatio="false" smooth="false" />
+                            <Image url="@../images/discord.png" preserveRatio="false" smooth="false" />
                           </image>
                         </ImageView>
                       </graphic>
