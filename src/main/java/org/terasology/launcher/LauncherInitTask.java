@@ -88,8 +88,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory());
             final Path gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory());
 
-            // TODO: Fix this for server unavailability
-
+            // TODO: Does this interact with any remote server for fetching/initializing the database?
             logger.trace("Setting up Package Manager");
             final PackageManager packageManager = new PackageManager();
             packageManager.initDatabase(launcherDirectory, gameDirectory);
@@ -288,20 +287,6 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }
         logger.debug("Game data directory: {}", gameDataDirectory);
         return gameDataDirectory;
-    }
-
-    private TerasologyGameVersions getTerasologyGameVersions(Path launcherDirectory, Path gameDirectory, BaseLauncherSettings launcherSettings) {
-        logger.trace("Init TerasologyGameVersions...");
-        updateMessage(BundleUtils.getLabel("splash_loadGameVersions"));
-        final TerasologyGameVersions gameVersions = new TerasologyGameVersions();
-        gameVersions.loadGameVersionsFromPackageManager(launcherSettings, launcherDirectory, gameDirectory);
-        if (logger.isInfoEnabled()) {
-            for (GameJob gameJob : GameJob.values()) {
-                logger.info("Game versions: {} {}", gameJob, gameVersions.getGameVersionList(gameJob).size() - 1);
-            }
-        }
-        logger.debug("Game versions: {}", gameVersions);
-        return gameVersions;
     }
 
     private void storeLauncherSettingsAfterInit(BaseLauncherSettings launcherSettings) throws LauncherStartFailedException {
