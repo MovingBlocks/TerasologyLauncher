@@ -21,6 +21,14 @@ import org.terasology.launcher.settings.BaseLauncherSettings;
 
 import java.nio.file.Path;
 
+/**
+ * Immutable launcher configuration object.
+ *
+ * Provides information on
+ *  - directories managed by the launcher
+ *  - user settings in form of {@link BaseLauncherSettings}
+ *  - the {@link PackageManager} used to download new games
+ */
 public class LauncherConfiguration {
 
     private final Path launcherDirectory;
@@ -29,7 +37,10 @@ public class LauncherConfiguration {
     private final BaseLauncherSettings launcherSettings;
     private final PackageManager packageManager;
 
-    public LauncherConfiguration(final Path launcherDirectory, final Path downloadDirectory, final Path tempDirectory, final BaseLauncherSettings launcherSettings,
+    public LauncherConfiguration(final Path launcherDirectory,
+                                 final Path downloadDirectory,
+                                 final Path tempDirectory,
+                                 final BaseLauncherSettings launcherSettings,
                                  final PackageManager packageManager) {
         this.launcherDirectory = launcherDirectory;
         this.downloadDirectory = downloadDirectory;
