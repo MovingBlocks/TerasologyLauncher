@@ -20,7 +20,7 @@ package org.terasology.launcher.game;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -51,7 +51,7 @@ public final class GameDownloader {
         final String jobName = gameVersion.getJob().name();
         final Integer buildNumber = gameVersion.getBuildNumber();
 
-        DirectoryUtils.checkDirectory(tempDirectory);
+        LauncherDirectoryUtils.checkDirectory(tempDirectory);
         if (saveDownloadedFiles) {
             downloadZipFile = downloadDirectory.resolve(jobName + "_" + buildNumber.toString() + "_" + System.currentTimeMillis() + ".zip");
         } else {
@@ -73,9 +73,9 @@ public final class GameDownloader {
         logger.info("The download URL is {}", downloadURL);
 
         final Path gameJobDirectory = gameParentDirectory.resolve(gameVersion.getJob().getInstallationDirectory()).resolve(jobName);
-        DirectoryUtils.checkDirectory(gameJobDirectory);
+        LauncherDirectoryUtils.checkDirectory(gameJobDirectory);
         gameDirectory = gameJobDirectory.resolve(buildNumber.toString());
-        DirectoryUtils.checkDirectory(gameDirectory);
+        LauncherDirectoryUtils.checkDirectory(gameDirectory);
         FileUtils.deleteDirectoryContent(gameDirectory);
     }
 

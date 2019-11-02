@@ -18,7 +18,7 @@ package org.terasology.launcher.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.FileUtils;
 
 import java.io.IOException;
@@ -118,8 +118,8 @@ public final class SelfUpdater {
             logger.info("New files temporarily located in: {}", tempLauncherDirectory);
 
             // Check both directories
-            DirectoryUtils.checkDirectory(launcherInstallationDirectory);
-            DirectoryUtils.checkDirectory(tempLauncherDirectory);
+            LauncherDirectoryUtils.checkDirectory(launcherInstallationDirectory);
+            LauncherDirectoryUtils.checkDirectory(tempLauncherDirectory);
 
             logger.info("Delete launcher installation directory: {}", launcherInstallationDirectory);
             SelfUpdater.deleteLauncherContent(launcherInstallationDirectory);

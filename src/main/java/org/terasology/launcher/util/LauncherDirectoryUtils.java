@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.windows.SavedGamesPathFinder;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,7 +29,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.stream.Stream;
 
-public final class DirectoryUtils {
+public final class LauncherDirectoryUtils {
 
     public static final String LAUNCHER_APPLICATION_DIR_NAME = "TerasologyLauncher";
     public static final String GAME_APPLICATION_DIR_NAME = "Terasology";
@@ -42,9 +41,9 @@ public final class DirectoryUtils {
     private static final String PROPERTY_USER_HOME = "user.home";
     private static final String ENV_APPDATA = "APPDATA";
     private static final String MAC_PATH = "Library/Application Support/";
-    private static final Logger logger = LoggerFactory.getLogger(DirectoryUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(LauncherDirectoryUtils.class);
 
-    private DirectoryUtils() {
+    private LauncherDirectoryUtils() {
     }
 
     /**

@@ -18,7 +18,7 @@ package org.terasology.launcher.packages;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -63,8 +63,8 @@ public class PackageManager {
      */
     public void initLocalStorage(Path gameDirectory, Path cacheDirectory) {
         try {
-            DirectoryUtils.checkDirectory(gameDirectory);
-            DirectoryUtils.checkDirectory(cacheDirectory);
+            LauncherDirectoryUtils.checkDirectory(gameDirectory);
+            LauncherDirectoryUtils.checkDirectory(cacheDirectory);
             localRepository = new LocalRepository(gameDirectory, cacheDirectory);
             localRepository.loadCache();
         } catch (IOException e) {

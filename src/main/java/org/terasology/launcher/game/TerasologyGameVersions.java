@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.PackageBuild;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -93,7 +93,7 @@ public final class TerasologyGameVersions {
     }
 
     public synchronized void loadGameVersionsFromPackageManager(GameSettings gameSettings, Path launcherDirectory, Path gameDirectory) {
-        final Path cacheDirectory = launcherDirectory.resolve(DirectoryUtils.CACHE_DIR_NAME);
+        final Path cacheDirectory = launcherDirectory.resolve(LauncherDirectoryUtils.CACHE_DIR_NAME);
         packageManager.initLocalStorage(gameDirectory, cacheDirectory);
         packageManager.sync(); // TODO: Make it optional
 
@@ -256,8 +256,8 @@ public final class TerasologyGameVersions {
     private Path getAndCheckCacheDirectory(Path launcherDirectory) {
         Path cacheDirectory = null;
         try {
-            cacheDirectory = launcherDirectory.resolve(DirectoryUtils.CACHE_DIR_NAME);
-            DirectoryUtils.checkDirectory(cacheDirectory);
+            cacheDirectory = launcherDirectory.resolve(LauncherDirectoryUtils.CACHE_DIR_NAME);
+            LauncherDirectoryUtils.checkDirectory(cacheDirectory);
         } catch (IOException e) {
             logger.error("Could not create or use cache directory '{}'!", cacheDirectory, e);
             cacheDirectory = null;

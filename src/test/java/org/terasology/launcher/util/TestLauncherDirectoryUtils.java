@@ -32,11 +32,11 @@ import java.nio.file.Paths;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.terasology.launcher.util.DirectoryUtils.*;
+import static org.terasology.launcher.util.LauncherDirectoryUtils.*;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(DirectoryUtils.class)
-public class TestDirectoryUtils {
+@PrepareForTest(LauncherDirectoryUtils.class)
+public class TestLauncherDirectoryUtils {
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
