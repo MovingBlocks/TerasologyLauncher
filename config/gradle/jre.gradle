@@ -1,0 +1,46 @@
+enum Jre {
+    // TODO Use `.tar.gz` on Linux
+    Linux32("zip"),
+    Linux64("zip"),
+    // TODO rename `Mac` to `MacOS` when artifact is renamed: https://github.com/MovingBlocks/TerasologyJRE/pull/5
+    Mac("zip"),
+    Windows32("zip"),
+    Windows64("zip");
+
+    public URL downloadUrl;
+    public File targetArchive;
+
+    Jre(String extension) {
+        String baseUrl = "http://artifactory.terasology.org/artifactory/libs-release-local"
+
+        // TODO can we use gradle dependencies/configurations to download this for the bundling task?
+        // Use vendored JRE from our Artifactory
+        String groupId = "org/terasology/jre/liberica"
+        String artifactId = this.name().toLowerCase()
+        String version = "0.0.1"
+
+        String artifact = "${artifactId}-${version}.${extension}"
+
+        this.downloadUrl = new URL("${baseUrl}/${groupId}/${artifactId}/${version}/${artifact}")
+        this.targetArchive = new File("${artifact}")   
+    }
+}
+
+task fetchJreAll {
+    group "Download"
+    description "Downloads JRE for all platforms"
+}
+
+Jre.each { arch ->
+    def downloadTask = task("fetchJre${arch}", type: Download) {
+        group "Download"
+        description "Download JRE for ${arch}"
+
+        src arch.downloadUrl
+        dest file("${project.projectDir}/jres/${arch.targetArchive}")
+        overwrite false
+        onlyIfModified true
+    }
+
+    fetchJreAll.dependsOn downloadTask
+}
