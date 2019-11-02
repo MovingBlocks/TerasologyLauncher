@@ -37,6 +37,7 @@ import static org.junit.Assert.assertTrue;
 public class TestFileUtils {
 
     private static final String FILE_NAME = "File";
+    private static final String DIRECTORY_NAME = "lorem";
     private static final String SAMPLE_TEXT = "Lorem Ipsum";
 
     @Rule
@@ -62,6 +63,43 @@ public class TestFileUtils {
         FileUtils.deleteDirectoryContent(directory);
         assertFalse(Files.exists(file));
         assertTrue(Files.exists(directory));
+    }
+
+    /**
+     * Test that `FileUtils.ensureEmptyDir` creates and empty directory if it does not exist.
+     */
+    @Test
+    public void testEnsureEmptyDirCreation() throws IOException {
+        Path context = tempFolder.newFolder().toPath();
+        // setup
+        Path dirToTest = context.resolve(DIRECTORY_NAME);
+        assertFalse(Files.exists(dirToTest));
+        // test
+        FileUtils.ensureEmptyDir(dirToTest);
+        assertTrue(Files.exists(dirToTest));
+        assertTrue(Files.isDirectory(dirToTest));
+        assertEquals(0, Files.list(dirToTest).count());
+    }
+
+    /**
+     * Test that `FileUtils.ensureEmptyDir` drains (delete all content) if the directory exists.
+     */
+    @Test
+    public void testEnsureEmptyDirDrain() throws IOException {
+        Path context = tempFolder.newFolder().toPath();
+        // setup
+        Path dirToTest = context.resolve(DIRECTORY_NAME);
+        Path file = dirToTest.resolve(FILE_NAME);
+        Files.createDirectory(dirToTest);
+        Files.createFile(file);
+        // assure directory exists and is not empty
+        assertTrue(Files.exists(dirToTest));
+        assertTrue(Files.exists(file));
+        // test
+        FileUtils.ensureEmptyDir(dirToTest);
+        assertTrue(Files.exists(dirToTest));
+        assertTrue(Files.isDirectory(dirToTest));
+        assertEquals(0, Files.list(dirToTest).count());
     }
 
     @Test

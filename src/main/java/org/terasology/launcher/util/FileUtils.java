@@ -69,7 +69,7 @@ public final class FileUtils {
      * @param directory Directory which content has to be deleted
      * @throws IOException if something goes wrong
      */
-    public static void deleteDirectoryContent(final Path directory) throws IOException {
+    static void deleteDirectoryContent(final Path directory) throws IOException {
         try (Stream<Path> stream = Files.list(directory)) {
             stream.forEach(path -> {
                 try {
@@ -143,6 +143,22 @@ public final class FileUtils {
             Files.walkFileTree(source, new LocalCopyVisitor(source, destination));
         } else {
             copyFile(source, destination);
+        }
+    }
+
+    /**
+     * Ensures that a directory exists and is empty.
+     *
+     * Deletes directory contents if the directory is not empty. If the directory does not exist, it is created.
+     * The directory itself is not deleted.
+     *
+     * @param directory absolute path to the directory
+     */
+    public static void ensureEmptyDir(final Path directory) throws IOException {
+        if (Files.notExists(directory)) {
+            Files.createDirectories(directory);
+        } else {
+            deleteDirectoryContent(directory);
         }
     }
 }

@@ -161,7 +161,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             throw new LauncherStartFailedException();
         }
         try {
-            FileUtils.deleteDirectoryContent(tempDirectory);
+            FileUtils.ensureEmptyDir(tempDirectory);
         } catch (IOException e) {
             logger.warn("The content of the temp directory can not be deleted! '{}'", tempDirectory, e);
         }

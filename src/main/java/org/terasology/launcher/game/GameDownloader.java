@@ -76,7 +76,7 @@ public final class GameDownloader {
         LauncherDirectoryUtils.checkDirectory(gameJobDirectory);
         gameDirectory = gameJobDirectory.resolve(buildNumber.toString());
         LauncherDirectoryUtils.checkDirectory(gameDirectory);
-        FileUtils.deleteDirectoryContent(gameDirectory);
+        FileUtils.ensureEmptyDir(gameDirectory);
     }
 
     public URL getDownloadURL() {
