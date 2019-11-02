@@ -30,7 +30,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.terasology.launcher.util.LauncherDirectoryUtils.*;
 
@@ -40,39 +39,6 @@ public class TestLauncherDirectoryUtils {
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
-
-    @Test(expected = IOException.class)
-    public void testCannotCreateDirectory() throws IOException {
-        PowerMockito.mockStatic(Files.class);
-
-        final Path directory = mock(Path.class);
-        when(Files.exists(directory)).thenReturn(false);
-        when(Files.createDirectories(directory)).thenThrow(new IOException("Failed to create directories"));
-
-        FileUtils.ensureWritableDir(directory);
-    }
-
-    @Test(expected = IOException.class)
-    public void testNotDirectory() throws IOException {
-        PowerMockito.mockStatic(Files.class);
-
-        final Path directory = mock(Path.class);
-        when(Files.exists(directory)).thenReturn(true);
-        when(Files.isDirectory(directory)).thenReturn(false);
-
-        FileUtils.ensureWritableDir(directory);
-    }
-
-    @Test(expected = IOException.class)
-    public void testNoPerms() throws IOException {
-        PowerMockito.mockStatic(Files.class);
-
-        final Path directory = mock(Path.class);
-        when(Files.isReadable(directory)).thenReturn(false);
-        when(Files.isWritable(directory)).thenReturn(false);
-
-        FileUtils.ensureWritableDir(directory);
-    }
 
     @Test
     public void testDirectoryWithFiles() throws IOException {
