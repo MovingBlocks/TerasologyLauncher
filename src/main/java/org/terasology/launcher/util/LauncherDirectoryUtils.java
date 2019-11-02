@@ -34,8 +34,6 @@ public final class LauncherDirectoryUtils {
     public static final String LAUNCHER_APPLICATION_DIR_NAME = "TerasologyLauncher";
     public static final String GAME_APPLICATION_DIR_NAME = "Terasology";
     public static final String GAME_DATA_DIR_NAME = "Terasology";
-    public static final String DOWNLOAD_DIR_NAME = "download";
-    public static final String TEMP_DIR_NAME = "temp";
     public static final String CACHE_DIR_NAME = "cache";
 
     private static final String PROPERTY_USER_HOME = "user.home";
@@ -44,26 +42,6 @@ public final class LauncherDirectoryUtils {
     private static final Logger logger = LoggerFactory.getLogger(LauncherDirectoryUtils.class);
 
     private LauncherDirectoryUtils() {
-    }
-
-    /**
-     * Checks if the given path exists, is a directory and can be read and written by the program.
-     *
-     * @param directory Path to check
-     * @throws IOException Reading the path fails in some way
-     */
-    public static void checkDirectory(Path directory) throws IOException {
-        if (!Files.exists(directory)) {
-            Files.createDirectories(directory);
-        }
-
-        if (!Files.isDirectory(directory)) {
-            throw new IOException("Directory is not a directory! " + directory);
-        }
-
-        if (!Files.isReadable(directory) || !Files.isWritable(directory)) {
-            throw new IOException("Can not read from or write into directory! " + directory);
-        }
     }
 
     /**

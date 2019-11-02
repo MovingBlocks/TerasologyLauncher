@@ -73,7 +73,7 @@ public final class GuiUtils {
 
     public static Path chooseDirectoryDialog(Stage owner, final Path directory, final String title) {
         try {
-            LauncherDirectoryUtils.checkDirectory(directory);
+            FileUtils.ensureWritableDir(directory);
         } catch (IOException e) {
             logger.error("Could not use {} as default directory!", directory, e);
             return null;
@@ -124,7 +124,7 @@ public final class GuiUtils {
 
     public static void openFileBrowser(Stage owner, final Path directory, final String errorMsg) {
         try {
-            LauncherDirectoryUtils.checkDirectory(directory);
+            FileUtils.ensureWritableDir(directory);
             EventQueue.invokeLater(() -> {
                 if (Desktop.isDesktopSupported()) {
                     try {

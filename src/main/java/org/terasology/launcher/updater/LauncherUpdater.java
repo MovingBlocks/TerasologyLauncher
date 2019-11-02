@@ -26,7 +26,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.DummyProgressListener;
@@ -127,7 +126,7 @@ public final class LauncherUpdater {
         final Path launcherLocation = Paths.get(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         logger.trace("Launcher location: {}", launcherLocation);
         launcherInstallationDirectory = launcherLocation.getParent().getParent();
-        LauncherDirectoryUtils.checkDirectory(launcherInstallationDirectory);
+        FileUtils.ensureWritableDir(launcherInstallationDirectory);
         logger.trace("Launcher installation directory: {}", launcherInstallationDirectory);
     }
 
@@ -216,7 +215,7 @@ public final class LauncherUpdater {
             logger.trace("ZIP file extracted");
 
             final Path tempLauncherDirectory = tempDirectory.resolve("TerasologyLauncher");
-            LauncherDirectoryUtils.checkDirectory(tempLauncherDirectory);
+            FileUtils.ensureWritableDir(tempLauncherDirectory);
 
             logger.info("Current launcher path: {}", launcherInstallationDirectory.toString());
             logger.info("New files temporarily located in: {}", tempLauncherDirectory.toAbsolutePath());

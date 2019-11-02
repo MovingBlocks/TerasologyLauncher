@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.LauncherDirectoryUtils;
+import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
@@ -213,7 +213,7 @@ public class SettingsController {
         final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDirectory, BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
         if (selectedFile != null) {
             try {
-                LauncherDirectoryUtils.checkDirectory(selectedFile);
+                FileUtils.ensureWritableDir(selectedFile);
                 gameDirectory = selectedFile;
                 updateDirectoryPathLabels();
             } catch (IOException e) {
@@ -233,7 +233,7 @@ public class SettingsController {
         final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
         if (selectedFile != null) {
             try {
-                LauncherDirectoryUtils.checkDirectory(selectedFile);
+                FileUtils.ensureWritableDir(selectedFile);
                 gameDataDirectory = selectedFile;
                 updateDirectoryPathLabels();
             } catch (IOException e) {

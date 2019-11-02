@@ -257,7 +257,7 @@ public final class TerasologyGameVersions {
         Path cacheDirectory = null;
         try {
             cacheDirectory = launcherDirectory.resolve(LauncherDirectoryUtils.CACHE_DIR_NAME);
-            LauncherDirectoryUtils.checkDirectory(cacheDirectory);
+            FileUtils.ensureWritableDir(cacheDirectory);
         } catch (IOException e) {
             logger.error("Could not create or use cache directory '{}'!", cacheDirectory, e);
             cacheDirectory = null;

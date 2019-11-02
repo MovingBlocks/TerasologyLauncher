@@ -49,7 +49,7 @@ public class TestLauncherDirectoryUtils {
         when(Files.exists(directory)).thenReturn(false);
         when(Files.createDirectories(directory)).thenThrow(new IOException("Failed to create directories"));
 
-        checkDirectory(directory);
+        FileUtils.ensureWritableDir(directory);
     }
 
     @Test(expected = IOException.class)
@@ -60,7 +60,7 @@ public class TestLauncherDirectoryUtils {
         when(Files.exists(directory)).thenReturn(true);
         when(Files.isDirectory(directory)).thenReturn(false);
 
-        checkDirectory(directory);
+        FileUtils.ensureWritableDir(directory);
     }
 
     @Test(expected = IOException.class)
@@ -71,7 +71,7 @@ public class TestLauncherDirectoryUtils {
         when(Files.isReadable(directory)).thenReturn(false);
         when(Files.isWritable(directory)).thenReturn(false);
 
-        checkDirectory(directory);
+        FileUtils.ensureWritableDir(directory);
     }
 
     @Test

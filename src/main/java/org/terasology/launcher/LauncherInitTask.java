@@ -26,10 +26,12 @@ import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.DirectoryCreator;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
@@ -63,8 +65,10 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // init directories
             updateMessage(BundleUtils.getLabel("splash_initLauncherDirs"));
             final Path launcherDirectory = getLauncherDirectory(os);
-            final Path downloadDirectory = getDownloadDirectory(launcherDirectory);
-            final Path tempDirectory = getTempDirectory(launcherDirectory);
+
+            final Path downloadDirectory = getDirectoryFor(org.terasology.launcher.util.LauncherManagedDirectory.DOWNLOAD, launcherDirectory);
+            final Path tempDirectory = getDirectoryFor(org.terasology.launcher.util.LauncherManagedDirectory.TEMP, launcherDirectory);
+            final Path cacheDirectory = getDirectoryFor(org.terasology.launcher.util.LauncherManagedDirectory.CACHE, launcherDirectory);
 
             // launcher settings
             final BaseLauncherSettings launcherSettings = getLauncherSettings(launcherDirectory);
@@ -89,6 +93,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // TODO: Does this interact with any remote server for fetching/initializing the database?
             logger.trace("Setting up Package Manager");
             final PackageManager packageManager = new PackageManager();
+            packageManager.initLocalStorage(gameDirectory, cacheDirectory);
             packageManager.initDatabase(launcherDirectory, gameDirectory);
             packageManager.syncDatabase();
 
@@ -122,51 +127,34 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return os;
     }
 
+    private void initDirectory(Path dir, String errorLabel, DirectoryCreator... creators)
+            throws LauncherStartFailedException {
+        try {
+            for (DirectoryCreator creator: creators) {
+                creator.apply(dir);
+            }
+        } catch (IOException e) {
+            logger.error("Directory '{}' cannot be created or used! '{}'", dir.getFileName(), dir, e);
+            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel(errorLabel) + "\n" + dir);
+            throw new LauncherStartFailedException();
+        }
+        logger.debug("{} directory: {}", dir.getFileName(), dir);
+    }
+
+    private Path getDirectoryFor(LauncherManagedDirectory directoryType, Path launcherDirectory)
+            throws LauncherStartFailedException {
+
+        Path dir = directoryType.getDirectoryPath(launcherDirectory);
+
+        initDirectory(dir, directoryType.getErrorLabel(), directoryType.getCreators());
+        return dir;
+    }
+
     private Path getLauncherDirectory(OperatingSystem os) throws LauncherStartFailedException {
-        logger.trace("Init LauncherDirectory...");
-        final Path launcherDirectory = LauncherDirectoryUtils.getApplicationDirectory(os, LauncherDirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME);
-        try {
-            LauncherDirectoryUtils.checkDirectory(launcherDirectory);
-        } catch (IOException e) {
-            logger.error("The launcher directory can not be created or used! '{}'", launcherDirectory, e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherDirectory") + "\n" + launcherDirectory);
-            throw new LauncherStartFailedException();
-        }
-        logger.debug("Launcher directory: {}", launcherDirectory);
+        final Path launcherDirectory =
+                LauncherDirectoryUtils.getApplicationDirectory(os, LauncherDirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME);
+        initDirectory(launcherDirectory, "message_error_launcherDirectory", FileUtils::ensureWritableDir);
         return launcherDirectory;
-    }
-
-    private Path getDownloadDirectory(Path launcherDirectory) throws LauncherStartFailedException {
-        logger.trace("Init DownloadDirectory...");
-        final Path downloadDirectory = launcherDirectory.resolve(LauncherDirectoryUtils.DOWNLOAD_DIR_NAME);
-        try {
-            LauncherDirectoryUtils.checkDirectory(downloadDirectory);
-        } catch (IOException e) {
-            logger.error("The download directory can not be created or used! '{}'", downloadDirectory, e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_downloadDirectory") + "\n" + downloadDirectory);
-            throw new LauncherStartFailedException();
-        }
-        logger.debug("Download directory: {}", downloadDirectory);
-        return downloadDirectory;
-    }
-
-    private Path getTempDirectory(Path launcherDirectory) throws LauncherStartFailedException {
-        logger.trace("Init TempDirectory...");
-        final Path tempDirectory = launcherDirectory.resolve(LauncherDirectoryUtils.TEMP_DIR_NAME);
-        try {
-            LauncherDirectoryUtils.checkDirectory(tempDirectory);
-        } catch (IOException e) {
-            logger.error("The temp directory can not be created or used! '{}'", tempDirectory, e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_tempDirectory") + "\n" + tempDirectory);
-            throw new LauncherStartFailedException();
-        }
-        try {
-            FileUtils.ensureEmptyDir(tempDirectory);
-        } catch (IOException e) {
-            logger.warn("The content of the temp directory can not be deleted! '{}'", tempDirectory, e);
-        }
-        logger.debug("Temp directory: {}", tempDirectory);
-        return tempDirectory;
     }
 
     private BaseLauncherSettings getLauncherSettings(Path launcherDirectory) throws LauncherStartFailedException {
@@ -221,7 +209,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         Path gameDirectory = settingsGameDirectory;
         if (gameDirectory != null) {
             try {
-                LauncherDirectoryUtils.checkDirectory(gameDirectory);
+                FileUtils.ensureWritableDir(gameDirectory);
             } catch (IOException e) {
                 logger.warn("The game directory can not be created or used! '{}'", gameDirectory, e);
                 GuiUtils.showWarningMessageDialog(owner, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
@@ -241,7 +229,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             }
         }
         try {
-            LauncherDirectoryUtils.checkDirectory(gameDirectory);
+            FileUtils.ensureWritableDir(gameDirectory);
         } catch (IOException e) {
             logger.error("The game directory can not be created or used! '{}'", gameDirectory, e);
             GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
@@ -256,7 +244,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         Path gameDataDirectory = settingsGameDataDirectory;
         if (gameDataDirectory != null) {
             try {
-                LauncherDirectoryUtils.checkDirectory(gameDataDirectory);
+                FileUtils.ensureWritableDir(gameDataDirectory);
             } catch (IOException e) {
                 logger.warn("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
                 GuiUtils.showWarningMessageDialog(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n"
@@ -277,7 +265,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             }
         }
         try {
-            LauncherDirectoryUtils.checkDirectory(gameDataDirectory);
+            FileUtils.ensureWritableDir(gameDataDirectory);
         } catch (IOException e) {
             logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
             GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
