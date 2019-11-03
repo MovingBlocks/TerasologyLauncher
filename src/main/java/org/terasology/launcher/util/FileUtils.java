@@ -147,18 +147,25 @@ public final class FileUtils {
     }
 
     /**
-     * Ensures that a directory exists and is empty.
+     * Ensures that a directory exists, is a directory and is empty.
      *
      * Deletes directory contents if the directory is not empty. If the directory does not exist, it is created.
      * The directory itself is not deleted.
      *
      * @param directory absolute path to the directory
+     *
+     * @throws IOException The path is not a directory
      */
     public static void ensureEmptyDir(final Path directory) throws IOException {
-        if (Files.notExists(directory)) {
+        if (!Files.exists(directory)) {
             Files.createDirectories(directory);
         } else {
-            deleteDirectoryContent(directory);
+
+            if (!Files.isDirectory(directory)) {
+                throw new IOException("Directory is not a directory! " + directory);
+            } else {
+                deleteDirectoryContent(directory);
+            }
         }
     }
 
