@@ -73,7 +73,7 @@ public final class GuiUtils {
 
     public static Path chooseDirectoryDialog(Stage owner, final Path directory, final String title) {
         try {
-            DirectoryUtils.checkDirectory(directory);
+            FileUtils.ensureWritableDir(directory);
         } catch (IOException e) {
             logger.error("Could not use {} as default directory!", directory, e);
             return null;
@@ -118,13 +118,13 @@ public final class GuiUtils {
     private static boolean deleteProposedDirectoryIfUnused(Path proposed, Path selected) throws IOException {
         return selected != null
                 && !Files.isSameFile(proposed, selected)
-                && !DirectoryUtils.containsFiles(proposed)
+                && !LauncherDirectoryUtils.containsFiles(proposed)
                 && !Files.deleteIfExists(proposed);
     }
 
     public static void openFileBrowser(Stage owner, final Path directory, final String errorMsg) {
         try {
-            DirectoryUtils.checkDirectory(directory);
+            FileUtils.ensureWritableDir(directory);
             EventQueue.invokeLater(() -> {
                 if (Desktop.isDesktopSupported()) {
                     try {

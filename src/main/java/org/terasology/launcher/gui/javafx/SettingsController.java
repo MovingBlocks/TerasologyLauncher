@@ -30,14 +30,10 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.game.JobItem;
-import org.terasology.launcher.game.TerasologyGameVersion;
-import org.terasology.launcher.game.TerasologyGameVersions;
-import org.terasology.launcher.game.VersionItem;
+import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
@@ -47,7 +43,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.text.Collator;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 
@@ -58,7 +53,8 @@ public class SettingsController {
     private Path launcherDirectory;
     private Path downloadDirectory;
     private BaseLauncherSettings launcherSettings;
-    private TerasologyGameVersions gameVersions;
+    private PackageManager packageManager;
+    private ApplicationController appController;
 
     private Path gameDirectory;
     private Path gameDataDirectory;
@@ -116,9 +112,9 @@ public class SettingsController {
     @FXML
     private Button cancelSettingsButton;
     @FXML
-    private ComboBox<JobItem> jobBox;
+    private ComboBox<ApplicationController.PackageItem> jobBox;
     @FXML
-    private ComboBox<VersionItem> buildVersionBox;
+    private ComboBox<String> buildVersionBox;
     @FXML
     private ComboBox<JavaHeapSize> maxHeapSizeBox;
     @FXML
@@ -147,13 +143,14 @@ public class SettingsController {
 
     @FXML
     protected void saveSettingsAction(ActionEvent event) {
+        // TODO: Clean up
         // save job
-        final JobItem jobItem = jobBox.getSelectionModel().getSelectedItem();
-        launcherSettings.setJob(jobItem.getJob());
+        //final JobItem jobItem = jobBox.getSelectionModel().getSelectedItem();
+        //launcherSettings.setJob(jobItem.getJob());
 
         // save build version
-        final VersionItem versionItem = buildVersionBox.getSelectionModel().getSelectedItem();
-        launcherSettings.setBuildVersion(versionItem.getVersion(), jobItem.getJob());
+        //final VersionItem versionItem = buildVersionBox.getSelectionModel().getSelectedItem();
+        //launcherSettings.setBuildVersion(versionItem.getVersion(), jobItem.getJob());
 
         // save gameDirectory
         launcherSettings.setGameDirectory(gameDirectory);
@@ -216,7 +213,7 @@ public class SettingsController {
         final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDirectory, BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
         if (selectedFile != null) {
             try {
-                DirectoryUtils.checkDirectory(selectedFile);
+                FileUtils.ensureWritableDir(selectedFile);
                 gameDirectory = selectedFile;
                 updateDirectoryPathLabels();
             } catch (IOException e) {
@@ -236,7 +233,7 @@ public class SettingsController {
         final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
         if (selectedFile != null) {
             try {
-                DirectoryUtils.checkDirectory(selectedFile);
+                FileUtils.ensureWritableDir(selectedFile);
                 gameDataDirectory = selectedFile;
                 updateDirectoryPathLabels();
             } catch (IOException e) {
@@ -275,12 +272,13 @@ public class SettingsController {
     }
 
     void initialize(final Path newLauncherDirectory, final Path newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
-                    final TerasologyGameVersions newGameVersions, final Stage newStage) {
+                    final PackageManager newPackageManager, final Stage newStage, final ApplicationController newAppController) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
         this.launcherSettings = newLauncherSettings;
-        this.gameVersions = newGameVersions;
+        this.packageManager = newPackageManager;
         this.stage = newStage;
+        this.appController = newAppController;
 
         populateJobBox();
         populateHeapSize();
@@ -343,64 +341,20 @@ public class SettingsController {
     }
 
     private void populateJobBox() {
-        jobBox.getItems().clear();
+        final ComboBox<ApplicationController.PackageItem> origJobBox = appController.getJobBox();
+        final ComboBox<String> origVersionBox = appController.getBuildVersionBox();
 
-        for (GameJob job : GameJob.values()) {
-            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
-                boolean foundInstalled = false;
-                final List<TerasologyGameVersion> gameVersionList = gameVersions.getGameVersionList(job);
-                for (TerasologyGameVersion gameVersion : gameVersionList) {
-                    if (gameVersion.isInstalled()) {
-                        foundInstalled = true;
-                        break;
-                    }
-                }
-                if (!foundInstalled) {
-                    continue;
-                }
-            }
+        jobBox.setItems(origJobBox.getItems());
+        buildVersionBox.setItems(origVersionBox.getItems());
+        jobBox.getSelectionModel().select(origJobBox.getSelectionModel().getSelectedIndex());
+        buildVersionBox.getSelectionModel().select(origVersionBox.getSelectionModel().getSelectedIndex());
 
-            final JobItem jobItem = new JobItem(job);
-            jobBox.getItems().add(jobItem);
-            if (launcherSettings.getJob() == job) {
-                jobBox.getSelectionModel().select(jobItem);
-            }
-        }
-
-        updateBuildVersionBox();
-
-        // add change listeners
-        jobBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldItem, newItem) -> {
-            if (jobBox.getItems().isEmpty()) {
-                return;
-            }
-            launcherSettings.setJob(newItem.getJob());
-            updateBuildVersionBox();
-            logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
+        jobBox.selectionModelProperty().bindBidirectional(appController.getJobBox().selectionModelProperty());
+        buildVersionBox.selectionModelProperty().bindBidirectional(appController.getBuildVersionBox().selectionModelProperty());
+        jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            buildVersionBox.setItems(newVal.getVersionList());
+            buildVersionBox.getSelectionModel().select(0);
         });
-
-        buildVersionBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldVersionItem, newVersionItem) -> {
-            if (newVersionItem != null) {
-                final Integer version = newVersionItem.getVersion();
-                launcherSettings.setBuildVersion(version, launcherSettings.getJob());
-                logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
-            }
-        });
-    }
-
-    private void updateBuildVersionBox() {
-        buildVersionBox.getItems().clear();
-
-        final JobItem jobItem = jobBox.getSelectionModel().getSelectedItem();
-        final int buildVersion = launcherSettings.getBuildVersion(jobItem.getJob());
-
-        for (TerasologyGameVersion version : gameVersions.getGameVersionList(jobItem.getJob())) {
-            final VersionItem versionItem = new VersionItem(version);
-            buildVersionBox.getItems().add(versionItem);
-            if (versionItem.getVersion() == buildVersion) {
-                buildVersionBox.getSelectionModel().select(versionItem);
-            }
-        }
     }
 
     private void populateHeapSize() {

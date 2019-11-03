@@ -18,10 +18,18 @@ package org.terasology.launcher.packages;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.util.DirectoryUtils;
+import org.terasology.launcher.util.DownloadException;
+import org.terasology.launcher.util.DownloadUtils;
+import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.ProgressListener;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,9 +39,16 @@ import java.util.Objects;
 public class PackageManager {
 
     private static final Logger logger = LoggerFactory.getLogger(PackageManager.class);
+    private static final String INSTALL_DIRECTORY = "games";
+    private static final String SOURCES_FILENAME = "sources.json";
+    private static final String DATABASE_FILENAME = "packages.db";
+    private static final String CACHE_DIRECTORY = "cache";
 
     private final Repository onlineRepository;
     private LocalRepository localRepository;
+    private PackageDatabase database;
+    private Path cacheDir;
+    private Path installDir;
 
     public PackageManager() {
         onlineRepository = new JenkinsRepository();
@@ -47,8 +62,8 @@ public class PackageManager {
      */
     public void initLocalStorage(Path gameDirectory, Path cacheDirectory) {
         try {
-            DirectoryUtils.checkDirectory(gameDirectory);
-            DirectoryUtils.checkDirectory(cacheDirectory);
+            FileUtils.ensureWritableDir(gameDirectory);
+            FileUtils.ensureWritableDir(cacheDirectory);
             localRepository = new LocalRepository(gameDirectory, cacheDirectory);
             localRepository.loadCache();
         } catch (IOException e) {
@@ -71,26 +86,104 @@ public class PackageManager {
         localRepository.saveCache();
     }
 
+    // TODO: Move to constructor
+    public void initDatabase(Path launcherDir, Path gameDir) {
+        cacheDir = launcherDir.resolve(CACHE_DIRECTORY);
+        installDir = gameDir.resolve(INSTALL_DIRECTORY);
+        final Path sourcesFile = launcherDir.resolve(SOURCES_FILENAME);
+
+        // Copy default sources file if necessary
+        if (Files.notExists(sourcesFile)) {
+            logger.info("Sources file not found. Copying default file to {}", sourcesFile);
+            try {
+                Files.copy(getClass().getResourceAsStream(SOURCES_FILENAME), sourcesFile);
+            } catch (IOException e) {
+                logger.error("Failed to copy default sources file to {}", sourcesFile);
+            }
+        }
+
+        database = new PackageDatabase(
+                sourcesFile,
+                launcherDir.resolve(DATABASE_FILENAME),
+                installDir
+        );
+    }
+
+    // TODO: Replace similar methods
+    public void syncDatabase() {
+        Objects.requireNonNull(database)
+                .sync();
+    }
+
     /**
      * Installs the mentioned package into the local repository.
      *
-     * @param pkgBuild the build of the game package
-     * @param version the version of the game package
+     * @param target the package to be installed
+     * @param listener the object which is to be informed about task progress
      */
-    public void install(PackageBuild pkgBuild, int version) {
-        // TODO: Install via cache
+    public void install(Package target, ProgressListener listener) throws IOException, DownloadException {
+        final Path cachedZip = cacheDir.resolve(target.zipName());
+
+        // TODO: Properly validate cache and handle exceptions
+        if (Files.notExists(cachedZip)) {
+            download(target, cachedZip, listener);
+        }
+
+        if (!listener.isCancelled()) {
+            final Path extractDir = installDir.resolve(target.getName()).resolve(target.getVersion());
+            FileUtils.extractZipTo(cachedZip, extractDir);
+            target.setInstalled(true);
+            logger.info("Finished installing package: {}-{}", target.getName(), target.getVersion());
+        }
+    }
+
+    private void download(Package target, Path cacheZip, ProgressListener listener) throws DownloadException, IOException {
+        final URL downloadUrl = new URL(target.getUrl());
+
+        final long contentLength = DownloadUtils.getContentLength(downloadUrl);
+        final long availableSpace = cacheZip.getParent().toFile().getUsableSpace();
+
+        if (availableSpace >= contentLength) {
+            final Path cacheZipPart = cacheZip.resolveSibling(target.zipName() + ".part");
+            Files.deleteIfExists(cacheZipPart);
+            DownloadUtils.downloadToFile(downloadUrl, cacheZipPart, listener);
+
+            if (!listener.isCancelled()) {
+                Files.move(cacheZipPart, cacheZip, StandardCopyOption.ATOMIC_MOVE);
+            }
+        } else {
+            throw new DownloadException("Insufficient space for downloading package");
+        }
+
+        logger.info("Finished downloading package: {}-{}", target.getName(), target.getVersion());
+        // TODO: Implement download functionality locally
     }
 
     /**
      * Removes the mentioned package from the local repository.
      *
-     * @param pkgBuild the build of the game package
-     * @param version the version of the game package
+     * @param target the package to be removed
      */
-    public void remove(PackageBuild pkgBuild, int version) {
-        Objects.requireNonNull(localRepository, "Local storage uninitialized")
-                .getPackage(pkgBuild, version)
-                .ifPresent(localRepository::remove);
+    public void remove(Package target) throws IOException {
+        // Recursively delete all files
+        Files.walk(resolveInstallDir(target))
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+
+        target.setInstalled(false);
+        logger.info("Finished removing package: {}-{}", target.getName(), target.getVersion());
+    }
+
+    /**
+     * Provides a list of all packages tracked by the package
+     * database.
+     *
+     * @return the list of all packages
+     */
+    public List<Package> getPackages() {
+        return Objects.requireNonNull(database)
+                .getPackages();
     }
 
     /**
@@ -103,5 +196,9 @@ public class PackageManager {
     public List<Integer> getPackageVersions(PackageBuild pkgBuild) {
         return Objects.requireNonNull(localRepository, "Local storage uninitialized")
                 .getPackageVersions(pkgBuild);
+    }
+
+    public Path resolveInstallDir(Package target) {
+        return installDir.resolve(target.getName()).resolve(target.getVersion());
     }
 }

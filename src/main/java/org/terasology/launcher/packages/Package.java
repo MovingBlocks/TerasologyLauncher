@@ -16,9 +16,45 @@
 
 package org.terasology.launcher.packages;
 
+import java.io.Serializable;
+
 /**
  * Model of a package handled by the PackageManager.
  */
-public class Package {
-    // TODO: Implement this
+public class Package implements Serializable {
+    private final String name;
+    private final String version;
+    private final String url;
+    private boolean installed;
+
+    Package(String name, String version, String url) {
+        this.name = name;
+        this.version = version;
+        this.url = url;
+        installed = false;
+    }
+
+    public String zipName() {
+        return name + "-" + version + ".zip";
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public boolean isInstalled() {
+        return installed;
+    }
+
+    public void setInstalled(boolean installed) {
+        this.installed = installed;
+    }
 }

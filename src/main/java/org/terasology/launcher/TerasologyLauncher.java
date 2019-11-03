@@ -162,7 +162,7 @@ public final class TerasologyLauncher extends Application {
         }
         final ApplicationController controller = fxmlLoader.getController();
         controller.initialize(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(), launcherConfiguration.getTempDirectory(),
-            launcherConfiguration.getLauncherSettings(), launcherConfiguration.getGameVersions(), mainStage, hostServices);
+            launcherConfiguration.getLauncherSettings(), launcherConfiguration.getPackageManager(), mainStage, hostServices);
 
         Scene scene = new Scene(root);
         scene.getStylesheets().add(BundleUtils.getStylesheet("css_terasology"));

@@ -19,6 +19,10 @@ package org.terasology.launcher.util;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -33,14 +37,52 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(FileUtils.class)
 public class TestFileUtils {
 
     private static final String FILE_NAME = "File";
+    private static final String DIRECTORY_NAME = "lorem";
     private static final String SAMPLE_TEXT = "Lorem Ipsum";
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
+
+    @Test(expected = IOException.class)
+    public void testCannotCreateDirectory() throws IOException {
+        PowerMockito.mockStatic(Files.class);
+
+        final Path directory = mock(Path.class);
+        when(Files.exists(directory)).thenReturn(false);
+        when(Files.createDirectories(directory)).thenThrow(new IOException("Failed to create directories"));
+
+        FileUtils.ensureWritableDir(directory);
+    }
+
+    @Test(expected = IOException.class)
+    public void testNotDirectory() throws IOException {
+        PowerMockito.mockStatic(Files.class);
+
+        final Path directory = mock(Path.class);
+        when(Files.exists(directory)).thenReturn(true);
+        when(Files.isDirectory(directory)).thenReturn(false);
+
+        FileUtils.ensureWritableDir(directory);
+    }
+
+    @Test(expected = IOException.class)
+    public void testNoPerms() throws IOException {
+        PowerMockito.mockStatic(Files.class);
+
+        final Path directory = mock(Path.class);
+        when(Files.isReadable(directory)).thenReturn(false);
+        when(Files.isWritable(directory)).thenReturn(false);
+
+        FileUtils.ensureWritableDir(directory);
+    }
 
     @Test
     public void testDeleteFile() throws IOException {
@@ -62,6 +104,43 @@ public class TestFileUtils {
         FileUtils.deleteDirectoryContent(directory);
         assertFalse(Files.exists(file));
         assertTrue(Files.exists(directory));
+    }
+
+    /**
+     * Test that `FileUtils.ensureEmptyDir` creates and empty directory if it does not exist.
+     */
+    @Test
+    public void testEnsureEmptyDirCreation() throws IOException {
+        Path context = tempFolder.newFolder().toPath();
+        // setup
+        Path dirToTest = context.resolve(DIRECTORY_NAME);
+        assertFalse(Files.exists(dirToTest));
+        // test
+        FileUtils.ensureEmptyDir(dirToTest);
+        assertTrue(Files.exists(dirToTest));
+        assertTrue(Files.isDirectory(dirToTest));
+        assertEquals(0, Files.list(dirToTest).count());
+    }
+
+    /**
+     * Test that `FileUtils.ensureEmptyDir` drains (delete all content) if the directory exists.
+     */
+    @Test
+    public void testEnsureEmptyDirDrain() throws IOException {
+        Path context = tempFolder.newFolder().toPath();
+        // setup
+        Path dirToTest = context.resolve(DIRECTORY_NAME);
+        Path file = dirToTest.resolve(FILE_NAME);
+        Files.createDirectory(dirToTest);
+        Files.createFile(file);
+        // assure directory exists and is not empty
+        assertTrue(Files.exists(dirToTest));
+        assertTrue(Files.exists(file));
+        // test
+        FileUtils.ensureEmptyDir(dirToTest);
+        assertTrue(Files.exists(dirToTest));
+        assertTrue(Files.isDirectory(dirToTest));
+        assertEquals(0, Files.list(dirToTest).count());
     }
 
     @Test

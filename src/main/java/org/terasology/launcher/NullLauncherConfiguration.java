@@ -27,7 +27,7 @@ public final class NullLauncherConfiguration extends LauncherConfiguration {
     private static NullLauncherConfiguration instance;
 
     private NullLauncherConfiguration() {
-        super(null, null, null, null, null);
+        super(null, null, null, null, null, null);
     }
 
     public static NullLauncherConfiguration getInstance() {

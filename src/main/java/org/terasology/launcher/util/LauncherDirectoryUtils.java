@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.windows.SavedGamesPathFinder;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,41 +29,19 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.stream.Stream;
 
-public final class DirectoryUtils {
+public final class LauncherDirectoryUtils {
 
     public static final String LAUNCHER_APPLICATION_DIR_NAME = "TerasologyLauncher";
     public static final String GAME_APPLICATION_DIR_NAME = "Terasology";
     public static final String GAME_DATA_DIR_NAME = "Terasology";
-    public static final String DOWNLOAD_DIR_NAME = "download";
-    public static final String TEMP_DIR_NAME = "temp";
     public static final String CACHE_DIR_NAME = "cache";
 
     private static final String PROPERTY_USER_HOME = "user.home";
     private static final String ENV_APPDATA = "APPDATA";
     private static final String MAC_PATH = "Library/Application Support/";
-    private static final Logger logger = LoggerFactory.getLogger(DirectoryUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(LauncherDirectoryUtils.class);
 
-    private DirectoryUtils() {
-    }
-
-    /**
-     * Checks if the given path exists, is a directory and can be read and written by the program.
-     *
-     * @param directory Path to check
-     * @throws IOException Reading the path fails in some way
-     */
-    public static void checkDirectory(Path directory) throws IOException {
-        if (!Files.exists(directory)) {
-            Files.createDirectories(directory);
-        }
-
-        if (!Files.isDirectory(directory)) {
-            throw new IOException("Directory is not a directory! " + directory);
-        }
-
-        if (!Files.isReadable(directory) || !Files.isWritable(directory)) {
-            throw new IOException("Can not read from or write into directory! " + directory);
-        }
+    private LauncherDirectoryUtils() {
     }
 
     /**

@@ -69,7 +69,7 @@ public final class FileUtils {
      * @param directory Directory which content has to be deleted
      * @throws IOException if something goes wrong
      */
-    public static void deleteDirectoryContent(final Path directory) throws IOException {
+    static void deleteDirectoryContent(final Path directory) throws IOException {
         try (Stream<Path> stream = Files.list(directory)) {
             stream.forEach(path -> {
                 try {
@@ -143,6 +143,51 @@ public final class FileUtils {
             Files.walkFileTree(source, new LocalCopyVisitor(source, destination));
         } else {
             copyFile(source, destination);
+        }
+    }
+
+    /**
+     * Ensures that a directory exists, is a directory and is empty.
+     *
+     * Deletes directory contents if the directory is not empty. If the directory does not exist, it is created.
+     * The directory itself is not deleted.
+     *
+     * @param directory absolute path to the directory
+     *
+     * @throws IOException The path is not a directory
+     */
+    public static void ensureEmptyDir(final Path directory) throws IOException {
+        if (!Files.exists(directory)) {
+            Files.createDirectories(directory);
+        } else {
+
+            if (!Files.isDirectory(directory)) {
+                throw new IOException("Directory is not a directory! " + directory);
+            } else {
+                deleteDirectoryContent(directory);
+            }
+        }
+    }
+
+    /**
+     * Checks if the given path exists, is a directory and can be read and written by the program.
+     *
+     * @param directory absolute path to the directory
+     *
+     * @throws IOException Reading the path fails in some way
+     */
+    public static void ensureWritableDir(Path directory) throws IOException {
+
+        if (!Files.exists(directory)) {
+            Files.createDirectories(directory);
+        }
+
+        if (!Files.isDirectory(directory)) {
+            throw new IOException("Directory is not a directory! " + directory);
+        }
+
+        if (!Files.isReadable(directory) || !Files.isWritable(directory)) {
+            throw new IOException("Can not read from or write into directory! " + directory);
         }
     }
 }

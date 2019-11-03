@@ -16,26 +16,40 @@
 
 package org.terasology.launcher;
 
-import org.terasology.launcher.game.TerasologyGameVersions;
+import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 
 import java.nio.file.Path;
 
+/**
+ * Immutable launcher configuration object.
+ *
+ * Provides information on
+ *  - directories managed by the launcher
+ *  - user settings in form of {@link BaseLauncherSettings}
+ *  - the {@link PackageManager} used to download new games
+ */
 public class LauncherConfiguration {
 
     private final Path launcherDirectory;
     private final Path downloadDirectory;
     private final Path tempDirectory;
+    private final Path cacheDirectory;
     private final BaseLauncherSettings launcherSettings;
-    private final TerasologyGameVersions gameVersions;
+    private final PackageManager packageManager;
 
-    public LauncherConfiguration(final Path launcherDirectory, final Path downloadDirectory, final Path tempDirectory, final BaseLauncherSettings launcherSettings,
-                                 final TerasologyGameVersions gameVersions) {
+    public LauncherConfiguration(final Path launcherDirectory,
+                                 final Path downloadDirectory,
+                                 final Path tempDirectory,
+                                 final Path cacheDirectory,
+                                 final BaseLauncherSettings launcherSettings,
+                                 final PackageManager packageManager) {
         this.launcherDirectory = launcherDirectory;
         this.downloadDirectory = downloadDirectory;
         this.tempDirectory = tempDirectory;
+        this.cacheDirectory = cacheDirectory;
         this.launcherSettings = launcherSettings;
-        this.gameVersions = gameVersions;
+        this.packageManager = packageManager;
     }
 
     public Path getLauncherDirectory() {
@@ -50,11 +64,15 @@ public class LauncherConfiguration {
         return tempDirectory;
     }
 
+    public Path getCacheDirectory() {
+        return cacheDirectory;
+    }
+
     public BaseLauncherSettings getLauncherSettings() {
         return launcherSettings;
     }
 
-    public TerasologyGameVersions getGameVersions() {
-        return gameVersions;
+    public PackageManager getPackageManager() {
+        return packageManager;
     }
 }
