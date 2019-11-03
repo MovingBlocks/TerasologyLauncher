@@ -106,7 +106,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             logger.trace("Creating launcher frame...");
 
-            return new LauncherConfiguration(launcherDirectory, downloadDirectory, tempDirectory, launcherSettings, packageManager);
+            return new LauncherConfiguration(launcherDirectory, downloadDirectory, tempDirectory, cacheDirectory, launcherSettings, packageManager);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
         }

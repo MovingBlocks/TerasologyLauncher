@@ -34,17 +34,20 @@ public class LauncherConfiguration {
     private final Path launcherDirectory;
     private final Path downloadDirectory;
     private final Path tempDirectory;
+    private final Path cacheDirectory;
     private final BaseLauncherSettings launcherSettings;
     private final PackageManager packageManager;
 
     public LauncherConfiguration(final Path launcherDirectory,
                                  final Path downloadDirectory,
                                  final Path tempDirectory,
+                                 final Path cacheDirectory,
                                  final BaseLauncherSettings launcherSettings,
                                  final PackageManager packageManager) {
         this.launcherDirectory = launcherDirectory;
         this.downloadDirectory = downloadDirectory;
         this.tempDirectory = tempDirectory;
+        this.cacheDirectory = cacheDirectory;
         this.launcherSettings = launcherSettings;
         this.packageManager = packageManager;
     }
@@ -59,6 +62,10 @@ public class LauncherConfiguration {
 
     public Path getTempDirectory() {
         return tempDirectory;
+    }
+
+    public Path getCacheDirectory() {
+        return cacheDirectory;
     }
 
     public BaseLauncherSettings getLauncherSettings() {
