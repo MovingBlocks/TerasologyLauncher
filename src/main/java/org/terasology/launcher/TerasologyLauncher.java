@@ -157,12 +157,12 @@ public final class TerasologyLauncher extends Application {
             root = (Parent) fxmlLoader.load();
         } catch (IOException e) {
             fxmlLoader = BundleUtils.getFXMLLoader("application");
-            fxmlLoader.setResources(ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", Languages.DEFAULT_LOCALE));
+            fxmlLoader.setResources(
+                    ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", Languages.DEFAULT_LOCALE));
             root = (Parent) fxmlLoader.load();
         }
         final ApplicationController controller = fxmlLoader.getController();
-        controller.initialize(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(), launcherConfiguration.getTempDirectory(),
-            launcherConfiguration.getLauncherSettings(), launcherConfiguration.getPackageManager(), mainStage, hostServices);
+        controller.initialize(launcherConfiguration, mainStage, hostServices);
 
         Scene scene = new Scene(root);
         scene.getStylesheets().add(BundleUtils.getStylesheet("css_terasology"));

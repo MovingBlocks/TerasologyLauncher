@@ -53,6 +53,7 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.LauncherConfiguration;
 import org.terasology.launcher.game.GameStarter;
 import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.log.LogViewAppender;
@@ -343,12 +344,10 @@ public class ApplicationController {
 
     @FXML
     protected void startAndDownloadAction() {
-        if (!selectedPackage.isInstalled()) {
-            logger.info("Download Game Action!");
-            downloadAction();
-        } else {
-            logger.info("Start Game Action!");
+        if (selectedPackage.isInstalled()) {
             startGameAction();
+        } else {
+            downloadAction();
         }
     }
 
@@ -421,13 +420,12 @@ public class ApplicationController {
         contentTabPane.getSelectionModel().select(2);
     }
 
-    public void initialize(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
-                           final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
-        this.launcherDirectory = newLauncherDirectory;
-        this.downloadDirectory = newDownloadDirectory;
-        this.tempDirectory = newTempDirectory;
-        this.launcherSettings = newLauncherSettings;
-        this.packageManager = newPackageManager;
+    public void initialize(final LauncherConfiguration launcherConfiguration, final Stage newStage, final HostServices hostServices) {
+        this.launcherDirectory = launcherConfiguration.getLauncherDirectory();
+        this.downloadDirectory = launcherConfiguration.getDownloadDirectory();
+        this.tempDirectory = launcherConfiguration.getTempDirectory();
+        this.launcherSettings = launcherConfiguration.getLauncherSettings();
+        this.packageManager = launcherConfiguration.getPackageManager();
         this.stage = newStage;
         this.hostServies = hostServices;
 
