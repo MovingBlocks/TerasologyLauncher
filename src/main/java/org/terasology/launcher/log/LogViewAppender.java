@@ -44,31 +44,15 @@ public class LogViewAppender extends AppenderBase<ILoggingEvent> {
         this.view = newView;
 
         view.setEditable(false);
+        view.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         data = FXCollections.observableArrayList();
         view.setItems(data);
 
-        TableColumn<ILoggingEvent, Date> timestampCol = new TableColumn<>("Timestamp");
-        timestampCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ILoggingEvent, Date>, ObservableValue<Date>>() {
-
-            @Override
-            public ObservableValue<Date> call(CellDataFeatures<ILoggingEvent, Date> item) {
-                return new ReadOnlyObjectWrapper<>(new Date(item.getValue().getTimeStamp()));
-            }
-        });
-        view.getColumns().add(timestampCol);
-
-        TableColumn<ILoggingEvent, Level> levelCol = new TableColumn<>("Level");
-        levelCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ILoggingEvent, Level>, ObservableValue<Level>>() {
-
-            @Override
-            public ObservableValue<Level> call(CellDataFeatures<ILoggingEvent, Level> item) {
-                return new ReadOnlyObjectWrapper<>(item.getValue().getLevel());
-            }
-        });
-        view.getColumns().add(levelCol);
-
-        timestampCol.setCellFactory(new Callback<TableColumn<ILoggingEvent, Date>, TableCell<ILoggingEvent, Date>>() {
+        TableColumn<ILoggingEvent, Date> timestampColumn = new TableColumn<>("Timestamp");
+        timestampColumn.setCellValueFactory(item -> new ReadOnlyObjectWrapper<>(new Date(item.getValue().getTimeStamp())));
+        setFixedWidth(timestampColumn, 100);
+        timestampColumn.setCellFactory(new Callback<TableColumn<ILoggingEvent, Date>, TableCell<ILoggingEvent, Date>>() {
             @Override
             public TableCell<ILoggingEvent, Date> call(TableColumn<ILoggingEvent, Date> param) {
                 return new TableCell<ILoggingEvent, Date>() {
@@ -88,22 +72,27 @@ public class LogViewAppender extends AppenderBase<ILoggingEvent> {
                 };
             }
         });
+        view.getColumns().add(timestampColumn);
 
-        TableColumn<ILoggingEvent, String> messageCol = new TableColumn<>("Message");
-        messageCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ILoggingEvent, String>, ObservableValue<String>>() {
+        TableColumn<ILoggingEvent, Level> levelColumn = new TableColumn<>("Level");
+        levelColumn.setCellValueFactory(item -> new ReadOnlyObjectWrapper<>(item.getValue().getLevel()));
+        setFixedWidth(levelColumn, 50);
+        view.getColumns().add(levelColumn);
 
-            @Override
-            public ObservableValue<String> call(CellDataFeatures<ILoggingEvent, String> item) {
-                return new ReadOnlyObjectWrapper<>(item.getValue().getFormattedMessage());
-            }
-        });
-        view.getColumns().add(messageCol);
-
+        TableColumn<ILoggingEvent, String> messageColumn = new TableColumn<>("Message");
+        messageColumn.setCellValueFactory(item -> new ReadOnlyObjectWrapper<>(item.getValue().getFormattedMessage()));
+        view.getColumns().add(messageColumn);
     }
 
     @Override
     public void append(ILoggingEvent event) {
         data.add(event);
+    }
+
+    private void setFixedWidth(TableColumn<?, ?> column, double width) {
+        column.setMinWidth(width);
+        column.setMaxWidth(width);
+        column.setResizable(false);
     }
 
 }
