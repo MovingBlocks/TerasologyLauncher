@@ -17,6 +17,8 @@
 package org.terasology.launcher.gui.javafx;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.AppenderBase;
 import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
 import javafx.animation.ScaleTransition;
@@ -55,7 +57,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameStarter;
 import org.terasology.launcher.game.TerasologyGameVersion;
-import org.terasology.launcher.log.LogViewAppender;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
@@ -431,16 +432,7 @@ public class ApplicationController {
         this.stage = newStage;
         this.hostServies = hostServices;
 
-        // add Logback view appender view to both the root logger and the tab
-        Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        if (rootLogger instanceof ch.qos.logback.classic.Logger) {
-            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
-
-            LogViewAppender viewLogger = new LogViewAppender(loggingView);
-            viewLogger.setContext(logbackLogger.getLoggerContext());
-            viewLogger.start(); // CHECK: do I really need to start it manually here?
-            logbackLogger.addAppender(viewLogger);
-        }
+       initLogging();
 
         gameStarter = new GameStarter();
 
@@ -449,6 +441,28 @@ public class ApplicationController {
 
         initComboBoxes();
         initButtons();
+    }
+
+    private void initLogging() {
+        // add Logback view appender view to both the root logger and the tab
+        Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+
+        final ObservableList<ILoggingEvent> data = FXCollections.observableArrayList();
+
+        if (rootLogger instanceof ch.qos.logback.classic.Logger) {
+            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
+            Appender<ILoggingEvent> viewLogger = new AppenderBase<ILoggingEvent>() {
+                @Override
+                protected void append(ILoggingEvent event) {
+                    data.add(event);
+                }
+            };
+            viewLogger.setContext(logbackLogger.getLoggerContext());
+            viewLogger.start(); // CHECK: do I really need to start it manually here?
+            logbackLogger.addAppender(viewLogger);
+        }
+
+        LogView.updateLogView(loggingView, data);
     }
 
     private Package selectedPackage;
