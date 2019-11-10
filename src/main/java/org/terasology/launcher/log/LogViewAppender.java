@@ -51,31 +51,25 @@ public class LogViewAppender extends AppenderBase<ILoggingEvent> {
 
         TableColumn<ILoggingEvent, Date> timestampColumn = new TableColumn<>("Timestamp");
         timestampColumn.setCellValueFactory(item -> new ReadOnlyObjectWrapper<>(new Date(item.getValue().getTimeStamp())));
-        setFixedWidth(timestampColumn, 100);
-        timestampColumn.setCellFactory(new Callback<TableColumn<ILoggingEvent, Date>, TableCell<ILoggingEvent, Date>>() {
-            @Override
-            public TableCell<ILoggingEvent, Date> call(TableColumn<ILoggingEvent, Date> param) {
-                return new TableCell<ILoggingEvent, Date>() {
-
-                    private DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM);
-
-                    @Override
-                    protected void updateItem(Date item, boolean empty) {
-                        super.updateItem(item, empty);
-
-                        if (!empty) {
-                            setText(df.format(item));
-                        } else {
-                            setText(null);
-                        }
-                    }
-                };
+        // Fix the width such that `CONSTRAINED_RESIZE_POLICY` only applies to the last column
+        // TODO: setting fixed width is bad and might conflict with system settings such as font size
+        setFixedWidth(timestampColumn, 120);
+        timestampColumn.setCellFactory(column ->
+            new TableCell<ILoggingEvent, Date>() {
+                private final DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM);
+                @Override
+                protected void updateItem(Date item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty ? null : formatter.format(item));
+                }
             }
-        });
+        );
         view.getColumns().add(timestampColumn);
 
         TableColumn<ILoggingEvent, Level> levelColumn = new TableColumn<>("Level");
         levelColumn.setCellValueFactory(item -> new ReadOnlyObjectWrapper<>(item.getValue().getLevel()));
+        // Fix the width such that `CONSTRAINED_RESIZE_POLICY` only applies to the last column
+        // TODO: setting fixed width is bad and might conflict with system settings such as font size
         setFixedWidth(levelColumn, 50);
         view.getColumns().add(levelColumn);
 
