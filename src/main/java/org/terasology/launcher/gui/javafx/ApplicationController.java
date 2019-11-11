@@ -16,7 +16,6 @@
 
 package org.terasology.launcher.gui.javafx;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
 import javafx.animation.ScaleTransition;
@@ -39,7 +38,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.BlendMode;
@@ -55,7 +53,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameStarter;
 import org.terasology.launcher.game.TerasologyGameVersion;
-import org.terasology.launcher.log.LogViewAppender;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
@@ -201,8 +198,6 @@ public class ApplicationController {
     @FXML
     private Accordion aboutInfoAccordion;
     @FXML
-    private TableView<ILoggingEvent> loggingView;
-    @FXML
     private Button settingsButton;
     @FXML
     private Button exitButton;
@@ -212,6 +207,8 @@ public class ApplicationController {
     private ImageView playImage;
     @FXML
     private ImageView downloadImage;
+    @FXML
+    private LogViewController logViewController;
 
     @FXML
     protected void handleExitButtonAction() {
@@ -436,10 +433,9 @@ public class ApplicationController {
         if (rootLogger instanceof ch.qos.logback.classic.Logger) {
             ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
 
-            LogViewAppender viewLogger = new LogViewAppender(loggingView);
-            viewLogger.setContext(logbackLogger.getLoggerContext());
-            viewLogger.start(); // CHECK: do I really need to start it manually here?
-            logbackLogger.addAppender(viewLogger);
+            logViewController.setContext(logbackLogger.getLoggerContext());
+            logViewController.start(); // CHECK: do I really need to start it manually here?
+            logbackLogger.addAppender(logViewController);
         }
 
         gameStarter = new GameStarter();
@@ -501,11 +497,11 @@ public class ApplicationController {
 
         buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             final String pkgName = jobBox.getSelectionModel().getSelectedItem().name;
-            final String pkgVer  = newVal;
+            final String pkgVer = newVal;
 
             selectedPackage = packages.stream()
                     .filter(pkg -> pkg.getName().equals(pkgName)
-                                && pkg.getVersion().equals(pkgVer))
+                            && pkg.getVersion().equals(pkgVer))
                     .findAny()
                     .orElse(null);
 
