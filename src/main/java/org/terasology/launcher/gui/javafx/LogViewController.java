@@ -34,12 +34,14 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
                         .atZone(ZoneId.systemDefault())
                         .toLocalDateTime();
 
-        final String message =
-                String.format("%s | %-5s | %s\n",
-                        formatter.format(timestamp),
-                        loggingEvent.getLevel(),
-                        loggingEvent.getFormattedMessage());
+        try {
+            final String message = loggingEvent.getFormattedMessage();
 
-        logArea.appendText(message);
+            logArea.appendText(String.format("%s | %-5s | ", formatter.format(timestamp), loggingEvent.getLevel()));
+            logArea.appendText(message);
+            logArea.appendText("\n");
+        } catch (Exception e) {
+
+        }
     }
 }
