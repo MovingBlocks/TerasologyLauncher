@@ -32,7 +32,7 @@ import java.util.Date;
 
 public class LogViewController extends AppenderBase<ILoggingEvent> {
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSS");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
     private final StringBuffer buffer;
 
