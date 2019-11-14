@@ -17,8 +17,6 @@
 package org.terasology.launcher.gui.javafx;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.github.rjeschke.txtmark.Configuration;
-import com.github.rjeschke.txtmark.Processor;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.application.HostServices;
@@ -31,7 +29,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -40,12 +37,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -66,26 +61,17 @@ import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.ProgressListener;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Stream;
 
 public class ApplicationController {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
-    private static final String ABOUT = "about";
 
     private static final long MB = 1024L * 1024;
     private static final long MINIMUM_FREE_SPACE = 200 * MB;
@@ -199,7 +185,7 @@ public class ApplicationController {
     @FXML
     private Label versionInfo;
     @FXML
-    private Accordion aboutInfoAccordion;
+    private AboutViewController aboutViewController;
     @FXML
     private TableView<ILoggingEvent> loggingView;
     @FXML
@@ -501,11 +487,11 @@ public class ApplicationController {
 
         buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             final String pkgName = jobBox.getSelectionModel().getSelectedItem().name;
-            final String pkgVer  = newVal;
+            final String pkgVer = newVal;
 
             selectedPackage = packages.stream()
                     .filter(pkg -> pkg.getName().equals(pkgName)
-                                && pkg.getVersion().equals(pkgVer))
+                            && pkg.getVersion().equals(pkgVer))
                     .findAny()
                     .orElse(null);
 
@@ -639,7 +625,7 @@ public class ApplicationController {
         updateLabels();
         updateTooltipTexts();
         updateChangeLog();
-        updateAboutTab();
+        aboutViewController.update();
     }
 
     private void updateLabels() {
@@ -745,70 +731,6 @@ public class ApplicationController {
         changelogView.getEngine().loadContent(gameInfoTextHTML);
         changelogView.setBlendMode(BlendMode.LIGHTEN);
         changelogView.getEngine().setUserStyleSheetLocation(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
-    }
-
-    private void updateAboutTab() {
-        aboutInfoAccordion.getPanes().clear();
-        Charset cs = Charset.forName("UTF-8");
-
-        Stream.of("README.md", "CHANGELOG.md", "CONTRIBUTING.md", "LICENSE")
-                .map(filename -> BundleUtils.getFXMLUrl(ABOUT, filename))
-                .filter(Objects::nonNull)
-                .forEach(url -> {
-                    try {
-                        int fnameIdx = url.getFile().lastIndexOf('/');
-                        int extIdx = url.getFile().lastIndexOf('.');
-                        String fname = url.getFile().substring(fnameIdx + 1);
-                        String ext = extIdx < 0 ? "" : url.getFile().substring(extIdx + 1).toLowerCase();
-
-                        final WebView view = new WebView();
-                        StringBuilder sb = new StringBuilder();
-
-                        if (ext.equals("md") || ext.equals("markdown")) {
-                            try (InputStream input = url.openStream()) {
-                                sb.append("<body style='padding-left:24px;'>\n");
-                                sb.append(Processor.process(input, Configuration.DEFAULT));
-                                sb.append("</body>");
-                                view.getEngine().loadContent(sb.toString(), "text/html");
-                            }
-                        } else if (ext.equals("htm") || ext.equals("html")) {
-                            view.getEngine().load(url.toExternalForm());
-                        } else {
-                            try (Reader isr = new InputStreamReader(url.openStream(), cs);
-                                 BufferedReader br = new BufferedReader(isr)) {
-                                String line = br.readLine();
-
-                                while (line != null) {
-                                    sb.append(line);
-                                    sb.append(System.lineSeparator());
-                                    line = br.readLine();
-                                }
-                                view.getEngine().loadContent(sb.toString(), "text/plain");
-                            }
-                        }
-
-                        view.getStylesheets().add(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
-                        view.setContextMenuEnabled(false);
-
-                        final AnchorPane pane = new AnchorPane();
-                        AnchorPane.setBottomAnchor(view, 0.0);
-                        AnchorPane.setTopAnchor(view, 0.0);
-                        pane.getChildren().add(view);
-
-                        final TitledPane titledPane = new TitledPane(fname, pane);
-                        titledPane.setAnimated(false);
-
-                        aboutInfoAccordion.getPanes().add(titledPane);
-                    } catch (MalformedURLException e) {
-                        logger.warn("Could not load info file -- {}", url);
-                    } catch (IOException e) {
-                        logger.warn("Failed to parse markdown file {}", url, e);
-                    }
-                });
-
-        if (!aboutInfoAccordion.getPanes().isEmpty()) {
-            aboutInfoAccordion.setExpandedPane(aboutInfoAccordion.getPanes().get(0));
-        }
     }
 
     private String getGameInfoText(TerasologyGameVersion gameVersion) {

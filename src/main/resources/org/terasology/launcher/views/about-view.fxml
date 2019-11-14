@@ -1,0 +1,12 @@
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Accordion?>
+<AnchorPane fx:controller="org.terasology.launcher.gui.javafx.AboutViewController"
+            xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2"
+            minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+  <children>
+    <Accordion fx:id="aboutInfoAccordion"
+               prefHeight="336.0" prefWidth="800.0"
+               AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0"
+               AnchorPane.topAnchor="8.0"/>
+  </children>
+</AnchorPane>
