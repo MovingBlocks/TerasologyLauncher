@@ -23,11 +23,18 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * Controller for the <b>About</b> section in the tab view.
+ *
+ * Presents static content which is compiled from Markdown and HTML documents.
+ */
 public class AboutViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(AboutViewController.class);
 
+    /** Bundle key for the resources related to this view. */
     private static final String ABOUT = "about";
+
     private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     @FXML
@@ -38,6 +45,11 @@ public class AboutViewController {
         update();
     }
 
+    /**
+     * Update/reload the <b>About</b> view.
+     *
+     * This will reload and parse the files to display again!
+     */
     public void update() {
         aboutInfoAccordion.getPanes().clear();
 
@@ -55,7 +67,7 @@ public class AboutViewController {
     }
 
     private Optional<TitledPane> getPaneFor(URL url) {
-        return renderFile(url)
+        return getViewFor(url)
                 .map(view -> {
                     view.getStylesheets().add(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
                     view.setContextMenuEnabled(false);
@@ -76,7 +88,7 @@ public class AboutViewController {
                 });
     }
 
-    private Optional<WebView> renderFile(URL url) {
+    private Optional<WebView> getViewFor(URL url) {
         switch (Files.getFileExtension(url.getFile().toLowerCase())) {
             case "md":
             case "markdown":
