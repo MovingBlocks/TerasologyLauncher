@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2019 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.terasology.launcher.gui.javafx;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.application.HostServices;
@@ -35,13 +34,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TableView;
-import javafx.scene.control.Tooltip;
-import javafx.scene.effect.BlendMode;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -50,7 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameStarter;
 import org.terasology.launcher.game.TerasologyGameVersion;
-import org.terasology.launcher.log.LogViewAppender;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
@@ -187,8 +178,6 @@ public class ApplicationController {
     @FXML
     private AboutViewController aboutViewController;
     @FXML
-    private TableView<ILoggingEvent> loggingView;
-    @FXML
     private Button settingsButton;
     @FXML
     private Button exitButton;
@@ -198,6 +187,8 @@ public class ApplicationController {
     private ImageView playImage;
     @FXML
     private ImageView downloadImage;
+    @FXML
+    private LogViewController logViewController;
 
     @FXML
     protected void handleExitButtonAction() {
@@ -422,10 +413,9 @@ public class ApplicationController {
         if (rootLogger instanceof ch.qos.logback.classic.Logger) {
             ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
 
-            LogViewAppender viewLogger = new LogViewAppender(loggingView);
-            viewLogger.setContext(logbackLogger.getLoggerContext());
-            viewLogger.start(); // CHECK: do I really need to start it manually here?
-            logbackLogger.addAppender(viewLogger);
+            logViewController.setContext(logbackLogger.getLoggerContext());
+            logViewController.start(); // CHECK: do I really need to start it manually here?
+            logbackLogger.addAppender(logViewController);
         }
 
         gameStarter = new GameStarter();

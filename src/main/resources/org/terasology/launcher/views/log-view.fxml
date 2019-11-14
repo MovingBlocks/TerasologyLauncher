@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.TextArea?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2"
+            minHeight="0.0" minWidth="0.0" prefHeight="336.0" prefWidth="800.0"
+            fx:controller="org.terasology.launcher.gui.javafx.LogViewController">
+    <children>
+      <TextArea fx:id="logArea"
+                prefHeight="336.0" prefWidth="200.0"
+                AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0"/>
+    </children>
+</AnchorPane>
