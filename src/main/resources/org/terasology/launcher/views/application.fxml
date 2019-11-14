@@ -24,9 +24,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.effect.GaussianBlur?>
 <?import javafx.scene.effect.Glow?>
@@ -174,17 +172,10 @@
                             </AnchorPane>
                           </content>
                         </Tab>
-                        <Tab fx:id="logTab" closable="false" text="Log">
+                        <Tab closable="false" text="Logging">
                           <content>
-                            <AnchorPane fx:id="logContent" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="800.0">
-                              <children>
-                                <ScrollPane id="ScrollPane" fitToHeight="true" fitToWidth="true" prefHeight="336.0" prefViewportHeight="336.0" prefViewportWidth="800.0" prefWidth="800.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0">
-                                  <content>
-                                    <TableView fx:id="loggingView" prefHeight="336.0" prefWidth="200.0" />
-                                  </content>
-                                </ScrollPane>
-                              </children>
-                            </AnchorPane>
+                            <!--TODO create `LogView` control and use it as tag: <LogView fx:id="logView" /> -->
+                            <fx:include fx:id="logView" source="./log-view.fxml"/>
                           </content>
                         </Tab>
                       </tabs>
