@@ -19,7 +19,6 @@
 
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
@@ -165,11 +164,7 @@
                         </Tab>
                         <Tab fx:id="aboutTab" closable="false" text="About">
                           <content>
-                            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                              <children>
-                                <Accordion fx:id="aboutInfoAccordion" prefHeight="336.0" prefWidth="800.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0" />
-                              </children>
-                            </AnchorPane>
+                            <fx:include fx:id="aboutView" source="about-view.fxml"/>
                           </content>
                         </Tab>
                         <Tab closable="false" text="Logging">
