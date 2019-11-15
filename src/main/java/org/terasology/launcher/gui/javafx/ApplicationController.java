@@ -20,6 +20,8 @@ import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.application.HostServices;
 import javafx.application.Platform;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -158,7 +160,6 @@ public class ApplicationController {
     private GameStarter gameStarter;
     private GameDownloadWorker gameDownloadWorker;
     private Stage stage;
-    private HostServices hostServies;
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private DownloadTask downloadTask;
@@ -170,17 +171,11 @@ public class ApplicationController {
     @FXML
     private ProgressBar progressBar;
     @FXML
-    private TabPane contentTabPane;
-    @FXML
     private Button cancelDownloadButton;
     @FXML
     private Button deleteButton;
     @FXML
-    private Button warningButton;
-    @FXML
     private WebView changelogView;
-    @FXML
-    private Label versionInfo;
     @FXML
     private AboutViewController aboutViewController;
     @FXML
@@ -195,6 +190,16 @@ public class ApplicationController {
     private ImageView downloadImage;
     @FXML
     private LogViewController logViewController;
+    @FXML
+    private FooterController footerController;
+
+    /** Indicate whether the user's hard drive is running out of space for game downloads. */
+    final private Property<Boolean> lowOnSpace;
+
+    public ApplicationController() {
+        lowOnSpace = new SimpleBooleanProperty(false);
+        footerController.bind(lowOnSpace);
+    }
 
     @FXML
     protected void handleExitButtonAction() {
@@ -204,42 +209,14 @@ public class ApplicationController {
     @FXML
     protected void handleControlButtonMouseEntered(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = createScaleTransition(1.2, source);
+        final Transition t = FXUtils.createScaleTransition(1.2, source);
         t.playFromStart();
     }
 
     @FXML
     protected void handleControlButtonMouseExited(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = createScaleTransition(1, source);
-        t.playFromStart();
-    }
-
-    @FXML
-    protected void handleSocialButtonMouseEntered(MouseEvent event) {
-        final Node source = (Node) event.getSource();
-        final Transition t = createScaleTransition(1.2, source);
-        t.playFromStart();
-    }
-
-    @FXML
-    protected void handleSocialButtonMouseExited(MouseEvent event) {
-        final Node source = (Node) event.getSource();
-        final Transition t = createScaleTransition(1, source);
-        t.playFromStart();
-    }
-
-    @FXML
-    protected void handleSocialButtonMousePressed(MouseEvent event) {
-        final Node source = (Node) event.getSource();
-        final Transition t = createScaleTransition(0.8, source);
-        t.playFromStart();
-    }
-
-    @FXML
-    protected void handleSocialButtonMouseReleased(MouseEvent event) {
-        final Node source = (Node) event.getSource();
-        final Transition t = createScaleTransition(1.2, source);
+        final Transition t = FXUtils.createScaleTransition(1, source);
         t.playFromStart();
     }
 
@@ -369,41 +346,6 @@ public class ApplicationController {
                 });
     }
 
-    @FXML
-    protected void openFacebook() {
-        openUri(BundleUtils.getURI("terasology_facebook"));
-    }
-
-    @FXML
-    protected void openGithub() {
-        openUri(BundleUtils.getURI("terasology_github"));
-    }
-
-    @FXML
-    protected void openDiscord() {
-        openUri(BundleUtils.getURI("terasology_discord"));
-    }
-
-    @FXML
-    protected void openReddit() {
-        openUri(BundleUtils.getURI("terasology_reddit"));
-    }
-
-    @FXML
-    protected void openTwitter() {
-        openUri(BundleUtils.getURI("terasology_twitter"));
-    }
-
-    @FXML
-    protected void openYoutube() {
-        openUri(BundleUtils.getURI("terasology_youtube"));
-    }
-
-    @FXML
-    protected void openLogs() {
-        contentTabPane.getSelectionModel().select(2);
-    }
-
     public void initialize(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
                            final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
@@ -412,7 +354,6 @@ public class ApplicationController {
         this.launcherSettings = newLauncherSettings;
         this.packageManager = newPackageManager;
         this.stage = newStage;
-        this.hostServies = hostServices;
 
         // add Logback view appender view to both the root logger and the tab
         Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -431,6 +372,14 @@ public class ApplicationController {
 
         initComboBoxes();
         initButtons();
+
+        // if less than 200MB available
+        //TODO: This only updates when the launcher is initialized (which should happen excatly once o.O)
+        //      We should update this value at least every time the download directory changes (user setting).
+        //      Ideally, we would check periodically for disk space.
+        lowOnSpace.setValue(downloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE);
+
+        footerController.setHostServices(hostServices);
     }
 
     private Package selectedPackage;
@@ -610,28 +559,11 @@ public class ApplicationController {
         stage.close();
     }
 
-    private void openUri(URI uri) {
-        if (uri != null) {
-            hostServies.showDocument(uri.toString());
-        }
-    }
-
     private void updateGui() {
         updateButtons();
-        updateLabels();
         updateTooltipTexts();
         updateChangeLog();
         aboutViewController.update();
-    }
-
-    private void updateLabels() {
-        // set and display version info
-        final String launcherVersion = TerasologyLauncherVersionInfo.getInstance().getDisplayVersion();
-        if (launcherVersion.isEmpty()) {
-            versionInfo.setText(BundleUtils.getLabel("launcher_versionInfo"));
-        } else {
-            versionInfo.setText(launcherVersion);
-        }
     }
 
     private void updateButtons() {
@@ -663,14 +595,6 @@ public class ApplicationController {
             startAndDownloadButton.setVisible(true);
         }
 
-        // if less than 200MB available
-        if (downloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
-            warningButton.setVisible(true);
-            warningButton.setTooltip(new Tooltip(BundleUtils.getLabel("message_warning_lowOnSpace")));
-            logger.warn(BundleUtils.getLabel("message_warning_lowOnSpace"));
-        } else {
-            warningButton.setVisible(false);
-        }
     }
 
     private void updateJobBox() {
@@ -844,22 +768,6 @@ public class ApplicationController {
     private TerasologyGameVersion getSelectedGameVersion() {
 //        return packageManager.getGameVersionForBuildVersion(launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
         return null;
-    }
-
-    /**
-     * Creates a {@link javafx.animation.ScaleTransition} with the given factor for the specified node element.
-     *
-     * @param factor the scaling factor
-     * @param node   the target node
-     * @return a transition object
-     */
-    private ScaleTransition createScaleTransition(final double factor, final Node node) {
-        final ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(200), node);
-        scaleTransition.setFromX(node.getScaleX());
-        scaleTransition.setFromY(node.getScaleY());
-        scaleTransition.setToX(factor);
-        scaleTransition.setToY(factor);
-        return scaleTransition;
     }
 
     ComboBox<PackageItem> getJobBox() {
