@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.web.WebView?>
+<AnchorPane fx:controller="org.terasology.launcher.gui.javafx.ChangelogViewController"
+            xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            prefHeight="180.0" prefWidth="200.0">
+  <children>
+    <WebView fx:id="changelogView" prefHeight="336.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0"
+             AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0"/>
+  </children>
+  <padding>
+    <Insets top="8.0" bottom="8.0"/>
+  </padding>
+</AnchorPane>

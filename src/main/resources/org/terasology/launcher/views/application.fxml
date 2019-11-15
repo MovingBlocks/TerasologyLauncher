@@ -150,19 +150,12 @@
                         <URL value="@terasology.css" />
                       </stylesheets>
                       <tabs>
-                        <Tab fx:id="changelogTab" text="Changelog">
+                        <Tab closable="false" text="Changelog">
                           <content>
-                            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                              <children>
-                                <WebView fx:id="changelogView" prefHeight="336.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0" />
-                              </children>
-                              <padding>
-                                <Insets top="8.0" bottom="8.0" />
-                              </padding>
-                            </AnchorPane>
+                            <fx:include fx:id="changelogView" source="changelog-view.fxml"/>
                           </content>
                         </Tab>
-                        <Tab fx:id="aboutTab" closable="false" text="About">
+                        <Tab closable="false" text="About">
                           <content>
                             <fx:include fx:id="aboutView" source="about-view.fxml"/>
                           </content>
@@ -170,7 +163,7 @@
                         <Tab closable="false" text="Logging">
                           <content>
                             <!--TODO create `LogView` control and use it as tag: <LogView fx:id="logView" /> -->
-                            <fx:include fx:id="logView" source="./log-view.fxml"/>
+                            <fx:include fx:id="logView" source="log-view.fxml"/>
                           </content>
                         </Tab>
                       </tabs>
