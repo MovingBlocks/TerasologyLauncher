@@ -20,7 +20,7 @@ import javafx.animation.Transition;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -58,6 +58,7 @@ import org.terasology.launcher.util.ProgressListener;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -189,15 +190,15 @@ public class ApplicationController {
     private FooterController footerController;
 
     /** Indicate whether the user's hard drive is running out of space for game downloads. */
-    final private Property<Boolean> lowOnSpace;
+    final private Property<Optional<Warning>> warning;
 
     public ApplicationController() {
-        lowOnSpace = new SimpleBooleanProperty(false);
+        warning = new SimpleObjectProperty(Optional.empty());
     }
 
     @FXML
     public void initialize() {
-        //footerController.bind(lowOnSpace);
+        footerController.bind(warning);
     }
 
     @FXML
@@ -372,11 +373,14 @@ public class ApplicationController {
         initComboBoxes();
         initButtons();
 
-        // if less than 200MB available
         //TODO: This only updates when the launcher is initialized (which should happen excatly once o.O)
         //      We should update this value at least every time the download directory changes (user setting).
         //      Ideally, we would check periodically for disk space.
-        lowOnSpace.setValue(downloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE);
+        if (downloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
+            warning.setValue(Optional.of(Warning.LOW_ON_SPACE));
+        } else {
+            warning.setValue(Optional.empty());
+        }
 
         footerController.setHostServices(hostServices);
     }

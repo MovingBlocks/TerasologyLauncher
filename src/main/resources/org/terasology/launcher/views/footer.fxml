@@ -97,7 +97,7 @@
       </HBox.margin>
       <children>
         <Button id="" fx:id="warningButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false"
-                onAction="#openLogs" styleClass="warningButton">
+                onAction="#openLogs" styleClass="warningButton" visible="false">
           <graphic>
             <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
               <image>

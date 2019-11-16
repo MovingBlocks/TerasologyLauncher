@@ -4,7 +4,7 @@ import javafx.animation.Transition;
 import javafx.application.HostServices;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -27,11 +27,11 @@ public class FooterController {
     private Button warningButton;
     @FXML
     private Label versionInfo;
-    private Optional<HostServices> hostServices;
-    private Property<Boolean> lowOnSpace;
+    private HostServices hostServices;
+    private Property<Optional<Warning>> warning;
 
     public FooterController() {
-        lowOnSpace = new SimpleBooleanProperty(false);
+        warning = new SimpleObjectProperty<>(Optional.empty());
     }
 
     private void updateLabels() {
@@ -44,13 +44,13 @@ public class FooterController {
     }
 
     public void setHostServices(HostServices hostServices) {
-        this.hostServices = Optional.ofNullable(hostServices);
+        this.hostServices = hostServices;
     }
 
     @FXML
     public void initialize() {
         updateLabels();
-        lowOnSpace.addListener((value, oldValue, newValue) -> updateWarningButton(newValue));
+        warning.addListener((value, oldValue, newValue) -> updateWarningButton(newValue));
     }
 
     @FXML
@@ -118,22 +118,21 @@ public class FooterController {
     }
 
     private void openUri(URI uri) {
-        if (uri != null) {
-            hostServices.ifPresent(services -> services.showDocument(uri.toString()));
+        if (uri != null && hostServices != null) {
+            hostServices.showDocument(uri.toString());
         }
     }
 
-    private void updateWarningButton(boolean showWarning) {
-        if (showWarning) {
-            warningButton.setVisible(true);
-            warningButton.setTooltip(new Tooltip(BundleUtils.getLabel("message_warning_lowOnSpace")));
-            logger.warn(BundleUtils.getLabel("message_warning_lowOnSpace"));
-        } else {
-            warningButton.setVisible(false);
-        }
+    private void updateWarningButton(Optional<Warning> warning) {
+        warningButton.setVisible(warning.isPresent());
+        warning.ifPresent(w -> {
+            String msg = BundleUtils.getLabel(w.messageKey);
+            warningButton.setTooltip(new Tooltip(msg));
+            logger.warn(msg);
+        });
     }
 
-    public void bind(ReadOnlyProperty<Boolean> lowOnSpace) {
-        this.lowOnSpace.bind(lowOnSpace);
+    void bind(ReadOnlyProperty<Optional<Warning>> warning) {
+        this.warning.bind(warning);
     }
 }
