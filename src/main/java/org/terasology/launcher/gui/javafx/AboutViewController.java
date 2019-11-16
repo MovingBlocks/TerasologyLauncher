@@ -56,7 +56,7 @@ public class AboutViewController {
         Stream.of("README.md", "CHANGELOG.md", "CONTRIBUTING.md", "LICENSE")
                 .map(filename -> BundleUtils.getFXMLUrl(ABOUT, filename))
                 .filter(Objects::nonNull)
-                .map(this::getPaneFor)
+                .map(this::createPaneFor)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(aboutInfoAccordion.getPanes()::add);
@@ -66,8 +66,8 @@ public class AboutViewController {
         }
     }
 
-    private Optional<TitledPane> getPaneFor(URL url) {
-        return getViewFor(url)
+    private Optional<TitledPane> createPaneFor(URL url) {
+        return createViewFor(url)
                 .map(view -> {
                     view.getStylesheets().add(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
                     view.setContextMenuEnabled(false);
@@ -88,7 +88,7 @@ public class AboutViewController {
                 });
     }
 
-    private Optional<WebView> getViewFor(URL url) {
+    private Optional<WebView> createViewFor(URL url) {
         switch (Files.getFileExtension(url.getFile().toLowerCase())) {
             case "md":
             case "markdown":

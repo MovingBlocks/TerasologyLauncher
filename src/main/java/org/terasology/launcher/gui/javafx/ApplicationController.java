@@ -621,7 +621,6 @@ public class ApplicationController {
         updateLabels();
         updateTooltipTexts();
         updateChangeLog();
-        aboutViewController.update();
     }
 
     private void updateLabels() {
