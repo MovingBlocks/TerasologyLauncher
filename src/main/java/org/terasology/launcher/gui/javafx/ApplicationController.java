@@ -171,8 +171,6 @@ public class ApplicationController {
     @FXML
     private WebView changelogView;
     @FXML
-    private AboutViewController aboutViewController;
-    @FXML
     private Button settingsButton;
     @FXML
     private Button exitButton;
@@ -182,6 +180,9 @@ public class ApplicationController {
     private ImageView playImage;
     @FXML
     private ImageView downloadImage;
+
+    @FXML
+    private AboutViewController aboutViewController;
     @FXML
     private LogViewController logViewController;
     @FXML
@@ -196,7 +197,7 @@ public class ApplicationController {
 
     @FXML
     public void initialize() {
-        footerController.bind(lowOnSpace);
+        //footerController.bind(lowOnSpace);
     }
 
     @FXML

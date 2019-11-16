@@ -20,6 +20,7 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.net.URI;
+import java.util.Optional;
 
 public class FooterController {
 
@@ -31,14 +32,14 @@ public class FooterController {
     private Button warningButton;
     @FXML
     private Label versionInfo;
-    private HostServices hostServices;
+    private Optional<HostServices> hostServices;
     private Property<Boolean> lowOnSpace;
 
     public FooterController() {
-        this.lowOnSpace = new SimpleBooleanProperty(false);
+        lowOnSpace = new SimpleBooleanProperty(false);
+    }
 
-        lowOnSpace.addListener((value, oldValue, newValue) -> updateWarningButton(newValue));
-
+    private void updateLabels() {
         final String launcherVersion = TerasologyLauncherVersionInfo.getInstance().getDisplayVersion();
         if (launcherVersion.isEmpty()) {
             versionInfo.setText(BundleUtils.getLabel("launcher_versionInfo"));
@@ -48,7 +49,13 @@ public class FooterController {
     }
 
     public void setHostServices(HostServices hostServices) {
-        this.hostServices = hostServices;
+        this.hostServices = Optional.ofNullable(hostServices);
+    }
+
+    @FXML
+    public void initialize() {
+        updateLabels();
+        lowOnSpace.addListener((value, oldValue, newValue) -> updateWarningButton(newValue));
     }
 
     @FXML
@@ -115,8 +122,8 @@ public class FooterController {
     }
 
     private void openUri(URI uri) {
-        if (uri != null && hostServices != null) {
-            hostServices.showDocument(uri.toString());
+        if (uri != null) {
+            hostServices.ifPresent(services -> services.showDocument(uri.toString()));
         }
     }
 
