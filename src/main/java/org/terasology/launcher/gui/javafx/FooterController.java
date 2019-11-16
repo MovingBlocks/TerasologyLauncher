@@ -1,6 +1,5 @@
 package org.terasology.launcher.gui.javafx;
 
-import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.application.HostServices;
 import javafx.beans.property.Property;
@@ -10,10 +9,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
-import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
@@ -26,8 +23,6 @@ public class FooterController {
 
     private static final Logger logger = LoggerFactory.getLogger(FooterController.class);
 
-    @FXML
-    private TabPane contentTabPane;
     @FXML
     private Button warningButton;
     @FXML
@@ -118,7 +113,8 @@ public class FooterController {
 
     @FXML
     protected void openLogs() {
-        contentTabPane.getSelectionModel().select(2);
+        //TODO: how to control the main launcher view from here?
+        //contentTabPane.getSelectionModel().select(2);
     }
 
     private void openUri(URI uri) {
