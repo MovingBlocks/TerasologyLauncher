@@ -16,7 +16,6 @@
 
 package org.terasology.launcher.gui.javafx;
 
-import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -34,9 +33,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.image.ImageView;
@@ -45,7 +42,6 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameStarter;
@@ -58,10 +54,8 @@ import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.ProgressListener;
-import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -198,6 +192,10 @@ public class ApplicationController {
 
     public ApplicationController() {
         lowOnSpace = new SimpleBooleanProperty(false);
+    }
+
+    @FXML
+    public void initialize() {
         footerController.bind(lowOnSpace);
     }
 
