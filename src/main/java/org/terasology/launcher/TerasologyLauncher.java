@@ -75,7 +75,7 @@ public final class TerasologyLauncher extends Application {
     }
 
     @Override
-    public void init() throws Exception {
+    public void init() {
         ImageView splash = new ImageView(BundleUtils.getFxImage("splash"));
         loadProgress = new ProgressBar();
         loadProgress.setPrefWidth(SPLASH_WIDTH);
@@ -85,7 +85,18 @@ public final class TerasologyLauncher extends Application {
         progressText.setAlignment(Pos.CENTER);
         splashLayout.getStylesheets().add(BundleUtils.getStylesheet("css_splash"));
         splashLayout.setEffect(new DropShadow());
-        hostServices = getHostServices();
+
+        try {
+            // This may throw an exception on a different thread, but we cannot catch it here o.O
+            // In addition, `hostServices` will be initialized, but disfunctional.
+            // Thus, we have no idea whether we can use the services or not...
+            hostServices = getHostServices();
+            // poor man's check: this will throw a NPE if the internal `hostServices.deleagte` is not initialized
+            hostServices.getCodeBase();
+        } catch (NullPointerException e) {
+            logger.warn("Host Services not available - won't be able to open hyperlinks in the system browser.");
+            hostServices = null;
+        }
     }
 
     @Override
