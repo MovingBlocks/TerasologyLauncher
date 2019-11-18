@@ -68,10 +68,6 @@ public class SettingsController {
     @FXML
     private Label initialHeapSizeLabel;
     @FXML
-    private Label jobLabel;
-    @FXML
-    private Label buildVersionLabel;
-    @FXML
     private Button gameDirectoryOpenButton;
     @FXML
     private Button gameDirectoryEditButton;
@@ -112,10 +108,6 @@ public class SettingsController {
     @FXML
     private Button cancelSettingsButton;
     @FXML
-    private ComboBox<ApplicationController.PackageItem> jobBox;
-    @FXML
-    private ComboBox<String> buildVersionBox;
-    @FXML
     private ComboBox<JavaHeapSize> maxHeapSizeBox;
     @FXML
     private ComboBox<JavaHeapSize> initialHeapSizeBox;
@@ -143,15 +135,6 @@ public class SettingsController {
 
     @FXML
     protected void saveSettingsAction(ActionEvent event) {
-        // TODO: Clean up
-        // save job
-        //final JobItem jobItem = jobBox.getSelectionModel().getSelectedItem();
-        //launcherSettings.setJob(jobItem.getJob());
-
-        // save build version
-        //final VersionItem versionItem = buildVersionBox.getSelectionModel().getSelectedItem();
-        //launcherSettings.setBuildVersion(versionItem.getVersion(), jobItem.getJob());
-
         // save gameDirectory
         launcherSettings.setGameDirectory(gameDirectory);
 
@@ -280,7 +263,6 @@ public class SettingsController {
         this.stage = newStage;
         this.appController = newAppController;
 
-        populateJobBox();
         populateHeapSize();
         populateLanguageValues();
         populateLanguageIcons();
@@ -309,8 +291,6 @@ public class SettingsController {
         gameSettingsTitle.setText(BundleUtils.getLabel("settings_game_title"));
         maxHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_maxHeapSize"));
         initialHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_initialHeapSize"));
-        jobLabel.setText(BundleUtils.getLabel("settings_game_job"));
-        buildVersionLabel.setText(BundleUtils.getLabel("settings_game_buildVersion"));
         gameDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_open"));
         gameDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_edit"));
         gameDataDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_open"));
@@ -338,23 +318,6 @@ public class SettingsController {
         searchForUpdatesBox.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
         saveSettingsButton.setText(BundleUtils.getLabel("settings_save"));
         cancelSettingsButton.setText(BundleUtils.getLabel("settings_cancel"));
-    }
-
-    private void populateJobBox() {
-        final ComboBox<ApplicationController.PackageItem> origJobBox = appController.getJobBox();
-        final ComboBox<String> origVersionBox = appController.getBuildVersionBox();
-
-        jobBox.setItems(origJobBox.getItems());
-        buildVersionBox.setItems(origVersionBox.getItems());
-        jobBox.getSelectionModel().select(origJobBox.getSelectionModel().getSelectedIndex());
-        buildVersionBox.getSelectionModel().select(origVersionBox.getSelectionModel().getSelectedIndex());
-
-        jobBox.selectionModelProperty().bindBidirectional(appController.getJobBox().selectionModelProperty());
-        buildVersionBox.selectionModelProperty().bindBidirectional(appController.getBuildVersionBox().selectionModelProperty());
-        jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            buildVersionBox.setItems(newVal.getVersionList());
-            buildVersionBox.getSelectionModel().select(0);
-        });
     }
 
     private void populateHeapSize() {
