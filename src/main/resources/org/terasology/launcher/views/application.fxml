@@ -33,7 +33,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.web.WebView?>
 <?import java.lang.String?>
 <?import java.net.URL?>
 <AnchorPane id="AnchorPane" fx:id="launcherFrame" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="562.140625" prefWidth="968.1666259765625" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="org.terasology.launcher.gui.javafx.ApplicationController">
@@ -66,19 +65,12 @@
                         <URL value="@terasology.css" />
                       </stylesheets>
                       <tabs>
-                        <Tab fx:id="changelogTab" text="Changelog">
+                        <Tab closable="false" text="Changelog">
                           <content>
-                            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                              <children>
-                                <WebView fx:id="changelogView" prefHeight="336.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0" />
-                              </children>
-                              <padding>
-                                <Insets top="8.0" bottom="8.0" />
-                              </padding>
-                            </AnchorPane>
+                            <fx:include fx:id="changelogView" source="changelog-view.fxml"/>
                           </content>
                         </Tab>
-                        <Tab fx:id="aboutTab" closable="false" text="About">
+                        <Tab closable="false" text="About">
                           <content>
                             <fx:include fx:id="aboutView" source="about-view.fxml"/>
                           </content>
@@ -86,7 +78,7 @@
                         <Tab closable="false" text="Logging">
                           <content>
                             <!--TODO create `LogView` control and use it as tag: <LogView fx:id="logView" /> -->
-                            <fx:include fx:id="logView" source="./log-view.fxml"/>
+                            <fx:include fx:id="logView" source="log-view.fxml"/>
                           </content>
                         </Tab>
                       </tabs>
