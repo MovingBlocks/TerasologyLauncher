@@ -27,7 +27,7 @@ public class Package implements Serializable {
     private final String url;
     private boolean installed;
 
-    Package(String name, String version, String url) {
+    public Package(String name, String version, String url) {
         this.name = name;
         this.version = version;
         this.url = url;

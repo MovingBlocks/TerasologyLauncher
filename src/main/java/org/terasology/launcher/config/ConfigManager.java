@@ -17,48 +17,71 @@
 package org.terasology.launcher.config;
 
 import com.google.gson.Gson;
-import javafx.concurrent.Task;
+import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
-import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.util.OperatingSystem;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
-public final class ConfigLoadTask extends Task<LauncherConfig> {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigLoadTask.class);
+public class ConfigManager {
+    private static final Logger logger = LoggerFactory.getLogger(ConfigManager.class);
     private static final String CONFIG_FILE = "config.json";
 
-    private final Gson gson = new Gson();
+    private final Path configPath;
+    private final Gson gson;
+    private LauncherConfig config;
+    private final ConfigLoadService loadService;
+    private final ConfigSaveService saveService;
 
-    @Override
-    protected LauncherConfig call() throws Exception {
+    public ConfigManager() {
+        configPath = resolveConfigPath();
+        gson = new GsonBuilder()
+                .registerTypeAdapter(Package.class, new PackageAdapter())
+                .create();
+
+        loadService = new ConfigLoadService(this);
+        saveService = new ConfigSaveService(this);
+    }
+
+    private Path resolveConfigPath() {
         final OperatingSystem os = OperatingSystem.getOS();
         if (os == OperatingSystem.UNKNOWN) {
             logger.error("Unsupported OS: {} {} {}",
                     System.getProperty("os.name"),
                     System.getProperty("os.version"),
                     System.getProperty("os.arch"));
-            throw new LauncherStartFailedException();
         }
 
         final Path launcherDir = LauncherDirectoryUtils.getApplicationDirectory(
                 os, LauncherDirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME);
-        final Path configPath = launcherDir.resolve(CONFIG_FILE);
+        return launcherDir.resolve(ConfigManager.CONFIG_FILE);
         // TODO: Use local methods for all stuff above
+    }
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(Files.newInputStream(configPath))
-        )) {
-            return gson.fromJson(reader, LauncherConfig.class);
-        } catch (IOException e) {
-            logger.error("Failed to read config file: {}", configPath);
-            throw new LauncherStartFailedException();
-        }
+    public void load() {
+        loadService.start();
+    }
+
+    public void save() {
+        saveService.start();
+    }
+
+    Path getConfigPath() {
+        return configPath;
+    }
+
+    Gson getGson() {
+        return gson;
+    }
+
+    public Optional<LauncherConfig> getConfig() {
+        return Optional.ofNullable(config);
+    }
+
+    void setConfig(LauncherConfig config) {
+        this.config = config;
     }
 }
