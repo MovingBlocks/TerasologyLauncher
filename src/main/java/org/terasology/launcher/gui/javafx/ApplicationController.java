@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2019 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,11 @@
 
 package org.terasology.launcher.gui.javafx;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.github.rjeschke.txtmark.Configuration;
-import com.github.rjeschke.txtmark.Processor;
-import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.application.HostServices;
 import javafx.application.Platform;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -31,32 +29,22 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
-import javafx.scene.effect.BlendMode;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherConfiguration;
 import org.terasology.launcher.game.GameStarter;
 import org.terasology.launcher.game.TerasologyGameVersion;
-import org.terasology.launcher.log.LogViewAppender;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
@@ -65,28 +53,18 @@ import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.ProgressListener;
-import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Stream;
 
 public class ApplicationController {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
-    private static final String ABOUT = "about";
 
     private static final long MB = 1024L * 1024;
     private static final long MINIMUM_FREE_SPACE = 200 * MB;
@@ -176,7 +154,6 @@ public class ApplicationController {
     private GameStarter gameStarter;
     private GameDownloadWorker gameDownloadWorker;
     private Stage stage;
-    private HostServices hostServies;
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private DownloadTask downloadTask;
@@ -188,21 +165,9 @@ public class ApplicationController {
     @FXML
     private ProgressBar progressBar;
     @FXML
-    private TabPane contentTabPane;
-    @FXML
     private Button cancelDownloadButton;
     @FXML
     private Button deleteButton;
-    @FXML
-    private Button warningButton;
-    @FXML
-    private WebView changelogView;
-    @FXML
-    private Label versionInfo;
-    @FXML
-    private Accordion aboutInfoAccordion;
-    @FXML
-    private TableView<ILoggingEvent> loggingView;
     @FXML
     private Button settingsButton;
     @FXML
@@ -215,6 +180,29 @@ public class ApplicationController {
     private ImageView downloadImage;
 
     @FXML
+    private AboutViewController aboutViewController;
+    @FXML
+    private LogViewController logViewController;
+    @FXML
+    private ChangelogViewController changelogViewController;
+    @FXML
+    private FooterController footerController;
+
+    /**
+     * Indicate whether the user's hard drive is running out of space for game downloads.
+     */
+    final private Property<Optional<Warning>> warning;
+
+    public ApplicationController() {
+        warning = new SimpleObjectProperty(Optional.empty());
+    }
+
+    @FXML
+    public void initialize() {
+        footerController.bind(warning);
+    }
+
+    @FXML
     protected void handleExitButtonAction() {
         close();
     }
@@ -222,42 +210,14 @@ public class ApplicationController {
     @FXML
     protected void handleControlButtonMouseEntered(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = createScaleTransition(1.2, source);
+        final Transition t = FXUtils.createScaleTransition(1.2, source);
         t.playFromStart();
     }
 
     @FXML
     protected void handleControlButtonMouseExited(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = createScaleTransition(1, source);
-        t.playFromStart();
-    }
-
-    @FXML
-    protected void handleSocialButtonMouseEntered(MouseEvent event) {
-        final Node source = (Node) event.getSource();
-        final Transition t = createScaleTransition(1.2, source);
-        t.playFromStart();
-    }
-
-    @FXML
-    protected void handleSocialButtonMouseExited(MouseEvent event) {
-        final Node source = (Node) event.getSource();
-        final Transition t = createScaleTransition(1, source);
-        t.playFromStart();
-    }
-
-    @FXML
-    protected void handleSocialButtonMousePressed(MouseEvent event) {
-        final Node source = (Node) event.getSource();
-        final Transition t = createScaleTransition(0.8, source);
-        t.playFromStart();
-    }
-
-    @FXML
-    protected void handleSocialButtonMouseReleased(MouseEvent event) {
-        final Node source = (Node) event.getSource();
-        final Transition t = createScaleTransition(1.2, source);
+        final Transition t = FXUtils.createScaleTransition(1, source);
         t.playFromStart();
     }
 
@@ -385,41 +345,6 @@ public class ApplicationController {
                 });
     }
 
-    @FXML
-    protected void openFacebook() {
-        openUri(BundleUtils.getURI("terasology_facebook"));
-    }
-
-    @FXML
-    protected void openGithub() {
-        openUri(BundleUtils.getURI("terasology_github"));
-    }
-
-    @FXML
-    protected void openDiscord() {
-        openUri(BundleUtils.getURI("terasology_discord"));
-    }
-
-    @FXML
-    protected void openReddit() {
-        openUri(BundleUtils.getURI("terasology_reddit"));
-    }
-
-    @FXML
-    protected void openTwitter() {
-        openUri(BundleUtils.getURI("terasology_twitter"));
-    }
-
-    @FXML
-    protected void openYoutube() {
-        openUri(BundleUtils.getURI("terasology_youtube"));
-    }
-
-    @FXML
-    protected void openLogs() {
-        contentTabPane.getSelectionModel().select(2);
-    }
-
     public void initialize(final LauncherConfiguration launcherConfiguration, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = launcherConfiguration.getLauncherDirectory();
         this.downloadDirectory = launcherConfiguration.getDownloadDirectory();
@@ -427,17 +352,15 @@ public class ApplicationController {
         this.launcherSettings = launcherConfiguration.getLauncherSettings();
         this.packageManager = launcherConfiguration.getPackageManager();
         this.stage = newStage;
-        this.hostServies = hostServices;
 
         // add Logback view appender view to both the root logger and the tab
         Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         if (rootLogger instanceof ch.qos.logback.classic.Logger) {
             ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
 
-            LogViewAppender viewLogger = new LogViewAppender(loggingView);
-            viewLogger.setContext(logbackLogger.getLoggerContext());
-            viewLogger.start(); // CHECK: do I really need to start it manually here?
-            logbackLogger.addAppender(viewLogger);
+            logViewController.setContext(logbackLogger.getLoggerContext());
+            logViewController.start(); // CHECK: do I really need to start it manually here?
+            logbackLogger.addAppender(logViewController);
         }
 
         gameStarter = new GameStarter();
@@ -447,6 +370,17 @@ public class ApplicationController {
 
         initComboBoxes();
         initButtons();
+
+        //TODO: This only updates when the launcher is initialized (which should happen excatly once o.O)
+        //      We should update this value at least every time the download directory changes (user setting).
+        //      Ideally, we would check periodically for disk space.
+        if (downloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
+            warning.setValue(Optional.of(Warning.LOW_ON_SPACE));
+        } else {
+            warning.setValue(Optional.empty());
+        }
+
+        footerController.setHostServices(hostServices);
     }
 
     private Package selectedPackage;
@@ -499,11 +433,11 @@ public class ApplicationController {
 
         buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             final String pkgName = jobBox.getSelectionModel().getSelectedItem().name;
-            final String pkgVer  = newVal;
+            final String pkgVer = newVal;
 
             selectedPackage = packages.stream()
                     .filter(pkg -> pkg.getName().equals(pkgName)
-                                && pkg.getVersion().equals(pkgVer))
+                            && pkg.getVersion().equals(pkgVer))
                     .findAny()
                     .orElse(null);
 
@@ -626,28 +560,9 @@ public class ApplicationController {
         stage.close();
     }
 
-    private void openUri(URI uri) {
-        if (uri != null) {
-            hostServies.showDocument(uri.toString());
-        }
-    }
-
     private void updateGui() {
         updateButtons();
-        updateLabels();
         updateTooltipTexts();
-        updateChangeLog();
-        updateAboutTab();
-    }
-
-    private void updateLabels() {
-        // set and display version info
-        final String launcherVersion = TerasologyLauncherVersionInfo.getInstance().getDisplayVersion();
-        if (launcherVersion.isEmpty()) {
-            versionInfo.setText(BundleUtils.getLabel("launcher_versionInfo"));
-        } else {
-            versionInfo.setText(launcherVersion);
-        }
     }
 
     private void updateButtons() {
@@ -677,15 +592,6 @@ public class ApplicationController {
         } else {
             cancelDownloadButton.setVisible(false);
             startAndDownloadButton.setVisible(true);
-        }
-
-        // if less than 200MB available
-        if (downloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
-            warningButton.setVisible(true);
-            warningButton.setTooltip(new Tooltip(BundleUtils.getLabel("message_warning_lowOnSpace")));
-            logger.warn(BundleUtils.getLabel("message_warning_lowOnSpace"));
-        } else {
-            warningButton.setVisible(false);
         }
     }
 
@@ -731,178 +637,6 @@ public class ApplicationController {
 //        }
     }
 
-    private void updateChangeLog() {
-        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-        final String gameInfoTextHTML;
-        if ((gameVersion == null) || (gameVersion.getJob() == null) || (gameVersion.getBuildNumber() == null)) {
-            gameInfoTextHTML = "";
-        } else {
-            gameInfoTextHTML = getGameInfoText(gameVersion);
-        }
-
-        changelogView.getEngine().loadContent(gameInfoTextHTML);
-        changelogView.setBlendMode(BlendMode.LIGHTEN);
-        changelogView.getEngine().setUserStyleSheetLocation(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
-    }
-
-    private void updateAboutTab() {
-        aboutInfoAccordion.getPanes().clear();
-        Charset cs = Charset.forName("UTF-8");
-
-        Stream.of("README.md", "CHANGELOG.md", "CONTRIBUTING.md", "LICENSE")
-                .map(filename -> BundleUtils.getFXMLUrl(ABOUT, filename))
-                .filter(Objects::nonNull)
-                .forEach(url -> {
-                    try {
-                        int fnameIdx = url.getFile().lastIndexOf('/');
-                        int extIdx = url.getFile().lastIndexOf('.');
-                        String fname = url.getFile().substring(fnameIdx + 1);
-                        String ext = extIdx < 0 ? "" : url.getFile().substring(extIdx + 1).toLowerCase();
-
-                        final WebView view = new WebView();
-                        StringBuilder sb = new StringBuilder();
-
-                        if (ext.equals("md") || ext.equals("markdown")) {
-                            try (InputStream input = url.openStream()) {
-                                sb.append("<body style='padding-left:24px;'>\n");
-                                sb.append(Processor.process(input, Configuration.DEFAULT));
-                                sb.append("</body>");
-                                view.getEngine().loadContent(sb.toString(), "text/html");
-                            }
-                        } else if (ext.equals("htm") || ext.equals("html")) {
-                            view.getEngine().load(url.toExternalForm());
-                        } else {
-                            try (Reader isr = new InputStreamReader(url.openStream(), cs);
-                                 BufferedReader br = new BufferedReader(isr)) {
-                                String line = br.readLine();
-
-                                while (line != null) {
-                                    sb.append(line);
-                                    sb.append(System.lineSeparator());
-                                    line = br.readLine();
-                                }
-                                view.getEngine().loadContent(sb.toString(), "text/plain");
-                            }
-                        }
-
-                        view.getStylesheets().add(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
-                        view.setContextMenuEnabled(false);
-
-                        final AnchorPane pane = new AnchorPane();
-                        AnchorPane.setBottomAnchor(view, 0.0);
-                        AnchorPane.setTopAnchor(view, 0.0);
-                        pane.getChildren().add(view);
-
-                        final TitledPane titledPane = new TitledPane(fname, pane);
-                        titledPane.setAnimated(false);
-
-                        aboutInfoAccordion.getPanes().add(titledPane);
-                    } catch (MalformedURLException e) {
-                        logger.warn("Could not load info file -- {}", url);
-                    } catch (IOException e) {
-                        logger.warn("Failed to parse markdown file {}", url, e);
-                    }
-                });
-
-        if (!aboutInfoAccordion.getPanes().isEmpty()) {
-            aboutInfoAccordion.setExpandedPane(aboutInfoAccordion.getPanes().get(0));
-        }
-    }
-
-    private String getGameInfoText(TerasologyGameVersion gameVersion) {
-//        logger.debug("Display game version: {} {}", gameVersion, gameVersion.getGameVersionInfo());
-//
-//        final Object[] arguments = new Object[9];
-//        arguments[0] = gameVersion.getJob().name();
-//        if (gameVersion.getJob().isStable()) {
-//            arguments[1] = 1;
-//        } else {
-//            arguments[1] = 0;
-//        }
-//        arguments[2] = gameVersion.getJob().getGitBranch();
-//        arguments[3] = gameVersion.getBuildNumber();
-//        if (gameVersion.isLatest()) {
-//            arguments[4] = 1;
-//        } else {
-//            arguments[4] = 0;
-//        }
-//        if (gameVersion.isInstalled()) {
-//            arguments[5] = 1;
-//        } else {
-//            arguments[5] = 0;
-//        }
-//        if (gameVersion.getSuccessful() != null) {
-//            if (!gameVersion.getSuccessful()) {
-//                // faulty
-//                arguments[6] = 0;
-//            } else {
-//                arguments[6] = 1;
-//            }
-//        } else {
-//            // unknown
-//            arguments[6] = 2;
-//        }
-//        if ((gameVersion.getGameVersionInfo() != null)
-//                && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
-//            arguments[7] = gameVersion.getGameVersionInfo().getDisplayVersion();
-//        } else {
-//            arguments[7] = "";
-//        }
-//        if ((gameVersion.getGameVersionInfo() != null)
-//                && (gameVersion.getGameVersionInfo().getDateTime() != null)) {
-//            arguments[8] = gameVersion.getGameVersionInfo().getDateTime();
-//        } else {
-//            arguments[8] = "";
-//        }
-//
-//        final String infoHeader1 = BundleUtils.getMessage(gameVersion.getJob().getInfoMessageKey(), arguments);
-//        final String infoHeader2 = BundleUtils.getMessage("infoHeader2", arguments);
-//
-//        final StringBuilder b = new StringBuilder();
-//        if ((infoHeader1 != null) && (infoHeader1.trim().length() > 0)) {
-//            b.append("<h1>")
-//                    .append(escapeHtml(infoHeader1))
-//                    .append("</h1>\n");
-//        }
-//        if ((infoHeader2 != null) && (infoHeader2.trim().length() > 0)) {
-//            b.append("<h2>")
-//                    .append(escapeHtml(infoHeader2))
-//                    .append("</h2>\n");
-//        }
-//        b.append("<strong>\n")
-//                .append(BundleUtils.getLabel("infoHeader3"))
-//                .append("</strong>\n");
-//
-//        if ((gameVersion.getChangeLog() != null) && !gameVersion.getChangeLog().isEmpty()) {
-//            b.append("<p>\n")
-//                    .append(BundleUtils.getLabel("infoHeader4"))
-//                    .append("<ul>\n");
-//            for (String msg : gameVersion.getChangeLog()) {
-//                b.append("<li>")
-//                        .append(escapeHtml(msg))
-//                        .append("</li>\n");
-//            }
-//            b.append("</ul>\n")
-//                    .append("</p>\n");
-//        }
-//
-//        /* Append changelogs of previous builds. */
-//        int previousLogs = gameVersion.getJob().isStable() ? 1 : 10;
-//        b.append("<hr/>");
-//        for (String msg : packageManager.getAggregatedChangeLog(gameVersion, previousLogs)) {
-//            b.append("<li>")
-//                    .append(escapeHtml(msg))
-//                    .append("</li>\n");
-//        }
-//
-//        return b.toString();
-        return "WIP";
-    }
-
-    private static String escapeHtml(String text) {
-        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#x27;").replace("/", "&#x2F;");
-    }
-
     void finishedGameDownload(boolean cancelled, boolean successfulDownloadAndExtract, boolean successfulLoadVersion, Path gameDirectory) {
         gameDownloadWorker = null;
         progressBar.setVisible(false);
@@ -924,22 +658,6 @@ public class ApplicationController {
     private TerasologyGameVersion getSelectedGameVersion() {
 //        return packageManager.getGameVersionForBuildVersion(launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
         return null;
-    }
-
-    /**
-     * Creates a {@link javafx.animation.ScaleTransition} with the given factor for the specified node element.
-     *
-     * @param factor the scaling factor
-     * @param node   the target node
-     * @return a transition object
-     */
-    private ScaleTransition createScaleTransition(final double factor, final Node node) {
-        final ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(200), node);
-        scaleTransition.setFromX(node.getScaleX());
-        scaleTransition.setFromY(node.getScaleY());
-        scaleTransition.setToX(factor);
-        scaleTransition.setToY(factor);
-        return scaleTransition;
     }
 
     ComboBox<PackageItem> getJobBox() {
