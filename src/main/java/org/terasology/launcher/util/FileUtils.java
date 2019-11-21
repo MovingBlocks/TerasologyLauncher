@@ -169,6 +169,25 @@ public final class FileUtils {
         }
     }
 
+
+    /**
+     * Checks whether the given path exists and is a readable directory.
+     * 
+     * Will return <code>false</code> if the given path is <code>null</code> or
+     * any of the required checks fails.
+     * 
+     * @param path path to the directory to check (may be null)
+     * @return true if the given path is a directory with read permissions,
+     *         false otherwise
+     */
+    public static boolean isReadableDir(final Path path) {
+        return 
+            path != null 
+                && Files.exists(path) 
+                && Files.isDirectory(path) 
+                && Files.isReadable(path);
+    }
+
     /**
      * Checks if the given path exists, is a directory and can be read and written by the program.
      *

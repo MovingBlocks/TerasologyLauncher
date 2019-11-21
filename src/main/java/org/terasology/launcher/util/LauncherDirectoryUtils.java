@@ -52,8 +52,7 @@ public final class LauncherDirectoryUtils {
      */
     public static boolean containsGameData(final Path gameInstallationPath) {
         boolean containsGameData = false;
-        if (gameInstallationPath != null && Files.exists(gameInstallationPath) &&
-                Files.isDirectory(gameInstallationPath) && Files.isReadable(gameInstallationPath)) {
+        if (FileUtils.isReadableDir(gameInstallationPath)) {
             try (Stream<Path> stream = Files.list(gameInstallationPath)) {
                 containsGameData = stream.anyMatch(child -> Files.isDirectory(child)
                         && isGameDataDirectoryName(child.getFileName().toString()) && containsFiles(child));
