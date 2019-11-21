@@ -18,8 +18,10 @@ package org.terasology.launcher.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import javafx.concurrent.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.OperatingSystem;
 
@@ -30,23 +32,28 @@ public class ConfigManager {
     private static final Logger logger = LoggerFactory.getLogger(ConfigManager.class);
     private static final String CONFIG_FILE = "config.json";
 
+    private final Path launcherDir;
     private final Path configPath;
     private final Gson gson;
     private LauncherConfig config;
-    private final ConfigLoadService loadService;
-    private final ConfigSaveService saveService;
+    private final Service<LauncherConfig> loadService;
+    private final Service<Void> saveService;
 
     public ConfigManager() {
-        configPath = resolveConfigPath();
+        launcherDir = resolveLauncherDir();
+        configPath = launcherDir.resolve(CONFIG_FILE);
         gson = new GsonBuilder()
+                .registerTypeAdapter(Path.class, new PathAdapter())
                 .registerTypeAdapter(Package.class, new PackageAdapter())
+                .disableHtmlEscaping()
+                .setPrettyPrinting()
                 .create();
 
         loadService = new ConfigLoadService(this);
         saveService = new ConfigSaveService(this);
     }
 
-    private Path resolveConfigPath() {
+    private Path resolveLauncherDir() {
         final OperatingSystem os = OperatingSystem.getOS();
         if (os == OperatingSystem.UNKNOWN) {
             logger.error("Unsupported OS: {} {} {}",
@@ -55,18 +62,21 @@ public class ConfigManager {
                     System.getProperty("os.arch"));
         }
 
-        final Path launcherDir = LauncherDirectoryUtils.getApplicationDirectory(
+        return LauncherDirectoryUtils.getApplicationDirectory(
                 os, LauncherDirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME);
-        return launcherDir.resolve(ConfigManager.CONFIG_FILE);
         // TODO: Use local methods for all stuff above
     }
 
-    public void load() {
-        loadService.start();
+    public Service<LauncherConfig> getLoadService() {
+        return loadService;
     }
 
-    public void save() {
-        saveService.start();
+    public Service<Void> getSaveService() {
+        return saveService;
+    }
+
+    Path getLauncherDir() {
+        return launcherDir;
     }
 
     Path getConfigPath() {

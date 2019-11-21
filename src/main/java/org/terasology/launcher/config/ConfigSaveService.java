@@ -52,4 +52,9 @@ class ConfigSaveService extends Service<Void> {
             }
         };
     }
+
+    @Override
+    protected void succeeded() {
+        logger.info("Saved config file: {}", manager.getConfigPath());
+    }
 }

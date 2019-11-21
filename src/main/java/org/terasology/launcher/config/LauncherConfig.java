@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.config;
 
+import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
@@ -34,7 +35,7 @@ public class LauncherConfig {
 
     // Launcher settings
     private Locale locale;
-    private Path launcherDir;
+    private transient Path launcherDir;
     private boolean checkUpdatesOnLaunch;
     private boolean closeAfterGameStart;
     private boolean cacheGamePackages;
@@ -111,6 +112,9 @@ public class LauncherConfig {
     }
 
     public void setLauncherDir(Path launcherDir) {
+        if (this.launcherDir != null) {
+            throw new IllegalStateException("Cannot reset launcherDir");
+        }
         this.launcherDir = launcherDir;
     }
 
