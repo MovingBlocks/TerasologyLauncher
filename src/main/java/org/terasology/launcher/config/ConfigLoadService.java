@@ -31,9 +31,11 @@ class ConfigLoadService extends Service<LauncherConfig> {
     private static final Logger logger = LoggerFactory.getLogger(ConfigLoadService.class);
 
     private final ConfigManager manager;
+    private final ConfigValidator validator;
 
     ConfigLoadService(ConfigManager manager) {
         this.manager = manager;
+        validator = new ConfigValidator();
     }
 
     @Override
@@ -44,7 +46,8 @@ class ConfigLoadService extends Service<LauncherConfig> {
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(Files.newInputStream(manager.getConfigPath()))
                 )) {
-                    return manager.getGson().fromJson(reader, LauncherConfig.class);
+                    final LauncherConfig config = manager.getGson().fromJson(reader, LauncherConfig.class);
+                    return validator.validate(config);
                 } catch (IOException e) {
                     logger.error("Failed to read config file: {}", manager.getConfigPath());
                     throw new LauncherStartFailedException();

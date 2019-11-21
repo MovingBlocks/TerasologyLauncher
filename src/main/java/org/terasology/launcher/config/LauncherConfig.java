@@ -41,4 +41,108 @@ public class LauncherConfig {
 
     // Miscellaneous
     private Package selectedPackage;
+
+    public Path getInstallDir() {
+        return installDir;
+    }
+
+    public void setInstallDir(Path installDir) {
+        this.installDir = installDir;
+    }
+
+    public Path getDataDir() {
+        return dataDir;
+    }
+
+    public void setDataDir(Path dataDir) {
+        this.dataDir = dataDir;
+    }
+
+    public JavaHeapSize getMaxMemory() {
+        return maxMemory;
+    }
+
+    public void setMaxMemory(JavaHeapSize maxMemory) {
+        this.maxMemory = maxMemory;
+    }
+
+    public JavaHeapSize getInitMemory() {
+        return initMemory;
+    }
+
+    public void setInitMemory(JavaHeapSize initMemory) {
+        this.initMemory = initMemory;
+    }
+
+    public String getJavaParam() {
+        return javaParam;
+    }
+
+    public void setJavaParam(String javaParam) {
+        this.javaParam = javaParam;
+    }
+
+    public String getGameParam() {
+        return gameParam;
+    }
+
+    public void setGameParam(String gameParam) {
+        this.gameParam = gameParam;
+    }
+
+    public LogLevel getLogLevel() {
+        return logLevel;
+    }
+
+    public void setLogLevel(LogLevel logLevel) {
+        this.logLevel = logLevel;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+
+    public Path getLauncherDir() {
+        return launcherDir;
+    }
+
+    public void setLauncherDir(Path launcherDir) {
+        this.launcherDir = launcherDir;
+    }
+
+    public boolean isCheckUpdatesOnLaunch() {
+        return checkUpdatesOnLaunch;
+    }
+
+    public void setCheckUpdatesOnLaunch(boolean checkUpdatesOnLaunch) {
+        this.checkUpdatesOnLaunch = checkUpdatesOnLaunch;
+    }
+
+    public boolean isCloseAfterGameStart() {
+        return closeAfterGameStart;
+    }
+
+    public void setCloseAfterGameStart(boolean closeAfterGameStart) {
+        this.closeAfterGameStart = closeAfterGameStart;
+    }
+
+    public boolean isCacheGamePackages() {
+        return cacheGamePackages;
+    }
+
+    public void setCacheGamePackages(boolean cacheGamePackages) {
+        this.cacheGamePackages = cacheGamePackages;
+    }
+
+    public Package getSelectedPackage() {
+        return selectedPackage;
+    }
+
+    public void setSelectedPackage(Package selectedPackage) {
+        this.selectedPackage = selectedPackage;
+    }
 }
