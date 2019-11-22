@@ -12,7 +12,6 @@
 <suppressions>
     <suppress checks="MethodName" files="Ole32.java"/>
     <suppress checks="MethodName" files="Shell32.java"/>
-    <suppress checks="ClassDataAbstractionCoupling" files="ApplicationController.java"/>
     <suppress checks="ClassDataAbstractionCoupling" files="TerasologyLauncher.java"/>
     <!-- suppress everything for `ApplicationContorller.java` for now -->
     <!-- TODO: remove this suppression -->
