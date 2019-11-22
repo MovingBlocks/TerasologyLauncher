@@ -31,11 +31,11 @@ public class ChangelogViewController {
     private WebView changelogView;
 
     //TODO: change this to a data type the package manager can handle
-    final private Property<TerasologyGameVersion> gameVersion;
+    private final Property<TerasologyGameVersion> gameVersionProperty;
 
     public ChangelogViewController() {
-        this.gameVersion = new SimpleObjectProperty<>();
-        gameVersion.addListener((observableValue, oldVersion, newVersion) -> update(newVersion));
+        this.gameVersionProperty = new SimpleObjectProperty<>();
+        gameVersionProperty.addListener((observableValue, oldVersion, newVersion) -> update(newVersion));
     }
 
     /**
@@ -43,10 +43,10 @@ public class ChangelogViewController {
      * <p>
      * The <b>ChangelogView</b> will update every time the property changes.
      *
-     * @param version property denoting the game version to display the changelog for
+     * @param property property denoting the game version to display the changelog for
      */
-    public void bind(ReadOnlyProperty<TerasologyGameVersion> version) {
-        gameVersion.bind(version);
+    public void bind(ReadOnlyProperty<TerasologyGameVersion> property) {
+        gameVersionProperty.bind(property);
     }
 
     /**
