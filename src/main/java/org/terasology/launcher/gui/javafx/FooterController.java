@@ -142,7 +142,7 @@ public class FooterController {
     private void updateWarningButton(Optional<Warning> warning) {
         warningButton.setVisible(warning.isPresent());
         warning.ifPresent(w -> {
-            String msg = BundleUtils.getLabel(w.messageKey);
+            String msg = BundleUtils.getLabel(w.getMessageKey());
             warningButton.setTooltip(new Tooltip(msg));
             logger.warn(msg);
         });
