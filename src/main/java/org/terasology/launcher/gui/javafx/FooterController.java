@@ -44,10 +44,10 @@ public class FooterController {
     @FXML
     private Label versionInfo;
     private HostServices hostServices;
-    private Property<Optional<Warning>> warning;
+    private Property<Optional<Warning>> warningProperty;
 
     public FooterController() {
-        warning = new SimpleObjectProperty<>(Optional.empty());
+        warningProperty = new SimpleObjectProperty<>(Optional.empty());
     }
 
     private void updateLabels() {
@@ -66,7 +66,7 @@ public class FooterController {
     @FXML
     public void initialize() {
         updateLabels();
-        warning.addListener((value, oldValue, newValue) -> updateWarningButton(newValue));
+        warningProperty.addListener((value, oldValue, newValue) -> updateWarningButton(newValue));
     }
 
     @FXML
@@ -148,7 +148,7 @@ public class FooterController {
         });
     }
 
-    void bind(ReadOnlyProperty<Optional<Warning>> warning) {
-        this.warning.bind(warning);
+    void bind(ReadOnlyProperty<Optional<Warning>> property) {
+        this.warningProperty.bind(property);
     }
 }
