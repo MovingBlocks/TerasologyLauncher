@@ -21,6 +21,9 @@ import javafx.scene.Node;
 import javafx.util.Duration;
 
 public class FXUtils {
+
+    private FXUtils() {}
+
     /**
      * Creates a {@link javafx.animation.ScaleTransition} with the given factor for the specified node element.
      *
