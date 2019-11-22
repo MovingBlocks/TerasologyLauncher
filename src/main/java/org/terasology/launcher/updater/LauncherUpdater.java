@@ -200,7 +200,8 @@ public final class LauncherUpdater {
             final URL updateURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
             logger.trace("Update URL: {}", updateURL);
 
-            final Path downloadedZipFile = downloadDirectory.resolve( jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
+            final Path downloadedZipFile =
+                downloadDirectory.resolve(jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
             logger.trace("Download ZIP file: {}", downloadedZipFile);
 
             DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new DummyProgressListener());
