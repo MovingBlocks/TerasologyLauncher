@@ -119,11 +119,8 @@ public class TestGameVersions {
 
         int expectedBuildsPerJob = 5; // Four builds (including the 'filled in' ones) per job, plus the virtual 'latest' version
 
-        Set<Integer> successfulStable = new HashSet<>();
-        successfulStable.addAll(Arrays.asList(minStable, minStable + 3));
-
-        Set<Integer> successfulUnstable = new HashSet<>();
-        successfulUnstable.addAll(Arrays.asList(minUnstable, minUnstable + 3));
+        Set<Integer> successfulStable = new HashSet<>(Arrays.asList(minStable, minStable + 3));
+        Set<Integer> successfulUnstable = new HashSet<>(Arrays.asList(minUnstable, minUnstable + 3));
 
         TestingUtils.mockBuildVersions(buildVersions);
         this.loadGameVersions(gameVersions);
@@ -175,14 +172,8 @@ public class TestGameVersions {
                     latest.getBuildNumber(), versions.get(1).getBuildNumber());
             for (int i = 0; i < versions.size(); i++) {
                 TerasologyGameVersion version = versions.get(i);
-                Assert.assertEquals(String.format(
-                        "Build should not be installed: %s!", version),
-                        false, version.isInstalled());
+                Assert.assertFalse(String.format("Build should not be installed: %s!", version), version.isInstalled());
                 additionalAssertions.accept(version, i);
-
-                if (version != latest && version.isLatest()) {
-                    Assert.assertNull(String.format("Found more than one latest build: %s %s", latest, version), latest);
-                }
             }
         }
     }
@@ -217,7 +208,6 @@ public class TestGameVersions {
         return gameVersions;
     }
 
-
     private void setUpdatesAvailable(boolean available, boolean omegaAvailable) throws Exception {
         int minStable = GameJob.TerasologyStable.getMinBuildNumber() + 1;
         int minUnstable = GameJob.Terasology.getMinBuildNumber() + 1;
@@ -229,5 +219,4 @@ public class TestGameVersions {
 
         TestingUtils.mockBuildVersions(buildVersions);
     }
-
 }
