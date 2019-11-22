@@ -20,9 +20,9 @@ import javafx.animation.ScaleTransition;
 import javafx.scene.Node;
 import javafx.util.Duration;
 
-public class FXUtils {
+final class FXUtils {
 
-    private FXUtils() {}
+    private FXUtils() { }
 
     /**
      * Creates a {@link javafx.animation.ScaleTransition} with the given factor for the specified node element.
@@ -31,7 +31,7 @@ public class FXUtils {
      * @param node   the target node
      * @return a transition object
      */
-    public static ScaleTransition createScaleTransition(final double factor, final Node node) {
+    static ScaleTransition createScaleTransition(final double factor, final Node node) {
         final ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(200), node);
         scaleTransition.setFromX(node.getScaleX());
         scaleTransition.setFromY(node.getScaleY());
