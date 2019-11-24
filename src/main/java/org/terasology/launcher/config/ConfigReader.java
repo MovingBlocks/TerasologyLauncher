@@ -36,10 +36,12 @@ class ConfigReader extends Service<Void> {
     private static final Logger logger = LoggerFactory.getLogger(ConfigReader.class);
 
     private final ConfigManager manager;
+    private final Path configPath;
     private final ConfigValidator validator;
 
     ConfigReader(ConfigManager manager) {
         this.manager = manager;
+        configPath = manager.getConfigPath();
         validator = new ConfigValidator(manager.getConfig());
     }
 
@@ -47,21 +49,19 @@ class ConfigReader extends Service<Void> {
     protected Task<Void> createTask() {
         return new Task<Void>() {
             @Override
-            protected Void call() {
-                final Path configFile = manager.getConfigPath();
-                if (Files.exists(configFile)) {
+            protected Void call() throws IOException {
+                if (Files.exists(configPath)) {
                     try (BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(Files.newInputStream(configFile))
+                            new InputStreamReader(Files.newInputStream(configPath))
                     )) {
                         final Config config = manager.getGson().fromJson(reader, Config.Builder.class)
                                 .launcherDir(manager.getLauncherDir())
                                 .build();
                         manager.setConfig(validator.validate(config));
-                    } catch (IOException e) {
-                        logger.error("Failed to read config file: {}", configFile);
                     }
                 } else {
-                    logger.warn("Config file was not found: {}", configFile);
+                    logger.warn("Config file was not found: {}", configPath);
+                    cancel();
                 }
                 return null;
             }
@@ -70,6 +70,16 @@ class ConfigReader extends Service<Void> {
 
     @Override
     protected void succeeded() {
-        logger.debug("Loaded config file: {}", manager.getConfigPath());
+        logger.debug("Finished reading config file: {}", configPath);
+    }
+
+    @Override
+    protected void cancelled() {
+        logger.debug("Cancelled reading config file: {}", configPath);
+    }
+
+    @Override
+    protected void failed() {
+        logger.error("Failed reading config file: {}", configPath);
     }
 }

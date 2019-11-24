@@ -25,6 +25,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * A {@link Service} to write the current configurations
@@ -34,22 +35,22 @@ class ConfigWriter extends Service<Void> {
     private static final Logger logger = LoggerFactory.getLogger(ConfigWriter.class);
 
     private final ConfigManager manager;
+    private final Path configPath;
 
     ConfigWriter(ConfigManager manager) {
         this.manager = manager;
+        configPath = manager.getConfigPath();
     }
 
     @Override
     protected Task<Void> createTask() {
         return new Task<Void>() {
             @Override
-            protected Void call() throws Exception {
+            protected Void call() throws IOException {
                 try (BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(Files.newOutputStream(manager.getConfigPath()))
+                        new OutputStreamWriter(Files.newOutputStream(configPath))
                 )) {
                     manager.getGson().toJson(manager.getConfig(), Config.class, writer);
-                } catch (IOException e) {
-                    logger.error("Failed to write config file: {}", manager.getConfigPath());
                 }
                 return null;
             }
@@ -58,6 +59,16 @@ class ConfigWriter extends Service<Void> {
 
     @Override
     protected void succeeded() {
-        logger.debug("Saved config file: {}", manager.getConfigPath());
+        logger.debug("Finished writing config file: {}", configPath);
+    }
+
+    @Override
+    protected void cancelled() {
+        logger.debug("Cancelled writing config file: {}", configPath);
+    }
+
+    @Override
+    protected void failed() {
+        logger.error("Failed writing config file: {}", configPath);
     }
 }

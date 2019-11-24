@@ -32,12 +32,16 @@ class PackageAdapter extends TypeAdapter<Package> {
 
     @Override
     public void write(JsonWriter out, Package pkg) throws IOException {
-        out.beginObject()
-            .name(KEY_NAME)
-            .value(pkg.getName())
-            .name(KEY_VERSION)
-            .value(pkg.getVersion())
-            .endObject();
+        if (pkg != null) {
+            out.beginObject()
+                .name(KEY_NAME)
+                .value(pkg.getName())
+                .name(KEY_VERSION)
+                .value(pkg.getVersion())
+                .endObject();
+        } else {
+            out.nullValue();
+        }
     }
 
     @Override
