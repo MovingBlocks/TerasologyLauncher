@@ -33,13 +33,13 @@ import java.util.Locale;
 /**
  * Provides methods to access configuration values and
  * supports reading and writing them to the disk. This
- * is a singleton class and should only be accessed
- * from the JavaFX application thread because of its
- * Services API.
+ * is a singleton class and its instance should be
+ * accessed only by using the {@code get()} method.
  */
 public class ConfigManager {
     private static final Logger logger = LoggerFactory.getLogger(ConfigManager.class);
     private static final String CONFIG_FILE = "config.json";
+    private static volatile ConfigManager instance;
 
     private final Path launcherDir;
     private final Path configPath;
@@ -48,7 +48,12 @@ public class ConfigManager {
     private final Service<Void> reader;
     private final Service<Void> writer;
 
-    public ConfigManager() {
+    private ConfigManager() {
+        // Prevent calling via reflection
+        if (instance != null) {
+            throw new RuntimeException("Cannot create second instance of a singleton class");
+        }
+
         launcherDir = resolveLauncherDir();
         configPath = launcherDir.resolve(CONFIG_FILE);
         config = createDefaultConfig();
@@ -98,10 +103,24 @@ public class ConfigManager {
                 .build();
     }
 
+    /**
+     * Provides a reader service that can be used to read
+     * configurations from the local config file. It should
+     * be used only from the JavaFX Application thread.
+     *
+     * @return the reader service
+     */
     public Service<Void> getReader() {
         return reader;
     }
 
+    /**
+     * Provides a writer service that can be used to write
+     * configurations to the local config file. It should
+     * be used only from the JavaFX Application thread.
+     *
+     * @return the writer service
+     */
     public Service<Void> getWriter() {
         return writer;
     }
@@ -121,7 +140,7 @@ public class ConfigManager {
     /**
      * Provides an immutable {@link Config} instance. It is
      * initially filled with default configurations which
-     * are reset when reader service is run.
+     * are reset after reader service is run.
      *
      * @return the default {@link Config} instance
      */
@@ -131,5 +150,22 @@ public class ConfigManager {
 
     void setConfig(Config config) {
         this.config = config;
+    }
+
+    /**
+     * Provides the only instance of this class.
+     *
+     * @return the singleton instance
+     */
+    public static ConfigManager get() {
+        // Double check locking
+        if (instance == null) {
+            synchronized (ConfigManager.class) {
+                if (instance == null) {
+                    instance = new ConfigManager();
+                }
+            }
+        }
+        return instance;
     }
 }
