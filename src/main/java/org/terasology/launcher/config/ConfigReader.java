@@ -35,7 +35,7 @@ class ConfigReader extends Service<Config> {
 
     ConfigReader(ConfigManager manager) {
         this.manager = manager;
-        validator = new ConfigValidator();
+        validator = new ConfigValidator(manager.getDefaultConfig());
     }
 
     @Override

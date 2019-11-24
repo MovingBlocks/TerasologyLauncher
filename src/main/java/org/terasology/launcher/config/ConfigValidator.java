@@ -20,65 +20,48 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.JavaHeapSize;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
 class ConfigValidator {
     private static final Logger logger = LoggerFactory.getLogger(ConfigValidator.class);
-    private static final List<Rule> RULES = Arrays.asList(
-            // TODO: Fix validation for immutable Config
-            // Max heap size
-            new Rule(
-                    c -> !(System.getProperty("os.arch").equals("x86")
-                            && c.getMaxMemory().compareTo(JavaHeapSize.GB_1_5) > 0),
-                    "Max memory cannot be greater than 1.5 GB for a 32-bit JVM",
-                    c -> c.setMaxMemory(JavaHeapSize.GB_1_5)
-            ),
 
-            // Initial heap size
-            new Rule(
-                    c -> c.getInitMemory().compareTo(c.getMaxMemory()) < 0,
-                    "Initial memory cannot be greater than max heap size",
-                    c -> c.setInitMemory(c.getMaxMemory())
-            )
-    );
+    private final Config defaultConfig;
 
-    Config validate(Config config) {
-        for (Rule rule : RULES) {
-            if (rule.brokenBy(config)) {
-                logger.error("Invalid configuration: {}", rule.getErrorMsg());
-                rule.correct(config);
-            }
-        }
-        return config;
+    ConfigValidator(final Config defaultConfig) {
+        this.defaultConfig = defaultConfig;
     }
 
-    private static class Rule {
-        private final Predicate<Config> predicate;
-        private final String errorMsg;
-        private final Consumer<Config> correction;
+    Config validate(final Config config) {
+        final GameConfig gameConfig = config.getGameConfig();
+        return config.rebuilder()
+                .gameConfig(gameConfig.rebuilder()
+                        .maxMemory(validateMaxMemory(gameConfig))
+                        .initMemory(validateInitMemory(gameConfig))
+                        .build())
+                .build();
+    }
 
-        Rule(Predicate<Config> predicate,
-             String errorMsg,
-             Consumer<Config> correction
+    private JavaHeapSize validateMaxMemory(final GameConfig gameConfig) {
+        final JavaHeapSize valid;
+        if (!(System.getProperty("os.arch").equals("x86")
+                && gameConfig.getMaxMemory().compareTo(JavaHeapSize.GB_1_5) > 0)
         ) {
-            this.predicate = predicate;
-            this.errorMsg = errorMsg;
-            this.correction = correction;
+            valid = gameConfig.getMaxMemory();
+        } else {
+            valid = defaultConfig.getGameConfig().getMaxMemory();
+            logger.warn("Max memory cannot be greater than 1.5 GB for a 32-bit JVM");
+            logger.debug("Continuing with max memory: {}", valid);
         }
+        return valid;
+    }
 
-        boolean brokenBy(Config config) {
-            return !predicate.test(config);
+    private JavaHeapSize validateInitMemory(final GameConfig gameConfig) {
+        final JavaHeapSize valid;
+        if (gameConfig.getInitMemory().compareTo(gameConfig.getMaxMemory()) < 0) {
+            valid = gameConfig.getInitMemory();
+        } else {
+            valid = gameConfig.getMaxMemory();
+            logger.warn("Initial heap size cannot be greater than max heap size");
+            logger.debug("Continuing with init memory: {}", valid);
         }
-
-        String getErrorMsg() {
-            return errorMsg;
-        }
-
-        void correct(Config config) {
-            correction.accept(config);
-        }
+        return valid;
     }
 }

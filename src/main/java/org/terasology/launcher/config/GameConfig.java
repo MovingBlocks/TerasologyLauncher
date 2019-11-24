@@ -31,7 +31,7 @@ public final class GameConfig {
     private final String gameParam;
     private final LogLevel logLevel;
 
-    private GameConfig(Builder builder) {
+    private GameConfig(final Builder builder) {
         this.installDir = builder.installDir;
         this.dataDir = builder.dataDir;
         this.maxMemory = builder.maxMemory;
@@ -69,6 +69,10 @@ public final class GameConfig {
         return logLevel;
     }
 
+    public Builder rebuilder() {
+        return new Builder(this);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -91,7 +95,17 @@ public final class GameConfig {
             gameParam = "";
         }
 
-        public Builder installDir(Path newInstallDir) {
+        private Builder(final GameConfig last) {
+            installDir = last.installDir;
+            dataDir = last.dataDir;
+            maxMemory = last.maxMemory;
+            initMemory = last.initMemory;
+            javaParam = last.javaParam;
+            gameParam = last.gameParam;
+            logLevel = last.logLevel;
+        }
+
+        public Builder installDir(final Path newInstallDir) {
             installDir = newInstallDir;
             return this;
         }

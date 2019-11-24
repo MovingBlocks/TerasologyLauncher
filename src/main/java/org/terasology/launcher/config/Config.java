@@ -31,7 +31,7 @@ public final class Config {
     private final boolean cacheGamePackages;
     private final Package selectedPackage;
 
-    private Config(Builder builder) {
+    private Config(final Builder builder) {
         this.gameConfig = builder.gameConfig;
         this.locale = builder.locale;
         this.launcherDir = builder.launcherDir;
@@ -69,6 +69,10 @@ public final class Config {
         return selectedPackage;
     }
 
+    public Builder rebuilder() {
+        return new Builder(this);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -87,6 +91,16 @@ public final class Config {
         private Package selectedPackage;
 
         private Builder() { }
+
+        private Builder(final Config last) {
+            gameConfig = last.gameConfig;
+            locale = last.locale;
+            launcherDir = last.launcherDir;
+            checkUpdatesOnLaunch = last.checkUpdatesOnLaunch;
+            closeAfterGameStarts = last.closeAfterGameStarts;
+            cacheGamePackages = last.cacheGamePackages;
+            selectedPackage = last.selectedPackage;
+        }
 
         public Builder gameConfig(final GameConfig newGameConfig) {
             gameConfig = newGameConfig;
