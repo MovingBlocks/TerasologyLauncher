@@ -22,10 +22,13 @@ import javafx.concurrent.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.Package;
+import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
+import org.terasology.launcher.util.LogLevel;
 import org.terasology.launcher.util.OperatingSystem;
 
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Optional;
 
 public class ConfigManager {
@@ -35,9 +38,10 @@ public class ConfigManager {
     private final Path launcherDir;
     private final Path configPath;
     private final Gson gson;
-    private LauncherConfig config;
-    private final Service<LauncherConfig> loadService;
-    private final Service<Void> saveService;
+    private final Config defaultConfig;
+    private Config config;
+    private final Service<Config> reader;
+    private final Service<Void> writer;
 
     public ConfigManager() {
         launcherDir = resolveLauncherDir();
@@ -48,9 +52,10 @@ public class ConfigManager {
                 .disableHtmlEscaping()
                 .setPrettyPrinting()
                 .create();
+        defaultConfig = createDefaultConfig();
 
-        loadService = new ConfigLoadService(this);
-        saveService = new ConfigSaveService(this);
+        reader = new ConfigReader(this);
+        writer = new ConfigWriter(this);
     }
 
     private Path resolveLauncherDir() {
@@ -67,12 +72,33 @@ public class ConfigManager {
         // TODO: Use local methods for all stuff above
     }
 
-    public Service<LauncherConfig> getLoadService() {
-        return loadService;
+    private Config createDefaultConfig() {
+        return Config.builder()
+                .gameConfig(GameConfig.builder()
+                        .installDir(launcherDir.resolve("Terasology"))
+                        .dataDir(launcherDir.resolve("TerasologyData"))
+                        .maxMemory(JavaHeapSize.GB_1_5)
+                        .initMemory(JavaHeapSize.GB_1)
+                        .javaParam("-XX:+UseParNewGC"
+                                + " -XX:+UseConcMarkSweepGC"
+                                + " -XX:MaxGCPauseMillis=20"
+                                + " -XX:ParallelGCThreads=10")
+                        .logLevel(LogLevel.DEFAULT)
+                        .build())
+                .locale(Locale.ENGLISH)
+                .launcherDir(launcherDir)
+                .checkUpdatesOnLaunch(false)
+                .cacheGamePackages(true)
+                .closeAfterGameStarts(true)
+                .build();
     }
 
-    public Service<Void> getSaveService() {
-        return saveService;
+    public Service<Config> getReader() {
+        return reader;
+    }
+
+    public Service<Void> getWriter() {
+        return writer;
     }
 
     Path getLauncherDir() {
@@ -87,11 +113,15 @@ public class ConfigManager {
         return gson;
     }
 
-    public Optional<LauncherConfig> getConfig() {
+    public Config getDefaultConfig() {
+        return defaultConfig;
+    }
+
+    public Optional<Config> getConfig() {
         return Optional.ofNullable(config);
     }
 
-    void setConfig(LauncherConfig config) {
+    void setConfig(Config config) {
         this.config = config;
     }
 }

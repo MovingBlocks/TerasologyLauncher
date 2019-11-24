@@ -26,12 +26,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 
-class ConfigSaveService extends Service<Void> {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigSaveService.class);
+class ConfigWriter extends Service<Void> {
+    private static final Logger logger = LoggerFactory.getLogger(ConfigWriter.class);
 
     private final ConfigManager manager;
 
-    ConfigSaveService(ConfigManager manager) {
+    ConfigWriter(ConfigManager manager) {
         this.manager = manager;
     }
 
@@ -44,7 +44,7 @@ class ConfigSaveService extends Service<Void> {
                         new OutputStreamWriter(Files.newOutputStream(manager.getConfigPath()))
                 )) {
                     manager.getConfig().ifPresent(config ->
-                            manager.getGson().toJson(config, LauncherConfig.class, writer));
+                            manager.getGson().toJson(config, Config.class, writer));
                 } catch (IOException e) {
                     logger.error("Failed to write config file: {}", manager.getConfigPath());
                 }

@@ -20,50 +20,46 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.LogLevel;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Locale;
 
-class ConfigLoadService extends Service<LauncherConfig> {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigLoadService.class);
+class ConfigReader extends Service<Config> {
+    private static final Logger logger = LoggerFactory.getLogger(ConfigReader.class);
 
     private final ConfigManager manager;
-    private final LauncherConfig defaultConfig;
     private final ConfigValidator validator;
 
-    ConfigLoadService(ConfigManager manager) {
+    ConfigReader(ConfigManager manager) {
         this.manager = manager;
         validator = new ConfigValidator();
-        defaultConfig = createDefaultConfig();
     }
 
     @Override
-    protected Task<LauncherConfig> createTask() {
-        return new Task<LauncherConfig>() {
+    protected Task<Config> createTask() {
+        return new Task<Config>() {
             @Override
-            protected LauncherConfig call() {
+            protected Config call() {
                 final Path configFile = manager.getConfigPath();
                 if (Files.notExists(configFile)) {
                     logger.info("No config file was found. Proceeding with defaults.");
-                    return defaultConfig;
+                    return manager.getDefaultConfig();
                 }
 
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(Files.newInputStream(configFile))
                 )) {
-                    final LauncherConfig config = manager.getGson().fromJson(reader, LauncherConfig.class);
-                    config.setLauncherDir(defaultConfig.getLauncherDir());
+                    final Config config = manager.getGson().fromJson(reader, Config.Builder.class)
+                            .launcherDir(manager.getLauncherDir())
+                            .build();
                     return validator.validate(config);
                 } catch (IOException e) {
                     logger.error("Failed to read config file: {}", configFile);
                     logger.warn("Using default configurations");
-                    return defaultConfig;
+                    return manager.getDefaultConfig();
                 }
             }
         };
@@ -73,26 +69,5 @@ class ConfigLoadService extends Service<LauncherConfig> {
     protected void succeeded() {
         logger.info("Loaded config file: {}", manager.getConfigPath());
         manager.setConfig(getValue());
-    }
-
-    private LauncherConfig createDefaultConfig() {
-        final Path launcherDir = manager.getLauncherDir();
-        final LauncherConfig config = new LauncherConfig();
-
-        config.setInstallDir(launcherDir.resolve("Terasology"));
-        config.setDataDir(config.getInstallDir());
-        config.setMaxMemory(JavaHeapSize.GB_2);
-        config.setInitMemory(JavaHeapSize.GB_1);
-        config.setJavaParam("-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=20 -XX:ParallelGCThreads=10");
-        config.setGameParam("");
-        config.setLogLevel(LogLevel.DEFAULT);
-        config.setLocale(Locale.ENGLISH);
-        config.setLauncherDir(launcherDir);
-        config.setCheckUpdatesOnLaunch(false);
-        config.setCacheGamePackages(true);
-        config.setCloseAfterGameStart(true);
-        config.setSelectedPackage(null);
-
-        return validator.validate(config);
     }
 }

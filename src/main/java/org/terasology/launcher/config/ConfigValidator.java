@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 class ConfigValidator {
     private static final Logger logger = LoggerFactory.getLogger(ConfigValidator.class);
     private static final List<Rule> RULES = Arrays.asList(
+            // TODO: Fix validation for immutable Config
             // Max heap size
             new Rule(
                     c -> !(System.getProperty("os.arch").equals("x86")
@@ -44,7 +45,7 @@ class ConfigValidator {
             )
     );
 
-    LauncherConfig validate(LauncherConfig config) {
+    Config validate(Config config) {
         for (Rule rule : RULES) {
             if (rule.brokenBy(config)) {
                 logger.error("Invalid configuration: {}", rule.getErrorMsg());
@@ -55,20 +56,20 @@ class ConfigValidator {
     }
 
     private static class Rule {
-        private final Predicate<LauncherConfig> predicate;
+        private final Predicate<Config> predicate;
         private final String errorMsg;
-        private final Consumer<LauncherConfig> correction;
+        private final Consumer<Config> correction;
 
-        Rule(Predicate<LauncherConfig> predicate,
+        Rule(Predicate<Config> predicate,
              String errorMsg,
-             Consumer<LauncherConfig> correction
+             Consumer<Config> correction
         ) {
             this.predicate = predicate;
             this.errorMsg = errorMsg;
             this.correction = correction;
         }
 
-        boolean brokenBy(LauncherConfig config) {
+        boolean brokenBy(Config config) {
             return !predicate.test(config);
         }
 
@@ -76,7 +77,7 @@ class ConfigValidator {
             return errorMsg;
         }
 
-        void correct(LauncherConfig config) {
+        void correct(Config config) {
             correction.accept(config);
         }
     }
