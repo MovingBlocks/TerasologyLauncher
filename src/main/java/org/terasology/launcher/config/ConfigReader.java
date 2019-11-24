@@ -27,7 +27,12 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-class ConfigReader extends Service<Config> {
+/**
+ * A {@link Service} to read a config file from the disk.
+ * On success the {@link Config} instance is validated
+ * and provided back to the {@link ConfigManager}.
+ */
+class ConfigReader extends Service<Void> {
     private static final Logger logger = LoggerFactory.getLogger(ConfigReader.class);
 
     private final ConfigManager manager;
@@ -35,39 +40,36 @@ class ConfigReader extends Service<Config> {
 
     ConfigReader(ConfigManager manager) {
         this.manager = manager;
-        validator = new ConfigValidator(manager.getDefaultConfig());
+        validator = new ConfigValidator(manager.getConfig());
     }
 
     @Override
-    protected Task<Config> createTask() {
-        return new Task<Config>() {
+    protected Task<Void> createTask() {
+        return new Task<Void>() {
             @Override
-            protected Config call() {
+            protected Void call() {
                 final Path configFile = manager.getConfigPath();
-                if (Files.notExists(configFile)) {
-                    logger.info("No config file was found. Proceeding with defaults.");
-                    return manager.getDefaultConfig();
+                if (Files.exists(configFile)) {
+                    try (BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(Files.newInputStream(configFile))
+                    )) {
+                        final Config config = manager.getGson().fromJson(reader, Config.Builder.class)
+                                .launcherDir(manager.getLauncherDir())
+                                .build();
+                        manager.setConfig(validator.validate(config));
+                    } catch (IOException e) {
+                        logger.error("Failed to read config file: {}", configFile);
+                    }
+                } else {
+                    logger.warn("Config file was not found: {}", configFile);
                 }
-
-                try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(Files.newInputStream(configFile))
-                )) {
-                    final Config config = manager.getGson().fromJson(reader, Config.Builder.class)
-                            .launcherDir(manager.getLauncherDir())
-                            .build();
-                    return validator.validate(config);
-                } catch (IOException e) {
-                    logger.error("Failed to read config file: {}", configFile);
-                    logger.warn("Using default configurations");
-                    return manager.getDefaultConfig();
-                }
+                return null;
             }
         };
     }
 
     @Override
     protected void succeeded() {
-        logger.info("Loaded config file: {}", manager.getConfigPath());
-        manager.setConfig(getValue());
+        logger.debug("Loaded config file: {}", manager.getConfigPath());
     }
 }

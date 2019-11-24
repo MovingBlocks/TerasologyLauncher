@@ -26,6 +26,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 
+/**
+ * A {@link Service} to write the current configurations
+ * to a config file on the disk.
+ */
 class ConfigWriter extends Service<Void> {
     private static final Logger logger = LoggerFactory.getLogger(ConfigWriter.class);
 
@@ -43,8 +47,7 @@ class ConfigWriter extends Service<Void> {
                 try (BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(Files.newOutputStream(manager.getConfigPath()))
                 )) {
-                    manager.getConfig().ifPresent(config ->
-                            manager.getGson().toJson(config, Config.class, writer));
+                    manager.getGson().toJson(manager.getConfig(), Config.class, writer);
                 } catch (IOException e) {
                     logger.error("Failed to write config file: {}", manager.getConfigPath());
                 }
@@ -55,6 +58,6 @@ class ConfigWriter extends Service<Void> {
 
     @Override
     protected void succeeded() {
-        logger.info("Saved config file: {}", manager.getConfigPath());
+        logger.debug("Saved config file: {}", manager.getConfigPath());
     }
 }

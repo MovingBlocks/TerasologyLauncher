@@ -23,6 +23,9 @@ import org.terasology.launcher.packages.Package;
 
 import java.io.IOException;
 
+/**
+ * Adds GSON support for {@link Package} instances.
+ */
 class PackageAdapter extends TypeAdapter<Package> {
     private static final String KEY_NAME = "name";
     private static final String KEY_VERSION = "version";

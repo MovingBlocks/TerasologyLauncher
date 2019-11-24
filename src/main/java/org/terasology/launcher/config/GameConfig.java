@@ -22,6 +22,11 @@ import org.terasology.launcher.util.LogLevel;
 import java.nio.file.Path;
 import java.util.Objects;
 
+/**
+ * Stores configuration values specific to the game.
+ * It is immutable and can be instantiated only with
+ * the help of a {@link Builder} instance.
+ */
 public final class GameConfig {
     private final Path installDir;
     private final Path dataDir;
@@ -69,10 +74,24 @@ public final class GameConfig {
         return logLevel;
     }
 
+    /**
+     * Provides a pre-filled {@link Builder} instance
+     * with all configurations copied from this. Use it
+     * to create a new {@link GameConfig} instance with
+     * modified configurations.
+     *
+     * @return a pre-filled {@link Builder} instance
+     */
     public Builder rebuilder() {
         return new Builder(this);
     }
 
+    /**
+     * Provides an empty {@link Builder} instance to fill
+     * configurations using builder pattern.
+     *
+     * @return an empty {@link Builder} instance
+     */
     public static Builder builder() {
         return new Builder();
     }

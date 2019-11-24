@@ -29,8 +29,14 @@ import org.terasology.launcher.util.OperatingSystem;
 
 import java.nio.file.Path;
 import java.util.Locale;
-import java.util.Optional;
 
+/**
+ * Provides methods to access configuration values and
+ * supports reading and writing them to the disk. This
+ * is a singleton class and should only be accessed
+ * from the JavaFX application thread because of its
+ * Services API.
+ */
 public class ConfigManager {
     private static final Logger logger = LoggerFactory.getLogger(ConfigManager.class);
     private static final String CONFIG_FILE = "config.json";
@@ -38,21 +44,20 @@ public class ConfigManager {
     private final Path launcherDir;
     private final Path configPath;
     private final Gson gson;
-    private final Config defaultConfig;
     private Config config;
-    private final Service<Config> reader;
+    private final Service<Void> reader;
     private final Service<Void> writer;
 
     public ConfigManager() {
         launcherDir = resolveLauncherDir();
         configPath = launcherDir.resolve(CONFIG_FILE);
+        config = createDefaultConfig();
         gson = new GsonBuilder()
                 .registerTypeAdapter(Path.class, new PathAdapter())
                 .registerTypeAdapter(Package.class, new PackageAdapter())
                 .disableHtmlEscaping()
                 .setPrettyPrinting()
                 .create();
-        defaultConfig = createDefaultConfig();
 
         reader = new ConfigReader(this);
         writer = new ConfigWriter(this);
@@ -93,7 +98,7 @@ public class ConfigManager {
                 .build();
     }
 
-    public Service<Config> getReader() {
+    public Service<Void> getReader() {
         return reader;
     }
 
@@ -113,12 +118,15 @@ public class ConfigManager {
         return gson;
     }
 
-    public Config getDefaultConfig() {
-        return defaultConfig;
-    }
-
-    public Optional<Config> getConfig() {
-        return Optional.ofNullable(config);
+    /**
+     * Provides an immutable {@link Config} instance. It is
+     * initially filled with default configurations which
+     * are reset when reader service is run.
+     *
+     * @return the default {@link Config} instance
+     */
+    public Config getConfig() {
+        return config;
     }
 
     void setConfig(Config config) {

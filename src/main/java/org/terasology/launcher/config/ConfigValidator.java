@@ -20,6 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.JavaHeapSize;
 
+/**
+ * Provides validated configurations by resetting to
+ * default values in case any configuration is found
+ * invalid.
+ */
 class ConfigValidator {
     private static final Logger logger = LoggerFactory.getLogger(ConfigValidator.class);
 
@@ -29,6 +34,15 @@ class ConfigValidator {
         this.defaultConfig = defaultConfig;
     }
 
+    /**
+     * Validates the configurations provided by a {@link Config}
+     * instance and returns its validated rebuild. If any
+     * configuration is found invalid, the default value for
+     * that configuration is used while rebuilding the instance.
+     *
+     * @param config the original {@link Config} instance
+     * @return the validated {@link Config} instance
+     */
     Config validate(final Config config) {
         final GameConfig gameConfig = config.getGameConfig();
         return config.rebuilder()
@@ -39,6 +53,13 @@ class ConfigValidator {
                 .build();
     }
 
+    /**
+     * Checks if the maximum memory is not set to a value greater
+     * than 1.5GB when the JVM is 32-bit.
+     *
+     * @param gameConfig the {@link GameConfig} instance to check from
+     * @return the same max memory if valid else the default value
+     */
     private JavaHeapSize validateMaxMemory(final GameConfig gameConfig) {
         final JavaHeapSize valid;
         if (!(System.getProperty("os.arch").equals("x86")
@@ -53,6 +74,13 @@ class ConfigValidator {
         return valid;
     }
 
+    /**
+     * Checks if the initial memory is set to a value lesser than
+     * the maximum memory.
+     *
+     * @param gameConfig the {@link GameConfig} instance to check from
+     * @return the same init memory if valid else the value of max memory
+     */
     private JavaHeapSize validateInitMemory(final GameConfig gameConfig) {
         final JavaHeapSize valid;
         if (gameConfig.getInitMemory().compareTo(gameConfig.getMaxMemory()) < 0) {

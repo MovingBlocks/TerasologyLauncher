@@ -22,6 +22,11 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Objects;
 
+/**
+ * Stores all application-wide configuration values.
+ * It is immutable and can be instantiated only with
+ * the help of a {@link Builder} instance.
+ */
 public final class Config {
     private final GameConfig gameConfig;
     private final Locale locale;
@@ -69,10 +74,24 @@ public final class Config {
         return selectedPackage;
     }
 
+    /**
+     * Provides a pre-filled {@link Builder} instance
+     * with all configurations copied from this. Use it
+     * to create a new {@link Config} instance with
+     * modified configurations.
+     *
+     * @return a pre-filled {@link Builder} instance
+     */
     public Builder rebuilder() {
         return new Builder(this);
     }
 
+    /**
+     * Provides an empty {@link Builder} instance to fill
+     * configurations using builder pattern.
+     *
+     * @return an empty {@link Builder} instance
+     */
     public static Builder builder() {
         return new Builder();
     }

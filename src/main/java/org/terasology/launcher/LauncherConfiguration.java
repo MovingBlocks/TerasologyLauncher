@@ -29,6 +29,7 @@ import java.nio.file.Path;
  *  - user settings in form of {@link BaseLauncherSettings}
  *  - the {@link PackageManager} used to download new games
  */
+@Deprecated
 public class LauncherConfiguration {
 
     private final Path launcherDirectory;

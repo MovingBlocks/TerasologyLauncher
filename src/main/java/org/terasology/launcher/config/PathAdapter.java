@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Adds GSON support for {@link Path} instances.
+ */
 class PathAdapter extends TypeAdapter<Path> {
     @Override
     public void write(JsonWriter out, Path path) throws IOException {
