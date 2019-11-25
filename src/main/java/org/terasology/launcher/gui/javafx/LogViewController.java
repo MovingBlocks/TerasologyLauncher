@@ -32,7 +32,7 @@ import java.util.Date;
 
 public class LogViewController extends AppenderBase<ILoggingEvent> {
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
     private final StringBuffer buffer;
 
@@ -78,7 +78,7 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
         final String message = loggingEvent.getFormattedMessage();
         final LocalDateTime timestamp = timestampFromEvent(loggingEvent);
 
-        buffer.append(String.format("%s | %-5s | ", formatter.format(timestamp), loggingEvent.getLevel()));
+        buffer.append(String.format("%s | %-5s | ", DATE_FORMATTER.format(timestamp), loggingEvent.getLevel()));
         buffer.append(message);
         buffer.append("\n");
     }

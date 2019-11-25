@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.terasology.launcher.gui.javafx;
 
 import javafx.beans.property.Property;
@@ -15,11 +31,11 @@ public class ChangelogViewController {
     private WebView changelogView;
 
     //TODO: change this to a data type the package manager can handle
-    final private Property<TerasologyGameVersion> gameVersion;
+    private final Property<TerasologyGameVersion> gameVersionProperty;
 
     public ChangelogViewController() {
-        this.gameVersion = new SimpleObjectProperty<>();
-        gameVersion.addListener((observableValue, oldVersion, newVersion) -> update(newVersion));
+        this.gameVersionProperty = new SimpleObjectProperty<>();
+        gameVersionProperty.addListener((observableValue, oldVersion, newVersion) -> update(newVersion));
     }
 
     /**
@@ -27,10 +43,10 @@ public class ChangelogViewController {
      * <p>
      * The <b>ChangelogView</b> will update every time the property changes.
      *
-     * @param version property denoting the game version to display the changelog for
+     * @param property property denoting the game version to display the changelog for
      */
-    public void bind(ReadOnlyProperty<TerasologyGameVersion> version) {
-        gameVersion.bind(version);
+    public void bind(ReadOnlyProperty<TerasologyGameVersion> property) {
+        gameVersionProperty.bind(property);
     }
 
     /**
