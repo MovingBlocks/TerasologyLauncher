@@ -160,7 +160,7 @@ public class ApplicationController {
     @FXML
     private ComboBox<PackageItem> jobBox;
     @FXML
-    private ComboBox<String> buildVersionBox;
+    private ComboBox<VersionItem> buildVersionBox;
     @FXML
     private ProgressBar progressBar;
     @FXML
@@ -386,12 +386,11 @@ public class ApplicationController {
     }
 
     private Package selectedPackage;
-    private List<Package> packages;
     private ObservableList<PackageItem> packageItems;
 
-    static class PackageItem {
+    private static class PackageItem {
         private final String name;
-        private final ObservableList<String> versionList;
+        private final ObservableList<VersionItem> versionList;
 
         PackageItem(String name) {
             this.name = name;
@@ -402,28 +401,38 @@ public class ApplicationController {
         public String toString() {
             return name;
         }
+    }
 
-        ObservableList<String> getVersionList() {
-            return versionList;
+    private static class VersionItem {
+        private final String version;
+        private final Package linkedPackage;
+
+        VersionItem(final String version, final Package linkedPackage) {
+            this.version = version;
+            this.linkedPackage = linkedPackage;
+        }
+
+        @Override
+        public String toString() {
+            return version;
         }
     }
 
     // To be called after database sync is done
     private void onSync() {
         packageItems.clear();
-        packages = packageManager.getPackages();
 
-        String currentPkgName = null;
-        PackageItem currentItem = null;
-        for (Package pkg : packages) {
-            if (pkg.getName().equals(currentPkgName)) {
-                currentItem.versionList.add(pkg.getVersion());
-            } else {
-                currentPkgName = pkg.getName();
-                currentItem = new PackageItem(currentPkgName);
-                currentItem.versionList.add(pkg.getVersion());
-                packageItems.add(currentItem);
+        String lastPkgName = null;
+        PackageItem pkgItem = null;
+        for (Package pkg : packageManager.getPackages()) {
+            if (!pkg.getName().equals(lastPkgName)) {
+                pkgItem = new PackageItem(pkg.getName());
+                packageItems.add(pkgItem);
+                lastPkgName = pkgItem.name;
             }
+            pkgItem.versionList.add(
+                    new VersionItem(pkg.getVersion(), pkg)
+            );
         }
     }
 
@@ -434,14 +443,10 @@ public class ApplicationController {
         });
 
         buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            final String pkgName = jobBox.getSelectionModel().getSelectedItem().name;
-            final String pkgVer = newVal;
-
-            selectedPackage = packages.stream()
-                    .filter(pkg -> pkg.getName().equals(pkgName)
-                            && pkg.getVersion().equals(pkgVer))
-                    .findAny()
-                    .orElse(null);
+            if (newVal == null) {
+                return;
+            }
+            selectedPackage = newVal.linkedPackage;
 
             if (selectedPackage != null && selectedPackage.isInstalled()) {
                 startAndDownloadButton.setGraphic(playImage);
@@ -450,6 +455,8 @@ public class ApplicationController {
                 startAndDownloadButton.setGraphic(downloadImage);
                 deleteButton.setDisable(true);
             }
+
+            changelogViewController.update(selectedPackage.getChangelog());
         });
 
         jobBox.setItems(packageItems);
@@ -666,7 +673,7 @@ public class ApplicationController {
         return jobBox;
     }
 
-    ComboBox<String> getBuildVersionBox() {
+    ComboBox<VersionItem> getBuildVersionBox() {
         return buildVersionBox;
     }
 }
