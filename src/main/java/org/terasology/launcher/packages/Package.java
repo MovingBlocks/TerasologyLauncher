@@ -17,6 +17,7 @@
 package org.terasology.launcher.packages;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Model of a package handled by the PackageManager.
@@ -25,12 +26,14 @@ public class Package implements Serializable {
     private final String name;
     private final String version;
     private final String url;
+    private final List<String> changelog;
     private boolean installed;
 
-    Package(String name, String version, String url) {
+    Package(String name, String version, String url, List<String> changelog) {
         this.name = name;
         this.version = version;
         this.url = url;
+        this.changelog = changelog;
         installed = false;
     }
 
@@ -48,6 +51,10 @@ public class Package implements Serializable {
 
     public String getUrl() {
         return url;
+    }
+
+    public List<String> getChangelog() {
+        return changelog;
     }
 
     public boolean isInstalled() {

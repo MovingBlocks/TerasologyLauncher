@@ -27,6 +27,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles fetching of packages from a Jenkins-based repository.
@@ -36,7 +37,12 @@ class JenkinsHandler implements RepositoryHandler {
     private static final Logger logger = LoggerFactory.getLogger(JenkinsHandler.class);
 
     private static final String JOB = "/job/";
-    private static final String API_FILTER = "/api/json?tree=builds[number,artifacts[fileName,relativePath],url]";
+    private static final String API_FILTER = "/api/json?"
+            + "tree=builds["
+            + "number,"
+            + "artifacts[fileName,relativePath],"
+            + "url,"
+            + "changeSet[items[msg]]]";
     private static final String TERASOLOGY_ZIP_PATTERN = "Terasology.*zip";
     private static final String ARTIFACT = "artifact/";
 
@@ -54,13 +60,18 @@ class JenkinsHandler implements RepositoryHandler {
             )) {
                 final ApiResult result = gson.fromJson(reader, ApiResult.class);
                 for (Build build : result.builds) {
+                    final List<String> changelog = Arrays.stream(build.changeSet.items)
+                            .map(change -> change.msg)
+                            .collect(Collectors.toList());
+
                     Arrays.stream(build.artifacts)
                             .filter(art -> art.fileName.matches(TERASOLOGY_ZIP_PATTERN))
                             .findFirst()
                             .ifPresent(art -> pkgList.add(new Package(
                                     pkgName,                                  // Package name
                                     build.number,                             // Package version
-                                    build.url + ARTIFACT + art.relativePath   // Full URL
+                                    build.url + ARTIFACT + art.relativePath,  // Full URL
+                                    changelog                                 // Changelog
                             )));
                 }
             } catch (IOException e) {
@@ -79,10 +90,19 @@ class JenkinsHandler implements RepositoryHandler {
         private String number;
         private Artifact[] artifacts;
         private String url;
+        private ChangeSet changeSet;
     }
 
     private static class Artifact {
         private String fileName;
         private String relativePath;
+    }
+
+    private static class ChangeSet {
+        private Change[] items;
+    }
+
+    private static class Change {
+        private String msg;
     }
 }
