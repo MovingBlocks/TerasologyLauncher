@@ -229,39 +229,6 @@ public class ApplicationController {
         buildVersionBox.setCellFactory(list -> new VersionListCell());
     }
 
-    private static final class VersionListCell extends ListCell<VersionItem> {
-        private static final Image ICON_CHECK = BundleUtils.getFxImage("icon_check");
-        private final HBox root;
-        private final Label labelVersion;
-        private final ImageView iconStatus;
-
-        VersionListCell() {
-            root = new HBox();
-            labelVersion = new Label();
-            iconStatus = new ImageView(ICON_CHECK);
-
-            final Pane separator = new Pane();
-            HBox.setHgrow(separator, Priority.ALWAYS);
-            HBox.setMargin(iconStatus, new Insets(0, 8, 0, 0));
-
-            root.getChildren().addAll(labelVersion, separator, iconStatus);
-        }
-
-        @Override
-        protected void updateItem(VersionItem item, boolean empty) {
-            super.updateItem(item, empty);
-
-            if (empty || item == null) {
-                setText(null);
-                setGraphic(null);
-            } else {
-                labelVersion.textProperty().bind(item.versionProperty);
-                iconStatus.visibleProperty().bind(item.installedProperty);
-                setGraphic(root);
-            }
-        }
-    }
-
     @FXML
     protected void handleExitButtonAction() {
         close();
@@ -733,5 +700,42 @@ public class ApplicationController {
 
     ComboBox<VersionItem> getBuildVersionBox() {
         return buildVersionBox;
+    }
+
+    /**
+     * Custom ListCell used to display package versions
+     * along with their installation status.
+     */
+    private static final class VersionListCell extends ListCell<VersionItem> {
+        private static final Image ICON_CHECK = BundleUtils.getFxImage("icon_check");
+        private static final Insets MARGIN = new Insets(0, 8, 0, 0);
+        private final HBox root;
+        private final Label labelVersion;
+        private final ImageView iconStatus;
+
+        VersionListCell() {
+            root = new HBox();
+            labelVersion = new Label();
+            iconStatus = new ImageView(ICON_CHECK);
+
+            final Pane separator = new Pane();
+            HBox.setHgrow(separator, Priority.ALWAYS);
+            HBox.setMargin(iconStatus, MARGIN);
+            root.getChildren().addAll(labelVersion, separator, iconStatus);
+        }
+
+        @Override
+        protected void updateItem(VersionItem item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (empty || item == null) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                labelVersion.textProperty().bind(item.versionProperty);
+                iconStatus.visibleProperty().bind(item.installedProperty);
+                setGraphic(root);
+            }
+        }
     }
 }

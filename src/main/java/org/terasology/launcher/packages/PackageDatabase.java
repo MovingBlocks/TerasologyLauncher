@@ -53,6 +53,7 @@ class PackageDatabase {
         this.installDir = installDir;
         gson = new Gson();
         database = loadDatabase();
+        markInstalled();
     }
 
     /**
@@ -60,33 +61,41 @@ class PackageDatabase {
      * in {@link #sourcesFile}.
      */
     void sync() {
-        database.clear();
-
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(Files.newInputStream(sourcesFile))
         )) {
+            final List<Package> newDatabase = new LinkedList<>();
             for (Repository source : gson.fromJson(reader, Repository[].class)) {
                 logger.trace("Fetching package list from: {}", source.url);
-                database.addAll(packageListOf(source));
+                newDatabase.addAll(packageListOf(source));
             }
 
-            // Mark the installed packages
-            if (Files.exists(installDir)) {
-                for (File pkgDir : Objects.requireNonNull(installDir.toFile().listFiles())) {
-                    for (File versionDir : Objects.requireNonNull(pkgDir.listFiles())) {
-                        database.stream()
-                                .filter(pkg -> pkg.getName().equals(pkgDir.getName())
-                                            && pkg.getVersion().equals(versionDir.getName()))
-                                .findFirst()
-                                .ifPresent(pkg -> pkg.setInstalled(true));
-                    }
-                }
-            }
+            database.clear();
+            database.addAll(newDatabase);
         } catch (IOException e) {
             logger.error("Failed to read sources: {}", sourcesFile);
             logger.warn("Aborting database synchronisation");
         } finally {
+            markInstalled();
             saveDatabase();
+        }
+    }
+
+    /**
+     * Scans the installation directory and marks the
+     * detected packages as installed.
+     */
+    private void markInstalled() {
+        if (Files.exists(installDir)) {
+            for (File pkgDir : Objects.requireNonNull(installDir.toFile().listFiles())) {
+                for (File versionDir : Objects.requireNonNull(pkgDir.listFiles())) {
+                    database.stream()
+                            .filter(pkg -> pkg.getName().equals(pkgDir.getName())
+                                    && pkg.getVersion().equals(versionDir.getName()))
+                            .findFirst()
+                            .ifPresent(pkg -> pkg.setInstalled(true));
+                }
+            }
         }
     }
 
