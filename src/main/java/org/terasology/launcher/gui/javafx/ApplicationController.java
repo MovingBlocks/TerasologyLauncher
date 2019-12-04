@@ -226,7 +226,8 @@ public class ApplicationController {
     @FXML
     public void initialize() {
         footerController.bind(warning);
-        buildVersionBox.setCellFactory(list -> new VersionListCell());
+        initComboBoxes();
+        initButtons();
     }
 
     @FXML
@@ -374,8 +375,8 @@ public class ApplicationController {
                 });
     }
 
-    public void initialize(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
-                           final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
+    public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
+                       final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
         this.tempDirectory = newTempDirectory;
@@ -397,9 +398,6 @@ public class ApplicationController {
 
         packageItems = FXCollections.observableArrayList();
         onSync();
-
-        initComboBoxes();
-        initButtons();
 
         //TODO: This only updates when the launcher is initialized (which should happen excatly once o.O)
         //      We should update this value at least every time the download directory changes (user setting).
@@ -458,6 +456,9 @@ public class ApplicationController {
                          Collectors.mapping(VersionItem::new, Collectors.toList())))
                 .forEach((name, versions) ->
                         packageItems.add(new PackageItem(name, versions)));
+
+        jobBox.setItems(packageItems);
+        jobBox.getSelectionModel().select(0);
     }
 
     private void initComboBoxes() {
@@ -466,6 +467,7 @@ public class ApplicationController {
             buildVersionBox.getSelectionModel().select(0);
         });
 
+        buildVersionBox.setCellFactory(list -> new VersionListCell());
         buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == null) {
                 return;
@@ -483,9 +485,6 @@ public class ApplicationController {
 
             changelogViewController.update(selectedPackage.getChangelog());
         });
-
-        jobBox.setItems(packageItems);
-        jobBox.getSelectionModel().select(0);
     }
 
     private void initButtons() {
