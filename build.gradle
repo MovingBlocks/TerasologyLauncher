@@ -170,15 +170,6 @@ def convertGitBranch = { gitBranch ->
     }
 }
 
-task createDocs {
-    def docs = file("$buildDir/docs")
-    outputs.dir docs
-    doLast {
-        docs.mkdirs()
-        new File(docs, 'readme.txt').write('Read me!')
-    }
-}
-
 //TODO change output path to avoid interference of different platforms
 /**
  * Extract a previously downloaded JRE package into `$buildDir/jre`
@@ -207,8 +198,9 @@ task prepareWin64Jre {
 
 //TODO replace by dynamic packaging per platform
 distributions {
-    main {
+    win64 {
         contents {
+            with distributions.main.contents
             from(prepareWin64Jre) {
                 into 'jre'
             }
