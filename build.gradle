@@ -183,6 +183,8 @@ task unpackWin64Jre(type: Copy) {
         includeEmptyDirs = false
     }
     into("$buildDir/jre")
+
+    dependsOn downloadJreWindows64
 }
 
 //TODO generalize for other platforms
