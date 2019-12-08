@@ -1,46 +1,46 @@
-enum Jre {
-    // TODO Use `.tar.gz` on Linux
-    Linux32("zip"),
-    Linux64("zip"),
-    // TODO rename `Mac` to `MacOS` when artifact is renamed: https://github.com/MovingBlocks/TerasologyJRE/pull/5
-    Mac("zip"),
-    Windows32("zip"),
-    Windows64("zip");
+/*
+ * Copyright 2019 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-    public URL downloadUrl;
-    public File targetArchive;
+// Uses Bellsoft Liberica JRE
+def jreVersion = '8u212'
+def jreUrlBase = "https://download.bell-sw.com/java/$jreVersion/bellsoft-jre$jreVersion"
+def jreUrlFilenames = [
+        Linux64   : 'linux-amd64.tar.gz',
+        Linux32   : 'linux-i586.tar.gz',
+        Windows64 : 'windows-amd64.zip',
+        Windows32 : 'windows-i586.zip',
+        Mac       : 'macos-amd64.zip'
+]
 
-    Jre(String extension) {
-        String baseUrl = "http://artifactory.terasology.org/artifactory/libs-release-local"
-
-        // TODO can we use gradle dependencies/configurations to download this for the bundling task?
-        // Use vendored JRE from our Artifactory
-        String groupId = "org/terasology/jre/liberica"
-        String artifactId = this.name().toLowerCase()
-        String version = "0.0.1"
-
-        String artifact = "${artifactId}-${version}.${extension}"
-
-        this.downloadUrl = new URL("${baseUrl}/${groupId}/${artifactId}/${version}/${artifact}")
-        this.targetArchive = new File("${artifact}")   
-    }
+task downloadJreAll {
+    group 'Download'
+    description 'Downloads JRE for all platforms'
 }
 
-task fetchJreAll {
-    group "Download"
-    description "Downloads JRE for all platforms"
-}
+jreUrlFilenames.each { os, file ->
+    def jreTask = "downloadJre$os"
 
-Jre.each { arch ->
-    def downloadTask = task("fetchJre${arch}", type: Download) {
-        group "Download"
-        description "Download JRE for ${arch}"
+    task "$jreTask"(type: Download) {
+        group 'Download'
+        description "Downloads JRE for $os"
 
-        src arch.downloadUrl
-        dest file("${project.projectDir}/jres/${arch.targetArchive}")
+        src "$jreUrlBase-$file"
+        dest "$projectDir/jre/$file"
         overwrite false
-        onlyIfModified true
     }
 
-    fetchJreAll.dependsOn downloadTask
+    downloadJreAll.dependsOn tasks.named(jreTask).get()
 }
