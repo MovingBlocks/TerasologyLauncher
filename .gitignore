@@ -52,4 +52,5 @@ certum.jks
 web-api-client/
 
 # Ignore donwloaded JREs
+jre/**
 jres/**
