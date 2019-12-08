@@ -172,7 +172,7 @@ public final class TerasologyLauncher extends Application {
             root = (Parent) fxmlLoader.load();
         }
         final ApplicationController controller = fxmlLoader.getController();
-        controller.initialize(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(), launcherConfiguration.getTempDirectory(),
+        controller.update(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(), launcherConfiguration.getTempDirectory(),
             launcherConfiguration.getLauncherSettings(), launcherConfiguration.getPackageManager(), mainStage, hostServices);
 
         Scene scene = new Scene(root);
