@@ -30,17 +30,97 @@ task downloadJreAll {
     description 'Downloads JRE for all platforms'
 }
 
-jreUrlFilenames.each { os, file ->
-    def jreTask = "downloadJre$os"
+task allDistZip {
+    group 'Distribution'
+    description 'Bundles the project with a JRE for each platform'
+    dependsOn distZip
+}
 
-    task "$jreTask"(type: Download) {
+jreUrlFilenames.each { os, file ->
+    def packedJre = new File("$projectDir/jre/$file")
+    def unpackedJre = new File("$buildDir/jre/$os")
+
+    def downloadTask = task("downloadJre$os", type: Download) {
         group 'Download'
         description "Downloads JRE for $os"
 
         src "$jreUrlBase-$file"
-        dest "$projectDir/jre/$file"
+        dest packedJre
         overwrite false
+
+        doLast {
+            // Unpack the JRE
+            if (!unpackedJre.exists()) {
+                unpackedJre.mkdirs()
+                copy {
+                    from(file.endsWith("zip")
+                            ? zipTree(packedJre)
+                            : tarTree(packedJre)) {
+                        eachFile { fcd ->
+                            fcd.relativePath = new RelativePath(
+                                    true, fcd.relativePath.segments.drop(1))
+                        }
+                        includeEmptyDirs = false
+                    }
+                    into unpackedJre
+                }
+            }
+        }
     }
 
-    downloadJreAll.dependsOn tasks.named(jreTask).get()
+    def distName = os.toLowerCase()
+    distributions {
+        "$distName" {
+            contents {
+                with distributions.main.contents
+                into('jre') {
+                    from unpackedJre
+                }
+            }
+        }
+    }
+
+    def zipTask = tasks.named("${distName}DistZip").get()
+    def tarTask = tasks.named("${distName}DistTar").get()
+
+    downloadJreAll.dependsOn downloadTask
+    zipTask.dependsOn downloadTask
+    zipTask.description "Bundles the project with a JRE for $os"
+    tarTask.dependsOn downloadTask
+    tarTask.description "Bundles the project with a JRE for $os"
+    allDistZip.dependsOn zipTask
+}
+
+/**
+ * Modify start scripts to use bundled JRE when
+ * available, otherwise fall back to searching.
+ */
+startScripts.doLast {
+    unixScript.text = unixScript
+            .text
+            .replaceFirst(/(?s)# Determine the Java.*(?=\R\R# Increase)/) { match ->
+                """\
+                |# Use bundled JRE when available
+                |if [ -d \$APP_HOME/jre ] ; then
+                |    JAVACMD=\$APP_HOME/jre/bin/java
+                |else
+                |    ${match.replace("\n", "\n    ")}
+                |fi"""
+                .stripMargin()
+            }
+
+    windowsScript.text = windowsScript
+            .text
+            .replaceFirst(/(?s)@rem Find java.*:init/) { match ->
+                """\
+                |@rem Use bundled JRE when available
+                |if not exist %APP_HOME%\\jre\\ goto findJava
+                |set JAVA_EXE=%APP_HOME%\\jre\\bin\\java.exe
+                |goto init
+                |
+                |:findJava
+                |$match
+                |"""
+                .stripMargin()
+            }
 }

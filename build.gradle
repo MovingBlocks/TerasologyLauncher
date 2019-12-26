@@ -143,70 +143,12 @@ targetCompatibility = 1.8
 
 mainClassName = 'org.terasology.launcher.TerasologyLauncher'
 
-// Bundle JRE (Use gradle argument: -PbundleJre=/path/to/jre)
-//TODO should be controlled by tasks for different platforms, and not by argument
-if (project.hasProperty('bundleJre')) {
-    applicationDistribution.from("$bundleJre") {
-        into 'jre'
-    }
-
-    startScripts {
-        doLast {
-            unixScript.text = unixScript.text.replaceFirst(/(?s)# Determine the Java.*(?=\R# Increase)/,
-                    '# Use bundled JRE\nJAVACMD=\\$APP_HOME/jre/bin/java\n')
-
-            windowsScript.text = windowsScript.text.replaceFirst(/(?s)@rem Find java.*:init/,
-                    '@rem Use bundled JRE\nset JAVA_EXE=' + /%APP_HOME%\\jre\\bin\\java.exe/ + '\n')
-        }
-    }
-}
-
 def convertGitBranch = { gitBranch ->
     if (gitBranch != null) {
         // Remove "origin/" from "origin/develop"
         gitBranch.substring(gitBranch.lastIndexOf("/") + 1)
     } else {
         ""
-    }
-}
-
-//TODO change output path to avoid interference of different platforms
-/**
- * Extract a previously downloaded JRE package into `$buildDir/jre`
- */
-task unpackWin64Jre(type: Copy) {
-    from(zipTree(rootProject.file("./jre/windows-amd64.zip"))) {
-        include("jre*/**")
-        eachFile { fcd ->
-            fcd.relativePath = new RelativePath(true, fcd.relativePath.segments.drop(1))
-        }
-        includeEmptyDirs = false
-    }
-    into("$buildDir/jre")
-
-    dependsOn downloadJreWindows64
-}
-
-//TODO generalize for other platforms
-/**
- * Copy/extract a specific JRE into `$buildDir/jre` to be packaged later
- */
-task prepareWin64Jre {
-    def jre = file("$buildDir/jre")
-    outputs.dir jre
-
-    dependsOn unpackWin64Jre
-}
-
-//TODO replace by dynamic packaging per platform
-distributions {
-    win64 {
-        contents {
-            with distributions.main.contents
-            from(prepareWin64Jre) {
-                into 'jre'
-            }
-        }
     }
 }
 
