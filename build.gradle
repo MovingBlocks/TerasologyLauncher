@@ -61,11 +61,6 @@ if (javaVersion.startsWith("1.8") && javaVersion.split("_")[1].toInteger() < 40)
     throw new GradleException("Java version 1.8.0_40 or later required, but was $javaVersion")
 }
 
-// gradle wrapper version
-wrapper {
-    gradleVersion '5.4.1'
-}
-
 import org.apache.tools.ant.filters.FixCrLfFilter
 
 import java.text.SimpleDateFormat
@@ -83,6 +78,11 @@ def getDisplayVersion = { env, versionBase ->
     }
 }
 
+// Define configuration for config
+configurations {
+    codeMetrics
+}
+
 // Declare "extra properties" (variables) for the project - a Gradle thing that makes them special.
 ext {
     // Read environment variables, including variables passed by jenkins continuous integration server
@@ -97,6 +97,9 @@ ext {
 
     // Splash image for the JAR
     splashImage = "org/terasology/launcher/images/splash.jpg"
+
+    // For handling code analytics via retrieved config zip
+    dirConfigMetrics = 'config/metrics'
 }
 
 // Declare remote repositories we're interested in - library files will be fetched from here
@@ -127,6 +130,9 @@ dependencies {
     if (new File('web-api-client').exists()) {
         compile project(':web-api-client')
     }
+
+    // Config for our code analytics lives in a centralized repo: https://github.com/MovingBlocks/TeraConfig
+    codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.3.2', ext: 'zip'
 
     // These dependencies are only needed for running tests
     testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -292,7 +298,7 @@ task createPatch(dependsOn: distZip) {
         File oldUnzipped = new File(patchDir, 'old/TerasologyLauncher/')
         File newUnzipped = new File(patchDir, 'new/TerasologyLauncher/')
 
-        String patchFileName = "$project.name-patch-$env.JOB_NAME-$lastSuccessfulBuildNumber-$env.BUILD_NUMBER"+".zip"
+        String patchFileName = "$project.name-patch-$env.JOB_NAME-$lastSuccessfulBuildNumber-$env.BUILD_NUMBER" + ".zip"
         File patchZip = new File(patchDir, patchFileName)
 
         logger.info("Creating patch file with: \n\told  : $oldUnzipped\n\tnew  : $newUnzipped\n\tpatch: $patchZip")
@@ -306,4 +312,22 @@ task createPatch(dependsOn: distZip) {
 
         println "Created patch: $patchFileName"
     }
+}
+
+task extractConfig (type: Copy) {
+    description = "Extracts our configuration files from the zip we fetched as a dependency"
+    from {
+        configurations.codeMetrics.collect {
+            zipTree(it)
+        }
+    }
+    into "$rootDir/$dirConfigMetrics"
+}
+
+ideaModule.dependsOn extractConfig
+
+// Include deletion of extracted config in the global clean task. Without the doLast it runs on *every* execution ...
+clean.doLast {
+    new File(dirConfigMetrics).deleteDir()
+    println "Cleaned root - don't forget to re-extract stuff! 'gradlew extractConfig' will do so, or 'gradlew idea' (or eclipse)"
 }

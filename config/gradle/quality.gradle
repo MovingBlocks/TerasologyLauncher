@@ -24,13 +24,14 @@
 checkstyle {
     toolVersion = '6.14.1'
     ignoreFailures = true
+    configFile = new File("$rootDir/config/metrics/checkstyle/checkstyle.xml")
     configProperties.samedir = checkstyle.configFile.parentFile
 }
 
 pmd {
     toolVersion = '5.5.2'
     ignoreFailures = true
-    ruleSetFiles = files("config/pmd/pmd.xml")
+    ruleSetFiles = files("$rootDir/config/metrics/pmd/pmd.xml")
 }
 
 spotbugs {

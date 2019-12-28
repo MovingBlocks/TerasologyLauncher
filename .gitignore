@@ -1,6 +1,7 @@
 # Ignore Gradle
 /.gradle/
 /build/
+config/metrics/
 
 # Ignore IntelliJ IDEA
 *.iml
