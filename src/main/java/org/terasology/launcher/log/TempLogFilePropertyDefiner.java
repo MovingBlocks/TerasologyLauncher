@@ -48,6 +48,9 @@ public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
     }
 
     public static TempLogFilePropertyDefiner getInstance() {
+        if (instance == null) { // TODO: fast fix, rethink it
+            instance = new TempLogFilePropertyDefiner();
+        }
         return instance;
     }
 
@@ -68,6 +71,7 @@ public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
 
     /**
      * Set the prefix string for generating the file's name.
+     *
      * @param prefix the prefix string to be used in generating the file's name; may be null
      */
     public void setPrefix(String prefix) {
@@ -80,6 +84,7 @@ public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
 
     /**
      * Set the suffix string for generating the file's name.
+     *
      * @param suffix the suffix string to be used in generating the file's name; may be null, in which case ".tmp" is used
      */
     public void setSuffix(String suffix) {
@@ -88,6 +93,7 @@ public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
 
     /**
      * Returns the temporary log file.
+     *
      * @return the log file
      */
     public Path getLogFile() {

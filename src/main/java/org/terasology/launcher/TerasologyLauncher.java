@@ -111,6 +111,7 @@ public final class TerasologyLauncher extends Application {
 
         showSplashStage(initialStage, launcherInitTask);
         Thread initThread = new Thread(launcherInitTask);
+        initThread.setName("Launcher init thread");
 
         launcherInitTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
@@ -130,6 +131,8 @@ public final class TerasologyLauncher extends Application {
                 }
             }
         });
+
+        launcherInitTask.setOnFailed(event -> {openCrashReporterAndExit(new RuntimeException("FUUU"));});
 
         initThread.start();
     }
