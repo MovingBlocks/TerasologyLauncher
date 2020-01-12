@@ -21,5 +21,6 @@ module terasology.launcher {
     requires java.desktop;
 
     exports org.terasology.launcher; // for launcher run
+    exports org.terasology.launcher.log to ch.qos.logback.core; // for TempLogFilePropertyDefiner
     opens org.terasology.launcher.gui.javafx to javafx.fxml; // for fxml controller access
 }
