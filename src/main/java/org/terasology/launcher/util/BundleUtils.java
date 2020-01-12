@@ -111,6 +111,13 @@ public final class BundleUtils {
     }
 
     public static String getStylesheet(String key) {
-        return ResourceBundle.getBundle(FXML_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        String moduleName = BundleUtils.class.getModule().getName();
+        String resourcePath = ResourceBundle.getBundle(FXML_BUNDLE, Languages.getCurrentLocale()).getString(key);
+        if (resourcePath.startsWith("/")) {
+            resourcePath = resourcePath.substring(1);
+        }
+        // Make JIGSAW's specific path for resource with module path.
+        // jrt - new protocol for access resources in JIGSAW's modules
+        return String.format("jrt:/%s/%s", moduleName, resourcePath);
     }
 }
