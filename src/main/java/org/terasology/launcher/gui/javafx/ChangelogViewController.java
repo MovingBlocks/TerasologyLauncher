@@ -58,7 +58,11 @@ public class ChangelogViewController {
     void update(final List<String> changes) {
         changelogView.getEngine().loadContent(makeHtml(changes));
         changelogView.setBlendMode(BlendMode.LIGHTEN);
-        changelogView.getEngine().setUserStyleSheetLocation(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
+        // TODO: return "changelogView.getEngine().setUserStyleSheetLocation(BundleUtils.getFxmlUrl(css_webview).toExternalForm())",
+        //  when https://github.com/openjdk/jfx/pull/22 has been merged.
+        //  See changelog-view.fxml
+        changelogView.getEngine().setUserStyleSheetLocation(
+                BundleUtils.getBundleResourceContentAsDataUrl("css_webview", "text/css"));
     }
 
     private String makeHtml(final List<String> changes) {

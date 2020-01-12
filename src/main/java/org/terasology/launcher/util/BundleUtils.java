@@ -21,10 +21,15 @@ import javafx.scene.image.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
+import java.util.Base64;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -119,5 +124,18 @@ public final class BundleUtils {
         // Make JIGSAW's specific path for resource with module path.
         // jrt - new protocol for access resources in JIGSAW's modules
         return String.format("jrt:/%s/%s", moduleName, resourcePath);
+    }
+
+    public static String getBundleResourceContentAsDataUrl(String key, String mimeType) {
+        try (InputStream stream = BundleUtils.getFXMLUrl(key).openStream();
+             BufferedInputStream bufferedInputStream = new BufferedInputStream(stream)) {
+
+            byte[] cssContent = bufferedInputStream.readAllBytes();
+            byte[] base64Content = Base64.getUrlEncoder().encode(cssContent);
+            return String.format("data:%s;base64,%s", mimeType, new String(base64Content, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            logger.error("Cannot load css for WebView", e);
+        }
+        return null;
     }
 }
