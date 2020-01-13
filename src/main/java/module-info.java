@@ -1,4 +1,4 @@
-module terasology.launcher {
+module org.terasology.launcher {
     //Logging
     requires org.slf4j;
     requires ch.qos.logback.classic;

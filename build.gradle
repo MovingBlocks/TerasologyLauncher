@@ -46,6 +46,7 @@ plugins {
     id 'project-report'
     id 'org.openjfx.javafxplugin' version '0.0.8'
     id 'org.beryx.jlink' version '2.17.0'
+    id 'org.javamodularity.moduleplugin' version '1.5.0'
 }
 
 apply from: "./config/gradle/jre.gradle"
@@ -57,7 +58,6 @@ apply from: "./config/gradle/environment.gradle"
 
 // Test for right version of Java in use for running this script
 assert JavaVersion.current().isJava11Compatible()
-def javaVersion = System.properties['java.version']
 
 // gradle wrapper version
 wrapper {
@@ -157,6 +157,17 @@ javafx {
 jlink {
     launcher {
         name = 'launcher'
+    }
+}
+
+// exclude module info files for Java 9
+checkstyleMain.exclude "**/module-info.java"
+checkstyleTest.exclude "**/module-info.java"
+
+test {
+    useJUnit()
+    moduleOptions {
+        runOnClasspath = true
     }
 }
 
