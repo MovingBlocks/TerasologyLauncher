@@ -132,7 +132,16 @@ public final class TerasologyLauncher extends Application {
             }
         });
 
-        launcherInitTask.setOnFailed(event -> {openCrashReporterAndExit(new RuntimeException("FUUU"));});
+        launcherInitTask.setOnFailed(event -> {
+            Throwable throwable = event.getSource().getException();
+            Exception exception;
+            if (throwable instanceof Exception) {
+                exception = (Exception) throwable;
+            } else {
+                exception = new Exception("Wrapped throwable, see deeper", throwable);
+            }
+            openCrashReporterAndExit(exception);
+        });
 
         initThread.start();
     }
@@ -176,7 +185,7 @@ public final class TerasologyLauncher extends Application {
         }
         final ApplicationController controller = fxmlLoader.getController();
         controller.update(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(), launcherConfiguration.getTempDirectory(),
-            launcherConfiguration.getLauncherSettings(), launcherConfiguration.getPackageManager(), mainStage, hostServices);
+                launcherConfiguration.getLauncherSettings(), launcherConfiguration.getPackageManager(), mainStage, hostServices);
 
         Scene scene = new Scene(root);
         scene.getStylesheets().add(BundleUtils.getStylesheet("css_terasology"));

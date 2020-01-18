@@ -115,6 +115,13 @@ public final class BundleUtils {
         return BundleUtils.class.getResource(url + '/' + relative);
     }
 
+    /**
+     * Get stylesheet url for bind it in javafx stylesheets
+     *
+     * @param key the key as specified in the fxml bundle file
+     * @return url, which locating requested stylesheet.
+     *              Received url use protocol jrt:// (java 9+)
+     */
     public static String getStylesheet(String key) {
         String moduleName = BundleUtils.class.getModule().getName();
         String resourcePath = ResourceBundle.getBundle(FXML_BUNDLE, Languages.getCurrentLocale()).getString(key);
@@ -126,6 +133,15 @@ public final class BundleUtils {
         return String.format("jrt:/%s/%s", moduleName, resourcePath);
     }
 
+    /**
+     * Get bundle's resource as data url.
+     * Using for webviews (webview in javafx cannot handle resource with protocol jrt)
+     * {@see https://github.com/openjdk/jfx/pull/22}
+     *
+     * @param key the key as specified in the fxml bundle file
+     * @param mimeType the mimetype of resource
+     * @return url in data form (data:{mimetype};base64;{data as base64})
+     */
     public static String getBundleResourceContentAsDataUrl(String key, String mimeType) {
         try (InputStream stream = BundleUtils.getFXMLUrl(key).openStream();
              BufferedInputStream bufferedInputStream = new BufferedInputStream(stream)) {
