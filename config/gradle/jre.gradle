@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 MovingBlocks
+ * Copyright 2020 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,78 @@
  */
 
 // Uses Bellsoft Liberica JRE
-def jreVersion = '8u212'
-def jreUrlBase = "https://download.bell-sw.com/java/$jreVersion/bellsoft-jre$jreVersion"
+def jreVersionGame = '8u212'
+def jdkVersionLauncher = '11.0.6+10' // jre version haven't jmod (needed for jlink/jpackager)
+
 def jreUrlFilenames = [
-        Linux64   : 'linux-amd64.tar.gz',
-        Linux32   : 'linux-i586.tar.gz',
-        Windows64 : 'windows-amd64.zip',
-        Windows32 : 'windows-i586.zip',
-        Mac       : 'macos-amd64.zip'
+        Linux64  : 'linux-amd64.tar.gz',
+        Linux32  : 'linux-i586.tar.gz',
+        Windows64: 'windows-amd64.zip',
+        Windows32: 'windows-i586.zip',
+        Mac      : 'macos-amd64.zip'
 ]
+
+task downloadJreGame {
+    group 'Download'
+    description 'Downloads Game JRE for all platforms'
+}
+
+task downloadJreLauncher {
+    group 'Download'
+    description 'Downloads Launcher JRE for all platforms'
+}
 
 task downloadJreAll {
     group 'Download'
     description 'Downloads JRE for all platforms'
+    dependsOn downloadJreGame, downloadJreLauncher
 }
 
-jreUrlFilenames.each { os, file ->
-    def jreTask = "downloadJre$os"
+def createJreTasks(String taskNameBase,
+                   String downloadUrl,
+                   String downloadFile,
+                   String unpackDir) {
 
-    task "$jreTask"(type: Download) {
+    task "download$taskNameBase"(type: Download) {
         group 'Download'
-        description "Downloads JRE for $os"
-
-        src "$jreUrlBase-$file"
-        dest "$projectDir/jre/$file"
+        src downloadUrl
+        dest downloadFile
         overwrite false
     }
 
-    downloadJreAll.dependsOn tasks.named(jreTask).get()
+    task "unpack$taskNameBase"(type: Copy) {
+        def archive
+        if (downloadFile.endsWith('tar.gz')) {
+            archive = tarTree(resources.gzip(downloadFile))
+        } else {
+            archive = zipTree(downloadFile)
+        }
+        from(archive){
+            include "*/**"
+            eachFile { fcd ->
+                fcd.relativePath = new RelativePath(true, fcd.relativePath.segments.drop(1))
+            }
+            includeEmptyDirs = false
+        }
+        into unpackDir
+        dependsOn tasks.named("download$taskNameBase")
+    }
+
+    return tasks.named("unpack$taskNameBase").get()
+}
+
+jreUrlFilenames.each { os, file ->
+    // JRE 8
+    downloadJreGame.dependsOn createJreTasks(
+            "Jre${os}Game",
+            "https://download.bell-sw.com/java/$jreVersionGame/bellsoft-jre$jreVersionGame-$file",
+            "$projectDir/jre/$os-$jreVersionGame-$file",
+            "$projectDir/jre/Game/$os")
+
+    // JDK 11
+    downloadJreLauncher.dependsOn createJreTasks(
+            "Jre${os}Launcher",
+            "https://download.bell-sw.com/java/$jdkVersionLauncher/bellsoft-jdk$jdkVersionLauncher-$file",
+            "$projectDir/jre/$os-$jdkVersionLauncher-$file",
+            "$projectDir/jre/Launcher/$os")
 }

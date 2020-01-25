@@ -158,7 +158,21 @@ jlink {
     launcher {
         name = 'launcher'
     }
+    ['Linux64',
+    'Linux32',
+    'Windows64',
+    'Windows32',
+    'Mac'].each { name ->
+        targetPlatform(name) {
+            jdkHome = "jre/Launcher/$name/"
+
+        }
+    }
 }
+
+tasks.named("jlink").get().dependsOn "downloadJreLauncher" // For creating images for platforms.
+
+
 
 // exclude module info files for Java 9
 checkstyleMain.exclude "**/module-info.java"
