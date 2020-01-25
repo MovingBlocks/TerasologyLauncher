@@ -158,6 +158,9 @@ jlink {
     launcher {
         name = 'launcher'
     }
+
+    imageName = "TerasologyLauncher"
+
     ['Linux64',
     'Linux32',
     'Windows64',
@@ -165,13 +168,23 @@ jlink {
     'Mac'].each { name ->
         targetPlatform(name) {
             jdkHome = "jre/Launcher/$name/"
-
         }
     }
 }
 
-tasks.named("jlink").get().dependsOn "downloadJreLauncher" // For creating images for platforms.
-
+tasks.getByName("jlink").dependsOn "downloadJreAll" // For creating images for platforms.
+tasks.getByName("jlink").doLast {
+    ['Linux64',
+     'Linux32',
+     'Windows64',
+     'Windows32',
+     'Mac'].each { platform ->
+        copy {
+            from file("jre/Game/$platform")
+            into file("${buildDir}/${jlink.imageName.get()}/${jlink.launcherData.get().name}-${platform}/jre")
+        }
+    }
+}
 
 
 // exclude module info files for Java 9

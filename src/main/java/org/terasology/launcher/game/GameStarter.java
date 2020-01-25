@@ -22,10 +22,12 @@ import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class GameStarter {
 
@@ -80,7 +82,7 @@ public final class GameStarter {
     private List<String> createProcessParameters(Path gamePath, Path gameDataDirectory, List<String> javaParameters,
                                                  List<String> gameParameters) {
         final List<String> processParameters = new ArrayList<>();
-        processParameters.add(System.getProperty("java.home") + "/bin/java"); // Use the current java
+        processParameters.add(System.getProperty("java.home") + "/jre/bin/java"); // Use the bundled java
         processParameters.addAll(javaParameters);
         processParameters.add("-jar");
         processParameters.add(gamePath.resolve("libs/Terasology.jar").toString());
