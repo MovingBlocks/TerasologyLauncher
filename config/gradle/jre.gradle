@@ -40,13 +40,17 @@ jreUrlFilenames.each { os, file ->
     def packedJre = new File("$projectDir/jre/$file")
     def unpackedJre = new File("$buildDir/jre/$os")
 
-    def downloadTask = task("downloadJre$os", type: Download) {
+    def downloadTask = task("downloadJre$os") {
         group 'Download'
         description "Downloads JRE for $os"
 
-        src "$jreUrlBase-$file"
-        dest packedJre
-        overwrite false
+        doFirst {
+            download {
+                src "$jreUrlBase-$file"
+                dest packedJre
+                overwrite false
+            }
+        }
 
         doLast {
             // Unpack the JRE
