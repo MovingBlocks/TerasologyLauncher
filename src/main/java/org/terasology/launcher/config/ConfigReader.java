@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.config;
 
+import com.google.gson.Gson;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
@@ -32,32 +33,35 @@ import java.nio.file.Path;
  * On success the {@link Config} instance is validated
  * and provided back to the {@link ConfigManager}.
  */
-class ConfigReader extends Service<Void> {
+class ConfigReader extends Service<Config> {
     private static final Logger logger = LoggerFactory.getLogger(ConfigReader.class);
 
-    private final ConfigManager manager;
     private final Path configPath;
+    private final Path launcherPath;
+    private final Gson decoder;
     private final ConfigValidator validator;
 
-    ConfigReader(ConfigManager manager) {
-        this.manager = manager;
-        configPath = manager.getConfigPath();
-        validator = new ConfigValidator(manager.getConfig());
+    ConfigReader(final Path configPath, final Path launcherPath, final Gson decoder, final ConfigValidator validator) {
+        this.configPath = configPath;
+        this.launcherPath = launcherPath;
+        this.decoder = decoder;
+        this.validator = validator;
     }
 
     @Override
-    protected Task<Void> createTask() {
-        return new Task<Void>() {
+    protected Task<Config> createTask() {
+        return new Task<Config>() {
             @Override
-            protected Void call() throws IOException {
+            protected Config call() throws IOException {
                 if (Files.exists(configPath)) {
                     try (BufferedReader reader = new BufferedReader(
                             new InputStreamReader(Files.newInputStream(configPath))
                     )) {
-                        final Config config = manager.getGson().fromJson(reader, Config.Builder.class)
-                                .launcherDir(manager.getLauncherDir())
+                        final Config config = decoder.fromJson(reader, Config.Builder.class)
+                                .launcherDir(launcherPath)
                                 .build();
-                        manager.setConfig(validator.validate(config));
+
+                        return validator.validate(config);
                     }
                 } else {
                     logger.warn("Config file was not found: {}", configPath);

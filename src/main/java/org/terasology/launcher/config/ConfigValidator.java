@@ -28,10 +28,10 @@ import org.terasology.launcher.util.JavaHeapSize;
 class ConfigValidator {
     private static final Logger logger = LoggerFactory.getLogger(ConfigValidator.class);
 
-    private final Config defaultConfig;
+    private final Config fallbackConfiguration;
 
     ConfigValidator(final Config defaultConfig) {
-        this.defaultConfig = defaultConfig;
+        this.fallbackConfiguration = defaultConfig;
     }
 
     /**
@@ -67,7 +67,7 @@ class ConfigValidator {
         ) {
             valid = gameConfig.getMaxMemory();
         } else {
-            valid = defaultConfig.getGameConfig().getMaxMemory();
+            valid = fallbackConfiguration.getGameConfig().getMaxMemory();
             logger.warn("Max memory cannot be greater than 1.5 GB for a 32-bit JVM");
             logger.debug("Continuing with max memory: {}", valid);
         }

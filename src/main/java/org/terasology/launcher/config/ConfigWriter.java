@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.config;
 
+import com.google.gson.Gson;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
@@ -34,12 +35,22 @@ import java.nio.file.Path;
 class ConfigWriter extends Service<Void> {
     private static final Logger logger = LoggerFactory.getLogger(ConfigWriter.class);
 
-    private final ConfigManager manager;
     private final Path configPath;
+    private final Gson encoder;
 
-    ConfigWriter(ConfigManager manager) {
-        this.manager = manager;
-        configPath = manager.getConfigPath();
+    private Config config;
+
+    ConfigWriter(final Path configPath, final Gson encoder, final Config config) {
+        this.configPath = configPath;
+        this.encoder = encoder;
+        this.config = config;
+    }
+
+    public void setConfig(final Config config) {
+        if (config == null) {
+            throw new IllegalArgumentException("Configuration instance 'config' must not be 'null'!");
+        }
+        this.config = config;
     }
 
     @Override
@@ -50,7 +61,7 @@ class ConfigWriter extends Service<Void> {
                 try (BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(Files.newOutputStream(configPath))
                 )) {
-                    manager.getGson().toJson(manager.getConfig(), Config.class, writer);
+                    encoder.toJson(config, Config.class, writer);
                 }
                 return null;
             }

@@ -41,11 +41,12 @@ public class ConfigManager {
     private static final String CONFIG_FILE = "config.json";
     private static volatile ConfigManager instance;
 
-    private final Path launcherDir;
+    private final Path launcherPath;
     private final Path configPath;
+    private final ConfigValidator validator;
     private final Gson gson;
     private Config config;
-    private final Service<Void> reader;
+    private final Service<Config> reader;
     private final Service<Void> writer;
 
     private ConfigManager() {
@@ -54,20 +55,26 @@ public class ConfigManager {
             throw new RuntimeException("Cannot create second instance of a singleton class");
         }
 
-        launcherDir = resolveLauncherDir();
-        configPath = launcherDir.resolve(CONFIG_FILE);
-        config = createDefaultConfig();
+        launcherPath = resolveLauncherDir();
+        configPath = launcherPath.resolve(CONFIG_FILE);
+        config = getDefaultConfigFor(launcherPath);
         gson = new GsonBuilder()
                 .registerTypeAdapter(Path.class, new PathAdapter())
                 .registerTypeAdapter(Package.class, new PackageAdapter())
                 .disableHtmlEscaping()
                 .setPrettyPrinting()
                 .create();
+        validator = new ConfigValidator(config);
 
-        reader = new ConfigReader(this);
-        writer = new ConfigWriter(this);
+        reader = new ConfigReader(configPath, launcherPath, gson, validator);
+        writer = new ConfigWriter(configPath, gson, config);
     }
 
+    /**
+     * Resolve the path to the launcher directory for host operating system.
+     *
+     * @return the absolute path to the launcher application directory
+     */
     private Path resolveLauncherDir() {
         final OperatingSystem os = OperatingSystem.getOS();
         if (os == OperatingSystem.UNKNOWN) {
@@ -82,19 +89,27 @@ public class ConfigManager {
         // TODO: Use local methods for all stuff above
     }
 
-    private Config createDefaultConfig() {
+    /**
+     * The default configuration of the launcher with installation and data directories inside `launcherDir`.
+     *
+     * @param launcherDir the absolute path to launcher application directory
+     * @return the default configuration
+     */
+    private Config getDefaultConfigFor(final Path launcherDir) {
+        final GameConfig gameConfig = GameConfig.builder()
+                .installDir(launcherDir.resolve("Terasology"))
+                .dataDir(launcherDir.resolve("TerasologyData"))
+                .maxMemory(JavaHeapSize.GB_1_5)
+                .initMemory(JavaHeapSize.GB_1)
+                .javaParam("-XX:+UseParNewGC"
+                        + " -XX:+UseConcMarkSweepGC"
+                        + " -XX:MaxGCPauseMillis=20"
+                        + " -XX:ParallelGCThreads=10")
+                .logLevel(LogLevel.DEFAULT)
+                .build();
+
         return Config.builder()
-                .gameConfig(GameConfig.builder()
-                        .installDir(launcherDir.resolve("Terasology"))
-                        .dataDir(launcherDir.resolve("TerasologyData"))
-                        .maxMemory(JavaHeapSize.GB_1_5)
-                        .initMemory(JavaHeapSize.GB_1)
-                        .javaParam("-XX:+UseParNewGC"
-                                + " -XX:+UseConcMarkSweepGC"
-                                + " -XX:MaxGCPauseMillis=20"
-                                + " -XX:ParallelGCThreads=10")
-                        .logLevel(LogLevel.DEFAULT)
-                        .build())
+                .gameConfig(gameConfig)
                 .locale(Locale.ENGLISH)
                 .launcherDir(launcherDir)
                 .checkUpdatesOnLaunch(false)
@@ -110,7 +125,7 @@ public class ConfigManager {
      *
      * @return the reader service
      */
-    public Service<Void> getReader() {
+    public Service<Config> getReader() {
         return reader;
     }
 
@@ -125,8 +140,8 @@ public class ConfigManager {
         return writer;
     }
 
-    Path getLauncherDir() {
-        return launcherDir;
+    Path getLauncherPath() {
+        return launcherPath;
     }
 
     Path getConfigPath() {
@@ -138,17 +153,20 @@ public class ConfigManager {
     }
 
     /**
-     * Provides an immutable {@link Config} instance. It is
-     * initially filled with default configurations which
-     * are reset after reader service is run.
+     * Provides an immutable {@link Config} instance.
      *
-     * @return the default {@link Config} instance
+     * The initial default configuration may be changed by running the reader service.
+     *
+     * @return the current launcher configuration as {@link Config} instance
      */
     public Config getConfig() {
         return config;
     }
 
-    void setConfig(Config config) {
+    void setConfig(final Config config) {
+        if (config == null) {
+            throw new IllegalArgumentException("Configuration 'config'  must not be 'null'!");
+        }
         this.config = config;
     }
 
@@ -160,11 +178,7 @@ public class ConfigManager {
     public static ConfigManager get() {
         // Double check locking
         if (instance == null) {
-            synchronized (ConfigManager.class) {
-                if (instance == null) {
-                    instance = new ConfigManager();
-                }
-            }
+            instance = new ConfigManager();
         }
         return instance;
     }
