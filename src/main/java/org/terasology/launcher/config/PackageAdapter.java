@@ -22,6 +22,7 @@ import com.google.gson.stream.JsonWriter;
 import org.terasology.launcher.packages.Package;
 
 import java.io.IOException;
+import java.util.Collections;
 
 /**
  * Adds GSON support for {@link Package} instances.
@@ -61,6 +62,6 @@ class PackageAdapter extends TypeAdapter<Package> {
         }
         in.endObject();
 
-        return new Package(name, version, null);
+        return new Package(name, version, null, Collections.emptyList());
     }
 }
