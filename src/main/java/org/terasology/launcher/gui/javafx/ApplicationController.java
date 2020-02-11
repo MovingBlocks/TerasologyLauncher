@@ -19,13 +19,19 @@ package org.terasology.launcher.gui.javafx;
 import javafx.animation.Transition;
 import javafx.application.HostServices;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -33,10 +39,16 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -60,6 +72,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class ApplicationController {
 
@@ -72,20 +85,22 @@ public class ApplicationController {
         private static final Logger logger = LoggerFactory.getLogger(DownloadTask.class);
 
         private final PackageManager packageManager;
-        private final Package target;
+        private final VersionItem target;
         private Runnable cleanup;
 
-        DownloadTask(PackageManager packageManager, Package target) {
+        DownloadTask(PackageManager packageManager, VersionItem target) {
             this.packageManager = packageManager;
             this.target = target;
         }
 
         @Override
         protected Void call() {
+            final Package targetPkg = target.linkedPackageProperty.get();
             try {
-                packageManager.install(target, this);
+                packageManager.install(targetPkg, this);
             } catch (IOException | DownloadException e) {
-                logger.error("Failed to download package: {}-{}", target.getName(), target.getVersion(), e);
+                logger.error("Failed to download package: {}-{}",
+                        targetPkg.getName(), targetPkg.getVersion(), e);
             }
             return null;
         }
@@ -97,6 +112,11 @@ public class ApplicationController {
         @Override
         public void update(int progress) {
             updateProgress(progress, 100);
+        }
+
+        @Override
+        protected void succeeded() {
+            target.installedProperty.set(true);
         }
 
         @Override
@@ -115,22 +135,29 @@ public class ApplicationController {
         private static final Logger logger = LoggerFactory.getLogger(DeleteTask.class);
 
         private final PackageManager packageManager;
-        private final Package target;
+        private final VersionItem target;
         private Runnable cleanup;
 
-        DeleteTask(PackageManager packageManager, Package target) {
+        DeleteTask(PackageManager packageManager, VersionItem target) {
             this.packageManager = packageManager;
             this.target = target;
         }
 
         @Override
         protected Void call() {
+            final Package targetPkg = target.linkedPackageProperty.get();
             try {
-                packageManager.remove(target);
+                packageManager.remove(targetPkg);
             } catch (IOException e) {
-                logger.error("Failed to remove package: {}-{}", target.getName(), target.getVersion(), e);
+                logger.error("Failed to remove package: {}-{}",
+                        targetPkg.getName(), targetPkg.getVersion(), e);
             }
             return null;
+        }
+
+        @Override
+        protected void succeeded() {
+            target.installedProperty.set(false);
         }
 
         @Override
@@ -160,7 +187,7 @@ public class ApplicationController {
     @FXML
     private ComboBox<PackageItem> jobBox;
     @FXML
-    private ComboBox<String> buildVersionBox;
+    private ComboBox<VersionItem> buildVersionBox;
     @FXML
     private ProgressBar progressBar;
     @FXML
@@ -199,6 +226,8 @@ public class ApplicationController {
     @FXML
     public void initialize() {
         footerController.bind(warning);
+        initComboBoxes();
+        initButtons();
     }
 
     @FXML
@@ -274,7 +303,7 @@ public class ApplicationController {
     }
 
     private void downloadAction() {
-        downloadTask = new DownloadTask(packageManager, selectedPackage);
+        downloadTask = new DownloadTask(packageManager, selectedVersion);
 
         jobBox.setDisable(true);
         buildVersionBox.setDisable(true);
@@ -333,7 +362,7 @@ public class ApplicationController {
                     logger.info("Removing game: {}-{}", selectedPackage.getName(), selectedPackage.getVersion());
 
                     deleteButton.setDisable(true);
-                    final DeleteTask deleteTask = new DeleteTask(packageManager, selectedPackage);
+                    final DeleteTask deleteTask = new DeleteTask(packageManager, selectedVersion);
                     deleteTask.onDone(() -> {
                         if (!selectedPackage.isInstalled()) {
                             startAndDownloadButton.setGraphic(downloadImage);
@@ -346,8 +375,8 @@ public class ApplicationController {
                 });
     }
 
-    public void initialize(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
-                           final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
+    public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
+                       final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
         this.tempDirectory = newTempDirectory;
@@ -370,9 +399,6 @@ public class ApplicationController {
         packageItems = FXCollections.observableArrayList();
         onSync();
 
-        initComboBoxes();
-        initButtons();
-
         //TODO: This only updates when the launcher is initialized (which should happen excatly once o.O)
         //      We should update this value at least every time the download directory changes (user setting).
         //      Ideally, we would check periodically for disk space.
@@ -385,63 +411,69 @@ public class ApplicationController {
         footerController.setHostServices(hostServices);
     }
 
+    private VersionItem selectedVersion;
     private Package selectedPackage;
-    private List<Package> packages;
     private ObservableList<PackageItem> packageItems;
 
-    static class PackageItem {
-        private final String name;
-        private final ObservableList<String> versionList;
+    private static class PackageItem {
+        private final ReadOnlyStringProperty nameProperty;
+        private final ObservableList<VersionItem> versionItems;
 
-        PackageItem(String name) {
-            this.name = name;
-            versionList = FXCollections.observableArrayList();
+        PackageItem(final String name, final List<VersionItem> versions) {
+            nameProperty = new SimpleStringProperty(name);
+            versionItems = FXCollections.observableList(versions);
         }
 
         @Override
         public String toString() {
-            return name;
+            return nameProperty.get();
+        }
+    }
+
+    private static class VersionItem {
+        private final ReadOnlyObjectProperty<Package> linkedPackageProperty;
+        private final ReadOnlyStringProperty versionProperty;
+        private final BooleanProperty installedProperty;
+
+        VersionItem(final Package linkedPackage) {
+            linkedPackageProperty = new SimpleObjectProperty<>(linkedPackage);
+            versionProperty = new SimpleStringProperty(linkedPackage.getVersion());
+            installedProperty = new SimpleBooleanProperty(linkedPackage.isInstalled());
         }
 
-        ObservableList<String> getVersionList() {
-            return versionList;
+        @Override
+        public String toString() {
+            return versionProperty.get();
         }
     }
 
     // To be called after database sync is done
     private void onSync() {
         packageItems.clear();
-        packages = packageManager.getPackages();
+        packageManager.getPackages()
+                .stream()
+                .collect(Collectors.groupingBy(Package::getName,
+                         Collectors.mapping(VersionItem::new, Collectors.toList())))
+                .forEach((name, versions) ->
+                        packageItems.add(new PackageItem(name, versions)));
 
-        String currentPkgName = null;
-        PackageItem currentItem = null;
-        for (Package pkg : packages) {
-            if (pkg.getName().equals(currentPkgName)) {
-                currentItem.versionList.add(pkg.getVersion());
-            } else {
-                currentPkgName = pkg.getName();
-                currentItem = new PackageItem(currentPkgName);
-                currentItem.versionList.add(pkg.getVersion());
-                packageItems.add(currentItem);
-            }
-        }
+        jobBox.setItems(packageItems);
+        jobBox.getSelectionModel().select(0);
     }
 
     private void initComboBoxes() {
         jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            buildVersionBox.setItems(newVal.versionList);
+            buildVersionBox.setItems(newVal.versionItems);
             buildVersionBox.getSelectionModel().select(0);
         });
 
+        buildVersionBox.setCellFactory(list -> new VersionListCell());
         buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            final String pkgName = jobBox.getSelectionModel().getSelectedItem().name;
-            final String pkgVer = newVal;
-
-            selectedPackage = packages.stream()
-                    .filter(pkg -> pkg.getName().equals(pkgName)
-                            && pkg.getVersion().equals(pkgVer))
-                    .findAny()
-                    .orElse(null);
+            if (newVal == null) {
+                return;
+            }
+            selectedVersion = newVal;
+            selectedPackage = newVal.linkedPackageProperty.get();
 
             if (selectedPackage != null && selectedPackage.isInstalled()) {
                 startAndDownloadButton.setGraphic(playImage);
@@ -450,10 +482,9 @@ public class ApplicationController {
                 startAndDownloadButton.setGraphic(downloadImage);
                 deleteButton.setDisable(true);
             }
-        });
 
-        jobBox.setItems(packageItems);
-        jobBox.getSelectionModel().select(0);
+            changelogViewController.update(selectedPackage.getChangelog());
+        });
     }
 
     private void initButtons() {
@@ -666,7 +697,44 @@ public class ApplicationController {
         return jobBox;
     }
 
-    ComboBox<String> getBuildVersionBox() {
+    ComboBox<VersionItem> getBuildVersionBox() {
         return buildVersionBox;
+    }
+
+    /**
+     * Custom ListCell used to display package versions
+     * along with their installation status.
+     */
+    private static final class VersionListCell extends ListCell<VersionItem> {
+        private static final Image ICON_CHECK = BundleUtils.getFxImage("icon_check");
+        private static final Insets MARGIN = new Insets(0, 8, 0, 0);
+        private final HBox root;
+        private final Label labelVersion;
+        private final ImageView iconStatus;
+
+        VersionListCell() {
+            root = new HBox();
+            labelVersion = new Label();
+            iconStatus = new ImageView(ICON_CHECK);
+
+            final Pane separator = new Pane();
+            HBox.setHgrow(separator, Priority.ALWAYS);
+            HBox.setMargin(iconStatus, MARGIN);
+            root.getChildren().addAll(labelVersion, separator, iconStatus);
+        }
+
+        @Override
+        protected void updateItem(VersionItem item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (empty || item == null) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                labelVersion.textProperty().bind(item.versionProperty);
+                iconStatus.visibleProperty().bind(item.installedProperty);
+                setGraphic(root);
+            }
+        }
     }
 }

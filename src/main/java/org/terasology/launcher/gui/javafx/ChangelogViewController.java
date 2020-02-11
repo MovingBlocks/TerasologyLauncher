@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.terasology.launcher.gui.javafx;
 
 import javafx.beans.property.Property;
@@ -9,17 +25,18 @@ import javafx.scene.web.WebView;
 import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.util.BundleUtils;
 
+import java.util.List;
+
 public class ChangelogViewController {
 
     @FXML
     private WebView changelogView;
 
     //TODO: change this to a data type the package manager can handle
-    final private Property<TerasologyGameVersion> gameVersion;
+    private final Property<TerasologyGameVersion> gameVersionProperty;
 
     public ChangelogViewController() {
-        this.gameVersion = new SimpleObjectProperty<>();
-        gameVersion.addListener((observableValue, oldVersion, newVersion) -> update(newVersion));
+        this.gameVersionProperty = new SimpleObjectProperty<>();
     }
 
     /**
@@ -27,118 +44,33 @@ public class ChangelogViewController {
      * <p>
      * The <b>ChangelogView</b> will update every time the property changes.
      *
-     * @param version property denoting the game version to display the changelog for
+     * @param property property denoting the game version to display the changelog for
      */
-    public void bind(ReadOnlyProperty<TerasologyGameVersion> version) {
-        gameVersion.bind(version);
+    public void bind(ReadOnlyProperty<TerasologyGameVersion> property) {
+        gameVersionProperty.bind(property);
     }
 
     /**
-     * Update the displayed changelog based on the selected `gameVersion`.
+     * Update the displayed changelog based on the selected package.
      *
-     * @param gameVersion
+     * @param changes list of changes
      */
-    private void update(TerasologyGameVersion gameVersion) {
-        final String gameInfoTextHTML;
-        if ((gameVersion == null) || (gameVersion.getJob() == null) || (gameVersion.getBuildNumber() == null)) {
-            gameInfoTextHTML = "";
-        } else {
-            gameInfoTextHTML = getGameInfoText(gameVersion);
-        }
-
-        changelogView.getEngine().loadContent(gameInfoTextHTML);
+    void update(final List<String> changes) {
+        changelogView.getEngine().loadContent(makeHtml(changes));
         changelogView.setBlendMode(BlendMode.LIGHTEN);
         changelogView.getEngine().setUserStyleSheetLocation(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
     }
 
-    private String getGameInfoText(TerasologyGameVersion gameVersion) {
-//        logger.debug("Display game version: {} {}", gameVersion, gameVersion.getGameVersionInfo());
-//
-//        final Object[] arguments = new Object[9];
-//        arguments[0] = gameVersion.getJob().name();
-//        if (gameVersion.getJob().isStable()) {
-//            arguments[1] = 1;
-//        } else {
-//            arguments[1] = 0;
-//        }
-//        arguments[2] = gameVersion.getJob().getGitBranch();
-//        arguments[3] = gameVersion.getBuildNumber();
-//        if (gameVersion.isLatest()) {
-//            arguments[4] = 1;
-//        } else {
-//            arguments[4] = 0;
-//        }
-//        if (gameVersion.isInstalled()) {
-//            arguments[5] = 1;
-//        } else {
-//            arguments[5] = 0;
-//        }
-//        if (gameVersion.getSuccessful() != null) {
-//            if (!gameVersion.getSuccessful()) {
-//                // faulty
-//                arguments[6] = 0;
-//            } else {
-//                arguments[6] = 1;
-//            }
-//        } else {
-//            // unknown
-//            arguments[6] = 2;
-//        }
-//        if ((gameVersion.getGameVersionInfo() != null)
-//                && (gameVersion.getGameVersionInfo().getDisplayVersion() != null)) {
-//            arguments[7] = gameVersion.getGameVersionInfo().getDisplayVersion();
-//        } else {
-//            arguments[7] = "";
-//        }
-//        if ((gameVersion.getGameVersionInfo() != null)
-//                && (gameVersion.getGameVersionInfo().getDateTime() != null)) {
-//            arguments[8] = gameVersion.getGameVersionInfo().getDateTime();
-//        } else {
-//            arguments[8] = "";
-//        }
-//
-//        final String infoHeader1 = BundleUtils.getMessage(gameVersion.getJob().getInfoMessageKey(), arguments);
-//        final String infoHeader2 = BundleUtils.getMessage("infoHeader2", arguments);
-//
-//        final StringBuilder b = new StringBuilder();
-//        if ((infoHeader1 != null) && (infoHeader1.trim().length() > 0)) {
-//            b.append("<h1>")
-//                    .append(escapeHtml(infoHeader1))
-//                    .append("</h1>\n");
-//        }
-//        if ((infoHeader2 != null) && (infoHeader2.trim().length() > 0)) {
-//            b.append("<h2>")
-//                    .append(escapeHtml(infoHeader2))
-//                    .append("</h2>\n");
-//        }
-//        b.append("<strong>\n")
-//                .append(BundleUtils.getLabel("infoHeader3"))
-//                .append("</strong>\n");
-//
-//        if ((gameVersion.getChangeLog() != null) && !gameVersion.getChangeLog().isEmpty()) {
-//            b.append("<p>\n")
-//                    .append(BundleUtils.getLabel("infoHeader4"))
-//                    .append("<ul>\n");
-//            for (String msg : gameVersion.getChangeLog()) {
-//                b.append("<li>")
-//                        .append(escapeHtml(msg))
-//                        .append("</li>\n");
-//            }
-//            b.append("</ul>\n")
-//                    .append("</p>\n");
-//        }
-//
-//        /* Append changelogs of previous builds. */
-//        int previousLogs = gameVersion.getJob().isStable() ? 1 : 10;
-//        b.append("<hr/>");
-//        for (String msg : packageManager.getAggregatedChangeLog(gameVersion, previousLogs)) {
-//            b.append("<li>")
-//                    .append(escapeHtml(msg))
-//                    .append("</li>\n");
-//        }
-//
-//        return b.toString();
-        return "WIP";
+    private String makeHtml(final List<String> changes) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("<strong>")
+                .append(BundleUtils.getLabel("infoHeader4"))
+                .append("</strong>")
+                .append("<ul>");
+        changes.forEach(change -> builder.append("<li>").append(escapeHtml(change)).append("</li>"));
+        builder.append("</ul>");
+
+        return builder.toString();
     }
 
     private static String escapeHtml(String text) {

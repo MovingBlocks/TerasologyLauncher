@@ -31,9 +31,9 @@ public enum LauncherManagedDirectory {
     CACHE(FileUtils::ensureWritableDir),
     DOWNLOAD(FileUtils::ensureWritableDir);
 
-    final private DirectoryCreator[] creators;
-    final private String errorLabel;
-    final private String directoryName;
+    private final DirectoryCreator[] creators;
+    private final String errorLabel;
+    private final String directoryName;
 
     LauncherManagedDirectory(DirectoryCreator... creators) {
         this.creators = creators;
@@ -42,6 +42,8 @@ public enum LauncherManagedDirectory {
     }
 
     /**
+     * The ordered list of {@link DirectoryCreator}s applicable for this directory.
+     *
      * @return ordered list of {@link DirectoryCreator}s which can be used to create/prepare the directory.
      */
     public DirectoryCreator[] getCreators() {

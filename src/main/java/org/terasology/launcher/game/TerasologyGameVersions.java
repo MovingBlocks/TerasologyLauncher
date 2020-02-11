@@ -22,11 +22,11 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.PackageBuild;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.JobResult;
+import org.terasology.launcher.util.LauncherDirectoryUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -159,9 +159,9 @@ public final class TerasologyGameVersions {
         try {
             final int maxDepth = 5;
             return Files.find(gameDirectory, maxDepth, (path, attributes) ->
-                             path.getFileName().toString().matches(FILE_ENGINE_JAR))
-                        .map(this::loadInstalledGameVersion)
-                        .collect(Collectors.toList());
+                    path.getFileName().toString().matches(FILE_ENGINE_JAR))
+                    .map(this::loadInstalledGameVersion)
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             logger.error("Hit an error scanning for existing file directories: {}", e.getMessage());
         }
@@ -393,32 +393,34 @@ public final class TerasologyGameVersions {
             }
         }
 
-        logger.info("Now checking build number mappings with game versions");
+        logger.info("Checking build number mappings with game versions ...");
+        int processed = associateEngineWithOmegaBuilds(gameVersionMap, buildNumbers, omegaMapping);
+        logger.info("Done (Matched " + processed + " out of " + gameVersionMap.size() + ")");
+    }
+
+    private int associateEngineWithOmegaBuilds(SortedMap<Integer, TerasologyGameVersion> gameVersionMap, SortedSet<Integer> buildNumbers, Map<Integer, Integer> omegaMapping) {
         int processed = 0;
         // TODO: Is it safe to use the entries from buildNumbers as keys or can they go out of sync vs loaded game versions?
         for (Integer engineBuildNumber : buildNumbers) {
             Integer matchingOmega = omegaMapping.get(engineBuildNumber);
-            if (matchingOmega != null) {
-                //logger.info("Omega build {} matches engine build {}", matchingOmega, engineBuildNumber);
-                TerasologyGameVersion gameVersion = gameVersionMap.get(engineBuildNumber);
-                if (gameVersion == null) {
-                    logger.warn("Failed to find a game version entry for engine build {} !", engineBuildNumber);
-                    continue;
-                } else {
-                    //logger.debug("Updating game version for engine {} with omega mapping {}", engineBuildNumber, matchingOmega);
-                    gameVersion.setOmegaNumber(matchingOmega);
-                }
+            if (updateOmegaForGameVersion(gameVersionMap, engineBuildNumber, matchingOmega)) {
+                processed++;
             } else {
-                logger.warn("*WARNING:* No Omega distribution found for engine build {}", engineBuildNumber);
                 // TODO: Display some sort of warning for the user if this build gets selected
+                logger.warn("*WARNING:* No Omega distribution found for engine build {}", engineBuildNumber);
             }
-
-            //logger.debug("Final game version object: {} ", gameVersionMap.get(engineBuildNumber));
-            processed++;
         }
+        return processed;
+    }
 
-        if (logger.isInfoEnabled()) {
-            logger.info("Processed " + processed + " out of " + gameVersionMap.size());
+    private boolean updateOmegaForGameVersion(SortedMap<Integer, TerasologyGameVersion> gameVersionMap, Integer engineBuildNumber, Integer matchingOmega) {
+        TerasologyGameVersion gameVersion = gameVersionMap.get(engineBuildNumber);
+        if (gameVersion == null || matchingOmega == null) {
+            logger.warn("Failed to find a game version entry for engine build {} !", engineBuildNumber);
+            return false;
+        } else {
+            gameVersion.setOmegaNumber(matchingOmega);
+            return true;
         }
     }
 
