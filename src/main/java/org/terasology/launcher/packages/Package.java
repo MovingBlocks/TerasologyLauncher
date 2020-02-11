@@ -29,7 +29,7 @@ public class Package implements Serializable {
     private final List<String> changelog;
     private boolean installed;
 
-    Package(String name, String version, String url, List<String> changelog) {
+    public Package(String name, String version, String url, List<String> changelog) {
         this.name = name;
         this.version = version;
         this.url = url;

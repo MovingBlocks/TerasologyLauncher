@@ -22,6 +22,7 @@ package org.terasology.launcher;
  * For instance, the launcher self update process stops the configuration assemble process. Instead of returning <code>null</code> the
  * NullLauncherConfiguration can intentionally be returned.
  */
+@Deprecated
 public final class NullLauncherConfiguration extends LauncherConfiguration {
 
     private static NullLauncherConfiguration instance;

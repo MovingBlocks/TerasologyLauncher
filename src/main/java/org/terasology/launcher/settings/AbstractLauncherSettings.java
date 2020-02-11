@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+@Deprecated
 public abstract class AbstractLauncherSettings implements GameSettings {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractLauncherSettings.class);
