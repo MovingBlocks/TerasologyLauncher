@@ -1,46 +1,130 @@
-enum Jre {
-    // TODO Use `.tar.gz` on Linux
-    Linux32("zip"),
-    Linux64("zip"),
-    // TODO rename `Mac` to `MacOS` when artifact is renamed: https://github.com/MovingBlocks/TerasologyJRE/pull/5
-    Mac("zip"),
-    Windows32("zip"),
-    Windows64("zip");
+/*
+ * Copyright 2019 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-    public URL downloadUrl;
-    public File targetArchive;
+// Uses Bellsoft Liberica JRE
+def jreVersion = '8u212'
+def jreUrlBase = "https://download.bell-sw.com/java/$jreVersion/bellsoft-jre$jreVersion"
+def jreUrlFilenames = [
+        Linux64   : 'linux-amd64.tar.gz',
+        Linux32   : 'linux-i586.tar.gz',
+        Windows64 : 'windows-amd64.zip',
+        Windows32 : 'windows-i586.zip',
+        Mac       : 'macos-amd64.zip'
+]
 
-    Jre(String extension) {
-        String baseUrl = "http://artifactory.terasology.org/artifactory/libs-release-local"
-
-        // TODO can we use gradle dependencies/configurations to download this for the bundling task?
-        // Use vendored JRE from our Artifactory
-        String groupId = "org/terasology/jre/liberica"
-        String artifactId = this.name().toLowerCase()
-        String version = "0.0.1"
-
-        String artifact = "${artifactId}-${version}.${extension}"
-
-        this.downloadUrl = new URL("${baseUrl}/${groupId}/${artifactId}/${version}/${artifact}")
-        this.targetArchive = new File("${artifact}")   
-    }
+task downloadJreAll {
+    group 'Download'
+    description 'Downloads JRE for all platforms'
 }
 
-task fetchJreAll {
-    group "Download"
-    description "Downloads JRE for all platforms"
+task allDistZip {
+    group 'Distribution'
+    description 'Bundles the project with a JRE for each platform'
+    dependsOn distZip
 }
 
-Jre.each { arch ->
-    def downloadTask = task("fetchJre${arch}", type: Download) {
-        group "Download"
-        description "Download JRE for ${arch}"
+jreUrlFilenames.each { os, file ->
+    def packedJre = new File("$projectDir/jre/$file")
+    def unpackedJre = new File("$buildDir/jre/$os")
 
-        src arch.downloadUrl
-        dest file("${project.projectDir}/jres/${arch.targetArchive}")
-        overwrite false
-        onlyIfModified true
+    def downloadTask = task("downloadJre$os") {
+        group 'Download'
+        description "Downloads JRE for $os"
+
+        doFirst {
+            download {
+                src "$jreUrlBase-$file"
+                dest packedJre
+                overwrite false
+            }
+        }
+
+        doLast {
+            // Unpack the JRE
+            if (!unpackedJre.exists()) {
+                unpackedJre.mkdirs()
+                copy {
+                    from(file.endsWith("zip")
+                            ? zipTree(packedJre)
+                            : tarTree(packedJre)) {
+                        eachFile { fcd ->
+                            fcd.relativePath = new RelativePath(
+                                    true, fcd.relativePath.segments.drop(1))
+                        }
+                        includeEmptyDirs = false
+                    }
+                    into unpackedJre
+                }
+            }
+        }
     }
 
-    fetchJreAll.dependsOn downloadTask
+    def distName = os.toLowerCase()
+    distributions {
+        "$distName" {
+            contents {
+                with distributions.main.contents
+                into('jre') {
+                    from unpackedJre
+                }
+            }
+        }
+    }
+
+    def zipTask = tasks.named("${distName}DistZip").get()
+    def tarTask = tasks.named("${distName}DistTar").get()
+
+    downloadJreAll.dependsOn downloadTask
+    zipTask.dependsOn downloadTask
+    zipTask.description "Bundles the project with a JRE for $os"
+    tarTask.dependsOn downloadTask
+    tarTask.description "Bundles the project with a JRE for $os"
+    allDistZip.dependsOn zipTask
+}
+
+/**
+ * Modify start scripts to use bundled JRE when
+ * available, otherwise fall back to searching.
+ */
+startScripts.doLast {
+    unixScript.text = unixScript
+            .text
+            .replaceFirst(/(?s)# Determine the Java.*(?=\R\R# Increase)/) { match ->
+                """\
+                |# Use bundled JRE when available
+                |if [ -d \$APP_HOME/jre ] ; then
+                |    JAVACMD=\$APP_HOME/jre/bin/java
+                |else
+                |    ${match.replace("\n", "\n    ")}
+                |fi"""
+                .stripMargin()
+            }
+
+    windowsScript.text = windowsScript
+            .text
+            .replaceFirst(/(?s)@rem Find java.*:init/) { match ->
+                """\
+                |@rem Use bundled JRE when available
+                |if not exist %APP_HOME%\\jre\\ goto findJava
+                |set JAVA_EXE=%APP_HOME%\\jre\\bin\\java.exe
+                |goto init
+                |
+                |:findJava
+                |$match
+                |"""
+                .stripMargin()
+            }
 }
