@@ -1,0 +1,22 @@
+name-template: 'Draft for v$NEXT_MINOR_VERSION'
+tag-template: 'v$NEXT_MINOR_VERSION'
+
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'Type: Enhancement'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'Type: Bug'
+  - title: '🧰 Maintenance'
+    label: 'Type: Maintenance'
+
+change-template: '- #$NUMBER $TITLE (@$AUTHOR)'
+
+exclude-labels:
+  - 'Topic: CI/CD'
+
+template: |
+  ## Changes
+
+  $CHANGES
