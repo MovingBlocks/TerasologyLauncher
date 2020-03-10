@@ -1,6 +1,6 @@
 Terasology Launcher - ReadMe
 ============================
-![Terasology Logo](https://github.com/MovingBlocks/TerasologyLauncher/wiki/images/logo.png)
+![Terasology Logo](src/main/resources/org/terasology/launcher/images/logo.png)
 
 [*Terasology Launcher*][GitHub TerasologyLauncher] is the official launcher for the open source game [Terasology][GitHub Terasology].
 
