@@ -24,7 +24,7 @@ jobs:
       - name: Download JREs
         run: ./gradlew downloadJreAll
       - name: Bundle all distribution packages
-          run: ./gradlew allDistZip
+        run: ./gradlew allDistZip
       - name: Upload bundle for ${{ matrix.platform }}
         uses: actions/upload-release-asset@v1
         env:
