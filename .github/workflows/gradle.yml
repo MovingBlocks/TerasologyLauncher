@@ -14,5 +14,5 @@ jobs:
       with:
         java-version: 1.8
         java-package: jdk+fx
-    - name: Build with Gradle
-      run: ./gradlew build
+    - name: Build and test with Gradle
+      run: ./gradlew test
