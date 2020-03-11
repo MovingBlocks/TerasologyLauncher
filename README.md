@@ -100,8 +100,8 @@ See [:octocat: contributor overview][github terasologylauncher contributors].
 
 This project uses
 
-- Font Awesome Icon for Webchat ("fa comment")
-- Bellsoft JRE
+- Font Awesome Icon for Webchat (`fa-comments`), CC BY 4.0 License, [Font Awesome Free License](https://fontawesome.com/license/free)
+- [Bellsoft Liberica JRE 8](https://bell-sw.com/pages/java-8u232/) is bundled with the launcher
 
 ## License [![](https://img.shields.io/github/license/MovingBlocks/TerasologyLauncher)][license]
 
