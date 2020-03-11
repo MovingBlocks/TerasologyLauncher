@@ -3,6 +3,14 @@
     <img src="https://github.com/MovingBlocks/TerasologyLauncher/workflows/Push%20Validation/badge.svg" alt="Build Status"/>
 </div>
 
+<h3 align="center"><font size="+1"><b>
+    <a href="#installation">Installation</a> | 
+    <a href="#community">Community</a> | 
+    <a href="#features">Features</a>  | 
+    <a href="#development">Development</a>  | 
+    <a href="#license">License</a> 
+</b></font></h3>
+
 [_Terasology Launcher_][github terasologylauncher] is the official launcher for the open source game [Terasology][github terasology]. It provides easy access to the different game versions and build types.
 
 Terasology and related projects are developed by a group of software enthusiast volunteers under the organization name [MovingBlocks][github movingblocks].
@@ -16,11 +24,11 @@ Terasology and related projects are developed by a group of software enthusiast 
    - `TerasologyLauncher.exe` (Windows)
    - `bin/TerasologyLauncher` (Unix, Linux, Mac OS X)
 
-## Documentation
+## Community
 
-More information can be found in our [Documentation](docs/Home.md)
+## Features
 
-## Building/Developing
+## Development
 
 _Terasology Launcher_ uses a [Gradle][gradle]-based build system and provides a [wrapper][gradle wrapper].
 It is a script which is called from the root of the source tree. It downloads and installs [Gradle][gradle] automatically.
@@ -50,16 +58,12 @@ Display available tasks
 
 Generate IntelliJ IDEA project files
 
-## Contributing
-
 Please use [GitHub][github terasologylauncher issues] or the forums ([english][english forum] or [german][german forum]) for contact, questions, feature suggestions, contributions and bug reports.
 
 We welcome contributions, especially through pull requests on GitHub.
 Submissions must be licensed under the [Apache License, Version 2.0][apache license].
 
 See also [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Contributors
 
 See [:octocat: contributor overview][github terasologylauncher contributors].
 
