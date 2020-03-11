@@ -9,14 +9,14 @@
     </a>
 </div>
 
-<h3 align="center"><font size="+1"><b>
+<h3 align="center"><b>
     <a href="#installation">Installation</a> | 
     <a href="#community">Community</a> | 
     <a href="#features">Features</a>  | 
     <a href="#development">Development</a>  | 
     <a href="#acknowledgements">Acknowledgements</a>  | 
     <a href="#license">License</a> 
-</b></font></h3>
+</b></h3>
 
 [_Terasology Launcher_][github terasologylauncher] is the official launcher for the open source game [Terasology][github terasology]. It provides easy access to the different game versions and build types. Terasology and related projects are developed by a group of software enthusiast volunteers under the organization name [MovingBlocks][github movingblocks].
 
@@ -36,28 +36,37 @@
 If you want to get in contact with the **Terasology** community and the whole **MovingBlocks** team, you can easily connect with us, share your ideas, report and solve problems.
 We are present in nearly the complete round-up of social networks. Follow/friend us wherever you want, chat with us and tell the world.
 
-<p align="center" style="word-spacing: 1.5em; padding-top:1em">
+&nbsp;
+
+<p align="center">
     <a title="Terasology Forum" href="https://forum.terasology.org">
         <img src="./src/main/resources/org/terasology/launcher/images/forum.png" width="48px"/>
     </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <a title="Discord" href="https://discord.gg/terasology">
         <img src="./src/main/resources/org/terasology/launcher/images/discord.png" width="48px"/>
     </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <a title="IRC Webchat" href="http://webchat.freenode.net/?channels=terasology&uio=d4?channels=%23terasology&nick=Terasologist...&prompt=1&useUserListIcons=true">
         <img src="./src/main/resources/org/terasology/launcher/images/webchat.png" width="48px"/>
     </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <a title="Twitter" href="https://twitter.com/Terasology">
     <img src="./src/main/resources/org/terasology/launcher/images/twitter.png" width="48px"/>
     </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <a title="Facebook" href="https://www.facebook.com/Terasology">
         <img src="./src/main/resources/org/terasology/launcher/images/facebook.png" width="48px"/>
     </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <a title="Reddit" href="http://www.reddit.com/r/Terasology">
         <img src="./src/main/resources/org/terasology/launcher/images/reddit.png" width="48px"/>
     </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <a title="Youtube" href="https://www.youtube.com/user/blockmaniaTV">
         <img src="./src/main/resources/org/terasology/launcher/images/youtube.png" width="48px"/>
     </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <a title="Patreon" href="https://www.patreon.com/Terasology">
         <img src="./src/main/resources/org/terasology/launcher/images/patreon.jpg" width="48px"/>
     </a>
