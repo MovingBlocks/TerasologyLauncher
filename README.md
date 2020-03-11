@@ -4,7 +4,7 @@
     <a href="https://github.com/MovingBlocks/TerasologyLauncher/releases/latest">
         <img src="https://img.shields.io/github/v/release/MovingBlocks/TerasologyLauncher" alt="Release" />
     </a>
-    <a href="">
+    <a href="http://www.apache.org/licenses/LICENSE-2.0.html">
         <img src="https://img.shields.io/github/license/MovingBlocks/TerasologyLauncher" alt="License" />
     </a>
 </div>
@@ -21,10 +21,9 @@
 
 Terasology and related projects are developed by a group of software enthusiast volunteers under the organization name [MovingBlocks][github movingblocks].
 
-## Installation
+## Installation [![](https://img.shields.io/github/v/release/MovingBlocks/TerasologyLauncher)][latest-release]
 
-1. Download the package for your platform
-   - [official releases][download github releases] (recommended)
+1. Download the corresponding archive for your platform from the [latest release][latest-release]:
 1. Extract the archive to the path where the launcher should be installed
 1. Start _Terasology Launcher_
    - `TerasologyLauncher.exe` (Windows)
@@ -73,17 +72,26 @@ See also [CONTRIBUTING.md](CONTRIBUTING.md).
 
 See [:octocat: contributor overview][github terasologylauncher contributors].
 
-## License
+## Acknowledgements
+
+This project uses
+
+## License [![](https://img.shields.io/github/license/MovingBlocks/TerasologyLauncher)][license]
 
 _Terasology Launcher_ is licensed under the [Apache License, Version 2.0][apache license].
+
+<!-- References -->
+
+[latest-release]: https://github.com/MovingBlocks/TerasologyLauncher/releases/ "TerasologyLauncher download (official releases)"
+[license]: http://www.apache.org/licenses/LICENSE-2.0.html "Apache License, Version 2.0"
+
+<!-- -->
 
 [github movingblocks]: https://github.com/MovingBlocks/ "MovingBlocks"
 [github terasology]: https://github.com/MovingBlocks/Terasology/ "Terasology"
 [github terasologylauncher]: https://github.com/MovingBlocks/TerasologyLauncher/ "TerasologyLauncher"
 [github terasologylauncher issues]: https://github.com/MovingBlocks/TerasologyLauncher/issues/ "TerasologyLauncher issues"
 [github terasologylauncher contributors]: https://github.com/MovingBlocks/TerasologyLauncher/graphs/contributors/ "TerasologyLauncher contributors"
-[download github releases]: https://github.com/MovingBlocks/TerasologyLauncher/releases/ "TerasologyLauncher download (official releases)"
 [english forum]: http://forum.terasology.org/threads/terasologylauncher-mrbarsack.708/ "TerasologyLauncher forum thread"
-[apache license]: http://www.apache.org/licenses/LICENSE-2.0.html "Apache License, Version 2.0"
 [gradle]: http://gradle.org "Gradle"
 [gradle wrapper]: http://gradle.org/docs/current/userguide/gradle_wrapper.html "Gradle Wrapper"
