@@ -1,8 +1,0 @@
-- [[Home]]
-- [[Getting Started]]
-- [[Setup Guide]]
-- [[Documentation]]
- - [[Create New Release]]
- - [[Add New Translation]]
- - [[Launcher Test Plan|launcher-test-plan]]
- - [[Settings Test Plan|settings-test-plan]]
