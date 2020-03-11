@@ -13,7 +13,7 @@ The launcher is part of the open source community around Terasology and provides
 
 |[Getting Started](Getting-Started.md)|[Community &amp; Contact](Community.md)|[Setup Guide](Setup-Guide.md)|[Technical Documentation](Documentation.md)|
 |:-----------------------------------:|:-------------------------------------:|:---------------------------:|:-----------------------------------------:|
-|[Getting Started](images/download.png =96x)|[Community](images/community.png =96x)|[Setup Guide](images/setup.png =96x)|[Technical Documentation](images/documentation.png =96x)|
+|![Getting Started](images/download.png)|![Community](images/community.png)|![Setup Guide](images/setup.png)|![Technical Documentation](images/documentation.png)|
 |Information for end users on how to get, start and use the launcher.|Check out this section to get more information or get in touch with us!|A step-by-step guide on how to set-up and run TerasologyLauncher from source.|In-depth information about the techniques used in TerasologyLauncher.|
 
 ## License
