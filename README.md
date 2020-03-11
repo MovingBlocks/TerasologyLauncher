@@ -48,7 +48,7 @@ If you want to get in contact with the **Terasology** community and the whole __
       <a title="Reddit" href="http://www.reddit.com/r/Terasology"><img src="./src/main/resources/org/terasology/launcher/images/reddit.png" width="48px"/></a>
       <a title="Youtube" href="https://www.youtube.com/user/blockmaniaTV"><img src="./src/main/resources/org/terasology/launcher/images/youtube.png" width="48px"/></a></td>
     <td width="33%" align="center">
-      <a title="Patreon" href="https://www.patreon.com/Terasology"><img src="./src/main/resources/org/terasology/launcher/images/patreon.png" width="48px"/></a></td>
+      <a title="Patreon" href="https://www.patreon.com/Terasology"><img src="./src/main/resources/org/terasology/launcher/images/patreon.svg" width="48px"/></a></td>
   </tr>
 </table>
 
