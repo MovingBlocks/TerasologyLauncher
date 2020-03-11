@@ -10,12 +10,12 @@
 </div>
 
 <h3 align="center"><b>
-    <a href="#installation">Installation</a> | 
+    <a href="#installation-">Installation</a> | 
     <a href="#community">Community</a> | 
     <a href="#features">Features</a>  | 
     <a href="#development">Development</a>  | 
     <a href="#acknowledgements">Acknowledgements</a>  | 
-    <a href="#license">License</a> 
+    <a href="#license-">License</a> 
 </b></h3>
 
 [_Terasology Launcher_][github terasologylauncher] is the official launcher for the open source game [Terasology][github terasology]. It provides easy access to the different game versions and build types. Terasology and related projects are developed by a group of software enthusiast volunteers under the organization name [MovingBlocks][github movingblocks].
