@@ -20,6 +20,7 @@
 
 [_Terasology Launcher_][github terasologylauncher] is the official launcher for the open source game [Terasology][github terasology]. It provides easy access to the different game versions and build types. Terasology and related projects are developed by a group of software enthusiast volunteers under the organization name [MovingBlocks][github movingblocks].
 
+
 ## Installation [![](https://img.shields.io/github/v/release/MovingBlocks/TerasologyLauncher)][latest-release]
 
 1. Download the corresponding archive for your platform from the [latest release][latest-release]
@@ -31,9 +32,10 @@
    | **Windows**               | `TerasologyLauncher.exe` or `bin/TerasologyLauncher.bat` |
    | **Unix, Linux, Mac OS X** | `bin/TerasologyLauncher`                                 |
 
+
 ## Community
 
-If you want to get in contact with the **Terasology** community and the whole **MovingBlocks** team, you can easily connect with us, share your ideas, report and solve problems.
+If you want to get in contact with the **Terasology** community and the whole **MovingBlocks** team, you can easily connect with us, share your ideas, report and solve problems. 
 We are present in nearly the complete round-up of social networks. Follow/friend us wherever you want, chat with us and tell the world.
 
 &nbsp;
@@ -70,9 +72,15 @@ We are present in nearly the complete round-up of social networks. Follow/friend
     <a title="Patreon" href="https://www.patreon.com/Terasology">
         <img src="./src/main/resources/org/terasology/launcher/images/patreon.jpg" width="48px"/>
     </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a title="GitHub Issues" href="https://github.com/MovingBlocks/TerasologyLauncher/issues">
+        <img src="./src/main/resources/org/terasology/launcher/images/github.png" width="48px"/>
+    </a>
 </p>
 
+
 ## Features
+
 
 ## Development
 
@@ -87,21 +95,21 @@ Basically everything can be done using the [Gradle](http://gradle.org) [wrapper]
 | `gradlew tasks`         | _Display other available build script tasks._                                            |
 | `gradlew idea`          | _Generate IntelliJ IDEA project files._                                                  |
 
-Please use [GitHub][github terasologylauncher issues] or the forums ([english][english forum] or [german][german forum]) for contact, questions, feature suggestions, contributions and bug reports.
-
-We welcome contributions, especially through pull requests on GitHub.
+If you have implemented a cool feature or fixed a bug send us a *pull request*! 
 Submissions must be licensed under the [Apache License, Version 2.0][apache license].
 
 See also [CONTRIBUTING.md](CONTRIBUTING.md).
 
-See [:octocat: contributor overview][github terasologylauncher contributors].
 
 ## Acknowledgements
+
+_Terasology Launcher_ is driven by its [:octocat: contributors][github terasologylauncher contributors]!
 
 This project uses
 
 - Font Awesome Icon for Webchat ("fa comment")
 - Bellsoft JRE
+
 
 ## License [![](https://img.shields.io/github/license/MovingBlocks/TerasologyLauncher)][license]
 
