@@ -1,6 +1,7 @@
-[[HOME|Home]] > [[COMMUNITY &amp; CONTACT|Community]]
+# Community & Contact
 
-<img align="left" width="96px" src="images/community.png"/>
+![Community](images/community.png)
+
 [**Terasology**](http://terasology.org) and related projects are developed by a group of software enthusiasts and volunteers under the organization name [**MovingBlocks**](https://github.com/MovingBlocks). We are spending our free time working on the open source game Terasology and its surrounding ecosystem.
 
 ## Get in Contact
