@@ -1,4 +1,4 @@
-[[HOME|Home]] > [[TERASOLOGY LAUNCHER DOCUMENTATION|Documentation]] > [[ADD NEW TRANSLATION|add-new-translation]]
+# Add new translation
 
 Adding new languages to the launcher's portfolio or helping out with translating single labels or messages is quite easy. We offer two ways of doing so:
 
@@ -7,7 +7,7 @@ Adding new languages to the launcher's portfolio or helping out with translating
 
 We strongly encourage you to use the Weblate interface as it allows for easy review of new translations or suggested changes. 
 
-# Using Weblate
+## Using Weblate
 Using the Weblate interface is really easy! To start off, you can just log-in with your GitHub Account. By doing so, your changes and translations will be recognized correctly in the Git commits. 
 
 All translations needed for **TerasologyLauncher** can be found in the corresponding Weblate project:
@@ -19,7 +19,7 @@ There are two sub-projects: one for *Labels* (all descriptive labels and button 
 
 You can add any new language to the round-up via the web interface. Note that English is the launcher's default language and can thus only be modified using [manual translation](#Manual Translation). For more information on how to use Weblate, see the official [Translator guide](http://weblate.readthedocs.org/en/weblate-1.9/user/index.html).
 
-# Manual Translation
+## Manual Translation
 Suppose you have done a translation to German. The necessary steps would be:
   * Copy [`LabelsBundle_en.properties`](https://github.com/MovingBlocks/TerasologyLauncher/blob/develop/src/main/resources/org/terasology/launcher/bundle/LabelsBundle_en.properties) to a new file `LabelsBundle_de.properties` in ` src/main/resources/org/terasology/launcher/bundle/`. Replace the language suffix with the appropriate one (see http://en.wikipedia.org/wiki/ISO_639-1). Translate everything to your target language. The property files need to be valid Java properties files (ISO 8859-1 character encoding). (see http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html).
   * Do the same for `MessageBundle_de.properties`
