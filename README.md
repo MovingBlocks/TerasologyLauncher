@@ -1,6 +1,12 @@
-<p align="center"><img src="./src/main/resources/org/terasology/launcher/images/logo.png"/></>
+<p align="center"><img src="./docs/images/logo.svg"/></>
 <div align="center">
     <img src="https://github.com/MovingBlocks/TerasologyLauncher/workflows/Push%20Validation/badge.svg" alt="Build Status"/>
+    <a href="https://github.com/MovingBlocks/TerasologyLauncher/releases/latest">
+        <img src="https://img.shields.io/github/v/release/MovingBlocks/TerasologyLauncher" alt="Release" />
+    </a>
+    <a href="">
+        <img src="https://img.shields.io/github/license/MovingBlocks/TerasologyLauncher" alt="License" />
+    </a>
 </div>
 
 <h3 align="center"><font size="+1"><b>
