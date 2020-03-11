@@ -28,6 +28,11 @@ the JavaFX runtime libraries installed, e.g., through an extra package often nam
    * lib/TerasologyLauncher.jar (Java)
 3. Use *Terasology Launcher* to download, config and start *Terasology*
 
+Documentation
+-------------
+More information can be found in our [Documentation](docs/Home.md)
+
+
 License
 -------
 *Terasology Launcher* is licensed under the [Apache License, Version 2.0][Apache License].
