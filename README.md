@@ -86,12 +86,15 @@ Furthermore, you will need [Git](https://git-scm.com) for source control and sig
 <details closed>
 <summary>1. Fork the project</summary>
 <br>
+    
 To get ready to tinker with the source code, *fork* the project by opening the [**TerasologyLauncher**](https://github.com/MovingBlocks/TerasologyLauncher) GitHub page and clicking on the little fork button in the upper right. 
+
 </details>
 
 <details closed>
 <summary>2. Clone the repository</summary>
 <br>
+    
 There are several ways to get the source code on your local workspace:
 - Use the command line by executing `git clone https://github.com/MovingBlocks/TerasologyLauncher.git` (replace `MovingBlocks` with your GitHub username to use your own fork)
 - Use IntelliJ's feature "Check out from version control" and follow the prompts
@@ -102,19 +105,23 @@ If you cloned your own fork, you might want to set the original repository as a 
 ~~~
 git remote add movingblocks https://github.com/MovingBlocks/TerasologyLauncher.git
 ~~~
+
 </details>
 
 <details closed>
 <summary>3. Generate project files and open in IDE</summary>
 <br>
+    
 To generate the project files for IntelliJ, open a command prompt in the directory you checked out into and execute `gradlew idea` - this fetches the right version of Gradle and all project dependencies automatically, as well as generates the project config. Afterwards, you can simply open the project file in IntelliJ. 
 
 There is also a version for Eclipse - `gradlew eclipse` - but we encourage you to use IntelliJ.
+
 </details>
 
 <details closed>
 <summary>4. Start developing</summary>
 <br>
+    
 Familiarise yourself with Git's concept of repositories, branches, and commits. To get the latest changes from your remote repositories (e.g. `movingblocks`) you need to *fetch* all remote data via `git fetch --all`. This does not change your workspace, it just loads up your local Git database.
 
 Apart from Git, basically everything can be done using the [Gradle](http://gradle.org) [wrapper](http://gradle.org/docs/current/userguide/gradle_wrapper.html). The following list is an excerpt of some commonly used tasks.
@@ -132,6 +139,7 @@ Apart from Git, basically everything can be done using the [Gradle](http://gradl
 Assume you have pushed some changes to your fork into a branch `myFeature`. In order to let us know about your work and give us the possibility to incorporate your changes you should send us a *pull request*. You can do this by selecting the `myFeature` branch on you GitHub repo and click the button which says "Open pull request".
 
 More information on how to contribute can be found in [CONTRIBUTING.md](https://github.com/MovingBlocks/TerasologyLauncher/blob/develop/CONTRIBUTING.md). Remember, that all submissions must be licensed under [Apache License, Version 2.0][license].
+
 </details>
 
 <details closed>
@@ -146,6 +154,7 @@ Tutorials and further information on Git:
 Developer setup tutorials for our main project, [**Terasology**](https://github.com/MovingBlocks/Terasology):
 - [Dev Setup](https://github.com/MovingBlocks/Terasology/wiki/Dev-Setup)
 - [Dealing with Forks](https://github.com/MovingBlocks/Terasology/wiki/Dealing-with-Forks)
+
 </details>
 
 
