@@ -84,7 +84,7 @@ To be able to run **TerasologyLauncher** from source follow these steps. This gu
 Furthermore, you will need [Git](https://git-scm.com) for source control and sign up for [GitHub](https://github.com/signup/free).
 
 <details closed>
-<summary>1. Fork the project</summary>
+<summary>:one: Fork the project</summary>
 <br>
     
 To get ready to tinker with the source code, *fork* the project by opening the [**TerasologyLauncher**](https://github.com/MovingBlocks/TerasologyLauncher) GitHub page and clicking on the little fork button in the upper right. 
@@ -92,7 +92,7 @@ To get ready to tinker with the source code, *fork* the project by opening the [
 </details>
 
 <details closed>
-<summary>2. Clone the repository</summary>
+<summary>:two: Clone the repository</summary>
 <br>
     
 There are several ways to get the source code on your local workspace:
@@ -109,7 +109,7 @@ git remote add movingblocks https://github.com/MovingBlocks/TerasologyLauncher.g
 </details>
 
 <details closed>
-<summary>3. Generate project files and open in IDE</summary>
+<summary>:three: Generate project files and open in IDE</summary>
 <br>
     
 To generate the project files for IntelliJ, open a command prompt in the directory you checked out into and execute `gradlew idea` - this fetches the right version of Gradle and all project dependencies automatically, as well as generates the project config. Afterwards, you can simply open the project file in IntelliJ. 
@@ -119,7 +119,7 @@ There is also a version for Eclipse - `gradlew eclipse` - but we encourage you t
 </details>
 
 <details closed>
-<summary>4. Start developing</summary>
+<summary>:tada: Start developing</summary>
 <br>
     
 Familiarise yourself with Git's concept of repositories, branches, and commits. To get the latest changes from your remote repositories (e.g. `movingblocks`) you need to *fetch* all remote data via `git fetch --all`. This does not change your workspace, it just loads up your local Git database.
@@ -143,7 +143,7 @@ More information on how to contribute can be found in [CONTRIBUTING.md](https://
 </details>
 
 <details closed>
-<summary>Related Resources</summary>
+<summary>:books: Related Resources</summary>
 <br>
 
 Tutorials and further information on Git:
