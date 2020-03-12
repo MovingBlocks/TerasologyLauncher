@@ -106,7 +106,7 @@ There is also a version for Eclipse - `gradlew eclipse` - but we encourage you t
 </details>
 
 <details closed>
-<summary>:tada: Start developing</summary>
+<summary>:nerd_face: Start developing</summary>
 <br>
     
 Familiarise yourself with Git's concept of repositories, branches, and commits. To get the latest changes from your remote repositories (e.g. `movingblocks`) you need to *fetch* all remote data via `git fetch --all`. This does not change your workspace, it just loads up your local Git database.
