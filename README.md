@@ -81,38 +81,25 @@ We are present in nearly the complete round-up of social networks. Follow/friend
 ## Development
 
 To be able to run **TerasologyLauncher** from source follow these steps. This guide is designed for [IntelliJ IDEA](http://www.jetbrains.com/idea/) (you can use the free community edition), but alternative setups are possible.
-Furthermore, you will need [Git](https://git-scm.com) for source control and sign up for [GitHub](https://github.com/signup/free).
 
 <details closed>
-<summary>:one: Fork the project</summary>
+<summary>:octocat: Get Ready</summary>
 <br>
-    
-To get ready to tinker with the source code, *fork* the project by opening the [**TerasologyLauncher**](https://github.com/MovingBlocks/TerasologyLauncher) GitHub page and clicking on the little fork button in the upper right. 
 
-</details>
+To contribute to this repo, please open a [pull request](https://guides.github.com/activities/forking/) from your fork of this repository.
 
-<details closed>
-<summary>:two: Clone the repository</summary>
-<br>
-    
-There are several ways to get the source code on your local workspace:
-- Use the command line by executing `git clone https://github.com/MovingBlocks/TerasologyLauncher.git` (replace `MovingBlocks` with your GitHub username to use your own fork)
-- Use IntelliJ's feature "Check out from version control" and follow the prompts
-- Use [GitHub for Windows](https://windows.github.com/) or [GitHub for Mac](https://mac.github.com/) to clone the repo
+For more information on building and developing the Terasology Launcher, make sure to read the rest of this README and [CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
-If you cloned your own fork, you might want to set the original repository as a remote. To do so, run
+### Requirements
 
-~~~
-git remote add movingblocks https://github.com/MovingBlocks/TerasologyLauncher.git
-~~~
+You'll need the following tools:
 
-</details>
+- Java SE Development Kit (JDK) 8 with JavaFX. It may be possible to use a later version of the JDK for local development, but the CI will verify against this baseline version.
+- Git to clone the repo and commit changes.
 
-<details closed>
-<summary>:three: Generate project files and open in IDE</summary>
-<br>
-    
-To generate the project files for IntelliJ, open a command prompt in the directory you checked out into and execute `gradlew idea` - this fetches the right version of Gradle and all project dependencies automatically, as well as generates the project config. Afterwards, you can simply open the project file in IntelliJ. 
+Development is possible on all common platforms (Windows, Linux, MacOS) as long as the JDK with JavaFX is properly set up.
+  
+To generate the project files for IntelliJ, open a command prompt in the directory you checked out into and execute `gradlew idea` - this fetches the right version of Gradle and all project dependencies automatically, as well as generates the project config. Afterwards, you can simply open the project file in IntelliJ.
 
 There is also a version for Eclipse - `gradlew eclipse` - but we encourage you to use IntelliJ.
 
@@ -135,8 +122,7 @@ Apart from Git, basically everything can be done using the [Gradle](http://gradl
 | `gradlew tasks`         | _Display other available build script tasks._                                            |
 | `gradlew idea`          | _Generate IntelliJ IDEA project files._                                                  |
 
-
-Assume you have pushed some changes to your fork into a branch `myFeature`. In order to let us know about your work and give us the possibility to incorporate your changes you should send us a *pull request*. You can do this by selecting the `myFeature` branch on you GitHub repo and click the button which says "Open pull request".
+Assume you have pushed some changes to your fork into a branch `myFeature`. In order to let us know about your work and give us the possibility to incorporate your changes you should send us a _pull request_. You can do this by selecting the `myFeature` branch on you GitHub repo and click the button which says "Open pull request".
 
 More information on how to contribute can be found in [CONTRIBUTING.md](https://github.com/MovingBlocks/TerasologyLauncher/blob/develop/CONTRIBUTING.md). Remember, that all submissions must be licensed under [Apache License, Version 2.0][license].
 
@@ -147,16 +133,17 @@ More information on how to contribute can be found in [CONTRIBUTING.md](https://
 <br>
 
 Tutorials and further information on Git:
+
 - http://www.vogella.de/articles/Git/article.html
 - http://gitref.org/
 - http://progit.org/
 
 Developer setup tutorials for our main project, [**Terasology**](https://github.com/MovingBlocks/Terasology):
+
 - [Dev Setup](https://github.com/MovingBlocks/Terasology/wiki/Dev-Setup)
 - [Dealing with Forks](https://github.com/MovingBlocks/Terasology/wiki/Dealing-with-Forks)
 
 </details>
-
 
 ## Acknowledgements
 
