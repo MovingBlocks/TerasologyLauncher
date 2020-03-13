@@ -180,7 +180,7 @@ Developer setup tutorials for our main project, [**Terasology**](https://github.
 
 ## Acknowledgements
 
-_Terasology Launcher_ is driven by its [:octocat: contributors][github terasologylauncher contributors]!
+_Terasology Launcher_ is driven by its [contributors][github terasologylauncher contributors]!
 
 This project uses
 
