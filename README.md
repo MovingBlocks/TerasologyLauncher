@@ -189,7 +189,7 @@ This project uses
 
 ## License [![](https://img.shields.io/github/license/MovingBlocks/TerasologyLauncher)][license]
 
-_Terasology Launcher_ is licensed under the [Apache License, Version 2.0][apache license].
+_Terasology Launcher_ is licensed under the [Apache License, Version 2.0][license].
 
 <!-- References -->
 
