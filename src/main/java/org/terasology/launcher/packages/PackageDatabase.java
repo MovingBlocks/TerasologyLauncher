@@ -133,16 +133,29 @@ class PackageDatabase {
         return Collections.unmodifiableList(database);
     }
 
+    static class PackageMetadata implements Serializable {
+        private String id;
+        private String name;
+
+        public String getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
     static class Repository implements Serializable {
         private String url;
         private String type;
-        private String[] trackedPackages;
+        private PackageMetadata[] trackedPackages;
 
         String getUrl() {
             return url;
         }
 
-        String[] getTrackedPackages() {
+        PackageMetadata[] getTrackedPackages() {
             return trackedPackages;
         }
     }

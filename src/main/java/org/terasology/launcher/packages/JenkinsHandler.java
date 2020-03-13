@@ -61,7 +61,8 @@ class JenkinsHandler implements RepositoryHandler {
     @Override
     public List<Package> getPackageList(PackageDatabase.Repository source) {
         final List<Package> pkgList = new LinkedList<>();
-        for (String pkgName : source.getTrackedPackages()) {
+        for (PackageDatabase.PackageMetadata pkg : source.getTrackedPackages()) {
+            String pkgName = pkg.getId();
             final String apiUrl = source.getUrl() + JOB + pkgName + API_FILTER;
 
             try (BufferedReader reader = new BufferedReader(
