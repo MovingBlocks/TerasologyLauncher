@@ -109,6 +109,7 @@ class JenkinsHandler implements RepositoryHandler {
                     // Create a Package
                     final Package currentPkg = new Package(
                             pkgId,
+                            pkg.getName(),
                             build.number,
                             zipUrl,
                             changelog

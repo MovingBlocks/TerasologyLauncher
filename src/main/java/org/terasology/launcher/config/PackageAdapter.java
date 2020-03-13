@@ -28,18 +28,18 @@ import java.util.Collections;
  * Adds GSON support for {@link Package} instances.
  */
 class PackageAdapter extends TypeAdapter<Package> {
-    private static final String KEY_NAME = "name";
+    private static final String KEY_ID = "id";
     private static final String KEY_VERSION = "version";
 
     @Override
     public void write(JsonWriter out, Package pkg) throws IOException {
         if (pkg != null) {
             out.beginObject()
-                .name(KEY_NAME)
+                    .name(KEY_ID)
                     .value(pkg.getId())
-                .name(KEY_VERSION)
-                .value(pkg.getVersion())
-                .endObject();
+                    .name(KEY_VERSION)
+                    .value(pkg.getVersion())
+                    .endObject();
         } else {
             out.nullValue();
         }
@@ -47,21 +47,24 @@ class PackageAdapter extends TypeAdapter<Package> {
 
     @Override
     public Package read(JsonReader in) throws IOException {
-        String name = null;
+        String id = null;
         String version = null;
 
         in.beginObject();
         while (in.hasNext()) {
             switch (in.nextName()) {
-                case KEY_NAME: name = in.nextString();
+                case KEY_ID:
+                    id = in.nextString();
                     break;
-                case KEY_VERSION: version = in.nextString();
+                case KEY_VERSION:
+                    version = in.nextString();
                     break;
-                default: in.skipValue();
+                default:
+                    in.skipValue();
             }
         }
         in.endObject();
 
-        return new Package(name, version, null, Collections.emptyList());
+        return new Package(id, null, version, null, Collections.emptyList());
     }
 }

@@ -452,7 +452,7 @@ public class ApplicationController {
         packageItems.clear();
         packageManager.getPackages()
                 .stream()
-                .collect(Collectors.groupingBy(Package::getId,
+                .collect(Collectors.groupingBy(Package::getName, //TODO this should be grouped by `id`
                          Collectors.mapping(VersionItem::new, Collectors.toList())))
                 .forEach((name, versions) ->
                         packageItems.add(new PackageItem(name, versions)));

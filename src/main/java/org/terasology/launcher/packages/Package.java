@@ -24,13 +24,15 @@ import java.util.List;
  */
 public class Package implements Serializable {
     private final String id;
+    private final String name;
     private final String version;
     private final String url;
     private final List<String> changelog;
     private boolean installed;
 
-    public Package(String id, String version, String url, List<String> changelog) {
+    public Package(String id, String name, String version, String url, List<String> changelog) {
         this.id = id;
+        this.name = name;
         this.version = version;
         this.url = url;
         this.changelog = changelog;
@@ -43,6 +45,10 @@ public class Package implements Serializable {
 
     public String getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getVersion() {
