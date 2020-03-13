@@ -26,10 +26,21 @@
 1. Extract the archive to the path where the launcher should be installed
 1. Start _Terasology Launcher_
 
-   | Operating System          | Executable                                               |
-   | ------------------------- | -------------------------------------------------------- |
-   | **Windows**               | `TerasologyLauncher.exe` or `bin/TerasologyLauncher.bat` |
-   | **Unix, Linux, Mac OS X** | `bin/TerasologyLauncher`                                 |
+<table align="center">
+  <thead align="left"><tr>
+    <th width="40%">Operating System</th>
+    <th width="60%">Executable</th>
+  </tr></thead>
+  <tr>
+    <td width="40%"><b>Windows</b></td>
+    <td width="60%"><code>TerasologyLauncher.exe</code> or <code>bin/TerasologyLauncher.bat</code></td>
+  </tr>
+  <tr>
+    <td width="40%"><b>Unix, Linux, Mac OS X</b></td>
+    <td width="60%"><code>bin/TerasologyLauncher</code></td>
+  </tr>
+</table>
+
 
 ## Community
 
@@ -113,14 +124,36 @@ Familiarise yourself with Git's concept of repositories, branches, and commits. 
 
 Apart from Git, basically everything can be done using the [Gradle](http://gradle.org) [wrapper](http://gradle.org/docs/current/userguide/gradle_wrapper.html). The following list is an excerpt of some commonly used tasks.
 
-| Command                 | _Description_                                                                            |
-| :---------------------- | :--------------------------------------------------------------------------------------- |
-| `gradlew build`         | _Compile the source code, run tests and build a JAR._                                    |
-| `gradlew install`       | _Create a local runnable installation (placed in `./build/install/TerasologyLauncher`)._ |
-| `gradlew run`           | _Build and run the launcher._                                                            |
-| `gradlew createRelease` | _Create a local development release (located in `./build/distributions`)._               |
-| `gradlew tasks`         | _Display other available build script tasks._                                            |
-| `gradlew idea`          | _Generate IntelliJ IDEA project files._                                                  |
+<table align="center">
+  <thead align="left"><tr>
+    <th width="50%">Command</th>
+    <th width="50%"><i>Description</i></th>
+  </tr></thead>
+  <tr>
+      <td width="50%"><code>gradlew build</code></td>
+      <td width="50%"><i>Compile the source code, run tests and build a JAR.</i></td>
+  </tr>
+  <tr>
+      <td width="50%"><code>gradlew install</code></td>
+      <td width="50%"><i>Create a local runnable installation (placed in <code>./build/install/TerasologyLauncher</code>).</i></td>
+  </tr>
+  <tr>
+      <td width="50%"><code>gradlew run</code></td>
+      <td width="50%"><i>Build and run the launcher.</i></td>
+  </tr>
+  <tr>
+      <td width="50%"><code>gradlew createRelease</code></td>
+      <td width="50%"><i>Create a local development release (located in <code>./build/distributions</code>).</i></td>
+  </tr>
+  <tr>
+      <td width="50%"><code>gradlew tasks</code></td>
+      <td width="50%"><i>Display other available build script tasks.</i></td>
+  </tr>
+  <tr>
+      <td width="50%"><code>gradlew idea`</td>
+      <td width="50%"><i>Generate IntelliJ IDEA project files.</i></td>
+  </tr>
+</table>
 
 Assume you have pushed some changes to your fork into a branch `myFeature`. In order to let us know about your work and give us the possibility to incorporate your changes you should send us a _pull request_. You can do this by selecting the `myFeature` branch on you GitHub repo and click the button which says "Open pull request".
 
