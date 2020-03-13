@@ -51,7 +51,6 @@ public class SettingsController {
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
 
     private Path launcherDirectory;
-    private Path downloadDirectory;
     private BaseLauncherSettings launcherSettings;
     private PackageManager packageManager;
     private ApplicationController appController;
@@ -69,8 +68,6 @@ public class SettingsController {
     private Label initialHeapSizeLabel;
     @FXML
     private Button gameDirectoryOpenButton;
-    @FXML
-    private Button gameDirectoryEditButton;
     @FXML
     private Button gameDataDirectoryOpenButton;
     @FXML
@@ -96,11 +93,7 @@ public class SettingsController {
     @FXML
     private Label launcherDirectoryLabel;
     @FXML
-    private Label downloadDirectoryLabel;
-    @FXML
     private Button launcherDirectoryOpenButton;
-    @FXML
-    private Button downloadDirectoryOpenButton;
     @FXML
     private CheckBox searchForUpdatesBox;
     @FXML
@@ -119,8 +112,6 @@ public class SettingsController {
     private TextField gameDataDirectoryPath;
     @FXML
     private TextField launcherDirectoryPath;
-    @FXML
-    private TextField downloadDirectoryPath;
     @FXML
     private TextField userJavaParametersField;
     @FXML
@@ -192,21 +183,6 @@ public class SettingsController {
     }
 
     @FXML
-    protected void editGameDirectoryAction() {
-        final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDirectory, BundleUtils.getLabel("settings_game_gameDirectory_edit_title"));
-        if (selectedFile != null) {
-            try {
-                FileUtils.ensureWritableDir(selectedFile);
-                gameDirectory = selectedFile;
-                updateDirectoryPathLabels();
-            } catch (IOException e) {
-                logger.error("The game directory can not be created or used! '{}'", gameDirectory, e);
-                GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
-            }
-        }
-    }
-
-    @FXML
     protected void openGameDataDirectoryAction() {
         GuiUtils.openFileBrowser(stage, gameDataDirectory, BundleUtils.getLabel("message_error_gameDataDirectory"));
     }
@@ -232,11 +208,6 @@ public class SettingsController {
     }
 
     @FXML
-    protected void openDownloadDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, downloadDirectory, BundleUtils.getLabel("message_error_downloadDirectory"));
-    }
-
-    @FXML
     protected void updateMaxHeapSizeBox() {
         final JavaHeapSize initialHeapSize = initialHeapSizeBox.getSelectionModel().getSelectedItem();
         final JavaHeapSize maxHeapSize = maxHeapSizeBox.getSelectionModel().getSelectedItem();
@@ -254,10 +225,9 @@ public class SettingsController {
         }
     }
 
-    void initialize(final Path newLauncherDirectory, final Path newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
+    void initialize(final Path newLauncherDirectory, final BaseLauncherSettings newLauncherSettings,
                     final PackageManager newPackageManager, final Stage newStage, final ApplicationController newAppController) {
         this.launcherDirectory = newLauncherDirectory;
-        this.downloadDirectory = newDownloadDirectory;
         this.launcherSettings = newLauncherSettings;
         this.packageManager = newPackageManager;
         this.stage = newStage;
@@ -292,7 +262,6 @@ public class SettingsController {
         maxHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_maxHeapSize"));
         initialHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_initialHeapSize"));
         gameDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_open"));
-        gameDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_edit"));
         gameDataDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_open"));
         gameDataDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_edit"));
         gameDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDirectory"));
@@ -312,9 +281,7 @@ public class SettingsController {
         closeAfterStartBox.setText(BundleUtils.getLabel("settings_launcher_closeLauncherAfterGameStart"));
         saveDownloadedFilesBox.setText(BundleUtils.getLabel("settings_launcher_saveDownloadedFiles"));
         launcherDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory"));
-        downloadDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory"));
         launcherDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory_open"));
-        downloadDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_downloadDirectory_open"));
         searchForUpdatesBox.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
         saveSettingsButton.setText(BundleUtils.getLabel("settings_save"));
         cancelSettingsButton.setText(BundleUtils.getLabel("settings_cancel"));
@@ -384,7 +351,6 @@ public class SettingsController {
         gameDirectoryPath.setText(gameDirectory.toString());
         gameDataDirectoryPath.setText(gameDataDirectory.toString());
         launcherDirectoryPath.setText(launcherDirectory.toString());
-        downloadDirectoryPath.setText(downloadDirectory.toString());
     }
 
     private void updateHeapSizeSelection() {
