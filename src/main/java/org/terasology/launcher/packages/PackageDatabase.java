@@ -90,7 +90,7 @@ class PackageDatabase {
             for (File pkgDir : Objects.requireNonNull(installDir.toFile().listFiles())) {
                 for (File versionDir : Objects.requireNonNull(pkgDir.listFiles())) {
                     database.stream()
-                            .filter(pkg -> pkg.getName().equals(pkgDir.getName())
+                            .filter(pkg -> pkg.getId().equals(pkgDir.getName())
                                     && pkg.getVersion().equals(versionDir.getName()))
                             .findFirst()
                             .ifPresent(pkg -> pkg.setInstalled(true));

@@ -62,8 +62,8 @@ class JenkinsHandler implements RepositoryHandler {
     public List<Package> getPackageList(PackageDatabase.Repository source) {
         final List<Package> pkgList = new LinkedList<>();
         for (PackageDatabase.PackageMetadata pkg : source.getTrackedPackages()) {
-            String pkgName = pkg.getId();
-            final String apiUrl = source.getUrl() + JOB + pkgName + API_FILTER;
+            String pkgId = pkg.getId();
+            final String apiUrl = source.getUrl() + JOB + pkgId + API_FILTER;
 
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(
@@ -108,10 +108,10 @@ class JenkinsHandler implements RepositoryHandler {
 
                     // Create a Package
                     final Package currentPkg = new Package(
-                            pkgName,                            // Name
-                            build.number,                       // Version
-                            zipUrl,                             // Zip URL
-                            changelog                           // Changelog
+                            pkgId,
+                            build.number,
+                            zipUrl,
+                            changelog
                     );
 
                     // Update tracked collections
@@ -157,7 +157,7 @@ class JenkinsHandler implements RepositoryHandler {
                         pkg.getChangelog().addAll(lastDownloadedChangelog);
                     } catch (IOException e) {
                         logger.warn("Failed to fetch upstream changelog for package: {} {}",
-                                pkg.getName(), pkg.getVersion());
+                                pkg.getId(), pkg.getVersion());
                     }
                 }
             }

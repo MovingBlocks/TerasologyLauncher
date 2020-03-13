@@ -94,12 +94,12 @@ public final class GameStarter {
         final ProcessBuilder pb = new ProcessBuilder(processParameters);
         pb.redirectErrorStream(true);
         pb.directory(gamePath.toFile());
-        logger.debug("Starting game process with '{}' in '{}' for '{}-{}'", processParameters, gamePath.toFile(), gamePkg.getName(), gamePkg.getVersion());
+        logger.debug("Starting game process with '{}' in '{}' for '{}-{}'", processParameters, gamePath.toFile(), gamePkg.getId(), gamePkg.getVersion());
         try {
             final Process p = pb.start();
 
             gameThread = new Thread(new GameRunner(p));
-            gameThread.setName("game" + gamePkg.getName() + "-" + gamePkg.getVersion());
+            gameThread.setName("game" + gamePkg.getId() + "-" + gamePkg.getVersion());
             gameThread.start();
 
             Thread.sleep(PROCESS_START_SLEEP_TIME);
@@ -112,7 +112,7 @@ public final class GameStarter {
                 logger.info("The game is successfully launched.");
             }
         } catch (InterruptedException | IOException | RuntimeException e) {
-            logger.error("The game could not be started due to an error! Parameters '{}' for '{}-{}'!", processParameters, gamePkg.getName(), gamePkg.getVersion(), e);
+            logger.error("The game could not be started due to an error! Parameters '{}' for '{}-{}'!", processParameters, gamePkg.getId(), gamePkg.getVersion(), e);
             return false;
         }
         return true;

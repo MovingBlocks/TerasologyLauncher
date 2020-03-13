@@ -36,7 +36,7 @@ class PackageAdapter extends TypeAdapter<Package> {
         if (pkg != null) {
             out.beginObject()
                 .name(KEY_NAME)
-                .value(pkg.getName())
+                    .value(pkg.getId())
                 .name(KEY_VERSION)
                 .value(pkg.getVersion())
                 .endObject();
