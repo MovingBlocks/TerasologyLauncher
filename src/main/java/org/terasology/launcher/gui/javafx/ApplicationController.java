@@ -102,7 +102,7 @@ public class ApplicationController {
                 packageManager.install(targetPkg, this);
             } catch (IOException | DownloadException e) {
                 logger.error("Failed to download package: {}-{}",
-                        targetPkg.getName(), targetPkg.getVersion(), e);
+                        targetPkg.getId(), targetPkg.getVersion(), e);
             }
             return null;
         }
@@ -152,7 +152,7 @@ public class ApplicationController {
                 packageManager.remove(targetPkg);
             } catch (IOException e) {
                 logger.error("Failed to remove package: {}-{}",
-                        targetPkg.getName(), targetPkg.getVersion(), e);
+                        targetPkg.getId(), targetPkg.getVersion(), e);
             }
             return null;
         }
@@ -361,7 +361,7 @@ public class ApplicationController {
         alert.showAndWait()
                 .filter(response -> response == ButtonType.OK)
                 .ifPresent(response -> {
-                    logger.info("Removing game: {}-{}", selectedPackage.getName(), selectedPackage.getVersion());
+                    logger.info("Removing game: {}-{}", selectedPackage.getId(), selectedPackage.getVersion());
 
                     deleteButton.setDisable(true);
                     final DeleteTask deleteTask = new DeleteTask(packageManager, selectedVersion);
@@ -454,7 +454,7 @@ public class ApplicationController {
         packageItems.clear();
         packageManager.getPackages()
                 .stream()
-                .collect(Collectors.groupingBy(Package::getName,
+                .collect(Collectors.groupingBy(Package::getName, //TODO this should be grouped by `id`
                          Collectors.mapping(VersionItem::new, Collectors.toList())))
                 .forEach((name, versions) ->
                         packageItems.add(new PackageItem(name, versions)));

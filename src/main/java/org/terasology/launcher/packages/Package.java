@@ -23,13 +23,15 @@ import java.util.List;
  * Model of a package handled by the PackageManager.
  */
 public class Package implements Serializable {
+    private final String id;
     private final String name;
     private final String version;
     private final String url;
     private final List<String> changelog;
     private boolean installed;
 
-    public Package(String name, String version, String url, List<String> changelog) {
+    public Package(String id, String name, String version, String url, List<String> changelog) {
+        this.id = id;
         this.name = name;
         this.version = version;
         this.url = url;
@@ -38,7 +40,11 @@ public class Package implements Serializable {
     }
 
     public String zipName() {
-        return name + "-" + version + ".zip";
+        return id + "-" + version + ".zip";
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {

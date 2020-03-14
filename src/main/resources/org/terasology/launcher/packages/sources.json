@@ -3,10 +3,22 @@
     "url" : "http://jenkins.terasology.org",
     "type" : "Jenkins",
     "trackedPackages" : [
-      "DistroOmegaRelease",
-      "DistroOmega",
-      "TerasologyStable",
-      "Terasology"
+      {
+        "id": "DistroOmegaRelease",
+        "name": "Terasology"
+      },
+      {
+        "id": "DistroOmega",
+        "name": "Terasology (nightly)"
+      },
+      {
+        "id": "TerasologyStable",
+        "name": "Terasology Lite"
+      },
+      {
+        "id": "Terasology",
+        "name": "Terasology Lite (nightly)"
+      }
     ]
   }
 ]
