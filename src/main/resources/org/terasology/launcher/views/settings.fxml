@@ -96,7 +96,7 @@
                            </children>
                         </HBox>
                        <TitledPane animated="false" text="Advanced options" GridPane.columnSpan="2147483647"
-                                   GridPane.rowIndex="7" GridPane.vgrow="SOMETIMES">
+                                   GridPane.rowIndex="7" GridPane.vgrow="SOMETIMES" expanded="false">
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
