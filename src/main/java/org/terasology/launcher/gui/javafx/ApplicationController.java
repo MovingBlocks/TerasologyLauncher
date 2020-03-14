@@ -16,8 +16,8 @@
 
 package org.terasology.launcher.gui.javafx;
 
+import com.sun.javafx.scene.control.skin.ComboBoxListViewSkin;
 import javafx.animation.Transition;
-import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
@@ -41,6 +41,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -62,6 +63,7 @@ import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.util.HostServicesWrapper;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.ProgressListener;
 
@@ -100,7 +102,7 @@ public class ApplicationController {
                 packageManager.install(targetPkg, this);
             } catch (IOException | DownloadException e) {
                 logger.error("Failed to download package: {}-{}",
-                        targetPkg.getName(), targetPkg.getVersion(), e);
+                        targetPkg.getId(), targetPkg.getVersion(), e);
             }
             return null;
         }
@@ -150,7 +152,7 @@ public class ApplicationController {
                 packageManager.remove(targetPkg);
             } catch (IOException e) {
                 logger.error("Failed to remove package: {}-{}",
-                        targetPkg.getName(), targetPkg.getVersion(), e);
+                        targetPkg.getId(), targetPkg.getVersion(), e);
             }
             return null;
         }
@@ -269,7 +271,7 @@ public class ApplicationController {
             }
 
             final SettingsController settingsController = fxmlLoader.getController();
-            settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, packageManager, settingsStage, this);
+            settingsController.initialize(launcherDirectory, launcherSettings, packageManager, settingsStage, this);
 
             Scene scene = new Scene(root);
             settingsStage.setScene(scene);
@@ -359,7 +361,7 @@ public class ApplicationController {
         alert.showAndWait()
                 .filter(response -> response == ButtonType.OK)
                 .ifPresent(response -> {
-                    logger.info("Removing game: {}-{}", selectedPackage.getName(), selectedPackage.getVersion());
+                    logger.info("Removing game: {}-{}", selectedPackage.getId(), selectedPackage.getVersion());
 
                     deleteButton.setDisable(true);
                     final DeleteTask deleteTask = new DeleteTask(packageManager, selectedVersion);
@@ -376,7 +378,7 @@ public class ApplicationController {
     }
 
     public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
-                       final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
+                       final PackageManager newPackageManager, final Stage newStage, final HostServicesWrapper hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
         this.tempDirectory = newTempDirectory;
@@ -452,7 +454,7 @@ public class ApplicationController {
         packageItems.clear();
         packageManager.getPackages()
                 .stream()
-                .collect(Collectors.groupingBy(Package::getName,
+                .collect(Collectors.groupingBy(Package::getName, //TODO this should be grouped by `id`
                          Collectors.mapping(VersionItem::new, Collectors.toList())))
                 .forEach((name, versions) ->
                         packageItems.add(new PackageItem(name, versions)));
@@ -461,12 +463,27 @@ public class ApplicationController {
         jobBox.getSelectionModel().select(0);
     }
 
+    /**
+     * Workaround to reset the scroll bar of the given ComboBox to either the selected index or the first element.
+     * <p>
+     * Code taken from: https://stackoverflow.com/a/57885977
+     *
+     * @param cb The {@link ComboBox} to reset the scroll bar for.
+     */
+    private void resetScrollBar(final ComboBox cb) {
+        // Beware: type of skin is an implementation detail!
+        ListView list = (ListView) ((ComboBoxListViewSkin) cb.getSkin()).getPopupContent();
+        list.scrollTo(Math.max(0, cb.getSelectionModel().getSelectedIndex()));
+    }
+
     private void initComboBoxes() {
         jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             buildVersionBox.setItems(newVal.versionItems);
+            //TODO remember selection / select latest installed version
             buildVersionBox.getSelectionModel().select(0);
         });
 
+        buildVersionBox.setOnShowing(e -> resetScrollBar(buildVersionBox));
         buildVersionBox.setCellFactory(list -> new VersionListCell());
         buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == null) {
