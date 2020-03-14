@@ -86,7 +86,7 @@ public final class TerasologyLauncher extends Application {
             // In addition, `hostServices` will be initialized, but disfunctional.
             // Thus, we have no idea whether we can use the services or not...
              hs = getHostServices();
-            // poor man's check: this will throw a NPE if the internal `hostServices.deleagte` is not initialized
+            // poor man's check: this will throw a NPE if the internal `hostServices.delegate` is not initialized
             hs.getCodeBase();
         } catch (NullPointerException e) {
             logger.warn("Host Services not available - won't be able to open hyperlinks in the system browser.");

@@ -63,7 +63,7 @@ public class HostServicesWrapper {
             try {
                 desktop.browse(uri);
             } catch (IOException e) {
-                logger.warn("Could not open URI with 'Browse' action", e);
+                logger.warn("Unable to open URI with 'Browse' action", e);
             }
         }
     }
