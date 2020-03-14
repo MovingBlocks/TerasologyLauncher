@@ -17,7 +17,6 @@
 package org.terasology.launcher.gui.javafx;
 
 import javafx.animation.Transition;
-import javafx.application.HostServices;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -30,9 +29,9 @@ import javafx.scene.input.MouseEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.HostServicesWrapper;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
-import java.net.URI;
 import java.util.Optional;
 
 public class FooterController {
@@ -43,7 +42,7 @@ public class FooterController {
     private Button warningButton;
     @FXML
     private Label versionInfo;
-    private HostServices hostServices;
+    private HostServicesWrapper hostServices;
     private Property<Optional<Warning>> warningProperty;
 
     public FooterController() {
@@ -59,7 +58,7 @@ public class FooterController {
         }
     }
 
-    public void setHostServices(HostServices hostServices) {
+    public void setHostServices(HostServicesWrapper hostServices) {
         this.hostServices = hostServices;
     }
 
@@ -99,44 +98,38 @@ public class FooterController {
 
     @FXML
     protected void openFacebook() {
-        openUri(BundleUtils.getURI("terasology_facebook"));
+        hostServices.tryOpenUri(BundleUtils.getURI("terasology_facebook"));
     }
 
     @FXML
     protected void openGithub() {
-        openUri(BundleUtils.getURI("terasology_github"));
+        hostServices.tryOpenUri(BundleUtils.getURI("terasology_github"));
     }
 
     @FXML
     protected void openDiscord() {
-        openUri(BundleUtils.getURI("terasology_discord"));
+        hostServices.tryOpenUri(BundleUtils.getURI("terasology_discord"));
     }
 
     @FXML
     protected void openReddit() {
-        openUri(BundleUtils.getURI("terasology_reddit"));
+        hostServices.tryOpenUri(BundleUtils.getURI("terasology_reddit"));
     }
 
     @FXML
     protected void openTwitter() {
-        openUri(BundleUtils.getURI("terasology_twitter"));
+        hostServices.tryOpenUri(BundleUtils.getURI("terasology_twitter"));
     }
 
     @FXML
     protected void openYoutube() {
-        openUri(BundleUtils.getURI("terasology_youtube"));
+        hostServices.tryOpenUri(BundleUtils.getURI("terasology_youtube"));
     }
 
     @FXML
     protected void openLogs() {
         //TODO: how to control the main launcher view from here?
         //contentTabPane.getSelectionModel().select(2);
-    }
-
-    private void openUri(URI uri) {
-        if (uri != null && hostServices != null) {
-            hostServices.showDocument(uri.toString());
-        }
     }
 
     private void updateWarningButton(Optional<Warning> warning) {
