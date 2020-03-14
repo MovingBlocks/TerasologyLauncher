@@ -463,10 +463,17 @@ public class ApplicationController {
         jobBox.getSelectionModel().select(0);
     }
 
-    private void resetScrollBar(ComboBox cb) {
+    /**
+     * Workaround to reset the scroll bar of the given ComboBox to either the selected index or the first element.
+     * <p>
+     * Code taken from: https://stackoverflow.com/a/57885977
+     *
+     * @param cb The {@link ComboBox} to reset the scroll bar for.
+     */
+    private void resetScrollBar(final ComboBox cb) {
         // Beware: type of skin is an implementation detail!
-        ListView list = (ListView) ((ComboBoxListViewSkin) buildVersionBox.getSkin()).getPopupContent();
-        list.scrollTo(Math.max(0, buildVersionBox.getSelectionModel().getSelectedIndex()));
+        ListView list = (ListView) ((ComboBoxListViewSkin) cb.getSkin()).getPopupContent();
+        list.scrollTo(Math.max(0, cb.getSelectionModel().getSelectedIndex()));
     }
 
     private void initComboBoxes() {
