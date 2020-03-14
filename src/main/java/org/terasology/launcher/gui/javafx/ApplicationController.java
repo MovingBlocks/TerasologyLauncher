@@ -271,7 +271,7 @@ public class ApplicationController {
             }
 
             final SettingsController settingsController = fxmlLoader.getController();
-            settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, packageManager, settingsStage, this);
+            settingsController.initialize(launcherDirectory, launcherSettings, packageManager, settingsStage, this);
 
             Scene scene = new Scene(root);
             settingsStage.setScene(scene);

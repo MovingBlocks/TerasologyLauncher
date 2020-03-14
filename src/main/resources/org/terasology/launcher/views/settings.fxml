@@ -86,18 +86,17 @@
                        <TextField fx:id="gameDataDirectoryPath" editable="false" GridPane.rowIndex="4"/>
                        <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                            <children>
-                              <Button fx:id="gameDirectoryEditButton" mnemonicParsing="false" onAction="#editGameDirectoryAction" text="Browse" />
                               <Button fx:id="gameDirectoryOpenButton" mnemonicParsing="false" onAction="#openGameDirectoryAction" text="Button" />
                            </children>
                         </HBox>
                        <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                            <children>
-                              <Button fx:id="gameDataDirectoryEditButton" mnemonicParsing="false" onAction="#editGameDataDirectoryAction" text="Browse" />
                               <Button fx:id="gameDataDirectoryOpenButton" mnemonicParsing="false" onAction="#openGameDataDirectoryAction" text="Button" />
+                              <Button fx:id="gameDataDirectoryEditButton" mnemonicParsing="false" onAction="#editGameDataDirectoryAction" text="Browse" />
                            </children>
                         </HBox>
                        <TitledPane animated="false" text="Advanced options" GridPane.columnSpan="2147483647"
-                                   GridPane.rowIndex="7" GridPane.vgrow="SOMETIMES">
+                                   GridPane.rowIndex="7" GridPane.vgrow="SOMETIMES" expanded="false">
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
@@ -138,21 +137,16 @@
                        <Button fx:id="launcherDirectoryOpenButton" mnemonicParsing="false"
                                onAction="#openLauncherDirectoryAction" text="Browse" GridPane.columnIndex="1"
                                GridPane.rowIndex="12"/>
-                       <Label fx:id="downloadDirectoryLabel" text="Download directory" GridPane.rowIndex="13"/>
-                       <Label text="Updates" GridPane.rowIndex="15"/>
-                       <Label text="Other" GridPane.rowIndex="18"/>
-                       <Button disable="true" mnemonicParsing="false" text="Check now" GridPane.rowIndex="16"/>
-                       <Button fx:id="downloadDirectoryOpenButton" mnemonicParsing="false"
-                               onAction="#openDownloadDirectoryAction" text="Browse" GridPane.columnIndex="1"
-                               GridPane.rowIndex="14"/>
-                       <Label text="Last checked on dd/mm/yyyy" GridPane.columnIndex="1" GridPane.rowIndex="16"/>
+                       <Label text="Updates" GridPane.rowIndex="13"/>
+                       <Label text="Other" GridPane.rowIndex="16"/>
+                       <Button disable="true" mnemonicParsing="false" text="Check now" GridPane.rowIndex="14"/>
+                       <Label text="Last checked on dd/mm/yyyy" GridPane.columnIndex="1" GridPane.rowIndex="14"/>
                        <CheckBox fx:id="searchForUpdatesBox" mnemonicParsing="false" text="Check on startup"
-                                 GridPane.columnSpan="2147483647" GridPane.rowIndex="17"/>
+                                 GridPane.columnSpan="2147483647" GridPane.rowIndex="15"/>
                        <CheckBox fx:id="closeAfterStartBox" mnemonicParsing="false" text="Close after game starts"
-                                 GridPane.rowIndex="19"/>
+                                 GridPane.rowIndex="17"/>
                        <CheckBox fx:id="saveDownloadedFilesBox" mnemonicParsing="false" text="Save downloaded files"
-                                 GridPane.rowIndex="20"/>
-                       <TextField fx:id="downloadDirectoryPath" editable="false" GridPane.rowIndex="14"/>
+                                 GridPane.rowIndex="18"/>
                      </children>
                   </GridPane>
                </content>
