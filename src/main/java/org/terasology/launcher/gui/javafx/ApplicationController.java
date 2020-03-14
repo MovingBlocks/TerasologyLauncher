@@ -17,7 +17,6 @@
 package org.terasology.launcher.gui.javafx;
 
 import javafx.animation.Transition;
-import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
@@ -62,6 +61,7 @@ import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.util.HostServicesWrapper;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.ProgressListener;
 
@@ -269,7 +269,7 @@ public class ApplicationController {
             }
 
             final SettingsController settingsController = fxmlLoader.getController();
-            settingsController.initialize(launcherDirectory, downloadDirectory, launcherSettings, packageManager, settingsStage, this);
+            settingsController.initialize(launcherDirectory, launcherSettings, packageManager, settingsStage, this);
 
             Scene scene = new Scene(root);
             settingsStage.setScene(scene);
@@ -376,7 +376,7 @@ public class ApplicationController {
     }
 
     public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
-                       final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
+                       final PackageManager newPackageManager, final Stage newStage, final HostServicesWrapper hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
         this.tempDirectory = newTempDirectory;
