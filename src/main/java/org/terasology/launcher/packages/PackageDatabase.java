@@ -90,7 +90,7 @@ class PackageDatabase {
             for (File pkgDir : Objects.requireNonNull(installDir.toFile().listFiles())) {
                 for (File versionDir : Objects.requireNonNull(pkgDir.listFiles())) {
                     database.stream()
-                            .filter(pkg -> pkg.getName().equals(pkgDir.getName())
+                            .filter(pkg -> pkg.getId().equals(pkgDir.getName())
                                     && pkg.getVersion().equals(versionDir.getName()))
                             .findFirst()
                             .ifPresent(pkg -> pkg.setInstalled(true));
@@ -133,16 +133,29 @@ class PackageDatabase {
         return Collections.unmodifiableList(database);
     }
 
+    static class PackageMetadata implements Serializable {
+        private String id;
+        private String name;
+
+        public String getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
     static class Repository implements Serializable {
         private String url;
         private String type;
-        private String[] trackedPackages;
+        private PackageMetadata[] trackedPackages;
 
         String getUrl() {
             return url;
         }
 
-        String[] getTrackedPackages() {
+        PackageMetadata[] getTrackedPackages() {
             return trackedPackages;
         }
     }

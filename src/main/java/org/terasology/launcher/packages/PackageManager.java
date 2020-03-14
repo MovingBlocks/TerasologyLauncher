@@ -130,10 +130,10 @@ public class PackageManager {
         }
 
         if (!listener.isCancelled()) {
-            final Path extractDir = installDir.resolve(target.getName()).resolve(target.getVersion());
+            final Path extractDir = installDir.resolve(target.getId()).resolve(target.getVersion());
             FileUtils.extractZipTo(cachedZip, extractDir);
             target.setInstalled(true);
-            logger.info("Finished installing package: {}-{}", target.getName(), target.getVersion());
+            logger.info("Finished installing package: {}-{}", target.getId(), target.getVersion());
         }
     }
 
@@ -155,7 +155,7 @@ public class PackageManager {
             throw new DownloadException("Insufficient space for downloading package");
         }
 
-        logger.info("Finished downloading package: {}-{}", target.getName(), target.getVersion());
+        logger.info("Finished downloading package: {}-{}", target.getId(), target.getVersion());
         // TODO: Implement download functionality locally
     }
 
@@ -172,7 +172,7 @@ public class PackageManager {
                 .forEach(File::delete);
 
         target.setInstalled(false);
-        logger.info("Finished removing package: {}-{}", target.getName(), target.getVersion());
+        logger.info("Finished removing package: {}-{}", target.getId(), target.getVersion());
     }
 
     /**
@@ -199,6 +199,6 @@ public class PackageManager {
     }
 
     public Path resolveInstallDir(Package target) {
-        return installDir.resolve(target.getName()).resolve(target.getVersion());
+        return installDir.resolve(target.getId()).resolve(target.getVersion());
     }
 }
