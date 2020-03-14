@@ -10,8 +10,8 @@
 </div>
 
 <h3 align="center"><b>
-    <a href="#installation-">Installation</a> | 
     <a href="#community">Community</a> | 
+    <a href="#installation-">Installation</a> | 
     <a href="#features">Features</a>  | 
     <a href="#development">Development</a>  | 
     <a href="#acknowledgements">Acknowledgements</a>  | 
@@ -19,28 +19,6 @@
 </b></h3>
 
 [_Terasology Launcher_][github terasologylauncher] is the official launcher for the open source game [Terasology][github terasology]. It provides easy access to the different game versions and build types. Terasology and related projects are developed by a group of software enthusiast volunteers under the organization name [MovingBlocks][github movingblocks].
-
-## Installation [![](https://img.shields.io/github/v/release/MovingBlocks/TerasologyLauncher)][latest-release]
-
-1. Download the corresponding archive for your platform from the [latest release][latest-release]
-1. Extract the archive to the path where the launcher should be installed
-1. Start _Terasology Launcher_
-
-<table align="center">
-  <thead align="left"><tr>
-    <th width="40%">Operating System</th>
-    <th width="60%">Executable</th>
-  </tr></thead>
-  <tr>
-    <td width="40%"><b>Windows</b></td>
-    <td width="60%"><code>TerasologyLauncher.exe</code> or <code>bin/TerasologyLauncher.bat</code></td>
-  </tr>
-  <tr>
-    <td width="40%"><b>Unix, Linux, Mac OS X</b></td>
-    <td width="60%"><code>bin/TerasologyLauncher</code></td>
-  </tr>
-</table>
-
 
 ## Community
 
@@ -87,7 +65,66 @@ We are present in nearly the complete round-up of social networks. Follow/friend
     </a>
 </p>
 
+## Installation [![](https://img.shields.io/github/v/release/MovingBlocks/TerasologyLauncher)][latest-release]
+
+1. Download the corresponding archive for your platform from the [latest release][latest-release]
+1. Extract the archive to the path where the launcher should be installed
+1. Start _Terasology Launcher_
+
+<table align="center">
+  <thead align="left"><tr>
+    <th width="40%">Operating System</th>
+    <th width="60%">Executable</th>
+  </tr></thead>
+  <tr>
+    <td width="40%"><b>Windows</b></td>
+    <td width="60%"><code>TerasologyLauncher.exe</code> or <code>bin/TerasologyLauncher.bat</code></td>
+  </tr>
+  <tr>
+    <td width="40%"><b>Unix, Linux, Mac OS X</b></td>
+    <td width="60%"><code>bin/TerasologyLauncher</code></td>
+  </tr>
+</table>
+
 ## Features
+
+On first start-up, the _Terasology Launcher_ will prompt you with the selection of the _Terasology_ installation and data directories.
+The *installation directory* is the application directory of _Terasology_ and contains downloaded and extracted game packages.
+The *data directory* is the place for configuration data and user-specific files such as key bindings and save games.
+Note, that these directories are different from the *launcher installation directory*, which is the folder you extracted the launcher archive to.
+
+![Terasology Launcher UI](docs/images/200314_TerasologyLauncher_UI.png)
+
+The *Terasology Launcher UI* provides functionality to download, start, and delete different game versions. The game versions are grouped by the type of build they belong to:
+
+<table align="center">
+  <thead align="left"><tr>
+    <th width="40%">Build Type</th>
+    <th width="60%">Explanation</th>
+  </tr></thead>
+  <tr>
+    <td width="40%"><b>Terasology</b></td>
+    <td width="60%">Released version of Terasology core game bundled with modules</td>
+  </tr>
+  <tr>
+    <td width="40%"><b>Terasology (nightly)</b></td>
+    <td width="60%">Development build of Terasology core game bundled with modules</td>
+  </tr>
+  <tr>
+    <td width="40%"><b>Terasology Lite</b></td>
+    <td width="60%">Released version of Terasology core game only</td>
+  </tr>
+  <tr>
+    <td width="40%"><b>Terasology Lite (nightly)</b></td>
+    <td width="60%">Development build of Terasology core game only</td>
+  </tr>
+</table>
+
+In addition to this main functionality, the UI displays information about new changes of the selected game version ("Changelog"), launcher information concerning changes, licensing and contribution guidelines ("About"), and logging data for the current launcher execution. Further, you have access to the social media representation of _Terasology_.
+
+![Terasology Launcher UI](docs/images/200314_TerasologyLauncher_UI-settings.png)
+
+TODO: describe and explain settings view
 
 ## Development
 
