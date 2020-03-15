@@ -124,7 +124,9 @@ In addition to this main functionality, the UI displays information about new ch
 
 ![Terasology Launcher UI](docs/images/200314_TerasologyLauncher_UI-settings.png)
 
-TODO: describe and explain settings view
+The *settings view* enables you to open the launcher installation, game installation and data directories for quick access and edit the data directory in case you want to change it after setting up the launcher. You can configure the memory settings for the game and even specify additional java or game arguments as well as the logging level for the game. Please note, that the "Initial Game Memory" and "Maximum Game Memory" setttings only apply to the game itself. The actual resource consumption may be higher due to additional resources required by the Java Virtual Machine (JVM).
+
+The remaining settings can be used to configure the launcher. You can set the launcher language and decide whether the launcher should search for updates, close when a game is started and save downloaded game package files.
 
 ## Development
 
