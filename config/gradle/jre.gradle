@@ -25,15 +25,19 @@ def jreUrlFilenames = [
         Mac       : 'macos-amd64.zip'
 ]
 
-task downloadJreAll {
-    group 'Download'
-    description 'Downloads JRE for all platforms'
-}
-
-task allDistZip {
+task createRelease() {
     group 'Distribution'
     description 'Bundles the project with a JRE for each platform'
     dependsOn distZip
+
+    doLast {
+        println 'Created release: ' + displayVersion
+    }
+}
+
+task downloadJreAll {
+    group 'Download'
+    description 'Downloads JRE for all platforms'
 }
 
 jreUrlFilenames.each { os, file ->
@@ -92,7 +96,7 @@ jreUrlFilenames.each { os, file ->
     zipTask.description "Bundles the project with a JRE for $os"
     tarTask.dependsOn downloadTask
     tarTask.description "Bundles the project with a JRE for $os"
-    allDistZip.dependsOn zipTask
+    createRelease.dependsOn zipTask
 }
 
 /**
