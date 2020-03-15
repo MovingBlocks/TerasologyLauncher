@@ -141,7 +141,7 @@ def convertGitBranch = { gitBranch ->
 
 task createVersionInfoFile {
 
-    inputs.property('version', '' + version)
+    inputs.property('version', version.toString())
 
     File versionInfoFileDir = new File('src/main/resources', 'org/terasology/launcher/version')
     File versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
