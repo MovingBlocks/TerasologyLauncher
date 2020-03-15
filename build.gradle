@@ -226,9 +226,8 @@ task copyExtra(type: Copy) {
 task copyExtraIntoResources(type: Copy) {
     from('README.md')
     from('CHANGELOG.md')
-    from('CONTRIBUTING.md')
+    from('docs/CONTRIBUTING.md')
     from('LICENSE')
-    from('NOTICE')
 
     into('src/main/resources/org/terasology/launcher/about')
 }
