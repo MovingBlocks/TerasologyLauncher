@@ -122,7 +122,7 @@ The *Terasology Launcher UI* provides functionality to download, start, and dele
 
 In addition to this main functionality, the UI displays information about new changes of the selected game version ("Changelog"), launcher information concerning changes, licensing and contribution guidelines ("About"), and logging data for the current launcher execution. Further, you have access to the social media representation of _Terasology_.
 
-![Terasology Launcher UI](docs/images/200314_TerasologyLauncher_UI-settings.png)
+![Terasology Launcher Settings UI](docs/images/200314_TerasologyLauncher_UI-settings.png)
 
 The *settings view* enables you to open the launcher installation, game installation and data directories for quick access and edit the data directory in case you want to change it after setting up the launcher. You can configure the memory settings for the game and even specify additional java or game arguments as well as the logging level for the game. Please note, that the "Initial Game Memory" and "Maximum Game Memory" setttings only apply to the game itself. The actual resource consumption may be higher due to additional resources required by the Java Virtual Machine (JVM).
 
