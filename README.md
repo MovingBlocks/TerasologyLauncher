@@ -130,15 +130,15 @@ The remaining settings can be used to configure the launcher. You can set the la
 
 ## Development
 
-To be able to run **TerasologyLauncher** from source follow these steps. This guide is designed for [IntelliJ IDEA](http://www.jetbrains.com/idea/) (you can use the free community edition), but alternative setups are possible.
+To be able to run **TerasologyLauncher** from source follow these steps. This guide is designed for [IntelliJ IDEA][intellij] (you can use the free community edition), but alternative setups are possible.
 
 <details closed>
 <summary>:octocat: Get Ready</summary>
 <br>
 
-To contribute to this repo, please open a [pull request](https://guides.github.com/activities/forking/) from your fork of this repository.
+To contribute to this repo, please open a [pull request][github forking] from your fork of this repository.
 
-For more information on building and developing the Terasology Launcher, make sure to read the rest of this README and [CONTRIBUTING.md](docs/CONTRIBUTING.md).
+For more information on building and developing the Terasology Launcher, make sure to read the rest of this README and [CONTRIBUTING.md][contributing].
 
 ### Requirements
 
@@ -161,7 +161,7 @@ There is also a version for Eclipse - `gradlew eclipse` - but we encourage you t
     
 Familiarise yourself with Git's concept of repositories, branches, and commits. To get the latest changes from your remote repositories (e.g. `movingblocks`) you need to *fetch* all remote data via `git fetch --all`. This does not change your workspace, it just loads up your local Git database.
 
-Apart from Git, basically everything can be done using the [Gradle](http://gradle.org) [wrapper](http://gradle.org/docs/current/userguide/gradle_wrapper.html). The following list is an excerpt of some commonly used tasks.
+Apart from Git, basically everything can be done using the [Gradle][gradle] [wrapper][gradle wrapper]. The following list is an excerpt of some commonly used tasks.
 
 <table align="center">
   <thead align="left"><tr>
@@ -196,7 +196,7 @@ Apart from Git, basically everything can be done using the [Gradle](http://gradl
 
 Assume you have pushed some changes to your fork into a branch `myFeature`. In order to let us know about your work and give us the possibility to incorporate your changes you should send us a _pull request_. You can do this by selecting the `myFeature` branch on you GitHub repo and click the button which says "Open pull request".
 
-More information on how to contribute can be found in [CONTRIBUTING.md](https://github.com/MovingBlocks/TerasologyLauncher/blob/develop/CONTRIBUTING.md). Remember, that all submissions must be licensed under [Apache License, Version 2.0][license].
+More information on how to contribute can be found in [CONTRIBUTING.md][contributing]. Remember, that all submissions must be licensed under [Apache License, Version 2.0][license].
 
 </details>
 
@@ -210,7 +210,7 @@ Tutorials and further information on Git:
 - http://gitref.org/
 - http://progit.org/
 
-Developer setup tutorials for our main project, [**Terasology**](https://github.com/MovingBlocks/Terasology):
+Developer setup tutorials for our main project, [**Terasology**][github terasology]:
 
 - [Dev Setup](https://github.com/MovingBlocks/Terasology/wiki/Dev-Setup)
 - [Dealing with Forks](https://github.com/MovingBlocks/Terasology/wiki/Dealing-with-Forks)
@@ -233,16 +233,16 @@ _Terasology Launcher_ is licensed under the [Apache License, Version 2.0][licens
 
 <!-- References -->
 
-[latest-release]: https://github.com/MovingBlocks/TerasologyLauncher/releases/ "TerasologyLauncher download (official releases)"
+[latest-release]: https://github.com/MovingBlocks/TerasologyLauncher/releases/ "TerasologyLauncher (official releases)"
 [license]: http://www.apache.org/licenses/LICENSE-2.0.html "Apache License, Version 2.0"
-
-<!-- -->
+[contributing]: docs/CONTRIBUTING.md "CONTRIBUTING.md"
 
 [github movingblocks]: https://github.com/MovingBlocks/ "MovingBlocks"
 [github terasology]: https://github.com/MovingBlocks/Terasology/ "Terasology"
 [github terasologylauncher]: https://github.com/MovingBlocks/TerasologyLauncher/ "TerasologyLauncher"
-[github terasologylauncher issues]: https://github.com/MovingBlocks/TerasologyLauncher/issues/ "TerasologyLauncher issues"
 [github terasologylauncher contributors]: https://github.com/MovingBlocks/TerasologyLauncher/graphs/contributors/ "TerasologyLauncher contributors"
-[english forum]: http://forum.terasology.org/threads/terasologylauncher-mrbarsack.708/ "TerasologyLauncher forum thread"
+
 [gradle]: http://gradle.org "Gradle"
 [gradle wrapper]: http://gradle.org/docs/current/userguide/gradle_wrapper.html "Gradle Wrapper"
+[intellij]: http://www.jetbrains.com/idea/ "IntelliJ IDEA"
+[github forking]: https://guides.github.com/activities/forking/ "GitHub Forking Guide"
