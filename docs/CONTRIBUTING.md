@@ -1,5 +1,4 @@
-Contributing to Terasology
-==================================
+# Contributing to Terasology
 
 If you would like to contribute code, documentation, or other assets, you can do so through GitHub by forking the repository and sending a pull request (PR). You can also simply report issues (bugs), but we ask you to search for any previous reports first.
 
@@ -7,8 +6,8 @@ If you would like to contribute code, documentation, or other assets, you can do
 
 Please follow our [Contributor Covenant Code of Conduct][code of conduct]. For questions please contact our [community][community].
 
-File an Issue
--------------
+## File an Issue
+
 You can report bugs and feature requests to [GitHub Issues][github issues]. As mentioned earlier, please look for a similar existing issue before submitting a new one.
 
 __Please provide as much information as possible to help us solve problems and answer questions better!__
@@ -17,22 +16,22 @@ Please don't use GitHub Issues for questions and support requests, but contact o
 
 For finding easy to do issues to start contributing, look at the ["Bite-size" labeled issues][github issues bitesize].
 
-Commits and Commit Messages
----------------------------
+## Commits and Commit Messages
+
 Follow these guidelines when creating public commits and writing commit messages.
 
 1. If your work spans multiple local commits, make sure they can be merged directly into the target branch. If you have commit and merge noise in the history have a look at [git-rebase][git rebase]. Ideally, every commit should be able to be used in isolation -- that is, each commit must build and pass all tests.
 1. The first line of the commit message should be a descriptive sentence about what the commit is doing. It should be possible to fully understand what the commit does by just reading this single line. 
 1. **Optional:** Please try to use [conventional commits][conventional commits]
 
-License
--------
+## License
+
 Submissions must be licensed under the [Apache License, Version 2.0][license].
 
 If you are adding a new file it should have a header like this (automatically available as a template in IntelliJ):
 ~~~
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2020 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,37 +47,32 @@ If you are adding a new file it should have a header like this (automatically av
  */
 ~~~
 
-How to Submit a Pull Request
-----------------------------
+## How to Submit a Pull Request
+
 Pull requests are highly appreciated! Please follow the guidelines below. 
 
-1. Fork the repository to your personal GitHub account.
-1. Create a topic branch for every separate change you make. The branch should have a short but explanatory name, such as "adds-french-translation".
-1. Apply your changes, committing at logical breaks. Make sure your changes are well-tested. 
-1. Check any unit tests that cover the affected code and, if possible, include new ones for new code.
-1. Update the [README][readme] for noteworthy changes.
-1. Push your branch to your personal fork and [create a pull request][github pull request] to the [_TerasologyLauncher_ repository][github]. 
-1. **Optional:** Add `Fix/Fixing/Fixes/Close/Closing/Refs #issue` to the PR description if you want to mark the mentioned issue  as completed in the issue tracker as soon as the change is merged.
+1. [Fork the repository][github forking] and make your changes. We advise to use [feature branches][feature branch] for every separate change you make. 
+1. Run the tests and do additional manual checks to be sure everything is working as expected. 
+1. [Create a pull request][github pull request]. Where applicable, you can [reference issues][github pr link issue] in the PR description.
 1. Watch for comments or acceptance on your PR. The PR can be updated by just pushing to the original branch.
 
 __Please note:__ if you want to change additional things that don't relate to what you have been working on, make sure you create a new branch off the `master` branch before making more changes - this way we can take in each change separately.
 
-How to Merge a Pull Request
----------------------------
+## How We Merge Pull Requests
+
 For trusted contributors with push access to our root repos you are welcome to help merge pull requests.
 
-1. Consider what scope is suitable for the change being PRed.
-  * **Trivial**: If it is a single typo fix in a comment or other *inactive text* it does not require further review.
-  * **Patch**: Small bug fixes. Be careful: even a string value changed can have unexpected impact elsewhere if it gets used as a key somewhere, involved in our internationalization, etc. Consider any possible integrations (like our translation server).
-  * **Minor**: If substantial code is being changed/added please review as able and ping relevant contributors with `@username` to bring their attention to the PR for review. Probably one additional person should review. 
-  * **Major**: If any involved code is likely to cause a backwards incompatibility of some sort, the PR needs the most possible review as it would require a major release. Consider, possibilities to deprecate the old version of the feature and provide a bridge to the new version to restore backwards compatibility. Alternatively, consider "parking" the change in a longer-term branch to wait for the next major release.
-1. React appropriately to the scope and perform local tests accordingly.
-1. Report any issues or concerns as comments in the PR and ping appropriate staff or other contributors with a `@username` mention.
-1. Assign the PR and any completed issues to an appropriate milestone if available for later release handling.
-1. If sufficient review for the scope of PR has been done and no issues have been noted, perform a squash-merge (please try to use [conventional commits][conventional commits]) to GitHub to auto-close the PR as merged.
+1. Our review process roughly follows these categories:
+    - **Trivial**: A single typo fix in a comment or other *inactive text*. Does not require further review.
+    - **Patch**: Small bug fixes. Needs careful review to prevent unexpected impact.
+    - **Minor**: Substantial code changes / additions. Needs thorough testing. May require reviews from multiple contributors.
+    - **Major**: Breaking changes! Need consideration concerning feature deprecation and backwards compatibility.
+1. We will review the changes and report any issues or concerns as comments in the PR and ping appropriate contributors with a `@username` mention to join the discussion or do an additional review of the changes.
+1. If sufficient review for the PR category has been done and no issues have been noted, the PR will be _squash-merged_.
 
-Related documentation
----------------------
+## Related documentation
+
+- [Conventional Commits][conventional commits]
 - [How to contribute translations](Add-New-Translation.md)
 
 <!-- References -->
@@ -91,5 +85,9 @@ Related documentation
 [github issues bitesize]: https://github.com/MovingBlocks/TerasologyLauncher/labels/Bite-size "Bite-size GitHub Issues"
 
 [conventional commits]: https://www.conventionalcommits.org/en/v1.0.0/ "Conventional Commits"
+[feature branch]: https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow "Feature Branch Workflow"
+[github forking]: https://guides.github.com/activities/forking/ "GitHub Forking"
 [git rebase]: https://git-scm.com/docs/git-rebase "Git Rebase"
 [github pull request]: https://help.github.com/articles/using-pull-requests/ "GitHub Pull Requests"
+[github pr link issue]: https://help.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue "Github Linking a Pull Request to an Issue"
+
