@@ -5,7 +5,7 @@ If you would like to contribute code, documentation, or other assets, you can do
 
 *When submitting code, please make every effort to follow existing conventions and style in order to keep the code as readable as possible.*
 
-Read on to learn more. For questions please contact our [community](/README.md#Community).
+Please follow our [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). For questions please contact our [community](/README.md#Community).
 
 File an Issue
 -------------
