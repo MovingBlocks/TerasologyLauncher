@@ -41,6 +41,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'java'
+    id 'nebula.release' version '14.1.0'
     id 'org.hidetake.swagger.generator' version '2.18.1'
     id 'pmd'
     id 'project-report'
@@ -73,16 +74,6 @@ import java.text.SimpleDateFormat
 def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
 
-def getDisplayVersion = { env, versionBase ->
-    if (env.JOB_NAME == "TerasologyLauncherStable") {
-        versionBase
-    } else if (env.JOB_NAME != null && env.BUILD_NUMBER != null) {
-        versionBase + '.' + env.BUILD_NUMBER + '+' + env.JOB_NAME
-    } else {
-        versionBase + ' local development ' + startDateTimeString
-    }
-}
-
 // Declare "extra properties" (variables) for the project - a Gradle thing that makes them special.
 ext {
     // Read environment variables, including variables passed by jenkins continuous integration server
@@ -90,13 +81,10 @@ ext {
 
     // Stuff for our automatic version file setup
     startDateTimeString = dateTimeFormat.format(new Date())
-    versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasology/launcher/version')
-    versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
-    versionBase = rootProject.file("version.txt").text.trim()
-    displayVersion = getDisplayVersion(env, versionBase)
 
     // Splash image for the JAR
     splashImage = "org/terasology/launcher/images/splash.jpg"
+    displayVersion = 'v' + version
 }
 
 // Declare remote repositories we're interested in - library files will be fetched from here
@@ -152,8 +140,14 @@ def convertGitBranch = { gitBranch ->
 }
 
 task createVersionInfoFile {
-    inputs.property('dateTime', startDateTimeString)
-    onlyIf { env.BUILD_URL != null }
+
+    inputs.property('version', version.toString())
+
+    File versionInfoFileDir = new File('src/main/resources', 'org/terasology/launcher/version')
+    File versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
+
+    outputs.file(versionInfoFile)
+
     doLast {
         versionInfoFileDir.mkdirs()
         ant.propertyfile(file: versionInfoFile) {
@@ -169,10 +163,8 @@ task createVersionInfoFile {
         }
     }
 }
-createVersionInfoFile.dependsOn processResources
-jar.dependsOn createVersionInfoFile
-distZip.dependsOn createVersionInfoFile
-distTar.dependsOn createVersionInfoFile
+
+processResources.dependsOn createVersionInfoFile
 
 jar {
     // replace development "logback.xml" with productive "logback_jar.xml"
@@ -183,7 +175,7 @@ jar {
         attributes("Main-Class": mainClassName)
         attributes("Class-Path": manifestClasspath)
         attributes("Implementation-Title": project.name)
-        attributes("Implementation-Version": versionBase)  // Use base version only to avoid re-creating identical jar
+        attributes("Implementation-Version": version)
         attributes("SplashScreen-Image": splashImage)
 
         // allow everything
@@ -213,12 +205,6 @@ task copyExtra(type: Copy) {
 
     from('LICENSE')
     from('NOTICE')
-
-    from('src/template/VERSION.md') {
-        expand(buildNumber: env.BUILD_NUMBER, buildUrl: env.BUILD_URL, gitBranch: convertGitBranch(env.GIT_BRANCH),
-                dateTime: startDateTimeString, displayVersion: displayVersion)
-        rename('VERSION.md', 'VERSION.txt')
-    }
 
     into "$buildDir/distributions"
 }
