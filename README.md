@@ -148,10 +148,6 @@ You'll need the following tools:
 - Git to clone the repo and commit changes.
 
 Development is possible on all common platforms (Windows, Linux, MacOS) as long as the JDK with JavaFX is properly set up.
-  
-To generate the project files for IntelliJ, open a command prompt in the directory you checked out into and execute `gradlew idea` - this fetches the right version of Gradle and all project dependencies automatically, as well as generates the project config. Afterwards, you can simply open the project file in IntelliJ.
-
-There is also a version for Eclipse - `gradlew eclipse` - but we encourage you to use IntelliJ.
 
 </details>
 
@@ -187,10 +183,6 @@ Apart from Git, basically everything can be done using the [Gradle][gradle] [wra
   <tr>
       <td width="50%"><code>gradlew tasks</code></td>
       <td width="50%"><i>Display other available build script tasks.</i></td>
-  </tr>
-  <tr>
-      <td width="50%"><code>gradlew idea`</td>
-      <td width="50%"><i>Generate IntelliJ IDEA project files.</i></td>
   </tr>
 </table>
 
