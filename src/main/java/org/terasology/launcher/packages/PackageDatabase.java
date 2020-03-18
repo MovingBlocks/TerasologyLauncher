@@ -65,9 +65,13 @@ class PackageDatabase {
                 new InputStreamReader(Files.newInputStream(sourcesFile))
         )) {
             final List<Package> newDatabase = new LinkedList<>();
-            for (Repository source : gson.fromJson(reader, Repository[].class)) {
-                logger.trace("Fetching package list from: {}", source.url);
-                newDatabase.addAll(packageListOf(source));
+            try {
+                for (Repository source : gson.fromJson(reader, Repository[].class)) {
+                    logger.trace("Fetching package list from: {}", source.url);
+                    newDatabase.addAll(packageListOf(source));
+                }
+            } catch (IllegalStateException e) {
+                logger.error("Could not read repositories from '%s'", sourcesFile, e);
             }
 
             database.clear();

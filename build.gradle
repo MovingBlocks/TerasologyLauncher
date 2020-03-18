@@ -155,6 +155,8 @@ task createVersionInfoFile {
 
     outputs.file(versionInfoFile)
 
+    onlyIf {env.JOB_NAME != null }
+
     doLast {
         versionInfoFileDir.mkdirs()
         ant.propertyfile(file: versionInfoFile) {

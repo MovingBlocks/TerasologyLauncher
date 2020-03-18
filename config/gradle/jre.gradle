@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 MovingBlocks
+ * Copyright 2020 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  */
 
 // Uses Bellsoft Liberica JRE
-def jreVersion = '8u212'
-def jreUrlBase = "https://download.bell-sw.com/java/$jreVersion/bellsoft-jre$jreVersion"
+def jreVersionGame = '8u212'
+def jdkVersionLauncher = '11.0.6+10' // jre version haven't jmod (needed for jlink/jpackager)
+
 def jreUrlFilenames = [
-        Linux64   : 'linux-amd64.tar.gz',
-        Linux32   : 'linux-i586.tar.gz',
-        Windows64 : 'windows-amd64.zip',
-        Windows32 : 'windows-i586.zip',
-        Mac       : 'macos-amd64.zip'
+        Linux64  : 'linux-amd64.tar.gz',
+        Linux32  : 'linux-i586.tar.gz',
+        Windows64: 'windows-amd64.zip',
+        Windows32: 'windows-i586.zip',
+        Mac      : 'macos-amd64.zip'
 ]
 
 task createRelease() {
@@ -35,55 +36,82 @@ task createRelease() {
     }
 }
 
+task downloadJreGame {
+    group 'Download'
+    description 'Downloads Game JRE for all platforms'
+}
+
+task downloadJreLauncher {
+    group 'Download'
+    description 'Downloads Launcher JRE for all platforms'
+}
+
 task downloadJreAll {
     group 'Download'
     description 'Downloads JRE for all platforms'
+    dependsOn downloadJreGame, downloadJreLauncher
+}
+
+def createJreTasks(String taskNameBase,
+                   String downloadUrl,
+                   String downloadFile,
+                   String unpackDir) {
+
+    task "download$taskNameBase"(type: Download) {
+        group 'Download'
+        src downloadUrl
+        dest downloadFile
+        overwrite false
+    }
+
+    task "unpack$taskNameBase"(type: Copy) {
+        from(downloadFile.endsWith("zip")
+                ? zipTree(downloadFile)
+                : tarTree(downloadFile)) {
+            eachFile { fcd ->
+                fcd.relativePath = new RelativePath(
+                        true, fcd.relativePath.segments.drop(1))
+            }
+            includeEmptyDirs = false
+        }
+        into unpackDir
+
+        outputs.dir unpackDir
+
+        dependsOn "download${taskNameBase}"
+    }
 }
 
 jreUrlFilenames.each { os, file ->
-    def packedJre = new File("$projectDir/jre/$file")
-    def unpackedJre = new File("$buildDir/jre/$os")
+    // JRE 8
+    def gameTaskBase = "Jre${os}Game"
+    createJreTasks(
+            gameTaskBase,
+            "https://download.bell-sw.com/java/$jreVersionGame/bellsoft-jre$jreVersionGame-$file",
+            "$projectDir/jre/$os-$jreVersionGame-$file",
+            "$projectDir/jre/Game/$os")
 
-    def downloadTask = task("downloadJre$os") {
-        group 'Download'
-        description "Downloads JRE for $os"
+    downloadJreGame.dependsOn "unpack${gameTaskBase}"
 
-        doFirst {
-            download {
-                src "$jreUrlBase-$file"
-                dest packedJre
-                overwrite false
-            }
-        }
+    // JDK 11
+    def launcherTaskBase = "Jre${os}Launcher"
+    createJreTasks(
+            launcherTaskBase,
+            "https://download.bell-sw.com/java/$jdkVersionLauncher/bellsoft-jdk$jdkVersionLauncher-$file",
+            "$projectDir/jre/$os-$jdkVersionLauncher-$file",
+            "$projectDir/jre/Launcher/$os")
+    downloadJreLauncher.dependsOn "unpack${launcherTaskBase}"
+}
 
-        doLast {
-            // Unpack the JRE
-            if (!unpackedJre.exists()) {
-                unpackedJre.mkdirs()
-                copy {
-                    from(file.endsWith("zip")
-                            ? zipTree(packedJre)
-                            : tarTree(packedJre)) {
-                        eachFile { fcd ->
-                            fcd.relativePath = new RelativePath(
-                                    true, fcd.relativePath.segments.drop(1))
-                        }
-                        includeEmptyDirs = false
-                    }
-                    into unpackedJre
-                }
-            }
-        }
-    }
-
+jreUrlFilenames.each { os, file ->
     def distName = os.toLowerCase()
+    
     distributions {
         "$distName" {
             contents {
+                from "unpackJre${os}Launcher"
+                into 'jre'
                 with distributions.main.contents
-                into('jre') {
-                    from unpackedJre
-                }
             }
         }
     }
@@ -91,44 +119,9 @@ jreUrlFilenames.each { os, file ->
     def zipTask = tasks.named("${distName}DistZip").get()
     def tarTask = tasks.named("${distName}DistTar").get()
 
-    downloadJreAll.dependsOn downloadTask
-    zipTask.dependsOn downloadTask
-    zipTask.description "Bundles the project with a JRE for $os"
-    tarTask.dependsOn downloadTask
-    tarTask.description "Bundles the project with a JRE for $os"
+    zipTask.dependsOn downloadJreAll
+    zipTask.description "Bundles the project with a JRE for ${os}"
+    tarTask.dependsOn downloadJreAll
+    tarTask.description "Bundles the project with a JRE for ${os}"
     createRelease.dependsOn zipTask
-}
-
-/**
- * Modify start scripts to use bundled JRE when
- * available, otherwise fall back to searching.
- */
-startScripts.doLast {
-    unixScript.text = unixScript
-            .text
-            .replaceFirst(/(?s)# Determine the Java.*(?=\R\R# Increase)/) { match ->
-                """\
-                |# Use bundled JRE when available
-                |if [ -d \$APP_HOME/jre ] ; then
-                |    JAVACMD=\$APP_HOME/jre/bin/java
-                |else
-                |    ${match.replace("\n", "\n    ")}
-                |fi"""
-                .stripMargin()
-            }
-
-    windowsScript.text = windowsScript
-            .text
-            .replaceFirst(/(?s)@rem Find java.*:init/) { match ->
-                """\
-                |@rem Use bundled JRE when available
-                |if not exist %APP_HOME%\\jre\\ goto findJava
-                |set JAVA_EXE=%APP_HOME%\\jre\\bin\\java.exe
-                |goto init
-                |
-                |:findJava
-                |$match
-                |"""
-                .stripMargin()
-            }
 }

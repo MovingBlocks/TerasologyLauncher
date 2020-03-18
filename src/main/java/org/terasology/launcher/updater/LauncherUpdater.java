@@ -78,8 +78,8 @@ public final class LauncherUpdater {
      * @return whether an update is available
      */
     public boolean updateAvailable() {
-        if (this.currentVersionInfo.isEmpty()) {
-            logger.trace("Skipping update check - no version info file found (assuming development environment)");
+        if (this.currentVersionInfo.isEmpty() || jobName.equals("null")) {
+            logger.trace("Skipping update check - no version info file or jobname found (assuming development environment)");
             return false;
         }
 

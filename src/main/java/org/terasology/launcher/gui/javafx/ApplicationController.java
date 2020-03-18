@@ -16,7 +16,6 @@
 
 package org.terasology.launcher.gui.javafx;
 
-import com.sun.javafx.scene.control.skin.ComboBoxListViewSkin;
 import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -463,19 +462,6 @@ public class ApplicationController {
         jobBox.getSelectionModel().select(0);
     }
 
-    /**
-     * Workaround to reset the scroll bar of the given ComboBox to either the selected index or the first element.
-     * <p>
-     * Code taken from: https://stackoverflow.com/a/57885977
-     *
-     * @param cb The {@link ComboBox} to reset the scroll bar for.
-     */
-    private void resetScrollBar(final ComboBox cb) {
-        // Beware: type of skin is an implementation detail!
-        ListView list = (ListView) ((ComboBoxListViewSkin) cb.getSkin()).getPopupContent();
-        list.scrollTo(Math.max(0, cb.getSelectionModel().getSelectedIndex()));
-    }
-
     private void initComboBoxes() {
         jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             buildVersionBox.setItems(newVal.versionItems);
@@ -483,7 +469,6 @@ public class ApplicationController {
             buildVersionBox.getSelectionModel().select(0);
         });
 
-        buildVersionBox.setOnShowing(e -> resetScrollBar(buildVersionBox));
         buildVersionBox.setCellFactory(list -> new VersionListCell());
         buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == null) {

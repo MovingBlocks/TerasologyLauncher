@@ -78,7 +78,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             final boolean serverAvailable = DownloadUtils.isJenkinsAvailable();
             if (serverAvailable && launcherSettings.isSearchForLauncherUpdates()) {
-                final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
+                final boolean selfUpdaterStarted =
+                        checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
+
                 if (selfUpdaterStarted) {
                     logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
                     return NullLauncherConfiguration.getInstance();
