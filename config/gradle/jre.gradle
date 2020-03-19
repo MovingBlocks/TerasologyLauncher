@@ -19,11 +19,10 @@ def jreVersionGame = '8u212'
 def jdkVersionLauncher = '11.0.6+10' // jre version haven't jmod (needed for jlink/jpackager)
 
 def jreUrlFilenames = [
-        Linux64  : 'linux-amd64.tar.gz',
-        Linux32  : 'linux-i586.tar.gz',
-        Windows64: 'windows-amd64.zip',
-        Windows32: 'windows-i586.zip',
-        Mac      : 'macos-amd64.zip'
+        Linux64  : 'linux-amd64-full.tar.gz',
+        Windows64: 'windows-amd64-full.zip',
+        Windows32: 'windows-i586-full.zip',
+        Mac      : 'macos-amd64-full.zip'
 ]
 
 task createRelease() {
@@ -36,21 +35,11 @@ task createRelease() {
     }
 }
 
-task downloadJreGame {
-    group 'Download'
-    description 'Downloads Game JRE for all platforms'
-}
-
-task downloadJreLauncher {
+task downloadJre {
     group 'Download'
     description 'Downloads Launcher JRE for all platforms'
 }
 
-task downloadJreAll {
-    group 'Download'
-    description 'Downloads JRE for all platforms'
-    dependsOn downloadJreGame, downloadJreLauncher
-}
 
 def createJreTasks(String taskNameBase,
                    String downloadUrl,
@@ -83,34 +72,22 @@ def createJreTasks(String taskNameBase,
 }
 
 jreUrlFilenames.each { os, file ->
-    // JRE 8
-    def gameTaskBase = "Jre${os}Game"
-    createJreTasks(
-            gameTaskBase,
-            "https://download.bell-sw.com/java/$jreVersionGame/bellsoft-jre$jreVersionGame-$file",
-            "$projectDir/jre/$os-$jreVersionGame-$file",
-            "$projectDir/jre/Game/$os")
-
-    downloadJreGame.dependsOn "unpack${gameTaskBase}"
-
     // JDK 11
-    def launcherTaskBase = "Jre${os}Launcher"
+    def launcherTaskBase = "Jre${os}"
     createJreTasks(
             launcherTaskBase,
             "https://download.bell-sw.com/java/$jdkVersionLauncher/bellsoft-jdk$jdkVersionLauncher-$file",
             "$projectDir/jre/$os-$jdkVersionLauncher-$file",
-            "$projectDir/jre/Launcher/$os")
-    downloadJreLauncher.dependsOn "unpack${launcherTaskBase}"
-}
-
-jreUrlFilenames.each { os, file ->
+            "$projectDir/jre/$os")
+    downloadJre.dependsOn "unpack${launcherTaskBase}"
     def distName = os.toLowerCase()
     
     distributions {
         "$distName" {
             contents {
-                from "unpackJre${os}Launcher"
-                into 'jre'
+                into ('jre') {
+                    from "$projectDir/jre/$os"
+                }
                 with distributions.main.contents
             }
         }
@@ -119,9 +96,43 @@ jreUrlFilenames.each { os, file ->
     def zipTask = tasks.named("${distName}DistZip").get()
     def tarTask = tasks.named("${distName}DistTar").get()
 
-    zipTask.dependsOn downloadJreAll
+    zipTask.dependsOn downloadJre
     zipTask.description "Bundles the project with a JRE for ${os}"
-    tarTask.dependsOn downloadJreAll
+    tarTask.dependsOn downloadJre
     tarTask.description "Bundles the project with a JRE for ${os}"
     createRelease.dependsOn zipTask
+}
+
+/**
+ * Modify start scripts to use bundled JRE when
+ * available, otherwise fall back to searching.
+ */
+startScripts.doLast {
+    unixScript.text = unixScript
+            .text
+            .replaceFirst(/(?s)# Determine the Java.*(?=\R\R# Increase)/) { match ->
+                """\
+                |# Use bundled JRE when available
+                |if [ -d \$APP_HOME/jre ] ; then
+                |    JAVACMD=\$APP_HOME/jre/bin/java
+                |else
+                |    ${match.replace("\n", "\n    ")}
+                |fi"""
+                .stripMargin()
+            }
+
+    windowsScript.text = windowsScript
+            .text
+            .replaceFirst(/(?s)@rem Find java.*:init/) { match ->
+                """\
+                |@rem Use bundled JRE when available
+                |if not exist %APP_HOME%\\jre\\ goto findJava
+                |set JAVA_EXE=%APP_HOME%\\jre\\bin\\java.exe
+                |goto init
+                |
+                |:findJava
+                |$match
+                |"""
+                .stripMargin()
+            }
 }
