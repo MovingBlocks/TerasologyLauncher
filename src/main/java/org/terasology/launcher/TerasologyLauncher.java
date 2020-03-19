@@ -77,6 +77,7 @@ public final class TerasologyLauncher extends Application {
 
     /**
      * Initialize the host service wrapper by attempting to use the JavaFX {@link HostServices}.
+     *
      * @return the configured host service wrapper
      */
     private HostServicesWrapper initHostServices() {
@@ -85,7 +86,7 @@ public final class TerasologyLauncher extends Application {
             // This may throw an exception on a different thread, but we cannot catch it here o.O
             // In addition, `hostServices` will be initialized, but disfunctional.
             // Thus, we have no idea whether we can use the services or not...
-             hs = getHostServices();
+            hs = getHostServices();
             // poor man's check: this will throw a NPE if the internal `hostServices.delegate` is not initialized
             hs.getCodeBase();
         } catch (NullPointerException e) {
@@ -153,7 +154,7 @@ public final class TerasologyLauncher extends Application {
             }
             //TODO: Should we really crash here? The task state is set to "failed" if an exception is thrown, even if
             //      it is caught...
-            // openCrashReporterAndExit(exception);
+            openCrashReporterAndExit(exception);
         });
 
         initThread.start();
@@ -176,9 +177,13 @@ public final class TerasologyLauncher extends Application {
     private void openCrashReporterAndExit(Exception e) {
         logger.error("The TerasologyLauncher could not be started!");
 
-        Path logFile = TempLogFilePropertyDefiner.getInstance().getLogFile();
-        //TODO: this hangs on Java 11 instead of showing the CrashReporter
-        // CrashReporter.report(e, logFile);
+        TempLogFilePropertyDefiner tempLogFileDefiner = TempLogFilePropertyDefiner.getInstance();
+
+        Path logFile = null;
+        if (tempLogFileDefiner != null) { // for dev run
+            logFile = tempLogFileDefiner.getLogFile();
+        }
+        CrashReporter.report(e, logFile);
         System.exit(1);
     }
 
