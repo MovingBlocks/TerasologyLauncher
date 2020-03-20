@@ -24,6 +24,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -31,12 +32,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -169,43 +172,44 @@ public final class LauncherUpdater {
     }
 
     public boolean update(Path downloadDirectory, Path tempDirectory) {
-//        try {
-//            logger.trace("Downloading launcher...");
-//            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
-//
-//            // Download launcher ZIP file
-//            final URL updateURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
-//            logger.trace("Update URL: {}", updateURL);
-//
-//            final Path downloadedZipFile =
-//                downloadDirectory.resolve(jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
-//            logger.trace("Download ZIP file: {}", downloadedZipFile);
-//
-//            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new DummyProgressListener());
-//
-//            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
-//
-//            // Extract launcher ZIP file
-//            final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
-//            if (!extracted) {
-//                throw new IOException("Could not extract ZIP file! " + downloadedZipFile);
-//            }
-//            logger.trace("ZIP file extracted");
-//
-//            final Path tempLauncherDirectory = tempDirectory.resolve("TerasologyLauncher");
-//            FileUtils.ensureWritableDir(tempLauncherDirectory);
-//
-//            logger.info("Current launcher path: {}", launcherInstallationDirectory.toString());
-//            logger.info("New files temporarily located in: {}", tempLauncherDirectory.toAbsolutePath());
-//
-//            // Start SelfUpdater
-//            SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
-//        } catch (DownloadException | IOException | RuntimeException e) {
-//            logger.error("Launcher update failed! Aborting update process!", e);
-//            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("update_launcher_updateFailed"));
-//            return false;
-//        }
-//        return true;
+
+        //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
+        try {
+            //TODO: resolve correct package base on current installation(?)
+            Optional<GHAsset> releaseAsset = latestRelease.getAssets().stream()
+                    .filter(asset -> asset.getName().equals("<os>_<arch>"))
+                    .findFirst();
+
+            releaseAsset.ifPresent(asset -> {
+                //TODO: use label instead, and figure out the filename....
+                final Path downloadedZipFile =
+                        downloadDirectory.resolve(asset.getName() + "_" + latestRelease.getTagName() + "_" + System.currentTimeMillis() + ".zip");
+
+                //TODO: DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new DummyProgressListener());
+
+                //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
+
+                // Extract launcher ZIP file
+                final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
+
+                logger.trace("ZIP file extracted");
+
+                final Path tempLauncherDirectory = tempDirectory.resolve("TerasologyLauncher");
+                try {
+                    FileUtils.ensureWritableDir(tempLauncherDirectory);
+
+                    logger.info("Current launcher path: {}", launcherInstallationDirectory.toString());
+                    logger.info("New files temporarily located in: {}", tempLauncherDirectory.toAbsolutePath());
+
+                    SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
+                } catch (IOException e) {
+                    logger.error("Launcher update failed! Aborting update process!", e);
+                    GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("update_launcher_updateFailed"));
+                }
+            });
+        } catch (IOException e) {
+
+        }
         return false;
     }
 }
