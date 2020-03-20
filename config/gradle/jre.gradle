@@ -78,15 +78,21 @@ jreUrlFilenames.each { os, file ->
     }
 
     distributions {
-        "${os.toLowerCase()}" {
+        def distName = os.toLowerCase()
+        def distBase = distName.replaceAll("\\d", "") // drop '32' or '64'
+
+        "${distName}" {
             contents {
                 with distributions.main.contents
 
                 into('jre') {
                     from unpackTask
                 }
+
+                from("${projectDir}/buildres/${distBase}")
+                from("${projectDir}/buildres/${distName}")
             }
-        }
+        }   
     }
 
     downloadJreAll.dependsOn downloadTask
