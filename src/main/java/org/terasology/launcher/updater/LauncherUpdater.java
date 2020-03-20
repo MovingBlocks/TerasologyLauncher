@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.updater;
 
+import com.vdurmont.semver4j.Semver;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
@@ -24,20 +25,16 @@ import javafx.scene.control.TextArea;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.kohsuke.github.GHRelease;
+import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DownloadException;
-import org.terasology.launcher.util.DownloadUtils;
-import org.terasology.launcher.util.DummyProgressListener;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
@@ -53,47 +50,23 @@ public final class LauncherUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
 
-    private final TerasologyLauncherVersionInfo currentVersionInfo;
-    private final String currentVersion;
-    private final String jobName;
+
+    private final Semver currentVersion;
 
     private GitHub github;
 
-    private Integer upstreamVersion;
-    private TerasologyLauncherVersionInfo versionInfo;
-    private String changeLog;
+    private GHRelease latestRelease;
 
     private Path launcherInstallationDirectory;
 
     public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
 
+        currentVersion = new Semver(currentVersionInfo.getVersion());
+
         try {
             github = GitHub.connectAnonymously();
-
-            final GHRelease latestRelease =
-                    github.getOrganization("MovingBlocks")
-                            .getRepository("TerasologyLauncher")
-                            .getLatestRelease();
-
-            final String latestTag = latestRelease.getTagName();
-
-            logger.info("Latest Release: {}", latestTag);
-
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-        this.currentVersionInfo = currentVersionInfo;
-
-        if (currentVersionInfo.getBuildNumber() == null || currentVersionInfo.getBuildNumber().trim().length() == 0) {
-            this.currentVersion = "0";
-        } else {
-            this.currentVersion = currentVersionInfo.getBuildNumber();
-        }
-        if (currentVersionInfo.getJobName() == null || currentVersionInfo.getJobName().trim().length() == 0) {
-            this.jobName = DownloadUtils.TERASOLOGY_LAUNCHER_DEVELOP_JOB_NAME;
-        } else {
-            this.jobName = currentVersionInfo.getJobName();
         }
     }
 
@@ -105,48 +78,29 @@ public final class LauncherUpdater {
      * @return whether an update is available
      */
     public boolean updateAvailable() {
-        if (this.currentVersionInfo.isEmpty()) {
-            logger.trace("Skipping update check - no version info file found (assuming development environment)");
-            return false;
-        }
+        //TODO return Option<GHRelease> instead of side-effect
+        if (github != null) {
+            try {
+                final GHRelease latestRelease = github.getOrganization("MovingBlocks")
+                        .getRepository("TerasologyLauncher")
+                        .getLatestRelease();
 
-        boolean updateAvailable = false;
-        upstreamVersion = null;
-        versionInfo = null;
-        changeLog = null;
-        try {
-            upstreamVersion = DownloadUtils.loadLastStableBuildNumberJenkins(jobName);
-            logger.trace("Launcher upstream version: {}", upstreamVersion);
-            updateAvailable = Integer.parseInt(currentVersion) < upstreamVersion;
-        } catch (DownloadException e) {
-            logger.warn("The latest stable version of the launcher could not be determined!", e);
-        } catch (NumberFormatException e) {
-            logger.error("The current version '{}' could not be parsed!", currentVersion, e);
-        }
-        if (updateAvailable) {
-            this.setNewVersionInfo();
-            this.setNewChangeLog();
-            logger.info("An update is available to the TerasologyLauncher. '{}' '{}'", upstreamVersion, versionInfo);
-        }
-        return updateAvailable;
-    }
+                final Semver latestVersion = new Semver(latestRelease.getTagName().replaceAll("^v(.*)$", "$1"));
 
-    private void setNewVersionInfo() {
-        URL urlVersionInfo = null;
-        try {
-            urlVersionInfo = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_VERSION_INFO);
-            versionInfo = TerasologyLauncherVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
-        } catch (IOException e) {
-            logger.warn("The launcher version info could not be loaded! '{}' '{}'", upstreamVersion, urlVersionInfo, e);
-        }
-    }
+                final boolean updateAvailable = latestVersion.isGreaterThan(currentVersion);
 
-    private void setNewChangeLog() {
-        try {
-            changeLog = DownloadUtils.loadLauncherChangeLogJenkins(jobName, upstreamVersion);
-        } catch (DownloadException e) {
-            logger.warn("The launcher change log could not be loaded! '{}'", upstreamVersion, e);
+                if (updateAvailable) {
+                    this.latestRelease = latestRelease;
+                }
+
+                return updateAvailable;
+            } catch (IOException e) {
+                logger.warn("Could not fetch latest release: {}", e.getMessage());
+            }
+        } else {
+            logger.warn("Could not connect to GitHub");
         }
+        return false;
     }
 
     public void detectAndCheckLauncherInstallationDirectory() throws URISyntaxException, IOException {
@@ -163,7 +117,7 @@ public final class LauncherUpdater {
         FutureTask<Boolean> dialog = new FutureTask<Boolean>(() -> {
             Parent root = BundleUtils.getFXMLLoader("update_dialog").load();
             ((TextArea) root.lookup("#infoTextArea")).setText(infoText);
-            ((TextArea) root.lookup("#changelogTextArea")).setText(changeLog);
+            ((TextArea) root.lookup("#changelogTextArea")).setText(latestRelease.getBody());
 
             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle(BundleUtils.getLabel("message_update_launcher_title"));
@@ -197,64 +151,61 @@ public final class LauncherUpdater {
     private String getUpdateInfo() {
         final StringBuilder builder = new StringBuilder();
         builder.append("  ")
-               .append(BundleUtils.getLabel("message_update_current"))
-               .append("  ")
-               .append(currentVersionInfo.getDisplayVersion())
-               .append("  \n")
-               .append("  ")
-               .append(BundleUtils.getLabel("message_update_latest"))
-               .append("  ");
-        if (versionInfo != null) {
-            builder.append(versionInfo.getDisplayVersion());
-        } else if (upstreamVersion != null) {
-            builder.append(upstreamVersion);
-        }
-        builder.append("  \n")
-               .append("  ")
-               .append(BundleUtils.getLabel("message_update_installationDirectory"))
-               .append("  ")
-               .append(launcherInstallationDirectory.toString())
-               .append("  ");
+                .append(BundleUtils.getLabel("message_update_current"))
+                .append("  ")
+                .append(currentVersion.getValue())
+                .append("  \n")
+                .append("  ")
+                .append(BundleUtils.getLabel("message_update_latest"))
+                .append("  ")
+                .append(latestRelease.getTagName())
+                .append("  \n")
+                .append("  ")
+                .append(BundleUtils.getLabel("message_update_installationDirectory"))
+                .append("  ")
+                .append(launcherInstallationDirectory.toString())
+                .append("  ");
         return builder.toString();
     }
 
     public boolean update(Path downloadDirectory, Path tempDirectory) {
-        try {
-            logger.trace("Downloading launcher...");
-            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
-
-            // Download launcher ZIP file
-            final URL updateURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
-            logger.trace("Update URL: {}", updateURL);
-
-            final Path downloadedZipFile =
-                downloadDirectory.resolve(jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
-            logger.trace("Download ZIP file: {}", downloadedZipFile);
-
-            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new DummyProgressListener());
-
-            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
-
-            // Extract launcher ZIP file
-            final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
-            if (!extracted) {
-                throw new IOException("Could not extract ZIP file! " + downloadedZipFile);
-            }
-            logger.trace("ZIP file extracted");
-
-            final Path tempLauncherDirectory = tempDirectory.resolve("TerasologyLauncher");
-            FileUtils.ensureWritableDir(tempLauncherDirectory);
-
-            logger.info("Current launcher path: {}", launcherInstallationDirectory.toString());
-            logger.info("New files temporarily located in: {}", tempLauncherDirectory.toAbsolutePath());
-
-            // Start SelfUpdater
-            SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
-        } catch (DownloadException | IOException | RuntimeException e) {
-            logger.error("Launcher update failed! Aborting update process!", e);
-            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("update_launcher_updateFailed"));
-            return false;
-        }
-        return true;
+//        try {
+//            logger.trace("Downloading launcher...");
+//            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
+//
+//            // Download launcher ZIP file
+//            final URL updateURL = DownloadUtils.createFileDownloadUrlJenkins(jobName, upstreamVersion, DownloadUtils.FILE_TERASOLOGY_LAUNCHER_ZIP);
+//            logger.trace("Update URL: {}", updateURL);
+//
+//            final Path downloadedZipFile =
+//                downloadDirectory.resolve(jobName + "_" + upstreamVersion + "_" + System.currentTimeMillis() + ".zip");
+//            logger.trace("Download ZIP file: {}", downloadedZipFile);
+//
+//            DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new DummyProgressListener());
+//
+//            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
+//
+//            // Extract launcher ZIP file
+//            final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
+//            if (!extracted) {
+//                throw new IOException("Could not extract ZIP file! " + downloadedZipFile);
+//            }
+//            logger.trace("ZIP file extracted");
+//
+//            final Path tempLauncherDirectory = tempDirectory.resolve("TerasologyLauncher");
+//            FileUtils.ensureWritableDir(tempLauncherDirectory);
+//
+//            logger.info("Current launcher path: {}", launcherInstallationDirectory.toString());
+//            logger.info("New files temporarily located in: {}", tempLauncherDirectory.toAbsolutePath());
+//
+//            // Start SelfUpdater
+//            SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
+//        } catch (DownloadException | IOException | RuntimeException e) {
+//            logger.error("Launcher update failed! Aborting update process!", e);
+//            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("update_launcher_updateFailed"));
+//            return false;
+//        }
+//        return true;
+        return false;
     }
 }

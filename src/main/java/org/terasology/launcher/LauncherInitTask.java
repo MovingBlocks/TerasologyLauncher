@@ -191,6 +191,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 // Run launcher without an update. Don't throw a LauncherStartFailedException.
             }
             if (foundLauncherInstallationDirectory) {
+                //TODO only inform about update, don't attempt to run a self-update
                 final boolean update = updater.showUpdateDialog(owner);
                 if (update) {
                     if (saveDownloadedFiles) {

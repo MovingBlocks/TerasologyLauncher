@@ -104,6 +104,7 @@ dependencies {
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
 
     compile group: 'org.kohsuke', name: 'github-api', version: '1.108'
+    compile group: 'com.vdurmont', name: 'semver4j', version: '3.1.0'
     
     // For Web API
     // TODO: extract swagger dependencies into swagger.gradle
@@ -166,6 +167,7 @@ task createVersionInfoFile {
             propertyEntry('gitCommit', env.GIT_COMMIT)
             propertyEntry('dateTime', startDateTimeString)
             propertyEntry('displayVersion', displayVersion)
+            propertyEntry('version', version.toString())
         }
     }
 }
