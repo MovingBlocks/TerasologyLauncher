@@ -134,6 +134,15 @@ def convertGitBranch = { gitBranch ->
     }
 }
 
+/**
+ * Create an entry for a `.properties` file if the value is not null.
+ *
+ * @return an `ant.entry` to be used with `ant.propertyfile`
+ */
+def propertyEntry(key, value) {
+    (value != null) ? ant.entry(key: key, value: value) : null
+}
+
 task createVersionInfoFile {
 
     inputs.property('version', version.toString())
@@ -146,15 +155,15 @@ task createVersionInfoFile {
     doLast {
         versionInfoFileDir.mkdirs()
         ant.propertyfile(file: versionInfoFile) {
-            ant.entry(key: 'buildNumber', value: env.BUILD_NUMBER)
-            ant.entry(key: 'buildId', value: env.BUILD_ID)
-            ant.entry(key: 'buildTag', value: env.BUILD_TAG)
-            ant.entry(key: 'buildUrl', value: env.BUILD_URL)
-            ant.entry(key: 'jobName', value: env.JOB_NAME)
-            ant.entry(key: 'gitBranch', value: convertGitBranch(env.GIT_BRANCH))
-            ant.entry(key: 'gitCommit', value: env.GIT_COMMIT)
-            ant.entry(key: 'dateTime', value: startDateTimeString)
-            ant.entry(key: 'displayVersion', value: displayVersion)
+            propertyEntry('buildNumber', env.BUILD_NUMBER)
+            propertyEntry('buildId', env.BUILD_ID)
+            propertyEntry('buildTag', env.BUILD_TAG)
+            propertyEntry('buildUrl',  env.BUILD_URL)
+            propertyEntry('jobName',  env.JOB_NAME)
+            propertyEntry('gitBranch', convertGitBranch(env.GIT_BRANCH))
+            propertyEntry('gitCommit', env.GIT_COMMIT)
+            propertyEntry('dateTime', startDateTimeString)
+            propertyEntry('displayVersion', displayVersion)
         }
     }
 }
