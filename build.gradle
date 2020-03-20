@@ -162,6 +162,8 @@ task createVersionInfoFile {
 processResources.dependsOn createVersionInfoFile
 
 jar {
+    //TODO we only use this name because the `.exe` start scripts require the JAR to be named 'TerasologyLauncher.jar'
+    jar.archiveFileName = "${project.name}.jar"
     // replace development "logback.xml" with productive "logback_jar.xml"
     exclude "logback.xml"
     rename('logback_jar.xml', 'logback.xml')
