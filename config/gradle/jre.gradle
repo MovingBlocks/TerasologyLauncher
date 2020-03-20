@@ -101,6 +101,18 @@ jreUrlFilenames.each { os, file ->
     createRelease.dependsOn "assemble${os}Dist"
 }
 
+distributions {
+    mac {
+        contents {
+            into 'TerasologyLauncher.app/Contents'
+            exclude '**/*.bat'
+            eachFile { details ->
+                details.path = details.path.toString().replaceAll("(Contents)/bin/(.+)", "\$1/MacOS/\$2")
+            }
+        }
+    }
+}
+
 /**
  * Modify start scripts to use bundled JRE when
  * available, otherwise fall back to searching.
