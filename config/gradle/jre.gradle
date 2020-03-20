@@ -16,7 +16,7 @@
 
 // Uses Bellsoft Liberica JRE
 def jreVersion = '8u212'
-def jreUrlBase = "https://download.bell-sw.com/java/$jreVersion/bellsoft-jre$jreVersion"
+def jreUrlBase = "https://download.bell-sw.com/java/${jreVersion}/bellsoft-jre${jreVersion}"
 def jreUrlFilenames = [
         Linux64   : 'linux-amd64.tar.gz',
         Linux32   : 'linux-i586.tar.gz',
@@ -36,67 +36,63 @@ task createRelease() {
 }
 
 task downloadJreAll {
-    group 'Download'
-    description 'Downloads JRE for all platforms'
+    group 'JRE'
+    description 'Downloads JREs for all platforms'
+}
+
+task unpackJreAll {
+    group 'JRE'
+    description 'Unpack JREs for all platforms'
+}
+
+def unpack(file) {
+    copySpec {
+        from((file.name.endsWith(".zip")) ? zipTree(file) : tarTree(file) ) {
+           eachFile { fcd ->
+                fcd.relativePath = new RelativePath(
+                        true, fcd.relativePath.segments.drop(1))
+            }
+            includeEmptyDirs = false 
+        }
+    }
 }
 
 jreUrlFilenames.each { os, file ->
-    def packedJre = new File("$projectDir/jre/$file")
-    def unpackedJre = new File("$buildDir/jre/$os")
 
-    def downloadTask = task("downloadJre$os") {
-        group 'Download'
+    def downloadTask = task "downloadJre${os}"(type: Download) {
+        group 'JRE'
         description "Downloads JRE for $os"
 
-        doFirst {
-            download {
-                src "$jreUrlBase-$file"
-                dest packedJre
-                overwrite false
-            }
-        }
-
-        doLast {
-            // Unpack the JRE
-            if (!unpackedJre.exists()) {
-                unpackedJre.mkdirs()
-                copy {
-                    from(file.endsWith("zip")
-                            ? zipTree(packedJre)
-                            : tarTree(packedJre)) {
-                        eachFile { fcd ->
-                            fcd.relativePath = new RelativePath(
-                                    true, fcd.relativePath.segments.drop(1))
-                        }
-                        includeEmptyDirs = false
-                    }
-                    into unpackedJre
-                }
-            }
-        }
+        src "${jreUrlBase}-${file}"
+        dest "${projectDir}/jre/${file}"
+        overwrite false
     }
 
-    def distName = os.toLowerCase()
+    def unpackTask = task "unpackJre${os}"(type: Copy) {
+        group 'JRE'
+        description "Unpack JRE for ${os} to distribution sources"
+        dependsOn downloadTask
+
+        with unpack(downloadTask.dest)
+        into "${buildDir}/jre/${os}"
+    }
+
     distributions {
-        "$distName" {
+        "${os.toLowerCase()}" {
             contents {
                 with distributions.main.contents
+
                 into('jre') {
-                    from unpackedJre
+                    from unpackTask
                 }
             }
         }
     }
 
-    def zipTask = tasks.named("${distName}DistZip").get()
-    def tarTask = tasks.named("${distName}DistTar").get()
-
     downloadJreAll.dependsOn downloadTask
-    zipTask.dependsOn downloadTask
-    zipTask.description "Bundles the project with a JRE for $os"
-    tarTask.dependsOn downloadTask
-    tarTask.description "Bundles the project with a JRE for $os"
-    createRelease.dependsOn zipTask
+    unpackJreAll.dependsOn unpackTask
+
+    createRelease.dependsOn "assemble${os}Dist"
 }
 
 /**
