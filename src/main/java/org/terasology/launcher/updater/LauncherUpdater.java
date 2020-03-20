@@ -23,6 +23,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.kohsuke.github.GHRelease;
+import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
@@ -43,11 +45,19 @@ import java.util.concurrent.FutureTask;
 
 public final class LauncherUpdater {
 
+    //TODO: use semver library to compare version strings
+
+    //TODO: connect to GitHub to check for new version (only consider stable releases for now)
+
+    //TODO: fetch all releases (including pre-releases) based on user settings<
+
     private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
 
     private final TerasologyLauncherVersionInfo currentVersionInfo;
     private final String currentVersion;
     private final String jobName;
+
+    private GitHub github;
 
     private Integer upstreamVersion;
     private TerasologyLauncherVersionInfo versionInfo;
@@ -56,6 +66,23 @@ public final class LauncherUpdater {
     private Path launcherInstallationDirectory;
 
     public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
+
+        try {
+            github = GitHub.connectAnonymously();
+
+            final GHRelease latestRelease =
+                    github.getOrganization("MovingBlocks")
+                            .getRepository("TerasologyLauncher")
+                            .getLatestRelease();
+
+            final String latestTag = latestRelease.getTagName();
+
+            logger.info("Latest Release: {}", latestTag);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         this.currentVersionInfo = currentVersionInfo;
 
         if (currentVersionInfo.getBuildNumber() == null || currentVersionInfo.getBuildNumber().trim().length() == 0) {

@@ -52,7 +52,7 @@ def unpack(file) {
                 fcd.relativePath = new RelativePath(
                         true, fcd.relativePath.segments.drop(1))
             }
-            includeEmptyDirs = false 
+            includeEmptyDirs = false
         }
     }
 }
