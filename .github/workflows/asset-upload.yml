@@ -27,6 +27,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLATFORM: ${{ matrix.platform }}
         with:
           # This pulls from the RELEASE event this workflow was triggered by.
           # See https://developer.github.com/v3/activity/events/types/#releaseevent

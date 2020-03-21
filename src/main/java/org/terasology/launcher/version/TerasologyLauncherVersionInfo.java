@@ -39,6 +39,7 @@ public final class TerasologyLauncherVersionInfo {
     private static final String DATE_TIME = "dateTime";
     private static final String DISPLAY_VERSION = "displayVersion";
     private static final String SEMVER_VERSION = "version";
+    private static final String PLATFORM = "platform";
 
     private static final String DEFAULT_VALUE = "";
 
@@ -57,6 +58,7 @@ public final class TerasologyLauncherVersionInfo {
     private final String displayVersion;
     private final String version;
     private final String stringRepresentation;
+    private final String platform;
 
     private TerasologyLauncherVersionInfo(Properties versionInfoProperties) {
         final Properties properties;
@@ -77,6 +79,7 @@ public final class TerasologyLauncherVersionInfo {
         dateTime = properties.getProperty(DATE_TIME, DEFAULT_VALUE);
         displayVersion = properties.getProperty(DISPLAY_VERSION, DEFAULT_VALUE);
         version = properties.getProperty(SEMVER_VERSION, DEFAULT_VALUE);
+        platform = properties.getProperty(PLATFORM);
 
         final StringBuilder stringRepresentationBuilder = new StringBuilder();
         stringRepresentationBuilder.append("[");
@@ -128,12 +131,15 @@ public final class TerasologyLauncherVersionInfo {
         stringRepresentation = stringRepresentationBuilder.toString();
     }
 
+    //TODO: why does this need to be a singleton?
     public static synchronized TerasologyLauncherVersionInfo getInstance() {
         if (instance == null) {
             instance = new TerasologyLauncherVersionInfo(null);
         }
         return instance;
     }
+
+    //TODO: return `Optional<String>` and get rid of `isEmpty`
 
     public static TerasologyLauncherVersionInfo loadFromInputStream(InputStream inStream) {
         return new TerasologyLauncherVersionInfo(loadPropertiesFromInputStream(inStream));
@@ -168,6 +174,10 @@ public final class TerasologyLauncherVersionInfo {
 
     public String getVersion() {
         return version;
+    }
+
+    public String getPlatform() {
+        return platform;
     }
 
     @Override
