@@ -76,6 +76,10 @@ public final class DownloadUtils {
     private DownloadUtils() {
     }
 
+    public static void downloadToFile(URL downloadURL, Path file) throws DownloadException {
+        downloadToFile(downloadURL, file, new DummyProgressListener());
+    }
+
     public static void downloadToFile(URL downloadURL, Path file, ProgressListener listener) throws DownloadException {
         listener.update(0);
 

@@ -25,12 +25,15 @@ import javafx.scene.control.TextArea;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.kohsuke.github.GHAsset;
+import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.DownloadException;
+import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
@@ -55,6 +58,7 @@ public final class LauncherUpdater {
 
 
     private final Semver currentVersion;
+    private final String currentPlatform;
 
     private GitHub github;
 
@@ -65,6 +69,7 @@ public final class LauncherUpdater {
     public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
 
         currentVersion = new Semver(currentVersionInfo.getVersion());
+        currentPlatform = currentVersionInfo.getPlatform();
 
         try {
             github = GitHub.connectAnonymously();
@@ -84,9 +89,10 @@ public final class LauncherUpdater {
         //TODO return Option<GHRelease> instead of side-effect
         if (github != null) {
             try {
-                final GHRelease latestRelease = github.getOrganization("MovingBlocks")
-                        .getRepository("TerasologyLauncher")
-                        .getLatestRelease();
+
+                final GHOrganization movingBlocks = github.getOrganization("MovingBlocks");
+                final GHRepository terasologyLauncher = movingBlocks.getRepository("TerasologyLauncher");
+                final GHRelease latestRelease = terasologyLauncher.getLatestRelease();
 
                 final Semver latestVersion = new Semver(latestRelease.getTagName().replaceAll("^v(.*)$", "$1"));
 
@@ -153,6 +159,7 @@ public final class LauncherUpdater {
      */
     private String getUpdateInfo() {
         final StringBuilder builder = new StringBuilder();
+        //TODO: also show what will be downloaded
         builder.append("  ")
                 .append(BundleUtils.getLabel("message_update_current"))
                 .append("  ")
@@ -172,44 +179,43 @@ public final class LauncherUpdater {
     }
 
     public boolean update(Path downloadDirectory, Path tempDirectory) {
-
+        boolean updateSuccessful = false;
         //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
         try {
-            //TODO: resolve correct package base on current installation(?)
+            //TODO: resolve correct package based on current installation(?)
             Optional<GHAsset> releaseAsset = latestRelease.getAssets().stream()
-                    .filter(asset -> asset.getName().equals("<os>_<arch>"))
+                    .filter(asset -> asset.getName().contains(currentPlatform))
                     .findFirst();
 
-            releaseAsset.ifPresent(asset -> {
-                //TODO: use label instead, and figure out the filename....
-                final Path downloadedZipFile =
-                        downloadDirectory.resolve(asset.getName() + "_" + latestRelease.getTagName() + "_" + System.currentTimeMillis() + ".zip");
-
-                //TODO: DownloadUtils.downloadToFile(updateURL, downloadedZipFile, new DummyProgressListener());
-
-                //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
-
-                // Extract launcher ZIP file
-                final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
-
-                logger.trace("ZIP file extracted");
-
-                final Path tempLauncherDirectory = tempDirectory.resolve("TerasologyLauncher");
+            updateSuccessful = releaseAsset.map(asset -> {
                 try {
-                    FileUtils.ensureWritableDir(tempLauncherDirectory);
+                    //TODO: should the asset name contain the version number?
+                    final Path downloadedZipFile = downloadDirectory.resolve(asset.getName());
+                    DownloadUtils.downloadToFile(asset.getUrl(), downloadedZipFile);
 
-                    logger.info("Current launcher path: {}", launcherInstallationDirectory.toString());
-                    logger.info("New files temporarily located in: {}", tempLauncherDirectory.toAbsolutePath());
+                    //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 
-                    SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
-                } catch (IOException e) {
+                    // Extract launcher ZIP file
+                    final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
+                    if (extracted) {
+                        final Path tempLauncherDirectory = tempDirectory.resolve("TerasologyLauncher");
+                        FileUtils.ensureWritableDir(tempLauncherDirectory);
+
+                        logger.info("Current launcher path: {}", launcherInstallationDirectory.toString());
+                        logger.info("New files temporarily located in: {}", tempLauncherDirectory.toAbsolutePath());
+
+                        SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
+                        return true;
+                    }
+                } catch (IOException | DownloadException e) {
                     logger.error("Launcher update failed! Aborting update process!", e);
                     GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("update_launcher_updateFailed"));
                 }
-            });
+                return false;
+            }).orElse(false);
         } catch (IOException e) {
-
+            //TODO: log and show error message
         }
-        return false;
+        return updateSuccessful;
     }
 }
