@@ -88,7 +88,6 @@ repositories {
     mavenCentral()
     // MovingBlocks Artifactory instance(s) for libs not readily available elsewhere plus our own libs
     maven { url "http://artifactory.terasology.org/artifactory/virtual-repo-live" }
-    maven { url "https://repo.eclipse.org/content/repositories/egit-releases/" }
     jcenter()
 }
 
@@ -104,7 +103,9 @@ dependencies {
     compile group: "com.google.guava", name: "guava", version: "28.1-jre"
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
 
-    compile group: 'org.kohsuke', name: 'github-api', version: '1.108'
+    implementation 'com.jcabi:jcabi-github:1.0'
+    compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
+
     compile group: 'com.vdurmont', name: 'semver4j', version: '3.1.0'
     
     // For Web API
