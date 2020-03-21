@@ -46,8 +46,6 @@ plugins {
 }
 
 apply from: "./config/gradle/jre.gradle"
-// TODO salvage useful bits and remove this
-//apply from: "./config/gradle/bundles.gradle"
 apply from: "./config/gradle/quality.gradle"
 apply from: "./config/gradle/swagger.gradle"
 
@@ -164,6 +162,8 @@ task createVersionInfoFile {
 processResources.dependsOn createVersionInfoFile
 
 jar {
+    //TODO we only use this name because the `.exe` start scripts require the JAR to be named 'TerasologyLauncher.jar'
+    jar.archiveFileName = "${project.name}.jar"
     // replace development "logback.xml" with productive "logback_jar.xml"
     exclude "logback.xml"
     rename('logback_jar.xml', 'logback.xml')
