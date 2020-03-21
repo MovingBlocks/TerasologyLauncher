@@ -92,7 +92,7 @@ jreUrlFilenames.each { os, file ->
                 from("${projectDir}/buildres/${distBase}")
                 from("${projectDir}/buildres/${distName}")
             }
-        }   
+        }
     }
 
     downloadJreAll.dependsOn downloadTask
