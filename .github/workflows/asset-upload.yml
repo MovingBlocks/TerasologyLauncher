@@ -21,10 +21,8 @@ jobs:
         with:
           java-version: 1.8
           java-package: jdk+fx
-      - name: Download JREs
-        run: ./gradlew downloadJreAll
-      - name: Bundle all distribution packages
-        run: ./gradlew createRelease
+      - name: Bundle distribution for ${{ matrix.platform }}
+        run: ./gradlew -Prelease.useLastTag=true ${{ matrix.platform }}DistZip
       - name: Upload bundle for ${{ matrix.platform }}
         uses: actions/upload-release-asset@v1
         env:
@@ -33,6 +31,6 @@ jobs:
           # This pulls from the RELEASE event this workflow was triggered by.
           # See https://developer.github.com/v3/activity/events/types/#releaseevent
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./build/distributions/TerasologyLauncher-${{ matrix.platform }}.zip
+          asset_path: ./build/distributions/TerasologyLauncher-${{ matrix.platform }}-${{ github.event.release.name }}.zip
           asset_name: TerasologyLauncher-${{ matrix.platform }}.zip
           asset_content_type: application/zip
