@@ -55,6 +55,7 @@ public final class LauncherUpdater {
     final private GitHubClient github;
 
     private GitHubRelease latestRelease;
+    private Semver latestVersion;
 
     private Path launcherInstallationDirectory;
 
@@ -80,7 +81,7 @@ public final class LauncherUpdater {
                 final GitHubRelease latestRelease =
                         new GitHubRelease(github.get("repos/movingblocks/terasologylauncher/releases/tags/v4.0.0-rc.4"));
 
-                final Semver latestVersion =
+                latestVersion =
                         new Semver(latestRelease.getTagName().replaceAll("^v(.*)$", "$1"));
 
                 final boolean updateAvailable = latestVersion.isGreaterThan(currentVersion);
@@ -185,7 +186,8 @@ public final class LauncherUpdater {
                 // Extract launcher ZIP file
                 final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
                 if (extracted) {
-                    final Path tempLauncherDirectory = tempDirectory.resolve("TerasologyLauncher");
+                    final Path tempLauncherDirectory =
+                            tempDirectory.resolve("TerasologyLauncher-" + currentPlatform + "-" + latestVersion.getValue());
                     FileUtils.ensureWritableDir(tempLauncherDirectory);
 
                     logger.info("Current launcher path: {}", launcherInstallationDirectory.toString());

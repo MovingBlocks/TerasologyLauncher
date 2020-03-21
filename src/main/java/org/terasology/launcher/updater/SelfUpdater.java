@@ -37,13 +37,13 @@ public final class SelfUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(SelfUpdater.class);
 
-    private static final String TERASOLOGY_LAUNCHER_JAR = "lib/TerasologyLauncher.jar";
+    private static final String TERASOLOGY_LAUNCHER_JAR = Paths.get(".", "lib", "TerasologyLauncher.jar").toString();
 
     private SelfUpdater() {
     }
 
-    private static String getJavaProgramFile() {
-        return System.getProperty("java.home") + "/bin/java";
+    private static Path getJavaExecutable() {
+        return Paths.get(System.getProperty("java.home"), "bin", "java");
     }
 
     private static void deleteLauncherContent(Path directory) {
@@ -75,7 +75,7 @@ public final class SelfUpdater {
     public static void runUpdate(Path tempLauncherDirectory, Path launcherInstallationDirectory) throws IOException {
         final List<String> arguments = new ArrayList<>();
         // Set 'java' executable as programme to run
-        arguments.add(getJavaProgramFile());
+        arguments.add(getJavaExecutable().toString());
         // Build and set the classpath
         arguments.add("-cp");
         arguments.add(TERASOLOGY_LAUNCHER_JAR);
@@ -132,7 +132,7 @@ public final class SelfUpdater {
 
         // Start new launcher
         final List<String> arguments = new ArrayList<>();
-        arguments.add(getJavaProgramFile());
+        arguments.add(getJavaExecutable().toString());
         arguments.add("-jar");
         arguments.add(TERASOLOGY_LAUNCHER_JAR);
 
