@@ -49,7 +49,7 @@ certum.jks
 /src/main/resources/org/terasology/launcher/icons/
 
 # Ignore version info file(s)
-src/main/resources/org/terasology/launcher/version/
+/src/main/resources/org/terasology/launcher/version/
 
 # Ignore generated Web API sources
 web-api-client/

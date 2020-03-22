@@ -5,7 +5,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>Terasology</string>
 	<key>CFBundleExecutable</key>
-	<string>terasologylauncher.command</string>
+	<string>TerasologyLauncher</string>
 	<key>CFBundleIconFile</key>
 	<string>terasology.icns</string>
 </dict>
