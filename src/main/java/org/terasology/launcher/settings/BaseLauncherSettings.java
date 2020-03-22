@@ -47,7 +47,6 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     public static final String PROPERTY_LOCALE = "locale";
     public static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
     public static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
-    public static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
     public static final String PROPERTY_PREFIX_LAST_BUILD_NUMBER = "lastBuildNumber_";
     public static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
     public static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
@@ -129,22 +128,6 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
             }
         }
         properties.setProperty(PROPERTY_LOCALE, Languages.getCurrentLocale().toString());
-    }
-
-    protected void initBuildVersion() {
-        for (GameJob j : GameJob.values()) {
-            final String key = PROPERTY_PREFIX_BUILD_VERSION + j.name();
-            final String buildVersionStr = properties.getProperty(key);
-            int buildVersion = TerasologyGameVersion.BUILD_VERSION_LATEST;
-            if (buildVersionStr != null) {
-                try {
-                    buildVersion = Integer.parseInt(buildVersionStr);
-                } catch (NumberFormatException e) {
-                    logger.warn(WARN_MSG_INVALID_VALUE, buildVersionStr, key);
-                }
-            }
-            properties.setProperty(key, String.valueOf(buildVersion));
-        }
     }
 
     protected void initLastBuildNumber() {
@@ -291,11 +274,6 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     }
 
     @Override
-    public synchronized Integer getBuildVersion(GameJob job) {
-        return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name()));
-    }
-
-    @Override
     public synchronized Integer getLastBuildNumber(GameJob job) {
         final String lastBuildNumberStr = properties.getProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name());
         if (LAST_BUILD_NUMBER_DEFAULT.equals(lastBuildNumberStr)) {
@@ -377,11 +355,6 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     @Override
     public synchronized void setLocale(Locale locale) {
         properties.setProperty(PROPERTY_LOCALE, locale.toString());
-    }
-
-    @Override
-    public synchronized void setBuildVersion(int version, GameJob job) {
-        properties.setProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name(), String.valueOf(version));
     }
 
     @Override
