@@ -1,8 +1,10 @@
 * text=auto eol=lf
 
-*.{cmd,[cC][mM][dD]} 	text eol=crlf
-*.{bat,[bB][aA][tT]} 	text eol=crlf
-*.{png,[pP][nN][gG]}	binary
-*.{jpg,[jJ][pP][gG]}	binary
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.exe  binary
+*.icns binary
+*.jpg  binary
+*.png  binary
 
-gradlew 		text eol=lf
+gradlew text eol=lf
