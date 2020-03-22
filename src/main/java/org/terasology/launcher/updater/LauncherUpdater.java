@@ -62,12 +62,10 @@ public final class LauncherUpdater {
     private Path launcherInstallationDirectory;
 
     public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
-        logger.trace("Creating Updater");
         currentVersion = new Semver(currentVersionInfo.getVersion());
         currentPlatform = currentVersionInfo.getPlatform();
 
         github = new GitHubClient();
-        logger.trace("Creating Updater ... Done");
     }
 
     Semver versionOf(GitHubRelease release) {
@@ -82,6 +80,7 @@ public final class LauncherUpdater {
      * @return option of the latest release, or none if up-to-date (or update check failed)
      */
     public Option<GitHubRelease> updateAvailable() {
+        //TODO: replace with 'latest' after testing
         return Try.of(() -> new GitHubRelease(github.get("repos/movingblocks/terasologylauncher/releases/tags/v4.0.0-rc.4")))
                 .onFailure(failure -> logger.warn("Could not fetch latest release: {}", failure.getMessage()))
                 .filter(release -> versionOf(release).isGreaterThan(currentVersion))
@@ -158,7 +157,6 @@ public final class LauncherUpdater {
     public boolean update(final Path downloadDirectory, final Path tempDirectory, final GitHubRelease latestRelease) {
 
         //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
-        //TODO: resolve correct package based on current installation(?)
         Optional<GitHubAsset> releaseAsset =
                 latestRelease.getAssets().stream()
                         .filter(asset -> asset.getName().contains(currentPlatform))
@@ -168,7 +166,8 @@ public final class LauncherUpdater {
             try {
                 //TODO: should the asset name contain the version number?
                 final Path downloadedZipFile = downloadDirectory.resolve(asset.getName());
-                final URI downloadUri = URI.create("http://localhost:8000/TerasologyLauncher-windows64-4.0.0-rc.4.zip");
+                //TODO: use correct download URL after testing
+                final URI downloadUri = URI.create("http://localhost:8000/" + asset.getName());
                 DownloadUtils.downloadToFile(downloadUri.toURL(), downloadedZipFile);
                 //DownloadUtils.downloadToFile(asset.getBrowserDownloadUrl().toURL(), downloadedZipFile);
 
@@ -204,7 +203,7 @@ public final class LauncherUpdater {
     private void runUpdate(Path updateDirectory, Path installationDirectory) throws IOException {
         //TODO: this uses the current JRE (from the current installation) to run the self updater
         final Path javaExecutable = Paths.get(System.getProperty("java.home"), "bin", "java");
-        ;
+
         final Path launcherJar = Paths.get(".", "lib", "TerasologyLauncher.jar");
 
         final List<String> arguments = new ArrayList<>();
