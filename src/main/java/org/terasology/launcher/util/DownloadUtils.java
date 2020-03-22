@@ -46,22 +46,13 @@ import java.util.regex.Pattern;
 
 public final class DownloadUtils {
 
-    public static final String TERASOLOGY_LAUNCHER_DEVELOP_JOB_NAME = "TerasologyLauncher";
-
     public static final String FILE_TERASOLOGY_GAME_ZIP = "/artifact/build/distributions/Terasology.zip";
     public static final String FILE_TERASOLOGY_OMEGA_ZIP = "/artifact/distros/omega/build/distributions/TerasologyOmega.zip";
-    public static final String FILE_TERASOLOGY_LAUNCHER_ZIP = "/artifact/build/distributions/TerasologyLauncher.zip";
     public static final String FILE_TERASOLOGY_GAME_VERSION_INFO = "/artifact/build/resources/main/org/terasology/version/versionInfo.properties";
-    public static final String FILE_TERASOLOGY_LAUNCHER_VERSION_INFO =
-            "/artifact/build/resources/main/org/terasology/launcher/version/versionInfo.properties";
-    private static final String FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG = "/artifact/build/distributions/CHANGELOG.txt";
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
 
-    private static final String JENKINS_URL = "http://jenkins.terasology.org";
-    private static final int JENKINS_TIMEOUT = 3000; // milliseconds
     private static final String JENKINS_JOB_URL = "http://jenkins.terasology.org/job/";
-    private static final String LAST_STABLE_BUILD = "/lastStableBuild";
     private static final String LAST_SUCCESSFUL_BUILD = "/lastSuccessfulBuild";
     private static final String BUILD_NUMBER = "/buildNumber";
 
@@ -194,39 +185,6 @@ public final class DownloadUtils {
         return new URL(urlBuilder.toString());
     }
 
-    public static boolean isJenkinsAvailable() {
-        logger.trace("Checking Jenkins availability...");
-        try {
-            HttpURLConnection conn = (HttpURLConnection) new URL(JENKINS_URL).openConnection();
-            try (AutoCloseable ac = conn::disconnect) {
-                conn.setConnectTimeout(JENKINS_TIMEOUT);
-                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    logger.trace("Jenkins is available at {}", JENKINS_URL);
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            logger.warn("Could not connect to Jenkins at {} - {}", JENKINS_URL, e.getMessage());
-        }
-        return false;
-    }
-
-    /**
-     * Get the build number of the last stable build on the Jenkins server.
-     * <p>
-     * Jenkins Terminology: "A build is stable if it was built successfully and no publisher reports it as unstable. A build is unstable
-     * if it was built successfully and one or more publishers report it unstable. For example if the JUnit publisher is configured and a
-     * test fails then the build will be marked unstable. "
-     * </p>
-     *
-     * @param jobName the Jenkins job name
-     * @return the <code>buildNumber</code> of the last <b>stable</b> build
-     * @throws DownloadException if something goes wrong
-     */
-    public static int loadLastStableBuildNumberJenkins(String jobName) throws DownloadException {
-        return loadBuildNumberJenkins(jobName, LAST_STABLE_BUILD);
-    }
-
     /**
      * Get the build number of the last successful build on the Jenkins server.
      * <p>
@@ -353,30 +311,5 @@ public final class DownloadUtils {
             throw new DownloadException("There was an issue attempting to fetch the Omega url" + urlResult, e);
         }
         return engineBuildNumber;
-    }
-
-    public static String loadLauncherChangeLogJenkins(String jobName, Integer buildNumber) throws DownloadException {
-        URL urlChangeLog;
-        try {
-            urlChangeLog = DownloadUtils.createFileDownloadUrlJenkins(jobName, buildNumber, FILE_TERASOLOGY_LAUNCHER_CHANGE_LOG);
-        } catch (MalformedURLException e) {
-            throw new DownloadException("Failed to create the changelog url", e);
-        }
-        final StringBuilder changeLog = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlChangeLog.openStream(), StandardCharsets.US_ASCII))) {
-            while (true) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                if (changeLog.length() > 0) {
-                    changeLog.append("\n");
-                }
-                changeLog.append(line);
-            }
-        } catch (IOException | RuntimeException e) {
-            throw new DownloadException("The launcher change log could not be loaded! job=" + jobName + URL + urlChangeLog, e);
-        }
-        return changeLog.toString();
     }
 }
