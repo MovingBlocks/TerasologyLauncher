@@ -19,10 +19,6 @@ package org.terasology.launcher.game;
 
 public interface GameSettings {
 
-    void setJob(GameJob job);
-
-    GameJob getJob();
-
     void setBuildVersion(int version, GameJob job);
 
     Integer getBuildVersion(GameJob job);

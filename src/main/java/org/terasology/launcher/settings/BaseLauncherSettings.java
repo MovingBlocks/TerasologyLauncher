@@ -45,7 +45,6 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     public static final String USER_GAME_PARAMETERS_DEFAULT = "";
 
     public static final String PROPERTY_LOCALE = "locale";
-    public static final String PROPERTY_JOB = "job";
     public static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
     public static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
     public static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
@@ -130,19 +129,6 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
             }
         }
         properties.setProperty(PROPERTY_LOCALE, Languages.getCurrentLocale().toString());
-    }
-
-    protected void initJob() {
-        final String jobStr = properties.getProperty(PROPERTY_JOB);
-        GameJob job = JOB_DEFAULT;
-        if (jobStr != null) {
-            try {
-                job = GameJob.valueOf(jobStr);
-            } catch (IllegalArgumentException e) {
-                logger.warn(WARN_MSG_INVALID_VALUE, jobStr, PROPERTY_JOB);
-            }
-        }
-        properties.setProperty(PROPERTY_JOB, job.name());
     }
 
     protected void initBuildVersion() {
@@ -305,11 +291,6 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     }
 
     @Override
-    public synchronized GameJob getJob() {
-        return GameJob.valueOf(properties.getProperty(PROPERTY_JOB));
-    }
-
-    @Override
     public synchronized Integer getBuildVersion(GameJob job) {
         return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name()));
     }
@@ -396,11 +377,6 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     @Override
     public synchronized void setLocale(Locale locale) {
         properties.setProperty(PROPERTY_LOCALE, locale.toString());
-    }
-
-    @Override
-    public synchronized void setJob(GameJob job) {
-        properties.setProperty(PROPERTY_JOB, job.name());
     }
 
     @Override
