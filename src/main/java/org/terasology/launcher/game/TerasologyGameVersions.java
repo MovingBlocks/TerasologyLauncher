@@ -191,11 +191,8 @@ public final class TerasologyGameVersions {
             final SortedSet<Integer> buildNumbers = new TreeSet<>();
             buildNumbersMap.put(job, buildNumbers);
 
-            // See if we have a known build number in the settings already (?)
-            Integer lastBuildNumberFromSettings = getLastBuildNumberFromSettings(gameSettings, job);
-
             // Go check Jenkins for the last successful build (so failures are skipped), then add more going backwards
-            Integer lastBuildNumberFromJenkins = loadLastSuccessfulBuildNumber(lastBuildNumberFromSettings, buildNumbers, job);
+            Integer lastBuildNumberFromJenkins = loadLastSuccessfulBuildNumber(buildNumbers, job);
 
             // Finally add the mapping to our storage
             lastBuildNumbers.put(job, lastBuildNumberFromJenkins);
@@ -210,8 +207,6 @@ public final class TerasologyGameVersions {
             final SortedSet<Integer> buildNumbers = buildNumbersMap.get(job);
             final Integer lastBuildNumber = lastBuildNumbers.get(job);
 
-            // Update the settings with the latest build number we know about (?)
-            gameSettings.setLastBuildNumber(lastBuildNumber, job);
             if (job.isStable() && !job.isOnlyInstalled()) {
                 fillBuildNumbers(buildNumbers, job.getMinBuildNumber(), lastBuildNumber);
             }
@@ -255,21 +250,7 @@ public final class TerasologyGameVersions {
         return cacheDirectory;
     }
 
-    private Integer getLastBuildNumberFromSettings(GameSettings gameSettings, GameJob job) {
-        final Integer lastBuildNumber = gameSettings.getLastBuildNumber(job);
-        final int lastBuildVersion;
-        if (lastBuildNumber == null) {
-            return null;
-        } else {
-            lastBuildVersion = lastBuildNumber;
-        }
-        if (TerasologyGameVersion.BUILD_VERSION_LATEST != lastBuildVersion && lastBuildVersion >= job.getMinBuildNumber()) {
-            return lastBuildVersion;
-        }
-        return null;
-    }
-
-    private Integer loadLastSuccessfulBuildNumber(Integer lastBuildNumber, SortedSet<Integer> buildNumbers, GameJob job) {
+    private Integer loadLastSuccessfulBuildNumber(SortedSet<Integer> buildNumbers, GameJob job) {
         Integer lastSuccessfulBuildNumber = null;
         if (!job.isOnlyInstalled()) {
             try {
@@ -277,7 +258,7 @@ public final class TerasologyGameVersions {
                 lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumberJenkins(job.name());
             } catch (DownloadException e) {
                 logger.info("Retrieving last successful build number failed. '{}'", job, e);
-                lastSuccessfulBuildNumber = lastBuildNumber;
+                lastSuccessfulBuildNumber = null;
             }
 
             if (lastSuccessfulBuildNumber != null && lastSuccessfulBuildNumber >= job.getMinBuildNumber()) {

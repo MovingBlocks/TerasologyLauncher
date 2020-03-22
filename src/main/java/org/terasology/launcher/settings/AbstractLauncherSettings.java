@@ -42,7 +42,6 @@ public abstract class AbstractLauncherSettings implements GameSettings {
         logger.trace("Init launcher settings ...");
 
         initLocale();
-        initLastBuildNumber();
         initMaxHeapSize();
         initInitialHeapSize();
         initSearchForLauncherUpdates();
@@ -79,8 +78,6 @@ public abstract class AbstractLauncherSettings implements GameSettings {
 
     protected abstract void initMaxHeapSize();
 
-    protected abstract void initLastBuildNumber();
-
     protected abstract void initLocale();
 
     // --------------------------------------------------------------------- //
@@ -88,8 +85,6 @@ public abstract class AbstractLauncherSettings implements GameSettings {
     // --------------------------------------------------------------------- //
 
     public abstract Locale getLocale();
-
-    public abstract Integer getLastBuildNumber(GameJob job);
 
     public abstract JavaHeapSize getMaxHeapSize();
 
@@ -124,8 +119,6 @@ public abstract class AbstractLauncherSettings implements GameSettings {
     // --------------------------------------------------------------------- //
 
     public abstract void setLocale(Locale locale);
-
-    public abstract void setLastBuildNumber(Integer lastBuildNumber, GameJob job);
 
     public abstract void setMaxHeapSize(JavaHeapSize maxHeapSize);
 

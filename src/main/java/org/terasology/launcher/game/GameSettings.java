@@ -17,9 +17,4 @@
 package org.terasology.launcher.game;
 
 
-public interface GameSettings {
-
-    void setLastBuildNumber(Integer lastBuildNumber, GameJob job);
-
-    Integer getLastBuildNumber(GameJob job);
-}
+public interface GameSettings {}
