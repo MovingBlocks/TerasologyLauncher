@@ -27,10 +27,9 @@ import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
-import org.terasology.launcher.util.LauncherDirectoryUtils;
-import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.util.OperatingSystem;
@@ -76,9 +75,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
 
-            final boolean serverAvailable = DownloadUtils.isJenkinsAvailable();
-            if (serverAvailable && launcherSettings.isSearchForLauncherUpdates()) {
-                final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
+            if (launcherSettings.isSearchForLauncherUpdates()) {
+                final boolean selfUpdaterStarted =
+                        checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
                 if (selfUpdaterStarted) {
                     logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
                     return NullLauncherConfiguration.getInstance();
@@ -86,6 +85,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             }
 
             // game directories
+            logger.info("Initializing game directories");
             updateMessage(BundleUtils.getLabel("splash_initGameDirs"));
             final Path gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory());
             final Path gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory());

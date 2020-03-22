@@ -37,6 +37,7 @@ import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,11 +61,12 @@ public final class LauncherUpdater {
     private Path launcherInstallationDirectory;
 
     public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
-
+        logger.trace("Creating Updater");
         currentVersion = new Semver(currentVersionInfo.getVersion());
         currentPlatform = currentVersionInfo.getPlatform();
 
         github = new GitHubClient();
+        logger.trace("Creating Updater ... Done");
     }
 
     /**
@@ -179,7 +181,9 @@ public final class LauncherUpdater {
             try {
                 //TODO: should the asset name contain the version number?
                 final Path downloadedZipFile = downloadDirectory.resolve(asset.getName());
-                DownloadUtils.downloadToFile(asset.getBrowserDownloadUrl().toURL(), downloadedZipFile);
+                final URI downloadUri = URI.create("http://localhost:8000/TerasologyLauncher-windows64-4.0.0-rc.4.zip");
+                DownloadUtils.downloadToFile(downloadUri.toURL(), downloadedZipFile);
+                //DownloadUtils.downloadToFile(asset.getBrowserDownloadUrl().toURL(), downloadedZipFile);
 
                 //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 

@@ -73,13 +73,9 @@ public final class FileUtils {
         try (Stream<Path> stream = Files.list(directory)) {
             stream.forEach(path -> {
                 try {
-                    if (Files.isDirectory(path)) {
-                        Files.walkFileTree(directory, new DeleteFileVisitor());
-                    } else {
-                        Files.delete(path);
-                    }
+                    Files.walkFileTree(path, new DeleteFileVisitor());
                 } catch (IOException e) {
-                    logger.error("Failed to delete '{}'", directory, e);
+                    logger.error("Failed to delete '{}'", path, e);
                 }
             });
         }
@@ -139,11 +135,13 @@ public final class FileUtils {
             return;
         }
 
-        if (Files.isDirectory(source)) {
-            Files.walkFileTree(source, new LocalCopyVisitor(source, destination));
-        } else {
-            copyFile(source, destination);
-        }
+        Files.walkFileTree(source, new LocalCopyVisitor(source, destination));
+
+//        if (Files.isDirectory(source)) {
+//            Files.walkFileTree(source, new LocalCopyVisitor(source, destination));
+//        } else {
+//            copyFile(source, destination);
+//        }
     }
 
     /**

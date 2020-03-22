@@ -95,7 +95,7 @@ public final class SelfUpdater {
 
     public static void main(String[] args) {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             logger.error("Sleep interrupted!", e);
         }
@@ -133,8 +133,11 @@ public final class SelfUpdater {
         // Start new launcher
         final List<String> arguments = new ArrayList<>();
         arguments.add(getJavaExecutable().toString());
-        arguments.add("-jar");
-        arguments.add(TERASOLOGY_LAUNCHER_JAR);
+        arguments.add("-cp");
+        arguments.add(System.getenv("CLASSPATH"));
+        arguments.add("org.terasology.launcher.TerasologyLauncher");
+//        arguments.add("-jar");
+//        arguments.add(TERASOLOGY_LAUNCHER_JAR);
 
         logger.info("Start new launcher: {}", arguments);
 

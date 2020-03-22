@@ -52,6 +52,9 @@ public class LocalCopyVisitor extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+        if (dir.endsWith("jre")) {
+            return FileVisitResult.SKIP_SUBTREE;
+        }
         final Path dirToCreate = targetDirectory.resolve(sourceDirectory.relativize(dir));
         if (Files.notExists(dirToCreate)) {
             Files.createDirectories(dirToCreate);
