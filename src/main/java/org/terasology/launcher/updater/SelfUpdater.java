@@ -37,6 +37,7 @@ public final class SelfUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(SelfUpdater.class);
 
+    private static final String PROJECT_NAME = "TerasologyLauncher";
     private static final String TERASOLOGY_LAUNCHER_JAR = Paths.get(".", "lib", "TerasologyLauncher.jar").toString();
 
     private SelfUpdater() {
@@ -44,6 +45,11 @@ public final class SelfUpdater {
 
     private static Path getJavaExecutable() {
         return Paths.get(System.getProperty("java.home"), "bin", "java");
+    }
+
+    private static Path getLauncherExecutable(final Path installationDirectory) {
+        final String suffix = (System.getProperty("os.name").matches(".*(?i)windows.*")) ? ".bat" : "";
+        return installationDirectory.resolve("bin").resolve(PROJECT_NAME + suffix);
     }
 
     private static void deleteLauncherContent(Path directory) {
@@ -95,7 +101,9 @@ public final class SelfUpdater {
 
     public static void main(String[] args) {
         try {
-            Thread.sleep(2000);
+            //TODO: properly wait for the old launcher application to shut down
+            //      with Java9: https://docs.oracle.com/javase/9/docs/api/java/lang/ProcessHandle.html
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             logger.error("Sleep interrupted!", e);
         }
@@ -103,7 +111,8 @@ public final class SelfUpdater {
         logger.info("Running self updater.");
 
         if (args == null || args.length != 2) {
-            logger.error("Two arguments needed!");
+            logger.error("Invalid number of arguments!");
+            logger.error("Usage: {} <installationDir> <tmpDir>", SelfUpdater.class.getCanonicalName());
             System.exit(1);
         }
 
@@ -130,25 +139,18 @@ public final class SelfUpdater {
             System.exit(1);
         }
 
-        // Start new launcher
-        final List<String> arguments = new ArrayList<>();
-        arguments.add(getJavaExecutable().toString());
-        arguments.add("-cp");
-        arguments.add(System.getenv("CLASSPATH"));
-        arguments.add("org.terasology.launcher.TerasologyLauncher");
-//        arguments.add("-jar");
-//        arguments.add(TERASOLOGY_LAUNCHER_JAR);
-
-        logger.info("Start new launcher: {}", arguments);
-
+        final Path cwd = launcherInstallationDirectory;
+        final Path cmd = cwd.relativize(getLauncherExecutable(launcherInstallationDirectory));
+        logger.info("Starting new launcher:\n\tcwd: {}\n\tcmd: {}", cwd.toString(), cmd.toString());
         try {
-            final ProcessBuilder pb = new ProcessBuilder();
-            pb.command(arguments);
-            pb.directory(launcherInstallationDirectory.toFile());
-            pb.start();
+            new ProcessBuilder()
+                    .command(cmd.toString())
+                    .directory(cwd.toFile())
+                    .start();
+            logger.info("Closing self-update.");
             System.exit(0);
         } catch (IOException | RuntimeException e) {
-            logger.error("Failed to restart launcher process after update! {}", arguments, e);
+            logger.error("Failed to restart launcher process after update!", e);
             System.exit(1);
         }
     }
