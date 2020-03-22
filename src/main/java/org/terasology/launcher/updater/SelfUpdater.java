@@ -25,8 +25,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The SelfUpdater class is responsible for copying the updated files to the right location.
@@ -38,13 +36,8 @@ public final class SelfUpdater {
     private static final Logger logger = LoggerFactory.getLogger(SelfUpdater.class);
 
     private static final String PROJECT_NAME = "TerasologyLauncher";
-    private static final String TERASOLOGY_LAUNCHER_JAR = Paths.get(".", "lib", "TerasologyLauncher.jar").toString();
 
     private SelfUpdater() {
-    }
-
-    private static Path getJavaExecutable() {
-        return Paths.get(System.getProperty("java.home"), "bin", "java");
     }
 
     private static Path getLauncherExecutable(final Path installationDirectory) {
@@ -70,33 +63,6 @@ public final class SelfUpdater {
         } catch (IOException e) {
             logger.error("Failed to delete launcher content", e);
         }
-    }
-
-    /**
-     * Starts the update process after downloading the needed files.
-     * @param tempLauncherDirectory the temp. launcher folder
-     * @param launcherInstallationDirectory  the installation folder
-     * @throws IOException if something goes wrong
-     */
-    public static void runUpdate(Path tempLauncherDirectory, Path launcherInstallationDirectory) throws IOException {
-        final List<String> arguments = new ArrayList<>();
-        // Set 'java' executable as programme to run
-        arguments.add(getJavaExecutable().toString());
-        // Build and set the classpath
-        arguments.add("-cp");
-        arguments.add(TERASOLOGY_LAUNCHER_JAR);
-        // Specify class with main method to run
-        arguments.add(SelfUpdater.class.getCanonicalName());
-        // Arguments for update locations
-        arguments.add(launcherInstallationDirectory.toString());
-        arguments.add(tempLauncherDirectory.toString());
-
-        logger.info("Running launcher self update: {}", arguments);
-
-        final ProcessBuilder pb = new ProcessBuilder();
-        pb.command(arguments);
-        pb.directory(tempLauncherDirectory.toFile());
-        pb.start();
     }
 
     public static void main(String[] args) {

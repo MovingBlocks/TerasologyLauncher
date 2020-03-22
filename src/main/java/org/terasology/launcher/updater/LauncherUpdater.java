@@ -41,6 +41,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -197,7 +199,7 @@ public final class LauncherUpdater {
                     logger.info("Current launcher path: {}", launcherInstallationDirectory.toString());
                     logger.info("New files temporarily located in: {}", tempLauncherDirectory.toAbsolutePath());
 
-                    SelfUpdater.runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
+                    runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
                     return true;
                 }
             } catch (IOException | DownloadException e) {
@@ -206,5 +208,37 @@ public final class LauncherUpdater {
             }
             return false;
         }).orElse(false);
+    }
+
+    /**
+     * Starts the {@link SelfUpdater} of the launcher in <code>updateDirectory</code>.
+     *
+     * @param updateDirectory       (temporary) directory containing the new launcher (extracted)
+     * @param installationDirectory current installation directory, will be updated
+     */
+    private void runUpdate(Path updateDirectory, Path installationDirectory) throws IOException {
+        //TODO: this uses the current JRE (from the current installation) to run the self updater
+        final Path javaExecutable = Paths.get(System.getProperty("java.home"), "bin", "java");
+        ;
+        final Path launcherJar = Paths.get(".", "lib", "TerasologyLauncher.jar");
+
+        final List<String> arguments = new ArrayList<>();
+        // Set 'java' executable as programme to run
+        arguments.add(javaExecutable.toString());
+        // Build and set the classpath
+        arguments.add("-cp");
+        arguments.add(launcherJar.toString());
+        // Specify class with main method to run
+        arguments.add(SelfUpdater.class.getCanonicalName());
+        // Arguments for update locations
+        arguments.add(installationDirectory.toString());
+        arguments.add(updateDirectory.toString());
+
+        logger.info("Running launcher self update:\n\tcmd: {}\n\tcwd: {}", arguments, updateDirectory.toString());
+
+        final ProcessBuilder pb = new ProcessBuilder();
+        pb.command(arguments);
+        pb.directory(updateDirectory.toFile());
+        pb.start();
     }
 }
