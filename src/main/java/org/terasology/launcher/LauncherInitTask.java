@@ -16,11 +16,13 @@
 
 package org.terasology.launcher;
 
+import io.vavr.control.Option;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.github.GitHubRelease;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
@@ -76,8 +78,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             LauncherSettingsValidator.validate(launcherSettings);
 
             if (launcherSettings.isSearchForLauncherUpdates()) {
+                final Path targetDirectory = launcherSettings.isKeepDownloadedFiles() ? downloadDirectory : tempDirectory;
                 final boolean selfUpdaterStarted =
-                        checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
+                        checkForLauncherUpdates(targetDirectory, tempDirectory);
                 if (selfUpdaterStarted) {
                     logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
                     return NullLauncherConfiguration.getInstance();
@@ -130,7 +133,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
     private void initDirectory(Path dir, String errorLabel, DirectoryCreator... creators)
             throws LauncherStartFailedException {
         try {
-            for (DirectoryCreator creator: creators) {
+            for (DirectoryCreator creator : creators) {
                 creator.apply(dir);
             }
         } catch (IOException e) {
@@ -173,12 +176,23 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return launcherSettings;
     }
 
-    private boolean checkForLauncherUpdates(Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
+    /**
+     * Check for and trigger an update if a newer release is available and the user confirms the update.
+     *
+     * @param downloadDirectory where to download the launcher archive to
+     * @param tempDirectory     where to extract the launcher archive for the self-update process
+     * @return true if the self-updater is started for an update, false otherwise
+     */
+    private boolean checkForLauncherUpdates(final Path downloadDirectory, final Path tempDirectory) {
         logger.trace("Check for launcher updates...");
         boolean selfUpdaterStarted = false;
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
         final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
-        if (updater.updateAvailable()) {
+        final Option<GitHubRelease> latestRelease = updater.updateAvailable();
+
+        //TODO: more functional implementation
+        if (latestRelease.isDefined()) {
+            final GitHubRelease release = latestRelease.get();
             logger.trace("Launcher update available!");
             updateMessage(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
             boolean foundLauncherInstallationDirectory = false;
@@ -191,14 +205,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 // Run launcher without an update. Don't throw a LauncherStartFailedException.
             }
             if (foundLauncherInstallationDirectory) {
-                //TODO only inform about update, don't attempt to run a self-update
-                final boolean update = updater.showUpdateDialog(owner);
+                final boolean update = updater.showUpdateDialog(owner, release);
                 if (update) {
-                    if (saveDownloadedFiles) {
-                        selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory);
-                    } else {
-                        selfUpdaterStarted = updater.update(tempDirectory, tempDirectory);
-                    }
+                    selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory, release);
                 }
             }
         }

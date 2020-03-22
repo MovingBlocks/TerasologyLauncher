@@ -17,6 +17,8 @@
 package org.terasology.launcher.updater;
 
 import com.vdurmont.semver4j.Semver;
+import io.vavr.control.Option;
+import io.vavr.control.Try;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
@@ -57,9 +59,6 @@ public final class LauncherUpdater {
 
     final private GitHubClient github;
 
-    private GitHubRelease latestRelease;
-    private Semver latestVersion;
-
     private Path launcherInstallationDirectory;
 
     public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
@@ -71,39 +70,25 @@ public final class LauncherUpdater {
         logger.trace("Creating Updater ... Done");
     }
 
+    Semver versionOf(GitHubRelease release) {
+        return new Semver(release.getTagName().replaceAll("^v(.*)$", "$1"));
+    }
+
     /**
      * This method indicates if a new launcher version is available.
      * <br>
      * Compares the current launcher version number to the upstream version number if an internet connection is available.
      *
-     * @return whether an update is available
+     * @return option of the latest release, or none if up-to-date (or update check failed)
      */
-    public boolean updateAvailable() {
-        //TODO return Option<GHRelease> instead of side-effect
-        if (github != null) {
-            try {
-                final GitHubRelease latestRelease =
-                        new GitHubRelease(github.get("repos/movingblocks/terasologylauncher/releases/tags/v4.0.0-rc.4"));
-
-                latestVersion =
-                        new Semver(latestRelease.getTagName().replaceAll("^v(.*)$", "$1"));
-
-                final boolean updateAvailable = latestVersion.isGreaterThan(currentVersion);
-
-                if (updateAvailable) {
-                    this.latestRelease = latestRelease;
-                }
-
-                return updateAvailable;
-            } catch (IOException e) {
-                logger.warn("Could not fetch latest release: {}", e.getMessage());
-            }
-        } else {
-            logger.warn("Could not connect to GitHub");
-        }
-        return false;
+    public Option<GitHubRelease> updateAvailable() {
+        return Try.of(() -> new GitHubRelease(github.get("repos/movingblocks/terasologylauncher/releases/tags/v4.0.0-rc.4")))
+                .onFailure(failure -> logger.warn("Could not fetch latest release: {}", failure.getMessage()))
+                .filter(release -> versionOf(release).isGreaterThan(currentVersion))
+                .toOption();
     }
 
+    //TODO: this should not be part of the launcher updater
     public void detectAndCheckLauncherInstallationDirectory() throws URISyntaxException, IOException {
         final Path launcherLocation = Paths.get(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         logger.trace("Launcher location: {}", launcherLocation);
@@ -112,8 +97,8 @@ public final class LauncherUpdater {
         logger.trace("Launcher installation directory: {}", launcherInstallationDirectory);
     }
 
-    public boolean showUpdateDialog(Stage parentStage) {
-        final String infoText = getUpdateInfo();
+    public boolean showUpdateDialog(Stage parentStage, final GitHubRelease latestRelease) {
+        final String infoText = getUpdateInfo(versionOf(latestRelease));
 
         FutureTask<Boolean> dialog = new FutureTask<Boolean>(() -> {
             Parent root = BundleUtils.getFXMLLoader("update_dialog").load();
@@ -149,18 +134,18 @@ public final class LauncherUpdater {
      *
      * @return a multi-line information message
      */
-    private String getUpdateInfo() {
+    private String getUpdateInfo(final Semver latestVersion) {
         final StringBuilder builder = new StringBuilder();
         //TODO: also show what will be downloaded
         builder.append("  ")
                 .append(BundleUtils.getLabel("message_update_current"))
                 .append("  ")
-                .append("v" + currentVersion.getValue())
+                .append(currentVersion.getValue())
                 .append("  \n")
                 .append("  ")
                 .append(BundleUtils.getLabel("message_update_latest"))
                 .append("  ")
-                .append(latestRelease.getTagName())
+                .append(latestVersion.getValue())
                 .append("  \n")
                 .append("  ")
                 .append(BundleUtils.getLabel("message_update_installationDirectory"))
@@ -170,7 +155,7 @@ public final class LauncherUpdater {
         return builder.toString();
     }
 
-    public boolean update(Path downloadDirectory, Path tempDirectory) {
+    public boolean update(final Path downloadDirectory, final Path tempDirectory, final GitHubRelease latestRelease) {
 
         //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
         //TODO: resolve correct package based on current installation(?)
@@ -193,7 +178,7 @@ public final class LauncherUpdater {
                 final boolean extracted = FileUtils.extractZipTo(downloadedZipFile, tempDirectory);
                 if (extracted) {
                     final Path tempLauncherDirectory =
-                            tempDirectory.resolve("TerasologyLauncher-" + currentPlatform + "-" + latestVersion.getValue());
+                            tempDirectory.resolve("TerasologyLauncher-" + currentPlatform + "-" + versionOf(latestRelease).getValue());
                     FileUtils.ensureWritableDir(tempLauncherDirectory);
 
                     logger.info("Current launcher path: {}", launcherInstallationDirectory.toString());
