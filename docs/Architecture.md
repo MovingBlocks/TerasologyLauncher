@@ -10,6 +10,15 @@ the following directories:
 |OS X    |`/Users/[USER]/Library/Application Support/TerasologyLauncher`|
 |Linux   |`/home/[USER]/.terasologylauncher`|
 
+### Init Service
+Present inside `org.terasology.launcher`. (Top level)<br/>
+Used to properly initialize the components and
+start other necessary services. Important functions are:
+- Displaying Splash screen
+- Starting Update Manager
+- Starting Package Manager
+- Starting Config Manager
+
 ### Views
 Present under `resources` directory, inside
 `org.terasology.launcher.views`.<br/>
