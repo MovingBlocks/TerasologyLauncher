@@ -17,6 +17,7 @@
 package org.terasology.launcher;
 
 import io.vavr.control.Option;
+import io.vavr.control.Try;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.stage.Stage;
@@ -185,7 +186,6 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
      */
     private boolean checkForLauncherUpdates(final Path downloadDirectory, final Path tempDirectory) {
         logger.trace("Check for launcher updates...");
-        boolean selfUpdaterStarted = false;
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
         final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
         final Option<GitHubRelease> latestRelease = updater.updateAvailable();
@@ -195,23 +195,19 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final GitHubRelease release = latestRelease.get();
             logger.trace("Launcher update available!");
             updateMessage(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
-            boolean foundLauncherInstallationDirectory = false;
-            try {
-                updater.detectAndCheckLauncherInstallationDirectory();
-                foundLauncherInstallationDirectory = true;
-            } catch (URISyntaxException | IOException e) {
-                logger.error("The launcher installation directory can not be detected or used!", e);
-                GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
-                // Run launcher without an update. Don't throw a LauncherStartFailedException.
-            }
-            if (foundLauncherInstallationDirectory) {
-                final boolean update = updater.showUpdateDialog(owner, release);
-                if (update) {
-                    selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory, release);
-                }
-            }
+
+            final Try<Path> installationDirectory = updater.detectAndCheckLauncherInstallationDirectory()
+                    .onFailure(e -> {
+                        logger.error("The launcher installation directory can not be detected or used!", e);
+                        GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
+                    });
+
+            return installationDirectory
+                    .filter(directory -> updater.showUpdateDialog(owner, directory, release))
+                    .map(directory -> updater.update(downloadDirectory, tempDirectory, directory, release))
+                    .getOrElse(false);
         }
-        return selfUpdaterStarted;
+        return false;
     }
 
     private Path getGameDirectory(OperatingSystem os, Path settingsGameDirectory) throws LauncherStartFailedException {

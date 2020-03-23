@@ -40,7 +40,6 @@ import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -59,8 +58,7 @@ public final class LauncherUpdater {
 
     final private GitHubClient github;
 
-    private Path launcherInstallationDirectory;
-
+    //TODO: updater should get the installation directory
     public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
         currentVersion = new Semver(currentVersionInfo.getVersion());
         currentPlatform = currentVersionInfo.getPlatform();
@@ -68,7 +66,7 @@ public final class LauncherUpdater {
         github = new GitHubClient();
     }
 
-    Semver versionOf(GitHubRelease release) {
+    private Semver versionOf(GitHubRelease release) {
         return new Semver(release.getTagName().replaceAll("^v(.*)$", "$1"));
     }
 
@@ -88,16 +86,19 @@ public final class LauncherUpdater {
     }
 
     //TODO: this should not be part of the launcher updater
-    public void detectAndCheckLauncherInstallationDirectory() throws URISyntaxException, IOException {
-        final Path launcherLocation = Paths.get(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-        logger.trace("Launcher location: {}", launcherLocation);
-        launcherInstallationDirectory = launcherLocation.getParent().getParent();
-        FileUtils.ensureWritableDir(launcherInstallationDirectory);
-        logger.trace("Launcher installation directory: {}", launcherInstallationDirectory);
+    public Try<Path> detectAndCheckLauncherInstallationDirectory() {
+        return Try.of(() -> {
+            final Path launcherLocation = Paths.get(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            logger.trace("Launcher location: {}", launcherLocation);
+            final Path launcherInstallationDirectory = launcherLocation.getParent().getParent();
+            FileUtils.ensureWritableDir(launcherInstallationDirectory);
+            logger.trace("Launcher installation directory: {}", launcherInstallationDirectory);
+            return launcherInstallationDirectory;
+        });
     }
 
-    public boolean showUpdateDialog(Stage parentStage, final GitHubRelease latestRelease) {
-        final String infoText = getUpdateInfo(versionOf(latestRelease));
+    public boolean showUpdateDialog(Stage parentStage, final Path installationDirectory, final GitHubRelease latestRelease) {
+        final String infoText = getUpdateInfo(versionOf(latestRelease), installationDirectory);
 
         FutureTask<Boolean> dialog = new FutureTask<Boolean>(() -> {
             Parent root = BundleUtils.getFXMLLoader("update_dialog").load();
@@ -133,7 +134,7 @@ public final class LauncherUpdater {
      *
      * @return a multi-line information message
      */
-    private String getUpdateInfo(final Semver latestVersion) {
+    private String getUpdateInfo(final Semver latestVersion, final Path installationDirectory) {
         final StringBuilder builder = new StringBuilder();
         //TODO: also show what will be downloaded
         builder.append("  ")
@@ -149,12 +150,15 @@ public final class LauncherUpdater {
                 .append("  ")
                 .append(BundleUtils.getLabel("message_update_installationDirectory"))
                 .append("  ")
-                .append(launcherInstallationDirectory.toString())
+                .append(installationDirectory.toString())
                 .append("  ");
         return builder.toString();
     }
 
-    public boolean update(final Path downloadDirectory, final Path tempDirectory, final GitHubRelease latestRelease) {
+    public boolean update(final Path downloadDirectory,
+                          final Path tempDirectory,
+                          final Path installationDirectory,
+                          final GitHubRelease latestRelease) {
 
         //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
         Optional<GitHubAsset> releaseAsset =
@@ -180,10 +184,10 @@ public final class LauncherUpdater {
                             tempDirectory.resolve("TerasologyLauncher-" + currentPlatform + "-" + versionOf(latestRelease).getValue());
                     FileUtils.ensureWritableDir(tempLauncherDirectory);
 
-                    logger.info("Current launcher path: {}", launcherInstallationDirectory.toString());
+                    logger.info("Current launcher path: {}", installationDirectory.toString());
                     logger.info("New files temporarily located in: {}", tempLauncherDirectory.toAbsolutePath());
 
-                    runUpdate(tempLauncherDirectory, launcherInstallationDirectory);
+                    runUpdate(tempLauncherDirectory, installationDirectory);
                     return true;
                 }
             } catch (IOException | DownloadException e) {
@@ -204,7 +208,9 @@ public final class LauncherUpdater {
         //TODO: this uses the current JRE (from the current installation) to run the self updater
         final Path javaExecutable = Paths.get(System.getProperty("java.home"), "bin", "java");
 
-        final Path launcherJar = Paths.get(".", "lib", "TerasologyLauncher.jar");
+        //TODO: when checking the installation directory in `detectAndCheckLauncherInstallationDirectory` we first
+        //      resolve exactly this information...
+        final Path launcherJar = Paths.get("lib", "TerasologyLauncher.jar");
 
         final List<String> arguments = new ArrayList<>();
         // Set 'java' executable as programme to run
