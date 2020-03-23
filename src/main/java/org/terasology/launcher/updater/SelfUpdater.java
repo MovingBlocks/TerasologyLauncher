@@ -41,8 +41,12 @@ public final class SelfUpdater {
     }
 
     private static Path getLauncherExecutable(final Path installationDirectory) {
+        final String binDir =
+                (System.getProperty("os.name").matches(".*(?i)mac.*")) ? "MacOS" : "bin";
+
         final String suffix = (System.getProperty("os.name").matches(".*(?i)windows.*")) ? ".bat" : "";
-        return installationDirectory.resolve("bin").resolve(PROJECT_NAME + suffix);
+
+        return installationDirectory.resolve(binDir).resolve(PROJECT_NAME + suffix);
     }
 
     private static void deleteLauncherContent(Path directory) {
