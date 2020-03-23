@@ -200,11 +200,11 @@ public final class FileUtils {
         }
 
         if (!Files.isDirectory(directory)) {
-            throw new IOException("Directory is not a directory! " + directory);
+            throw new IOException("Not a directory: " + directory);
         }
 
         if (!Files.isReadable(directory) || !Files.isWritable(directory)) {
-            throw new IOException("Can not read from or write into directory! " + directory);
+            throw new IOException("No read or write permissions: " + directory);
         }
     }
 }
