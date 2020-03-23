@@ -1,3 +1,4 @@
 #!/usr/bin/env sh
-echo "Starting TerasologyLauncher from './bin/TerasologyLauncher'"
-sh ./bin/TerasologyLauncher
+BASE_DIR=$(dirname "$0")
+echo "Starting TerasologyLauncher from '${BASE_DIR}/bin/TerasologyLauncher'"
+sh ${BASE_DIR}/bin/TerasologyLauncher
