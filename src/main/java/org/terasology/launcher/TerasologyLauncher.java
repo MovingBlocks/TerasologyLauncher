@@ -117,7 +117,7 @@ public final class TerasologyLauncher extends Application {
         initProxy();
         initLanguage();
 
-        final Task<LauncherConfiguration> launcherInitTask = new LauncherInitTask(initialStage);
+        final Task<LauncherConfiguration> launcherInitTask = new LauncherInitTask(initialStage, hostServices);
 
         showSplashStage(initialStage, launcherInitTask);
         Thread initThread = new Thread(launcherInitTask);

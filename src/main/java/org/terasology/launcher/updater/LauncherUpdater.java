@@ -98,9 +98,22 @@ public final class LauncherUpdater {
     }
 
     public boolean showUpdateDialog(Stage parentStage, final Path installationDirectory, final GitHubRelease latestRelease) {
+        FutureTask<Boolean> dialog = getUpdateDialog(parentStage, installationDirectory, latestRelease);
+
+        Platform.runLater(dialog);
+        boolean result = false;
+        try {
+            result = dialog.get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Uh oh, something went wrong with the update dialog!", e);
+        }
+        return result;
+    }
+
+    private FutureTask<Boolean> getUpdateDialog(Stage parentStage, Path installationDirectory, GitHubRelease latestRelease) {
         final String infoText = getUpdateInfo(versionOf(latestRelease), installationDirectory);
 
-        FutureTask<Boolean> dialog = new FutureTask<Boolean>(() -> {
+        return new FutureTask<Boolean>(() -> {
             Parent root = BundleUtils.getFXMLLoader("update_dialog").load();
             ((TextArea) root.lookup("#infoTextArea")).setText(infoText);
             ((TextArea) root.lookup("#changelogTextArea")).setText(latestRelease.getBody());
@@ -118,15 +131,6 @@ public final class LauncherUpdater {
                     .filter(response -> response == ButtonType.YES)
                     .isPresent();
         });
-
-        Platform.runLater(dialog);
-        boolean result = false;
-        try {
-            result = dialog.get();
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("Uh oh, something went wrong with the update dialog!", e);
-        }
-        return result;
     }
 
     /**

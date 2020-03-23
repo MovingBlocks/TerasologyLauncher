@@ -32,6 +32,7 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.util.HostServicesWrapper;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
@@ -39,6 +40,7 @@ import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,9 +50,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(LauncherInitTask.class);
 
     private final Stage owner;
+    private final HostServicesWrapper hostServices;
 
-    public LauncherInitTask(final Stage newOwner) {
+    public LauncherInitTask(final Stage newOwner, HostServicesWrapper hostServices) {
         this.owner = newOwner;
+        this.hostServices = hostServices;
     }
 
     /**
@@ -202,12 +206,23 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                         GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
                     });
 
-            return installationDirectory
-                    .filter(directory -> updater.showUpdateDialog(owner, directory, release))
-                    .map(directory -> updater.update(downloadDirectory, tempDirectory, directory, release))
-                    .getOrElse(false);
+            installationDirectory
+                    //TODO: .filter(directory -> updater.showUpdateDialog(owner, directory, release))
+                    .map(directory -> updater.showUpdateDialog(owner, directory, release))
+                    //TODO: .map(directory -> updater.update(downloadDirectory, tempDirectory, directory, release))
+                    //TODO: .getOrElse(false);
+                    .onSuccess(this::showDownloadPage);
         }
         return false;
+    }
+
+    private void showDownloadPage(final boolean _ignored) {
+        final String downloadPage = "https://terasology.org/download";
+        try {
+            hostServices.tryOpenUri(new URI(downloadPage));
+        } catch (URISyntaxException e) {
+            logger.warn("Could not open URL '{}': {}", downloadPage, e.getMessage());
+        }
     }
 
     private Path getGameDirectory(OperatingSystem os, Path settingsGameDirectory) throws LauncherStartFailedException {

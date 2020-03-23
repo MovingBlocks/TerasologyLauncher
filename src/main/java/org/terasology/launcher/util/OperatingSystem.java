@@ -27,6 +27,7 @@ public enum OperatingSystem {
     WINDOWS_VISTA("Windows Vista"),
     WINDOWS_7("Windows 7"),
     WINDOWS_8("Windows 8"),
+    WINDOWS_10("Windows 10"),
     WINDOWS_UNKNOWN("Windows"),
     MAC_OSX("Mac OS X"),
     MAC("Mac"),
@@ -49,11 +50,14 @@ public enum OperatingSystem {
     }
 
     public boolean isWindows() {
-        return (this == WINDOWS_XP) || (this == WINDOWS_VISTA) || (this == WINDOWS_7) || (this == WINDOWS_8) || (this == WINDOWS_UNKNOWN);
+        return (this == WINDOWS_XP) || (this == WINDOWS_VISTA)
+                || (this == WINDOWS_7) || (this == WINDOWS_8) || (this == WINDOWS_10)
+                || (this == WINDOWS_UNKNOWN);
     }
 
     /**
      * Should only be executed once at the start.
+     *
      * @return the operating system
      */
     public static OperatingSystem getOS() {
