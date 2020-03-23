@@ -79,7 +79,7 @@ public final class LauncherUpdater {
      */
     public Option<GitHubRelease> updateAvailable() {
         //TODO: replace with 'latest' after testing
-        return Try.of(() -> new GitHubRelease(github.get("repos/movingblocks/terasologylauncher/releases/tags/v4.0.0-rc.4")))
+        return Try.of(() -> new GitHubRelease(github.get("repos/movingblocks/terasologylauncher/releases/latest")))
                 .onFailure(failure -> logger.warn("Could not fetch latest release: {}", failure.getMessage()))
                 .filter(release -> versionOf(release).isGreaterThan(currentVersion))
                 .toOption();
@@ -174,10 +174,7 @@ public final class LauncherUpdater {
             try {
                 //TODO: should the asset name contain the version number?
                 final Path downloadedZipFile = downloadDirectory.resolve(asset.getName());
-                //TODO: use correct download URL after testing
-                final URI downloadUri = URI.create("http://localhost:8000/" + asset.getName());
-                DownloadUtils.downloadToFile(downloadUri.toURL(), downloadedZipFile);
-                //DownloadUtils.downloadToFile(asset.getBrowserDownloadUrl().toURL(), downloadedZipFile);
+                DownloadUtils.downloadToFile(asset.getBrowserDownloadUrl().toURL(), downloadedZipFile);
 
                 //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
 
