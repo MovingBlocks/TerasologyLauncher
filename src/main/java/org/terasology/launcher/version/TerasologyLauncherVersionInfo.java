@@ -123,6 +123,10 @@ public final class TerasologyLauncherVersionInfo {
         stringRepresentationBuilder.append("=");
         stringRepresentationBuilder.append(version);
         stringRepresentationBuilder.append(", ");
+        stringRepresentationBuilder.append(PLATFORM);
+        stringRepresentationBuilder.append("=");
+        stringRepresentationBuilder.append(platform);
+        stringRepresentationBuilder.append(", ");
         stringRepresentationBuilder.append("isEmpty");
         stringRepresentationBuilder.append("=");
         stringRepresentationBuilder.append(isEmpty);
@@ -168,6 +172,14 @@ public final class TerasologyLauncherVersionInfo {
         return isEmpty;
     }
 
+    public String getBuildNumber() {
+        return buildNumber;
+    }
+
+    public String getJobName() {
+        return jobName;
+    }
+
     public String getDisplayVersion() {
         return displayVersion;
     }
@@ -184,4 +196,5 @@ public final class TerasologyLauncherVersionInfo {
     public String toString() {
         return stringRepresentation;
     }
+
 }
