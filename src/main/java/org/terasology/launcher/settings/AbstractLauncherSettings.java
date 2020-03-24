@@ -18,8 +18,6 @@ package org.terasology.launcher.settings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.game.GameSettings;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
@@ -30,7 +28,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Deprecated
-public abstract class AbstractLauncherSettings implements GameSettings {
+public abstract class AbstractLauncherSettings {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractLauncherSettings.class);
 

@@ -92,44 +92,6 @@ public final class TerasologyGameVersions {
         return null;
     }
 
-    public synchronized void loadGameVersionsFromPackageManager(GameSettings gameSettings, Path launcherDirectory, Path gameDirectory) {
-        final Path cacheDirectory = launcherDirectory.resolve(LauncherDirectoryUtils.CACHE_DIR_NAME);
-        packageManager.initLocalStorage(gameDirectory, cacheDirectory);
-        packageManager.sync(); // TODO: Make it optional
-
-        // Get list of installed games
-        final List<TerasologyGameVersion> allInstalledGames = getInstalledGames(gameDirectory);
-
-        for (GameJob job : GameJob.values()) {
-            // Get all available games from Jenkins or cache
-            final List<TerasologyGameVersion> availableGames = packageManager.getPackageVersions(PackageBuild.byJobName(job.name()))
-                    .stream()
-                    .map(buildNumber -> getGameVersion(buildNumber, job, cacheDirectory))
-                    .collect(Collectors.toList());
-
-            // Copy installation data for the games that are already installed
-            allInstalledGames.stream()
-                    .filter(gameVersion -> gameVersion.getJob().equals(job))
-                    .forEach(installedGame -> {
-                        for (TerasologyGameVersion availableGame : availableGames) {
-                            if (availableGame.getBuildNumber().equals(installedGame.getBuildNumber())) {
-                                availableGame.setInstallationPath(installedGame.getInstallationPath());
-                                availableGame.setGameJar(installedGame.getGameJar());
-                                break;
-                            }
-                        }
-                    });
-
-            // Add the installed games and sort by build numbers (in descending order)
-            availableGames.sort(Comparator.comparing(TerasologyGameVersion::getBuildNumber).reversed());
-
-            // Add extra item denoting the latest version
-            availableGames.add(0, makeLatestFrom(availableGames.get(0)));
-
-            gameVersionLists.put(job, availableGames);
-        }
-    }
-
     private TerasologyGameVersion getGameVersion(int buildNumber, GameJob job, Path cacheDirectory) {
         // Return cached version if it exists
         final Path cacheFile = createCacheFile(job, buildNumber, cacheDirectory);
@@ -176,7 +138,7 @@ public final class TerasologyGameVersions {
         return latestGame;
     }
 
-    public synchronized void loadGameVersions(GameSettings gameSettings, Path launcherDirectory, Path gameDirectory) {
+    public synchronized void loadGameVersions(Path launcherDirectory, Path gameDirectory) {
         final Path cacheDirectory = getAndCheckCacheDirectory(launcherDirectory);
 
         gameVersionLists.clear();
