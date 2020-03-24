@@ -68,11 +68,11 @@ public final class SelfUpdater {
 
     /**
      * Starts the update process after downloading the needed files.
-     * @param tempLauncherDirectory the temp. launcher folder
-     * @param launcherInstallationDirectory  the installation folder
+     * @param updateDirectory the temp. launcher folder
+     * @param installationDirectory  the installation folder
      * @throws IOException if something goes wrong
      */
-    public static void runUpdate(Path tempLauncherDirectory, Path launcherInstallationDirectory) throws IOException {
+    public static void runUpdate(Path updateDirectory, Path installationDirectory) throws IOException {
         final List<String> arguments = new ArrayList<>();
         // Set 'java' executable as programme to run
         arguments.add(getJavaProgramFile());
@@ -82,14 +82,14 @@ public final class SelfUpdater {
         // Specify class with main method to run
         arguments.add(SelfUpdater.class.getCanonicalName());
         // Arguments for update locations
-        arguments.add(launcherInstallationDirectory.toString());
-        arguments.add(tempLauncherDirectory.toString());
+        arguments.add(installationDirectory.toString());
+        arguments.add(updateDirectory.toString());
 
         logger.info("Running launcher self update: {}", arguments);
 
         final ProcessBuilder pb = new ProcessBuilder();
         pb.command(arguments);
-        pb.directory(tempLauncherDirectory.toFile());
+        pb.directory(updateDirectory.toFile());
         pb.start();
     }
 

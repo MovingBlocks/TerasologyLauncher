@@ -21,12 +21,14 @@ import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.github.GitHubRelease;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
+import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -37,6 +39,7 @@ import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,9 +49,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(LauncherInitTask.class);
 
     private final Stage owner;
+    private final HostServices hostServices;
 
-    public LauncherInitTask(final Stage newOwner) {
+    public LauncherInitTask(final Stage newOwner, HostServices hostServices) {
         this.owner = newOwner;
+        this.hostServices = hostServices;
     }
 
     /**
@@ -178,8 +183,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         boolean selfUpdaterStarted = false;
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
         final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
-        if (updater.updateAvailable()) {
-            logger.trace("Launcher update available!");
+        final GitHubRelease release = updater.updateAvailable() ;
+        if (release != null) {
+            logger.info("Launcher update available: {}", release.getTagName());
             updateMessage(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
             boolean foundLauncherInstallationDirectory = false;
             try {
@@ -191,17 +197,26 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 // Run launcher without an update. Don't throw a LauncherStartFailedException.
             }
             if (foundLauncherInstallationDirectory) {
-                final boolean update = updater.showUpdateDialog(owner);
+                final boolean update = updater.showUpdateDialog(owner, release);
                 if (update) {
-                    if (saveDownloadedFiles) {
-                        selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory);
-                    } else {
-                        selfUpdaterStarted = updater.update(tempDirectory, tempDirectory);
-                    }
+                    showDownloadPage();
+                    // TODO: start self-updater instead
+                    if (false){
+                        final Path targetDirectory = saveDownloadedFiles ? downloadDirectory : tempDirectory;
+                        selfUpdaterStarted = updater.update(targetDirectory, tempDirectory);}
                 }
             }
         }
         return selfUpdaterStarted;
+    }
+
+    private void showDownloadPage() {
+        final String downloadPage = "https://terasology.org/download";
+        try {
+            hostServices.tryOpenUri(new URI(downloadPage));
+        } catch (URISyntaxException e) {
+            logger.info("Could not open '{}': {}", downloadPage, e.getMessage());
+        }
     }
 
     private Path getGameDirectory(OperatingSystem os, Path settingsGameDirectory) throws LauncherStartFailedException {

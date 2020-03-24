@@ -31,7 +31,7 @@ task createRelease() {
     dependsOn distZip
 
     doLast {
-        println 'Created release: ' + displayVersion
+        println 'Created release: ' + version
     }
 }
 
