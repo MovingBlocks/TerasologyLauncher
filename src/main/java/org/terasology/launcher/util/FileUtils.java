@@ -27,7 +27,6 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
 public final class FileUtils {
@@ -73,13 +72,9 @@ public final class FileUtils {
         try (Stream<Path> stream = Files.list(directory)) {
             stream.forEach(path -> {
                 try {
-                    if (Files.isDirectory(path)) {
-                        Files.walkFileTree(directory, new DeleteFileVisitor());
-                    } else {
-                        Files.delete(path);
-                    }
+                    Files.walkFileTree(path, new DeleteFileVisitor());
                 } catch (IOException e) {
-                    logger.error("Failed to delete '{}'", directory, e);
+                    logger.error("Failed to delete '{}'", path, e);
                 }
             });
         }
@@ -112,21 +107,6 @@ public final class FileUtils {
     }
 
     /**
-     * Copy file from the source path to the destination. If the source file does not exists nothing happens.
-     *
-     * @param source      File to copy
-     * @param destination Destination for the copy
-     * @throws IOException If copying the file fails
-     */
-    private static void copyFile(final Path source, final Path destination) throws IOException {
-        if (Files.notExists(source)) {
-            logger.error("Source file doesn't exists! '{}'", source);
-            return;
-        }
-        Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    /**
      * Copy the whole folder recursively to the specified destination.
      *
      * @param source      the folder to copy
@@ -139,11 +119,7 @@ public final class FileUtils {
             return;
         }
 
-        if (Files.isDirectory(source)) {
-            Files.walkFileTree(source, new LocalCopyVisitor(source, destination));
-        } else {
-            copyFile(source, destination);
-        }
+        Files.walkFileTree(source, new LocalCopyVisitor(source, destination));
     }
 
     /**
@@ -202,11 +178,11 @@ public final class FileUtils {
         }
 
         if (!Files.isDirectory(directory)) {
-            throw new IOException("Directory is not a directory! " + directory);
+            throw new IOException("Not a directory: " + directory);
         }
 
         if (!Files.isReadable(directory) || !Files.isWritable(directory)) {
-            throw new IOException("Can not read from or write into directory! " + directory);
+            throw new IOException("Missing read or write permissions: " + directory);
         }
     }
 }
