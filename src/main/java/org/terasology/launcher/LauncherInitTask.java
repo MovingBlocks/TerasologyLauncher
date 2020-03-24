@@ -21,6 +21,7 @@ import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.github.GitHubRelease;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
@@ -182,8 +183,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         boolean selfUpdaterStarted = false;
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
         final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
-        if (updater.updateAvailable()) {
-            logger.trace("Launcher update available!");
+        final GitHubRelease release = updater.updateAvailable() ;
+        if (release != null) {
+            logger.info("Launcher update available: {}", release.getTagName());
             updateMessage(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
             boolean foundLauncherInstallationDirectory = false;
             try {
@@ -195,7 +197,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 // Run launcher without an update. Don't throw a LauncherStartFailedException.
             }
             if (foundLauncherInstallationDirectory) {
-                final boolean update = updater.showUpdateDialog(owner);
+                final boolean update = updater.showUpdateDialog(owner, release);
                 if (update) {
                     showDownloadPage();
                     // TODO: start self-updater instead
