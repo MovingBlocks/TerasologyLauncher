@@ -18,8 +18,6 @@ package org.terasology.launcher.settings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.game.GameSettings;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
@@ -30,7 +28,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Deprecated
-public abstract class AbstractLauncherSettings implements GameSettings {
+public abstract class AbstractLauncherSettings {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractLauncherSettings.class);
 
@@ -42,9 +40,6 @@ public abstract class AbstractLauncherSettings implements GameSettings {
         logger.trace("Init launcher settings ...");
 
         initLocale();
-        initJob();
-        initBuildVersion();
-        initLastBuildNumber();
         initMaxHeapSize();
         initInitialHeapSize();
         initSearchForLauncherUpdates();
@@ -81,25 +76,13 @@ public abstract class AbstractLauncherSettings implements GameSettings {
 
     protected abstract void initMaxHeapSize();
 
-    protected abstract void initLastBuildNumber();
-
     protected abstract void initLocale();
-
-    protected abstract void initJob();
-
-    protected abstract void initBuildVersion();
 
     // --------------------------------------------------------------------- //
     // GETTERS
     // --------------------------------------------------------------------- //
 
     public abstract Locale getLocale();
-
-    public abstract GameJob getJob();
-
-    public abstract Integer getBuildVersion(GameJob job);
-
-    public abstract Integer getLastBuildNumber(GameJob job);
 
     public abstract JavaHeapSize getMaxHeapSize();
 
@@ -134,12 +117,6 @@ public abstract class AbstractLauncherSettings implements GameSettings {
     // --------------------------------------------------------------------- //
 
     public abstract void setLocale(Locale locale);
-
-    public abstract void setJob(GameJob job);
-
-    public abstract void setBuildVersion(int version, GameJob job);
-
-    public abstract void setLastBuildNumber(Integer lastBuildNumber, GameJob job);
 
     public abstract void setMaxHeapSize(JavaHeapSize maxHeapSize);
 

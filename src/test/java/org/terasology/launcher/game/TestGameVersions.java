@@ -182,10 +182,8 @@ public class TestGameVersions {
         Path launcherDir = Files.createTempDirectory("terasology-launcher-dir").toAbsolutePath();
         Path gameDirectory = Files.createTempDirectory("terasology-game-dir").toAbsolutePath();
 
-        BaseLauncherSettings settings = new BaseLauncherSettings(launcherDir);
-        settings.init();
 
-        gameVersions.loadGameVersions(settings, launcherDir, gameDirectory);
+        gameVersions.loadGameVersions(launcherDir, gameDirectory);
     }
 
     private TerasologyGameVersions getGameVersions(boolean doMapping, boolean omega) throws Exception {
