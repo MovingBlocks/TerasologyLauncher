@@ -182,7 +182,7 @@ public final class FileUtils {
         }
 
         if (!Files.isReadable(directory) || !Files.isWritable(directory)) {
-            throw new IOException("No read or write permissions: " + directory);
+            throw new IOException("Missing read or write permissions: " + directory);
         }
     }
 }
