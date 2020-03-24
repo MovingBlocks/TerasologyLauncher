@@ -236,7 +236,7 @@ public final class TerasologyLauncher extends Application {
      * @param stage the stage to decorate
      */
     private static void decorateStage(Stage stage) {
-        stage.setTitle("TerasologyLauncher " + TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
+        stage.setTitle("TerasologyLauncher");
         List<String> iconIds = Arrays.asList("icon16", "icon32", "icon64", "icon128");
 
         for (String id : iconIds) {

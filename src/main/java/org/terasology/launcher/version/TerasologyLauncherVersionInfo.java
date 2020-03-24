@@ -37,7 +37,7 @@ public final class TerasologyLauncherVersionInfo {
     private static final String GIT_BRANCH = "gitBranch";
     private static final String GIT_COMMIT = "gitCommit";
     private static final String DATE_TIME = "dateTime";
-    private static final String DISPLAY_VERSION = "displayVersion";
+    private static final String VERSION = "version";
 
     private static final String DEFAULT_VALUE = "";
 
@@ -53,7 +53,7 @@ public final class TerasologyLauncherVersionInfo {
     private final String gitBranch;
     private final String gitCommit;
     private final String dateTime;
-    private final String displayVersion;
+    private final String version;
     private final String stringRepresentation;
 
     private TerasologyLauncherVersionInfo(Properties versionInfoProperties) {
@@ -73,7 +73,7 @@ public final class TerasologyLauncherVersionInfo {
         gitBranch = properties.getProperty(GIT_BRANCH, DEFAULT_VALUE);
         gitCommit = properties.getProperty(GIT_COMMIT, DEFAULT_VALUE);
         dateTime = properties.getProperty(DATE_TIME, DEFAULT_VALUE);
-        displayVersion = properties.getProperty(DISPLAY_VERSION, DEFAULT_VALUE);
+        version = properties.getProperty(VERSION, DEFAULT_VALUE);
 
         final StringBuilder stringRepresentationBuilder = new StringBuilder();
         stringRepresentationBuilder.append("[");
@@ -109,9 +109,9 @@ public final class TerasologyLauncherVersionInfo {
         stringRepresentationBuilder.append("=");
         stringRepresentationBuilder.append(dateTime);
         stringRepresentationBuilder.append(", ");
-        stringRepresentationBuilder.append(DISPLAY_VERSION);
+        stringRepresentationBuilder.append(VERSION);
         stringRepresentationBuilder.append("=");
-        stringRepresentationBuilder.append(displayVersion);
+        stringRepresentationBuilder.append(version);
         stringRepresentationBuilder.append(", ");
         stringRepresentationBuilder.append("isEmpty");
         stringRepresentationBuilder.append("=");
@@ -187,8 +187,8 @@ public final class TerasologyLauncherVersionInfo {
         return dateTime;
     }
 
-    public String getDisplayVersion() {
-        return displayVersion;
+    public String getVersion() {
+        return version;
     }
 
     @Override

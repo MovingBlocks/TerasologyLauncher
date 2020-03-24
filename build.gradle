@@ -79,7 +79,6 @@ ext {
 
     // Splash image for the JAR
     splashImage = "org/terasology/launcher/images/splash.jpg"
-    displayVersion = 'v' + version
 }
 
 // Declare remote repositories we're interested in - library files will be fetched from here
@@ -158,7 +157,7 @@ task createVersionInfoFile {
             ant.entry(key: 'gitBranch', value: convertGitBranch(env.GIT_BRANCH))
             ant.entry(key: 'gitCommit', value: env.GIT_COMMIT)
             ant.entry(key: 'dateTime', value: startDateTimeString)
-            ant.entry(key: 'displayVersion', value: displayVersion)
+            ant.entry(key: 'version', value: version)
         }
     }
 }

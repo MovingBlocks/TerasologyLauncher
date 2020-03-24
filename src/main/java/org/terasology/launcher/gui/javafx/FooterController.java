@@ -50,7 +50,7 @@ public class FooterController {
     }
 
     private void updateLabels() {
-        final String launcherVersion = TerasologyLauncherVersionInfo.getInstance().getDisplayVersion();
+        final String launcherVersion = TerasologyLauncherVersionInfo.getInstance().getVersion();
         if (launcherVersion.isEmpty()) {
             versionInfo.setText(BundleUtils.getLabel("launcher_versionInfo"));
         } else {

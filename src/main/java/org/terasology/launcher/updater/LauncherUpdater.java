@@ -172,13 +172,13 @@ public final class LauncherUpdater {
         builder.append("  ")
                .append(BundleUtils.getLabel("message_update_current"))
                .append("  ")
-               .append(currentVersionInfo.getDisplayVersion())
+               .append(currentVersionInfo.getVersion())
                .append("  \n")
                .append("  ")
                .append(BundleUtils.getLabel("message_update_latest"))
                .append("  ");
         if (versionInfo != null) {
-            builder.append(versionInfo.getDisplayVersion());
+            builder.append(versionInfo.getVersion());
         } else if (upstreamVersion != null) {
             builder.append(upstreamVersion);
         }
