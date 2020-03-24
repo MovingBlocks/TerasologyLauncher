@@ -159,6 +159,10 @@ task createVersionInfoFile {
     }
 }
 
+clean {
+    delete createVersionInfoFile.outputs.files
+}
+
 processResources.dependsOn createVersionInfoFile
 
 jar {
