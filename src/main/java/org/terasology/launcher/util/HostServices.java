@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.Desktop;
+import java.awt.EventQueue;
 import java.io.IOException;
 import java.net.URI;
 
@@ -36,11 +37,13 @@ public class HostServices {
      */
     public void tryOpenUri(URI uri) {
         if (desktop != null) {
-            try {
-                desktop.browse(uri);
-            } catch (IOException e) {
-                logger.warn("Unable to open URI with 'Browse' action", e);
-            }
+            EventQueue.invokeLater(() -> {
+                try {
+                    desktop.browse(uri);
+                } catch (IOException e) {
+                    logger.warn("Unable to open URI '{}': {}", uri.toString(), e.getMessage());
+                }
+            });
         }
     }
 }
