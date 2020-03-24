@@ -18,7 +18,6 @@ package org.terasology.launcher;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
-import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
@@ -46,7 +45,7 @@ import org.terasology.crashreporter.CrashReporter;
 import org.terasology.launcher.gui.javafx.ApplicationController;
 import org.terasology.launcher.log.TempLogFilePropertyDefiner;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.HostServicesWrapper;
+import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
@@ -69,30 +68,10 @@ public final class TerasologyLauncher extends Application {
     private ProgressBar loadProgress;
     private Label progressText;
     private Stage mainStage;
-    private HostServicesWrapper hostServices;
+    private HostServices hostServices;
 
     public static void main(String[] args) {
         launch(args);
-    }
-
-    /**
-     * Initialize the host service wrapper by attempting to use the JavaFX {@link HostServices}.
-     * @return the configured host service wrapper
-     */
-    private HostServicesWrapper initHostServices() {
-        HostServices hs;
-        try {
-            // This may throw an exception on a different thread, but we cannot catch it here o.O
-            // In addition, `hostServices` will be initialized, but disfunctional.
-            // Thus, we have no idea whether we can use the services or not...
-             hs = getHostServices();
-            // poor man's check: this will throw a NPE if the internal `hostServices.delegate` is not initialized
-            hs.getCodeBase();
-        } catch (NullPointerException e) {
-            logger.warn("Host Services not available - won't be able to open hyperlinks in the system browser.");
-            hs = null;
-        }
-        return new HostServicesWrapper(hs);
     }
 
     @Override
@@ -106,7 +85,7 @@ public final class TerasologyLauncher extends Application {
         progressText.setAlignment(Pos.CENTER);
         splashLayout.getStylesheets().add(BundleUtils.getStylesheet("css_splash"));
         splashLayout.setEffect(new DropShadow());
-        hostServices = initHostServices();
+        hostServices = new HostServices();
     }
 
     @Override
@@ -183,7 +162,7 @@ public final class TerasologyLauncher extends Application {
         }
         final ApplicationController controller = fxmlLoader.getController();
         controller.update(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(), launcherConfiguration.getTempDirectory(),
-            launcherConfiguration.getLauncherSettings(), launcherConfiguration.getPackageManager(), mainStage, hostServices);
+                launcherConfiguration.getLauncherSettings(), launcherConfiguration.getPackageManager(), mainStage, hostServices);
 
         Scene scene = new Scene(root);
         scene.getStylesheets().add(BundleUtils.getStylesheet("css_terasology"));

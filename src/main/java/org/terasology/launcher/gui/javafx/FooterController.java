@@ -29,7 +29,7 @@ import javafx.scene.input.MouseEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.HostServicesWrapper;
+import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.util.Optional;
@@ -42,7 +42,7 @@ public class FooterController {
     private Button warningButton;
     @FXML
     private Label versionInfo;
-    private HostServicesWrapper hostServices;
+    private HostServices hostServices;
     private Property<Optional<Warning>> warningProperty;
 
     public FooterController() {
@@ -58,7 +58,7 @@ public class FooterController {
         }
     }
 
-    public void setHostServices(HostServicesWrapper hostServices) {
+    public void setHostServices(HostServices hostServices) {
         this.hostServices = hostServices;
     }
 

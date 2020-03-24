@@ -63,7 +63,7 @@ import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.GuiUtils;
-import org.terasology.launcher.util.HostServicesWrapper;
+import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.ProgressListener;
 
@@ -378,7 +378,7 @@ public class ApplicationController {
     }
 
     public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
-                       final PackageManager newPackageManager, final Stage newStage, final HostServicesWrapper hostServices) {
+                       final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
         this.tempDirectory = newTempDirectory;
