@@ -19,7 +19,6 @@ package org.terasology.launcher;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.stage.Stage;
-import org.everit.json.schema.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.github.GitHubRelease;
@@ -117,9 +116,8 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             return new LauncherConfiguration(launcherDirectory, downloadDirectory, tempDirectory, cacheDirectory, launcherSettings, packageManager);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
-        } catch (ValidationException e) {
-            logger.error("Failed to validate 'sources.json'.");
         }
+
         return null;
     }
 

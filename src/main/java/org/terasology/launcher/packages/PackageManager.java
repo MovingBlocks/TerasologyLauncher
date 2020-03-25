@@ -17,6 +17,7 @@
 package org.terasology.launcher.packages;
 
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -125,6 +126,9 @@ public class PackageManager {
         ) {
             final Schema schema = SchemaLoader.load(new JSONObject(new JSONTokener(schemaIn)));
             schema.validate(new JSONArray((new JSONTokener(jsonIn))));
+        } catch (ValidationException e) {
+            logger.error("sources.json has invalid value at: {}", e.getPointerToViolation());
+            throw new RuntimeException("Failed to validate sources.json.");
         } catch (IOException e) {
             throw new RuntimeException("Failed to validate sources.json.");
         }
