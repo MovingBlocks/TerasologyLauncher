@@ -27,16 +27,12 @@ buildscript {
         jcenter()
         maven { url "https://plugins.gradle.org/m2/" }
     }
-    dependencies {
-        //TODO: replace with google/archive-patcher?
-        classpath group: "com.alexkasko.delta", name: "delta-diff", version: "1.1.3"
-    }
 }
 
 plugins {
     id 'application'
     id 'checkstyle'
-    id 'com.github.spotbugs' version '1.6.9'
+    id "com.github.spotbugs" version "4.0.4"
     id 'de.undercouch.download' version '3.4.3' // TODO: upgrade to latest version (191011: 4.0.0)
     id 'java'
     id 'nebula.release' version '14.1.0'
@@ -46,20 +42,14 @@ plugins {
 }
 
 apply from: "./config/gradle/jre.gradle"
-apply from: "./config/gradle/quality.gradle"
 apply from: "./config/gradle/swagger.gradle"
 
 // Test for right version of Java in use for running this script
-assert org.gradle.api.JavaVersion.current().isJava8Compatible()
+assert JavaVersion.current().isJava8Compatible()
 def javaVersion = System.properties['java.version']
 // make sure at least 8u40 is used for the build (required for JavaFX)
 if (javaVersion.startsWith("1.8") && javaVersion.split("_")[1].toInteger() < 40) {
     throw new GradleException("Java version 1.8.0_40 or later required, but was $javaVersion")
-}
-
-// gradle wrapper version
-wrapper {
-    gradleVersion '5.4.1'
 }
 
 import org.apache.tools.ant.filters.FixCrLfFilter
@@ -86,47 +76,69 @@ repositories {
     // Main Maven repo
     mavenCentral()
     // MovingBlocks Artifactory instance(s) for libs not readily available elsewhere plus our own libs
-    maven { url "http://artifactory.terasology.org/artifactory/virtual-repo-live" }
+    maven {
+        allowInsecureProtocol true
+        url "http://artifactory.terasology.org/artifactory/virtual-repo-live"
+    }
     jcenter()
 }
 
 // Primary dependencies definition
 dependencies {
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.7'
-    compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
-    compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.1.0'
-    compile group: 'org.terasology', name: 'CrashReporter', version: '1.2.+'
-    compile group: 'com.github.rjeschke', name: 'txtmark', version: '0.11'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.7'
+    implementation group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
+    implementation group: 'net.java.dev.jna', name: 'jna-platform', version: '4.1.0'
+    implementation group: 'org.terasology', name: 'CrashReporter', version: '1.2.+'
+    implementation group: 'com.github.rjeschke', name: 'txtmark', version: '0.11'
 
-    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
-    compile group: "com.google.guava", name: "guava", version: "28.1-jre"
-    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+    implementation group: "com.google.guava", name: "guava", version: "28.1-jre"
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
 
-    compile group: 'com.jcabi', name: 'jcabi-github', version: '1.0'
+    implementation group: 'com.jcabi', name: 'jcabi-github', version: '1.0'
     // should only be used inside org.terasology.launcher.github
-    compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
+    implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
 
-    compile group: 'com.vdurmont', name: 'semver4j', version: '3.1.0'
+    implementation group: 'com.vdurmont', name: 'semver4j', version: '3.1.0'
     
     // For Web API
     // TODO: extract swagger dependencies into swagger.gradle
     swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.5'
     if (new File('web-api-client').exists()) {
-        compile project(':web-api-client')
+        implementation project(':web-api-client')
     }
 
     // These dependencies are only needed for running tests
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+    testImplementation group: 'junit', name: 'junit', version: '4.11'
+    testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
 
     // Don't upgrade either of these until https://github.com/powermock/powermock/issues/717 is resolved
-    testCompile 'org.powermock:powermock-module-junit4:1.6.4'
-    testCompile 'org.powermock:powermock-api-mockito:1.6.4'
+    testImplementation 'org.powermock:powermock-module-junit4:1.6.4'
+    testImplementation 'org.powermock:powermock-api-mockito:1.6.4'
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+checkstyle {
+    toolVersion = '6.14.1'
+    ignoreFailures = true
+    configProperties.samedir = checkstyle.configFile.parentFile
+}
+
+pmd {
+    toolVersion = '5.5.2'
+    ignoreFailures = true
+    ruleSetFiles = files("config/pmd/pmd.xml")
+}
+
+spotbugs {
+    toolVersion = '3.1.11'
+    ignoreFailures = true
+    effort = 'max'
+    reportLevel = 'medium'
+}
 
 mainClassName = 'org.terasology.launcher.TerasologyLauncher'
 
@@ -177,11 +189,11 @@ jar {
     exclude "logback.xml"
     rename('logback_jar.xml', 'logback.xml')
     manifest {
-        def manifestClasspath = configurations.runtime.collect { it.getName() }.join(" ")
+        def manifestClasspath = configurations.runtimeClasspath.collect { it.getName() }.join(" ")
         attributes("Main-Class": mainClassName)
         attributes("Class-Path": manifestClasspath)
         attributes("Implementation-Title": project.name)
-        attributes("Implementation-Version": version)
+        attributes("Implementation-Version": project.version)
         attributes("SplashScreen-Image": splashImage)
 
         // allow everything
