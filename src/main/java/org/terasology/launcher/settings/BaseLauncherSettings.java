@@ -19,7 +19,6 @@ package org.terasology.launcher.settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LogLevel;
@@ -37,6 +36,8 @@ import java.util.Properties;
 
 /**
  * Provides access to launcher settings.
+ *
+ * @deprecated to be replaced by {@link org.terasology.launcher.config.Config}
  */
 @Deprecated
 public final class BaseLauncherSettings extends AbstractLauncherSettings {

@@ -132,7 +132,6 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 checkstyle {
-    ignoreFailures = true
     configFile = new File("$rootDir/config/metrics/checkstyle/checkstyle.xml")
     configProperties.samedir = checkstyle.configFile.parentFile
 }
@@ -199,7 +198,9 @@ clean {
     delete extractCodeMetricsConfig.destinationDir
 }
 
-processResources.dependsOn(createVersionInfoFile, extractCodeMetricsConfig)
+processResources.dependsOn createVersionInfoFile
+//TODO: wait for release of https://github.com/MovingBlocks/TeraConfig/pull/9
+//      processResources.dependsOn extractCodeMetricsConfig
 
 jar {
     //TODO we only use this name because the `.exe` start scripts require the JAR to be named 'TerasologyLauncher.jar'
