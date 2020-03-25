@@ -16,6 +16,11 @@
 
 package org.terasology.launcher.packages;
 
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.DownloadException;
@@ -25,6 +30,7 @@ import org.terasology.launcher.util.ProgressListener;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,6 +47,7 @@ public class PackageManager {
     private static final Logger logger = LoggerFactory.getLogger(PackageManager.class);
     private static final String INSTALL_DIRECTORY = "games";
     private static final String SOURCES_FILENAME = "sources.json";
+    private static final String SOURCES_SCHEMA = "schema.json";
     private static final String DATABASE_FILENAME = "packages.db";
     private static final String CACHE_DIRECTORY = "cache";
 
@@ -100,6 +107,8 @@ public class PackageManager {
             } catch (IOException e) {
                 logger.error("Failed to copy default sources file to {}", sourcesFile);
             }
+        } else {
+            validateSchema(sourcesFile);
         }
 
         database = new PackageDatabase(
@@ -107,6 +116,18 @@ public class PackageManager {
                 launcherDir.resolve(DATABASE_FILENAME),
                 installDir
         );
+    }
+
+    private void validateSchema(final Path jsonFile) {
+        try (
+                InputStream schemaIn = getClass().getResourceAsStream(SOURCES_SCHEMA);
+                InputStream jsonIn = Files.newInputStream(jsonFile)
+        ) {
+            final Schema schema = SchemaLoader.load(new JSONObject(new JSONTokener(schemaIn)));
+            schema.validate(new JSONArray((new JSONTokener(jsonIn))));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to validate sources.json.");
+        }
     }
 
     // TODO: Replace similar methods
