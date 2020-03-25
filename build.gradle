@@ -33,10 +33,10 @@ plugins {
     id 'application'
     id 'checkstyle'
     id "com.github.spotbugs" version "4.0.4"
-    id 'de.undercouch.download' version '3.4.3' // TODO: upgrade to latest version (191011: 4.0.0)
+    id 'de.undercouch.download' version '4.0.4'
     id 'java'
     id 'nebula.release' version '14.1.0'
-    id 'org.hidetake.swagger.generator' version '2.18.1'
+    id 'org.hidetake.swagger.generator' version '2.18.2'
     id 'pmd'
     id 'project-report'
 }
@@ -59,6 +59,10 @@ import java.text.SimpleDateFormat
 def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
 
+configurations {
+    codeMetrics
+}
+
 // Declare "extra properties" (variables) for the project - a Gradle thing that makes them special.
 ext {
     // Read environment variables, including variables passed by jenkins continuous integration server
@@ -68,7 +72,10 @@ ext {
     startDateTimeString = dateTimeFormat.format(new Date())
 
     // Splash image for the JAR
-    splashImage = "org/terasology/launcher/images/splash.jpg"
+    splashImage = 'org/terasology/launcher/images/splash.jpg'
+
+    // Shared code analytics configurations via retrieved config zip
+    metricsConfigDir = 'config/metrics'
 }
 
 // Declare remote repositories we're interested in - library files will be fetched from here
@@ -115,6 +122,9 @@ dependencies {
     // Don't upgrade either of these until https://github.com/powermock/powermock/issues/717 is resolved
     testImplementation 'org.powermock:powermock-module-junit4:1.6.4'
     testImplementation 'org.powermock:powermock-api-mockito:1.6.4'
+
+    // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
+    codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.3.2', ext: 'zip'
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
@@ -122,19 +132,17 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 checkstyle {
-    toolVersion = '6.14.1'
     ignoreFailures = true
+    configFile = new File("$rootDir/config/metrics/checkstyle/checkstyle.xml")
     configProperties.samedir = checkstyle.configFile.parentFile
 }
 
 pmd {
-    toolVersion = '5.5.2'
     ignoreFailures = true
-    ruleSetFiles = files("config/pmd/pmd.xml")
+    ruleSetFiles = files("$rootDir/config/metrics/pmd/pmd.xml")
 }
 
 spotbugs {
-    toolVersion = '3.1.11'
     ignoreFailures = true
     effort = 'max'
     reportLevel = 'medium'
@@ -176,11 +184,22 @@ task createVersionInfoFile {
     }
 }
 
-clean {
-    delete createVersionInfoFile.outputs.files
+task extractCodeMetricsConfig(type: Copy) {
+    description = "Extract code metrics configuration to '$metricsConfigDir'"
+    from {
+        configurations.codeMetrics.collect {
+            zipTree(it)
+        }
+    }
+    into "$rootDir/$metricsConfigDir"
 }
 
-processResources.dependsOn createVersionInfoFile
+clean {
+    delete createVersionInfoFile.outputs.files
+    delete extractCodeMetricsConfig.destinationDir
+}
+
+processResources.dependsOn(createVersionInfoFile, extractCodeMetricsConfig)
 
 jar {
     //TODO we only use this name because the `.exe` start scripts require the JAR to be named 'TerasologyLauncher.jar'
