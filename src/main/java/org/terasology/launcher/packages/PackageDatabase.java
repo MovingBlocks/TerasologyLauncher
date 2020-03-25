@@ -17,6 +17,13 @@
 package org.terasology.launcher.packages;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +34,10 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,7 +60,9 @@ class PackageDatabase {
         this.sourcesFile = sourcesFile;
         this.databaseFile = databaseFile;
         this.installDir = installDir;
-        gson = new Gson();
+        gson = new GsonBuilder()
+                .registerTypeAdapter(Repository.class, new RepositoryDeserializer())
+                .create();
         database = loadDatabase();
         markInstalled();
     }
@@ -157,6 +168,42 @@ class PackageDatabase {
 
         PackageMetadata[] getTrackedPackages() {
             return trackedPackages;
+        }
+    }
+
+    private static class RepositoryDeserializer implements JsonDeserializer<Repository> {
+        @Override
+        public Repository deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                throws JsonParseException {
+            final Repository repo = new Repository();
+            final JsonObject obj = json.getAsJsonObject();
+
+            repo.url = obj.get("url").getAsString();
+            repo.type = obj.get("type").getAsString();
+
+            final JsonArray pkgs = obj.getAsJsonArray("trackedPackages");
+            final List<PackageMetadata> tracked = new ArrayList<>(pkgs.size());
+            for (JsonElement e : pkgs) {
+                final PackageMetadata metadata = new PackageMetadata();
+
+                if (e.isJsonObject()) {
+                    // Newer schema
+                    JsonObject tmp = e.getAsJsonObject();
+                    metadata.id = tmp.get("id").getAsString();
+                    metadata.name = tmp.get("name").getAsString();
+                } else if (e.isJsonPrimitive()) {
+                    // Older schema
+                    String tmp = e.getAsString();
+                    metadata.id = tmp;
+                    metadata.name = tmp;
+                } else {
+                    throw new JsonParseException("Invalid format for \"trackedPackages\"");
+                }
+                tracked.add(metadata);
+            }
+            repo.trackedPackages = tracked.toArray(new PackageMetadata[0]);
+
+            return repo;
         }
     }
 }
