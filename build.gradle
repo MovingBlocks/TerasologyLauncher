@@ -124,7 +124,7 @@ dependencies {
     testImplementation 'org.powermock:powermock-api-mockito:1.6.4'
 
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
-    codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.3.2', ext: 'zip'
+    codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.4.0', ext: 'zip'
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
