@@ -114,35 +114,16 @@ distributions {
 }
 
 /**
- * Modify start scripts to use bundled JRE when
- * available, otherwise fall back to searching.
+ * Patch start scripts to use bundled JRE. Patch files are located in 'buildres/scripts'.
  */
 startScripts.doLast {
-    unixScript.text = unixScript
-            .text
-            .replaceFirst(/(?s)# Determine the Java.*(?=\R\R# Increase)/) { match ->
-                """\
-                |# Use bundled JRE when available
-                |if [ -d \$APP_HOME/jre ] ; then
-                |    JAVACMD=\$APP_HOME/jre/bin/java
-                |else
-                |    ${match.replace("\n", "\n    ")}
-                |fi"""
-                .stripMargin()
-            }
+    ant.patch(
+            originalfile: unixScript,
+            patchfile: file("$projectDir/buildres/scripts/${file(unixScript).name}.patch")
+    )
 
-    windowsScript.text = windowsScript
-            .text
-            .replaceFirst(/(?s)@rem Find java.*:init/) { match ->
-                """\
-                |@rem Use bundled JRE when available
-                |if not exist %APP_HOME%\\jre\\ goto findJava
-                |set JAVA_EXE=%APP_HOME%\\jre\\bin\\java.exe
-                |goto init
-                |
-                |:findJava
-                |$match
-                |"""
-                .stripMargin()
-            }
+    ant.patch(
+            originalfile: windowsScript,
+            patchfile: file("$projectDir/buildres/scripts/${file(windowsScript).name}.patch")
+    )
 }
