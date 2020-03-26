@@ -20,6 +20,7 @@ import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
@@ -57,6 +58,7 @@ public class PackageManager {
     private PackageDatabase database;
     private Path cacheDir;
     private Path installDir;
+    private Path sourcesFile;
 
     public PackageManager() {
         onlineRepository = new JenkinsRepository();
@@ -94,44 +96,56 @@ public class PackageManager {
         localRepository.saveCache();
     }
 
-    // TODO: Move to constructor
-    public void initDatabase(Path launcherDir, Path gameDir) {
+    public void setupDirs(Path launcherDir, Path gameDir) {
         cacheDir = launcherDir.resolve(CACHE_DIRECTORY);
         installDir = gameDir.resolve(INSTALL_DIRECTORY);
-        final Path sourcesFile = launcherDir.resolve(SOURCES_FILENAME);
+        sourcesFile = launcherDir.resolve(SOURCES_FILENAME);
+    }
 
-        // Copy default sources file if necessary
+    public void validateSources() {
         if (Files.notExists(sourcesFile)) {
-            logger.info("Sources file not found. Copying default file to {}", sourcesFile);
-            try {
-                Files.copy(getClass().getResourceAsStream(SOURCES_FILENAME), sourcesFile);
-            } catch (IOException e) {
-                logger.error("Failed to copy default sources file to {}", sourcesFile);
-            }
-        } else {
-            validateSchema(sourcesFile);
+            logger.warn("sources.json not found: {}", sourcesFile);
+            throw new PackageManagerException("sources.json is missing");
         }
+        if (!validateSchema(sourcesFile)) {
+            throw new PackageManagerException("There were errors reading sources.json");
+        }
+    }
 
+    public void copyDefaultSources() {
+        logger.info("Copying default sources file to {}", sourcesFile);
+        try {
+            Files.copy(getClass().getResourceAsStream(SOURCES_FILENAME), sourcesFile);
+        } catch (IOException e) {
+            logger.error("Failed to copy default sources file to {}", sourcesFile);
+            throw new RuntimeException("Default sources file could not be copied to " + sourcesFile);
+        }
+    }
+
+    public void initDatabase() {
         database = new PackageDatabase(
                 sourcesFile,
-                launcherDir.resolve(DATABASE_FILENAME),
+                sourcesFile.resolveSibling(DATABASE_FILENAME),
                 installDir
         );
     }
 
-    private void validateSchema(final Path jsonFile) {
+    private boolean validateSchema(final Path jsonFile) {
         try (
                 InputStream schemaIn = getClass().getResourceAsStream(SOURCES_SCHEMA);
                 InputStream jsonIn = Files.newInputStream(jsonFile)
         ) {
             final Schema schema = SchemaLoader.load(new JSONObject(new JSONTokener(schemaIn)));
             schema.validate(new JSONArray((new JSONTokener(jsonIn))));
+            return true;
         } catch (ValidationException e) {
             logger.error("sources.json has invalid value at: {}", e.getPointerToViolation());
-            throw new RuntimeException("Failed to validate sources.json.");
+        } catch (JSONException e) {
+            logger.error("sources.json has syntax error: {}", e.getMessage());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to validate sources.json.");
+            logger.error("Failed to validate sources.json: {}", e.getMessage());
         }
+        return false;
     }
 
     // TODO: Replace similar methods

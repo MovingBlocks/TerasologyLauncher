@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.github.GitHubRelease;
 import org.terasology.launcher.packages.PackageManager;
+import org.terasology.launcher.packages.PackageManagerException;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.updater.LauncherUpdater;
@@ -101,8 +102,16 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             logger.trace("Setting up Package Manager");
             final PackageManager packageManager = new PackageManager();
             packageManager.initLocalStorage(gameDirectory, cacheDirectory);
-            packageManager.initDatabase(launcherDirectory, gameDirectory);
-            packageManager.syncDatabase();
+            packageManager.setupDirs(launcherDirectory, gameDirectory);
+            try {
+                packageManager.validateSources();
+            } catch (PackageManagerException e) {
+                // TODO: ask to proceed with default
+                packageManager.copyDefaultSources();
+            } finally {
+                packageManager.initDatabase();
+                packageManager.syncDatabase();
+            }
 
             logger.trace("Change LauncherSettings...");
             launcherSettings.setGameDirectory(gameDirectory);
