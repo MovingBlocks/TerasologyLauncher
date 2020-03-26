@@ -115,7 +115,8 @@ public class PackageManager {
     public void copyDefaultSources() {
         logger.info("Copying default sources file to {}", sourcesFile);
         try {
-            Files.copy(getClass().getResourceAsStream(SOURCES_FILENAME), sourcesFile);
+            Files.copy(getClass().getResourceAsStream(SOURCES_FILENAME),
+                    sourcesFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             logger.error("Failed to copy default sources file to {}", sourcesFile);
             throw new RuntimeException("Default sources file could not be copied to " + sourcesFile);

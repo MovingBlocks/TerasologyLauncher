@@ -18,6 +18,8 @@ package org.terasology.launcher;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
 
@@ -106,12 +109,24 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             try {
                 packageManager.validateSources();
             } catch (PackageManagerException e) {
-                // TODO: ask to proceed with default
-                packageManager.copyDefaultSources();
-            } finally {
-                packageManager.initDatabase();
-                packageManager.syncDatabase();
+                final boolean replaceWithDefault = CompletableFuture.supplyAsync(() -> {
+                    final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setHeaderText(e.getMessage());
+                    alert.setContentText("Replace sources.json with default values?");
+                    return alert.showAndWait()
+                            .map(btn -> btn == ButtonType.OK)
+                            .orElse(false);
+                }, Platform::runLater).join();
+
+                if (replaceWithDefault) {
+                    packageManager.copyDefaultSources();
+                } else {
+                    this.cancel();
+                    return null;
+                }
             }
+            packageManager.initDatabase();
+            packageManager.syncDatabase();
 
             logger.trace("Change LauncherSettings...");
             launcherSettings.setGameDirectory(gameDirectory);

@@ -125,6 +125,8 @@ public final class TerasologyLauncher extends Application {
             openCrashReporterAndExit((Exception) event.getSource().getException());
         });
 
+        launcherInitTask.setOnCancelled(event -> Platform.exit());
+
         initThread.start();
     }
 
