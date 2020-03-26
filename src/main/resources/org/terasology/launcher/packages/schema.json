@@ -13,17 +13,8 @@
         "type": "array",
         "items": {
           "oneOf": [
-
-            {"type": "string", "minLength": 1},
-
-            {
-              "type": "object",
-              "properties": {
-                "id": {"type": "string", "minLength": 1},
-                "name": {"type": "string", "minLength": 1}
-              },
-              "required": ["id", "name"]
-            }
+            {"$ref": "subschema/TrackedPackage.json#/4.0"},
+            {"$ref": "subschema/TrackedPackage.json#/4.1"}
           ]
         }
       }

@@ -18,6 +18,7 @@ package org.terasology.launcher.packages;
 
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -136,7 +137,12 @@ public class PackageManager {
                 InputStream schemaIn = getClass().getResourceAsStream(SOURCES_SCHEMA);
                 InputStream jsonIn = Files.newInputStream(jsonFile)
         ) {
-            final Schema schema = SchemaLoader.load(new JSONObject(new JSONTokener(schemaIn)));
+            final Schema schema = SchemaLoader.builder()
+                    .schemaClient(SchemaClient.classPathAwareClient())
+                    .resolutionScope("classpath://org/terasology/launcher/packages/schema.json")
+                    .schemaJson(new JSONObject(new JSONTokener(schemaIn)))
+                    .build().load().build();
+
             schema.validate(new JSONArray((new JSONTokener(jsonIn))));
             return true;
         } catch (ValidationException e) {

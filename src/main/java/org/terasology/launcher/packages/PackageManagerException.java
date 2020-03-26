@@ -6,7 +6,7 @@
 package org.terasology.launcher.packages;
 
 /**
- * Purpose: Magical
+ * Thrown when errors are encountered within {@link PackageManager}.
  */
 public class PackageManagerException extends RuntimeException {
     public PackageManagerException(final String message) {
