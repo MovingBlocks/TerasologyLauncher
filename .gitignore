@@ -1,6 +1,7 @@
 # Ignore Gradle
 /.gradle/
 /build/
+/config/metrics
 
 # Ignore IntelliJ IDEA
 *.iml
@@ -56,4 +57,3 @@ web-api-client/
 
 # Ignore donwloaded JREs
 jre/**
-jres/**
