@@ -293,12 +293,17 @@ public class ApplicationController {
                     launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
             if (!gameStarted) {
                 GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
-            } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
-                if (gameDownloadWorker == null) {
-                    logger.info("Close launcher after game start.");
-                    close();
-                } else {
-                    logger.info("The launcher can not be closed after game start, because a download is running.");
+            } else {
+                launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
+                launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
+
+                if (launcherSettings.isCloseLauncherAfterGameStart()) {
+                    if (gameDownloadWorker == null) {
+                        logger.info("Close launcher after game start.");
+                        close();
+                    } else {
+                        logger.info("The launcher can not be closed after game start, because a download is running.");
+                    }
                 }
             }
         }
@@ -325,6 +330,8 @@ public class ApplicationController {
             if (selectedPackage.isInstalled()) {
                 startAndDownloadButton.setGraphic(playImage);
                 deleteButton.setDisable(false);
+                launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
+                launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
             }
             downloadTask = null;
         });
@@ -411,6 +418,8 @@ public class ApplicationController {
         }
 
         footerController.setHostServices(hostServices);
+
+        initializeComboBoxSelection();
     }
 
     private VersionItem selectedVersion;
@@ -455,7 +464,7 @@ public class ApplicationController {
         packageManager.getPackages()
                 .stream()
                 .collect(Collectors.groupingBy(Package::getName, //TODO this should be grouped by `id`
-                         Collectors.mapping(VersionItem::new, Collectors.toList())))
+                        Collectors.mapping(VersionItem::new, Collectors.toList())))
                 .forEach((name, versions) ->
                         packageItems.add(new PackageItem(name, versions)));
 
@@ -479,8 +488,18 @@ public class ApplicationController {
     private void initComboBoxes() {
         jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             buildVersionBox.setItems(newVal.versionItems);
-            //TODO remember selection / select latest installed version
-            buildVersionBox.getSelectionModel().select(0);
+
+            String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
+            String selectedJobId = newVal.versionItems.get(0).linkedPackageProperty.get().getId();
+            if (lastPlayedGameJob.isEmpty() || !lastPlayedGameJob.equals(selectedJobId)) {
+                // select last installed package for the selected job or the latest one if none installed
+                String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(selectedJobId)
+                        .map(pkg -> pkg.getVersion()).orElseGet(() -> "");
+                selectBuildVersionBoxItemForVersion(buildVersionBox, lastInstalledVersion);
+            } else {
+                // select the package last played
+                selectBuildVersionBoxItemForVersion(buildVersionBox, launcherSettings.getLastPlayedGameVersion());
+            }
         });
 
         buildVersionBox.setOnShowing(e -> resetScrollBar(buildVersionBox));
@@ -502,6 +521,56 @@ public class ApplicationController {
 
             changelogViewController.update(selectedPackage.getChangelog());
         });
+    }
+
+    private void selectJobBoxItemForJob(final ComboBox<PackageItem> jobBox, final String jobId) {
+        PackageItem packageItem = jobBox.getItems().stream()
+                .filter(item -> item.versionItems.stream()
+                        .anyMatch(vItem -> vItem.linkedPackageProperty.get().getId().equals(jobId)))
+                .findFirst()
+                .orElseGet(() -> null);
+
+        if (packageItem != null) {
+            jobBox.getSelectionModel().select(packageItem);
+        } else {
+            jobBox.getSelectionModel().select(0);
+        }
+    }
+
+    private void selectBuildVersionBoxItemForVersion(final ComboBox<VersionItem> buildVersionBox, final String version) {
+        VersionItem versionItem = buildVersionBox.getItems().stream()
+                .filter(item -> item.versionProperty.get().equals(version))
+                .findFirst()
+                .orElseGet(() -> null);
+
+        if (versionItem != null) {
+            buildVersionBox.getSelectionModel().select(versionItem);
+        } else {
+            buildVersionBox.getSelectionModel().select(0);
+        }
+    }
+
+    private void initializeComboBoxSelection() {
+        String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
+        if (!lastPlayedGameJob.isEmpty()) {
+            // select the package last played
+            selectJobBoxItemForJob(jobBox, launcherSettings.getLastPlayedGameJob());
+            selectBuildVersionBoxItemForVersion(buildVersionBox, launcherSettings.getLastPlayedGameVersion());
+        } else {
+            String lastInstalledGameJob = launcherSettings.getLastInstalledGameJob();
+            if (!lastInstalledGameJob.isEmpty()) {
+                // select last installed package job and version
+                selectJobBoxItemForJob(jobBox, lastInstalledGameJob);
+                selectBuildVersionBoxItemForVersion(buildVersionBox, launcherSettings.getLastInstalledGameVersion());
+            } else {
+                // select last installed package for the default job or the latest one if none installed
+                String defaultGameJob = launcherSettings.getDefaultGameJob();
+                selectJobBoxItemForJob(jobBox, defaultGameJob);
+                String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(defaultGameJob)
+                        .map(pkg -> pkg.getVersion()).orElseGet(() -> "");
+                selectBuildVersionBoxItemForVersion(buildVersionBox, lastInstalledVersion);
+            }
+        }
     }
 
     private void initButtons() {
