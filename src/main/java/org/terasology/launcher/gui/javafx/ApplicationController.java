@@ -500,10 +500,12 @@ public class ApplicationController {
                 // select last installed package for the selected job or the latest one if none installed
                 String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(selectedJobId)
                         .map(pkg -> pkg.getVersion()).orElseGet(() -> "");
-                selectBuildVersionBoxItemForVersion(buildVersionBox, lastInstalledVersion);
+                selectItem(buildVersionBox, item ->
+                        item.versionProperty.get().equals(lastInstalledVersion));
             } else {
                 // select the package last played
-                selectBuildVersionBoxItemForVersion(buildVersionBox, launcherSettings.getLastPlayedGameVersion());
+                selectItem(buildVersionBox, item ->
+                        item.versionProperty.get().equals(launcherSettings.getLastPlayedGameVersion()));
             }
         });
 
@@ -568,7 +570,7 @@ public class ApplicationController {
                 // select last installed package job and version
                 selectJobBoxItemForJob(jobBox, lastInstalledGameJob);
                 selectItem(buildVersionBox, item ->
-                        item.versionProperty.get().equals(launcherSettings.getLastInstalledGameVersion());
+                        item.versionProperty.get().equals(launcherSettings.getLastInstalledGameVersion()));
             } else {
                 // select last installed package for the default job or the latest one if none installed
                 String defaultGameJob = launcherSettings.getDefaultGameJob();
@@ -576,7 +578,7 @@ public class ApplicationController {
                 String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(defaultGameJob)
                         .map(pkg -> pkg.getVersion()).orElseGet(() -> "");
                 selectItem(buildVersionBox, item ->
-                        item.versionProperty.get().equals(lastInstalledVersion);
+                        item.versionProperty.get().equals(lastInstalledVersion));
             }
         }
     }
