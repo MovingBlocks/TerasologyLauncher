@@ -74,6 +74,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ApplicationController {
@@ -527,52 +528,55 @@ public class ApplicationController {
         });
     }
 
+    /*
+     * filters the items of `comboBox` with `predicate` and
+     * selects the first resulting or if none, the first of the `comboBox` items
+     */
+    private <T> void selectItem(final ComboBox<T> comboBox, Predicate<T> predicate) {
+        final T item = comboBox.getItems().stream()
+                .filter(predicate)
+                .findFirst()
+                .orElse(comboBox.getItems().get(0));
+
+        comboBox.getSelectionModel().select(item);
+    }
+
     private void selectJobBoxItemForJob(final ComboBox<PackageItem> jobBox, final String jobId) {
-        PackageItem packageItem = jobBox.getItems().stream()
-                .filter(item -> item.versionItems.stream()
-                        .anyMatch(vItem -> vItem.linkedPackageProperty.get().getId().equals(jobId)))
-                .findFirst()
-                .orElseGet(() -> null);
-
-        if (packageItem != null) {
-            jobBox.getSelectionModel().select(packageItem);
-        } else {
-            jobBox.getSelectionModel().select(0);
-        }
+        selectItem(jobBox, jobItem ->
+                jobItem.versionItems.stream()
+                        .anyMatch(vItem -> vItem.linkedPackageProperty.get().getId().equals(jobId)));
     }
 
-    private void selectBuildVersionBoxItemForVersion(final ComboBox<VersionItem> buildVersionBox, final String version) {
-        VersionItem versionItem = buildVersionBox.getItems().stream()
-                .filter(item -> item.versionProperty.get().equals(version))
-                .findFirst()
-                .orElseGet(() -> null);
-
-        if (versionItem != null) {
-            buildVersionBox.getSelectionModel().select(versionItem);
-        } else {
-            buildVersionBox.getSelectionModel().select(0);
-        }
-    }
-
+    /**
+     * TODO: Reduce boilerplate code after switching to >= Java 9
+     * Optional<Package> pkg = getLastPlayed()
+     * 	.or(() -> getLastInstalled())
+     * 	.or(() -> getLatestInstalled());
+     *
+     * this.select(pkg);
+     */
     private void initializeComboBoxSelection() {
         String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
         if (!lastPlayedGameJob.isEmpty()) {
             // select the package last played
             selectJobBoxItemForJob(jobBox, launcherSettings.getLastPlayedGameJob());
-            selectBuildVersionBoxItemForVersion(buildVersionBox, launcherSettings.getLastPlayedGameVersion());
+            selectItem(buildVersionBox, item ->
+                    item.versionProperty.get().equals(launcherSettings.getLastPlayedGameVersion()));
         } else {
             String lastInstalledGameJob = launcherSettings.getLastInstalledGameJob();
             if (!lastInstalledGameJob.isEmpty()) {
                 // select last installed package job and version
                 selectJobBoxItemForJob(jobBox, lastInstalledGameJob);
-                selectBuildVersionBoxItemForVersion(buildVersionBox, launcherSettings.getLastInstalledGameVersion());
+                selectItem(buildVersionBox, item ->
+                        item.versionProperty.get().equals(launcherSettings.getLastInstalledGameVersion());
             } else {
                 // select last installed package for the default job or the latest one if none installed
                 String defaultGameJob = launcherSettings.getDefaultGameJob();
                 selectJobBoxItemForJob(jobBox, defaultGameJob);
                 String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(defaultGameJob)
                         .map(pkg -> pkg.getVersion()).orElseGet(() -> "");
-                selectBuildVersionBoxItemForVersion(buildVersionBox, lastInstalledVersion);
+                selectItem(buildVersionBox, item ->
+                        item.versionProperty.get().equals(lastInstalledVersion);
             }
         }
     }
