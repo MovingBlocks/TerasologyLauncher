@@ -35,6 +35,8 @@ public final class Config {
     private final boolean closeAfterGameStarts;
     private final boolean cacheGamePackages;
     private final Package selectedPackage;
+    private final Package lastPlayedGamePackage;
+    private final Package lastInstalledGamePackage;
 
     private Config(final Builder builder) {
         this.gameConfig = builder.gameConfig;
@@ -44,6 +46,8 @@ public final class Config {
         this.closeAfterGameStarts = builder.closeAfterGameStarts;
         this.cacheGamePackages = builder.cacheGamePackages;
         this.selectedPackage = builder.selectedPackage;
+        this.lastPlayedGamePackage = builder.lastPlayedGamePackage;
+        this.lastInstalledGamePackage = builder.lastInstalledGamePackage;
     }
 
     public GameConfig getGameConfig() {
@@ -73,6 +77,10 @@ public final class Config {
     public Package getSelectedPackage() {
         return selectedPackage;
     }
+
+    public Package getLastPlayedGamePackage() { return lastPlayedGamePackage; }
+
+    public Package getLastInstalledGamePackage() { return lastInstalledGamePackage; }
 
     /**
      * Provides a pre-filled {@link Builder} instance
@@ -108,6 +116,8 @@ public final class Config {
         private boolean closeAfterGameStarts;
         private boolean cacheGamePackages;
         private Package selectedPackage;
+        private Package lastPlayedGamePackage;
+        private Package lastInstalledGamePackage;
 
         private Builder() { }
 
@@ -119,6 +129,8 @@ public final class Config {
             closeAfterGameStarts = last.closeAfterGameStarts;
             cacheGamePackages = last.cacheGamePackages;
             selectedPackage = last.selectedPackage;
+            lastPlayedGamePackage = last.lastPlayedGamePackage;
+            lastInstalledGamePackage = last.lastInstalledGamePackage;
         }
 
         public Builder gameConfig(final GameConfig newGameConfig) {
@@ -153,6 +165,16 @@ public final class Config {
 
         public Builder selectedPackage(final Package newSelectedPackage) {
             selectedPackage = newSelectedPackage;
+            return this;
+        }
+
+        public Builder lastPlayedGamePackage(final Package newLastPlayedGamePackage) {
+            lastPlayedGamePackage = newLastPlayedGamePackage;
+            return this;
+        }
+
+        public Builder lastInstalledGamePackage(final Package newLastInstalledGamePackage) {
+            lastInstalledGamePackage = newLastInstalledGamePackage;
             return this;
         }
 
