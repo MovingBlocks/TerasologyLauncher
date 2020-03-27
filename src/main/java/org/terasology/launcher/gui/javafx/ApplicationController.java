@@ -369,6 +369,10 @@ public class ApplicationController {
                 .filter(response -> response == ButtonType.OK)
                 .ifPresent(response -> {
                     logger.info("Removing game: {}-{}", selectedPackage.getId(), selectedPackage.getVersion());
+                    // triggering a game deletion implies the player doesn't want to play this game anymore
+                    // hence, we unset `lastPlayedGameJob` and `lastPlayedGameVersion` settings independent of deletion success
+                    launcherSettings.setLastPlayedGameJob("");
+                    launcherSettings.setLastPlayedGameVersion("");
 
                     deleteButton.setDisable(true);
                     final DeleteTask deleteTask = new DeleteTask(packageManager, selectedVersion);
