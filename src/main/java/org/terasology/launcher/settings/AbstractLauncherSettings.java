@@ -27,6 +27,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * @deprecated to be replaced by {@link org.terasology.launcher.config.Config}
+ */
 @Deprecated
 public abstract class AbstractLauncherSettings {
 
