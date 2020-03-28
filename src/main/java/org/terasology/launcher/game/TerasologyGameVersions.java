@@ -19,8 +19,6 @@ package org.terasology.launcher.game;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.packages.PackageBuild;
-import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
@@ -40,7 +38,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,13 +64,11 @@ public final class TerasologyGameVersions {
 
     private final Map<GameJob, List<TerasologyGameVersion>> gameVersionLists;
     private final Map<GameJob, SortedMap<Integer, TerasologyGameVersion>> gameVersionMaps;
-    private final PackageManager packageManager;
     private final Gson gson;
 
     public TerasologyGameVersions() {
         gameVersionLists = new EnumMap<>(GameJob.class);
         gameVersionMaps = new EnumMap<>(GameJob.class);
-        packageManager = new PackageManager();
         gson = new Gson();
     }
 

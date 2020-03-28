@@ -20,12 +20,12 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.github.GitHubRelease;
 import org.terasology.launcher.packages.PackageManager;
-import org.terasology.launcher.packages.PackageManagerException;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.updater.LauncherUpdater;
@@ -103,26 +103,12 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             // TODO: Does this interact with any remote server for fetching/initializing the database?
             logger.trace("Setting up Package Manager");
-            final PackageManager packageManager = new PackageManager();
-            packageManager.initLocalStorage(gameDirectory, cacheDirectory);
-            packageManager.setupDirs(launcherDirectory, gameDirectory);
-            try {
-                packageManager.validateSources();
-            } catch (PackageManagerException e) {
-                final boolean replaceWithDefault = CompletableFuture.supplyAsync(() -> {
-                    final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                    alert.setHeaderText(e.getMessage());
-                    alert.setContentText("Replace sources.json with default values?");
-                    return alert.showAndWait()
-                            .map(btn -> btn == ButtonType.OK)
-                            .orElse(false);
-                }, Platform::runLater).join();
-
-                if (replaceWithDefault) {
+            final PackageManager packageManager = new PackageManager(launcherDirectory, gameDirectory);
+            if (!packageManager.validateSources()) {
+                if (confirmSourcesOverwrite()) {
                     packageManager.copyDefaultSources();
                 } else {
-                    this.cancel();
-                    return null;
+                    throw new IllegalStateException("Error reading sources file");
                 }
             }
             packageManager.initDatabase();
@@ -315,6 +301,24 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }
         logger.debug("Game data directory: {}", gameDataDirectory);
         return gameDataDirectory;
+    }
+
+    /**
+     * Shows a confirmation dialog for overwriting current sources file
+     * with default values.
+     *
+     * @return whether the user confirms this overwrite
+     */
+    private boolean confirmSourcesOverwrite() {
+        return CompletableFuture.supplyAsync(() -> {
+            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setHeaderText(BundleUtils.getLabel("message_error_sourcesFile_header"));
+            alert.setContentText(BundleUtils.getLabel("message_error_sourcesFile_content"));
+            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+            return alert.showAndWait()
+                    .map(btn -> btn == ButtonType.OK)
+                    .orElse(false);
+        }, Platform::runLater).join();
     }
 
     private void storeLauncherSettingsAfterInit(BaseLauncherSettings launcherSettings) throws LauncherStartFailedException {

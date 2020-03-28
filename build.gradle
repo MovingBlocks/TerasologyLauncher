@@ -88,7 +88,6 @@ repositories {
         url "http://artifactory.terasology.org/artifactory/virtual-repo-live"
     }
     jcenter()
-    // JitPack repo
     maven { url "https://jitpack.io" }
 }
 

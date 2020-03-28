@@ -61,8 +61,11 @@ public class PackageManager {
     private Path installDir;
     private Path sourcesFile;
 
-    public PackageManager() {
+    public PackageManager(Path launcherDir, Path gameDir) {
         onlineRepository = new JenkinsRepository();
+        cacheDir = launcherDir.resolve(CACHE_DIRECTORY);
+        installDir = gameDir.resolve(INSTALL_DIRECTORY);
+        sourcesFile = launcherDir.resolve(SOURCES_FILENAME);
     }
 
     /**
@@ -97,45 +100,23 @@ public class PackageManager {
         localRepository.saveCache();
     }
 
-    public void setupDirs(Path launcherDir, Path gameDir) {
-        cacheDir = launcherDir.resolve(CACHE_DIRECTORY);
-        installDir = gameDir.resolve(INSTALL_DIRECTORY);
-        sourcesFile = launcherDir.resolve(SOURCES_FILENAME);
-    }
-
-    public void validateSources() {
+    /**
+     * Checks if the sources file contains any syntax errors or
+     * schema violations. Note that the default values are copied
+     * over and used when no sources file is found.
+     *
+     * @return whether the sources file is valid
+     */
+    public boolean validateSources() {
         if (Files.notExists(sourcesFile)) {
             logger.warn("sources.json not found: {}", sourcesFile);
-            throw new PackageManagerException("sources.json is missing");
+            copyDefaultSources();
+            return true;
         }
-        if (!validateSchema(sourcesFile)) {
-            throw new PackageManagerException("There were errors reading sources.json");
-        }
-    }
 
-    public void copyDefaultSources() {
-        logger.info("Copying default sources file to {}", sourcesFile);
-        try {
-            Files.copy(getClass().getResourceAsStream(SOURCES_FILENAME),
-                    sourcesFile, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            logger.error("Failed to copy default sources file to {}", sourcesFile);
-            throw new RuntimeException("Default sources file could not be copied to " + sourcesFile);
-        }
-    }
-
-    public void initDatabase() {
-        database = new PackageDatabase(
-                sourcesFile,
-                sourcesFile.resolveSibling(DATABASE_FILENAME),
-                installDir
-        );
-    }
-
-    private boolean validateSchema(final Path jsonFile) {
         try (
                 InputStream schemaIn = getClass().getResourceAsStream(SOURCES_SCHEMA);
-                InputStream jsonIn = Files.newInputStream(jsonFile)
+                InputStream jsonIn = Files.newInputStream(sourcesFile)
         ) {
             final Schema schema = SchemaLoader.builder()
                     .schemaClient(SchemaClient.classPathAwareClient())
@@ -153,6 +134,32 @@ public class PackageManager {
             logger.error("Failed to validate sources.json: {}", e.getMessage());
         }
         return false;
+    }
+
+    /**
+     * Copies the default (bundled) sources file into the appropriate
+     * directory, overwriting any existing sources file if necessary.
+     */
+    public void copyDefaultSources() {
+        logger.info("Copying default sources file to {}", sourcesFile);
+        try {
+            Files.copy(getClass().getResourceAsStream(SOURCES_FILENAME),
+                    sourcesFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            logger.error("Failed to copy default sources file to {}", sourcesFile);
+            throw new RuntimeException("Default sources file could not be copied to " + sourcesFile);
+        }
+    }
+
+    /**
+     * Initializes a new {@link PackageDatabase}.
+     */
+    public void initDatabase() {
+        database = new PackageDatabase(
+                sourcesFile,
+                sourcesFile.resolveSibling(DATABASE_FILENAME),
+                installDir
+        );
     }
 
     // TODO: Replace similar methods

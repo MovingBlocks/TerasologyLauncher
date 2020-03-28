@@ -13,8 +13,8 @@
         "type": "array",
         "items": {
           "oneOf": [
-            {"$ref": "subschema/TrackedPackage.json#/4.0"},
-            {"$ref": "subschema/TrackedPackage.json#/4.1"}
+            {"$ref": "subschema/TrackedPackage.json#/v1"},
+            {"$ref": "subschema/TrackedPackage.json#/v2"}
           ]
         }
       }
