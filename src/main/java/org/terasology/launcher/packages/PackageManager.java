@@ -39,7 +39,6 @@ import java.util.Objects;
 public class PackageManager {
 
     private static final Logger logger = LoggerFactory.getLogger(PackageManager.class);
-    private static final String INSTALL_DIRECTORY = "games";
     private static final String SOURCES_FILENAME = "sources.json";
     private static final String DATABASE_FILENAME = "packages.db";
     private static final String CACHE_DIRECTORY = "cache";
@@ -57,7 +56,7 @@ public class PackageManager {
     /**
      * Sets up local storage for working with game packages and cache files.
      *
-     * @param gameDirectory directory path for storing game packages
+     * @param gameDirectory  directory path for storing game packages
      * @param cacheDirectory directory path for storing cache files
      */
     public void initLocalStorage(Path gameDirectory, Path cacheDirectory) {
@@ -87,10 +86,10 @@ public class PackageManager {
     }
 
     // TODO: Move to constructor
-    public void initDatabase(Path launcherDir, Path gameDir) {
-        cacheDir = launcherDir.resolve(CACHE_DIRECTORY);
-        installDir = gameDir.resolve(INSTALL_DIRECTORY);
-        final Path sourcesFile = launcherDir.resolve(SOURCES_FILENAME);
+    public void initDatabase(final Path userDataDirectory, final Path gameInstallationDir) {
+        cacheDir = userDataDirectory.resolve(CACHE_DIRECTORY);
+        installDir = gameInstallationDir;
+        final Path sourcesFile = userDataDirectory.resolve(SOURCES_FILENAME);
 
         // Copy default sources file if necessary
         if (Files.notExists(sourcesFile)) {
@@ -104,7 +103,7 @@ public class PackageManager {
 
         database = new PackageDatabase(
                 sourcesFile,
-                launcherDir.resolve(DATABASE_FILENAME),
+                userDataDirectory.resolve(DATABASE_FILENAME),
                 installDir
         );
     }
@@ -118,7 +117,7 @@ public class PackageManager {
     /**
      * Installs the mentioned package into the local repository.
      *
-     * @param target the package to be installed
+     * @param target   the package to be installed
      * @param listener the object which is to be informed about task progress
      */
     public void install(Package target, ProgressListener listener) throws IOException, DownloadException {
