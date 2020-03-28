@@ -18,6 +18,9 @@ package org.terasology.launcher;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +46,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
 
@@ -63,6 +67,8 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
      */
     @Override
     protected LauncherConfiguration call() {
+        // TODO: Use idiomatic JavaFX error handling.
+
         try {
             // get OS info
             final OperatingSystem os = getOperatingSystem();
@@ -98,9 +104,15 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             // TODO: Does this interact with any remote server for fetching/initializing the database?
             logger.trace("Setting up Package Manager");
-            final PackageManager packageManager = new PackageManager();
-            packageManager.initLocalStorage(gameDirectory, cacheDirectory);
-            packageManager.initDatabase(userDataDirectory, gameDirectory);
+            final PackageManager packageManager = new PackageManager(userDataDirectory, gameDirectory);
+            if (!packageManager.validateSources()) {
+                if (confirmSourcesOverwrite()) {
+                    packageManager.copyDefaultSources();
+                } else {
+                    throw new IllegalStateException("Error reading sources file");
+                }
+            }
+            packageManager.initDatabase();
             packageManager.syncDatabase();
 
             logger.trace("Change LauncherSettings...");
@@ -116,6 +128,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
         }
+
         return null;
     }
 
@@ -257,6 +270,27 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }
         logger.debug("Game data directory: {}", gameDataDirectory);
         return gameDataDirectory;
+    }
+
+    /**
+     * Shows a confirmation dialog for overwriting current sources file
+     * with default values.
+     *
+     * @return whether the user confirms this overwrite
+     */
+    private boolean confirmSourcesOverwrite() {
+        return CompletableFuture.supplyAsync(() -> {
+            final Alert alert = new Alert(
+                    Alert.AlertType.WARNING,
+                    BundleUtils.getLabel("message_error_sourcesFile_content"),
+                    ButtonType.OK,
+                    new ButtonType(BundleUtils.getLabel("launcher_exit")));
+            alert.setHeaderText(BundleUtils.getLabel("message_error_sourcesFile_header"));
+            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+            return alert.showAndWait()
+                    .map(btn -> btn == ButtonType.OK)
+                    .orElse(false);
+        }, Platform::runLater).join();
     }
 
     private void storeLauncherSettingsAfterInit(BaseLauncherSettings launcherSettings) throws LauncherStartFailedException {

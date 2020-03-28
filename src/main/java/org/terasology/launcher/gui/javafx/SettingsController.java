@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
@@ -277,7 +276,7 @@ public class SettingsController {
         final JavaHeapSize[] heapSizeRange = System.getProperty("os.arch").equals("x86")
                 ? Arrays.copyOfRange(JavaHeapSize.values(), 0, JavaHeapSize.GB_1_5.ordinal() + 1)
                 : JavaHeapSize.values();
-        
+
         for (JavaHeapSize heapSize : heapSizeRange) {
             maxHeapSizeBox.getItems().add(heapSize);
             initialHeapSizeBox.getItems().add(heapSize);

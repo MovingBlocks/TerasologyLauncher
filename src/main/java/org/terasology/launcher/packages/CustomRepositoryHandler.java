@@ -16,6 +16,8 @@
 
 package org.terasology.launcher.packages;
 
+import org.terasology.launcher.packages.db.DatabaseRepository;
+
 import java.util.List;
 
 /**
@@ -24,7 +26,7 @@ import java.util.List;
  */
 class CustomRepositoryHandler implements RepositoryHandler {
     @Override
-    public List<Package> getPackageList(PackageDatabase.Repository source) {
+    public List<Package> getPackageList(DatabaseRepository source) {
         // TODO: Implement this
         return null;
     }

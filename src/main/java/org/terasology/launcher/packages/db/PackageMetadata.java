@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 MovingBlocks
+ * Copyright 2020 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.packages;
+package org.terasology.launcher.packages.db;
 
-import java.util.List;
-import org.terasology.launcher.packages.db.DatabaseRepository;
+import java.io.Serializable;
 
-/**
- * Provides method to fetch all packages from a repository.
- */
-interface RepositoryHandler {
-    List<Package> getPackageList(DatabaseRepository source);
+public class PackageMetadata implements Serializable {
+    private String id;
+    private String name;
 
-    static RepositoryHandler ofType(String type) {
-        switch (type) {
-            case "Jenkins": return new JenkinsHandler();
-            case "Custom" : return new CustomRepositoryHandler();
-            default: return null;
-        }
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
