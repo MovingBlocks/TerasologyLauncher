@@ -71,6 +71,7 @@ class PackageDatabase {
                 new InputStreamReader(Files.newInputStream(sourcesFile))
         )) {
             final List<Package> newDatabase = new LinkedList<>();
+            // TODO: read the DatabaseRepository list before-hand and pass to sync()
             for (DatabaseRepository source : gson.fromJson(reader, DatabaseRepository[].class)) {
                 logger.trace("Fetching package list from: {}", source.getUrl());
                 newDatabase.addAll(packageListOf(source));
