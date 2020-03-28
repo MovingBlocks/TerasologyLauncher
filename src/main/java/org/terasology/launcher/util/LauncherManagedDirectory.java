@@ -29,7 +29,8 @@ public enum LauncherManagedDirectory {
     //TODO add documentation what these folders are exactly used for
     TEMP(FileUtils::ensureEmptyDir, FileUtils::ensureWritableDir),
     CACHE(FileUtils::ensureWritableDir),
-    DOWNLOAD(FileUtils::ensureWritableDir);
+    DOWNLOAD(FileUtils::ensureWritableDir),
+    GAMES(FileUtils::ensureWritableDir);
 
     private final DirectoryCreator[] creators;
     private final String errorLabel;
