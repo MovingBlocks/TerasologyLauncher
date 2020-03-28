@@ -189,9 +189,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             updateMessage(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
             boolean foundLauncherInstallationDirectory = false;
             try {
-                updater.detectAndCheckLauncherInstallationDirectory();
+                final Path installationDir = LauncherDirectoryUtils.getInstallationDirectory();
+                FileUtils.ensureWritableDir(installationDir);
+                logger.trace("Launcher installation directory: {}", installationDir);
                 foundLauncherInstallationDirectory = true;
-            } catch (URISyntaxException | IOException e) {
+            } catch (IOException e) {
                 logger.error("The launcher installation directory can not be detected or used!", e);
                 GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
                 // Run launcher without an update. Don't throw a LauncherStartFailedException.
