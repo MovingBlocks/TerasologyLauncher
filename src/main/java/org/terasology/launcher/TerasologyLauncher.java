@@ -39,9 +39,7 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.crashreporter.CrashReporter;
 import org.terasology.launcher.gui.javafx.ApplicationController;
-import org.terasology.launcher.log.TempLogFilePropertyDefiner;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
@@ -49,7 +47,6 @@ import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.MissingResourceException;
@@ -111,13 +108,14 @@ public final class TerasologyLauncher extends Application {
                     showMainStage(config);
                 }
             } catch (IOException | LauncherStartFailedException e) {
-                openCrashReporterAndExit(e);
+                logger.error("The TerasologyLauncher could not be started!", e);
+                System.exit(1);
             }
         });
 
         launcherInitTask.setOnFailed(event -> {
-            Platform.exit();
-            openCrashReporterAndExit((Exception) event.getSource().getException());
+            logger.error("The TerasologyLauncher could not be started!", event.getSource().getException());
+            System.exit(1);
         });
 
         launcherInitTask.setOnCancelled(event -> Platform.exit());
@@ -132,19 +130,6 @@ public final class TerasologyLauncher extends Application {
      */
     private static void initProxy() {
         System.setProperty("java.net.useSystemProxies", "true");
-    }
-
-    /**
-     * Opens the CrashReporter with the given exception and exits the launcher.
-     *
-     * @param e the exception causing the launcher to fail
-     */
-    private void openCrashReporterAndExit(Exception e) {
-        logger.error("The TerasologyLauncher could not be started!");
-
-        Path logFile = TempLogFilePropertyDefiner.getInstance().getLogFile();
-        CrashReporter.report(e, logFile);
-        System.exit(1);
     }
 
     private void showMainStage(final LauncherConfiguration launcherConfiguration) throws IOException {
