@@ -311,9 +311,12 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
      */
     private boolean confirmSourcesOverwrite() {
         return CompletableFuture.supplyAsync(() -> {
-            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            final Alert alert = new Alert(
+                    Alert.AlertType.WARNING,
+                    BundleUtils.getLabel("message_error_sourcesFile_content"),
+                    ButtonType.OK,
+                    new ButtonType(BundleUtils.getLabel("launcher_exit")));
             alert.setHeaderText(BundleUtils.getLabel("message_error_sourcesFile_header"));
-            alert.setContentText(BundleUtils.getLabel("message_error_sourcesFile_content"));
             alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
             return alert.showAndWait()
                     .map(btn -> btn == ButtonType.OK)

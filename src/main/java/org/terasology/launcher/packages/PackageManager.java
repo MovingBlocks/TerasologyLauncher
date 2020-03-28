@@ -114,6 +114,7 @@ public class PackageManager {
             return true;
         }
 
+        logger.trace("Validating sources.json using its schema");
         try (
                 InputStream schemaIn = getClass().getResourceAsStream(SOURCES_SCHEMA);
                 InputStream jsonIn = Files.newInputStream(sourcesFile)
@@ -124,7 +125,7 @@ public class PackageManager {
                     .schemaJson(new JSONObject(new JSONTokener(schemaIn)))
                     .build().load().build();
 
-            schema.validate(new JSONArray((new JSONTokener(jsonIn))));
+            schema.validate(new JSONArray(new JSONTokener(jsonIn)));
             return true;
         } catch (ValidationException e) {
             logger.error("sources.json has invalid value at: {}", e.getPointerToViolation());
