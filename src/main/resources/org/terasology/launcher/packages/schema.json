@@ -12,10 +12,12 @@
       "trackedPackages": {
         "type": "array",
         "items": {
-          "oneOf": [
-            {"$ref": "subschema/TrackedPackage.json#/v1"},
-            {"$ref": "subschema/TrackedPackage.json#/v2"}
-          ]
+          "type": "object",
+          "properties": {
+            "id": {"type": "string", "minLength": 1},
+            "name": {"type": "string", "minLength": 1}
+          },
+          "required": ["id", "name"]
         }
       }
     },

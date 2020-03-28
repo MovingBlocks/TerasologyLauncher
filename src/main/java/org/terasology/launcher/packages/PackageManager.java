@@ -21,7 +21,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -126,17 +125,15 @@ public class PackageManager {
                 InputStream sourcesJson = Files.newInputStream(sourcesFile);
                 InputStream sourcesJsonForGson = Files.newInputStream(sourcesFile)
         ) {
-            final Schema schema = SchemaLoader.builder()
-                    .schemaClient(SchemaClient.classPathAwareClient())
-                    .resolutionScope("classpath://org/terasology/launcher/packages/schema.json")
-                    .schemaJson(new JSONObject(new JSONTokener(schemaIn)))
-                    .build().load().build();
 
             InputStreamReader reader = new InputStreamReader(sourcesJsonForGson);
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(DatabaseRepository.class, new DatabaseRepositoryDeserializer())
                     .create();
             gson.fromJson(reader, DatabaseRepository[].class);
+
+            JSONObject rawSchema = new JSONObject(new JSONTokener(schemaIn));
+            Schema schema = SchemaLoader.load(rawSchema);
 
             JSONArray toValidate = new JSONArray(new JSONTokener(sourcesJson));
             schema.validate(toValidate);
