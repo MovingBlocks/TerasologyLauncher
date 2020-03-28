@@ -83,97 +83,6 @@ public class ApplicationController {
     private static final long MB = 1024L * 1024;
     private static final long MINIMUM_FREE_SPACE = 200 * MB;
 
-    private static final class DownloadTask extends Task<Void> implements ProgressListener {
-        private static final Logger logger = LoggerFactory.getLogger(DownloadTask.class);
-
-        private final PackageManager packageManager;
-        private final VersionItem target;
-        private Runnable cleanup;
-
-        DownloadTask(PackageManager packageManager, VersionItem target) {
-            this.packageManager = packageManager;
-            this.target = target;
-        }
-
-        @Override
-        protected Void call() {
-            final Package targetPkg = target.linkedPackageProperty.get();
-            try {
-                packageManager.install(targetPkg, this);
-            } catch (IOException | DownloadException e) {
-                logger.error("Failed to download package: {}-{}",
-                        targetPkg.getId(), targetPkg.getVersion(), e);
-            }
-            return null;
-        }
-
-        @Override
-        public void update() {
-        }
-
-        @Override
-        public void update(int progress) {
-            updateProgress(progress, 100);
-        }
-
-        @Override
-        protected void succeeded() {
-            target.installedProperty.set(true);
-        }
-
-        @Override
-        protected void done() {
-            if (cleanup != null) {
-                Platform.runLater(cleanup);
-            }
-        }
-
-        public void onDone(Runnable cleanupCallback) {
-            cleanup = cleanupCallback;
-        }
-    }
-
-    private static final class DeleteTask extends Task<Void> {
-        private static final Logger logger = LoggerFactory.getLogger(DeleteTask.class);
-
-        private final PackageManager packageManager;
-        private final VersionItem target;
-        private Runnable cleanup;
-
-        DeleteTask(PackageManager packageManager, VersionItem target) {
-            this.packageManager = packageManager;
-            this.target = target;
-        }
-
-        @Override
-        protected Void call() {
-            final Package targetPkg = target.linkedPackageProperty.get();
-            try {
-                packageManager.remove(targetPkg);
-            } catch (IOException e) {
-                logger.error("Failed to remove package: {}-{}",
-                        targetPkg.getId(), targetPkg.getVersion(), e);
-            }
-            return null;
-        }
-
-        @Override
-        protected void succeeded() {
-            target.installedProperty.set(false);
-        }
-
-        @Override
-        protected void done() {
-            if (cleanup != null) {
-                Platform.runLater(cleanup);
-            }
-        }
-
-        public void onDone(Runnable cleanupCallback) {
-            cleanup = cleanupCallback;
-        }
-    }
-
     private Path launcherDirectory;
     private Path downloadDirectory;
     private Path tempDirectory;
@@ -185,6 +94,10 @@ public class ApplicationController {
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private DownloadTask downloadTask;
+
+    private VersionItem selectedVersion;
+    private Package selectedPackage;
+    private ObservableList<PackageItem> packageItems;
 
     @FXML
     private ComboBox<PackageItem> jobBox;
@@ -219,7 +132,7 @@ public class ApplicationController {
     /**
      * Indicate whether the user's hard drive is running out of space for game downloads.
      */
-    final private Property<Optional<Warning>> warning;
+    private final Property<Optional<Warning>> warning;
 
     public ApplicationController() {
         warning = new SimpleObjectProperty(Optional.empty());
@@ -413,49 +326,13 @@ public class ApplicationController {
         footerController.setHostServices(hostServices);
     }
 
-    private VersionItem selectedVersion;
-    private Package selectedPackage;
-    private ObservableList<PackageItem> packageItems;
-
-    private static class PackageItem {
-        private final ReadOnlyStringProperty nameProperty;
-        private final ObservableList<VersionItem> versionItems;
-
-        PackageItem(final String name, final List<VersionItem> versions) {
-            nameProperty = new SimpleStringProperty(name);
-            versionItems = FXCollections.observableList(versions);
-        }
-
-        @Override
-        public String toString() {
-            return nameProperty.get();
-        }
-    }
-
-    private static class VersionItem {
-        private final ReadOnlyObjectProperty<Package> linkedPackageProperty;
-        private final ReadOnlyStringProperty versionProperty;
-        private final BooleanProperty installedProperty;
-
-        VersionItem(final Package linkedPackage) {
-            linkedPackageProperty = new SimpleObjectProperty<>(linkedPackage);
-            versionProperty = new SimpleStringProperty(linkedPackage.getVersion());
-            installedProperty = new SimpleBooleanProperty(linkedPackage.isInstalled());
-        }
-
-        @Override
-        public String toString() {
-            return versionProperty.get();
-        }
-    }
-
     // To be called after database sync is done
     private void onSync() {
         packageItems.clear();
         packageManager.getPackages()
                 .stream()
                 .collect(Collectors.groupingBy(Package::getName, //TODO this should be grouped by `id`
-                         Collectors.mapping(VersionItem::new, Collectors.toList())))
+                        Collectors.mapping(VersionItem::new, Collectors.toList())))
                 .forEach((name, versions) ->
                         packageItems.add(new PackageItem(name, versions)));
 
@@ -752,6 +629,129 @@ public class ApplicationController {
                 iconStatus.visibleProperty().bind(item.installedProperty);
                 setGraphic(root);
             }
+        }
+    }
+
+    private static final class DownloadTask extends Task<Void> implements ProgressListener {
+        private static final Logger logger = LoggerFactory.getLogger(DownloadTask.class);
+
+        private final PackageManager packageManager;
+        private final VersionItem target;
+        private Runnable cleanup;
+
+        DownloadTask(PackageManager packageManager, VersionItem target) {
+            this.packageManager = packageManager;
+            this.target = target;
+        }
+
+        @Override
+        protected Void call() {
+            final Package targetPkg = target.linkedPackageProperty.get();
+            try {
+                packageManager.install(targetPkg, this);
+            } catch (IOException | DownloadException e) {
+                logger.error("Failed to download package: {}-{}",
+                        targetPkg.getId(), targetPkg.getVersion(), e);
+            }
+            return null;
+        }
+
+        @Override
+        public void update() {
+        }
+
+        @Override
+        public void update(int progress) {
+            updateProgress(progress, 100);
+        }
+
+        @Override
+        protected void succeeded() {
+            target.installedProperty.set(true);
+        }
+
+        @Override
+        protected void done() {
+            if (cleanup != null) {
+                Platform.runLater(cleanup);
+            }
+        }
+
+        public void onDone(Runnable cleanupCallback) {
+            cleanup = cleanupCallback;
+        }
+    }
+
+    private static final class DeleteTask extends Task<Void> {
+        private static final Logger logger = LoggerFactory.getLogger(DeleteTask.class);
+
+        private final PackageManager packageManager;
+        private final VersionItem target;
+        private Runnable cleanup;
+
+        DeleteTask(PackageManager packageManager, VersionItem target) {
+            this.packageManager = packageManager;
+            this.target = target;
+        }
+
+        @Override
+        protected Void call() {
+            final Package targetPkg = target.linkedPackageProperty.get();
+            try {
+                packageManager.remove(targetPkg);
+            } catch (IOException e) {
+                logger.error("Failed to remove package: {}-{}",
+                        targetPkg.getId(), targetPkg.getVersion(), e);
+            }
+            return null;
+        }
+
+        @Override
+        protected void succeeded() {
+            target.installedProperty.set(false);
+        }
+
+        @Override
+        protected void done() {
+            if (cleanup != null) {
+                Platform.runLater(cleanup);
+            }
+        }
+
+        public void onDone(Runnable cleanupCallback) {
+            cleanup = cleanupCallback;
+        }
+    }
+
+    private static class PackageItem {
+        private final ReadOnlyStringProperty nameProperty;
+        private final ObservableList<VersionItem> versionItems;
+
+        PackageItem(final String name, final List<VersionItem> versions) {
+            nameProperty = new SimpleStringProperty(name);
+            versionItems = FXCollections.observableList(versions);
+        }
+
+        @Override
+        public String toString() {
+            return nameProperty.get();
+        }
+    }
+
+    private static class VersionItem {
+        private final ReadOnlyObjectProperty<Package> linkedPackageProperty;
+        private final ReadOnlyStringProperty versionProperty;
+        private final BooleanProperty installedProperty;
+
+        VersionItem(final Package linkedPackage) {
+            linkedPackageProperty = new SimpleObjectProperty<>(linkedPackage);
+            versionProperty = new SimpleStringProperty(linkedPackage.getVersion());
+            installedProperty = new SimpleBooleanProperty(linkedPackage.isInstalled());
+        }
+
+        @Override
+        public String toString() {
+            return versionProperty.get();
         }
     }
 }

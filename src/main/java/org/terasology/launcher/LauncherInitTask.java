@@ -28,11 +28,11 @@ import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
-import org.terasology.launcher.util.HostServices;
-import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.util.HostServices;
+import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.util.OperatingSystem;
@@ -135,7 +135,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
     private void initDirectory(Path dir, String errorLabel, DirectoryCreator... creators)
             throws LauncherStartFailedException {
         try {
-            for (DirectoryCreator creator: creators) {
+            for (DirectoryCreator creator : creators) {
                 creator.apply(dir);
             }
         } catch (IOException e) {
@@ -183,7 +183,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         boolean selfUpdaterStarted = false;
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
         final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
-        final GitHubRelease release = updater.updateAvailable() ;
+        final GitHubRelease release = updater.updateAvailable();
         if (release != null) {
             logger.info("Launcher update available: {}", release.getTagName());
             updateMessage(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
@@ -201,9 +201,10 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 if (update) {
                     showDownloadPage();
                     // TODO: start self-updater instead
-                    if (false){
+                    if (false) {
                         final Path targetDirectory = saveDownloadedFiles ? downloadDirectory : tempDirectory;
-                        selfUpdaterStarted = updater.update(targetDirectory, tempDirectory);}
+                        selfUpdaterStarted = updater.update(targetDirectory, tempDirectory);
+                    }
                 }
             }
         }

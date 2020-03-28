@@ -36,7 +36,7 @@ import java.util.Locale;
  * is a singleton class and its instance should be
  * accessed only by using the {@code get()} method.
  */
-public class ConfigManager {
+public final class ConfigManager {
     private static final Logger logger = LoggerFactory.getLogger(ConfigManager.class);
     private static final String CONFIG_FILE = "config.json";
     private static volatile ConfigManager instance;
