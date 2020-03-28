@@ -16,6 +16,9 @@
 
 package org.terasology.launcher.packages;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaClient;
@@ -36,6 +39,7 @@ import org.terasology.launcher.util.ProgressListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -116,10 +120,11 @@ public class PackageManager {
             return true;
         }
 
-        logger.trace("Validating sources.json using its schema");
+        logger.trace("Validating '{}'", sourcesFile);
         try (
                 InputStream schemaIn = getClass().getResourceAsStream(SOURCES_SCHEMA);
-                InputStream jsonIn = Files.newInputStream(sourcesFile)
+                InputStream sourcesJson = Files.newInputStream(sourcesFile);
+                InputStream sourcesJsonForGson = Files.newInputStream(sourcesFile)
         ) {
             final Schema schema = SchemaLoader.builder()
                     .schemaClient(SchemaClient.classPathAwareClient())
@@ -127,11 +132,18 @@ public class PackageManager {
                     .schemaJson(new JSONObject(new JSONTokener(schemaIn)))
                     .build().load().build();
 
-            schema.validate(new JSONArray(new JSONTokener(jsonIn)));
+            InputStreamReader reader = new InputStreamReader(sourcesJsonForGson);
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(DatabaseRepository.class, new DatabaseRepositoryDeserializer())
+                    .create();
+            gson.fromJson(reader, DatabaseRepository[].class);
+
+            JSONArray toValidate = new JSONArray(new JSONTokener(sourcesJson));
+            schema.validate(toValidate);
             return true;
         } catch (ValidationException e) {
             logger.error("sources.json has invalid value at: {}", e.getPointerToViolation());
-        } catch (JSONException e) {
+        } catch (JSONException | JsonSyntaxException e) {
             logger.error("sources.json has syntax error: {}", e.getMessage());
         } catch (IOException e) {
             logger.error("Failed to validate sources.json: {}", e.getMessage());
