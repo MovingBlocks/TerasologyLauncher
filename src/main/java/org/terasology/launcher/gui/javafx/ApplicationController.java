@@ -327,6 +327,7 @@ public class ApplicationController {
             progressBar.setVisible(false);
             startAndDownloadButton.setVisible(true);
             cancelDownloadButton.setVisible(false);
+            packageManager.syncDatabase();
 
             if (selectedPackage.isInstalled()) {
                 startAndDownloadButton.setGraphic(playImage);
@@ -378,6 +379,7 @@ public class ApplicationController {
                     deleteButton.setDisable(true);
                     final DeleteTask deleteTask = new DeleteTask(packageManager, selectedVersion);
                     deleteTask.onDone(() -> {
+                        packageManager.syncDatabase();
                         if (!selectedPackage.isInstalled()) {
                             startAndDownloadButton.setGraphic(downloadImage);
                         } else {
@@ -549,7 +551,7 @@ public class ApplicationController {
                         .anyMatch(vItem -> vItem.linkedPackageProperty.get().getId().equals(jobId)));
     }
 
-    /**
+    /*
      * TODO: Reduce boilerplate code after switching to >= Java 9
      * Optional<Package> pkg = getLastPlayed()
      * 	.or(() -> getLastInstalled())
