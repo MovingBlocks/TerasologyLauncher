@@ -29,14 +29,11 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.github.GitHubClient;
 import org.terasology.launcher.github.GitHubRelease;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -81,14 +78,6 @@ public final class LauncherUpdater {
             logger.warn("Update check failed: {}", e.getMessage());
         }
         return null;
-    }
-
-    public void detectAndCheckLauncherInstallationDirectory() throws URISyntaxException, IOException {
-        final Path launcherLocation = Paths.get(LauncherUpdater.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-        logger.trace("Launcher location: {}", launcherLocation);
-        launcherInstallationDirectory = launcherLocation.getParent().getParent();
-        FileUtils.ensureWritableDir(launcherInstallationDirectory);
-        logger.trace("Launcher installation directory: {}", launcherInstallationDirectory);
     }
 
     public boolean showUpdateDialog(Stage parentStage, final GitHubRelease release) {

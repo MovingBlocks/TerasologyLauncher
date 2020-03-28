@@ -21,8 +21,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -101,22 +99,19 @@ public final class TerasologyLauncher extends Application {
         showSplashStage(initialStage, launcherInitTask);
         Thread initThread = new Thread(launcherInitTask);
 
-        launcherInitTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(final WorkerStateEvent workerStateEvent) {
-                try {
-                    LauncherConfiguration config = launcherInitTask.getValue();
-                    if (config == null) {
-                        throw new LauncherStartFailedException("Launcher configuration was `null`.");
-                    } else if (config instanceof NullLauncherConfiguration) {
-                        logger.info("Closing the launcher ... (empty configuration, probably due to update)");
-                        Platform.exit();
-                    } else {
-                        showMainStage(config);
-                    }
-                } catch (IOException | LauncherStartFailedException e) {
-                    openCrashReporterAndExit(e);
+        launcherInitTask.setOnSucceeded(workerStateEvent -> {
+            try {
+                LauncherConfiguration config = launcherInitTask.getValue();
+                if (config == null) {
+                    throw new LauncherStartFailedException("Launcher configuration was `null`.");
+                } else if (config instanceof NullLauncherConfiguration) {
+                    logger.info("Closing the launcher ... (empty configuration, probably due to update)");
+                    Platform.exit();
+                } else {
+                    showMainStage(config);
                 }
+            } catch (IOException | LauncherStartFailedException e) {
+                openCrashReporterAndExit(e);
             }
         });
 

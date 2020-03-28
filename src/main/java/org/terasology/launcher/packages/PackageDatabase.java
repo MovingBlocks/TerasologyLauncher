@@ -39,9 +39,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Provides package details from all online and local repositories.
@@ -142,6 +144,13 @@ class PackageDatabase {
 
     List<Package> getPackages() {
         return Collections.unmodifiableList(database);
+    }    
+    
+    Optional<Package> getLatestInstalledPackageForId(String packageId) {
+        return database.stream()
+                        .filter(pkg -> pkg.getId().equals(packageId) && pkg.isInstalled())
+                        .sorted(Comparator.comparing(Package::getVersion).reversed())
+                        .findFirst();
     }
 
     static class PackageMetadata implements Serializable {

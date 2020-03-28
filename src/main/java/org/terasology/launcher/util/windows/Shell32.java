@@ -34,7 +34,9 @@ public interface Shell32 extends StdCallLibrary {
 
     Shell32 INSTANCE = (Shell32) Native.loadLibrary("shell32", Shell32.class, W32APIOptions.UNICODE_OPTIONS);
 
+    @SuppressWarnings("checkstyle:methodname")
     int SHGetKnownFolderPath(Guid.GUID rfid, int dwFlags, WinNT.HANDLE hToken, PointerByReference pszPath);
 
+    @SuppressWarnings("checkstyle:methodname")
     int SHGetFolderPath(WinDef.HWND hwndOwner, int nFolder, WinNT.HANDLE hToken, int dwFlags, char[] pszPath);
 }

@@ -28,6 +28,8 @@ import java.nio.file.Path;
  *  - directories managed by the launcher
  *  - user settings in form of {@link BaseLauncherSettings}
  *  - the {@link PackageManager} used to download new games
+ *
+ * @deprecated use {@link org.terasology.launcher.config.Config} instead
  */
 @Deprecated
 public class LauncherConfiguration {

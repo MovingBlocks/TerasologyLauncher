@@ -134,7 +134,6 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 checkstyle {
-    ignoreFailures = true
     configFile = new File("$rootDir/config/metrics/checkstyle/checkstyle.xml")
     configProperties.samedir = checkstyle.configFile.parentFile
 }

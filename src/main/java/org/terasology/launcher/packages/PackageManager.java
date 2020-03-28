@@ -41,6 +41,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Handles installation, removal and update of game packages.
@@ -48,7 +49,6 @@ import java.util.Objects;
 public class PackageManager {
 
     private static final Logger logger = LoggerFactory.getLogger(PackageManager.class);
-    private static final String INSTALL_DIRECTORY = "games";
     private static final String SOURCES_FILENAME = "sources.json";
     private static final String SOURCES_SCHEMA = "schema.json";
     private static final String DATABASE_FILENAME = "packages.db";
@@ -64,14 +64,14 @@ public class PackageManager {
     public PackageManager(Path launcherDir, Path gameDir) {
         onlineRepository = new JenkinsRepository();
         cacheDir = launcherDir.resolve(CACHE_DIRECTORY);
-        installDir = gameDir.resolve(INSTALL_DIRECTORY);
+        installDir = gameDir;
         sourcesFile = launcherDir.resolve(SOURCES_FILENAME);
     }
 
     /**
      * Sets up local storage for working with game packages and cache files.
      *
-     * @param gameDirectory directory path for storing game packages
+     * @param gameDirectory  directory path for storing game packages
      * @param cacheDirectory directory path for storing cache files
      */
     public void initLocalStorage(Path gameDirectory, Path cacheDirectory) {
@@ -172,7 +172,7 @@ public class PackageManager {
     /**
      * Installs the mentioned package into the local repository.
      *
-     * @param target the package to be installed
+     * @param target   the package to be installed
      * @param listener the object which is to be informed about task progress
      */
     public void install(Package target, ProgressListener listener) throws IOException, DownloadException {
@@ -250,6 +250,10 @@ public class PackageManager {
     public List<Integer> getPackageVersions(PackageBuild pkgBuild) {
         return Objects.requireNonNull(localRepository, "Local storage uninitialized")
                 .getPackageVersions(pkgBuild);
+    }
+
+    public Optional<Package> getLatestInstalledPackageForId(String packageId) {
+        return database.getLatestInstalledPackageForId(packageId);
     }
 
     public Path resolveInstallDir(Package target) {
