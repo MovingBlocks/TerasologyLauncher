@@ -222,41 +222,6 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }
     }
 
-    private Path getGameDirectory(OperatingSystem os, Path settingsGameDirectory) throws LauncherStartFailedException {
-        logger.trace("Init GameDirectory...");
-        Path gameDirectory = settingsGameDirectory;
-        if (gameDirectory != null) {
-            try {
-                FileUtils.ensureWritableDir(gameDirectory);
-            } catch (IOException e) {
-                logger.warn("The game directory can not be created or used! '{}'", gameDirectory, e);
-                GuiUtils.showWarningMessageDialog(owner, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
-
-                // Set gameDirectory to 'null' -> user has to choose new game directory
-                gameDirectory = null;
-            }
-        }
-        if (gameDirectory == null) {
-            logger.trace("Choose installation directory for the game...");
-            updateMessage(BundleUtils.getLabel("splash_chooseGameDirectory"));
-            gameDirectory = GuiUtils.chooseDirectoryDialog(owner, LauncherDirectoryUtils.getApplicationDirectory(os, LauncherDirectoryUtils.GAME_APPLICATION_DIR_NAME),
-                    BundleUtils.getLabel("message_dialog_title_chooseGameDirectory"));
-            if (gameDirectory == null || Files.notExists(gameDirectory)) {
-                logger.info("The new game directory is not approved. The TerasologyLauncher is terminated.");
-                Platform.exit();
-            }
-        }
-        try {
-            FileUtils.ensureWritableDir(gameDirectory);
-        } catch (IOException e) {
-            logger.error("The game directory can not be created or used! '{}'", gameDirectory, e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
-            throw new LauncherStartFailedException();
-        }
-        logger.debug("Game directory: {}", gameDirectory);
-        return gameDirectory;
-    }
-
     private Path getGameDataDirectory(OperatingSystem os, Path settingsGameDataDirectory) throws LauncherStartFailedException {
         logger.trace("Init GameDataDirectory...");
         Path gameDataDirectory = settingsGameDataDirectory;
