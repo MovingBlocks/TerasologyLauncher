@@ -104,7 +104,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             // TODO: Does this interact with any remote server for fetching/initializing the database?
             logger.trace("Setting up Package Manager");
-            final PackageManager packageManager = new PackageManager(installationDirectory, gameDirectory);
+            final PackageManager packageManager = new PackageManager(userDataDirectory, gameDirectory);
             if (!packageManager.validateSources()) {
                 if (confirmSourcesOverwrite()) {
                     packageManager.copyDefaultSources();

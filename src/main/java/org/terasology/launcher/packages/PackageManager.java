@@ -63,11 +63,11 @@ public class PackageManager {
     private Path installDir;
     private Path sourcesFile;
 
-    public PackageManager(Path launcherDir, Path gameDir) {
+    public PackageManager(Path userDataDir, Path gameDir) {
         onlineRepository = new JenkinsRepository();
-        cacheDir = launcherDir.resolve(CACHE_DIRECTORY);
+        cacheDir = userDataDir.resolve(CACHE_DIRECTORY);
         installDir = gameDir;
-        sourcesFile = launcherDir.resolve(SOURCES_FILENAME);
+        sourcesFile = userDataDir.resolve(SOURCES_FILENAME);
     }
 
     /**
