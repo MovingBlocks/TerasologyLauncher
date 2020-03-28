@@ -28,11 +28,11 @@ import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
-import org.terasology.launcher.util.HostServices;
-import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.util.HostServices;
+import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.util.OperatingSystem;
@@ -69,11 +69,12 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             // init directories
             updateMessage(BundleUtils.getLabel("splash_initLauncherDirs"));
+            final Path installationDirectory = LauncherDirectoryUtils.getInstallationDirectory();
             final Path launcherDirectory = getLauncherDirectory(os);
 
-            final Path downloadDirectory = getDirectoryFor(org.terasology.launcher.util.LauncherManagedDirectory.DOWNLOAD, launcherDirectory);
-            final Path tempDirectory = getDirectoryFor(org.terasology.launcher.util.LauncherManagedDirectory.TEMP, launcherDirectory);
-            final Path cacheDirectory = getDirectoryFor(org.terasology.launcher.util.LauncherManagedDirectory.CACHE, launcherDirectory);
+            final Path downloadDirectory = getDirectoryFor(LauncherManagedDirectory.DOWNLOAD, launcherDirectory);
+            final Path tempDirectory = getDirectoryFor(LauncherManagedDirectory.TEMP, launcherDirectory);
+            final Path cacheDirectory = getDirectoryFor(LauncherManagedDirectory.CACHE, launcherDirectory);
 
             // launcher settings
             final BaseLauncherSettings launcherSettings = getLauncherSettings(launcherDirectory);
@@ -92,7 +93,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             // game directories
             updateMessage(BundleUtils.getLabel("splash_initGameDirs"));
-            final Path gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory());
+            final Path gameDirectory = getDirectoryFor(LauncherManagedDirectory.GAMES, installationDirectory);
             final Path gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory());
 
             // TODO: Does this interact with any remote server for fetching/initializing the database?
