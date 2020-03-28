@@ -532,9 +532,11 @@ public class ApplicationController {
         });
     }
 
-    /*
-     * filters the items of `comboBox` with `predicate` and
-     * selects the first resulting or if none, the first of the `comboBox` items
+    /**
+     * Select the first item matching given predicate, select the first item otherwise.
+     *
+     * @param comboBox  the combo box to change the selection for
+     * @param predicate first item matching this predicate will be selected
      */
     private <T> void selectItem(final ComboBox<T> comboBox, Predicate<T> predicate) {
         final T item = comboBox.getItems().stream()
@@ -551,14 +553,18 @@ public class ApplicationController {
                         .anyMatch(vItem -> vItem.linkedPackageProperty.get().getId().equals(jobId)));
     }
 
-    /*
-     * TODO: Reduce boilerplate code after switching to >= Java 9
-     * Optional<Package> pkg = getLastPlayed()
-     * 	.or(() -> getLastInstalled())
-     * 	.or(() -> getLatestInstalled());
+    /**
+     * Initialize selected game job and version based on last played and last installed games.
      *
-     * this.select(pkg);
+     * The selection is derived from the following precedence rules:
+     * <ol>
+     *     <li>Select the <b>last played game</b></li>
+     *     <li>Select the <b>last installed game</b></li>
+     *     <li>Select <b>latest version of default job</b> otherwise</li>
+     * </ol>
      */
+    //TODO: Reduce boilerplate code after switching to >= Java 9
+    //      Use 'Optional::or' to chain logic together
     private void initializeComboBoxSelection() {
         String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
         if (!lastPlayedGameJob.isEmpty()) {
