@@ -71,8 +71,6 @@ public class SettingsController {
     @FXML
     private Button gameDataDirectoryOpenButton;
     @FXML
-    private Button gameDataDirectoryEditButton;
-    @FXML
     private Label gameDirectoryLabel;
     @FXML
     private Label gameDataDirectoryLabel;
@@ -188,21 +186,6 @@ public class SettingsController {
     }
 
     @FXML
-    protected void editGameDataDirectoryAction() {
-        final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
-        if (selectedFile != null) {
-            try {
-                FileUtils.ensureWritableDir(selectedFile);
-                gameDataDirectory = selectedFile;
-                updateDirectoryPathLabels();
-            } catch (IOException e) {
-                logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
-                GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
-            }
-        }
-    }
-
-    @FXML
     protected void openLauncherDirectoryAction() {
         GuiUtils.openFileBrowser(stage, launcherDirectory, BundleUtils.getLabel("message_error_launcherDirectory"));
     }
@@ -263,7 +246,6 @@ public class SettingsController {
         initialHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_initialHeapSize"));
         gameDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_open"));
         gameDataDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_open"));
-        gameDataDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_edit"));
         gameDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDirectory"));
         gameDataDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDataDirectory"));
 

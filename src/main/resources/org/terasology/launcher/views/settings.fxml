@@ -92,7 +92,6 @@
                        <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                            <children>
                               <Button fx:id="gameDataDirectoryOpenButton" mnemonicParsing="false" onAction="#openGameDataDirectoryAction" text="Button" />
-                              <Button fx:id="gameDataDirectoryEditButton" mnemonicParsing="false" onAction="#editGameDataDirectoryAction" text="Browse" />
                            </children>
                         </HBox>
                        <TitledPane animated="false" text="Advanced options" GridPane.columnSpan="2147483647"
