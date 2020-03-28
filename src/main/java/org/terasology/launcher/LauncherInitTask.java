@@ -70,14 +70,14 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // init directories
             updateMessage(BundleUtils.getLabel("splash_initLauncherDirs"));
             final Path installationDirectory = LauncherDirectoryUtils.getInstallationDirectory();
-            final Path launcherDirectory = getLauncherDirectory(os);
+            final Path userDataDirectory = getLauncherDirectory(os);
 
-            final Path downloadDirectory = getDirectoryFor(LauncherManagedDirectory.DOWNLOAD, launcherDirectory);
-            final Path tempDirectory = getDirectoryFor(LauncherManagedDirectory.TEMP, launcherDirectory);
-            final Path cacheDirectory = getDirectoryFor(LauncherManagedDirectory.CACHE, launcherDirectory);
+            final Path downloadDirectory = getDirectoryFor(LauncherManagedDirectory.DOWNLOAD, userDataDirectory);
+            final Path tempDirectory = getDirectoryFor(LauncherManagedDirectory.TEMP, userDataDirectory);
+            final Path cacheDirectory = getDirectoryFor(LauncherManagedDirectory.CACHE, userDataDirectory);
 
             // launcher settings
-            final BaseLauncherSettings launcherSettings = getLauncherSettings(launcherDirectory);
+            final BaseLauncherSettings launcherSettings = getLauncherSettings(userDataDirectory);
 
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
@@ -100,7 +100,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             logger.trace("Setting up Package Manager");
             final PackageManager packageManager = new PackageManager();
             packageManager.initLocalStorage(gameDirectory, cacheDirectory);
-            packageManager.initDatabase(launcherDirectory, gameDirectory);
+            packageManager.initDatabase(userDataDirectory, gameDirectory);
             packageManager.syncDatabase();
 
             logger.trace("Change LauncherSettings...");
@@ -112,7 +112,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             logger.trace("Creating launcher frame...");
 
-            return new LauncherConfiguration(launcherDirectory, downloadDirectory, tempDirectory, cacheDirectory, launcherSettings, packageManager);
+            return new LauncherConfiguration(userDataDirectory, downloadDirectory, tempDirectory, cacheDirectory, launcherSettings, packageManager);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
         }
