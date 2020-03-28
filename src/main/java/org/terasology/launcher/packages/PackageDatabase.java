@@ -18,14 +18,11 @@ package org.terasology.launcher.packages;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.packages.db.DatabaseRepositoryDeserializer;
+import org.terasology.launcher.packages.db.DatabaseRepository;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,11 +30,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -52,41 +46,40 @@ class PackageDatabase {
 
     private static final Logger logger = LoggerFactory.getLogger(PackageDatabase.class);
 
-    private final Path sourcesFile;
     private final Path databaseFile;
     private final Path installDir;
     private final Gson gson;
     private final List<Package> database;
 
-    PackageDatabase(Path sourcesFile, Path databaseFile, Path installDir) {
-        this.sourcesFile = sourcesFile;
+    PackageDatabase(Path databaseFile, Path installDir) {
         this.databaseFile = databaseFile;
         this.installDir = installDir;
         gson = new GsonBuilder()
-                .registerTypeAdapter(Repository.class, new RepositoryDeserializer())
+                .registerTypeAdapter(DatabaseRepository.class, new DatabaseRepositoryDeserializer())
                 .create();
         database = loadDatabase();
         markInstalled();
     }
 
     /**
-     * Fetches details of all packages for each repository specified
-     * in {@link #sourcesFile}.
+     * Fetches details of all packages for each repository specified in {@code sourcesFile}.
+     *
+     * @param sourcesFile
      */
-    void sync() {
+    void sync(Path sourcesFile) {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(Files.newInputStream(sourcesFile))
         )) {
             final List<Package> newDatabase = new LinkedList<>();
-            for (Repository source : gson.fromJson(reader, Repository[].class)) {
-                logger.trace("Fetching package list from: {}", source.url);
+            for (DatabaseRepository source : gson.fromJson(reader, DatabaseRepository[].class)) {
+                logger.trace("Fetching package list from: {}", source.getUrl());
                 newDatabase.addAll(packageListOf(source));
             }
 
             database.clear();
             database.addAll(newDatabase);
-        } catch (IOException e) {
-            logger.error("Failed to read sources: {}", sourcesFile);
+        } catch (IOException | JsonSyntaxException e) {
+            logger.error("Failed to read sources file '{}': {}", sourcesFile, e.getMessage());
             logger.warn("Aborting database synchronisation");
         } finally {
             markInstalled();
@@ -112,8 +105,8 @@ class PackageDatabase {
         }
     }
 
-    private List<Package> packageListOf(Repository source) {
-        return Objects.requireNonNull(RepositoryHandler.ofType(source.type), "Invalid repository type")
+    private List<Package> packageListOf(DatabaseRepository source) {
+        return Objects.requireNonNull(RepositoryHandler.ofType(source.getType()), "Invalid repository type")
                 .getPackageList(source);
     }
 
@@ -153,66 +146,4 @@ class PackageDatabase {
                         .findFirst();
     }
 
-    static class PackageMetadata implements Serializable {
-        private String id;
-        private String name;
-
-        public String getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
-
-    static class Repository implements Serializable {
-        private String url;
-        private String type;
-        private PackageMetadata[] trackedPackages;
-
-        String getUrl() {
-            return url;
-        }
-
-        PackageMetadata[] getTrackedPackages() {
-            return trackedPackages;
-        }
-    }
-
-    private static class RepositoryDeserializer implements JsonDeserializer<Repository> {
-        @Override
-        public Repository deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
-            final Repository repo = new Repository();
-            final JsonObject obj = json.getAsJsonObject();
-
-            repo.url = obj.get("url").getAsString();
-            repo.type = obj.get("type").getAsString();
-
-            final JsonArray pkgs = obj.getAsJsonArray("trackedPackages");
-            final List<PackageMetadata> tracked = new ArrayList<>(pkgs.size());
-            for (JsonElement e : pkgs) {
-                final PackageMetadata metadata = new PackageMetadata();
-
-                if (e.isJsonObject()) {
-                    // Newer schema
-                    JsonObject tmp = e.getAsJsonObject();
-                    metadata.id = tmp.get("id").getAsString();
-                    metadata.name = tmp.get("name").getAsString();
-                } else if (e.isJsonPrimitive()) {
-                    // Older schema
-                    String tmp = e.getAsString();
-                    metadata.id = tmp;
-                    metadata.name = tmp;
-                } else {
-                    throw new JsonParseException("Invalid format for \"trackedPackages\"");
-                }
-                tracked.add(metadata);
-            }
-            repo.trackedPackages = tracked.toArray(new PackageMetadata[0]);
-
-            return repo;
-        }
-    }
 }

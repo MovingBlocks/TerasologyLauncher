@@ -26,6 +26,8 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.packages.db.DatabaseRepository;
+import org.terasology.launcher.packages.db.DatabaseRepositoryDeserializer;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
@@ -157,7 +159,6 @@ public class PackageManager {
      */
     public void initDatabase() {
         database = new PackageDatabase(
-                sourcesFile,
                 sourcesFile.resolveSibling(DATABASE_FILENAME),
                 installDir
         );
@@ -166,7 +167,7 @@ public class PackageManager {
     // TODO: Replace similar methods
     public void syncDatabase() {
         Objects.requireNonNull(database)
-                .sync();
+                .sync(sourcesFile);
     }
 
     /**

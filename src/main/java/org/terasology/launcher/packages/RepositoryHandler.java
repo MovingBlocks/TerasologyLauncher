@@ -17,12 +17,13 @@
 package org.terasology.launcher.packages;
 
 import java.util.List;
+import org.terasology.launcher.packages.db.DatabaseRepository;
 
 /**
  * Provides method to fetch all packages from a repository.
  */
 interface RepositoryHandler {
-    List<Package> getPackageList(PackageDatabase.Repository source);
+    List<Package> getPackageList(DatabaseRepository source);
 
     static RepositoryHandler ofType(String type) {
         switch (type) {
