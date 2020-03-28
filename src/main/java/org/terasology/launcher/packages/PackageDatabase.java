@@ -138,7 +138,7 @@ class PackageDatabase {
     Optional<Package> getLatestInstalledPackageForId(String packageId) {
         return database.stream()
                         .filter(pkg -> pkg.getId().equals(packageId) && pkg.isInstalled())
-                        .sorted(Comparator.comparing(Package::getVersion))
+                        .sorted(Comparator.comparing(Package::getVersion).reversed())
                         .findFirst();
     }
 
