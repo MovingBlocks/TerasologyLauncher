@@ -32,6 +32,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Handles installation, removal and update of game packages.
@@ -195,6 +196,10 @@ public class PackageManager {
     public List<Integer> getPackageVersions(PackageBuild pkgBuild) {
         return Objects.requireNonNull(localRepository, "Local storage uninitialized")
                 .getPackageVersions(pkgBuild);
+    }
+
+    public Optional<Package> getLatestInstalledPackageForId(String packageId) {
+        return database.getLatestInstalledPackageForId(packageId);
     }
 
     public Path resolveInstallDir(Package target) {

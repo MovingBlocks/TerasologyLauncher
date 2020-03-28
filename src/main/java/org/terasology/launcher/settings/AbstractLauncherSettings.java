@@ -53,6 +53,11 @@ public abstract class AbstractLauncherSettings {
         initUserJavaParameters();
         initUserGameParameters();
         initLogLevel();
+        initDefaultGameJob();
+        initLastPlayedGameJob();
+        initLastPlayedGameVersion();
+        initLastInstalledGameJob();
+        initLastInstalledGameVersion();
     }
 
     // --------------------------------------------------------------------- //
@@ -80,6 +85,16 @@ public abstract class AbstractLauncherSettings {
     protected abstract void initMaxHeapSize();
 
     protected abstract void initLocale();
+
+    protected abstract void initDefaultGameJob();
+
+    protected abstract void initLastPlayedGameJob();
+
+    protected abstract void initLastPlayedGameVersion();
+
+    protected abstract void initLastInstalledGameJob();
+
+    protected abstract void initLastInstalledGameVersion();
 
     // --------------------------------------------------------------------- //
     // GETTERS
@@ -115,6 +130,16 @@ public abstract class AbstractLauncherSettings {
 
     public abstract boolean isKeepDownloadedFiles();
 
+    public abstract String getDefaultGameJob();
+
+    public abstract String getLastPlayedGameJob();
+
+    public abstract String getLastPlayedGameVersion();
+
+    public abstract String getLastInstalledGameJob();
+
+    public abstract String getLastInstalledGameVersion();
+
     // --------------------------------------------------------------------- //
     // SETTERS
     // --------------------------------------------------------------------- //
@@ -140,4 +165,14 @@ public abstract class AbstractLauncherSettings {
     public abstract void setGameDirectory(Path gameDirectory);
 
     public abstract void setGameDataDirectory(Path gameDataDirectory);
+
+    public abstract void setDefaultGameJob(String lastPlayedGameJob);
+
+    public abstract void setLastPlayedGameJob(String lastPlayedGameJob);
+
+    public abstract void setLastPlayedGameVersion(String lastPlayedGameVersion);
+
+    public abstract void setLastInstalledGameJob(String lastInstalledGameJob);
+
+    public abstract void setLastInstalledGameVersion(String lastInstalledGameVersion);
 }

@@ -74,6 +74,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ApplicationController {
@@ -206,12 +207,17 @@ public class ApplicationController {
                     launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
             if (!gameStarted) {
                 GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
-            } else if (launcherSettings.isCloseLauncherAfterGameStart()) {
-                if (gameDownloadWorker == null) {
-                    logger.info("Close launcher after game start.");
-                    close();
-                } else {
-                    logger.info("The launcher can not be closed after game start, because a download is running.");
+            } else {
+                launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
+                launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
+
+                if (launcherSettings.isCloseLauncherAfterGameStart()) {
+                    if (gameDownloadWorker == null) {
+                        logger.info("Close launcher after game start.");
+                        close();
+                    } else {
+                        logger.info("The launcher can not be closed after game start, because a download is running.");
+                    }
                 }
             }
         }
@@ -234,10 +240,13 @@ public class ApplicationController {
             progressBar.setVisible(false);
             startAndDownloadButton.setVisible(true);
             cancelDownloadButton.setVisible(false);
+            packageManager.syncDatabase();
 
             if (selectedPackage.isInstalled()) {
                 startAndDownloadButton.setGraphic(playImage);
                 deleteButton.setDisable(false);
+                launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
+                launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
             }
             downloadTask = null;
         });
@@ -275,10 +284,15 @@ public class ApplicationController {
                 .filter(response -> response == ButtonType.OK)
                 .ifPresent(response -> {
                     logger.info("Removing game: {}-{}", selectedPackage.getId(), selectedPackage.getVersion());
+                    // triggering a game deletion implies the player doesn't want to play this game anymore
+                    // hence, we unset `lastPlayedGameJob` and `lastPlayedGameVersion` settings independent of deletion success
+                    launcherSettings.setLastPlayedGameJob("");
+                    launcherSettings.setLastPlayedGameVersion("");
 
                     deleteButton.setDisable(true);
                     final DeleteTask deleteTask = new DeleteTask(packageManager, selectedVersion);
                     deleteTask.onDone(() -> {
+                        packageManager.syncDatabase();
                         if (!selectedPackage.isInstalled()) {
                             startAndDownloadButton.setGraphic(downloadImage);
                         } else {
@@ -324,6 +338,8 @@ public class ApplicationController {
         }
 
         footerController.setHostServices(hostServices);
+
+        initializeComboBoxSelection();
     }
 
     // To be called after database sync is done
@@ -356,8 +372,20 @@ public class ApplicationController {
     private void initComboBoxes() {
         jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             buildVersionBox.setItems(newVal.versionItems);
-            //TODO remember selection / select latest installed version
-            buildVersionBox.getSelectionModel().select(0);
+
+            String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
+            String selectedJobId = newVal.versionItems.get(0).linkedPackageProperty.get().getId();
+            if (lastPlayedGameJob.isEmpty() || !lastPlayedGameJob.equals(selectedJobId)) {
+                // select last installed package for the selected job or the latest one if none installed
+                String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(selectedJobId)
+                        .map(pkg -> pkg.getVersion()).orElseGet(() -> "");
+                selectItem(buildVersionBox, item ->
+                        item.versionProperty.get().equals(lastInstalledVersion));
+            } else {
+                // select the package last played
+                selectItem(buildVersionBox, item ->
+                        item.versionProperty.get().equals(launcherSettings.getLastPlayedGameVersion()));
+            }
         });
 
         buildVersionBox.setOnShowing(e -> resetScrollBar(buildVersionBox));
@@ -379,6 +407,70 @@ public class ApplicationController {
 
             changelogViewController.update(selectedPackage.getChangelog());
         });
+    }
+
+    /**
+     * Select the first item matching given predicate, select the first item otherwise.
+     *
+     * @param comboBox  the combo box to change the selection for
+     * @param predicate first item matching this predicate will be selected
+     */
+    private <T> void selectItem(final ComboBox<T> comboBox, Predicate<T> predicate) {
+        final T item = comboBox.getItems().stream()
+                .filter(predicate)
+                .findFirst()
+                .orElse(comboBox.getItems().get(0));
+
+        comboBox.getSelectionModel().select(item);
+    }
+
+    /**
+     * Select the package item with given {@code jobId} or the first item of {@code jobBox}.
+     *
+     * @param jobId the job id of the package to be selected
+     */
+    private void selectItemForJob(final String jobId) {
+        selectItem(jobBox, jobItem ->
+                jobItem.versionItems.stream()
+                        .anyMatch(vItem -> vItem.linkedPackageProperty.get().getId().equals(jobId)));
+    }
+
+    /**
+     * Initialize selected game job and version based on last played and last installed games.
+     *
+     * The selection is derived from the following precedence rules:
+     * <ol>
+     *     <li>Select the <b>last played game</b></li>
+     *     <li>Select the <b>last installed game</b></li>
+     *     <li>Select <b>latest version of default job</b> otherwise</li>
+     * </ol>
+     */
+    //TODO: Reduce boilerplate code after switching to >= Java 9
+    //      Use 'Optional::or' to chain logic together
+    private void initializeComboBoxSelection() {
+        String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
+        if (!lastPlayedGameJob.isEmpty()) {
+            // select the package last played
+            selectItemForJob(launcherSettings.getLastPlayedGameJob());
+            selectItem(buildVersionBox, item ->
+                    item.versionProperty.get().equals(launcherSettings.getLastPlayedGameVersion()));
+        } else {
+            String lastInstalledGameJob = launcherSettings.getLastInstalledGameJob();
+            if (!lastInstalledGameJob.isEmpty()) {
+                // select last installed package job and version
+                selectItemForJob(lastInstalledGameJob);
+                selectItem(buildVersionBox, item ->
+                        item.versionProperty.get().equals(launcherSettings.getLastInstalledGameVersion()));
+            } else {
+                // select last installed package for the default job or the latest one if none installed
+                String defaultGameJob = launcherSettings.getDefaultGameJob();
+                selectItemForJob(defaultGameJob);
+                String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(defaultGameJob)
+                        .map(pkg -> pkg.getVersion()).orElseGet(() -> "");
+                selectItem(buildVersionBox, item ->
+                        item.versionProperty.get().equals(lastInstalledVersion));
+            }
+        }
     }
 
     private void initButtons() {
