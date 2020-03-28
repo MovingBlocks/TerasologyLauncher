@@ -424,7 +424,12 @@ public class ApplicationController {
         comboBox.getSelectionModel().select(item);
     }
 
-    private void selectJobBoxItemForJob(final ComboBox<PackageItem> jobBox, final String jobId) {
+    /**
+     * Select the package item with given {@code jobId} or the first item of {@code jobBox}.
+     *
+     * @param jobId the job id of the package to be selected
+     */
+    private void selectItemForJob(final String jobId) {
         selectItem(jobBox, jobItem ->
                 jobItem.versionItems.stream()
                         .anyMatch(vItem -> vItem.linkedPackageProperty.get().getId().equals(jobId)));
@@ -446,20 +451,20 @@ public class ApplicationController {
         String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
         if (!lastPlayedGameJob.isEmpty()) {
             // select the package last played
-            selectJobBoxItemForJob(jobBox, launcherSettings.getLastPlayedGameJob());
+            selectItemForJob(launcherSettings.getLastPlayedGameJob());
             selectItem(buildVersionBox, item ->
                     item.versionProperty.get().equals(launcherSettings.getLastPlayedGameVersion()));
         } else {
             String lastInstalledGameJob = launcherSettings.getLastInstalledGameJob();
             if (!lastInstalledGameJob.isEmpty()) {
                 // select last installed package job and version
-                selectJobBoxItemForJob(jobBox, lastInstalledGameJob);
+                selectItemForJob(lastInstalledGameJob);
                 selectItem(buildVersionBox, item ->
                         item.versionProperty.get().equals(launcherSettings.getLastInstalledGameVersion()));
             } else {
                 // select last installed package for the default job or the latest one if none installed
                 String defaultGameJob = launcherSettings.getDefaultGameJob();
-                selectJobBoxItemForJob(jobBox, defaultGameJob);
+                selectItemForJob(defaultGameJob);
                 String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(defaultGameJob)
                         .map(pkg -> pkg.getVersion()).orElseGet(() -> "");
                 selectItem(buildVersionBox, item ->

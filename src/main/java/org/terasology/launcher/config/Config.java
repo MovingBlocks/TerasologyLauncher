@@ -78,9 +78,13 @@ public final class Config {
         return selectedPackage;
     }
 
-    public Package getLastPlayedGamePackage() { return lastPlayedGamePackage; }
+    public Package getLastPlayedGamePackage() {
+        return lastPlayedGamePackage;
+    }
 
-    public Package getLastInstalledGamePackage() { return lastInstalledGamePackage; }
+    public Package getLastInstalledGamePackage() {
+        return lastInstalledGamePackage;
+    }
 
     /**
      * Provides a pre-filled {@link Builder} instance
@@ -119,7 +123,8 @@ public final class Config {
         private Package lastPlayedGamePackage;
         private Package lastInstalledGamePackage;
 
-        private Builder() { }
+        private Builder() {
+        }
 
         private Builder(final Config last) {
             gameConfig = last.gameConfig;
