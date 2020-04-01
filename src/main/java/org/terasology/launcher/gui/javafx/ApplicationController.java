@@ -49,7 +49,6 @@ import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameStarter;
-import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
@@ -293,7 +292,7 @@ public class ApplicationController {
                 });
     }
 
-    public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
+    public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
                        final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
@@ -519,24 +518,9 @@ public class ApplicationController {
     }
 
     private void updateButtons() {
-        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-        if (gameVersion == null) {
-            deleteButton.setDisable(true);
-            startAndDownloadButton.setGraphic(downloadImage);
-            startAndDownloadButton.setDisable(true);
-        } else if (gameVersion.isInstalled()) {
-            deleteButton.setDisable(false);
-            startAndDownloadButton.setGraphic(playImage);
-            startAndDownloadButton.setDisable(false);
-        } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful() && (gameVersion.getBuildNumber() != null) && (gameDownloadWorker == null)) {
-            deleteButton.setDisable(true);
-            startAndDownloadButton.setGraphic(downloadImage);
-            startAndDownloadButton.setDisable(false);
-        } else {
-            deleteButton.setDisable(true);
-            startAndDownloadButton.setGraphic(downloadImage);
-            startAndDownloadButton.setDisable(true);
-        }
+        deleteButton.setDisable(true);
+        startAndDownloadButton.setGraphic(downloadImage);
+        startAndDownloadButton.setDisable(true);
 
         // Cancel download
         if (gameDownloadWorker != null) {
@@ -546,21 +530,6 @@ public class ApplicationController {
             cancelDownloadButton.setVisible(false);
             startAndDownloadButton.setVisible(true);
         }
-    }
-
-    private void updateBuildVersionBox() {
-//        buildVersionBox.getItems().clear();
-//
-//        final JobItem jobItem = jobBox.getSelectionModel().getSelectedItem();
-//        final int buildVersion = launcherSettings.getBuildVersion(jobItem.getJob());
-//
-//        for (TerasologyGameVersion version : packageManager.getGameVersionList(jobItem.getJob())) {
-//            final VersionItem versionItem = new VersionItem(version);
-//            buildVersionBox.getItems().add(versionItem);
-//            if (versionItem.getVersion() == buildVersion) {
-//                buildVersionBox.getSelectionModel().select(versionItem);
-//            }
-//        }
     }
 
     void finishedGameDownload(boolean cancelled, boolean successfulDownloadAndExtract, boolean successfulLoadVersion, Path gameDirectory) {
@@ -578,12 +547,6 @@ public class ApplicationController {
             }
         }
         updateGui();
-        updateBuildVersionBox();
-    }
-
-    private TerasologyGameVersion getSelectedGameVersion() {
-//        return packageManager.getGameVersionForBuildVersion(launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
-        return null;
     }
 
     /**
