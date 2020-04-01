@@ -18,12 +18,10 @@ package org.terasology.launcher.gui.javafx;
 
 import com.sun.javafx.scene.control.skin.ComboBoxListViewSkin;
 import javafx.animation.Transition;
-import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -622,47 +620,6 @@ public class ApplicationController {
                 iconStatus.visibleProperty().bind(item.installedProperty());
                 setGraphic(root);
             }
-        }
-    }
-
-    private static final class DeleteTask extends Task<Void> {
-        private static final Logger logger = LoggerFactory.getLogger(DeleteTask.class);
-
-        private final PackageManager packageManager;
-        private final VersionItem target;
-        private Runnable cleanup;
-
-        DeleteTask(PackageManager packageManager, VersionItem target) {
-            this.packageManager = packageManager;
-            this.target = target;
-        }
-
-        @Override
-        protected Void call() {
-            final Package targetPkg = target.getLinkedPackage();
-            try {
-                packageManager.remove(targetPkg);
-            } catch (IOException e) {
-                logger.error("Failed to remove package: {}-{}",
-                        targetPkg.getId(), targetPkg.getVersion(), e);
-            }
-            return null;
-        }
-
-        @Override
-        protected void succeeded() {
-            target.installedProperty().set(false);
-        }
-
-        @Override
-        protected void done() {
-            if (cleanup != null) {
-                Platform.runLater(cleanup);
-            }
-        }
-
-        public void onDone(Runnable cleanupCallback) {
-            cleanup = cleanupCallback;
         }
     }
 
