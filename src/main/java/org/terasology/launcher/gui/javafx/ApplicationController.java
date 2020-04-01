@@ -86,7 +86,6 @@ public class ApplicationController {
 
     private Path launcherDirectory;
     private Path downloadDirectory;
-    private Path tempDirectory;
     private BaseLauncherSettings launcherSettings;
     private PackageManager packageManager;
     private GameStarter gameStarter;
@@ -308,7 +307,6 @@ public class ApplicationController {
                        final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
-        this.tempDirectory = newTempDirectory;
         this.launcherSettings = newLauncherSettings;
         this.packageManager = newPackageManager;
         this.stage = newStage;
@@ -500,60 +498,6 @@ public class ApplicationController {
         }
     }
 
-    private void populateJobBox() {
-//        jobBox.getItems().clear();
-//
-//        for (GameJob job : GameJob.values()) {
-//            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
-//                boolean foundInstalled = false;
-//                final List<TerasologyGameVersion> gameVersionList = packageManager.getGameVersionList(job);
-//                for (TerasologyGameVersion gameVersion : gameVersionList) {
-//                    if (gameVersion.isInstalled()) {
-//                        foundInstalled = true;
-//                        break;
-//                    }
-//                }
-//                if (!foundInstalled) {
-//                    continue;
-//                }
-//            }
-//
-//            final JobItem jobItem = new JobItem(job);
-//            jobBox.getItems().add(jobItem);
-//            if (launcherSettings.getJob() == job) {
-//                jobBox.getSelectionModel().select(jobItem);
-//            }
-//        }
-//
-//        updateBuildVersionBox();
-//
-//        // add change listeners
-//        jobBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<JobItem>() {
-//            @Override
-//            public void changed(final ObservableValue<? extends JobItem> observableValue, final JobItem oldItem, final JobItem newItem) {
-//                if (jobBox.getItems().isEmpty()) {
-//                    return;
-//                }
-//                launcherSettings.setJob(newItem.getJob());
-//                updateBuildVersionBox();
-//                updateGui();
-//                logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
-//            }
-//        });
-//
-//        buildVersionBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<VersionItem>() {
-//            @Override
-//            public void changed(final ObservableValue<? extends VersionItem> observableValue, final VersionItem oldVersionItem, final VersionItem newVersionItem) {
-//                if (newVersionItem != null) {
-//                    final Integer version = newVersionItem.getVersion();
-//                    launcherSettings.setBuildVersion(version, launcherSettings.getJob());
-//                    logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
-//                    updateGui();
-//                }
-//            }
-//        });
-    }
-
     /**
      * Closes the launcher frame this Controller handles. The launcher frame Stage is determined by the enclosing anchor pane.
      */
@@ -614,33 +558,6 @@ public class ApplicationController {
         }
     }
 
-    private void updateJobBox() {
-//        jobBox.getItems().clear();
-//        for (GameJob job : GameJob.values()) {
-//            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
-//                boolean foundInstalled = false;
-//                final List<TerasologyGameVersion> gameVersionList = packageManager.getGameVersionList(job);
-//                for (TerasologyGameVersion gameVersion : gameVersionList) {
-//                    if (gameVersion.isInstalled()) {
-//                        foundInstalled = true;
-//                        break;
-//                    }
-//                }
-//                if (!foundInstalled) {
-//                    continue;
-//                }
-//            }
-//
-//            final JobItem jobItem = new JobItem(job);
-//            jobBox.getItems().add(jobItem);
-//            if (launcherSettings.getJob() == job) {
-//                jobBox.getSelectionModel().select(jobItem);
-//            }
-//        }
-//
-//        updateBuildVersionBox();
-    }
-
     private void updateBuildVersionBox() {
 //        buildVersionBox.getItems().clear();
 //
@@ -677,14 +594,6 @@ public class ApplicationController {
     private TerasologyGameVersion getSelectedGameVersion() {
 //        return packageManager.getGameVersionForBuildVersion(launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
         return null;
-    }
-
-    ComboBox<PackageItem> getJobBox() {
-        return jobBox;
-    }
-
-    ComboBox<VersionItem> getBuildVersionBox() {
-        return buildVersionBox;
     }
 
     /**
