@@ -56,11 +56,9 @@ import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.ProgressListener;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -624,56 +622,6 @@ public class ApplicationController {
                 iconStatus.visibleProperty().bind(item.installedProperty());
                 setGraphic(root);
             }
-        }
-    }
-
-    private static final class DownloadTask extends Task<Void> implements ProgressListener {
-        private static final Logger logger = LoggerFactory.getLogger(DownloadTask.class);
-
-        private final PackageManager packageManager;
-        private final VersionItem target;
-        private Runnable cleanup;
-
-        DownloadTask(PackageManager packageManager, VersionItem target) {
-            this.packageManager = packageManager;
-            this.target = target;
-        }
-
-        @Override
-        protected Void call() {
-            final Package targetPkg = target.getLinkedPackage();
-            try {
-                packageManager.install(targetPkg, this);
-            } catch (IOException | DownloadException e) {
-                logger.error("Failed to download package: {}-{}",
-                        targetPkg.getId(), targetPkg.getVersion(), e);
-            }
-            return null;
-        }
-
-        @Override
-        public void update() {
-        }
-
-        @Override
-        public void update(int progress) {
-            updateProgress(progress, 100);
-        }
-
-        @Override
-        protected void succeeded() {
-            target.installedProperty().set(true);
-        }
-
-        @Override
-        protected void done() {
-            if (cleanup != null) {
-                Platform.runLater(cleanup);
-            }
-        }
-
-        public void onDone(Runnable cleanupCallback) {
-            cleanup = cleanupCallback;
         }
     }
 
