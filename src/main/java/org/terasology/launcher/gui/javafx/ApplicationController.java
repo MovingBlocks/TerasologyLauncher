@@ -19,13 +19,8 @@ package org.terasology.launcher.gui.javafx;
 import com.sun.javafx.scene.control.skin.ComboBoxListViewSkin;
 import javafx.animation.Transition;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -69,7 +64,6 @@ import org.terasology.launcher.util.ProgressListener;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -369,20 +363,20 @@ public class ApplicationController {
 
     private void initComboBoxes() {
         jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            buildVersionBox.setItems(newVal.versionItems);
+            buildVersionBox.setItems(newVal.getVersionItems());
 
             String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
-            String selectedJobId = newVal.versionItems.get(0).linkedPackageProperty.get().getId();
+            String selectedJobId = newVal.getVersionItems().get(0).getLinkedPackage().getId();
             if (lastPlayedGameJob.isEmpty() || !lastPlayedGameJob.equals(selectedJobId)) {
                 // select last installed package for the selected job or the latest one if none installed
                 String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(selectedJobId)
-                        .map(pkg -> pkg.getVersion()).orElseGet(() -> "");
+                        .map(Package::getVersion).orElse("");
                 selectItem(buildVersionBox, item ->
-                        item.versionProperty.get().equals(lastInstalledVersion));
+                        item.getVersion().equals(lastInstalledVersion));
             } else {
                 // select the package last played
                 selectItem(buildVersionBox, item ->
-                        item.versionProperty.get().equals(launcherSettings.getLastPlayedGameVersion()));
+                        item.getVersion().equals(launcherSettings.getLastPlayedGameVersion()));
             }
         });
 
@@ -393,7 +387,7 @@ public class ApplicationController {
                 return;
             }
             selectedVersion = newVal;
-            selectedPackage = newVal.linkedPackageProperty.get();
+            selectedPackage = newVal.getLinkedPackage();
 
             if (selectedPackage != null && selectedPackage.isInstalled()) {
                 startAndDownloadButton.setGraphic(playImage);
@@ -429,13 +423,13 @@ public class ApplicationController {
      */
     private void selectItemForJob(final String jobId) {
         selectItem(jobBox, jobItem ->
-                jobItem.versionItems.stream()
-                        .anyMatch(vItem -> vItem.linkedPackageProperty.get().getId().equals(jobId)));
+                jobItem.getVersionItems().stream()
+                        .anyMatch(vItem -> vItem.getLinkedPackage().getId().equals(jobId)));
     }
 
     /**
      * Initialize selected game job and version based on last played and last installed games.
-     *
+     * <p>
      * The selection is derived from the following precedence rules:
      * <ol>
      *     <li>Select the <b>last played game</b></li>
@@ -451,22 +445,22 @@ public class ApplicationController {
             // select the package last played
             selectItemForJob(launcherSettings.getLastPlayedGameJob());
             selectItem(buildVersionBox, item ->
-                    item.versionProperty.get().equals(launcherSettings.getLastPlayedGameVersion()));
+                    item.getVersion().equals(launcherSettings.getLastPlayedGameVersion()));
         } else {
             String lastInstalledGameJob = launcherSettings.getLastInstalledGameJob();
             if (!lastInstalledGameJob.isEmpty()) {
                 // select last installed package job and version
                 selectItemForJob(lastInstalledGameJob);
                 selectItem(buildVersionBox, item ->
-                        item.versionProperty.get().equals(launcherSettings.getLastInstalledGameVersion()));
+                        item.getVersion().equals(launcherSettings.getLastInstalledGameVersion()));
             } else {
                 // select last installed package for the default job or the latest one if none installed
                 String defaultGameJob = launcherSettings.getDefaultGameJob();
                 selectItemForJob(defaultGameJob);
                 String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(defaultGameJob)
-                        .map(pkg -> pkg.getVersion()).orElseGet(() -> "");
+                        .map(Package::getVersion).orElse("");
                 selectItem(buildVersionBox, item ->
-                        item.versionProperty.get().equals(lastInstalledVersion));
+                        item.getVersion().equals(lastInstalledVersion));
             }
         }
     }
@@ -626,8 +620,8 @@ public class ApplicationController {
                 setText(null);
                 setGraphic(null);
             } else {
-                labelVersion.textProperty().bind(item.versionProperty);
-                iconStatus.visibleProperty().bind(item.installedProperty);
+                labelVersion.textProperty().bind(item.versionProperty());
+                iconStatus.visibleProperty().bind(item.installedProperty());
                 setGraphic(root);
             }
         }
@@ -647,7 +641,7 @@ public class ApplicationController {
 
         @Override
         protected Void call() {
-            final Package targetPkg = target.linkedPackageProperty.get();
+            final Package targetPkg = target.getLinkedPackage();
             try {
                 packageManager.install(targetPkg, this);
             } catch (IOException | DownloadException e) {
@@ -668,7 +662,7 @@ public class ApplicationController {
 
         @Override
         protected void succeeded() {
-            target.installedProperty.set(true);
+            target.installedProperty().set(true);
         }
 
         @Override
@@ -697,7 +691,7 @@ public class ApplicationController {
 
         @Override
         protected Void call() {
-            final Package targetPkg = target.linkedPackageProperty.get();
+            final Package targetPkg = target.getLinkedPackage();
             try {
                 packageManager.remove(targetPkg);
             } catch (IOException e) {
@@ -709,7 +703,7 @@ public class ApplicationController {
 
         @Override
         protected void succeeded() {
-            target.installedProperty.set(false);
+            target.installedProperty().set(false);
         }
 
         @Override
@@ -724,35 +718,4 @@ public class ApplicationController {
         }
     }
 
-    private static class PackageItem {
-        private final ReadOnlyStringProperty nameProperty;
-        private final ObservableList<VersionItem> versionItems;
-
-        PackageItem(final String name, final List<VersionItem> versions) {
-            nameProperty = new SimpleStringProperty(name);
-            versionItems = FXCollections.observableList(versions);
-        }
-
-        @Override
-        public String toString() {
-            return nameProperty.get();
-        }
-    }
-
-    private static class VersionItem {
-        private final ReadOnlyObjectProperty<Package> linkedPackageProperty;
-        private final ReadOnlyStringProperty versionProperty;
-        private final BooleanProperty installedProperty;
-
-        VersionItem(final Package linkedPackage) {
-            linkedPackageProperty = new SimpleObjectProperty<>(linkedPackage);
-            versionProperty = new SimpleStringProperty(linkedPackage.getVersion());
-            installedProperty = new SimpleBooleanProperty(linkedPackage.isInstalled());
-        }
-
-        @Override
-        public String toString() {
-            return versionProperty.get();
-        }
-    }
 }
