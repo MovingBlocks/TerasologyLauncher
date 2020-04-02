@@ -25,7 +25,7 @@ import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LogLevel;
-import org.terasology.launcher.util.OperatingSystem;
+import org.terasology.launcher.util.Platform;
 
 import java.nio.file.Path;
 import java.util.Locale;
@@ -76,13 +76,7 @@ public final class ConfigManager {
      * @return the absolute path to the launcher application directory
      */
     private Path resolveLauncherDir() {
-        final OperatingSystem os = OperatingSystem.getOS();
-        if (os == OperatingSystem.UNKNOWN) {
-            logger.error("Unsupported OS: {} {} {}",
-                    System.getProperty("os.name"),
-                    System.getProperty("os.version"),
-                    System.getProperty("os.arch"));
-        }
+        final Platform os = Platform.getPlatform();
 
         return LauncherDirectoryUtils.getApplicationDirectory(
                 os, LauncherDirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME);
