@@ -52,10 +52,13 @@ public class GitHubRelease {
         return json.getString("body");
     }
 
-    public boolean hasAssetFor(String platform) {
+    public String getDownloadUrl(String platform) {
         return json.getJsonArray("assets")
                 .stream()
                 .map(JsonValue::asJsonObject)
-                .anyMatch(asset -> asset.getString("name").contains(platform));
+                .filter(asset -> asset.getString("name").contains(platform))
+                .findFirst()
+                .map(asset -> asset.getString("browser_download_url"))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid platform")); // Should not reach
     }
 }

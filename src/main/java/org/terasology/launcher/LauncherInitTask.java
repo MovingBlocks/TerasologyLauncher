@@ -193,24 +193,22 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
     }
 
     private boolean checkForLauncherUpdates(OperatingSystem os, Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
-        final boolean is64Bit = System.getProperty("os.arch").contains("64");
         final String platform;
-        if (os.isWindows() && is64Bit) {
-            platform = "windows64";
+        if (os.isWindows()) {
+            platform = "windows";
         } else if (os.isMac()) {
             platform = "mac";
-        } else if (os == OperatingSystem.LINUX && is64Bit) {
-            platform = "linux64";
+        } else if (os == OperatingSystem.LINUX) {
+            platform = "linux";
         } else {
-            logger.warn("Self-updates are not supported for the current platform: {} {}-bit",
-                    System.getProperty("os.name"), is64Bit ? "64" : "32");
-            return false;
+            logger.warn("Current platform is unsupported: {}", System.getProperty("os.name"));
+            platform = null;
         }
 
         logger.trace("Check for launcher updates...");
         boolean selfUpdaterStarted = false;
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
-        final LauncherUpdater updater = new LauncherUpdater(platform, TerasologyLauncherVersionInfo.getInstance());
+        final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
         final GitHubRelease release = updater.updateAvailable();
         if (release != null) {
             logger.info("Launcher update available: {}", release.getTagName());
@@ -226,15 +224,13 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
                 // Run launcher without an update. Don't throw a LauncherStartFailedException.
             }
-            if (foundLauncherInstallationDirectory) {
-                final boolean update = updater.showUpdateDialog(owner, release);
-                if (update) {
+            if (foundLauncherInstallationDirectory && updater.confirmUpdate(owner, release)) {
+                if (platform != null) {
+                    // TODO: start self-updater
+                    final Path targetDirectory = saveDownloadedFiles ? downloadDirectory : tempDirectory;
+                    selfUpdaterStarted = updater.update(targetDirectory, tempDirectory);
+                } else {
                     showDownloadPage();
-                    // TODO: start self-updater instead
-                    if (false) {
-                        final Path targetDirectory = saveDownloadedFiles ? downloadDirectory : tempDirectory;
-                        selfUpdaterStarted = updater.update(targetDirectory, tempDirectory);
-                    }
                 }
             }
         }

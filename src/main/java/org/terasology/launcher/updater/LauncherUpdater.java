@@ -42,14 +42,12 @@ public final class LauncherUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
 
-    private final String currentPlatform;
     private final Semver currentVersion;
     private final GitHubClient github;
 
     private Path launcherInstallationDirectory;
 
-    public LauncherUpdater(String currentPlatform, TerasologyLauncherVersionInfo currentVersionInfo) {
-        this.currentPlatform = currentPlatform;
+    public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
         github = new GitHubClient();
         //TODO: might not be valid semver, catch or use Try<..>
         currentVersion = new Semver(currentVersionInfo.getVersion());
@@ -73,8 +71,7 @@ public final class LauncherUpdater {
         try {
             final GitHubRelease latestRelease = github.getLatestRelease("movingblocks", "terasologylauncher");
 
-            if (versionOf(latestRelease).isGreaterThan(currentVersion)
-                    && latestRelease.hasAssetFor(currentPlatform)) {
+            if (versionOf(latestRelease).isGreaterThan(currentVersion)) {
                 return latestRelease;
             }
         } catch (IOException e) {
@@ -83,7 +80,7 @@ public final class LauncherUpdater {
         return null;
     }
 
-    public boolean showUpdateDialog(Stage parentStage, final GitHubRelease release) {
+    public boolean confirmUpdate(Stage parentStage, final GitHubRelease release) {
         FutureTask<Boolean> dialog = getUpdateDialog(parentStage, release);
 
         Platform.runLater(dialog);
