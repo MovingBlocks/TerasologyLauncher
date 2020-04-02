@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2020 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             final boolean serverAvailable = DownloadUtils.isJenkinsAvailable();
             if (serverAvailable && launcherSettings.isSearchForLauncherUpdates()) {
-                final boolean selfUpdaterStarted = checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
+                final boolean selfUpdaterStarted = checkForLauncherUpdates(os, downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
                 if (selfUpdaterStarted) {
                     logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
                     return NullLauncherConfiguration.getInstance();
@@ -192,11 +192,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return launcherSettings;
     }
 
-    private boolean checkForLauncherUpdates(Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
+    private boolean checkForLauncherUpdates(OperatingSystem os, Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
         logger.trace("Check for launcher updates...");
         boolean selfUpdaterStarted = false;
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
-        final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
+        final LauncherUpdater updater = new LauncherUpdater(os, TerasologyLauncherVersionInfo.getInstance());
         final GitHubRelease release = updater.updateAvailable();
         if (release != null) {
             logger.info("Launcher update available: {}", release.getTagName());

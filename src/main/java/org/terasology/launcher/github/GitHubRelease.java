@@ -20,6 +20,11 @@ package org.terasology.launcher.github;
 import com.google.common.base.Preconditions;
 
 import javax.json.JsonObject;
+import javax.json.JsonValue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Simplified interface for GitHub releases.
@@ -45,5 +50,12 @@ public class GitHubRelease {
 
     public String getBody() {
         return json.getString("body");
+    }
+
+    public boolean hasAssetFor(String platform) {
+        return json.getJsonArray("assets")
+                .stream()
+                .map(JsonValue::asJsonObject)
+                .anyMatch(asset -> asset.getString("name").contains(platform));
     }
 }

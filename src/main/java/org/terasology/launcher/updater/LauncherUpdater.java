@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2020 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.terasology.launcher.github.GitHubClient;
 import org.terasology.launcher.github.GitHubRelease;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
@@ -41,12 +42,22 @@ public final class LauncherUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
 
+    private final String currentPlatform;
     private final Semver currentVersion;
     private final GitHubClient github;
 
     private Path launcherInstallationDirectory;
 
-    public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
+    public LauncherUpdater(OperatingSystem os, TerasologyLauncherVersionInfo currentVersionInfo) {
+        if (os.isWindows()) {
+            currentPlatform = "windows64";
+        } else if (os.isMac()) {
+            currentPlatform = "mac";
+        } else if (os.isUnix()) {
+            currentPlatform = "linux64";
+        } else {
+            currentPlatform = null;
+        }
         github = new GitHubClient();
         //TODO: might not be valid semver, catch or use Try<..>
         currentVersion = new Semver(currentVersionInfo.getVersion());
@@ -69,9 +80,9 @@ public final class LauncherUpdater {
         //TODO: only check of both version are defined and valid semver?
         try {
             final GitHubRelease latestRelease = github.getLatestRelease("movingblocks", "terasologylauncher");
-            final Semver latestVersion = versionOf(latestRelease);
 
-            if (latestVersion.isGreaterThan(currentVersion)) {
+            if (versionOf(latestRelease).isGreaterThan(currentVersion)
+                    && latestRelease.hasAssetFor(currentPlatform)) {
                 return latestRelease;
             }
         } catch (IOException e) {
