@@ -21,9 +21,9 @@ import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameDownloader;
+import org.terasology.launcher.tasks.ProgressListener;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DownloadException;
-import org.terasology.launcher.util.ProgressListener;
 
 public class GameDownloadWorker extends Task<Void> implements ProgressListener {
 

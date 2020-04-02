@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.gui.javafx;
+package org.terasology.launcher.tasks;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.gui.javafx.VersionItem;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
+import org.terasology.launcher.util.DownloadException;
 
 import java.io.IOException;
 
-final class DeleteTask extends Task<Void> {
-    private static final Logger logger = LoggerFactory.getLogger(DeleteTask.class);
+public final class DownloadTask extends Task<Void> implements ProgressListener {
+    private static final Logger logger = LoggerFactory.getLogger(DownloadTask.class);
 
     private final PackageManager packageManager;
     private final VersionItem target;
     private Runnable cleanup;
 
-    DeleteTask(PackageManager packageManager, VersionItem target) {
+    public DownloadTask(final PackageManager packageManager, final VersionItem target) {
         this.packageManager = packageManager;
         this.target = target;
     }
@@ -41,17 +43,26 @@ final class DeleteTask extends Task<Void> {
     protected Void call() {
         final Package targetPkg = target.getLinkedPackage();
         try {
-            packageManager.remove(targetPkg);
-        } catch (IOException e) {
-            logger.error("Failed to remove package: {}-{}",
+            packageManager.install(targetPkg, this);
+        } catch (IOException | DownloadException e) {
+            logger.error("Failed to download package: {}-{}",
                     targetPkg.getId(), targetPkg.getVersion(), e);
         }
         return null;
     }
 
     @Override
+    public void update() {
+    }
+
+    @Override
+    public void update(int progress) {
+        updateProgress(progress, 100);
+    }
+
+    @Override
     protected void succeeded() {
-        target.installedProperty().set(false);
+        target.installedProperty().set(true);
     }
 
     @Override

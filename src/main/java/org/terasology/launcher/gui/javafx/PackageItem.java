@@ -23,7 +23,7 @@ import javafx.collections.ObservableList;
 
 import java.util.List;
 
-class PackageItem {
+public class PackageItem {
     private final ReadOnlyStringProperty name;
     private final ObservableList<VersionItem> versionItems;
 

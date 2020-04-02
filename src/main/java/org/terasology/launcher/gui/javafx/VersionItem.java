@@ -24,7 +24,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import org.terasology.launcher.packages.Package;
 
-class VersionItem {
+public class VersionItem {
     private final ReadOnlyObjectProperty<Package> linkedPackage;
     private final ReadOnlyStringProperty version;
     private final BooleanProperty installed;

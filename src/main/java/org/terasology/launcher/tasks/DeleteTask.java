@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.gui.javafx;
+package org.terasology.launcher.tasks;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.gui.javafx.VersionItem;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
-import org.terasology.launcher.util.DownloadException;
-import org.terasology.launcher.util.ProgressListener;
 
 import java.io.IOException;
 
-final class DownloadTask extends Task<Void> implements ProgressListener {
-    private static final Logger logger = LoggerFactory.getLogger(DownloadTask.class);
+public final class DeleteTask extends Task<Void> {
+    private static final Logger logger = LoggerFactory.getLogger(DeleteTask.class);
 
     private final PackageManager packageManager;
     private final VersionItem target;
     private Runnable cleanup;
 
-    DownloadTask(final PackageManager packageManager, final VersionItem target) {
+    public DeleteTask(PackageManager packageManager, VersionItem target) {
         this.packageManager = packageManager;
         this.target = target;
     }
@@ -43,26 +42,17 @@ final class DownloadTask extends Task<Void> implements ProgressListener {
     protected Void call() {
         final Package targetPkg = target.getLinkedPackage();
         try {
-            packageManager.install(targetPkg, this);
-        } catch (IOException | DownloadException e) {
-            logger.error("Failed to download package: {}-{}",
+            packageManager.remove(targetPkg);
+        } catch (IOException e) {
+            logger.error("Failed to remove package: {}-{}",
                     targetPkg.getId(), targetPkg.getVersion(), e);
         }
         return null;
     }
 
     @Override
-    public void update() {
-    }
-
-    @Override
-    public void update(int progress) {
-        updateProgress(progress, 100);
-    }
-
-    @Override
     protected void succeeded() {
-        target.installedProperty().set(true);
+        target.installedProperty().set(false);
     }
 
     @Override
