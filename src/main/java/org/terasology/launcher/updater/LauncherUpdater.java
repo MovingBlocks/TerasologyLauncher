@@ -48,16 +48,8 @@ public final class LauncherUpdater {
 
     private Path launcherInstallationDirectory;
 
-    public LauncherUpdater(OperatingSystem os, TerasologyLauncherVersionInfo currentVersionInfo) {
-        if (os.isWindows()) {
-            currentPlatform = "windows64";
-        } else if (os.isMac()) {
-            currentPlatform = "mac";
-        } else if (os.isUnix()) {
-            currentPlatform = "linux64";
-        } else {
-            currentPlatform = null;
-        }
+    public LauncherUpdater(String currentPlatform, TerasologyLauncherVersionInfo currentVersionInfo) {
+        this.currentPlatform = currentPlatform;
         github = new GitHubClient();
         //TODO: might not be valid semver, catch or use Try<..>
         currentVersion = new Semver(currentVersionInfo.getVersion());
