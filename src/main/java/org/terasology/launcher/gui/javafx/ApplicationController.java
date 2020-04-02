@@ -216,28 +216,21 @@ public class ApplicationController {
     private void downloadAction() {
         downloadTask = new DownloadTask(packageManager, selectedVersion);
 
-        jobBox.setDisable(true);
-        buildVersionBox.setDisable(true);
+        jobBox.disableProperty().bind(downloadTask.runningProperty());
+        buildVersionBox.disableProperty().bind(downloadTask.runningProperty());
+        progressBar.visibleProperty().bind(downloadTask.runningProperty());
+        cancelDownloadButton.visibleProperty().bind(downloadTask.runningProperty());
+        startAndDownloadButton.visibleProperty().bind(downloadTask.runningProperty().not());
+
         progressBar.progressProperty().bind(downloadTask.progressProperty());
-        progressBar.setVisible(true);
-        startAndDownloadButton.setVisible(false);
-        cancelDownloadButton.setVisible(true);
 
-        downloadTask.onDone(() -> {
-            jobBox.setDisable(false);
-            buildVersionBox.setDisable(false);
-            progressBar.progressProperty().unbind();
-            progressBar.setVisible(false);
-            startAndDownloadButton.setVisible(true);
-            cancelDownloadButton.setVisible(false);
+        downloadTask.setOnSucceeded(workerStateEvent -> {
             packageManager.syncDatabase();
+            startAndDownloadButton.setGraphic(playImage);
+            deleteButton.setDisable(false);
+            launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
+            launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
 
-            if (selectedPackage.isInstalled()) {
-                startAndDownloadButton.setGraphic(playImage);
-                deleteButton.setDisable(false);
-                launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
-                launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
-            }
             downloadTask = null;
         });
 

@@ -32,7 +32,6 @@ public final class DownloadTask extends Task<Void> implements ProgressListener {
 
     private final PackageManager packageManager;
     private final VersionItem target;
-    private Runnable cleanup;
 
     public DownloadTask(final PackageManager packageManager, final VersionItem target) {
         this.packageManager = packageManager;
@@ -65,14 +64,4 @@ public final class DownloadTask extends Task<Void> implements ProgressListener {
         target.installedProperty().set(true);
     }
 
-    @Override
-    protected void done() {
-        if (cleanup != null) {
-            Platform.runLater(cleanup);
-        }
-    }
-
-    public void onDone(Runnable cleanupCallback) {
-        cleanup = cleanupCallback;
-    }
 }
