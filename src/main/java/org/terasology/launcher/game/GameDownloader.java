@@ -24,7 +24,7 @@ import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
-import org.terasology.launcher.util.ProgressListener;
+import org.terasology.launcher.tasks.ProgressListener;
 
 import java.io.IOException;
 import java.net.URL;

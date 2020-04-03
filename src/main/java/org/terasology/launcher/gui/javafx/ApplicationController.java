@@ -18,17 +18,10 @@ package org.terasology.launcher.gui.javafx;
 
 import com.sun.javafx.scene.control.skin.ComboBoxListViewSkin;
 import javafx.animation.Transition;
-import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -56,20 +49,18 @@ import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameStarter;
-import org.terasology.launcher.game.TerasologyGameVersion;
+import org.terasology.launcher.tasks.DeleteTask;
+import org.terasology.launcher.tasks.DownloadTask;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.ProgressListener;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -86,7 +77,6 @@ public class ApplicationController {
 
     private Path launcherDirectory;
     private Path downloadDirectory;
-    private Path tempDirectory;
     private BaseLauncherSettings launcherSettings;
     private PackageManager packageManager;
     private GameStarter gameStarter;
@@ -226,28 +216,21 @@ public class ApplicationController {
     private void downloadAction() {
         downloadTask = new DownloadTask(packageManager, selectedVersion);
 
-        jobBox.setDisable(true);
-        buildVersionBox.setDisable(true);
+        jobBox.disableProperty().bind(downloadTask.runningProperty());
+        buildVersionBox.disableProperty().bind(downloadTask.runningProperty());
+        progressBar.visibleProperty().bind(downloadTask.runningProperty());
+        cancelDownloadButton.visibleProperty().bind(downloadTask.runningProperty());
+        startAndDownloadButton.visibleProperty().bind(downloadTask.runningProperty().not());
+
         progressBar.progressProperty().bind(downloadTask.progressProperty());
-        progressBar.setVisible(true);
-        startAndDownloadButton.setVisible(false);
-        cancelDownloadButton.setVisible(true);
 
-        downloadTask.onDone(() -> {
-            jobBox.setDisable(false);
-            buildVersionBox.setDisable(false);
-            progressBar.progressProperty().unbind();
-            progressBar.setVisible(false);
-            startAndDownloadButton.setVisible(true);
-            cancelDownloadButton.setVisible(false);
+        downloadTask.setOnSucceeded(workerStateEvent -> {
             packageManager.syncDatabase();
+            startAndDownloadButton.setGraphic(playImage);
+            deleteButton.setDisable(false);
+            launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
+            launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
 
-            if (selectedPackage.isInstalled()) {
-                startAndDownloadButton.setGraphic(playImage);
-                deleteButton.setDisable(false);
-                launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
-                launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
-            }
             downloadTask = null;
         });
 
@@ -304,11 +287,10 @@ public class ApplicationController {
                 });
     }
 
-    public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final Path newTempDirectory, final BaseLauncherSettings newLauncherSettings,
+    public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
                        final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.downloadDirectory = newDownloadDirectory;
-        this.tempDirectory = newTempDirectory;
         this.launcherSettings = newLauncherSettings;
         this.packageManager = newPackageManager;
         this.stage = newStage;
@@ -371,20 +353,20 @@ public class ApplicationController {
 
     private void initComboBoxes() {
         jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            buildVersionBox.setItems(newVal.versionItems);
+            buildVersionBox.setItems(newVal.getVersionItems());
 
             String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
-            String selectedJobId = newVal.versionItems.get(0).linkedPackageProperty.get().getId();
+            String selectedJobId = newVal.getVersionItems().get(0).getLinkedPackage().getId();
             if (lastPlayedGameJob.isEmpty() || !lastPlayedGameJob.equals(selectedJobId)) {
                 // select last installed package for the selected job or the latest one if none installed
                 String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(selectedJobId)
-                        .map(pkg -> pkg.getVersion()).orElseGet(() -> "");
+                        .map(Package::getVersion).orElse("");
                 selectItem(buildVersionBox, item ->
-                        item.versionProperty.get().equals(lastInstalledVersion));
+                        item.getVersion().equals(lastInstalledVersion));
             } else {
                 // select the package last played
                 selectItem(buildVersionBox, item ->
-                        item.versionProperty.get().equals(launcherSettings.getLastPlayedGameVersion()));
+                        item.getVersion().equals(launcherSettings.getLastPlayedGameVersion()));
             }
         });
 
@@ -395,7 +377,7 @@ public class ApplicationController {
                 return;
             }
             selectedVersion = newVal;
-            selectedPackage = newVal.linkedPackageProperty.get();
+            selectedPackage = newVal.getLinkedPackage();
 
             if (selectedPackage != null && selectedPackage.isInstalled()) {
                 startAndDownloadButton.setGraphic(playImage);
@@ -431,13 +413,13 @@ public class ApplicationController {
      */
     private void selectItemForJob(final String jobId) {
         selectItem(jobBox, jobItem ->
-                jobItem.versionItems.stream()
-                        .anyMatch(vItem -> vItem.linkedPackageProperty.get().getId().equals(jobId)));
+                jobItem.getVersionItems().stream()
+                        .anyMatch(vItem -> vItem.getLinkedPackage().getId().equals(jobId)));
     }
 
     /**
      * Initialize selected game job and version based on last played and last installed games.
-     *
+     * <p>
      * The selection is derived from the following precedence rules:
      * <ol>
      *     <li>Select the <b>last played game</b></li>
@@ -453,22 +435,22 @@ public class ApplicationController {
             // select the package last played
             selectItemForJob(launcherSettings.getLastPlayedGameJob());
             selectItem(buildVersionBox, item ->
-                    item.versionProperty.get().equals(launcherSettings.getLastPlayedGameVersion()));
+                    item.getVersion().equals(launcherSettings.getLastPlayedGameVersion()));
         } else {
             String lastInstalledGameJob = launcherSettings.getLastInstalledGameJob();
             if (!lastInstalledGameJob.isEmpty()) {
                 // select last installed package job and version
                 selectItemForJob(lastInstalledGameJob);
                 selectItem(buildVersionBox, item ->
-                        item.versionProperty.get().equals(launcherSettings.getLastInstalledGameVersion()));
+                        item.getVersion().equals(launcherSettings.getLastInstalledGameVersion()));
             } else {
                 // select last installed package for the default job or the latest one if none installed
                 String defaultGameJob = launcherSettings.getDefaultGameJob();
                 selectItemForJob(defaultGameJob);
                 String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(defaultGameJob)
-                        .map(pkg -> pkg.getVersion()).orElseGet(() -> "");
+                        .map(Package::getVersion).orElse("");
                 selectItem(buildVersionBox, item ->
-                        item.versionProperty.get().equals(lastInstalledVersion));
+                        item.getVersion().equals(lastInstalledVersion));
             }
         }
     }
@@ -498,60 +480,6 @@ public class ApplicationController {
         } else {
             startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
         }
-    }
-
-    private void populateJobBox() {
-//        jobBox.getItems().clear();
-//
-//        for (GameJob job : GameJob.values()) {
-//            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
-//                boolean foundInstalled = false;
-//                final List<TerasologyGameVersion> gameVersionList = packageManager.getGameVersionList(job);
-//                for (TerasologyGameVersion gameVersion : gameVersionList) {
-//                    if (gameVersion.isInstalled()) {
-//                        foundInstalled = true;
-//                        break;
-//                    }
-//                }
-//                if (!foundInstalled) {
-//                    continue;
-//                }
-//            }
-//
-//            final JobItem jobItem = new JobItem(job);
-//            jobBox.getItems().add(jobItem);
-//            if (launcherSettings.getJob() == job) {
-//                jobBox.getSelectionModel().select(jobItem);
-//            }
-//        }
-//
-//        updateBuildVersionBox();
-//
-//        // add change listeners
-//        jobBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<JobItem>() {
-//            @Override
-//            public void changed(final ObservableValue<? extends JobItem> observableValue, final JobItem oldItem, final JobItem newItem) {
-//                if (jobBox.getItems().isEmpty()) {
-//                    return;
-//                }
-//                launcherSettings.setJob(newItem.getJob());
-//                updateBuildVersionBox();
-//                updateGui();
-//                logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
-//            }
-//        });
-//
-//        buildVersionBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<VersionItem>() {
-//            @Override
-//            public void changed(final ObservableValue<? extends VersionItem> observableValue, final VersionItem oldVersionItem, final VersionItem newVersionItem) {
-//                if (newVersionItem != null) {
-//                    final Integer version = newVersionItem.getVersion();
-//                    launcherSettings.setBuildVersion(version, launcherSettings.getJob());
-//                    logger.debug("Selected gamejob: {} -- {}", launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
-//                    updateGui();
-//                }
-//            }
-//        });
     }
 
     /**
@@ -585,24 +513,9 @@ public class ApplicationController {
     }
 
     private void updateButtons() {
-        final TerasologyGameVersion gameVersion = getSelectedGameVersion();
-        if (gameVersion == null) {
-            deleteButton.setDisable(true);
-            startAndDownloadButton.setGraphic(downloadImage);
-            startAndDownloadButton.setDisable(true);
-        } else if (gameVersion.isInstalled()) {
-            deleteButton.setDisable(false);
-            startAndDownloadButton.setGraphic(playImage);
-            startAndDownloadButton.setDisable(false);
-        } else if ((gameVersion.getSuccessful() != null) && gameVersion.getSuccessful() && (gameVersion.getBuildNumber() != null) && (gameDownloadWorker == null)) {
-            deleteButton.setDisable(true);
-            startAndDownloadButton.setGraphic(downloadImage);
-            startAndDownloadButton.setDisable(false);
-        } else {
-            deleteButton.setDisable(true);
-            startAndDownloadButton.setGraphic(downloadImage);
-            startAndDownloadButton.setDisable(true);
-        }
+        deleteButton.setDisable(true);
+        startAndDownloadButton.setGraphic(downloadImage);
+        startAndDownloadButton.setDisable(true);
 
         // Cancel download
         if (gameDownloadWorker != null) {
@@ -612,48 +525,6 @@ public class ApplicationController {
             cancelDownloadButton.setVisible(false);
             startAndDownloadButton.setVisible(true);
         }
-    }
-
-    private void updateJobBox() {
-//        jobBox.getItems().clear();
-//        for (GameJob job : GameJob.values()) {
-//            if (job.isOnlyInstalled() && (launcherSettings.getJob() != job)) {
-//                boolean foundInstalled = false;
-//                final List<TerasologyGameVersion> gameVersionList = packageManager.getGameVersionList(job);
-//                for (TerasologyGameVersion gameVersion : gameVersionList) {
-//                    if (gameVersion.isInstalled()) {
-//                        foundInstalled = true;
-//                        break;
-//                    }
-//                }
-//                if (!foundInstalled) {
-//                    continue;
-//                }
-//            }
-//
-//            final JobItem jobItem = new JobItem(job);
-//            jobBox.getItems().add(jobItem);
-//            if (launcherSettings.getJob() == job) {
-//                jobBox.getSelectionModel().select(jobItem);
-//            }
-//        }
-//
-//        updateBuildVersionBox();
-    }
-
-    private void updateBuildVersionBox() {
-//        buildVersionBox.getItems().clear();
-//
-//        final JobItem jobItem = jobBox.getSelectionModel().getSelectedItem();
-//        final int buildVersion = launcherSettings.getBuildVersion(jobItem.getJob());
-//
-//        for (TerasologyGameVersion version : packageManager.getGameVersionList(jobItem.getJob())) {
-//            final VersionItem versionItem = new VersionItem(version);
-//            buildVersionBox.getItems().add(versionItem);
-//            if (versionItem.getVersion() == buildVersion) {
-//                buildVersionBox.getSelectionModel().select(versionItem);
-//            }
-//        }
     }
 
     void finishedGameDownload(boolean cancelled, boolean successfulDownloadAndExtract, boolean successfulLoadVersion, Path gameDirectory) {
@@ -671,20 +542,6 @@ public class ApplicationController {
             }
         }
         updateGui();
-        updateBuildVersionBox();
-    }
-
-    private TerasologyGameVersion getSelectedGameVersion() {
-//        return packageManager.getGameVersionForBuildVersion(launcherSettings.getJob(), launcherSettings.getBuildVersion(launcherSettings.getJob()));
-        return null;
-    }
-
-    ComboBox<PackageItem> getJobBox() {
-        return jobBox;
-    }
-
-    ComboBox<VersionItem> getBuildVersionBox() {
-        return buildVersionBox;
     }
 
     /**
@@ -717,133 +574,11 @@ public class ApplicationController {
                 setText(null);
                 setGraphic(null);
             } else {
-                labelVersion.textProperty().bind(item.versionProperty);
-                iconStatus.visibleProperty().bind(item.installedProperty);
+                labelVersion.textProperty().bind(item.versionProperty());
+                iconStatus.visibleProperty().bind(item.installedProperty());
                 setGraphic(root);
             }
         }
     }
 
-    private static final class DownloadTask extends Task<Void> implements ProgressListener {
-        private static final Logger logger = LoggerFactory.getLogger(DownloadTask.class);
-
-        private final PackageManager packageManager;
-        private final VersionItem target;
-        private Runnable cleanup;
-
-        DownloadTask(PackageManager packageManager, VersionItem target) {
-            this.packageManager = packageManager;
-            this.target = target;
-        }
-
-        @Override
-        protected Void call() {
-            final Package targetPkg = target.linkedPackageProperty.get();
-            try {
-                packageManager.install(targetPkg, this);
-            } catch (IOException | DownloadException e) {
-                logger.error("Failed to download package: {}-{}",
-                        targetPkg.getId(), targetPkg.getVersion(), e);
-            }
-            return null;
-        }
-
-        @Override
-        public void update() {
-        }
-
-        @Override
-        public void update(int progress) {
-            updateProgress(progress, 100);
-        }
-
-        @Override
-        protected void succeeded() {
-            target.installedProperty.set(true);
-        }
-
-        @Override
-        protected void done() {
-            if (cleanup != null) {
-                Platform.runLater(cleanup);
-            }
-        }
-
-        public void onDone(Runnable cleanupCallback) {
-            cleanup = cleanupCallback;
-        }
-    }
-
-    private static final class DeleteTask extends Task<Void> {
-        private static final Logger logger = LoggerFactory.getLogger(DeleteTask.class);
-
-        private final PackageManager packageManager;
-        private final VersionItem target;
-        private Runnable cleanup;
-
-        DeleteTask(PackageManager packageManager, VersionItem target) {
-            this.packageManager = packageManager;
-            this.target = target;
-        }
-
-        @Override
-        protected Void call() {
-            final Package targetPkg = target.linkedPackageProperty.get();
-            try {
-                packageManager.remove(targetPkg);
-            } catch (IOException e) {
-                logger.error("Failed to remove package: {}-{}",
-                        targetPkg.getId(), targetPkg.getVersion(), e);
-            }
-            return null;
-        }
-
-        @Override
-        protected void succeeded() {
-            target.installedProperty.set(false);
-        }
-
-        @Override
-        protected void done() {
-            if (cleanup != null) {
-                Platform.runLater(cleanup);
-            }
-        }
-
-        public void onDone(Runnable cleanupCallback) {
-            cleanup = cleanupCallback;
-        }
-    }
-
-    private static class PackageItem {
-        private final ReadOnlyStringProperty nameProperty;
-        private final ObservableList<VersionItem> versionItems;
-
-        PackageItem(final String name, final List<VersionItem> versions) {
-            nameProperty = new SimpleStringProperty(name);
-            versionItems = FXCollections.observableList(versions);
-        }
-
-        @Override
-        public String toString() {
-            return nameProperty.get();
-        }
-    }
-
-    private static class VersionItem {
-        private final ReadOnlyObjectProperty<Package> linkedPackageProperty;
-        private final ReadOnlyStringProperty versionProperty;
-        private final BooleanProperty installedProperty;
-
-        VersionItem(final Package linkedPackage) {
-            linkedPackageProperty = new SimpleObjectProperty<>(linkedPackage);
-            versionProperty = new SimpleStringProperty(linkedPackage.getVersion());
-            installedProperty = new SimpleBooleanProperty(linkedPackage.isInstalled());
-        }
-
-        @Override
-        public String toString() {
-            return versionProperty.get();
-        }
-    }
 }
