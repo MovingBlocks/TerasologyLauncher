@@ -17,7 +17,8 @@
 package org.terasology.launcher.util;
 
 public final class Platform {
-
+    
+    @SuppressWarnings("checkstyle:staticvariablename")
     private static Platform PLATFORM;
 
     private String os;
