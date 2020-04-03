@@ -131,7 +131,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return null;
     }
 
-    private Platform getPlatform() throws LauncherStartFailedException {
+    private Platform getPlatform() {
         logger.trace("Init Platform...");
         updateMessage(BundleUtils.getLabel("splash_checkOS"));
         final Platform platform = Platform.getPlatform();
