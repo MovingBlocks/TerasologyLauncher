@@ -27,7 +27,7 @@ public final class Platform {
     private Platform() {
         // TODO: consider using regex
         final String platformOs = System.getProperty("os.name").toLowerCase();
-        if (platformOs.equals("linux")) {
+        if (platformOs.startsWith("linux")) {
             this.os = "linux";
         } else if (platformOs.startsWith("mac os")) {
             this.os = "mac";
