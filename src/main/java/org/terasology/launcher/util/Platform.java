@@ -22,7 +22,7 @@ package org.terasology.launcher.util;
 
 public final class Platform {
     
-    private static final Platform platform = new Platform();
+    private static final Platform PLATFORM = new Platform();
 
     private String os;
     private String arch;
@@ -91,6 +91,6 @@ public final class Platform {
      * @return the platform
      */
     public static Platform getPlatform() {
-        return platform;
+        return PLATFORM;
     }
 }
