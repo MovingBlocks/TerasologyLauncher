@@ -16,17 +16,25 @@
 
 package org.terasology.launcher.util;
 
+/**
+ * A simplified representation of a computer platform as `os` and `arch`
+ */
+
 public final class Platform {
     
-    @SuppressWarnings("checkstyle:staticvariablename")
-    private static Platform PLATFORM;
+    private static final Platform platform = new Platform();
 
     private String os;
     private String arch;
 
+    /**
+     * Constructs platform information for the current host system.
+     * Simplifies operating system name to one of `linux`, `mac`, `windows` if applicable.
+     * Simplifies operating system architecture to one of `32` and `64` if applicable.
+     */
     private Platform() {
-        // TODO: consider using regex
         final String platformOs = System.getProperty("os.name").toLowerCase();
+        // TODO: consider using regex
         if (platformOs.startsWith("linux")) {
             this.os = "linux";
         } else if (platformOs.startsWith("mac os")) {
@@ -47,10 +55,16 @@ public final class Platform {
         }
     }
 
+    /**
+     * @return the simplified operating system name as platform os
+     */
     public String getOs() {
         return this.os;
     }
 
+    /**
+     * @return the simplified operating system architecture as platform arch
+     */
     public String getArch() {
         return this.arch;
     }
@@ -72,13 +86,11 @@ public final class Platform {
     }
 
     /**
-     * @return the operating system singleton
+     * Get information on the host platform the launcher is currently running on.
+     *
+     * @return the platform
      */
     public static Platform getPlatform() {
-        if (PLATFORM == null) {
-            PLATFORM = new Platform();
-        }
-
-        return PLATFORM;
+        return platform;
     }
 }
