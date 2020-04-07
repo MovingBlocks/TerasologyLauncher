@@ -35,22 +35,22 @@ public final class Platform {
         final String platformOs = System.getProperty("os.name").toLowerCase();
         // TODO: consider using regex
         if (platformOs.startsWith("linux")) {
-            this.os = "linux";
+            os = "linux";
         } else if (platformOs.startsWith("mac os")) {
-            this.os = "mac";
+            os = "mac";
         } else if (platformOs.startsWith("windows")) {
-            this.os = "windows";
+            os = "windows";
         } else {
-            this.os = platformOs;
+            os = platformOs;
         }
 
         final String platformArch = System.getProperty("os.arch");
         if (platformArch.equals("x86_64") || platformArch.equals("amd64")) {
-            this.arch = "64";
-        } else if (platformArch.equals("x86")) {
-            this.arch = "32";
+            arch = "64";
+        } else if (platformArch.equals("x86") || platformArch.equals("i386")) {
+            arch = "32";
         } else {
-            this.arch = platformArch;
+            arch = platformArch;
         }
     }
 
@@ -58,30 +58,30 @@ public final class Platform {
      * @return the simplified operating system name as platform os
      */
     public String getOs() {
-        return this.os;
+        return os;
     }
 
     /**
      * @return the simplified operating system architecture as platform arch
      */
     public String getArch() {
-        return this.arch;
+        return arch;
     }
 
     public boolean isLinux() {
-        return this.os.equals("linux");
+        return os.equals("linux");
     }
 
     public boolean isMac() {
-        return this.os.equals("mac");
+        return os.equals("mac");
     }
 
     public boolean isWindows() {
-        return this.os.equals("windows");
+        return os.equals("windows");
     }
 
     public String toString() {
-        return "OS '" + this.os + "', arch '" + this.arch + "'";
+        return "OS '" + os + "', arch '" + arch + "'";
     }
 
     /**
