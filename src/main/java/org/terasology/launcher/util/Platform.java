@@ -19,7 +19,6 @@ package org.terasology.launcher.util;
 /**
  * A simplified representation of a computer platform as `os` and `arch`
  */
-
 public final class Platform {
     
     private static final Platform PLATFORM = new Platform();
