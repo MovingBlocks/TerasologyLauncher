@@ -27,7 +27,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseRepositoryDeserializer implements JsonDeserializer<RepositoryConfiguration> {
+public class RepositoryConfigurationDeserializer implements JsonDeserializer<RepositoryConfiguration> {
     @Override
     public RepositoryConfiguration deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {

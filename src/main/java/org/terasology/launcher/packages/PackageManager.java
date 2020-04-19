@@ -28,7 +28,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.packages.db.DatabaseRepositoryDeserializer;
+import org.terasology.launcher.packages.db.RepositoryConfigurationDeserializer;
 import org.terasology.launcher.packages.db.RepositoryConfiguration;
 import org.terasology.launcher.tasks.ProgressListener;
 import org.terasology.launcher.util.DownloadException;
@@ -93,7 +93,7 @@ public class PackageManager {
 
             InputStreamReader reader = new InputStreamReader(sourcesJsonForGson);
             Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(RepositoryConfiguration.class, new DatabaseRepositoryDeserializer())
+                    .registerTypeAdapter(RepositoryConfiguration.class, new RepositoryConfigurationDeserializer())
                     .create();
             gson.fromJson(reader, RepositoryConfiguration[].class);
 

@@ -21,7 +21,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.packages.db.DatabaseRepositoryDeserializer;
+import org.terasology.launcher.packages.db.RepositoryConfigurationDeserializer;
 import org.terasology.launcher.packages.db.RepositoryConfiguration;
 
 import java.io.BufferedReader;
@@ -55,7 +55,7 @@ class PackageDatabase {
         this.databaseFile = databaseFile;
         this.installDir = installDir;
         gson = new GsonBuilder()
-                .registerTypeAdapter(RepositoryConfiguration.class, new DatabaseRepositoryDeserializer())
+                .registerTypeAdapter(RepositoryConfiguration.class, new RepositoryConfigurationDeserializer())
                 .create();
         database = loadDatabase();
         markInstalled();
