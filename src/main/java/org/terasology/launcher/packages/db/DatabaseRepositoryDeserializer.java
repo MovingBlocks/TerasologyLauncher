@@ -27,11 +27,11 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseRepositoryDeserializer implements JsonDeserializer<DatabaseRepository> {
+public class DatabaseRepositoryDeserializer implements JsonDeserializer<RepositoryConfiguration> {
     @Override
-    public DatabaseRepository deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public RepositoryConfiguration deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
-        final DatabaseRepository repo = new DatabaseRepository();
+        final RepositoryConfiguration repo = new RepositoryConfiguration();
         final JsonObject obj = json.getAsJsonObject();
 
         repo.setUrl(obj.get("url").getAsString());

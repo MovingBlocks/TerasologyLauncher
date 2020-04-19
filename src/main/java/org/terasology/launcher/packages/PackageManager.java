@@ -28,12 +28,12 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.packages.db.DatabaseRepository;
 import org.terasology.launcher.packages.db.DatabaseRepositoryDeserializer;
+import org.terasology.launcher.packages.db.RepositoryConfiguration;
+import org.terasology.launcher.tasks.ProgressListener;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.tasks.ProgressListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -128,9 +128,9 @@ public class PackageManager {
 
             InputStreamReader reader = new InputStreamReader(sourcesJsonForGson);
             Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(DatabaseRepository.class, new DatabaseRepositoryDeserializer())
+                    .registerTypeAdapter(RepositoryConfiguration.class, new DatabaseRepositoryDeserializer())
                     .create();
-            gson.fromJson(reader, DatabaseRepository[].class);
+            gson.fromJson(reader, RepositoryConfiguration[].class);
 
             JSONObject rawSchema = new JSONObject(new JSONTokener(schemaIn));
             Schema schema = SchemaLoader.load(rawSchema);

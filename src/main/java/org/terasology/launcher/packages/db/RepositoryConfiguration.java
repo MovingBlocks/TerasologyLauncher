@@ -18,7 +18,7 @@ package org.terasology.launcher.packages.db;
 
 import java.io.Serializable;
 
-public class DatabaseRepository implements Serializable {
+public class RepositoryConfiguration implements Serializable {
     private String url;
     private String type;
     private PackageMetadata[] trackedPackages;

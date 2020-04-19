@@ -16,6 +16,8 @@
 
 package org.terasology.launcher.packages;
 
+import org.terasology.launcher.packages.db.RepositoryConfiguration;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -24,5 +26,8 @@ import java.util.Optional;
  */
 public interface Repository {
     List<Integer> getPackageVersions(PackageBuild pkgBuild);
+
     Optional<Package> getPackage(PackageBuild pkgBuild, int version);
+
+    List<Package> getPackageList(RepositoryConfiguration config);
 }

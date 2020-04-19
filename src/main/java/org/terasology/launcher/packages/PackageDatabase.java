@@ -22,7 +22,7 @@ import com.google.gson.JsonSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.db.DatabaseRepositoryDeserializer;
-import org.terasology.launcher.packages.db.DatabaseRepository;
+import org.terasology.launcher.packages.db.RepositoryConfiguration;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -55,7 +55,7 @@ class PackageDatabase {
         this.databaseFile = databaseFile;
         this.installDir = installDir;
         gson = new GsonBuilder()
-                .registerTypeAdapter(DatabaseRepository.class, new DatabaseRepositoryDeserializer())
+                .registerTypeAdapter(RepositoryConfiguration.class, new DatabaseRepositoryDeserializer())
                 .create();
         database = loadDatabase();
         markInstalled();
@@ -72,7 +72,7 @@ class PackageDatabase {
         )) {
             final List<Package> newDatabase = new LinkedList<>();
             // TODO: read the DatabaseRepository list before-hand and pass to sync()
-            for (DatabaseRepository source : gson.fromJson(reader, DatabaseRepository[].class)) {
+            for (RepositoryConfiguration source : gson.fromJson(reader, RepositoryConfiguration[].class)) {
                 logger.trace("Fetching package list from: {}", source.getUrl());
                 newDatabase.addAll(packageListOf(source));
             }
@@ -106,8 +106,17 @@ class PackageDatabase {
         }
     }
 
-    private List<Package> packageListOf(DatabaseRepository source) {
-        return Objects.requireNonNull(RepositoryHandler.ofType(source.getType()), "Invalid repository type")
+    private List<Package> packageListOf(RepositoryConfiguration source) {
+        final Repository repository;
+        switch (source.getType().toLowerCase()) {
+            case "jenkins":
+                repository = new JenkinsRepository();
+                break;
+            default:
+                repository = null;
+        }
+
+        return Objects.requireNonNull(repository, "Invalid repository type")
                 .getPackageList(source);
     }
 

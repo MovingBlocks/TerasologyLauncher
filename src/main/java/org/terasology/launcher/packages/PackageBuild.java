@@ -25,8 +25,6 @@ public enum PackageBuild {
     OMEGA_STABLE("DistroOmegaRelease"),
     OMEGA_UNSTABLE("DistroOmega");
 
-    // TODO: Remove this enum when 3rd-party package types are supported
-
     private final String jobName;
 
     PackageBuild(String jobName) {
@@ -35,14 +33,5 @@ public enum PackageBuild {
 
     public String getJobName() {
         return jobName;
-    }
-
-    public static PackageBuild byJobName(String jobName) {
-        for (PackageBuild packageType : values()) {
-            if (packageType.jobName.equals(jobName)) {
-                return packageType;
-            }
-        }
-        throw new IllegalArgumentException("Invalid job name: " + jobName);
     }
 }
