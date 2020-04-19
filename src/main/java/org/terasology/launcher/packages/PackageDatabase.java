@@ -63,8 +63,6 @@ class PackageDatabase {
 
     /**
      * Fetches details of all packages for each repository specified in {@code sourcesFile}.
-     *
-     * @param sourcesFile
      */
     void sync(Path sourcesFile) {
         try (BufferedReader reader = new BufferedReader(
@@ -108,12 +106,10 @@ class PackageDatabase {
 
     private List<Package> packageListOf(RepositoryConfiguration source) {
         final Repository repository;
-        switch (source.getType().toLowerCase()) {
-            case "jenkins":
-                repository = new JenkinsRepository();
-                break;
-            default:
-                repository = null;
+        if (source.getType().equalsIgnoreCase("jenkins")) {
+            repository = new JenkinsRepository();
+        } else {
+            repository = null;
         }
 
         return Objects.requireNonNull(repository, "Invalid repository type")
@@ -147,13 +143,11 @@ class PackageDatabase {
 
     List<Package> getPackages() {
         return Collections.unmodifiableList(database);
-    }    
-    
+    }
+
     Optional<Package> getLatestInstalledPackageForId(String packageId) {
         return database.stream()
-                        .filter(pkg -> pkg.getId().equals(packageId) && pkg.isInstalled())
-                        .sorted(Comparator.comparing(Package::getVersion).reversed())
-                        .findFirst();
+                .filter(pkg -> pkg.getId().equals(packageId) && pkg.isInstalled()).max(Comparator.comparing(Package::getVersion));
     }
 
 }

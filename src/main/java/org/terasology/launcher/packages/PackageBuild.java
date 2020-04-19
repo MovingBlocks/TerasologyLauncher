@@ -20,18 +20,8 @@ package org.terasology.launcher.packages;
  * Enum for different builds of game package available now.
  */
 public enum PackageBuild {
-    STABLE("TerasologyStable"),
-    UNSTABLE("Terasology"),
-    OMEGA_STABLE("DistroOmegaRelease"),
-    OMEGA_UNSTABLE("DistroOmega");
-
-    private final String jobName;
-
-    PackageBuild(String jobName) {
-        this.jobName = jobName;
-    }
-
-    public String getJobName() {
-        return jobName;
-    }
+    STABLE,
+    UNSTABLE,
+    OMEGA_STABLE,
+    OMEGA_UNSTABLE
 }
