@@ -42,14 +42,10 @@ public class LocalRepository implements Repository {
 
     private static final String VERSIONS_CACHE_FILENAME = "versions.cache";
 
-    private final Path gameDirectory;
-    private final Path cacheDirectory;
     private final Path versionsCache;
     private final Map<PackageBuild, List<Integer>> cachedVersions;
 
-    LocalRepository(Path gameDirectory, Path cacheDirectory) {
-        this.gameDirectory = gameDirectory;
-        this.cacheDirectory = cacheDirectory;
+    LocalRepository(final Path cacheDirectory) {
         versionsCache = cacheDirectory.resolve(VERSIONS_CACHE_FILENAME);
         cachedVersions = new EnumMap<>(PackageBuild.class);
     }
@@ -81,14 +77,6 @@ public class LocalRepository implements Repository {
                 logger.warn("Failed to load cache file: {}", versionsCache.toAbsolutePath());
             }
         }
-    }
-
-    void install(Package pkg) {
-        // TODO: Implement this
-    }
-
-    void remove(Package pkg) {
-        // TODO: Implement this
     }
 
     @Override

@@ -59,50 +59,15 @@ public class PackageManager {
     private static final String DATABASE_FILENAME = "packages.db";
     private static final String CACHE_DIRECTORY = "cache";
 
-    private final Repository onlineRepository;
-    private LocalRepository localRepository;
     private PackageDatabase database;
     private Path cacheDir;
     private Path installDir;
     private Path sourcesFile;
 
     public PackageManager(Path userDataDir, Path gameDir) {
-        onlineRepository = new JenkinsRepository();
         cacheDir = userDataDir.resolve(CACHE_DIRECTORY);
         installDir = gameDir;
         sourcesFile = userDataDir.resolve(SOURCES_FILENAME);
-    }
-
-    /**
-     * Sets up local storage for working with game packages and cache files.
-     *
-     * @param gameDirectory  directory path for storing game packages
-     * @param cacheDirectory directory path for storing cache files
-     */
-    public void initLocalStorage(Path gameDirectory, Path cacheDirectory) {
-        try {
-            FileUtils.ensureWritableDir(gameDirectory);
-            FileUtils.ensureWritableDir(cacheDirectory);
-            localRepository = new LocalRepository(gameDirectory, cacheDirectory);
-            localRepository.loadCache();
-        } catch (IOException e) {
-            logger.error("Error initialising local storage: {}", e.getMessage());
-        }
-    }
-
-    /**
-     * Synchronizes the cached game version list with the list of game versions
-     * available online.
-     */
-    public void sync() {
-        Objects.requireNonNull(localRepository, "Local storage uninitialized");
-
-        for (PackageBuild pkgBuild : PackageBuild.values()) {
-            final List<Integer> versions = onlineRepository.getPackageVersions(pkgBuild);
-            logger.debug("Versions for job {}: {}", pkgBuild.getJobName(), versions.toString());
-            localRepository.updateCache(pkgBuild, versions);
-        }
-        localRepository.saveCache();
     }
 
     /**
@@ -248,18 +213,6 @@ public class PackageManager {
     public List<Package> getPackages() {
         return Objects.requireNonNull(database)
                 .getPackages();
-    }
-
-    /**
-     * Provides the list of package versions available for a build by querying
-     * the cached version list.
-     *
-     * @param pkgBuild the build of the game packages
-     * @return the list of versions available for that package
-     */
-    public List<Integer> getPackageVersions(PackageBuild pkgBuild) {
-        return Objects.requireNonNull(localRepository, "Local storage uninitialized")
-                .getPackageVersions(pkgBuild);
     }
 
     public Optional<Package> getLatestInstalledPackageForId(String packageId) {
