@@ -21,16 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.db.RepositoryConfiguration;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Provides game packages from the local filesystem.
@@ -50,45 +44,6 @@ public class LocalRepository implements Repository {
         cachedVersions = new EnumMap<>(PackageBuild.class);
     }
 
-    void updateCache(PackageBuild pkgType, List<Integer> versions) {
-        cachedVersions.put(pkgType, versions);
-        logger.trace("Updating cached version list for {} ...", pkgType);
-    }
-
-    void saveCache() {
-        try (ObjectOutputStream out = new ObjectOutputStream(
-                Files.newOutputStream(versionsCache))) {
-            out.writeObject(cachedVersions);
-            logger.info("Saved cache file: {}", versionsCache.toAbsolutePath());
-        } catch (IOException e) {
-            logger.warn("Failed to save cache file: {}", versionsCache.toAbsolutePath());
-        }
-    }
-
-    void loadCache() {
-        // TODO: Do this in a background thread
-        if (Files.exists(versionsCache)) {
-            try (ObjectInputStream in = new ObjectInputStream(
-                    Files.newInputStream(versionsCache))) {
-                cachedVersions.putAll(
-                        (Map<PackageBuild, List<Integer>>) in.readObject());
-                logger.info("Loaded cache file: {}", versionsCache.toAbsolutePath());
-            } catch (ClassNotFoundException | IOException e) {
-                logger.warn("Failed to load cache file: {}", versionsCache.toAbsolutePath());
-            }
-        }
-    }
-
-    @Override
-    public List<Integer> getPackageVersions(PackageBuild pkgBuild) {
-        return cachedVersions.getOrDefault(pkgBuild, Collections.emptyList());
-    }
-
-    @Override
-    public Optional<Package> getPackage(PackageBuild pkgBuild, int version) {
-        // TODO: Implement this
-        return Optional.empty();
-    }
 
     @Override
     public List<Package> getPackageList(RepositoryConfiguration config) {

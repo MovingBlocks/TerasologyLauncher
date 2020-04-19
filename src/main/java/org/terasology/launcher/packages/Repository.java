@@ -19,15 +19,10 @@ package org.terasology.launcher.packages;
 import org.terasology.launcher.packages.db.RepositoryConfiguration;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Interface for anything that can provide game packages.
  */
 public interface Repository {
-    List<Integer> getPackageVersions(PackageBuild pkgBuild);
-
-    Optional<Package> getPackage(PackageBuild pkgBuild, int version);
-
     List<Package> getPackageList(RepositoryConfiguration config);
 }

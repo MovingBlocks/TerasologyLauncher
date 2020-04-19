@@ -34,7 +34,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -56,9 +55,6 @@ public class JenkinsRepository implements Repository {
             + "upstreamProjects[name]";
     private static final String TERASOLOGY_ZIP_PATTERN = "Terasology.*zip";
     private static final String ARTIFACT = "artifact/";
-    private static final String JENKINS_JOB_URL = "http://jenkins.terasology.org/job/";
-    private static final String API_PATH = "/api/json?tree=builds[number,result]";
-    private static final int LIMIT_VERSIONS = 5;
 
     private final Gson gson = new Gson();
     private final Map<String, Package> syncedPackages = new HashMap<>();
@@ -182,37 +178,6 @@ public class JenkinsRepository implements Repository {
                     .map(change -> change.msg)
                     .collect(Collectors.toList());
         }
-    }
-
-    @Override
-    public List<Integer> getPackageVersions(PackageBuild pkgType) {
-        final String jobApiPath = JENKINS_JOB_URL + pkgType.getJobName() + API_PATH;
-
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(
-                        new URL(jobApiPath).openStream()))) {
-
-            final Job result = gson.fromJson(reader, Job.class);
-            return Arrays.stream(result.builds)
-                    .map(build -> build.number)
-                    .map(Integer::parseInt)
-                    .limit(LIMIT_VERSIONS)
-                    .collect(Collectors.toList());
-
-        } catch (IOException e) {
-            logger.warn("Failed to access URL: {}", jobApiPath);
-        }
-        return Collections.emptyList();
-    }
-
-    @Override
-    public Optional<Package> getPackage(PackageBuild pkgBuild, int version) {
-        // TODO: Implement this
-        return Optional.empty();
-    }
-
-    private static class Job {
-        private Build[] builds;
     }
 
     private static class ApiResult {
