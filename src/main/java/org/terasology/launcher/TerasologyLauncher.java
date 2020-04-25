@@ -18,12 +18,9 @@ package org.terasology.launcher;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
-import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -42,17 +39,14 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.crashreporter.CrashReporter;
 import org.terasology.launcher.gui.javafx.ApplicationController;
-import org.terasology.launcher.log.TempLogFilePropertyDefiner;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.HostServicesWrapper;
+import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.MissingResourceException;
@@ -69,31 +63,10 @@ public final class TerasologyLauncher extends Application {
     private ProgressBar loadProgress;
     private Label progressText;
     private Stage mainStage;
-    private HostServicesWrapper hostServices;
+    private HostServices hostServices;
 
     public static void main(String[] args) {
         launch(args);
-    }
-
-    /**
-     * Initialize the host service wrapper by attempting to use the JavaFX {@link HostServices}.
-     *
-     * @return the configured host service wrapper
-     */
-    private HostServicesWrapper initHostServices() {
-        HostServices hs;
-        try {
-            // This may throw an exception on a different thread, but we cannot catch it here o.O
-            // In addition, `hostServices` will be initialized, but disfunctional.
-            // Thus, we have no idea whether we can use the services or not...
-            hs = getHostServices();
-            // poor man's check: this will throw a NPE if the internal `hostServices.delegate` is not initialized
-            hs.getCodeBase();
-        } catch (NullPointerException e) {
-            logger.warn("Host Services not available - won't be able to open hyperlinks in the system browser.");
-            hs = null;
-        }
-        return new HostServicesWrapper(hs);
     }
 
     @Override
@@ -107,7 +80,7 @@ public final class TerasologyLauncher extends Application {
         progressText.setAlignment(Pos.CENTER);
         splashLayout.getStylesheets().add(BundleUtils.getStylesheet("css_splash"));
         splashLayout.setEffect(new DropShadow());
-        hostServices = initHostServices();
+        hostServices = new HostServices();
     }
 
     @Override
@@ -118,31 +91,36 @@ public final class TerasologyLauncher extends Application {
         initProxy();
         initLanguage();
 
-        final Task<LauncherConfiguration> launcherInitTask = new LauncherInitTask(initialStage);
+        final Task<LauncherConfiguration> launcherInitTask = new LauncherInitTask(initialStage, hostServices);
 
         showSplashStage(initialStage, launcherInitTask);
         Thread initThread = new Thread(launcherInitTask);
         initThread.setName("Launcher init thread");
         initThread.setUncaughtExceptionHandler((t, e) -> logger.warn("Initialization failed!", e));
 
-        launcherInitTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(final WorkerStateEvent workerStateEvent) {
-                try {
-                    LauncherConfiguration config = launcherInitTask.getValue();
-                    if (config == null) {
-                        throw new LauncherStartFailedException("Launcher configuration was `null`.");
-                    } else if (config instanceof NullLauncherConfiguration) {
-                        logger.info("Closing the launcher ... (empty configuration, probably due to update)");
-                        Platform.exit();
-                    } else {
-                        showMainStage(config);
-                    }
-                } catch (IOException | LauncherStartFailedException e) {
-                    openCrashReporterAndExit(e);
+        launcherInitTask.setOnSucceeded(workerStateEvent -> {
+            try {
+                LauncherConfiguration config = launcherInitTask.getValue();
+                if (config == null) {
+                    throw new LauncherStartFailedException("Launcher configuration was `null`.");
+                } else if (config instanceof NullLauncherConfiguration) {
+                    logger.info("Closing the launcher ... (empty configuration, probably due to update)");
+                    Platform.exit();
+                } else {
+                    showMainStage(config);
                 }
+            } catch (IOException | LauncherStartFailedException e) {
+                logger.error("The TerasologyLauncher could not be started!", e);
+                System.exit(1);
             }
         });
+
+        launcherInitTask.setOnFailed(event -> {
+            logger.error("The TerasologyLauncher could not be started!", event.getSource().getException());
+            System.exit(1);
+        });
+
+        launcherInitTask.setOnCancelled(event -> Platform.exit());
 
         launcherInitTask.setOnFailed(event -> {
             Throwable throwable = event.getSource().getException();
@@ -203,7 +181,7 @@ public final class TerasologyLauncher extends Application {
             root = (Parent) fxmlLoader.load();
         }
         final ApplicationController controller = fxmlLoader.getController();
-        controller.update(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(), launcherConfiguration.getTempDirectory(),
+        controller.update(launcherConfiguration.getLauncherDirectory(), launcherConfiguration.getDownloadDirectory(),
                 launcherConfiguration.getLauncherSettings(), launcherConfiguration.getPackageManager(), mainStage, hostServices);
 
         Scene scene = new Scene(root);
@@ -278,7 +256,7 @@ public final class TerasologyLauncher extends Application {
      * @param stage the stage to decorate
      */
     private static void decorateStage(Stage stage) {
-        stage.setTitle("TerasologyLauncher " + TerasologyLauncherVersionInfo.getInstance().getDisplayVersion());
+        stage.setTitle("TerasologyLauncher");
         List<String> iconIds = Arrays.asList("icon16", "icon32", "icon64", "icon128");
 
         for (String id : iconIds) {

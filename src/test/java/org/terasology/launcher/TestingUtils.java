@@ -34,23 +34,10 @@ public final class TestingUtils {
 
     }
 
-    public static void mockBuildVersion(GameJob job, int version) throws Exception {
-        VersionInformation information = new VersionInformation();
-        information.addMapping(job, version);
-        mockBuildVersions(information);
-    }
-
-    public static void mockBuildVersion(String job, int version) throws Exception {
-        VersionInformation information = new VersionInformation();
-        information.addMapping(job, version, version);
-        mockBuildVersions(information);
-    }
-
     /**
      * Mocks out various methods in DownloadUtils to respond using the giving job map.
      *
      * @param buildValues A map from {@link GameJob} names to a map of omega build number to normal build numbers
-     *
      * @throws Exception
      */
     public static void mockBuildVersions(VersionInformation buildValues) throws Exception {

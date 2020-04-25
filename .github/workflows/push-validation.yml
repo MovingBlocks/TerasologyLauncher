@@ -15,4 +15,4 @@ jobs:
         java-version: 1.11
         java-package: jdk+fx
     - name: Build and test with Gradle
-      run: ./gradlew test
+      run: ./gradlew check

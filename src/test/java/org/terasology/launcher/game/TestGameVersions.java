@@ -23,7 +23,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.terasology.launcher.TestingUtils;
-import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.DownloadUtils;
 
 import java.nio.file.Files;
@@ -45,24 +44,24 @@ public class TestGameVersions {
 
     // These functions are common assertions, to be used with requireAssertions
     private static final BiConsumer<TerasologyGameVersion, Integer> REQUIRES_SUCCESSFUL =
-        (version, i) -> Assert.assertEquals(
-                String.format("Build should be successful: %s!", version),
-                true,
-                version.getSuccessful());
+            (version, i) -> Assert.assertEquals(
+                    String.format("Build should be successful: %s!", version),
+                    true,
+                    version.getSuccessful());
     private static final BiConsumer<TerasologyGameVersion, Integer> REQUIRES_MIN_BUILD_PLUS_ONE =
-        (version, i) -> Assert.assertEquals(
-                String.format("Build number mismatch!: %s", version),
-                version.getJob().getMinBuildNumber() + 1,
-                (long) version.getBuildNumber());
+            (version, i) -> Assert.assertEquals(
+                    String.format("Build number mismatch!: %s", version),
+                    version.getJob().getMinBuildNumber() + 1,
+                    (long) version.getBuildNumber());
     private static final BiConsumer<TerasologyGameVersion, Integer> REQUIRES_OMEGA_SAME_NUMBER =
-        (version, i) -> Assert.assertEquals(
-                String.format("Omega build should have the same number as regular build: %s", version),
-                version.getBuildNumber(),
-                version.getOmegaNumber());
+            (version, i) -> Assert.assertEquals(
+                    String.format("Omega build should have the same number as regular build: %s", version),
+                    version.getBuildNumber(),
+                    version.getOmegaNumber());
 
     // These functions can be used with
     private static final BiConsumer<TerasologyGameVersion, Integer> REQUIRES_NULL_OMEGA =
-        (version, i) -> Assert.assertNull(String.format("Omega build should not be available: %s!", version), version.getOmegaNumber());
+            (version, i) -> Assert.assertNull(String.format("Omega build should not be available: %s!", version), version.getOmegaNumber());
 
     @Test
     public void testGetSingleVersion() throws Exception {
@@ -184,10 +183,8 @@ public class TestGameVersions {
         Path launcherDir = Files.createTempDirectory("terasology-launcher-dir").toAbsolutePath();
         Path gameDirectory = Files.createTempDirectory("terasology-game-dir").toAbsolutePath();
 
-        BaseLauncherSettings settings = new BaseLauncherSettings(launcherDir);
-        settings.init();
 
-        gameVersions.loadGameVersions(settings, launcherDir, gameDirectory);
+        gameVersions.loadGameVersions(launcherDir, gameDirectory);
     }
 
     private TerasologyGameVersions getGameVersions(boolean doMapping, boolean omega) throws Exception {

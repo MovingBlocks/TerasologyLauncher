@@ -16,15 +16,29 @@
 
 package org.terasology.launcher.packages;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.packages.db.DatabaseRepository;
+import org.terasology.launcher.packages.db.DatabaseRepositoryDeserializer;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.util.ProgressListener;
+import org.terasology.launcher.tasks.ProgressListener;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +46,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Handles installation, removal and update of game packages.
@@ -39,8 +54,8 @@ import java.util.Objects;
 public class PackageManager {
 
     private static final Logger logger = LoggerFactory.getLogger(PackageManager.class);
-    private static final String INSTALL_DIRECTORY = "games";
     private static final String SOURCES_FILENAME = "sources.json";
+    private static final String SOURCES_SCHEMA = "schema.json";
     private static final String DATABASE_FILENAME = "packages.db";
     private static final String CACHE_DIRECTORY = "cache";
 
@@ -49,15 +64,19 @@ public class PackageManager {
     private PackageDatabase database;
     private Path cacheDir;
     private Path installDir;
+    private Path sourcesFile;
 
-    public PackageManager() {
+    public PackageManager(Path userDataDir, Path gameDir) {
         onlineRepository = new JenkinsRepository();
+        cacheDir = userDataDir.resolve(CACHE_DIRECTORY);
+        installDir = gameDir;
+        sourcesFile = userDataDir.resolve(SOURCES_FILENAME);
     }
 
     /**
      * Sets up local storage for working with game packages and cache files.
      *
-     * @param gameDirectory directory path for storing game packages
+     * @param gameDirectory  directory path for storing game packages
      * @param cacheDirectory directory path for storing cache files
      */
     public void initLocalStorage(Path gameDirectory, Path cacheDirectory) {
@@ -86,25 +105,70 @@ public class PackageManager {
         localRepository.saveCache();
     }
 
-    // TODO: Move to constructor
-    public void initDatabase(Path launcherDir, Path gameDir) {
-        cacheDir = launcherDir.resolve(CACHE_DIRECTORY);
-        installDir = gameDir.resolve(INSTALL_DIRECTORY);
-        final Path sourcesFile = launcherDir.resolve(SOURCES_FILENAME);
-
-        // Copy default sources file if necessary
+    /**
+     * Checks if the sources file contains any syntax errors or
+     * schema violations. Note that the default values are copied
+     * over and used when no sources file is found.
+     *
+     * @return whether the sources file is valid
+     */
+    public boolean validateSources() {
         if (Files.notExists(sourcesFile)) {
-            logger.info("Sources file not found. Copying default file to {}", sourcesFile);
-            try {
-                Files.copy(getClass().getResourceAsStream(SOURCES_FILENAME), sourcesFile);
-            } catch (IOException e) {
-                logger.error("Failed to copy default sources file to {}", sourcesFile);
-            }
+            logger.warn("sources.json not found: {}", sourcesFile);
+            copyDefaultSources();
+            return true;
         }
 
+        logger.trace("Validating '{}'", sourcesFile);
+        try (
+                InputStream schemaIn = getClass().getResourceAsStream(SOURCES_SCHEMA);
+                InputStream sourcesJson = Files.newInputStream(sourcesFile);
+                InputStream sourcesJsonForGson = Files.newInputStream(sourcesFile)
+        ) {
+
+            InputStreamReader reader = new InputStreamReader(sourcesJsonForGson);
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(DatabaseRepository.class, new DatabaseRepositoryDeserializer())
+                    .create();
+            gson.fromJson(reader, DatabaseRepository[].class);
+
+            JSONObject rawSchema = new JSONObject(new JSONTokener(schemaIn));
+            Schema schema = SchemaLoader.load(rawSchema);
+
+            JSONArray toValidate = new JSONArray(new JSONTokener(sourcesJson));
+            schema.validate(toValidate);
+            return true;
+        } catch (ValidationException e) {
+            logger.error("sources.json has invalid value at: {}", e.getPointerToViolation());
+        } catch (JSONException | JsonSyntaxException e) {
+            logger.error("sources.json has syntax error: {}", e.getMessage());
+        } catch (IOException e) {
+            logger.error("Failed to validate sources.json: {}", e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Copies the default (bundled) sources file into the appropriate
+     * directory, overwriting any existing sources file if necessary.
+     */
+    public void copyDefaultSources() {
+        logger.info("Copying default sources file to {}", sourcesFile);
+        try {
+            Files.copy(getClass().getResourceAsStream(SOURCES_FILENAME),
+                    sourcesFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            logger.error("Failed to copy default sources file to {}", sourcesFile);
+            throw new RuntimeException("Default sources file could not be copied to " + sourcesFile);
+        }
+    }
+
+    /**
+     * Initializes a new {@link PackageDatabase}.
+     */
+    public void initDatabase() {
         database = new PackageDatabase(
-                sourcesFile,
-                launcherDir.resolve(DATABASE_FILENAME),
+                sourcesFile.resolveSibling(DATABASE_FILENAME),
                 installDir
         );
     }
@@ -112,13 +176,13 @@ public class PackageManager {
     // TODO: Replace similar methods
     public void syncDatabase() {
         Objects.requireNonNull(database)
-                .sync();
+                .sync(sourcesFile);
     }
 
     /**
      * Installs the mentioned package into the local repository.
      *
-     * @param target the package to be installed
+     * @param target   the package to be installed
      * @param listener the object which is to be informed about task progress
      */
     public void install(Package target, ProgressListener listener) throws IOException, DownloadException {
@@ -196,6 +260,10 @@ public class PackageManager {
     public List<Integer> getPackageVersions(PackageBuild pkgBuild) {
         return Objects.requireNonNull(localRepository, "Local storage uninitialized")
                 .getPackageVersions(pkgBuild);
+    }
+
+    public Optional<Package> getLatestInstalledPackageForId(String packageId) {
+        return database.getLatestInstalledPackageForId(packageId);
     }
 
     public Path resolveInstallDir(Package target) {

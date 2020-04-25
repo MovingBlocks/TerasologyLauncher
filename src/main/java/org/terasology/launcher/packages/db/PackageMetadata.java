@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2020 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.util;
+package org.terasology.launcher.packages.db;
 
-/**
- * A dummy implementation of {@link ProgressListener} that does nothing.
- */
-public class DummyProgressListener implements ProgressListener {
+import java.io.Serializable;
 
-    @Override
-    public void update() {
-        // ignore
+public class PackageMetadata implements Serializable {
+    private String id;
+    private String name;
+
+    public String getId() {
+        return id;
     }
 
-    @Override
-    public void update(int progress) {
-        // ignore
+    public String getName() {
+        return name;
     }
 
-    @Override
-    public boolean isCancelled() {
-        return false;
+    public void setId(String id) {
+        this.id = id;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
 }

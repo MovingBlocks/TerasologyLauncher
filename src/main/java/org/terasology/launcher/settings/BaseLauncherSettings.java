@@ -18,8 +18,6 @@ package org.terasology.launcher.settings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LogLevel;
@@ -37,6 +35,8 @@ import java.util.Properties;
 
 /**
  * Provides access to launcher settings.
+ *
+ * @deprecated to be replaced by {@link org.terasology.launcher.config.Config}
  */
 @Deprecated
 public final class BaseLauncherSettings extends AbstractLauncherSettings {
@@ -45,11 +45,8 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     public static final String USER_GAME_PARAMETERS_DEFAULT = "";
 
     public static final String PROPERTY_LOCALE = "locale";
-    public static final String PROPERTY_JOB = "job";
     public static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
     public static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
-    public static final String PROPERTY_PREFIX_BUILD_VERSION = "buildVersion_";
-    public static final String PROPERTY_PREFIX_LAST_BUILD_NUMBER = "lastBuildNumber_";
     public static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
     public static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
     public static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
@@ -58,14 +55,22 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     public static final String PROPERTY_USER_JAVA_PARAMETERS = "userJavaParameters";
     public static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
     public static final String PROPERTY_LOG_LEVEL = "logLevel";
+    public static final String PROPERTY_DEFAULT_GAME_JOB = "defaultGameJob";
+    public static final String PROPERTY_LAST_PLAYED_GAME_JOB = "lastPlayedGameJob";
+    public static final String PROPERTY_LAST_PLAYED_GAME_VERSION = "lastPlayedGameVersion";
+    public static final String PROPERTY_LAST_INSTALLED_GAME_JOB = "lastInstalledGameJob";
+    public static final String PROPERTY_LAST_INSTALLED_GAME_VERSION = "lastInstalledGameVersion";
 
-    public static final GameJob JOB_DEFAULT = GameJob.TerasologyStable;
     public static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     public static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
-    public static final String LAST_BUILD_NUMBER_DEFAULT = "";
     public static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
     public static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
     public static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
+    public static final String DEFAULT_GAME_JOB_DEFAULT = "DistroOmegaRelease";
+    public static final String LAST_PLAYED_GAME_JOB_DEFAULT = "";
+    public static final String LAST_PLAYED_GAME_VERSION_DEFAULT = "";
+    public static final String LAST_INSTALLED_GAME_JOB_DEFAULT = "";
+    public static final String LAST_INSTALLED_GAME_VERSION_DEFAULT = "";
 
     public static final String LAUNCHER_SETTINGS_FILE_NAME = "TerasologyLauncherSettings.properties";
 
@@ -130,55 +135,6 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
             }
         }
         properties.setProperty(PROPERTY_LOCALE, Languages.getCurrentLocale().toString());
-    }
-
-    protected void initJob() {
-        final String jobStr = properties.getProperty(PROPERTY_JOB);
-        GameJob job = JOB_DEFAULT;
-        if (jobStr != null) {
-            try {
-                job = GameJob.valueOf(jobStr);
-            } catch (IllegalArgumentException e) {
-                logger.warn(WARN_MSG_INVALID_VALUE, jobStr, PROPERTY_JOB);
-            }
-        }
-        properties.setProperty(PROPERTY_JOB, job.name());
-    }
-
-    protected void initBuildVersion() {
-        for (GameJob j : GameJob.values()) {
-            final String key = PROPERTY_PREFIX_BUILD_VERSION + j.name();
-            final String buildVersionStr = properties.getProperty(key);
-            int buildVersion = TerasologyGameVersion.BUILD_VERSION_LATEST;
-            if (buildVersionStr != null) {
-                try {
-                    buildVersion = Integer.parseInt(buildVersionStr);
-                } catch (NumberFormatException e) {
-                    logger.warn(WARN_MSG_INVALID_VALUE, buildVersionStr, key);
-                }
-            }
-            properties.setProperty(key, String.valueOf(buildVersion));
-        }
-    }
-
-    protected void initLastBuildNumber() {
-        for (GameJob j : GameJob.values()) {
-            final String key = PROPERTY_PREFIX_LAST_BUILD_NUMBER + j.name();
-            final String lastBuildNumberStr = properties.getProperty(key);
-            Integer lastBuildNumber = null;
-            if (lastBuildNumberStr != null) {
-                try {
-                    lastBuildNumber = Integer.parseInt(lastBuildNumberStr);
-                } catch (NumberFormatException e) {
-                    logger.warn(WARN_MSG_INVALID_VALUE, lastBuildNumberStr, key);
-                }
-            }
-            if (lastBuildNumber != null && lastBuildNumber >= j.getMinBuildNumber()) {
-                properties.setProperty(key, lastBuildNumber.toString());
-            } else {
-                properties.setProperty(key, LAST_BUILD_NUMBER_DEFAULT);
-            }
-        }
     }
 
     protected void initMaxHeapSize() {
@@ -295,6 +251,41 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
         }
     }
 
+    protected void initDefaultGameJob() {
+        final String defaultGameJobStr = properties.getProperty(PROPERTY_DEFAULT_GAME_JOB);
+        if (defaultGameJobStr == null || defaultGameJobStr.isEmpty()) {
+            properties.setProperty(PROPERTY_DEFAULT_GAME_JOB, DEFAULT_GAME_JOB_DEFAULT);
+        }
+    }
+
+    protected void initLastPlayedGameJob() {
+        final String lastPlayedGameJobStr = properties.getProperty(PROPERTY_LAST_PLAYED_GAME_JOB);
+        if (lastPlayedGameJobStr == null || lastPlayedGameJobStr.isEmpty()) {
+            properties.setProperty(PROPERTY_LAST_PLAYED_GAME_JOB, LAST_PLAYED_GAME_JOB_DEFAULT);
+        }
+    }
+
+    protected void initLastPlayedGameVersion() {
+        final String lastPlayedGameVersionStr = properties.getProperty(PROPERTY_LAST_PLAYED_GAME_VERSION);
+        if (lastPlayedGameVersionStr == null || lastPlayedGameVersionStr.isEmpty()) {
+            properties.setProperty(PROPERTY_LAST_PLAYED_GAME_VERSION, LAST_PLAYED_GAME_VERSION_DEFAULT);
+        }
+    }
+
+    protected void initLastInstalledGameJob() {
+        final String lastInstalledGameJobStr = properties.getProperty(PROPERTY_LAST_INSTALLED_GAME_JOB);
+        if (lastInstalledGameJobStr == null || lastInstalledGameJobStr.isEmpty()) {
+            properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_JOB, LAST_INSTALLED_GAME_JOB_DEFAULT);
+        }
+    }
+
+    protected void initLastInstalledGameVersion() {
+        final String lastInstalledGameVersionStr = properties.getProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION);
+        if (lastInstalledGameVersionStr == null || lastInstalledGameVersionStr.isEmpty()) {
+            properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION, LAST_INSTALLED_GAME_VERSION_DEFAULT);
+        }
+    }
+
     // --------------------------------------------------------------------- //
     // GETTERS
     // --------------------------------------------------------------------- //
@@ -302,25 +293,6 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     @Override
     public synchronized Locale getLocale() {
         return Locale.forLanguageTag(properties.getProperty(PROPERTY_LOCALE));
-    }
-
-    @Override
-    public synchronized GameJob getJob() {
-        return GameJob.valueOf(properties.getProperty(PROPERTY_JOB));
-    }
-
-    @Override
-    public synchronized Integer getBuildVersion(GameJob job) {
-        return Integer.parseInt(properties.getProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name()));
-    }
-
-    @Override
-    public synchronized Integer getLastBuildNumber(GameJob job) {
-        final String lastBuildNumberStr = properties.getProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name());
-        if (LAST_BUILD_NUMBER_DEFAULT.equals(lastBuildNumberStr)) {
-            return null;
-        }
-        return Integer.parseInt(lastBuildNumberStr);
     }
 
     @Override
@@ -389,6 +361,31 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
         return Boolean.valueOf(properties.getProperty(PROPERTY_SAVE_DOWNLOADED_FILES));
     }
 
+    @Override
+    public synchronized String getDefaultGameJob() {
+        return properties.getProperty(PROPERTY_DEFAULT_GAME_JOB);
+    }
+
+    @Override
+    public synchronized String getLastPlayedGameJob() {
+        return properties.getProperty(PROPERTY_LAST_PLAYED_GAME_JOB);
+    }
+
+    @Override
+    public synchronized String getLastPlayedGameVersion() {
+        return properties.getProperty(PROPERTY_LAST_PLAYED_GAME_VERSION);
+    }
+
+    @Override
+    public synchronized String getLastInstalledGameJob() {
+        return properties.getProperty(PROPERTY_LAST_INSTALLED_GAME_JOB);
+    }
+
+    @Override
+    public synchronized String getLastInstalledGameVersion() {
+        return properties.getProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION);
+    }
+
     // --------------------------------------------------------------------- //
     // SETTERS
     // --------------------------------------------------------------------- //
@@ -396,25 +393,6 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     @Override
     public synchronized void setLocale(Locale locale) {
         properties.setProperty(PROPERTY_LOCALE, locale.toString());
-    }
-
-    @Override
-    public synchronized void setJob(GameJob job) {
-        properties.setProperty(PROPERTY_JOB, job.name());
-    }
-
-    @Override
-    public synchronized void setBuildVersion(int version, GameJob job) {
-        properties.setProperty(PROPERTY_PREFIX_BUILD_VERSION + job.name(), String.valueOf(version));
-    }
-
-    @Override
-    public synchronized void setLastBuildNumber(Integer lastBuildNumber, GameJob job) {
-        if (lastBuildNumber != null && lastBuildNumber >= job.getMinBuildNumber()) {
-            properties.setProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name(), lastBuildNumber.toString());
-        } else {
-            properties.setProperty(PROPERTY_PREFIX_LAST_BUILD_NUMBER + job.name(), LAST_BUILD_NUMBER_DEFAULT);
-        }
     }
 
     @Override
@@ -465,6 +443,31 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     @Override
     public synchronized void setGameDataDirectory(Path gameDataDirectory) {
         properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toUri().toString());
+    }
+
+    @Override
+    public synchronized void setDefaultGameJob(String defaultGameJob) {
+        properties.setProperty(PROPERTY_DEFAULT_GAME_JOB, defaultGameJob);
+    }
+
+    @Override
+    public synchronized void setLastPlayedGameJob(String lastPlayedGameJob) {
+        properties.setProperty(PROPERTY_LAST_PLAYED_GAME_JOB, lastPlayedGameJob);
+    }
+
+    @Override
+    public synchronized void setLastPlayedGameVersion(String lastPlayedGameVersion) {
+        properties.setProperty(PROPERTY_LAST_PLAYED_GAME_VERSION, lastPlayedGameVersion);
+    }
+
+    @Override
+    public synchronized void setLastInstalledGameJob(String lastInstalledGameJob) {
+        properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_JOB, lastInstalledGameJob);
+    }
+
+    @Override
+    public synchronized void setLastInstalledGameVersion(String lastInstalledGameVersion) {
+        properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION, lastInstalledGameVersion);
     }
 
     @Override

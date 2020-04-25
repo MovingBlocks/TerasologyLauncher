@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
@@ -70,8 +69,6 @@ public class SettingsController {
     private Button gameDirectoryOpenButton;
     @FXML
     private Button gameDataDirectoryOpenButton;
-    @FXML
-    private Button gameDataDirectoryEditButton;
     @FXML
     private Label gameDirectoryLabel;
     @FXML
@@ -188,21 +185,6 @@ public class SettingsController {
     }
 
     @FXML
-    protected void editGameDataDirectoryAction() {
-        final Path selectedFile = GuiUtils.chooseDirectoryDialog(stage, gameDataDirectory, BundleUtils.getLabel("settings_game_gameDataDirectory_edit_title"));
-        if (selectedFile != null) {
-            try {
-                FileUtils.ensureWritableDir(selectedFile);
-                gameDataDirectory = selectedFile;
-                updateDirectoryPathLabels();
-            } catch (IOException e) {
-                logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
-                GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
-            }
-        }
-    }
-
-    @FXML
     protected void openLauncherDirectoryAction() {
         GuiUtils.openFileBrowser(stage, launcherDirectory, BundleUtils.getLabel("message_error_launcherDirectory"));
     }
@@ -263,7 +245,6 @@ public class SettingsController {
         initialHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_initialHeapSize"));
         gameDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_open"));
         gameDataDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_open"));
-        gameDataDirectoryEditButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_edit"));
         gameDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDirectory"));
         gameDataDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDataDirectory"));
 
@@ -295,7 +276,7 @@ public class SettingsController {
         final JavaHeapSize[] heapSizeRange = System.getProperty("os.arch").equals("x86")
                 ? Arrays.copyOfRange(JavaHeapSize.values(), 0, JavaHeapSize.GB_1_5.ordinal() + 1)
                 : JavaHeapSize.values();
-        
+
         for (JavaHeapSize heapSize : heapSizeRange) {
             maxHeapSizeBox.getItems().add(heapSize);
             initialHeapSizeBox.getItems().add(heapSize);

@@ -19,6 +19,8 @@ package org.terasology.launcher.packages;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.packages.db.DatabaseRepository;
+import org.terasology.launcher.packages.db.PackageMetadata;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,9 +61,9 @@ class JenkinsHandler implements RepositoryHandler {
     private final Map<Package, String> upstreamUrls = new LinkedHashMap<>();
 
     @Override
-    public List<Package> getPackageList(PackageDatabase.Repository source) {
+    public List<Package> getPackageList(DatabaseRepository source) {
         final List<Package> pkgList = new LinkedList<>();
-        for (PackageDatabase.PackageMetadata pkg : source.getTrackedPackages()) {
+        for (PackageMetadata pkg : source.getTrackedPackages()) {
             String pkgId = pkg.getId();
             final String apiUrl = source.getUrl() + JOB + pkgId + API_FILTER;
 

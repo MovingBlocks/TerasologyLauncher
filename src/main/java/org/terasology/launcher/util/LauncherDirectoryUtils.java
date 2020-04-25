@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.windows.SavedGamesPathFinder;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -163,5 +165,19 @@ public final class LauncherDirectoryUtils {
         }
 
         return gameDataDirectory;
+    }
+
+    public static Path getInstallationDirectory() {
+        final URL location = LauncherDirectoryUtils.class.getProtectionDomain().getCodeSource().getLocation();
+        Path installationDirectory = null;
+        try {
+            final Path launcherLocation = Paths.get(location.toURI());
+            logger.trace("Launcher location: {}", launcherLocation);
+            installationDirectory = launcherLocation.getParent().getParent();
+            logger.trace("Launcher installation directory: {}", installationDirectory);
+        } catch (URISyntaxException e) {
+            logger.error("Could not determine launcher installation directory.", e);
+        }
+        return installationDirectory;
     }
 }

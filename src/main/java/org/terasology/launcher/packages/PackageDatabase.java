@@ -17,8 +17,12 @@
 package org.terasology.launcher.packages;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.packages.db.DatabaseRepositoryDeserializer;
+import org.terasology.launcher.packages.db.DatabaseRepository;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,13 +30,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Provides package details from all online and local repositories.
@@ -41,33 +46,35 @@ class PackageDatabase {
 
     private static final Logger logger = LoggerFactory.getLogger(PackageDatabase.class);
 
-    private final Path sourcesFile;
     private final Path databaseFile;
     private final Path installDir;
     private final Gson gson;
     private final List<Package> database;
 
-    PackageDatabase(Path sourcesFile, Path databaseFile, Path installDir) {
-        this.sourcesFile = sourcesFile;
+    PackageDatabase(Path databaseFile, Path installDir) {
         this.databaseFile = databaseFile;
         this.installDir = installDir;
-        gson = new Gson();
+        gson = new GsonBuilder()
+                .registerTypeAdapter(DatabaseRepository.class, new DatabaseRepositoryDeserializer())
+                .create();
         database = loadDatabase();
         markInstalled();
     }
 
     /**
-     * Fetches details of all packages for each repository specified
-     * in {@link #sourcesFile}.
+     * Fetches details of all packages for each repository specified in {@code sourcesFile}.
+     *
+     * @param sourcesFile
      */
-    void sync() {
+    void sync(Path sourcesFile) {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(Files.newInputStream(sourcesFile))
         )) {
             final List<Package> newDatabase = new LinkedList<>();
+            // TODO: read the DatabaseRepository list before-hand and pass to sync()
             try {
-                for (Repository source : gson.fromJson(reader, Repository[].class)) {
-                    logger.trace("Fetching package list from: {}", source.url);
+                for (DatabaseRepository source : gson.fromJson(reader, DatabaseRepository[].class)) {
+                    logger.trace("Fetching package list from: {}", source.getUrl());
                     newDatabase.addAll(packageListOf(source));
                 }
             } catch (IllegalStateException e) {
@@ -76,8 +83,8 @@ class PackageDatabase {
 
             database.clear();
             database.addAll(newDatabase);
-        } catch (IOException e) {
-            logger.error("Failed to read sources: {}", sourcesFile);
+        } catch (IOException | JsonSyntaxException e) {
+            logger.error("Failed to read sources file '{}': {}", sourcesFile, e.getMessage());
             logger.warn("Aborting database synchronisation");
         } finally {
             markInstalled();
@@ -103,8 +110,8 @@ class PackageDatabase {
         }
     }
 
-    private List<Package> packageListOf(Repository source) {
-        return Objects.requireNonNull(RepositoryHandler.ofType(source.type), "Invalid repository type")
+    private List<Package> packageListOf(DatabaseRepository source) {
+        return Objects.requireNonNull(RepositoryHandler.ofType(source.getType()), "Invalid repository type")
                 .getPackageList(source);
     }
 
@@ -137,30 +144,11 @@ class PackageDatabase {
         return Collections.unmodifiableList(database);
     }
 
-    static class PackageMetadata implements Serializable {
-        private String id;
-        private String name;
-
-        public String getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
+    Optional<Package> getLatestInstalledPackageForId(String packageId) {
+        return database.stream()
+                        .filter(pkg -> pkg.getId().equals(packageId) && pkg.isInstalled())
+                        .sorted(Comparator.comparing(Package::getVersion).reversed())
+                        .findFirst();
     }
 
-    static class Repository implements Serializable {
-        private String url;
-        private String type;
-        private PackageMetadata[] trackedPackages;
-
-        String getUrl() {
-            return url;
-        }
-
-        PackageMetadata[] getTrackedPackages() {
-            return trackedPackages;
-        }
-    }
 }

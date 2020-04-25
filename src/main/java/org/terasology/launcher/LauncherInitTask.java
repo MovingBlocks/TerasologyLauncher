@@ -18,37 +18,46 @@ package org.terasology.launcher;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.github.GitHubRelease;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
-import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.util.HostServices;
+import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.util.OperatingSystem;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherInitTask.class);
 
     private final Stage owner;
+    private final HostServices hostServices;
 
-    public LauncherInitTask(final Stage newOwner) {
+    public LauncherInitTask(final Stage newOwner, HostServices hostServices) {
         this.owner = newOwner;
+        this.hostServices = hostServices;
     }
 
     /**
@@ -58,20 +67,23 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
      */
     @Override
     protected LauncherConfiguration call() {
+        // TODO: Use idiomatic JavaFX error handling.
+
         try {
             // get OS info
             final OperatingSystem os = getOperatingSystem();
 
             // init directories
             updateMessage(BundleUtils.getLabel("splash_initLauncherDirs"));
-            final Path launcherDirectory = getLauncherDirectory(os);
+            final Path installationDirectory = LauncherDirectoryUtils.getInstallationDirectory();
+            final Path userDataDirectory = getLauncherDirectory(os);
 
-            final Path downloadDirectory = getDirectoryFor(org.terasology.launcher.util.LauncherManagedDirectory.DOWNLOAD, launcherDirectory);
-            final Path tempDirectory = getDirectoryFor(org.terasology.launcher.util.LauncherManagedDirectory.TEMP, launcherDirectory);
-            final Path cacheDirectory = getDirectoryFor(org.terasology.launcher.util.LauncherManagedDirectory.CACHE, launcherDirectory);
+            final Path downloadDirectory = getDirectoryFor(LauncherManagedDirectory.DOWNLOAD, userDataDirectory);
+            final Path tempDirectory = getDirectoryFor(LauncherManagedDirectory.TEMP, userDataDirectory);
+            final Path cacheDirectory = getDirectoryFor(LauncherManagedDirectory.CACHE, userDataDirectory);
 
             // launcher settings
-            final BaseLauncherSettings launcherSettings = getLauncherSettings(launcherDirectory);
+            final BaseLauncherSettings launcherSettings = getLauncherSettings(userDataDirectory);
 
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
@@ -89,14 +101,20 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             // game directories
             updateMessage(BundleUtils.getLabel("splash_initGameDirs"));
-            final Path gameDirectory = getGameDirectory(os, launcherSettings.getGameDirectory());
+            final Path gameDirectory = getDirectoryFor(LauncherManagedDirectory.GAMES, installationDirectory);
             final Path gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory());
 
             // TODO: Does this interact with any remote server for fetching/initializing the database?
             logger.trace("Setting up Package Manager");
-            final PackageManager packageManager = new PackageManager();
-            packageManager.initLocalStorage(gameDirectory, cacheDirectory);
-            packageManager.initDatabase(launcherDirectory, gameDirectory);
+            final PackageManager packageManager = new PackageManager(userDataDirectory, gameDirectory);
+            if (!packageManager.validateSources()) {
+                if (confirmSourcesOverwrite()) {
+                    packageManager.copyDefaultSources();
+                } else {
+                    throw new IllegalStateException("Error reading sources file");
+                }
+            }
+            packageManager.initDatabase();
             packageManager.syncDatabase();
 
             logger.trace("Change LauncherSettings...");
@@ -108,10 +126,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             logger.trace("Creating launcher frame...");
 
-            return new LauncherConfiguration(launcherDirectory, downloadDirectory, tempDirectory, cacheDirectory, launcherSettings, packageManager);
+            return new LauncherConfiguration(userDataDirectory, downloadDirectory, tempDirectory, cacheDirectory, launcherSettings, packageManager);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
         }
+
         return null;
     }
 
@@ -132,7 +151,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
     private void initDirectory(Path dir, String errorLabel, DirectoryCreator... creators)
             throws LauncherStartFailedException {
         try {
-            for (DirectoryCreator creator: creators) {
+            for (DirectoryCreator creator : creators) {
                 creator.apply(dir);
             }
         } catch (IOException e) {
@@ -180,25 +199,29 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         boolean selfUpdaterStarted = false;
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
         final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
-        if (updater.updateAvailable()) {
-            logger.trace("Launcher update available!");
+        final GitHubRelease release = updater.updateAvailable();
+        if (release != null) {
+            logger.info("Launcher update available: {}", release.getTagName());
             updateMessage(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
             boolean foundLauncherInstallationDirectory = false;
             try {
-                updater.detectAndCheckLauncherInstallationDirectory();
+                final Path installationDir = LauncherDirectoryUtils.getInstallationDirectory();
+                FileUtils.ensureWritableDir(installationDir);
+                logger.trace("Launcher installation directory: {}", installationDir);
                 foundLauncherInstallationDirectory = true;
-            } catch (URISyntaxException | IOException e) {
+            } catch (IOException e) {
                 logger.error("The launcher installation directory can not be detected or used!", e);
                 GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
                 // Run launcher without an update. Don't throw a LauncherStartFailedException.
             }
             if (foundLauncherInstallationDirectory) {
-                final boolean update = updater.showUpdateDialog(owner);
+                final boolean update = updater.showUpdateDialog(owner, release);
                 if (update) {
-                    if (saveDownloadedFiles) {
-                        selfUpdaterStarted = updater.update(downloadDirectory, tempDirectory);
-                    } else {
-                        selfUpdaterStarted = updater.update(tempDirectory, tempDirectory);
+                    showDownloadPage();
+                    // TODO: start self-updater instead
+                    if (false) {
+                        final Path targetDirectory = saveDownloadedFiles ? downloadDirectory : tempDirectory;
+                        selfUpdaterStarted = updater.update(targetDirectory, tempDirectory);
                     }
                 }
             }
@@ -206,39 +229,13 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return selfUpdaterStarted;
     }
 
-    private Path getGameDirectory(OperatingSystem os, Path settingsGameDirectory) throws LauncherStartFailedException {
-        logger.trace("Init GameDirectory...");
-        Path gameDirectory = settingsGameDirectory;
-        if (gameDirectory != null) {
-            try {
-                FileUtils.ensureWritableDir(gameDirectory);
-            } catch (IOException e) {
-                logger.warn("The game directory can not be created or used! '{}'", gameDirectory, e);
-                GuiUtils.showWarningMessageDialog(owner, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
-
-                // Set gameDirectory to 'null' -> user has to choose new game directory
-                gameDirectory = null;
-            }
-        }
-        if (gameDirectory == null) {
-            logger.trace("Choose installation directory for the game...");
-            updateMessage(BundleUtils.getLabel("splash_chooseGameDirectory"));
-            gameDirectory = GuiUtils.chooseDirectoryDialog(owner, LauncherDirectoryUtils.getApplicationDirectory(os, LauncherDirectoryUtils.GAME_APPLICATION_DIR_NAME),
-                    BundleUtils.getLabel("message_dialog_title_chooseGameDirectory"));
-            if (gameDirectory == null || Files.notExists(gameDirectory)) {
-                logger.info("The new game directory is not approved. The TerasologyLauncher is terminated.");
-                Platform.exit();
-            }
-        }
+    private void showDownloadPage() {
+        final String downloadPage = "https://terasology.org/download";
         try {
-            FileUtils.ensureWritableDir(gameDirectory);
-        } catch (IOException e) {
-            logger.error("The game directory can not be created or used! '{}'", gameDirectory, e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_gameDirectory") + "\n" + gameDirectory);
-            throw new LauncherStartFailedException();
+            hostServices.tryOpenUri(new URI(downloadPage));
+        } catch (URISyntaxException e) {
+            logger.info("Could not open '{}': {}", downloadPage, e.getMessage());
         }
-        logger.debug("Game directory: {}", gameDirectory);
-        return gameDirectory;
     }
 
     private Path getGameDataDirectory(OperatingSystem os, Path settingsGameDataDirectory) throws LauncherStartFailedException {
@@ -275,6 +272,27 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }
         logger.debug("Game data directory: {}", gameDataDirectory);
         return gameDataDirectory;
+    }
+
+    /**
+     * Shows a confirmation dialog for overwriting current sources file
+     * with default values.
+     *
+     * @return whether the user confirms this overwrite
+     */
+    private boolean confirmSourcesOverwrite() {
+        return CompletableFuture.supplyAsync(() -> {
+            final Alert alert = new Alert(
+                    Alert.AlertType.WARNING,
+                    BundleUtils.getLabel("message_error_sourcesFile_content"),
+                    ButtonType.OK,
+                    new ButtonType(BundleUtils.getLabel("launcher_exit")));
+            alert.setHeaderText(BundleUtils.getLabel("message_error_sourcesFile_header"));
+            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+            return alert.showAndWait()
+                    .map(btn -> btn == ButtonType.OK)
+                    .orElse(false);
+        }, Platform::runLater).join();
     }
 
     private void storeLauncherSettingsAfterInit(BaseLauncherSettings launcherSettings) throws LauncherStartFailedException {
