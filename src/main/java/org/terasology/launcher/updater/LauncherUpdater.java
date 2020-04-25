@@ -66,10 +66,7 @@ public final class LauncherUpdater {
      */
     //TODO: return Option<GitHubRelease>
     public GitHubRelease updateAvailable() {
-        if (this.currentVersionInfo.isEmpty()  || jobName.equals("null")) {
-            logger.trace("Skipping update check - no version info file found (assuming development environment)");
-            return null;
-        }
+        //TODO: only check of both version are defined and valid semver?
         try {
             final GitHubRelease latestRelease = github.getLatestRelease("movingblocks", "terasologylauncher");
             final Semver latestVersion = versionOf(latestRelease);
