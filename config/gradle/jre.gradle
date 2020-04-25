@@ -86,8 +86,10 @@ jreUrlFilenames.each { os, file ->
 
     def unpackedJre = new File("$buildDir/jre/$os")
 
-    def distName = os.toLowerCase()
     distributions {
+        def distName = os.toLowerCase()
+        def distBase = distName.replaceAll("\\d", "") // drop '32' or '64'
+
         "$distName" {
             contents {
                 with distributions.main.contents
