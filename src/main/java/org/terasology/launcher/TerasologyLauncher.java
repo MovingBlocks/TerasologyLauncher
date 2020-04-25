@@ -122,19 +122,6 @@ public final class TerasologyLauncher extends Application {
 
         launcherInitTask.setOnCancelled(event -> Platform.exit());
 
-        launcherInitTask.setOnFailed(event -> {
-            Throwable throwable = event.getSource().getException();
-            Exception exception;
-            if (throwable instanceof Exception) {
-                exception = (Exception) throwable;
-            } else {
-                exception = new Exception("Wrapped throwable, see deeper", throwable);
-            }
-            //TODO: Should we really crash here? The task state is set to "failed" if an exception is thrown, even if
-            //      it is caught...
-            openCrashReporterAndExit(exception);
-        });
-
         initThread.start();
     }
 
@@ -145,24 +132,6 @@ public final class TerasologyLauncher extends Application {
      */
     private static void initProxy() {
         System.setProperty("java.net.useSystemProxies", "true");
-    }
-
-    /**
-     * Opens the CrashReporter with the given exception and exits the launcher.
-     *
-     * @param e the exception causing the launcher to fail
-     */
-    private void openCrashReporterAndExit(Exception e) {
-        logger.error("The TerasologyLauncher could not be started!");
-
-        TempLogFilePropertyDefiner tempLogFileDefiner = TempLogFilePropertyDefiner.getInstance();
-
-        Path logFile = null;
-        if (tempLogFileDefiner != null) { // for dev run
-            logFile = tempLogFileDefiner.getLogFile();
-        }
-        CrashReporter.report(e, logFile);
-        System.exit(1);
     }
 
     private void showMainStage(final LauncherConfiguration launcherConfiguration) throws IOException {
