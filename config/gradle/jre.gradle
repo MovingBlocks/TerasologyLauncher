@@ -58,7 +58,8 @@ def createJreTasks(String taskNameBase,
         overwrite false
     }
 
-    task "unpack$taskNameBase"(type: Copy) {
+    def unpackTask = task "unpack$taskNameBase"(type: Copy) {
+        group 'JRE'
         from(downloadFile.endsWith("zip")
                 ? zipTree(downloadFile)
                 : tarTree(downloadFile)) {
@@ -74,17 +75,17 @@ def createJreTasks(String taskNameBase,
 
         dependsOn "download${taskNameBase}"
     }
+
+    return unpackTask
 }
 
 jreUrlFilenames.each { os, file ->
     def launcherTaskBase = "Jre${os}"
-    createJreTasks(
+    def unpackTask = createJreTasks(
             launcherTaskBase,
             "https://download.bell-sw.com/java/$jdkVersionLauncher/bellsoft-jdk$jdkVersionLauncher-$file",
             "$projectDir/jre/$os-$jdkVersionLauncher-$file",
             "$projectDir/jre/$os")
-
-    def unpackedJre = new File("$buildDir/jre/$os")
 
     distributions {
         def distName = os.toLowerCase()
@@ -95,7 +96,7 @@ jreUrlFilenames.each { os, file ->
                 with distributions.main.contents
 
                 into('jre') {
-                    from unpackedJre
+                    from unpackTask
                 }
 
                 from("${projectDir}/buildres/${distBase}")
