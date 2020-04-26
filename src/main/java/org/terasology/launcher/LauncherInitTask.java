@@ -16,7 +16,6 @@
 
 package org.terasology.launcher;
 
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -38,7 +37,7 @@ import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
-import org.terasology.launcher.util.OperatingSystem;
+import org.terasology.launcher.util.Platform;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
@@ -71,12 +70,12 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
         try {
             // get OS info
-            final OperatingSystem os = getOperatingSystem();
+            final Platform platform = getPlatform();
 
             // init directories
             updateMessage(BundleUtils.getLabel("splash_initLauncherDirs"));
             final Path installationDirectory = LauncherDirectoryUtils.getInstallationDirectory();
-            final Path userDataDirectory = getLauncherDirectory(os);
+            final Path userDataDirectory = getLauncherDirectory(platform);
 
             final Path downloadDirectory = getDirectoryFor(LauncherManagedDirectory.DOWNLOAD, userDataDirectory);
             final Path tempDirectory = getDirectoryFor(LauncherManagedDirectory.TEMP, userDataDirectory);
@@ -102,7 +101,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // game directories
             updateMessage(BundleUtils.getLabel("splash_initGameDirs"));
             final Path gameDirectory = getDirectoryFor(LauncherManagedDirectory.GAMES, installationDirectory);
-            final Path gameDataDirectory = getGameDataDirectory(os, launcherSettings.getGameDataDirectory());
+            final Path gameDataDirectory = getGameDataDirectory(platform, launcherSettings.getGameDataDirectory());
 
             // TODO: Does this interact with any remote server for fetching/initializing the database?
             logger.trace("Setting up Package Manager");
@@ -134,18 +133,15 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return null;
     }
 
-    private OperatingSystem getOperatingSystem() throws LauncherStartFailedException {
-        logger.trace("Init OperatingSystem...");
+    private Platform getPlatform() {
+        logger.trace("Init Platform...");
         updateMessage(BundleUtils.getLabel("splash_checkOS"));
-        final OperatingSystem os = OperatingSystem.getOS();
-        if (os == OperatingSystem.UNKNOWN) {
-            logger.error("The operating system is not supported! '{}' '{}' '{}'", System.getProperty("os.name"), System.getProperty("os.arch"),
-                    System.getProperty("os.version"));
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_operatingSystem"));
-            throw new LauncherStartFailedException();
+        final Platform platform = Platform.getPlatform();
+        if (!platform.isLinux() && !platform.isMac() && !platform.isWindows()) {
+            logger.warn("Detected unexpected platform: {}", platform);
         }
-        logger.debug("Operating system: {}", os);
-        return os;
+        logger.debug("Platform: {}", platform);
+        return platform;
     }
 
     private void initDirectory(Path dir, String errorLabel, DirectoryCreator... creators)
@@ -171,9 +167,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return dir;
     }
 
-    private Path getLauncherDirectory(OperatingSystem os) throws LauncherStartFailedException {
+    private Path getLauncherDirectory(Platform platform) throws LauncherStartFailedException {
         final Path launcherDirectory =
-                LauncherDirectoryUtils.getApplicationDirectory(os, LauncherDirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME);
+                LauncherDirectoryUtils.getApplicationDirectory(platform, LauncherDirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME);
         initDirectory(launcherDirectory, "message_error_launcherDirectory", FileUtils::ensureWritableDir);
         return launcherDirectory;
     }
@@ -238,7 +234,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }
     }
 
-    private Path getGameDataDirectory(OperatingSystem os, Path settingsGameDataDirectory) throws LauncherStartFailedException {
+    private Path getGameDataDirectory(Platform os, Path settingsGameDataDirectory) throws LauncherStartFailedException {
         logger.trace("Init GameDataDirectory...");
         Path gameDataDirectory = settingsGameDataDirectory;
         if (gameDataDirectory != null) {
@@ -260,7 +256,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                     BundleUtils.getLabel("message_dialog_title_chooseGameDataDirectory"));
             if (Files.notExists(gameDataDirectory)) {
                 logger.info("The new game data directory is not approved. The TerasologyLauncher is terminated.");
-                Platform.exit();
+                javafx.application.Platform.exit();
             }
         }
         try {
@@ -292,7 +288,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             return alert.showAndWait()
                     .map(btn -> btn == ButtonType.OK)
                     .orElse(false);
-        }, Platform::runLater).join();
+        }, javafx.application.Platform::runLater).join();
     }
 
     private void storeLauncherSettingsAfterInit(BaseLauncherSettings launcherSettings) throws LauncherStartFailedException {
