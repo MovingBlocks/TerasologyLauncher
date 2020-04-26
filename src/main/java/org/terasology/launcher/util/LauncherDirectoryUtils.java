@@ -97,15 +97,15 @@ public final class LauncherDirectoryUtils {
     /**
      * Should only be executed once at the start.
      *
-     * @param os              the operating system
+     * @param platform              the operating system
      * @param applicationName the name of the application
      * @return the app. folder
      */
-    public static Path getApplicationDirectory(OperatingSystem os, String applicationName) {
+    public static Path getApplicationDirectory(Platform platform, String applicationName) {
         final Path userHome = Paths.get(System.getProperty(PROPERTY_USER_HOME, "."));
         final Path applicationDirectory;
 
-        if (os.isWindows()) {
+        if (platform.isWindows()) {
             final String envAppData = System.getenv(ENV_APPDATA);
             if ((envAppData != null) && (envAppData.length() > 0)) {
                 applicationDirectory = Paths.get(envAppData).resolve(applicationName);
@@ -116,9 +116,9 @@ public final class LauncherDirectoryUtils {
                 //   System.getenv("USERPROFILE")
                 //   System.getenv("HOMEDRIVE") + System.getenv("HOMEPATH")
             }
-        } else if (os.isUnix()) {
+        } else if (platform.isLinux()) {
             applicationDirectory = userHome.resolve('.' + applicationName.toLowerCase(Locale.ENGLISH));
-        } else if (os.isMac()) {
+        } else if (platform.isMac()) {
             applicationDirectory = userHome.resolve(MAC_PATH + applicationName);
         } else {
             applicationDirectory = userHome.resolve(applicationName);
@@ -130,14 +130,14 @@ public final class LauncherDirectoryUtils {
     /**
      * Should only be executed once at the start.
      *
-     * @param os the operating system
+     * @param platform the operating system
      * @return the gama data directory
      */
-    public static Path getGameDataDirectory(OperatingSystem os) {
+    public static Path getGameDataDirectory(Platform platform) {
         final Path userHome = Paths.get(System.getProperty(PROPERTY_USER_HOME, "."));
         final Path gameDataDirectory;
 
-        if (os.isWindows()) {
+        if (platform.isWindows()) {
             Path path = null;
 
             final String savedGamesPath = SavedGamesPathFinder.findSavedGamesPath();
@@ -156,9 +156,9 @@ public final class LauncherDirectoryUtils {
             }
 
             gameDataDirectory = path.resolve(GAME_DATA_DIR_NAME);
-        } else if (os.isUnix()) {
+        } else if (platform.isLinux()) {
             gameDataDirectory = userHome.resolve('.' + GAME_DATA_DIR_NAME.toLowerCase(Locale.ENGLISH));
-        } else if (os.isMac()) {
+        } else if (platform.isMac()) {
             gameDataDirectory = userHome.resolve(MAC_PATH + GAME_DATA_DIR_NAME);
         } else {
             gameDataDirectory = userHome.resolve(GAME_DATA_DIR_NAME);
