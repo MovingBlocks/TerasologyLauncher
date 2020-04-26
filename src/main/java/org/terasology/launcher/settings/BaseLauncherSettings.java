@@ -41,7 +41,7 @@ import java.util.Properties;
 @Deprecated
 public final class BaseLauncherSettings extends AbstractLauncherSettings {
 
-    public static final String USER_JAVA_PARAMETERS_DEFAULT = "-XX:+UseG1GC -XX:MaxGCPauseMillis=20";
+    public static final String USER_JAVA_PARAMETERS_DEFAULT = "-XX:MaxGCPauseMillis=20";
     public static final String USER_GAME_PARAMETERS_DEFAULT = "";
 
     public static final String PROPERTY_LOCALE = "locale";
