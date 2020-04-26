@@ -15,8 +15,8 @@
  */
 
 // Uses Bellsoft Liberica JRE
-def jreVersionGame = '8u212'
-def jdkVersionLauncher = '11.0.7+10' // jre version haven't jmod (needed for jlink/jpackager)
+// https://bell-sw.com/pages/liberica_install_guide-11.0.7/
+def jdkVersion = '11.0.7+10' // jre version haven't jmod (needed for jlink/jpackager)
 def jreUrlFilenames = [
         Linux64   : 'linux-amd64-full.tar.gz',
         Linux32   : 'linux-i586-full.tar.gz',
@@ -83,8 +83,8 @@ jreUrlFilenames.each { os, file ->
     def launcherTaskBase = "Jre${os}"
     def unpackTask = createJreTasks(
             launcherTaskBase,
-            "https://download.bell-sw.com/java/$jdkVersionLauncher/bellsoft-jdk$jdkVersionLauncher-$file",
-            "$projectDir/jre/$os-$jdkVersionLauncher-$file",
+            "https://download.bell-sw.com/java/$jdkVersion/bellsoft-jdk$jdkVersion-$file",
+            "$projectDir/jre/$os-$jdkVersion-$file",
             "$projectDir/jre/$os")
 
     distributions {
