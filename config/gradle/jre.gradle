@@ -16,7 +16,7 @@
 
 // Uses Bellsoft Liberica JRE
 def jreVersionGame = '8u212'
-def jdkVersionLauncher = '11.0.6+10' // jre version haven't jmod (needed for jlink/jpackager)
+def jdkVersionLauncher = '11.0.7+10' // jre version haven't jmod (needed for jlink/jpackager)
 def jreUrlFilenames = [
         Linux64   : 'linux-amd64-full.tar.gz',
         Linux32   : 'linux-i586-full.tar.gz',
