@@ -18,11 +18,11 @@
 def jreVersionGame = '8u212'
 def jdkVersionLauncher = '11.0.6+10' // jre version haven't jmod (needed for jlink/jpackager)
 def jreUrlFilenames = [
-        Linux64   : 'linux-amd64.tar.gz',
-        Linux32   : 'linux-i586.tar.gz',
-        Windows64 : 'windows-amd64.zip',
-        Windows32 : 'windows-i586.zip',
-        Mac       : 'macos-amd64.zip'
+        Linux64   : 'linux-amd64-full.tar.gz',
+        Linux32   : 'linux-i586-full.tar.gz',
+        Windows64 : 'windows-amd64-full.zip',
+        Windows32 : 'windows-i586-full.zip',
+        Mac       : 'macos-amd64-full.zip'
 ]
 
 task createRelease() {
