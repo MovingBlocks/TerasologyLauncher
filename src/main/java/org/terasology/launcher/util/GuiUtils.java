@@ -52,11 +52,6 @@ public final class GuiUtils {
         });
 
         Platform.runLater(dialog);
-        try {
-            dialog.get();
-        } catch (InterruptedException | ExecutionException e) {
-            logger.warn("Uh oh, something went wrong with the dialog!", e);
-        }
     }
 
     public static void showWarningMessageDialog(Stage owner, String message) {
