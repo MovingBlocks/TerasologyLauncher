@@ -33,7 +33,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -48,11 +47,11 @@ import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameStarter;
-import org.terasology.launcher.tasks.DeleteTask;
-import org.terasology.launcher.tasks.DownloadTask;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.tasks.DeleteTask;
+import org.terasology.launcher.tasks.DownloadTask;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.HostServices;
@@ -75,13 +74,12 @@ public class ApplicationController {
     private static final long MINIMUM_FREE_SPACE = 200 * MB;
 
     private Path launcherDirectory;
-    private Path downloadDirectory;
     private BaseLauncherSettings launcherSettings;
     private PackageManager packageManager;
     private GameStarter gameStarter;
     private Stage stage;
 
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private DownloadTask downloadTask;
 
     private VersionItem selectedVersion;
@@ -110,8 +108,6 @@ public class ApplicationController {
     private ImageView downloadImage;
 
     @FXML
-    private AboutViewController aboutViewController;
-    @FXML
     private LogViewController logViewController;
     @FXML
     private ChangelogViewController changelogViewController;
@@ -124,7 +120,7 @@ public class ApplicationController {
     private final Property<Optional<Warning>> warning;
 
     public ApplicationController() {
-        warning = new SimpleObjectProperty(Optional.empty());
+        warning = new SimpleObjectProperty<>(Optional.empty());
     }
 
     @FXML
@@ -288,7 +284,6 @@ public class ApplicationController {
     public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
                        final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
-        this.downloadDirectory = newDownloadDirectory;
         this.launcherSettings = newLauncherSettings;
         this.packageManager = newPackageManager;
         this.stage = newStage;
@@ -311,7 +306,7 @@ public class ApplicationController {
         //TODO: This only updates when the launcher is initialized (which should happen excatly once o.O)
         //      We should update this value at least every time the download directory changes (user setting).
         //      Ideally, we would check periodically for disk space.
-        if (downloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
+        if (newDownloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
             warning.setValue(Optional.of(Warning.LOW_ON_SPACE));
         } else {
             warning.setValue(Optional.empty());
