@@ -22,6 +22,7 @@ import javafx.concurrent.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.Package;
+import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LogLevel;
@@ -95,10 +96,7 @@ public final class ConfigManager {
                 .dataDir(launcherDir.resolve("TerasologyData"))
                 .maxMemory(JavaHeapSize.GB_1_5)
                 .initMemory(JavaHeapSize.GB_1)
-                .javaParam("-XX:+UseParNewGC"
-                        + " -XX:+UseConcMarkSweepGC"
-                        + " -XX:MaxGCPauseMillis=20"
-                        + " -XX:ParallelGCThreads=10")
+                .javaParam(BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT)
                 .logLevel(LogLevel.DEFAULT)
                 .build();
 

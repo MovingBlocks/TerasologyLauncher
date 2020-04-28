@@ -18,9 +18,9 @@ package org.terasology.launcher.game;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
@@ -82,13 +82,13 @@ public class TestGameRunner {
         gameRunner.run();
 
         // Make sure GameRunner logs TEST_STRING line 1
-        verify((Logger) Whitebox.getInternalState(gameRunner, "logger")).trace(
+        verify((Logger) Whitebox.getInternalState(GameRunner.class, "logger")).trace(
                 "Game output: {}",
                 testString.substring(0, testString.indexOf("\n"))
         );
 
         // Make sure GameRunner logs TEST_STRING line 2
-        verify((Logger) Whitebox.getInternalState(gameRunner, "logger")).trace(
+        verify((Logger) Whitebox.getInternalState(GameRunner.class, "logger")).trace(
                 "Game output: {}",
                 testString.substring(testString.indexOf("\n") + 1)
         );
@@ -103,7 +103,7 @@ public class TestGameRunner {
         gameRunner.run();
 
         // Make sure GameRunner logs that the game exited
-        verify((Logger) Whitebox.getInternalState(gameRunner, "logger"), atLeastOnce()).debug(
+        verify((Logger) Whitebox.getInternalState(GameRunner.class, "logger"), atLeastOnce()).debug(
                 "Game closed with the exit value '{}'.",
                 0
         );
@@ -126,7 +126,7 @@ public class TestGameRunner {
         gameRunner.run();
 
         // Make sure GameRunner logs that the game thread was interrupted
-        verify((Logger) Whitebox.getInternalState(gameRunner, "logger")).debug("Game thread interrupted.");
+        verify((Logger) Whitebox.getInternalState(GameRunner.class, "logger")).debug("Game thread interrupted.");
     }
 
     @Test
@@ -141,7 +141,7 @@ public class TestGameRunner {
         gameRunner.run();
 
         // Make sure GameRunner logs an error with an InterruptedException
-        verify((Logger) Whitebox.getInternalState(gameRunner, "logger")).error(eq("The game thread was interrupted!"), any(InterruptedException.class));
+        verify((Logger) Whitebox.getInternalState(GameRunner.class, "logger")).error(eq("The game thread was interrupted!"), any(InterruptedException.class));
     }
 
     @Test
@@ -159,6 +159,6 @@ public class TestGameRunner {
         gameRunner.run();
 
         // Make sure GameRunner logs an error with an IOException
-        verify((Logger) Whitebox.getInternalState(gameRunner, "logger")).error(eq("Could not read game output!"), any(IOException.class));
+        verify((Logger) Whitebox.getInternalState(GameRunner.class, "logger")).error(eq("Could not read game output!"), any(IOException.class));
     }
 }

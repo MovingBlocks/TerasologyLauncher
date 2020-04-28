@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.terasology.launcher.TestingUtils;
@@ -33,11 +34,12 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.spy;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DownloadUtils.class, TerasologyGameVersions.class})
+@PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*"})
 public class TestGameVersions {
 
     // These functions are common assertions, to be used with requireAssertions
@@ -197,7 +199,7 @@ public class TestGameVersions {
         // We suppress fetching the game version info, so that the test doesn't depend on the network
         // and is deterministic
         PowerMockito.doAnswer((i) -> {
-            TerasologyGameVersion version = i.getArgumentAt(0, TerasologyGameVersion.class);
+            TerasologyGameVersion version = i.getArgument(0, TerasologyGameVersion.class);
             version.setGameVersionInfo(TerasologyGameVersionInfo.getEmptyGameVersionInfo());
             return null;
         }).when(gameVersions, "loadAndSetGameVersionInfo", any(), any(), any(), any());

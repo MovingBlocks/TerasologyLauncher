@@ -95,6 +95,8 @@ public final class TerasologyLauncher extends Application {
 
         showSplashStage(initialStage, launcherInitTask);
         Thread initThread = new Thread(launcherInitTask);
+        initThread.setName("Launcher init thread");
+        initThread.setUncaughtExceptionHandler((t, e) -> logger.warn("Initialization failed!", e));
 
         launcherInitTask.setOnSucceeded(workerStateEvent -> {
             try {

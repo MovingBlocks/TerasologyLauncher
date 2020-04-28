@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 MovingBlocks
+ * Copyright 2020 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
  */
 
 // Uses Bellsoft Liberica JRE
-def jreVersion = '8u212'
-def jreUrlBase = "https://download.bell-sw.com/java/${jreVersion}/bellsoft-jre${jreVersion}"
+// https://bell-sw.com/pages/liberica_install_guide-11.0.7/
+def jdkVersion = '11.0.7+10' // jre version haven't jmod (needed for jlink/jpackager)
 def jreUrlFilenames = [
-        Linux64   : 'linux-amd64.tar.gz',
-        Linux32   : 'linux-i586.tar.gz',
-        Windows64 : 'windows-amd64.zip',
-        Windows32 : 'windows-i586.zip',
-        Mac       : 'macos-amd64.zip'
+        Linux64   : 'linux-amd64-full.tar.gz',
+        Windows64 : 'windows-amd64-full.zip',
+        Windows32 : 'windows-i586-full.zip',
+        Mac       : 'macos-amd64-full.zip'
 ]
 
 task createRelease() {
@@ -37,7 +36,7 @@ task createRelease() {
 
 task downloadJreAll {
     group 'JRE'
-    description 'Downloads JREs for all platforms'
+    description 'Downloads Launcher JREs for all platforms'
 }
 
 task unpackJreAll {
@@ -45,43 +44,53 @@ task unpackJreAll {
     description 'Unpack JREs for all platforms'
 }
 
-def unpack(file) {
-    copySpec {
-        from((file.name.endsWith(".zip")) ? zipTree(file) : tarTree(file) ) {
-           eachFile { fcd ->
-                fcd.relativePath = new RelativePath(
-                        true, fcd.relativePath.segments.drop(1))
-            }
-            includeEmptyDirs = false 
-        }
-    }
-}
 
-jreUrlFilenames.each { os, file ->
+def createJreTasks(String taskNameBase,
+                   String downloadUrl,
+                   String downloadFile,
+                   String unpackDir) {
 
-    def downloadTask = task "downloadJre${os}"(type: Download) {
+    task "download$taskNameBase"(type: Download) {
         group 'JRE'
-        description "Downloads JRE for $os"
-
-        src "${jreUrlBase}-${file}"
-        dest "${projectDir}/jre/${file}"
+        src downloadUrl
+        dest downloadFile
         overwrite false
     }
 
-    def unpackTask = task "unpackJre${os}"(type: Copy) {
+    def unpackTask = task "unpack$taskNameBase"(type: Copy) {
         group 'JRE'
-        description "Unpack JRE for ${os} to distribution sources"
-        dependsOn downloadTask
+        from(downloadFile.endsWith("zip")
+                ? zipTree(downloadFile)
+                : tarTree(downloadFile)) {
+            eachFile { fcd ->
+                fcd.relativePath = new RelativePath(
+                        true, fcd.relativePath.segments.drop(1))
+            }
+            includeEmptyDirs = false
+        }
+        into unpackDir
 
-        with unpack(downloadTask.dest)
-        into "${buildDir}/jre/${os}"
+        outputs.dir unpackDir
+
+        dependsOn "download${taskNameBase}"
     }
+
+    return unpackTask
+}
+
+jreUrlFilenames.each { os, file ->
+    def launcherTaskBase = "Jre${os}"
+    def unpackTask = createJreTasks(
+            launcherTaskBase,
+            "https://download.bell-sw.com/java/$jdkVersion/bellsoft-jdk$jdkVersion-$file",
+            "$projectDir/jre/$os-$jdkVersion-$file",
+            "$projectDir/jre/$os")
 
     distributions {
         def distName = os.toLowerCase()
         def distBase = distName.replaceAll("\\d", "") // drop '32' or '64'
 
-        "${distName}" {
+        "$distName" {
             contents {
                 with distributions.main.contents
 
@@ -95,8 +104,8 @@ jreUrlFilenames.each { os, file ->
         }
     }
 
-    downloadJreAll.dependsOn downloadTask
-    unpackJreAll.dependsOn unpackTask
+    downloadJreAll.dependsOn "downolad${launcherTaskBase}"
+    unpackJreAll.dependsOn "unpack${launcherTaskBase}"
 
     createRelease.dependsOn "assemble${os}Dist"
 }

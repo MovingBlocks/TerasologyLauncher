@@ -24,9 +24,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
 
 public final class TestingUtils {
 
@@ -49,11 +49,11 @@ public final class TestingUtils {
             latestBuilds.put(entry.getKey(), Collections.max(entry.getValue().keySet()));
         }
 
-        PowerMockito.doAnswer((i) -> latestBuilds.get(i.getArgumentAt(0, String.class))).
+        PowerMockito.doAnswer((i) -> latestBuilds.get(i.getArgument(0, String.class))).
                 when(DownloadUtils.class, "loadBuildNumberJenkins", anyString(), anyString());
 
         PowerMockito.doAnswer((i) ->
-                buildValues.hasEntry(i.getArgumentAt(0, String.class), i.getArgumentAt(1, Integer.class)) ? JobResult.SUCCESS : JobResult.NOT_BUILT)
+                buildValues.hasEntry(i.getArgument(0, String.class), i.getArgument(1, Integer.class)) ? JobResult.SUCCESS : JobResult.NOT_BUILT)
                 .when(DownloadUtils.class, "loadJobResultJenkins", anyString(), anyInt());
 
         PowerMockito.doReturn(null).when(DownloadUtils.class, "loadChangeLogJenkins", anyString(), anyInt());
@@ -61,8 +61,8 @@ public final class TestingUtils {
         // Omega trigger
         // This lambda simulates the behavior of an actual Jenkins server, mapping an omega build number to a 'linked' normal build
         PowerMockito.doAnswer((i) -> {
-            GameJob job = i.getArgumentAt(0, GameJob.class);
-            int omegaBuildNumber = i.getArgumentAt(1, int.class);
+            GameJob job = i.getArgument(0, GameJob.class);
+            int omegaBuildNumber = i.getArgument(1, Integer.class);
             return buildValues.getNormalFromOmega(job.name(), omegaBuildNumber);
         }).when(DownloadUtils.class, "loadEngineTriggerJenkins", anyObject(), anyInt());
     }

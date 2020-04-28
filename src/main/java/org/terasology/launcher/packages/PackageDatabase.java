@@ -72,9 +72,13 @@ class PackageDatabase {
         )) {
             final List<Package> newDatabase = new LinkedList<>();
             // TODO: read the DatabaseRepository list before-hand and pass to sync()
-            for (DatabaseRepository source : gson.fromJson(reader, DatabaseRepository[].class)) {
-                logger.trace("Fetching package list from: {}", source.getUrl());
-                newDatabase.addAll(packageListOf(source));
+            try {
+                for (DatabaseRepository source : gson.fromJson(reader, DatabaseRepository[].class)) {
+                    logger.trace("Fetching package list from: {}", source.getUrl());
+                    newDatabase.addAll(packageListOf(source));
+                }
+            } catch (IllegalStateException e) {
+                logger.error("Could not read repositories from '%s'", sourcesFile, e);
             }
 
             database.clear();
@@ -138,8 +142,8 @@ class PackageDatabase {
 
     List<Package> getPackages() {
         return Collections.unmodifiableList(database);
-    }    
-    
+    }
+
     Optional<Package> getLatestInstalledPackageForId(String packageId) {
         return database.stream()
                         .filter(pkg -> pkg.getId().equals(packageId) && pkg.isInstalled())
