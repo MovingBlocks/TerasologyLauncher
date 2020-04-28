@@ -115,10 +115,10 @@ dependencies {
     // These dependencies are only needed for running tests
     testImplementation group: 'junit', name: 'junit', version: '4.11'
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.26.0'
-    testCompile group: 'org.mockito', name: 'mockito-inline', version: '2.26.0' // For final classes
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '2.26.0' // For final classes
 
-    testCompile 'org.powermock:powermock-module-junit4:2.0.4'
-    testCompile 'org.powermock:powermock-api-mockito2:2.0.2'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.4'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
 
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
     codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.4.0', ext: 'zip'
