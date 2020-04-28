@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.terasology.launcher.game;
 
 import javafx.concurrent.Task;
@@ -10,8 +26,6 @@ import org.terasology.launcher.util.LogLevel;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 final class RunGameTask extends Task<Void> {
@@ -20,24 +34,18 @@ final class RunGameTask extends Task<Void> {
     protected IGameStarter starter;
 
     private final Package pkg;
-    private GameStarterWIP starter;
 
     RunGameTask(Package pkg,
-                Path gamePath,
-                Path gameDataDirectory,
-                JavaHeapSize heapMin,
-                JavaHeapSize heapMax,
-                List<String> javaParams,
-                List<String> gameParams,
-                LogLevel logLevel) {
+                       Path gamePath,
+                       Path gameDataDirectory,
+                       JavaHeapSize heapMin,
+                       JavaHeapSize heapMax,
+                       List<String> javaParams,
+                       List<String> gameParams,
+                       LogLevel logLevel) {
         this.pkg = pkg;
-        this.gamePath = gamePath;
-        this.gameDataDirectory = gameDataDirectory;
-        this.heapMin = heapMin;
-        this.heapMax = heapMax;
-        this.userJavaParameters = javaParams;
-        this.userGameParameters = gameParams;
-        this.logLevel = logLevel;
+        this.starter = new GameStarterWIP(
+                gamePath,  gameDataDirectory,  heapMin,  heapMax,  javaParams,  gameParams,  logLevel);
     }
 
     protected RunGameTask(Package pkg) {
@@ -83,39 +91,6 @@ final class RunGameTask extends Task<Void> {
         // when process exits, finish task
 
         // if task gets cancelled, end process
-
-
         return null;
-    }
-
-    public ProcessBuilder buildProcess() {
-        final List<String> processParameters = new ArrayList<>();
-        processParameters.add(getRuntimePath().toString());
-        processParameters.addAll(createJavaParameters());
-        processParameters.add("-jar");
-        processParameters.add(gamePath.resolve(Path.of("libs", "Terasology.jar")).toString());
-        processParameters.add("-homedir=" + gameDataDirectory.toAbsolutePath().toString());
-        processParameters.addAll(userGameParameters);
-
-        return new ProcessBuilder(processParameters).directory(gamePath.toFile());
-    }
-
-    Path getRuntimePath() {
-        return Paths.get(System.getProperty("java.home"),"bin", "java");
-    }
-
-    private List<String> createJavaParameters() {
-        final List<String> javaParameters = new ArrayList<>();
-        if (heapMin.isUsed()) {
-            javaParameters.add("-Xms" + heapMin.getSizeParameter());
-        }
-        if (heapMax.isUsed()) {
-            javaParameters.add("-Xmx" + heapMax.getSizeParameter());
-        }
-        if (!logLevel.isDefault()) {
-            javaParameters.add("-DlogOverrideLevel=" + logLevel.name());
-        }
-        javaParameters.addAll(userJavaParameters);
-        return javaParameters;
-    }
+    };
 }
