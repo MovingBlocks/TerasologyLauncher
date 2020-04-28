@@ -19,7 +19,6 @@
 def jdkVersion = '11.0.7+10' // jre version haven't jmod (needed for jlink/jpackager)
 def jreUrlFilenames = [
         Linux64   : 'linux-amd64-full.tar.gz',
-//        Linux32   : 'linux-i586-full.tar.gz', // -full builds not available for linux-i586
         Windows64 : 'windows-amd64-full.zip',
         Windows32 : 'windows-i586-full.zip',
         Mac       : 'macos-amd64-full.zip'
