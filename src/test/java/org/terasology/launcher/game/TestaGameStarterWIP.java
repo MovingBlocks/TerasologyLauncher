@@ -17,7 +17,6 @@ package org.terasology.launcher.game;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
@@ -33,7 +32,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.terasology.launcher.TestingUtils.hasItemsFrom;
 
-public class TestRunGameTask {
+public class TestaGameStarterWIP {
     static final String JAVA_ARG_1 = "-client";
     static final String JAVA_ARG_2 = "--enable-preview";
     static final String GAME_ARG_1 = "--no-splash";
@@ -44,7 +43,6 @@ public class TestRunGameTask {
     static final LogLevel LOG_LEVEL = LogLevel.INFO;
 
     private final FileSystem fs = FileSystems.getDefault();
-    private Package pkg;
     private Path gamePath;
     private List<String> javaParams;
     private List<String> gameParams;
@@ -52,7 +50,6 @@ public class TestRunGameTask {
 
     @Before
     public void setup() {
-        pkg = new Package("1","b","c","d", List.of("e"));
         gamePath = fs.getPath(GAME_DIR);
         gameDataPath = fs.getPath(GAME_DATA_DIR);
         javaParams = List.of(JAVA_ARG_1, JAVA_ARG_2);
@@ -60,18 +57,18 @@ public class TestRunGameTask {
     }
 
     @Test
-    public void testTaskConstruction() {
-        RunGameTask task = newTask();
-        assertNotNull(task);
+    public void testConstruction() {
+        GameStarterWIP starter = newStarter();
+        assertNotNull(starter);
     }
 
-    private RunGameTask newTask() {
-        return new RunGameTask(pkg, gamePath, gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
+    private GameStarterWIP newStarter() {
+        return new GameStarterWIP(gamePath, gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
     }
 
     @Test
     public void testJre() {
-        RunGameTask task = newTask();
+        GameStarterWIP task = newStarter();
         // This is the sort of test where the code under test and the expectation are just copies
         // of the same source. But since there's a plan to separate the launcher runtime from the
         // game runtime, the runtime location seemed like a good thing to specify in its own test.
@@ -80,8 +77,8 @@ public class TestRunGameTask {
 
     @Test
     public void testBuildProcess() {
-        RunGameTask task = newTask();
-        ProcessBuilder processBuilder = task.buildProcess();
+        GameStarterWIP starter = newStarter();
+        ProcessBuilder processBuilder = starter.processBuilder;
         final Path gameJar = gamePath.resolve(Path.of("libs", "Terasology.jar"));
 
         assertNotNull(processBuilder.directory());
@@ -93,5 +90,4 @@ public class TestRunGameTask {
         // could parameterize this test for the things that are optional?
         // heap min, heap max, log level, gameParams and javaParams are all optional.
     }
-
 }
