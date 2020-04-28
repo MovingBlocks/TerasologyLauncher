@@ -24,8 +24,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 
 public final class TestingUtils {
@@ -64,7 +64,7 @@ public final class TestingUtils {
             GameJob job = i.getArgument(0, GameJob.class);
             int omegaBuildNumber = i.getArgument(1, Integer.class);
             return buildValues.getNormalFromOmega(job.name(), omegaBuildNumber);
-        }).when(DownloadUtils.class, "loadEngineTriggerJenkins", anyObject(), anyInt());
+        }).when(DownloadUtils.class, "loadEngineTriggerJenkins", any(), anyInt());
     }
 
     /**
@@ -74,7 +74,7 @@ public final class TestingUtils {
         // A mapping from a job name (normal or omega) to a mapping of build numbers (of that job's type) to linked build numbers of the opposite type.
         // For example, 'GameJob.TerasologyStable.name()' would contain a map of 'normal' numbers to 'omega' numbers,
         // while 'GameJob.TerasologyStable.getOmegaJobName()' would contain a map of 'omega' numbers to 'normal' numbers.
-        private Map<String, Map<Integer, Integer>> buildVersions = new HashMap<>();
+        private final Map<String, Map<Integer, Integer>> buildVersions = new HashMap<>();
 
         public void addMapping(GameJob job, int normalBuild, Integer omegaBuild) {
             this.get(job.name()).put(normalBuild, omegaBuild);
