@@ -15,14 +15,19 @@
  */
 package org.terasology.launcher;
 
+import org.hamcrest.Matcher;
+import org.hamcrest.core.AllOf;
+import org.hamcrest.core.IsIterableContaining;
 import org.powermock.api.mockito.PowerMockito;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.JobResult;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -109,4 +114,13 @@ public final class TestingUtils {
         }
     }
 
+    public static <T> Matcher<Iterable<? super T>> hasItemsFrom(Collection<T> items) {
+        /* org.hamcrest.Matchers.hasItems(T...) takes variable arguments, so if
+         * we want to match against a list, we reimplement it.
+         */
+
+        return new AllOf<>(items.stream().map(
+                IsIterableContaining::hasItem
+        ).collect(Collectors.toUnmodifiableList()));
+    }
 }
