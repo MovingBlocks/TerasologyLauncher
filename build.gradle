@@ -35,6 +35,8 @@ plugins {
     id "com.github.spotbugs" version "4.0.4"
     id 'de.undercouch.download' version '4.0.4'
     id 'java'
+    // to help clarify conflicting logging providers
+    id 'name.remal.component-metadata' version '1.0.186'
     id 'nebula.release' version '14.1.0'
     id 'org.hidetake.swagger.generator' version '2.18.2'
     id 'pmd'
@@ -42,6 +44,7 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.0.8'
 }
 
+apply plugin: 'org.terasology.gradlegoo'
 apply from: "./config/gradle/jre.gradle"
 apply from: "./config/gradle/swagger.gradle"
 
@@ -83,13 +86,17 @@ repositories {
         allowInsecureProtocol true
         url "http://artifactory.terasology.org/artifactory/virtual-repo-live"
     }
+    maven {
+        // for spf4j dependencies that haven't been merged upstream
+        // i.e. org.apache.avro:avro
+        url  "https://dl.bintray.com/zolyfarkas/core"
+    }
     jcenter()
     maven { url "https://jitpack.io" }
 }
 
 // Primary dependencies definition
 dependencies {
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha1'
     implementation group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
     implementation group: 'net.java.dev.jna', name: 'jna-platform', version: '4.1.0'
     implementation group: 'com.github.rjeschke', name: 'txtmark', version: '0.11'
@@ -113,7 +120,9 @@ dependencies {
     }
 
     // These dependencies are only needed for running tests
-    testImplementation group: 'junit', name: 'junit', version: '4.11'
+    testImplementation 'org.spf4j:spf4j-slf4j-test:8.8.1'
+    testImplementation 'org.hamcrest:hamcrest:2.2'
+    testImplementation group: 'junit', name: 'junit', version: '4.13'
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.26.0'
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '2.26.0' // For final classes
 
@@ -122,6 +131,16 @@ dependencies {
 
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
     codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.4.0', ext: 'zip'
+}
+
+configurations.named("testRuntimeClasspath") {
+    gradlegoo.prefers(getResolutionStrategy(), "logging", "jcl-api-capability", "jcl-over-slf4j", "jcl should prefer slf4j when available")
+    gradlegoo.prefers(getResolutionStrategy(), "logging", "slf4j-impl-capability", "spf4j-slf4j-test", "tests use slf4j-test")
+}
+
+configurations.named("testCompileClasspath") {
+    gradlegoo.prefers(getResolutionStrategy(), "logging", "jcl-api-capability", "jcl-over-slf4j", "jcl should prefer slf4j when available")
+    gradlegoo.prefers(getResolutionStrategy(), "logging", "slf4j-impl-capability", "spf4j-slf4j-test", "tests use slf4j-test")
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
