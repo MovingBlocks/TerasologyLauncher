@@ -1,0 +1,21 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'groovy'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    localGroovy()
+}
+
+gradlePlugin {
+    plugins {
+        simplePlugin {
+            id = 'org.terasology.gradlegoo'
+            implementationClass = 'org.terasology.gradlegoo.GradleGooPlugin'
+        }
+    }
+}
