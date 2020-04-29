@@ -8,6 +8,7 @@ import org.gradle.api.artifacts.ComponentMetadataRule
 import org.gradle.api.artifacts.ResolutionStrategy
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 
+
 @SuppressWarnings("unused")
 class GradleGooPlugin implements Plugin<Project> {
     @Override

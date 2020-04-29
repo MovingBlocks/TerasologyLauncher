@@ -117,6 +117,16 @@ dependencies {
     implementation group: 'com.vdurmont', name: 'semver4j', version: '3.1.0'
 
     // These dependencies are only needed for running tests
+    testImplementation('org.spf4j:spf4j-slf4j-test:8.8.1') {
+        because "testable logging"
+    }
+    testImplementation 'org.hamcrest:hamcrest:2.2'
+    testImplementation 'junit:junit:4.13'
+    testImplementation('org.mockito:mockito-inline:2.26.0') {
+        because "-inline build enables mocking final classes"
+        // https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.2
+        // > Be aware that this artifact may be abolished when the inline mock making feature is integrated into the default mock maker.
+    }
 
     testImplementation 'org.hamcrest:hamcrest:2.2'
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.+"
@@ -147,9 +157,9 @@ dependencies {
 
 configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation)Classpath/ }).all {
     resolutionStrategy(gradlegoo.prefers("logging", "jcl-api-capability", "jcl-over-slf4j", "jcl should prefer slf4j " +
-            "when available"));
+            "when available"))
     resolutionStrategy(gradlegoo.prefers("logging", "slf4j-impl-capability",
-            "spf4j-slf4j-test", "tests use slf4j-test"));
+            "spf4j-slf4j-test", "tests use slf4j-test"))
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
