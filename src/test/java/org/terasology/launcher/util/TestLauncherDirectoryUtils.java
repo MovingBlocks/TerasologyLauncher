@@ -18,8 +18,6 @@ package org.terasology.launcher.util;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.terasology.launcher.util.LauncherDirectoryUtils.containsFiles;
 import static org.terasology.launcher.util.LauncherDirectoryUtils.containsGameData;
 
-@RunWith(JUnitPlatform.class)
 public class TestLauncherDirectoryUtils {
 
     @TempDir

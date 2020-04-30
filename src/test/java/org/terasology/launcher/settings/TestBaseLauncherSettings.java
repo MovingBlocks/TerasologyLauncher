@@ -16,10 +16,9 @@
 
 package org.terasology.launcher.settings;
 
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
@@ -33,7 +32,7 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_GAME_DATA_DIRECTORY;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_GAME_DIRECTORY;
@@ -47,13 +46,16 @@ import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_USE
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_USER_JAVA_PARAMETERS;
 
 public class TestBaseLauncherSettings {
-    @Rule
-    public TemporaryFolder tempDirectory = new TemporaryFolder();
+    @TempDir
+    Path tempDirectory;
+    @TempDir
+    Path gameDirectory;
+    @TempDir
+    Path gameDataDirectory;
 
     private BaseLauncherSettings baseLauncherSettings;
     private Properties testProperties;
     private Path testPropertiesFile;
-    private Path tempLauncherDirectory;
 
     private String locale;
     private String job;
@@ -63,8 +65,6 @@ public class TestBaseLauncherSettings {
     private String lastBuildNumber;
     private String searchForLauncherUpdates;
     private String closeLauncherAfterGameStart;
-    private String gameDirectory;
-    private String gameDataDirectory;
     private String saveDownloadedFiles;
     private String userJavaParameters;
     private String userGameParameters;
@@ -76,8 +76,8 @@ public class TestBaseLauncherSettings {
         assertEquals(baseLauncherSettings.getInitialHeapSize(), JavaHeapSize.valueOf(initialHeapSize));
         assertEquals(baseLauncherSettings.isSearchForLauncherUpdates(), Boolean.valueOf(searchForLauncherUpdates));
         assertEquals(baseLauncherSettings.isCloseLauncherAfterGameStart(), Boolean.valueOf(closeLauncherAfterGameStart));
-        assertEquals(baseLauncherSettings.getGameDirectory(), Paths.get(new URI(gameDirectory)));
-        assertEquals(baseLauncherSettings.getGameDataDirectory(), Paths.get(new URI(gameDataDirectory)));
+        assertEquals(baseLauncherSettings.getGameDirectory(), gameDirectory);
+        assertEquals(baseLauncherSettings.getGameDataDirectory(), gameDataDirectory);
         assertEquals(baseLauncherSettings.isKeepDownloadedFiles(), Boolean.valueOf(saveDownloadedFiles));
         assertEquals(baseLauncherSettings.getUserJavaParameters(), userJavaParameters);
         assertEquals(baseLauncherSettings.getUserGameParameters(), userGameParameters);
@@ -86,10 +86,9 @@ public class TestBaseLauncherSettings {
 
     @BeforeEach
     public void setup() throws Exception {
-        tempLauncherDirectory = tempDirectory.newFolder().toPath();
-        testPropertiesFile = tempLauncherDirectory.resolve(BaseLauncherSettings.LAUNCHER_SETTINGS_FILE_NAME);
+        testPropertiesFile = tempDirectory.resolve(BaseLauncherSettings.LAUNCHER_SETTINGS_FILE_NAME);
 
-        baseLauncherSettings = new BaseLauncherSettings(tempLauncherDirectory);
+        baseLauncherSettings = new BaseLauncherSettings(tempDirectory);
     }
 
     @Test
@@ -103,8 +102,6 @@ public class TestBaseLauncherSettings {
         lastBuildNumber = String.valueOf(GameJob.valueOf(job).getMinBuildNumber());
         searchForLauncherUpdates = "false";
         closeLauncherAfterGameStart = "false";
-        gameDirectory = tempDirectory.newFolder().toURI().toString();
-        gameDataDirectory = tempDirectory.newFolder().toURI().toString();
         saveDownloadedFiles = "false";
         userJavaParameters = "-XXnoSystemGC";
         userGameParameters = "-headless";
@@ -117,8 +114,8 @@ public class TestBaseLauncherSettings {
         testProperties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialHeapSize);
         testProperties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, searchForLauncherUpdates);
         testProperties.setProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START, closeLauncherAfterGameStart);
-        testProperties.setProperty(PROPERTY_GAME_DIRECTORY, gameDirectory);
-        testProperties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory);
+        testProperties.setProperty(PROPERTY_GAME_DIRECTORY, gameDirectory.toUri().toString());
+        testProperties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toUri().toString());
         testProperties.setProperty(PROPERTY_SAVE_DOWNLOADED_FILES, saveDownloadedFiles);
         testProperties.setProperty(PROPERTY_USER_JAVA_PARAMETERS, userJavaParameters);
         testProperties.setProperty(PROPERTY_USER_GAME_PARAMETERS, userGameParameters);
@@ -165,8 +162,6 @@ public class TestBaseLauncherSettings {
         lastBuildNumber = String.valueOf(GameJob.valueOf(job).getMinBuildNumber());
         searchForLauncherUpdates = "true";
         closeLauncherAfterGameStart = "true";
-        gameDirectory = tempDirectory.newFolder().toURI().toString();
-        gameDataDirectory = tempDirectory.newFolder().toURI().toString();
         saveDownloadedFiles = "true";
         userJavaParameters = "-XXUseParNewGC -XXUseConcMarkSweepGC";
         userGameParameters = "-noCrashReport";
@@ -178,8 +173,8 @@ public class TestBaseLauncherSettings {
         baseLauncherSettings.setInitialHeapSize(JavaHeapSize.valueOf(initialHeapSize));
         baseLauncherSettings.setSearchForLauncherUpdates(Boolean.valueOf(searchForLauncherUpdates));
         baseLauncherSettings.setCloseLauncherAfterGameStart(Boolean.valueOf(closeLauncherAfterGameStart));
-        baseLauncherSettings.setGameDirectory(Paths.get(new URI(gameDirectory)));
-        baseLauncherSettings.setGameDataDirectory(Paths.get(new URI(gameDataDirectory)));
+        baseLauncherSettings.setGameDirectory(gameDirectory);
+        baseLauncherSettings.setGameDataDirectory(gameDataDirectory);
         baseLauncherSettings.setKeepDownloadedFiles(Boolean.valueOf(saveDownloadedFiles));
         baseLauncherSettings.setUserJavaParameters(userJavaParameters);
         baseLauncherSettings.setUserGameParameters(userGameParameters);
