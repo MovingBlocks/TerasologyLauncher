@@ -26,6 +26,8 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Collections;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
@@ -190,5 +192,36 @@ public class TestFileUtils {
         // DirectoryNotEmptyException will be logged but not thrown
         FileUtils.deleteFileSilently(tempFolder);
         assertTrue(Files.exists(tempFolder));
+    }
+
+    @Test
+    public void testExtract(@TempDir Path zipDir, @TempDir Path outputDir) throws IOException {
+        final String fileInRoot = "fileInRoot";
+        final String fileInFolder = "folder/fileInFolder";
+        final String file1Contents = SAMPLE_TEXT + "1";
+        final String file2Contents = SAMPLE_TEXT + "2";
+        /* An archive with this structure is created:
+         * <zip root>
+         * +-- fileInRoot
+         * +-- folder
+         * |   +-- fileInFolder
+         */
+        Path zipFile = zipDir.resolve(FILE_NAME + ".zip");
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile))) {
+            zipOutputStream.putNextEntry(new ZipEntry(fileInRoot));
+            zipOutputStream.write(file1Contents.getBytes());
+            zipOutputStream.closeEntry();
+            zipOutputStream.putNextEntry(new ZipEntry(fileInFolder));
+            zipOutputStream.write(file2Contents.getBytes());
+            zipOutputStream.closeEntry();
+        }
+
+        FileUtils.extractZipTo(zipFile, outputDir);
+        Path extractedFileInRoot = outputDir.resolve(fileInRoot);
+        Path extractedFileInFolder = outputDir.resolve(fileInFolder);
+        assertTrue(Files.exists(extractedFileInRoot));
+        assertTrue(Files.exists(extractedFileInFolder));
+        assertEquals(file1Contents, Files.readAllLines(extractedFileInRoot).get(0));
+        assertEquals(file2Contents, Files.readAllLines(extractedFileInFolder).get(0));
     }
 }
