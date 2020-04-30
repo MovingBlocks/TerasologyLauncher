@@ -17,10 +17,13 @@ package org.terasology.launcher.game;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.terasology.launcher.TestingUtils;
 import org.terasology.launcher.util.DownloadUtils;
 
@@ -33,10 +36,10 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.spy;
 
 @RunWith(PowerMockRunner.class)
+@PowerMockRunnerDelegate(JUnitPlatform.class)
 @PrepareForTest({DownloadUtils.class, TerasologyGameVersions.class})
 @PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*"})
 public class TestGameVersions {

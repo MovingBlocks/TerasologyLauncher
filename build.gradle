@@ -113,10 +113,18 @@ dependencies {
     }
 
     // These dependencies are only needed for running tests
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.2")
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.26.0'
-    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '2.26.0' // For final classes
+
+    // using the jupiter-under-junit4 approach because powermock does not
+    // support junit5 natively.
+    // see https://github.com/powermock/powermock/issues/830#issuecomment-616243661
+    // https://junit.org/junit5/docs/5.6.2/user-guide/index.html#running-tests-junit-platform-runner
+    testImplementation "org.junit.platform:junit-platform-runner:1.6.2"
+    testImplementation "junit:junit:4.1.3"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.2"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.2"
+
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '3.3.3' // For final classes
 
     testImplementation 'org.powermock:powermock-module-junit4:2.0.4'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'

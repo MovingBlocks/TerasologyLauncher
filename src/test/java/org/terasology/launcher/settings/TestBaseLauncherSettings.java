@@ -16,9 +16,9 @@
 
 package org.terasology.launcher.settings;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.rules.TemporaryFolder;
 import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.util.JavaHeapSize;

@@ -17,10 +17,9 @@
 package org.terasology.launcher.util;
 
 import org.junit.jupiter.api.Test;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,38 +28,34 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.terasology.launcher.util.LauncherDirectoryUtils.*;
+import static org.terasology.launcher.util.LauncherDirectoryUtils.containsFiles;
+import static org.terasology.launcher.util.LauncherDirectoryUtils.containsGameData;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(LauncherDirectoryUtils.class)
-@PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*"})
+@RunWith(JUnitPlatform.class)
 public class TestLauncherDirectoryUtils {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @TempDir
+    public Path tempFolder;
 
     @Test
     public void testDirectoryWithFiles() throws IOException {
-        Path directory = tempFolder.newFolder().toPath();
-        Path file = directory.resolve("File");
+        Path file = tempFolder.resolve("File");
         assertNotNull(Files.createFile(file));
-        assertTrue(containsFiles(directory));
+        assertTrue(containsFiles(tempFolder));
     }
 
     @Test
     public void testEmptyDirectory() throws IOException {
-        Path directory = tempFolder.newFolder().toPath();
-        assertFalse(containsFiles(directory));
+        assertFalse(containsFiles(tempFolder));
     }
 
     @Test
     public void testGameDirectory() throws IOException {
-        Path gameDirectory = tempFolder.newFolder().toPath();
-        Path savesDirectory = gameDirectory.resolve(GameDataDirectoryNames.SAVES.getName());
+        Path savesDirectory = tempFolder.resolve(GameDataDirectoryNames.SAVES.getName());
         Path saveFile = savesDirectory.resolve("saveFile");
 
         Files.createDirectories(savesDirectory);
         Files.createFile(saveFile);
-        assertTrue(containsGameData(gameDirectory));
+        assertTrue(containsGameData(tempFolder));
     }
 }

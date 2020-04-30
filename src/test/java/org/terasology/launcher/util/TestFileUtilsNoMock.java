@@ -1,6 +1,7 @@
 package org.terasology.launcher.util;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,11 +20,8 @@ public class TestFileUtilsNoMock {
     private static final String FILE_NAME = "File";
     private static final String SAMPLE_TEXT = "Lorem Ipsum";
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
-
     @Test
-    public void testExtract() throws IOException {
+    public void testExtract(@TempDir Path zipDir, @TempDir Path outputDir) throws IOException {
         final String fileInRoot = "fileInRoot";
         final String fileInFolder = "folder/fileInFolder";
         final String file1Contents = SAMPLE_TEXT + "1";
@@ -34,7 +32,7 @@ public class TestFileUtilsNoMock {
          * +-- folder
          * |   +-- fileInFolder
          */
-        Path zipFile = tempFolder.newFile(FILE_NAME + ".zip").toPath();
+        Path zipFile = zipDir.resolve(FILE_NAME + ".zip");
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile))) {
             zipOutputStream.putNextEntry(new ZipEntry(fileInRoot));
             zipOutputStream.write(file1Contents.getBytes());
@@ -44,7 +42,6 @@ public class TestFileUtilsNoMock {
             zipOutputStream.closeEntry();
         }
 
-        Path outputDir = tempFolder.newFolder().toPath();
         FileUtils.extractZipTo(zipFile, outputDir);
         Path extractedFileInRoot = outputDir.resolve(fileInRoot);
         Path extractedFileInFolder = outputDir.resolve(fileInFolder);
