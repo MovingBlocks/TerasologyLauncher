@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-final class GameStarterWIP {
+class GameStarterWIP implements IGameStarter {
     final ProcessBuilder processBuilder;
 
     GameStarterWIP(Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
@@ -52,11 +52,12 @@ final class GameStarterWIP {
         processBuilder = new ProcessBuilder(processParameters).directory(gamePath.toFile());
     }
 
+    @Override
     public Process start() throws IOException {
         return processBuilder.start();
     }
 
     Path getRuntimePath() {
-        return Paths.get(System.getProperty("java.home"),"bin", "java");
+        return Paths.get(System.getProperty("java.home"), "bin", "java");
     }
 }
