@@ -17,28 +17,39 @@
 package org.terasology.launcher.game;
 
 import javafx.concurrent.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.List;
 
 final class RunGameTask extends Task<Void> {
-    private final Package pkg;
-    private GameStarterWIP starter;
+    private static final Logger logger = LoggerFactory.getLogger(RunGameTask.class);
 
-    public RunGameTask(Package pkg,
-                       Path gamePath,
-                       Path gameDataDirectory,
-                       JavaHeapSize heapMin,
-                       JavaHeapSize heapMax,
-                       List<String> javaParams,
-                       List<String> gameParams,
-                       LogLevel logLevel) {
+    protected IGameStarter starter;
+
+    private final Package pkg;
+
+    RunGameTask(Package pkg,
+                Path gamePath,
+                Path gameDataDirectory,
+                JavaHeapSize heapMin,
+                JavaHeapSize heapMax,
+                List<String> javaParams,
+                List<String> gameParams,
+                LogLevel logLevel) {
         this.pkg = pkg;
         this.starter = new GameStarterWIP(
                 gamePath,  gameDataDirectory,  heapMin,  heapMax,  javaParams,  gameParams,  logLevel);
+    }
+
+    protected RunGameTask(Package pkg) {
+        this.pkg = pkg;
     }
 
     /**
@@ -56,6 +67,7 @@ final class RunGameTask extends Task<Void> {
     @Override
     protected Void call() throws Exception {
         // start subprocess
+        logger.warn("Where is everyone???");
         Process process = this.starter.start();
         this.starter = null;
 
@@ -65,6 +77,12 @@ final class RunGameTask extends Task<Void> {
     }
 
     Void monitorProcess(Process process) {
+        logger.warn("I have process {}", process.pid());
+        var gameOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        gameOutput.lines().forEachOrdered(line -> logger.trace("Game output: {}", line));
+
+        logger.warn("We are DONE with all that");
+
         // monitor output (and pass through to logs)
         // start a countdown
         // stopped before countdown? fail task with error message
