@@ -152,15 +152,4 @@ public final class TestingUtils {
         }
     }
 
-    /**
-     * temporary class to transition from PowerMock
-     *
-     * @deprecated delete before merging PR
-     */
-    @Deprecated
-    public static class Whitebox {
-        public static Object getInternalState(Object aClass, String attributeName) {
-            return null;
-        }
-    }
 }

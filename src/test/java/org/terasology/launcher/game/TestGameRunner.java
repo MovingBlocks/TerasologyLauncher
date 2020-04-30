@@ -17,12 +17,6 @@ package org.terasology.launcher.game;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
-import org.powermock.reflect.Whitebox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,14 +28,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockRunnerDelegate(JUnitPlatform.class)
-@PrepareForTest({GameRunner.class, LoggerFactory.class, Thread.class})
 public class TestGameRunner {
 
     /**
@@ -51,11 +41,11 @@ public class TestGameRunner {
 
     @BeforeEach
     public void setup() throws Exception {
-        mockStatic(LoggerFactory.class);
-        mockStatic(Thread.class);
+        final LoggerFactory loggerFactory = mock(LoggerFactory.class);
+        mock(Thread.class);
 
         Logger logger = mock(Logger.class);
-        when(LoggerFactory.getLogger(any(Class.class))).thenReturn(logger);
+        when(loggerFactory.getLogger(any(Class.class))).thenReturn(logger);
 
         // Create fake game process to give to GameRunner
         gameProcess = mock(Process.class);
@@ -163,5 +153,17 @@ public class TestGameRunner {
 
         // Make sure GameRunner logs an error with an IOException
         verify((Logger) Whitebox.getInternalState(GameRunner.class, "logger")).error(eq("Could not read game output!"), any(IOException.class));
+    }
+
+    /**
+     * temporary class to transition from PowerMock
+     *
+     * @deprecated delete before merging PR
+     */
+    @Deprecated
+    protected static class Whitebox {
+        public static Object getInternalState(Object aClass, String attributeName) {
+            return null;
+        }
     }
 }
