@@ -15,56 +15,23 @@
  */
 package org.terasology.launcher;
 
-import org.powermock.api.mockito.PowerMockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameJob;
-import org.terasology.launcher.util.DownloadUtils;
+import org.terasology.launcher.util.IBuildRepository;
 import org.terasology.launcher.util.JobResult;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyObject;
-import static org.mockito.ArgumentMatchers.anyString;
 
 public final class TestingUtils {
 
     private TestingUtils() {
 
-    }
-
-    /**
-     * Mocks out various methods in DownloadUtils to respond using the giving job map.
-     *
-     * @param buildValues A map from {@link GameJob} names to a map of omega build number to normal build numbers
-     * @throws Exception
-     */
-    public static void mockBuildVersions(VersionInformation buildValues) throws Exception {
-        PowerMockito.spy(DownloadUtils.class);
-
-        // Cache the greatest normal build number (the values of each sub-map) for each job name to use as the 'latest' value
-        Map<String, Integer> latestBuilds = new HashMap<>();
-        for (Map.Entry<String, Map<Integer, Integer>> entry : buildValues.getMap().entrySet()) {
-            latestBuilds.put(entry.getKey(), Collections.max(entry.getValue().keySet()));
-        }
-
-        PowerMockito.doAnswer((i) -> latestBuilds.get(i.getArgument(0, String.class))).
-                when(DownloadUtils.class, "loadBuildNumberJenkins", anyString(), anyString());
-
-        PowerMockito.doAnswer((i) ->
-                buildValues.hasEntry(i.getArgument(0, String.class), i.getArgument(1, Integer.class)) ? JobResult.SUCCESS : JobResult.NOT_BUILT)
-                .when(DownloadUtils.class, "loadJobResultJenkins", anyString(), anyInt());
-
-        PowerMockito.doReturn(null).when(DownloadUtils.class, "loadChangeLogJenkins", anyString(), anyInt());
-
-        // Omega trigger
-        // This lambda simulates the behavior of an actual Jenkins server, mapping an omega build number to a 'linked' normal build
-        PowerMockito.doAnswer((i) -> {
-            GameJob job = i.getArgument(0, GameJob.class);
-            int omegaBuildNumber = i.getArgument(1, Integer.class);
-            return buildValues.getNormalFromOmega(job.name(), omegaBuildNumber);
-        }).when(DownloadUtils.class, "loadEngineTriggerJenkins", anyObject(), anyInt());
     }
 
     /**
@@ -74,7 +41,7 @@ public final class TestingUtils {
         // A mapping from a job name (normal or omega) to a mapping of build numbers (of that job's type) to linked build numbers of the opposite type.
         // For example, 'GameJob.TerasologyStable.name()' would contain a map of 'normal' numbers to 'omega' numbers,
         // while 'GameJob.TerasologyStable.getOmegaJobName()' would contain a map of 'omega' numbers to 'normal' numbers.
-        private Map<String, Map<Integer, Integer>> buildVersions = new HashMap<>();
+        private final Map<String, Map<Integer, Integer>> buildVersions = new HashMap<>();
 
         public void addMapping(GameJob job, int normalBuild, Integer omegaBuild) {
             this.get(job.name()).put(normalBuild, omegaBuild);
@@ -109,4 +76,91 @@ public final class TestingUtils {
         }
     }
 
+    public static class MockBuildRepository implements IBuildRepository {
+        private static final Logger logger = LoggerFactory.getLogger(MockBuildRepository.class);
+
+        private VersionInformation buildValues;
+        private final Map<String, Integer> latestBuilds;
+
+        /**
+         * Initialized with no builds.
+         *
+         */
+        public MockBuildRepository() {
+            this(new VersionInformation());
+        }
+
+        /**
+         * Mocks out various methods in DownloadUtils to respond using the giving job map.
+         *
+         * @param buildValues A map from {@link GameJob} names to a map of omega build number to normal build numbers
+         */
+        public MockBuildRepository(VersionInformation buildValues) {
+            assert buildValues != null;
+            latestBuilds = new HashMap<>();
+            setBuildValues(buildValues);
+        }
+
+        public void setBuildValues(VersionInformation buildValues) {
+            this.buildValues = buildValues;
+            latestBuilds.clear();
+            // Cache the greatest normal build number (the values of each sub-map) for each job name to use as the 'latest' value
+            for (Map.Entry<String, Map<Integer, Integer>> entry : buildValues.getMap().entrySet()) {
+                latestBuilds.put(entry.getKey(), Collections.max(entry.getValue().keySet()));
+            }
+        }
+
+        @Override
+        public boolean isJenkinsAvailable() {
+            return true;
+        }
+
+        @Override
+        public int loadLastStableBuildNumberJenkins(String jobName) {
+            return loadLastSuccessfulBuildNumberJenkins(jobName);
+        }
+
+        @Override
+        public int loadLastSuccessfulBuildNumberJenkins(String jobName) {
+            if (!latestBuilds.containsKey(jobName)) {
+                logger.error("I have no build number for the name \"{}\"", jobName);
+                return -1;
+            }
+            return latestBuilds.get(jobName);
+        }
+
+        @Override
+        public JobResult loadJobResultJenkins(String jobName, int buildNumber) {
+            return buildValues.hasEntry(jobName, buildNumber) ? JobResult.SUCCESS : JobResult.NOT_BUILT;
+        }
+
+        @Override
+        public List<String> loadChangeLogJenkins(String jobName, int buildNumber) {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public int loadEngineTriggerJenkins(GameJob job, int omegaBuildNumber) {
+            // Omega trigger
+            // This simulates the behavior of an actual Jenkins server, mapping an omega build number to a 'linked' normal build
+            return buildValues.getNormalFromOmega(job.name(), omegaBuildNumber);
+        }
+
+        @Override
+        public URL createFileDownloadUrlJenkins(String jobName, int buildNumber, ArtifactType fileName) throws MalformedURLException {
+            return new URL("file:///dev/null#" + this.getClass().getName());
+        }
+    }
+
+    /**
+     * temporary class to transition from PowerMock
+     *
+     * @deprecated delete before merging PR
+     */
+    @Deprecated
+    public static class Whitebox {
+        public static Object getInternalState(Object aClass, String attributeName) {
+            return null;
+        }
+    }
 }

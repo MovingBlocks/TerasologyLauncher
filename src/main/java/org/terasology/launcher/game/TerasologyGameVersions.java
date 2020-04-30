@@ -16,15 +16,15 @@
 
 package org.terasology.launcher.game;
 
-import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DownloadException;
-import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.IBuildRepository;
 import org.terasology.launcher.util.JobResult;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
+import org.terasology.launcher.util.OnlineBuildRepository;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -64,12 +64,18 @@ public final class TerasologyGameVersions {
 
     private final Map<GameJob, List<TerasologyGameVersion>> gameVersionLists;
     private final Map<GameJob, SortedMap<Integer, TerasologyGameVersion>> gameVersionMaps;
-    private final Gson gson;
+
+    private final IBuildRepository buildRepository;
 
     public TerasologyGameVersions() {
+        this(new OnlineBuildRepository());
+    }
+
+    public TerasologyGameVersions(IBuildRepository buildRepository) {
         gameVersionLists = new EnumMap<>(GameJob.class);
         gameVersionMaps = new EnumMap<>(GameJob.class);
-        gson = new Gson();
+        assert buildRepository != null;
+        this.buildRepository = buildRepository;
     }
 
     public synchronized List<TerasologyGameVersion> getGameVersionList(GameJob job) {
@@ -212,7 +218,7 @@ public final class TerasologyGameVersions {
         if (!job.isOnlyInstalled()) {
             try {
                 // Use "successful" and not "stable" for TerasologyGame.
-                lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumberJenkins(job.name());
+                lastSuccessfulBuildNumber = buildRepository.loadLastSuccessfulBuildNumberJenkins(job.name());
             } catch (DownloadException e) {
                 logger.info("Retrieving last successful build number failed. '{}'", job, e);
                 lastSuccessfulBuildNumber = null;
@@ -226,7 +232,7 @@ public final class TerasologyGameVersions {
                      buildNumber--) {
                     try {
                         // Skip unavailable builds
-                        DownloadUtils.loadJobResultJenkins(job.name(), buildNumber);
+                        buildRepository.loadJobResultJenkins(job.name(), buildNumber);
                         buildNumbers.add(buildNumber);
                     } catch (DownloadException e) {
                         logger.info("Cannot find build number '{}' for job '{}'.", buildNumber, job);
@@ -257,7 +263,7 @@ public final class TerasologyGameVersions {
         // We more or less redo the original process in looking up the Omega job then later going back in history to map to the engine job
         Integer lastSuccessfulBuildNumber;
         try {
-            lastSuccessfulBuildNumber = DownloadUtils.loadLastSuccessfulBuildNumberJenkins(job.getOmegaJobName());
+            lastSuccessfulBuildNumber = buildRepository.loadLastSuccessfulBuildNumberJenkins(job.getOmegaJobName());
         } catch (DownloadException e) {
             logger.info("Retrieving last successful Omega build number failed, unable to load Omega distributions. '{}'", job, e);
             return;
@@ -285,7 +291,7 @@ public final class TerasologyGameVersions {
             int matchingEngineBuildNumber = -1;
             try {
                 // See if the job exists and is successful. If not we don't care so try the next one
-                matchingEngineBuildNumber = DownloadUtils.loadEngineTriggerJenkins(job, omegaBuildNumber);
+                matchingEngineBuildNumber = buildRepository.loadEngineTriggerJenkins(job, omegaBuildNumber);
                 if (matchingEngineBuildNumber == -1) {
                     // In this case we know there is a successful Omega build that didn't trigger from an engine build
                     // By storing the Omega number we can keep looking
@@ -353,7 +359,7 @@ public final class TerasologyGameVersions {
      */
     private boolean checkJobResult(GameJob job, int omegaBuildNumber) {
         try {
-            JobResult jobResult = DownloadUtils.loadJobResultJenkins(job.getOmegaJobName(), omegaBuildNumber);
+            JobResult jobResult = buildRepository.loadJobResultJenkins(job.getOmegaJobName(), omegaBuildNumber);
             if (jobResult != JobResult.SUCCESS) {
                 logger.info("Retrieved an Omega result of {} for build number {}, skipping", jobResult, omegaBuildNumber);
                 return false;
@@ -531,7 +537,7 @@ public final class TerasologyGameVersions {
             } else if (!job.isOnlyInstalled()) {
                 Boolean successful = null;
                 try {
-                    JobResult jobResult = DownloadUtils.loadJobResultJenkins(job.name(), buildNumber);
+                    JobResult jobResult = buildRepository.loadJobResultJenkins(job.name(), buildNumber);
                     successful = jobResult != null && (jobResult == JobResult.SUCCESS || jobResult == JobResult.UNSTABLE);
                 } catch (DownloadException e) {
                     logger.warn("Failed to load job result (probably OK): '{}' '{}'", job, buildNumber);
@@ -547,11 +553,9 @@ public final class TerasologyGameVersions {
                 gameVersion.setChangeLog(cachedGameVersion.getChangeLog());
             } else if (!job.isOnlyInstalled()) {
                 try {
-                    final List<String> changeLog = DownloadUtils.loadChangeLogJenkins(job.name(), buildNumber);
-                    if (changeLog != null) {
-                        if (changeLog.isEmpty()) {
-                            changeLog.add(BundleUtils.getLabel("message_noChangeLog"));
-                        }
+                    List<String> changeLog = buildRepository.loadChangeLogJenkins(job.name(), buildNumber);
+                    if (changeLog == null || changeLog.isEmpty()) {
+                        changeLog = List.of(BundleUtils.getLabel("message_noChangeLog"));
                         gameVersion.setChangeLog(Collections.unmodifiableList(changeLog));
                     }
                 } catch (DownloadException e) {
@@ -561,7 +565,7 @@ public final class TerasologyGameVersions {
         }
     }
 
-    private void loadAndSetGameVersionInfo(TerasologyGameVersion gameVersion, TerasologyGameVersion cachedGameVersion, GameJob job, Integer buildNumber) {
+    protected void loadAndSetGameVersionInfo(TerasologyGameVersion gameVersion, TerasologyGameVersion cachedGameVersion, GameJob job, Integer buildNumber) {
         if (gameVersion.getGameVersionInfo() == null) {
             if (cachedGameVersion != null && cachedGameVersion.getGameVersionInfo() != null) {
                 gameVersion.setGameVersionInfo(cachedGameVersion.getGameVersionInfo());
@@ -569,7 +573,7 @@ public final class TerasologyGameVersions {
                 TerasologyGameVersionInfo gameVersionInfo = null;
                 URL urlVersionInfo = null;
                 try {
-                    urlVersionInfo = DownloadUtils.createFileDownloadUrlJenkins(job.name(), buildNumber, DownloadUtils.FILE_TERASOLOGY_GAME_VERSION_INFO);
+                    urlVersionInfo = buildRepository.createFileDownloadUrlJenkins(job.name(), buildNumber, IBuildRepository.ArtifactType.FILE_TERASOLOGY_GAME_VERSION_INFO);
                     gameVersionInfo = TerasologyGameVersionInfo.loadFromInputStream(urlVersionInfo.openStream());
                 } catch (IOException e) {
                     if (e instanceof FileNotFoundException) {

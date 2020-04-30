@@ -17,15 +17,7 @@ package org.terasology.launcher.game;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.terasology.launcher.TestingUtils;
-import org.terasology.launcher.util.DownloadUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,12 +28,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
 
-import static org.powermock.api.mockito.PowerMockito.spy;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockRunnerDelegate(JUnitPlatform.class)
-@PrepareForTest({DownloadUtils.class, TerasologyGameVersions.class})
-@PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*"})
 public class TestGameVersions {
 
     // These functions are common assertions, to be used with requireAssertions
@@ -65,13 +52,10 @@ public class TestGameVersions {
 
     @Test
     public void testGetMultipleSequentialVersions() throws Exception {
-        TerasologyGameVersions gameVersions = this.getGameVersions(false, false);
-
         int minStable = GameJob.TerasologyStable.getMinBuildNumber() + 1;
         int minUnstable = GameJob.Terasology.getMinBuildNumber() + 1;
 
-        TestingUtils.VersionInformation buildVersions = new TestingUtils.VersionInformation();
-
+        var buildVersions = new TestingUtils.VersionInformation();
         buildVersions.addMapping(GameJob.TerasologyStable, minStable, -1);
         buildVersions.addMapping(GameJob.TerasologyStable, minStable + 1, -1);
         buildVersions.addMapping(GameJob.TerasologyStable, minStable + 2, -1);
@@ -80,11 +64,11 @@ public class TestGameVersions {
         buildVersions.addMapping(GameJob.Terasology, minUnstable + 1, -1);
         buildVersions.addMapping(GameJob.Terasology, minUnstable + 2, -1);
 
+        TerasologyGameVersions gameVersions = this.getGameVersions(false, false, buildVersions);
+        this.loadGameVersions(gameVersions);
+
         // Three versions per job, plus the virtual 'latest' version
         int expectedVersionsPerJob = 4;
-
-        TestingUtils.mockBuildVersions(buildVersions);
-        this.loadGameVersions(gameVersions);
 
         int[] stableVers = this.getBuildArray(minStable, minStable + 2);
         int[] unstableVars = this.getBuildArray(minUnstable, minUnstable + 2);
@@ -92,32 +76,29 @@ public class TestGameVersions {
         this.runAssertions(gameVersions, expectedVersionsPerJob, REQUIRES_NULL_OMEGA.andThen(REQUIRES_SUCCESSFUL).andThen((version, i) -> {
             int[] target = version.getJob() == GameJob.TerasologyStable ? stableVers : unstableVars;
             Assertions.assertEquals(target[i], (long) version.getBuildNumber(), String.format("Build number mismatch: %s", version));
-
         }));
     }
 
     @Test
     public void testGetMultipleNonSequentialVersions() throws Exception {
-        TerasologyGameVersions gameVersions = this.getGameVersions(false, false);
-
         int minStable = GameJob.TerasologyStable.getMinBuildNumber() + 1;
         int minUnstable = GameJob.Terasology.getMinBuildNumber() + 1;
 
-        TestingUtils.VersionInformation buildVersions = new TestingUtils.VersionInformation();
-
+        var buildVersions = new TestingUtils.VersionInformation();
+        
         buildVersions.addMapping(GameJob.TerasologyStable, minStable);
         buildVersions.addMapping(GameJob.TerasologyStable, minStable + 3);
 
         buildVersions.addMapping(GameJob.Terasology, minUnstable);
         buildVersions.addMapping(GameJob.Terasology, minUnstable + 3);
 
+        TerasologyGameVersions gameVersions = this.getGameVersions(false, false, buildVersions);
+        this.loadGameVersions(gameVersions);
+
         int expectedBuildsPerJob = 5; // Four builds (including the 'filled in' ones) per job, plus the virtual 'latest' version
 
         Set<Integer> successfulStable = new HashSet<>(Arrays.asList(minStable, minStable + 3));
         Set<Integer> successfulUnstable = new HashSet<>(Arrays.asList(minUnstable, minUnstable + 3));
-
-        TestingUtils.mockBuildVersions(buildVersions);
-        this.loadGameVersions(gameVersions);
 
         int[] stableVers = this.getBuildArray(minStable, minStable + 3);
         int[] unstableVars = this.getBuildArray(minUnstable, minUnstable + 3);
@@ -167,39 +148,23 @@ public class TestGameVersions {
         Path launcherDir = Files.createTempDirectory("terasology-launcher-dir").toAbsolutePath();
         Path gameDirectory = Files.createTempDirectory("terasology-game-dir").toAbsolutePath();
 
-
         gameVersions.loadGameVersions(launcherDir, gameDirectory);
     }
 
-    private TerasologyGameVersions getGameVersions(boolean doMapping, boolean omega) throws Exception {
-        spy(TerasologyGameVersions.class);
+    private TerasologyGameVersions getGameVersions(boolean doMapping, boolean omega) {
+        return getGameVersions(doMapping, omega, new TestingUtils.VersionInformation());
+    }
 
-        TerasologyGameVersions gameVersions = spy(new TerasologyGameVersions());
-
+    private TerasologyGameVersions getGameVersions(boolean doMapping, boolean omega, TestingUtils.VersionInformation buildVersions) {
         if (doMapping) {
-            this.setUpdatesAvailable(true, omega);
+            int minStable = GameJob.TerasologyStable.getMinBuildNumber() + 1;
+            int minUnstable = GameJob.Terasology.getMinBuildNumber() + 1;
+
+            buildVersions.addMapping(GameJob.TerasologyStable, minStable, omega ? minStable : -1);
+            buildVersions.addMapping(GameJob.Terasology, minUnstable, omega ? minUnstable : -1);
         }
 
-        // We suppress fetching the game version info, so that the test doesn't depend on the network
-        // and is deterministic
-        PowerMockito.doAnswer((i) -> {
-            TerasologyGameVersion version = i.getArgument(0, TerasologyGameVersion.class);
-            version.setGameVersionInfo(TerasologyGameVersionInfo.getEmptyGameVersionInfo());
-            return null;
-        }).when(gameVersions, "loadAndSetGameVersionInfo", any(), any(), any(), any());
-
-        return gameVersions;
+        return new TerasologyGameVersions(new TestingUtils.MockBuildRepository(buildVersions));
     }
 
-    private void setUpdatesAvailable(boolean available, boolean omegaAvailable) throws Exception {
-        int minStable = GameJob.TerasologyStable.getMinBuildNumber() + 1;
-        int minUnstable = GameJob.Terasology.getMinBuildNumber() + 1;
-
-        TestingUtils.VersionInformation buildVersions = new TestingUtils.VersionInformation();
-
-        buildVersions.addMapping(GameJob.TerasologyStable, available ? minStable : 0, omegaAvailable ? minStable : -1);
-        buildVersions.addMapping(GameJob.Terasology, available ? minUnstable : 0, omegaAvailable ? minUnstable : -1);
-
-        TestingUtils.mockBuildVersions(buildVersions);
-    }
 }
