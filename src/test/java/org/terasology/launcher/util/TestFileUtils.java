@@ -18,33 +18,23 @@ package org.terasology.launcher.util;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Collections;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockRunnerDelegate(JUnitPlatform.class)
-@PrepareForTest(FileUtils.class)
-@PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*"})
 public class TestFileUtils {
 
     private static final String FILE_NAME = "File";
@@ -55,42 +45,47 @@ public class TestFileUtils {
     public Path tempFolder;
 
     @Test
-    public void testCannotCreateDirectory() throws IOException {
-        PowerMockito.mockStatic(Files.class);
+    public void testCannotCreateDirectory() {
+        final Path directory = tempFolder.resolve(DIRECTORY_NAME);
+        var tempFolderFile = tempFolder.toFile();
+        assert tempFolderFile.setWritable(false);
 
-        final Path directory = mock(Path.class);
-        when(Files.exists(directory)).thenReturn(false);
-        when(Files.createDirectories(directory)).thenThrow(new IOException("Failed to create directories"));
-
-        assertThrows(IOException.class, () ->
-                FileUtils.ensureWritableDir(directory)
-        );
+        try {
+            assertThrows(IOException.class, () ->
+                    FileUtils.ensureWritableDir(directory)
+            );
+        } finally {
+            assert tempFolderFile.setWritable(true); // so @TempDir can tidy up
+        }
     }
 
     @Test
-    public void testNotDirectory() {
-        PowerMockito.mockStatic(Files.class);
+    public void testNotDirectory() throws IOException {
+        var notDirectory = tempFolder.resolve("notADirectory");
+        Files.createFile(notDirectory);
 
-        final Path directory = mock(Path.class);
-        when(Files.exists(directory)).thenReturn(true);
-        when(Files.isDirectory(directory)).thenReturn(false);
-
-        assertThrows(IOException.class, () ->
-                FileUtils.ensureWritableDir(directory)
+        var exc = assertThrows(IOException.class, () ->
+                FileUtils.ensureWritableDir(notDirectory)
         );
+        assertThat(exc.getMessage(), startsWith("Not a directory"));
     }
 
     @Test
-    public void testNoPerms() {
-        PowerMockito.mockStatic(Files.class);
+    public void testNoPerms() throws IOException {
+        var directory = tempFolder.resolve(DIRECTORY_NAME);
+        Files.createDirectory(directory, PosixFilePermissions.asFileAttribute(Collections.emptySet()));
 
-        final Path directory = mock(Path.class);
-        when(Files.isReadable(directory)).thenReturn(false);
-        when(Files.isWritable(directory)).thenReturn(false);
-
-        assertThrows(IOException.class, () ->
-                FileUtils.ensureWritableDir(directory)
-        );
+        try {
+            var exc = assertThrows(IOException.class, () ->
+                    FileUtils.ensureWritableDir(directory)
+            );
+            assertThat(exc.getMessage(), startsWith("Missing read or write permissions"));
+        } finally {
+            // oh no, @TempDir doesn't know how to delete this! make it writable again.
+            var d = directory.toFile();
+            assert d.setReadable(true);
+            assert d.setWritable(true);
+        }
     }
 
     @Test
@@ -169,8 +164,9 @@ public class TestFileUtils {
     }
 
     @Test
-    public void testDeleteFileSilently() {
+    public void testDeleteFileSilently() throws IOException {
         Path tempFile = tempFolder.resolve(FILE_NAME);
+        Files.createFile(tempFile);
         assertTrue(Files.exists(tempFile));
 
         FileUtils.deleteFileSilently(tempFile);
