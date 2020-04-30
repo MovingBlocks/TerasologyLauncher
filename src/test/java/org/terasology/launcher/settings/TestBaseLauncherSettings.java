@@ -84,7 +84,7 @@ public class TestBaseLauncherSettings {
         assertEquals(baseLauncherSettings.getLogLevel(), LogLevel.valueOf(logLevel));
     }
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         tempLauncherDirectory = tempDirectory.newFolder().toPath();
         testPropertiesFile = tempLauncherDirectory.resolve(BaseLauncherSettings.LAUNCHER_SETTINGS_FILE_NAME);

@@ -15,9 +15,8 @@
  */
 package org.terasology.launcher.game;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
@@ -46,7 +45,7 @@ public class TestGameRunner {
      */
     private Process gameProcess;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         mockStatic(LoggerFactory.class);
         mockStatic(Thread.class);

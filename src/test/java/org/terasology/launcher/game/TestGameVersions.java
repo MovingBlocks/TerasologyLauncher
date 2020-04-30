@@ -15,9 +15,8 @@
  */
 package org.terasology.launcher.game;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -44,24 +43,15 @@ public class TestGameVersions {
 
     // These functions are common assertions, to be used with requireAssertions
     private static final BiConsumer<TerasologyGameVersion, Integer> REQUIRES_SUCCESSFUL =
-            (version, i) -> Assert.assertEquals(
-                    String.format("Build should be successful: %s!", version),
-                    true,
-                    version.getSuccessful());
+            (version, i) -> Assertions.assertEquals(true, version.getSuccessful(), String.format("Build should be successful: %s!", version));
     private static final BiConsumer<TerasologyGameVersion, Integer> REQUIRES_MIN_BUILD_PLUS_ONE =
-            (version, i) -> Assert.assertEquals(
-                    String.format("Build number mismatch!: %s", version),
-                    version.getJob().getMinBuildNumber() + 1,
-                    (long) version.getBuildNumber());
+            (version, i) -> Assertions.assertEquals(version.getJob().getMinBuildNumber() + 1, (long) version.getBuildNumber(), String.format("Build number mismatch!: %s", version));
     private static final BiConsumer<TerasologyGameVersion, Integer> REQUIRES_OMEGA_SAME_NUMBER =
-            (version, i) -> Assert.assertEquals(
-                    String.format("Omega build should have the same number as regular build: %s", version),
-                    version.getBuildNumber(),
-                    version.getOmegaNumber());
+            (version, i) -> Assertions.assertEquals(version.getBuildNumber(), version.getOmegaNumber(), String.format("Omega build should have the same number as regular build: %s", version));
 
     // These functions can be used with
     private static final BiConsumer<TerasologyGameVersion, Integer> REQUIRES_NULL_OMEGA =
-            (version, i) -> Assert.assertNull(String.format("Omega build should not be available: %s!", version), version.getOmegaNumber());
+            (version, i) -> Assertions.assertNull(version.getOmegaNumber(), String.format("Omega build should not be available: %s!", version));
 
     @Test
     public void testGetSingleVersion() throws Exception {
@@ -98,7 +88,7 @@ public class TestGameVersions {
 
         this.runAssertions(gameVersions, expectedVersionsPerJob, REQUIRES_NULL_OMEGA.andThen(REQUIRES_SUCCESSFUL).andThen((version, i) -> {
             int[] target = version.getJob() == GameJob.TerasologyStable ? stableVers : unstableVars;
-            Assert.assertEquals(String.format("Build number mismatch: %s", version), target[i], (long) version.getBuildNumber());
+            Assertions.assertEquals(target[i], (long) version.getBuildNumber(), String.format("Build number mismatch: %s", version));
 
         }));
     }
@@ -133,15 +123,9 @@ public class TestGameVersions {
             boolean isSuccessful =
                     (version.getJob() == GameJob.TerasologyStable ? successfulStable : successfulUnstable).contains(version.getBuildNumber());
 
-            Assert.assertEquals(
-                    String.format("Unexpected 'successful' state for version %s", version),
-                    isSuccessful, version.getSuccessful());
-            Assert.assertEquals(
-                    String.format("Unexpected omega build for version %s", version),
-                    isSuccessful ? version.getBuildNumber() : null, version.getOmegaNumber());
-            Assert.assertEquals(
-                    String.format("Build number mismatch! 'Gaps' between available builds should be filled %s", version),
-                    (version.getJob() == GameJob.TerasologyStable ? stableVers : unstableVars)[i], (long) version.getBuildNumber());
+            Assertions.assertEquals(isSuccessful, version.getSuccessful(), String.format("Unexpected 'successful' state for version %s", version));
+            Assertions.assertEquals(isSuccessful ? version.getBuildNumber() : null, version.getOmegaNumber(), String.format("Unexpected omega build for version %s", version));
+            Assertions.assertEquals((version.getJob() == GameJob.TerasologyStable ? stableVers : unstableVars)[i], (long) version.getBuildNumber(), String.format("Build number mismatch! 'Gaps' between available builds should be filled %s", version));
         });
     }
 
@@ -162,18 +146,15 @@ public class TestGameVersions {
     private void runAssertions(TerasologyGameVersions gameVersions, int expected, BiConsumer<TerasologyGameVersion, Integer> additionalAssertions) {
         for (GameJob job : GameJob.values()) {
             List<TerasologyGameVersion> versions = gameVersions.getGameVersionList(job);
-            Assert.assertEquals("Unexpected number of versions for " + job.name(), expected, versions.size());
+            Assertions.assertEquals(expected, versions.size(), "Unexpected number of versions for " + job.name());
 
             TerasologyGameVersion latest = versions.get(0);
-            Assert.assertTrue(String.format(
-                    "First version is not marked latest: %s", latest),
-                    latest.isLatest());
-            Assert.assertEquals(
-                    "First ('latest') build and second ('real') build do not have the same build number!",
-                    latest.getBuildNumber(), versions.get(1).getBuildNumber());
+            Assertions.assertTrue(latest.isLatest(), String.format(
+                    "First version is not marked latest: %s", latest));
+            Assertions.assertEquals(latest.getBuildNumber(), versions.get(1).getBuildNumber(), "First ('latest') build and second ('real') build do not have the same build number!");
             for (int i = 0; i < versions.size(); i++) {
                 TerasologyGameVersion version = versions.get(i);
-                Assert.assertFalse(String.format("Build should not be installed: %s!", version), version.isInstalled());
+                Assertions.assertFalse(version.isInstalled(), String.format("Build should not be installed: %s!", version));
                 additionalAssertions.accept(version, i);
             }
         }

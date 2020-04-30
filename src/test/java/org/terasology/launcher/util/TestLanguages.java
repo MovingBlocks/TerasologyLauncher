@@ -16,13 +16,13 @@
 
 package org.terasology.launcher.util;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public final class TestLanguages {
 
@@ -115,7 +115,7 @@ public final class TestLanguages {
         assertEquals(Languages.SUPPORTED_LOCALES.size(), Languages.SETTINGS_LABEL_KEYS.size());
     }
 
-    @AfterClass
+    @AfterAll
     public static void resetLanguages() {
         Languages.init(Languages.DEFAULT_LOCALE.toString());
     }
