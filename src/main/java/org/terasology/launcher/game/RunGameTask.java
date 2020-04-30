@@ -1,26 +1,35 @@
 package org.terasology.launcher.game;
 
 import javafx.concurrent.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 final class RunGameTask extends Task<Void> {
-    private final Package pkg;
-    private final Path gamePath;
-    private final Path gameDataDirectory;
-    private final JavaHeapSize heapMin;
-    private final JavaHeapSize heapMax;
-    private final List<String> userJavaParameters;
-    private final List<String> userGameParameters;
-    private final LogLevel logLevel;
+    private static final Logger logger = LoggerFactory.getLogger(RunGameTask.class);
 
-    public RunGameTask(Package pkg, Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams, LogLevel logLevel) {
+    protected IGameStarter starter;
+
+    private final Package pkg;
+    private GameStarterWIP starter;
+
+    RunGameTask(Package pkg,
+                Path gamePath,
+                Path gameDataDirectory,
+                JavaHeapSize heapMin,
+                JavaHeapSize heapMax,
+                List<String> javaParams,
+                List<String> gameParams,
+                LogLevel logLevel) {
         this.pkg = pkg;
         this.gamePath = gamePath;
         this.gameDataDirectory = gameDataDirectory;
@@ -29,6 +38,10 @@ final class RunGameTask extends Task<Void> {
         this.userJavaParameters = javaParams;
         this.userGameParameters = gameParams;
         this.logLevel = logLevel;
+    }
+
+    protected RunGameTask(Package pkg) {
+        this.pkg = pkg;
     }
 
     /**
@@ -46,6 +59,22 @@ final class RunGameTask extends Task<Void> {
     @Override
     protected Void call() throws Exception {
         // start subprocess
+        logger.warn("Where is everyone???");
+        Process process = this.starter.start();
+        this.starter = null;
+
+        Void result = monitorProcess(process);
+
+        return null;
+    }
+
+    Void monitorProcess(Process process) {
+        logger.warn("I have process {}", process.pid());
+        var gameOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        gameOutput.lines().forEachOrdered(line -> logger.trace("Game output: {}", line));
+
+        logger.warn("We are DONE with all that");
+
         // monitor output (and pass through to logs)
         // start a countdown
         // stopped before countdown? fail task with error message
