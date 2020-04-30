@@ -303,7 +303,7 @@ public class ApplicationController {
         packageItems = FXCollections.observableArrayList();
         onSync();
 
-        //TODO: This only updates when the launcher is initialized (which should happen excatly once o.O)
+        //TODO: This only updates when the launcher is initialized (which should happen exactly once o.O)
         //      We should update this value at least every time the download directory changes (user setting).
         //      Ideally, we would check periodically for disk space.
         if (newDownloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
@@ -448,19 +448,6 @@ public class ApplicationController {
         exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
     }
 
-    private void updateTooltipTexts() {
-        cancelDownloadButton.getTooltip().setText(BundleUtils.getLabel("launcher_cancelDownload"));
-        deleteButton.getTooltip().setText(BundleUtils.getLabel("launcher_delete"));
-        settingsButton.getTooltip().setText(BundleUtils.getLabel("launcher_settings"));
-        exitButton.getTooltip().setText(BundleUtils.getLabel("launcher_exit"));
-
-        if (startAndDownloadButton.getGraphic() == downloadImage) {
-            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
-        } else {
-            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
-        }
-    }
-
     /**
      * Closes the launcher frame this Controller handles. The launcher frame Stage is determined by the enclosing anchor pane.
      */
@@ -481,26 +468,6 @@ public class ApplicationController {
 
         logger.debug("Closing the launcher ...");
         stage.close();
-    }
-
-    private void updateGui() {
-        updateButtons();
-        updateTooltipTexts();
-    }
-
-    private void updateButtons() {
-        deleteButton.setDisable(true);
-        startAndDownloadButton.setGraphic(downloadImage);
-        startAndDownloadButton.setDisable(true);
-
-        // Cancel download
-        if (downloadTask != null) {
-            cancelDownloadButton.setVisible(true);
-            startAndDownloadButton.setVisible(false);
-        } else {
-            cancelDownloadButton.setVisible(false);
-            startAndDownloadButton.setVisible(true);
-        }
     }
 
     /**

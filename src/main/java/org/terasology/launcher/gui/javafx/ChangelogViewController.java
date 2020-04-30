@@ -16,13 +16,9 @@
 
 package org.terasology.launcher.gui.javafx;
 
-import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.web.WebView;
-import org.terasology.launcher.game.TerasologyGameVersion;
 import org.terasology.launcher.util.BundleUtils;
 
 import java.util.List;
@@ -32,22 +28,7 @@ public class ChangelogViewController {
     @FXML
     private WebView changelogView;
 
-    //TODO: change this to a data type the package manager can handle
-    private final Property<TerasologyGameVersion> gameVersionProperty;
-
     public ChangelogViewController() {
-        this.gameVersionProperty = new SimpleObjectProperty<>();
-    }
-
-    /**
-     * Bin this changelog view to the game version described by the property.
-     * <p>
-     * The <b>ChangelogView</b> will update every time the property changes.
-     *
-     * @param property property denoting the game version to display the changelog for
-     */
-    public void bind(ReadOnlyProperty<TerasologyGameVersion> property) {
-        gameVersionProperty.bind(property);
     }
 
     /**
