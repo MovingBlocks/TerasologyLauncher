@@ -63,7 +63,6 @@ public class OnlineBuildRepository implements IBuildRepository {
 //    private static final String FILE_TERASOLOGY_LAUNCHER_ZIP = "/artifact/build/distributions/TerasologyLauncher.zip";
 
     public OnlineBuildRepository() {
-        assert false;  // not during tests!!!
     }
 
     @Override
