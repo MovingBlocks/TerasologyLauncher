@@ -33,7 +33,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -75,13 +74,12 @@ public class ApplicationController {
     private static final long MINIMUM_FREE_SPACE = 200 * MB;
 
     private Path launcherDirectory;
-    private Path downloadDirectory;
     private BaseLauncherSettings launcherSettings;
     private PackageManager packageManager;
     private GameStarter gameStarter;
     private Stage stage;
 
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private DownloadTask downloadTask;
 
     private VersionItem selectedVersion;
@@ -288,7 +286,6 @@ public class ApplicationController {
     public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
                        final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
-        this.downloadDirectory = newDownloadDirectory;
         this.launcherSettings = newLauncherSettings;
         this.packageManager = newPackageManager;
         this.stage = newStage;
@@ -308,10 +305,10 @@ public class ApplicationController {
         packageItems = FXCollections.observableArrayList();
         onSync();
 
-        //TODO: This only updates when the launcher is initialized (which should happen excatly once o.O)
+        //TODO: This only updates when the launcher is initialized (which should happen exactly once o.O)
         //      We should update this value at least every time the download directory changes (user setting).
         //      Ideally, we would check periodically for disk space.
-        if (downloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
+        if (newDownloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
             warning.setValue(Optional.of(Warning.LOW_ON_SPACE));
         } else {
             warning.setValue(Optional.empty());
@@ -453,19 +450,6 @@ public class ApplicationController {
         exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
     }
 
-    private void updateTooltipTexts() {
-        cancelDownloadButton.getTooltip().setText(BundleUtils.getLabel("launcher_cancelDownload"));
-        deleteButton.getTooltip().setText(BundleUtils.getLabel("launcher_delete"));
-        settingsButton.getTooltip().setText(BundleUtils.getLabel("launcher_settings"));
-        exitButton.getTooltip().setText(BundleUtils.getLabel("launcher_exit"));
-
-        if (startAndDownloadButton.getGraphic() == downloadImage) {
-            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
-        } else {
-            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
-        }
-    }
-
     /**
      * Closes the launcher frame this Controller handles. The launcher frame Stage is determined by the enclosing anchor pane.
      */
@@ -486,26 +470,6 @@ public class ApplicationController {
 
         logger.debug("Closing the launcher ...");
         stage.close();
-    }
-
-    private void updateGui() {
-        updateButtons();
-        updateTooltipTexts();
-    }
-
-    private void updateButtons() {
-        deleteButton.setDisable(true);
-        startAndDownloadButton.setGraphic(downloadImage);
-        startAndDownloadButton.setDisable(true);
-
-        // Cancel download
-        if (downloadTask != null) {
-            cancelDownloadButton.setVisible(true);
-            startAndDownloadButton.setVisible(false);
-        } else {
-            cancelDownloadButton.setVisible(false);
-            startAndDownloadButton.setVisible(true);
-        }
     }
 
     /**

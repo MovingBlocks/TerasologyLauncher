@@ -19,20 +19,18 @@ package org.terasology.launcher.settings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.terasology.launcher.game.GameJob;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LogLevel;
 
 import java.io.OutputStream;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_GAME_DATA_DIRECTORY;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_GAME_DIRECTORY;
@@ -54,15 +52,11 @@ public class TestBaseLauncherSettings {
     Path gameDataDirectory;
 
     private BaseLauncherSettings baseLauncherSettings;
-    private Properties testProperties;
     private Path testPropertiesFile;
 
     private String locale;
-    private String job;
     private String maxHeapSize;
     private String initialHeapSize;
-    private String buildVersion;
-    private String lastBuildNumber;
     private String searchForLauncherUpdates;
     private String closeLauncherAfterGameStart;
     private String saveDownloadedFiles;
@@ -95,11 +89,8 @@ public class TestBaseLauncherSettings {
     public void testInitWithValues() throws Exception {
         //initialise properties with sample values
         locale = "en";
-        job = "TerasologyStable";
         maxHeapSize = "GB_2_5";
         initialHeapSize = "GB_1_5";
-        buildVersion = String.valueOf(GameJob.valueOf(job).getMinBuildNumber() + 1);
-        lastBuildNumber = String.valueOf(GameJob.valueOf(job).getMinBuildNumber());
         searchForLauncherUpdates = "false";
         closeLauncherAfterGameStart = "false";
         saveDownloadedFiles = "false";
@@ -108,7 +99,7 @@ public class TestBaseLauncherSettings {
         logLevel = "DEBUG";
 
         //set properties
-        testProperties = new Properties();
+        Properties testProperties = new Properties();
         testProperties.setProperty(PROPERTY_LOCALE, locale);
         testProperties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxHeapSize);
         testProperties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialHeapSize);
@@ -143,8 +134,8 @@ public class TestBaseLauncherSettings {
         assertEquals(baseLauncherSettings.getInitialHeapSize(), BaseLauncherSettings.INITIAL_HEAP_SIZE_DEFAULT);
         assertEquals(baseLauncherSettings.isSearchForLauncherUpdates(), BaseLauncherSettings.SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT);
         assertEquals(baseLauncherSettings.isCloseLauncherAfterGameStart(), BaseLauncherSettings.CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT);
-        assertEquals(baseLauncherSettings.getGameDirectory(), null);
-        assertEquals(baseLauncherSettings.getGameDataDirectory(), null);
+        assertNull(baseLauncherSettings.getGameDirectory());
+        assertNull(baseLauncherSettings.getGameDataDirectory());
         assertEquals(baseLauncherSettings.isKeepDownloadedFiles(), Boolean.valueOf(saveDownloadedFiles));
         assertEquals(baseLauncherSettings.getUserJavaParameters(), BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
         assertEquals(baseLauncherSettings.getUserGameParameters(), BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
@@ -155,11 +146,8 @@ public class TestBaseLauncherSettings {
     public void testSetters() throws Exception {
         //re-initialise properties with sample values
         locale = "fr";
-        job = "Terasology";
         maxHeapSize = "GB_4";
         initialHeapSize = "GB_3";
-        buildVersion = String.valueOf(GameJob.valueOf(job).getMinBuildNumber() + 1);
-        lastBuildNumber = String.valueOf(GameJob.valueOf(job).getMinBuildNumber());
         searchForLauncherUpdates = "true";
         closeLauncherAfterGameStart = "true";
         saveDownloadedFiles = "true";
@@ -171,11 +159,11 @@ public class TestBaseLauncherSettings {
         baseLauncherSettings.setLocale(Locale.forLanguageTag(locale));
         baseLauncherSettings.setMaxHeapSize(JavaHeapSize.valueOf(maxHeapSize));
         baseLauncherSettings.setInitialHeapSize(JavaHeapSize.valueOf(initialHeapSize));
-        baseLauncherSettings.setSearchForLauncherUpdates(Boolean.valueOf(searchForLauncherUpdates));
-        baseLauncherSettings.setCloseLauncherAfterGameStart(Boolean.valueOf(closeLauncherAfterGameStart));
+        baseLauncherSettings.setSearchForLauncherUpdates(Boolean.parseBoolean(searchForLauncherUpdates));
+        baseLauncherSettings.setCloseLauncherAfterGameStart(Boolean.parseBoolean(closeLauncherAfterGameStart));
         baseLauncherSettings.setGameDirectory(gameDirectory);
         baseLauncherSettings.setGameDataDirectory(gameDataDirectory);
-        baseLauncherSettings.setKeepDownloadedFiles(Boolean.valueOf(saveDownloadedFiles));
+        baseLauncherSettings.setKeepDownloadedFiles(Boolean.parseBoolean(saveDownloadedFiles));
         baseLauncherSettings.setUserJavaParameters(userJavaParameters);
         baseLauncherSettings.setUserGameParameters(userGameParameters);
         baseLauncherSettings.setLogLevel(LogLevel.valueOf(logLevel));
