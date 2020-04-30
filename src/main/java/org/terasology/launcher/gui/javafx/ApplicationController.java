@@ -79,7 +79,6 @@ public class ApplicationController {
     private BaseLauncherSettings launcherSettings;
     private PackageManager packageManager;
     private GameStarter gameStarter;
-    private GameDownloadWorker gameDownloadWorker;
     private Stage stage;
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -201,7 +200,7 @@ public class ApplicationController {
                 launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
 
                 if (launcherSettings.isCloseLauncherAfterGameStart()) {
-                    if (gameDownloadWorker == null) {
+                    if (downloadTask == null) {
                         logger.info("Close launcher after game start.");
                         close();
                     } else {
@@ -477,9 +476,6 @@ public class ApplicationController {
         } catch (IOException e) {
             logger.warn("Could not store current launcher settings!");
         }
-        if (gameDownloadWorker != null) {
-            gameDownloadWorker.cancel(false);
-        }
         gameStarter.dispose();
 
         // TODO: Improve close request handling
@@ -503,30 +499,13 @@ public class ApplicationController {
         startAndDownloadButton.setDisable(true);
 
         // Cancel download
-        if (gameDownloadWorker != null) {
+        if (downloadTask != null) {
             cancelDownloadButton.setVisible(true);
             startAndDownloadButton.setVisible(false);
         } else {
             cancelDownloadButton.setVisible(false);
             startAndDownloadButton.setVisible(true);
         }
-    }
-
-    void finishedGameDownload(boolean cancelled, boolean successfulDownloadAndExtract, boolean successfulLoadVersion, Path gameDirectory) {
-        gameDownloadWorker = null;
-        progressBar.setVisible(false);
-        if (!cancelled) {
-            if (!successfulDownloadAndExtract) {
-                GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDownload_downloadExtract"));
-            } else if (!successfulLoadVersion) {
-                if (gameDirectory != null) {
-                    GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDownload_loadVersion") + "\n" + gameDirectory);
-                } else {
-                    GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameDownload_loadVersion"));
-                }
-            }
-        }
-        updateGui();
     }
 
     /**
