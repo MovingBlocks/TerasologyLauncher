@@ -30,7 +30,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.terasology.launcher.TestingUtils.hasItemsFrom;
+import static org.terasology.launcher.Matchers.hasItemsFrom;
 
 public class TestaGameStarterWIP {
     static final String JAVA_ARG_1 = "-client";
