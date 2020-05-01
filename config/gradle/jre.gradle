@@ -82,7 +82,7 @@ jreUrlFilenames.each { os, file ->
     def launcherTaskBase = "Jre${os}"
     def unpackTask = createJreTasks(
             launcherTaskBase,
-            "https://download.bell-sw.com/java/$jdkVersion/bellsoft-jdk$jdkVersion-$file",
+            "https://download.bell-sw.com/java/$jdkVersion/bellsoft-jre$jdkVersion-$file",
             "$projectDir/jre/$os-$jdkVersion-$file",
             "$projectDir/jre/$os")
 
