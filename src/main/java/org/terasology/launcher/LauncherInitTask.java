@@ -30,7 +30,6 @@ import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
-import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.HostServices;
@@ -87,8 +86,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
 
-            final boolean serverAvailable = DownloadUtils.isJenkinsAvailable();
-            if (serverAvailable && launcherSettings.isSearchForLauncherUpdates()) {
+            if (launcherSettings.isSearchForLauncherUpdates()) {
                 final boolean selfUpdaterStarted =
                         checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
 
