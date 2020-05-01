@@ -100,8 +100,4 @@ public class LocalRepository implements Repository {
         return Optional.empty();
     }
 
-    @Override
-    public boolean isAvailable() {
-        return true;
-    }
 }

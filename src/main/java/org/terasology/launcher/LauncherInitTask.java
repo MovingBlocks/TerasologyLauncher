@@ -24,7 +24,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.github.GitHubRelease;
-import org.terasology.launcher.packages.JenkinsRepository;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
@@ -87,8 +86,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
 
-            final boolean serverAvailable = new JenkinsRepository().isAvailable();
-            if (serverAvailable && launcherSettings.isSearchForLauncherUpdates()) {
+            if (launcherSettings.isSearchForLauncherUpdates()) {
                 final boolean selfUpdaterStarted =
                         checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
 
