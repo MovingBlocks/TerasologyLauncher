@@ -25,4 +25,5 @@ import java.util.Optional;
 public interface Repository {
     List<Integer> getPackageVersions(PackageBuild pkgBuild);
     Optional<Package> getPackage(PackageBuild pkgBuild, int version);
+    boolean isAvailable();
 }

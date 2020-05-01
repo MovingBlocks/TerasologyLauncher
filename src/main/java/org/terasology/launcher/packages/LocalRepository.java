@@ -99,4 +99,9 @@ public class LocalRepository implements Repository {
         // TODO: Implement this
         return Optional.empty();
     }
+
+    @Override
+    public boolean isAvailable() {
+        return true;
+    }
 }

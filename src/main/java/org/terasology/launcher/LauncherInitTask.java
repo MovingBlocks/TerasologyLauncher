@@ -24,6 +24,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.github.GitHubRelease;
+import org.terasology.launcher.packages.JenkinsRepository;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
@@ -36,7 +37,6 @@ import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
-import org.terasology.launcher.util.OnlineBuildRepository;
 import org.terasology.launcher.util.Platform;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
@@ -87,7 +87,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
 
-            final boolean serverAvailable = new OnlineBuildRepository().isJenkinsAvailable();
+            final boolean serverAvailable = new JenkinsRepository().isAvailable();
             if (serverAvailable && launcherSettings.isSearchForLauncherUpdates()) {
                 final boolean selfUpdaterStarted =
                         checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());

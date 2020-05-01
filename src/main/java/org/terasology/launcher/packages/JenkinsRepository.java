@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.packages;
 
+import com.google.common.primitives.Ints;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,9 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +43,7 @@ public class JenkinsRepository implements Repository {
     private static final String JENKINS_JOB_URL = "http://jenkins.terasology.org/job/";
     private static final String API_PATH = "/api/json?tree=builds[number,result]";
     private static final int LIMIT_VERSIONS = 5;
+    private static final Duration JENKINS_TIMEOUT = Duration.ofSeconds(3);
 
     private Gson gson = new Gson();
 
@@ -67,6 +71,24 @@ public class JenkinsRepository implements Repository {
     public Optional<Package> getPackage(PackageBuild pkgBuild, int version) {
         // TODO: Implement this
         return Optional.empty();
+    }
+
+    @Override
+    public boolean isAvailable() {
+        logger.trace("Checking Jenkins availability...");
+        try {
+            HttpURLConnection conn = (HttpURLConnection) new URL(JENKINS_JOB_URL).openConnection();
+            try (AutoCloseable ac = conn::disconnect) {
+                conn.setConnectTimeout(Ints.checkedCast(JENKINS_TIMEOUT.toMillis()));
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    logger.trace("Jenkins is available at {}", JENKINS_JOB_URL);
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Could not connect to Jenkins at {} - {}", JENKINS_JOB_URL, e.getMessage());
+        }
+        return false;
     }
 
     private static class Job {
