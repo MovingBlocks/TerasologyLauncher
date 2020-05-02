@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.settings;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,16 +33,12 @@ public final class LauncherSettingsValidator {
     private static final Logger logger = LoggerFactory.getLogger(LauncherSettingsValidator.class);
 
     private static Set<String> deprecatedParameters =
-            Sets.newHashSet("-XX:\\+UseParNewGC", "-XX:\\+UseConcMarkSweepGC", "-XX:ParallelGCThreads=10");
+            Sets.newHashSet("-XX:+UseParNewGC", "-XX:+UseConcMarkSweepGC", "-XX:ParallelGCThreads=10");
 
-    private static String removeUnsupportedJvmParameters(final String currentParams) {
-        String params = currentParams;
-
-        for (String deprecatedParam : deprecatedParameters) {
-            params = params.replaceAll(deprecatedParam, "");
-        }
-
-        return params;
+    private static String removeUnsupportedJvmParameters(final List<String> params) {
+        List<String> correctedParams = Lists.newArrayList(params);
+        correctedParams.removeAll(deprecatedParameters);
+        return String.join(" ", correctedParams);
     }
 
     private static final List<SettingsValidationRule> RULES = Arrays.asList(
@@ -62,7 +59,7 @@ public final class LauncherSettingsValidator {
             new SettingsValidationRule(
                     s -> s.getUserGameParameterList().stream().anyMatch(deprecatedParameters::contains),
                     "Ensure unsupported JVM arguments are removed",
-                    s -> s.setUserJavaParameters(removeUnsupportedJvmParameters(s.getUserJavaParameters()))
+                    s -> s.setUserJavaParameters(removeUnsupportedJvmParameters(s.getUserJavaParameterList()))
             )
     );
 
