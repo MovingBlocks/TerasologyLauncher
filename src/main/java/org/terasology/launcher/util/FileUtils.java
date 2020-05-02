@@ -94,7 +94,7 @@ public final class FileUtils {
             if (Files.notExists(outputLocation)) {
                 Files.createDirectories(outputLocation);
             }
-            try (FileSystem fileSystem = FileSystems.newFileSystem(archive, null)) {
+            try (FileSystem fileSystem = FileSystems.newFileSystem(archive)) {
                 for (Path rootDirectory : fileSystem.getRootDirectories()) {
                     Files.walkFileTree(rootDirectory, new ArchiveCopyVisitor(outputLocation));
                 }
