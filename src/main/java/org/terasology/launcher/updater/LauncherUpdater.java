@@ -44,8 +44,6 @@ public final class LauncherUpdater {
     private final Semver currentVersion;
     private final GitHubClient github;
 
-    private Path launcherInstallationDirectory;
-
     public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
         github = new GitHubClient();
         //TODO: might not be valid semver, catch or use Try<..>
@@ -94,23 +92,16 @@ public final class LauncherUpdater {
     }
 
     private FutureTask<Boolean> getUpdateDialog(Stage parentStage, GitHubRelease release) {
-        final String infoText = new StringBuilder()
-                .append("  ")
-                .append(BundleUtils.getLabel("message_update_current"))
-                .append("  ")
-                .append(currentVersion.getValue())
-                .append("  \n")
-                .append("  ")
-                .append(BundleUtils.getLabel("message_update_latest"))
-                .append("  ")
-                .append(versionOf(release).getValue())
-                .append("  \n")
-                .append("  ")
-                .append(BundleUtils.getLabel("message_update_installationDirectory"))
-                .append("  ")
-                .append(launcherInstallationDirectory.toString())
-                .append("  ")
-                .toString();
+        final String infoText = "  " +
+                BundleUtils.getLabel("message_update_current") +
+                "  " +
+                currentVersion.getValue() +
+                "  \n" +
+                "  " +
+                BundleUtils.getLabel("message_update_latest") +
+                "  " +
+                versionOf(release).getValue() +
+                "  ";
 
         return new FutureTask<>(() -> {
             Parent root = BundleUtils.getFXMLLoader("update_dialog").load();
