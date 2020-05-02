@@ -49,6 +49,7 @@ class ConfigValidator {
                 .gameConfig(gameConfig.rebuilder()
                         .maxMemory(validateMaxMemory(gameConfig))
                         .initMemory(validateInitMemory(gameConfig))
+                        .javaParam(validateJavaParam(gameConfig))
                         .build())
                 .build();
     }
@@ -91,5 +92,17 @@ class ConfigValidator {
             logger.debug("Continuing with init memory: {}", valid);
         }
         return valid;
+    }
+
+    private String validateJavaParam(final GameConfig gameConfig) {
+        String params = gameConfig.getJavaParam();
+
+        final String[] deprecatedParams = {"-XX:+UseParNewGC", "-XX:+UseConcMarkSweepGC", "-XX:ParallelGCThreads=10"};
+
+        for (String deprecatedParam : deprecatedParams) {
+            params = params.replaceAll(deprecatedParam, "");
+        }
+
+        return params;
     }
 }

@@ -29,19 +29,37 @@ import java.util.List;
 public final class LauncherSettingsValidator {
     private static final Logger logger = LoggerFactory.getLogger(LauncherSettingsValidator.class);
 
+    private static String removeUnsupportedJvmParameters(final String currentParams) {
+        String params = currentParams;
+
+        final String[] deprecatedParams = {"-XX:\\+UseParNewGC", "-XX:\\+UseConcMarkSweepGC", "-XX:ParallelGCThreads=10"};
+
+        for (String deprecatedParam : deprecatedParams) {
+            params = params.replaceAll(deprecatedParam, "");
+        }
+
+        return params;
+    }
+
     private static final List<SettingsValidationRule> RULES = Arrays.asList(
             // Rule for max heap size
             new SettingsValidationRule(
-                s -> !(System.getProperty("os.arch").equals("x86") && s.getMaxHeapSize().compareTo(JavaHeapSize.GB_1_5) > 0),
-                "Max heap size cannot be greater than 1.5 GB for a 32-bit JVM",
-                s -> s.setMaxHeapSize(JavaHeapSize.GB_1_5)
+                    s -> !(System.getProperty("os.arch").equals("x86") && s.getMaxHeapSize().compareTo(JavaHeapSize.GB_1_5) > 0),
+                    "Max heap size cannot be greater than 1.5 GB for a 32-bit JVM",
+                    s -> s.setMaxHeapSize(JavaHeapSize.GB_1_5)
             ),
 
             // Rule for initial heap size
             new SettingsValidationRule(
-                s -> s.getInitialHeapSize().compareTo(s.getMaxHeapSize()) < 0,
+                    s -> s.getInitialHeapSize().compareTo(s.getMaxHeapSize()) < 0,
                     "Initial heap size cannot be greater than max heap size",
-                s -> s.setInitialHeapSize(s.getMaxHeapSize())
+                    s -> s.setInitialHeapSize(s.getMaxHeapSize())
+            ),
+
+            new SettingsValidationRule(
+                    s -> s.getUserJavaParameters().isEmpty(),
+                    "Ensure unsupported JVM arguments are removed",
+                    s -> s.setUserJavaParameters(removeUnsupportedJvmParameters(s.getUserJavaParameters()))
             )
     );
 
