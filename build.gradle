@@ -124,11 +124,13 @@ dependencies {
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
-sourceCompatibility = 1.11
-targetCompatibility = 1.11
+java {
+    sourceCompatibility = JavaVersion.VERSION_14
+    targetCompatibility = JavaVersion.VERSION_14
+}
 
 javafx {
-    version = "11.0.2"
+    version = "14"
     modules = [
             'javafx.graphics',
             'javafx.fxml',
