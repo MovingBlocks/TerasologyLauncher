@@ -77,7 +77,7 @@ final class RunGameTask extends Task<Void> {
     }
 
     Void monitorProcess(Process process) {
-        logger.warn("I have process {}", process.pid());
+        logger.warn("I have process {}", process);
         var gameOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
         gameOutput.lines().forEachOrdered(line -> logger.trace("Game output: {}", line));
 
