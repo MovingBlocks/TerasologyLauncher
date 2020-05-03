@@ -15,8 +15,8 @@
  */
 package org.terasology.launcher.game;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LogLevel;
 
@@ -27,12 +27,12 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.terasology.launcher.Matchers.hasItemsFrom;
 
-public class TestaGameStarterWIP {
+public class TestGameStarterWIP {
     static final String JAVA_ARG_1 = "-client";
     static final String JAVA_ARG_2 = "--enable-preview";
     static final String GAME_ARG_1 = "--no-splash";
@@ -48,7 +48,7 @@ public class TestaGameStarterWIP {
     private List<String> gameParams;
     private Path gameDataPath;
 
-    @Before
+    @BeforeEach
     public void setup() {
         gamePath = fs.getPath(GAME_DIR);
         gameDataPath = fs.getPath(GAME_DATA_DIR);
