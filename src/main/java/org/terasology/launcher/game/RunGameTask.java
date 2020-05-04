@@ -28,7 +28,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.List;
 
-final class RunGameTask extends Task<Void> {
+final class RunGameTask extends Task<Integer> {
     private static final Logger logger = LoggerFactory.getLogger(RunGameTask.class);
 
     protected IGameStarter starter;
@@ -65,25 +65,26 @@ final class RunGameTask extends Task<Void> {
      *                   background operation
      */
     @Override
-    protected Void call() throws Exception {
+    protected Integer call() throws Exception {
         // start subprocess
-        logger.warn("Where is everyone???");
         Process process = this.starter.start();
         this.starter = null;
 
-        Void result = monitorProcess(process);
-
-        return null;
+        return monitorProcess(process);
     }
 
-    Void monitorProcess(Process process) {
-        logger.warn("I have process {}", process);
+    int monitorProcess(Process process) throws InterruptedException {
+        logger.debug("Game process is {}", process);
+
+        // log each line of process output
         var gameOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        gameOutput.lines().forEachOrdered(line -> logger.trace("Game output: {}", line));
+        gameOutput.lines().forEachOrdered(line -> logger.info("Game output: {}", line));
 
-        logger.warn("We are DONE with all that");
+        // The output has closed, so we _often_ have the exit value immediately, but apparently
+        // not always — the tests were flaky. To be safe, waitFor.
+        var exitValue = process.waitFor();
+        logger.debug("Game closed with the exit value '{}'.", exitValue);
 
-        // monitor output (and pass through to logs)
         // start a countdown
         // stopped before countdown? fail task with error message
         // still running? okay, update progress
@@ -91,6 +92,6 @@ final class RunGameTask extends Task<Void> {
         // when process exits, finish task
 
         // if task gets cancelled, end process
-        return null;
+        return exitValue;
     };
 }

@@ -47,7 +47,7 @@ public class TestRunGameTaskVintage {
 
     @Test
     @CollectLogs(minLevel = Level.TRACE)
-    public void testGameOutput() {
+    public void testGameOutput() throws InterruptedException {
         String[] gameOutputLines = {"LineOne", "LineTwo"};
 
         Process gameProcess = new HappyGameProcess(String.join("\n", gameOutputLines));

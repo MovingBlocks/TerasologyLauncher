@@ -141,6 +141,12 @@ dependencies {
     }
     testImplementation "junit:junit:4.+"
 
+    testCompile("org.testfx:testfx-core:4.0.16-alpha") {
+        because "to test JavaFX Application"
+        // -alpha because that's the only kind of release they have?
+    }
+    testCompile "org.testfx:testfx-junit5:4.0.16-alpha"
+
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
     codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.4.0', ext: 'zip'
 }
