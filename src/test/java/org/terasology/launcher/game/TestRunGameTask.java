@@ -18,6 +18,7 @@ package org.terasology.launcher.game;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import jersey.repackaged.com.google.common.base.Throwables;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -33,19 +34,23 @@ import org.testfx.framework.junit5.ApplicationExtension;
 
 import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @ExtendWith(ApplicationExtension.class)
@@ -54,7 +59,23 @@ public class TestRunGameTask {
     static final int EXIT_CODE_OK = 0;
     static final int EXIT_CODE_ERROR = 1;
 
+    static Callable<Process> completesSuccessfully = runProcess("true");
+    static Callable<Process> completesWithError = runProcess("false");
+    static Callable<Process> exceptionThrowingStart = () -> {
+        throw new OurIOException("GRUMPY \uD83D\uDC7F");
+    };
+    static Callable<Process> noSuchCommand = runProcess(() -> {
+        // If you have a program with this name on your path while running these tests,
+        // you have incredible luck.
+        return "nope" + new Random()
+                .ints(16, 0, 255).mapToObj(
+                        i -> Integer.toString(i, Character.MAX_RADIX)
+                )
+                .collect(Collectors.joining());
+    });
+
     private ExecutorService executor;
+    private RunGameTask gameTask;
 
     @SuppressWarnings("SameParameterValue")
     static ExecutorService singleThreadExecutor(String nameFormat) {
@@ -64,14 +85,25 @@ public class TestRunGameTask {
 
     @BeforeEach
     void setUp() {
+        // Would it be plausible to do a @BeforeAll thing that provides a thread pool we don't have
+        // to tear down for each test? What kind of assertions would we have to make between tests
+        // to ensure it's in a clean state?
         executor = singleThreadExecutor("gameTask-%s");
+        gameTask = new RunGameTask(null);
+    }
+
+    @AfterEach
+    void tearDown() throws InterruptedException {
+        assertThat(executor.shutdownNow(), empty());
+        executor.awaitTermination(100, TimeUnit.MILLISECONDS);
+        assertTrue(executor.isTerminated());
+        assertTrue(gameTask.isDone());
     }
 
     @SlowTest
     @DisabledOnOs(OS.WINDOWS)
     public void testGameExitSuccessful() throws InterruptedException, ExecutionException {
-        RunGameTask gameTask = new RunGameTask(null);
-        gameTask.starter = new CompletesSuccessfully();
+        gameTask.starter = completesSuccessfully;
 
         // we can use TestLogger expectations without Slf4jTestRunner, we just can't
         // depend on their annotations. I think.
@@ -92,8 +124,7 @@ public class TestRunGameTask {
     @Test
     @DisabledOnOs(OS.WINDOWS)
     public void testGameExitError() throws InterruptedException {
-        RunGameTask gameTask = new RunGameTask(null);
-        gameTask.starter = new ExitsWithErrorStatus();
+        gameTask.starter = completesWithError;
 
         var hasExitMessage = TestLoggers.sys().expect(
                 RunGameTask.class.getName(), Level.DEBUG,
@@ -117,8 +148,7 @@ public class TestRunGameTask {
 
     @Test
     public void testBadStarter() {
-        RunGameTask gameTask = new RunGameTask(null);
-        gameTask.starter = new ExceptionThrowingStarter();
+        gameTask.starter = exceptionThrowingStart;
 
         executor.submit(gameTask);
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
@@ -127,8 +157,7 @@ public class TestRunGameTask {
 
     @Test
     public void testExeNotFound() {
-        RunGameTask gameTask = new RunGameTask(null);
-        gameTask.starter = new NoSuchCommand();
+        gameTask.starter = noSuchCommand;
 
         executor.submit(gameTask);
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
@@ -142,17 +171,22 @@ public class TestRunGameTask {
     @Disabled("use to experiment with how processes work")
     @Test
     public void testProcessKiller() throws InterruptedException, ExecutionException {
-        RunGameTask gameTask = new RunGameTask(null);
         gameTask.starter = new SlowTicker(4);
 
         var result = executor.submit(gameTask);
 //        Thread.sleep(2500);
-        executor.shutdown();
-        executor.awaitTermination(2500, TimeUnit.MILLISECONDS);
         result.get();
     }
 
-    static class SlowTicker implements IGameStarter {
+    private static Callable<Process> runProcess(String... command) {
+        return new ProcessBuilder(command)::start;
+    }
+
+    private static Callable<Process> runProcess(Supplier<String> command) {
+        return runProcess(command.get());
+    }
+
+    private static class SlowTicker implements Callable<Process> {
         private final int seconds;
 
         SlowTicker(int seconds) {
@@ -160,50 +194,20 @@ public class TestRunGameTask {
         }
 
         @Override
-        public Process start() throws IOException {
-            var pb = new ProcessBuilder("/bin/bash", "-c", String.format("for i in $( seq %s ) ; do echo $i ; sleep 1 ; done", seconds));
+        public Process call() throws IOException {
+            var pb = new ProcessBuilder(
+                    "/bin/bash", "-c",
+                    String.format("for i in $( seq %s ) ; do echo $i ; sleep 1 ; done", seconds)
+            );
             var proc = pb.start();
             LoggerFactory.getLogger(SlowTicker.class).info(" ⏲ Ticker PID {}", proc.pid());
             return proc;
         }
     }
 
-    static class CompletesSuccessfully implements IGameStarter {
-        @Override
-        public Process start() throws IOException {
-            return new ProcessBuilder("true").start();
-        }
-    }
-
-    static class ExitsWithErrorStatus implements IGameStarter {
-        @Override
-        public Process start() throws IOException {
-            return new ProcessBuilder("false").start();
-        }
-    }
-
     static class OurIOException extends IOException {
         OurIOException(final String grumpy) {
             super(grumpy);
-        }
-    }
-
-    static class ExceptionThrowingStarter implements IGameStarter {
-        @Override
-        public Process start() throws IOException {
-            throw new OurIOException("GRUMPY");
-        }
-    }
-
-    static class NoSuchCommand implements IGameStarter {
-        @Override
-        public Process start() throws IOException {
-            // If you have a program with this name on your path while running these tests,
-            // you have incredible luck.
-            var filename = "nope" + new Random().ints(16, 0, 255).mapToObj(i -> Integer.toString(i, Character.MAX_RADIX)).collect(Collectors.joining());
-            final ProcessBuilder processBuilder = new ProcessBuilder(filename);
-            processBuilder.redirectErrorStream(true);
-            return processBuilder.start();
         }
     }
 }

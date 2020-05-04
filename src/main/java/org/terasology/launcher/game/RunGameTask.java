@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.game;
 
+import com.google.common.base.Verify;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +28,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 final class RunGameTask extends Task<Integer> {
     private static final Logger logger = LoggerFactory.getLogger(RunGameTask.class);
 
-    protected IGameStarter starter;
+    protected Callable<Process> starter;
 
     private final Package pkg;
 
@@ -67,13 +69,14 @@ final class RunGameTask extends Task<Integer> {
     @Override
     protected Integer call() throws Exception {
         // start subprocess
-        Process process = this.starter.start();
-        this.starter = null;
-
+        Verify.verifyNotNull(this.starter);
+        Verify.verify(!this.isDone());
+        Process process = this.starter.call();
         return monitorProcess(process);
     }
 
     int monitorProcess(Process process) throws InterruptedException {
+        Verify.verifyNotNull(process);
         logger.debug("Game process is {}", process);
 
         // log each line of process output

@@ -24,8 +24,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
-class GameStarterWIP implements IGameStarter {
+class GameStarterWIP implements Callable<Process> {
     final ProcessBuilder processBuilder;
 
     GameStarterWIP(Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
@@ -53,7 +54,7 @@ class GameStarterWIP implements IGameStarter {
     }
 
     @Override
-    public Process start() throws IOException {
+    public Process call() throws IOException {
         return processBuilder.start();
     }
 

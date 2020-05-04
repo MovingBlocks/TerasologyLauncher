@@ -162,8 +162,8 @@ public class TestRunGameTaskVintage {
         }
 
         @Override
-        public int waitFor() throws InterruptedException {
-            throw new UnsupportedOperationException("Don't wait!");
+        public int waitFor() {
+            return exitValue();
         }
 
         /**
