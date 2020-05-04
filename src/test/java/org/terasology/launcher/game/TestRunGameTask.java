@@ -20,7 +20,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import jersey.repackaged.com.google.common.base.Throwables;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -38,6 +37,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -49,6 +49,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -58,6 +59,8 @@ public class TestRunGameTask {
 
     static final int EXIT_CODE_OK = 0;
     static final int EXIT_CODE_ERROR = 1;
+    static final int EXIT_CODE_SIGKILL = 0b10000000 + 9;   // SIGKILL = 9
+    static final int EXIT_CODE_SIGTERM = 0b10000000 + 15;  // SIGTERM = 15
 
     static Callable<Process> completesSuccessfully = runProcess("true");
     static Callable<Process> completesWithError = runProcess("false");
@@ -155,7 +158,7 @@ public class TestRunGameTask {
         assertThat(thrown.getCause(), instanceOf(OurIOException.class));
     }
 
-    @Test
+    @SlowTest
     public void testExeNotFound() {
         gameTask.starter = noSuchCommand;
 
@@ -168,18 +171,46 @@ public class TestRunGameTask {
        ));
     }
 
-    @Disabled("use to experiment with how processes work")
-    @Test
-    public void testProcessKiller() throws InterruptedException, ExecutionException {
-        gameTask.starter = new SlowTicker(4);
+    @SlowTest
+    @DisabledOnOs(OS.WINDOWS)
+    public void testTerminatedProcess() throws ExecutionException, InterruptedException {
+        // FIXME: SelfDestructionProcess is using some very arbitrary timeouts.
+        //    Which means it's unnecessarily slow and probably also flaky.
+        gameTask.starter = new SelfDestructingProcess(5);
 
-        var result = executor.submit(gameTask);
-//        Thread.sleep(2500);
-        result.get();
+        executor.submit(gameTask);
+        assertEquals(EXIT_CODE_SIGTERM, gameTask.get());
+        assertNotEquals(EXIT_CODE_SIGKILL, gameTask.get());
     }
 
+    @SlowTest
+    @DisabledOnOs(OS.WINDOWS)
+    public void testCancellation() throws InterruptedException, ExecutionException {
+        gameTask.starter = new SlowTicker(5);
+
+        executor.submit(gameTask);
+        Thread.sleep(100);  // FIXME: just long enough to make sure process has started
+        // gameTask.cancel();
+        assertTrue(gameTask.cancel(true));
+        assertEquals(EXIT_CODE_SIGTERM, gameTask.get());
+
+        // TODO: assert thread is done
+        // TODO: and/or assert executor is empty
+        // TODO: assert process is gone
+        // TODO: assert task state reflects cancellation? (do we care?)
+
+        // TODO: test all of
+        //   - cancel javafx.Task.cancel(mayInterruptIfRunning=true)
+        //   - cancel on Future returned by executor.submit
+        //   - cancel (non-javafx) on Task
+    }
+
+    // TODO: cancel *after* process already exited
+
     private static Callable<Process> runProcess(String... command) {
-        return new ProcessBuilder(command)::start;
+        final ProcessBuilder processBuilder = new ProcessBuilder(command);
+        processBuilder.redirectErrorStream(true);
+        return processBuilder::start;
     }
 
     private static Callable<Process> runProcess(Supplier<String> command) {
@@ -200,7 +231,24 @@ public class TestRunGameTask {
                     String.format("for i in $( seq %s ) ; do echo $i ; sleep 1 ; done", seconds)
             );
             var proc = pb.start();
-            LoggerFactory.getLogger(SlowTicker.class).info(" ⏲ Ticker PID {}", proc.pid());
+            LoggerFactory.getLogger(SlowTicker.class).debug(" ⏲ Ticker PID {}", proc.pid());
+            return proc;
+        }
+    }
+
+    private static class SelfDestructingProcess extends SlowTicker {
+        SelfDestructingProcess(final int seconds) {
+            super(seconds);
+        }
+
+        @Override
+        public Process call() throws IOException {
+            var proc = super.call();
+            new ScheduledThreadPoolExecutor(1).schedule(
+                    // looks like destroy = SIGTERM,
+                    // destroyForcibly = SIGKILL
+                    proc::destroy, 1100, TimeUnit.MILLISECONDS
+            );
             return proc;
         }
     }
