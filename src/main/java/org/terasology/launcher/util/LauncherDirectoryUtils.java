@@ -19,7 +19,6 @@ package org.terasology.launcher.util;
 import javafx.stage.DirectoryChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.util.windows.SavedGamesPathFinder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -138,23 +137,7 @@ public final class LauncherDirectoryUtils {
         final Path gameDataDirectory;
 
         if (platform.isWindows()) {
-            Path path = null;
-
-            final String savedGamesPath = SavedGamesPathFinder.findSavedGamesPath();
-            if (savedGamesPath != null) {
-                path = Paths.get(savedGamesPath);
-            }
-
-            if (path == null) {
-                final String documentsPath = SavedGamesPathFinder.findDocumentsPath();
-                if (documentsPath != null) {
-                    path = Paths.get(documentsPath);
-                }
-            }
-            if (path == null) {
-                path = new DirectoryChooser().getInitialDirectory().toPath();
-            }
-
+            Path path = Paths.get(System.getenv("APPDATA"));
             gameDataDirectory = path.resolve(GAME_DATA_DIR_NAME);
         } else if (platform.isLinux()) {
             gameDataDirectory = userHome.resolve('.' + GAME_DATA_DIR_NAME.toLowerCase(Locale.ENGLISH));
