@@ -16,9 +16,7 @@
 
 package org.terasology.launcher.game;
 
-import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import javafx.application.Platform;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -176,7 +174,7 @@ public class TestRunGameTask {
 
     @SlowTest
     @DisabledOnOs(OS.WINDOWS)
-    public void testTerminatedProcess() throws ExecutionException, InterruptedException {
+    public void testTerminatedProcess() {
         // FIXME: SelfDestructionProcess is using some very arbitrary timeouts.
         //    Which means it's unnecessarily slow and probably also flaky.
         gameTask.starter = new SelfDestructingProcess(5);
@@ -204,15 +202,9 @@ public class TestRunGameTask {
 
     private static class SlowTicker implements Callable<Process> {
         private final int seconds;
-        private final SettableFuture<ProcessHandle> futureHandle;
 
         SlowTicker(int seconds) {
-            this(seconds, null);
-        }
-
-        SlowTicker(int seconds, SettableFuture<ProcessHandle> futureHandle) {
             this.seconds = seconds;
-            this.futureHandle = futureHandle;
         }
 
         @Override
@@ -222,10 +214,6 @@ public class TestRunGameTask {
                     String.format("for i in $( seq %s ) ; do echo $i ; sleep 1 ; done", seconds)
             );
             var proc = pb.start();
-            if (futureHandle != null) {
-                final var handle = proc.toHandle();
-                Platform.runLater(() -> futureHandle.set(handle));
-            }
             LoggerFactory.getLogger(SlowTicker.class).debug(" ⏲ Ticker PID {}", proc.pid());
             return proc;
         }
@@ -242,7 +230,7 @@ public class TestRunGameTask {
             new ScheduledThreadPoolExecutor(1).schedule(
                     // looks like destroy = SIGTERM,
                     // destroyForcibly = SIGKILL
-                    proc::destroy, 1100, TimeUnit.MILLISECONDS
+                    proc::destroy, 100, TimeUnit.MILLISECONDS
             );
             return proc;
         }
