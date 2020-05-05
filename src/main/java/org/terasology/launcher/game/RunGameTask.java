@@ -29,19 +29,24 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 
-final class RunGameTask extends Task<Void> {
+final class RunGameTask extends Task<Boolean> {
     static final int EXIT_CODE_OK = 0;
+
+    static final Predicate<String> START_MATCH = Pattern.compile("CONFIRMED").asPredicate();
 
     private static final Logger logger = LoggerFactory.getLogger(RunGameTask.class);
 
     protected Callable<Process> starter;
 
     private final Package pkg;
+    private boolean valueSet;
 
     RunGameTask(Package pkg,
                        Path gamePath,
@@ -71,7 +76,7 @@ final class RunGameTask extends Task<Void> {
      * @return The result of the background work, if any.
      */
     @Override
-    protected Void call() throws GameStartError, GameExitError, InterruptedException {
+    protected Boolean call() throws GameStartError, GameExitError, InterruptedException {
         verifyNotNull(this.starter);
         verify(!this.isDone());
         Process process;
@@ -81,7 +86,7 @@ final class RunGameTask extends Task<Void> {
             throw new GameStartError(e);
         }
         monitorProcess(process);
-        return null;
+        return true;
     }
 
     void monitorProcess(Process process) throws InterruptedException, GameExitError {
@@ -91,7 +96,7 @@ final class RunGameTask extends Task<Void> {
 
         // log each line of process output
         var gameOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        gameOutput.lines().forEachOrdered(line -> logger.info("Game output: {}", line));
+        gameOutput.lines().forEachOrdered(this::handleOutputLine);
 
         try {
             // The output has closed, so we _often_ have the exit value immediately, but apparently
@@ -109,9 +114,19 @@ final class RunGameTask extends Task<Void> {
             logger.warn("Interrupted while waiting for game process exit.", e);
             throw e;
         }
-    };
+    }
 
-    public abstract static class RunGameError extends Exception { };
+    protected void handleOutputLine(String line) {
+        if ((!valueSet) && START_MATCH.test(line)) {
+            // we have an extra flag just for this because we can't check
+            // the content of valueProperty in this thread.
+            valueSet = true;
+            this.updateValue(true);
+        }
+        logger.info("Game output: {}", line);
+    }
+
+    public abstract static class RunGameError extends Exception { }
 
     public static class GameStartError extends RunGameError {
         GameStartError(final Exception e) {
@@ -123,7 +138,7 @@ final class RunGameTask extends Task<Void> {
         public String toString() {
             return MoreObjects.toStringHelper(this).addValue(this.getCause()).toString();
         }
-    };
+    }
 
     public static class GameExitError extends RunGameError {
         public final int exitValue;
@@ -136,5 +151,5 @@ final class RunGameTask extends Task<Void> {
         public String toString() {
             return MoreObjects.toStringHelper(this).add("exitValue", exitValue).toString();
         }
-    };
+    }
 }

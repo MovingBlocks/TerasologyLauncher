@@ -16,7 +16,9 @@
 
 package org.terasology.launcher.game;
 
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import javafx.concurrent.WorkerStateEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,8 +31,11 @@ import org.spf4j.test.log.TestLoggers;
 import org.spf4j.test.matchers.LogMatchers;
 import org.terasology.launcher.SlowTest;
 import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.util.WaitForAsyncUtils;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -41,11 +46,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static com.google.common.util.concurrent.Futures.allAsList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
@@ -189,6 +196,47 @@ public class TestRunGameTask {
         // it fails with the other signal.
         assertThat(exitValue, allOf(equalTo(EXIT_CODE_SIGTERM), not(EXIT_CODE_SIGKILL)));
     }
+
+
+    @SlowTest
+    @DisabledOnOs(OS.WINDOWS)
+    public void testSuccessEvent() throws Exception {
+        // FIXME: use a mock process
+        //     This test doesn't deal with process exceptions or exit codes, so we could
+        //     use a mock process instead of one of these things that's platform-specific.
+        final String confirmedStart = "CONFIRMED_START";
+        gameTask.starter = runProcess("bash", "-c", "echo yolo " + confirmedStart + "; sleep 1");
+
+        final SettableFuture<Boolean> theValue = SettableFuture.create();
+        final SettableFuture<Instant> gotValueAt = SettableFuture.create();
+        final SettableFuture<Instant> taskDoneAt = SettableFuture.create();
+
+        gameTask.valueProperty().addListener(started -> {
+            theValue.set(gameTask.valueProperty().getValue());
+            gotValueAt.set(Instant.now());
+        });
+
+        WaitForAsyncUtils.asyncFx(() ->
+            gameTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, (event) ->
+                taskDoneAt.set(Instant.now())
+            )
+        );
+
+        executor.submit(gameTask);
+
+        //noinspection UnstableApiUsage
+        allAsList(
+               theValue, gotValueAt, taskDoneAt
+        ).get(3000, TimeUnit.SECONDS);
+
+        // get()ing the list made sure these are all complete
+        assertTrue(theValue.get());
+
+        // Assert that we got the value significantly before the process finished.
+        assertThat(Duration.between(gotValueAt.get(), taskDoneAt.get()),
+                   greaterThan(Duration.ofMillis(100)));
+    }
+
 
     private static Callable<Process> runProcess(String... command) {
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
