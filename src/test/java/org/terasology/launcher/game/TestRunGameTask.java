@@ -16,10 +16,12 @@
 
 package org.terasology.launcher.game;
 
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import jersey.repackaged.com.google.common.base.Throwables;
+import javafx.application.Platform;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -32,8 +34,11 @@ import org.terasology.launcher.SlowTest;
 import org.testfx.framework.junit5.ApplicationExtension;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,10 +51,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -119,14 +126,14 @@ public class TestRunGameTask {
         );
 
         executor.submit(gameTask);
-        assertEquals(EXIT_CODE_OK, gameTask.get());
+        gameTask.get();
 
         hasExitMessage.assertObservation(100, TimeUnit.MILLISECONDS);
     }
 
     @Test
     @DisabledOnOs(OS.WINDOWS)
-    public void testGameExitError() throws InterruptedException {
+    public void testGameExitError() {
         gameTask.starter = completesWithError;
 
         var hasExitMessage = TestLoggers.sys().expect(
@@ -138,13 +145,10 @@ public class TestRunGameTask {
         );
 
         executor.submit(gameTask);
-        try {
-            assertEquals(EXIT_CODE_ERROR, gameTask.get());
-        } catch (ExecutionException e) {
-            // see the stack trace from in-thread
-            // can we have a test Extension for this please?
-            Throwables.propagate(e.getCause());
-        }
+        var thrown = assertThrows(ExecutionException.class, gameTask::get);
+        Throwable exc = thrown.getCause();
+        assertThat(exc, instanceOf(RunGameTask.GameExitError.class));
+        assertEquals(EXIT_CODE_ERROR, ((RunGameTask.GameExitError) exc).exitValue);
 
         hasExitMessage.assertObservation(100, TimeUnit.MILLISECONDS);
     }
@@ -155,7 +159,9 @@ public class TestRunGameTask {
 
         executor.submit(gameTask);
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
-        assertThat(thrown.getCause(), instanceOf(OurIOException.class));
+        Throwable exc = thrown.getCause();
+        assertThat(exc, instanceOf(RunGameTask.GameStartError.class));
+        assertThat(exc.getCause(), instanceOf(OurIOException.class));
     }
 
     @SlowTest
@@ -164,7 +170,9 @@ public class TestRunGameTask {
 
         executor.submit(gameTask);
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
-        var cause = thrown.getCause();
+        Throwable exc = thrown.getCause();
+        assertThat(exc, instanceOf(RunGameTask.GameStartError.class));
+        var cause = exc.getCause();
         assertThat(cause, allOf(
                 instanceOf(IOException.class),
                 hasToString(containsStringIgnoringCase("no such file"))
@@ -179,20 +187,43 @@ public class TestRunGameTask {
         gameTask.starter = new SelfDestructingProcess(5);
 
         executor.submit(gameTask);
-        assertEquals(EXIT_CODE_SIGTERM, gameTask.get());
-        assertNotEquals(EXIT_CODE_SIGKILL, gameTask.get());
+        var thrown = assertThrows(ExecutionException.class, gameTask::get);
+        Throwable exc = thrown.getCause();
+        assertThat(exc, instanceOf(RunGameTask.GameExitError.class));
+        final int exitValue = ((RunGameTask.GameExitError) exc).exitValue;
+        // It is redundant to test both that a value is one thing and
+        // also is not a different thing, but it'd be informative test output if
+        // it fails with the other signal.
+        assertThat(exitValue, allOf(equalTo(EXIT_CODE_SIGTERM), not(EXIT_CODE_SIGKILL)));
     }
 
+    @Disabled("TODO")
     @SlowTest
     @DisabledOnOs(OS.WINDOWS)
     public void testCancellation() throws InterruptedException, ExecutionException {
-        gameTask.starter = new SlowTicker(5);
+        SettableFuture<ProcessHandle> handleFuture = SettableFuture.create();
+
+        final int tickerDuration = 5;
+        gameTask.starter = new SlowTicker(tickerDuration, handleFuture);
 
         executor.submit(gameTask);
-        Thread.sleep(100);  // FIXME: just long enough to make sure process has started
-        // gameTask.cancel();
+
+        final var processHandle = handleFuture.get();
+
+        // Thread.sleep(100);  // FIXME: just long enough to make sure process has started
+
+        assertTrue(processHandle.isAlive());
+
+        var started = processHandle.info().startInstant().orElseThrow();
+
         assertTrue(gameTask.cancel(true));
-        assertEquals(EXIT_CODE_SIGTERM, gameTask.get());
+        assertThrows(CancellationException.class, gameTask::get);
+        while (processHandle.isAlive()) {
+            //noinspection BusyWait
+            Thread.sleep(50); // yes I am busy-waiting do you have a better idea?
+        }
+
+        assertThat(Duration.between(started, Instant.now()), lessThan(Duration.ofSeconds(tickerDuration)));
 
         // TODO: assert thread is done
         // TODO: and/or assert executor is empty
@@ -219,9 +250,15 @@ public class TestRunGameTask {
 
     private static class SlowTicker implements Callable<Process> {
         private final int seconds;
+        private final SettableFuture<ProcessHandle> futureHandle;
 
         SlowTicker(int seconds) {
+            this(seconds, null);
+        }
+
+        SlowTicker(int seconds, SettableFuture<ProcessHandle> futureHandle) {
             this.seconds = seconds;
+            this.futureHandle = futureHandle;
         }
 
         @Override
@@ -231,6 +268,10 @@ public class TestRunGameTask {
                     String.format("for i in $( seq %s ) ; do echo $i ; sleep 1 ; done", seconds)
             );
             var proc = pb.start();
+            if (futureHandle != null) {
+                final var handle = proc.toHandle();
+                Platform.runLater(() -> futureHandle.set(handle));
+            }
             LoggerFactory.getLogger(SlowTicker.class).debug(" ⏲ Ticker PID {}", proc.pid());
             return proc;
         }

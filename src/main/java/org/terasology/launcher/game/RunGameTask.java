@@ -16,7 +16,7 @@
 
 package org.terasology.launcher.game;
 
-import com.google.common.base.Verify;
+import com.google.common.base.MoreObjects;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,13 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-final class RunGameTask extends Task<Integer> {
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Verify.verify;
+import static com.google.common.base.Verify.verifyNotNull;
+
+final class RunGameTask extends Task<Void> {
+    static final int EXIT_CODE_OK = 0;
+
     private static final Logger logger = LoggerFactory.getLogger(RunGameTask.class);
 
     protected Callable<Process> starter;
@@ -63,38 +69,72 @@ final class RunGameTask extends Task<Integer> {
      * in runtime exceptions.
      *
      * @return The result of the background work, if any.
-     * @throws Exception an unhandled exception which occurred during the
-     *                   background operation
      */
     @Override
-    protected Integer call() throws Exception {
-        // start subprocess
-        Verify.verifyNotNull(this.starter);
-        Verify.verify(!this.isDone());
-        Process process = this.starter.call();
-        return monitorProcess(process);
+    protected Void call() throws GameStartError, GameExitError, InterruptedException {
+        verifyNotNull(this.starter);
+        verify(!this.isDone());
+        Process process;
+        try {
+            process = this.starter.call();
+        } catch (Exception e) {
+            throw new GameStartError(e);
+        }
+        monitorProcess(process);
+        return null;
     }
 
-    int monitorProcess(Process process) throws InterruptedException {
-        Verify.verifyNotNull(process);
+    void monitorProcess(Process process) throws InterruptedException, GameExitError {
+        checkNotNull(process);
         logger.debug("Game process is {}", process);
+        updateMessage("Game running as process " + process.pid());
 
         // log each line of process output
         var gameOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
         gameOutput.lines().forEachOrdered(line -> logger.info("Game output: {}", line));
 
-        // The output has closed, so we _often_ have the exit value immediately, but apparently
-        // not always — the tests were flaky. To be safe, waitFor.
-        var exitValue = process.waitFor();
-        logger.debug("Game closed with the exit value '{}'.", exitValue);
+        try {
+            // The output has closed, so we _often_ have the exit value immediately, but apparently
+            // not always — the tests were flaky. To be safe, waitFor.
+            var exitValue = process.waitFor();
+            logger.debug("Game closed with the exit value '{}'.", exitValue);
 
-        // start a countdown
-        // stopped before countdown? fail task with error message
-        // still running? okay, update progress
+            if (exitValue == EXIT_CODE_OK) {
+                updateMessage("Process complete.");
+            } else {
+                updateMessage("Process exited with code " + exitValue);
+                throw new GameExitError(exitValue);
+            }
+        } catch (InterruptedException e) {
+            logger.warn("Interrupted while waiting for game process exit.", e);
+            throw e;
+        }
+    };
 
-        // when process exits, finish task
+    public abstract static class RunGameError extends Exception { };
 
-        // if task gets cancelled, end process
-        return exitValue;
+    public static class GameStartError extends RunGameError {
+        GameStartError(final Exception e) {
+            super();
+            this.initCause(e);
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this).addValue(this.getCause()).toString();
+        }
+    };
+
+    public static class GameExitError extends RunGameError {
+        public final int exitValue;
+
+        GameExitError(final int exitValue) {
+            this.exitValue = exitValue;
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this).add("exitValue", exitValue).toString();
+        }
     };
 }
