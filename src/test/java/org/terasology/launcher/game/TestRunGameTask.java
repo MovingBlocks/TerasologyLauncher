@@ -21,7 +21,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import javafx.application.Platform;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -34,11 +33,8 @@ import org.terasology.launcher.SlowTest;
 import org.testfx.framework.junit5.ApplicationExtension;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -54,7 +50,6 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -196,47 +191,6 @@ public class TestRunGameTask {
         // it fails with the other signal.
         assertThat(exitValue, allOf(equalTo(EXIT_CODE_SIGTERM), not(EXIT_CODE_SIGKILL)));
     }
-
-    @Disabled("TODO")
-    @SlowTest
-    @DisabledOnOs(OS.WINDOWS)
-    public void testCancellation() throws InterruptedException, ExecutionException {
-        SettableFuture<ProcessHandle> handleFuture = SettableFuture.create();
-
-        final int tickerDuration = 5;
-        gameTask.starter = new SlowTicker(tickerDuration, handleFuture);
-
-        executor.submit(gameTask);
-
-        final var processHandle = handleFuture.get();
-
-        // Thread.sleep(100);  // FIXME: just long enough to make sure process has started
-
-        assertTrue(processHandle.isAlive());
-
-        var started = processHandle.info().startInstant().orElseThrow();
-
-        assertTrue(gameTask.cancel(true));
-        assertThrows(CancellationException.class, gameTask::get);
-        while (processHandle.isAlive()) {
-            //noinspection BusyWait
-            Thread.sleep(50); // yes I am busy-waiting do you have a better idea?
-        }
-
-        assertThat(Duration.between(started, Instant.now()), lessThan(Duration.ofSeconds(tickerDuration)));
-
-        // TODO: assert thread is done
-        // TODO: and/or assert executor is empty
-        // TODO: assert process is gone
-        // TODO: assert task state reflects cancellation? (do we care?)
-
-        // TODO: test all of
-        //   - cancel javafx.Task.cancel(mayInterruptIfRunning=true)
-        //   - cancel on Future returned by executor.submit
-        //   - cancel (non-javafx) on Task
-    }
-
-    // TODO: cancel *after* process already exited
 
     private static Callable<Process> runProcess(String... command) {
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
