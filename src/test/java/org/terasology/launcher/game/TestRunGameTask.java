@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spf4j.log.Level;
 import org.spf4j.test.log.TestLoggers;
@@ -32,24 +33,25 @@ import org.spf4j.test.matchers.LogMatchers;
 import org.terasology.launcher.SlowTest;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.util.WaitForAsyncUtils;
+import org.threeten.extra.MutableClock;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Random;
-import java.util.concurrent.Callable;
+import java.time.temporal.ChronoUnit;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeoutException;
 
 import static com.google.common.util.concurrent.Futures.allAsList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.describedAs;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -68,21 +70,6 @@ public class TestRunGameTask {
     static final int EXIT_CODE_ERROR = 1;
     static final int EXIT_CODE_SIGKILL = 0b10000000 + 9;   // SIGKILL = 9
     static final int EXIT_CODE_SIGTERM = 0b10000000 + 15;  // SIGTERM = 15
-
-    static Callable<Process> completesSuccessfully = runProcess("true");
-    static Callable<Process> completesWithError = runProcess("false");
-    static Callable<Process> exceptionThrowingStart = () -> {
-        throw new OurIOException("GRUMPY \uD83D\uDC7F");
-    };
-    static Callable<Process> noSuchCommand = runProcess(() -> {
-        // If you have a program with this name on your path while running these tests,
-        // you have incredible luck.
-        return "nope" + new Random()
-                .ints(16, 0, 255).mapToObj(
-                        i -> Integer.toString(i, Character.MAX_RADIX)
-                )
-                .collect(Collectors.joining());
-    });
 
     private ExecutorService executor;
     private RunGameTask gameTask;
@@ -113,7 +100,7 @@ public class TestRunGameTask {
     @SlowTest
     @DisabledOnOs(OS.WINDOWS)
     public void testGameExitSuccessful() throws InterruptedException, ExecutionException {
-        gameTask.starter = completesSuccessfully;
+        gameTask.starter = MockProcesses.COMPLETES_SUCCESSFULLY;
 
         // we can use TestLogger expectations without Slf4jTestRunner, we just can't
         // depend on their annotations. I think.
@@ -134,7 +121,7 @@ public class TestRunGameTask {
     @Test
     @DisabledOnOs(OS.WINDOWS)
     public void testGameExitError() {
-        gameTask.starter = completesWithError;
+        gameTask.starter = MockProcesses.COMPLETES_WITH_ERROR;
 
         var hasExitMessage = TestLoggers.sys().expect(
                 RunGameTask.class.getName(), Level.DEBUG,
@@ -155,18 +142,18 @@ public class TestRunGameTask {
 
     @Test
     public void testBadStarter() {
-        gameTask.starter = exceptionThrowingStart;
+        gameTask.starter = MockProcesses.EXCEPTION_THROWING_START;
 
         executor.submit(gameTask);
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
         assertThat(exc, instanceOf(RunGameTask.GameStartError.class));
-        assertThat(exc.getCause(), instanceOf(OurIOException.class));
+        assertThat(exc.getCause(), instanceOf(MockProcesses.OurIOException.class));
     }
 
     @SlowTest
     public void testExeNotFound() {
-        gameTask.starter = noSuchCommand;
+        gameTask.starter = MockProcesses.NO_SUCH_COMMAND;
 
         executor.submit(gameTask);
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
@@ -184,7 +171,7 @@ public class TestRunGameTask {
     public void testTerminatedProcess() {
         // FIXME: SelfDestructionProcess is using some very arbitrary timeouts.
         //    Which means it's unnecessarily slow and probably also flaky.
-        gameTask.starter = new SelfDestructingProcess(5);
+        gameTask.starter = new MockProcesses.SelfDestructingProcess(5);
 
         executor.submit(gameTask);
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
@@ -198,14 +185,30 @@ public class TestRunGameTask {
     }
 
 
-    @SlowTest
-    @DisabledOnOs(OS.WINDOWS)
+    @Test
     public void testSuccessEvent() throws Exception {
-        // FIXME: use a mock process
-        //     This test doesn't deal with process exceptions or exit codes, so we could
-        //     use a mock process instead of one of these things that's platform-specific.
+        var clock = MutableClock.epochUTC();
+        var hop = Duration.ofMillis(100);
+
         final String confirmedStart = "CONFIRMED_START";
-        gameTask.starter = runProcess("bash", "-c", "echo yolo " + confirmedStart + "; sleep 1");
+
+        final Logger logger = LoggerFactory.getLogger(TestRunGameTask.class);
+
+        Runnable handleAdvance = () -> {
+            WaitForAsyncUtils.waitForFxEvents(1);
+            clock.add(hop);
+            logger.debug("TICK {}", clock.instant().toEpochMilli());
+            WaitForAsyncUtils.waitForFxEvents(1);
+        };
+
+        gameTask.starter = () -> new MockProcesses.OneLineAtATimeProcess(
+                spyingIterator(List.of(
+                        "some babble\n",
+                        confirmedStart + "\n",
+                        "more babble\n",
+                        "have a nice day etc\n"
+                ), handleAdvance)
+        );
 
         final SettableFuture<Boolean> theValue = SettableFuture.create();
         final SettableFuture<Instant> gotValueAt = SettableFuture.create();
@@ -213,80 +216,48 @@ public class TestRunGameTask {
 
         gameTask.valueProperty().addListener(started -> {
             theValue.set(gameTask.valueProperty().getValue());
-            gotValueAt.set(Instant.now());
+            clock.add(7, ChronoUnit.MILLIS);
+            gotValueAt.set(clock.instant());
         });
 
         WaitForAsyncUtils.asyncFx(() ->
-            gameTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, (event) ->
-                taskDoneAt.set(Instant.now())
+            gameTask.addEventHandler(
+                    WorkerStateEvent.WORKER_STATE_SUCCEEDED, (event) -> {
+                        clock.add(11, ChronoUnit.MILLIS);
+                        taskDoneAt.set(clock.instant());
+                     }
             )
-        );
+        ).get();
 
         executor.submit(gameTask);
 
-        //noinspection UnstableApiUsage
-        allAsList(
-               theValue, gotValueAt, taskDoneAt
-        ).get(3000, TimeUnit.SECONDS);
+        try {
+            //noinspection UnstableApiUsage
+            allAsList(
+                   theValue, gotValueAt, taskDoneAt
+            ).get(20, TimeUnit.SECONDS);
+        } catch (ExecutionException | TimeoutException e) {
+            logger.warn("Failed to get futures because {}", e.getLocalizedMessage());
+            var result = gameTask.get();
+            logger.warn("And yet gameTask returned? {}", result);
+            throw e;
+        }
 
         // get()ing the list made sure these are all complete
         assertTrue(theValue.get());
 
         // Assert that we got the value significantly before the process finished.
         assertThat(Duration.between(gotValueAt.get(), taskDoneAt.get()),
-                   greaterThan(Duration.ofMillis(100)));
+                   describedAs("Time between %0 and %1 should be greater than %2",
+                               greaterThan(hop.multipliedBy(2)),
+                               gotValueAt.get(), taskDoneAt.get(), hop.multipliedBy(2)));
     }
 
 
-    private static Callable<Process> runProcess(String... command) {
-        final ProcessBuilder processBuilder = new ProcessBuilder(command);
-        processBuilder.redirectErrorStream(true);
-        return processBuilder::start;
-    }
-
-    private static Callable<Process> runProcess(Supplier<String> command) {
-        return runProcess(command.get());
-    }
-
-    private static class SlowTicker implements Callable<Process> {
-        private final int seconds;
-
-        SlowTicker(int seconds) {
-            this.seconds = seconds;
-        }
-
-        @Override
-        public Process call() throws IOException {
-            var pb = new ProcessBuilder(
-                    "/bin/bash", "-c",
-                    String.format("for i in $( seq %s ) ; do echo $i ; sleep 1 ; done", seconds)
-            );
-            var proc = pb.start();
-            LoggerFactory.getLogger(SlowTicker.class).debug(" ⏲ Ticker PID {}", proc.pid());
-            return proc;
-        }
-    }
-
-    private static class SelfDestructingProcess extends SlowTicker {
-        SelfDestructingProcess(final int seconds) {
-            super(seconds);
-        }
-
-        @Override
-        public Process call() throws IOException {
-            var proc = super.call();
-            new ScheduledThreadPoolExecutor(1).schedule(
-                    // looks like destroy = SIGTERM,
-                    // destroyForcibly = SIGKILL
-                    proc::destroy, 100, TimeUnit.MILLISECONDS
-            );
-            return proc;
-        }
-    }
-
-    static class OurIOException extends IOException {
-        OurIOException(final String grumpy) {
-            super(grumpy);
-        }
+    public static Iterator<String> spyingIterator(List<String> list, Runnable onNext) {
+        return list.stream().takeWhile(string -> {
+            onNext.run();
+            return true;
+        }).iterator();
     }
 }

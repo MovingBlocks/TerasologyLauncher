@@ -16,8 +16,9 @@
 
 package org.terasology.launcher.game;
 
-import org.apache.commons.io.input.NullInputStream;
+import javafx.application.Platform;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.spf4j.log.Level;
@@ -27,11 +28,6 @@ import org.spf4j.test.log.annotations.CollectLogs;
 import org.spf4j.test.log.junit4.Spf4jTestLogJUnitRunner;
 import org.spf4j.test.matchers.LogMatchers;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.concurrent.CompletableFuture;
-
 import static org.hamcrest.Matchers.allOf;
 
 
@@ -39,6 +35,13 @@ import static org.hamcrest.Matchers.allOf;
 public class TestRunGameTaskVintage {
 
     public TestLoggers testLogs;
+
+    @BeforeClass
+    public static void setUpClass() {
+        // If we don't use the full TestFX junit4 runner, we need to do something
+        // to keep RunGameTask content when it sends updates to the Application Thread.
+        Platform.startup(null);
+    }
 
     @Before
     public void setUp() {
@@ -50,7 +53,7 @@ public class TestRunGameTaskVintage {
     public void testGameOutput() throws InterruptedException, RunGameTask.GameExitError {
         String[] gameOutputLines = {"LineOne", "LineTwo"};
 
-        Process gameProcess = new HappyGameProcess(String.join("\n", gameOutputLines));
+        Process gameProcess = new MockProcesses.HappyGameProcess(String.join("\n", gameOutputLines));
 
         RunGameTask gameTask = new RunGameTask(null);
 
@@ -132,70 +135,4 @@ public class TestRunGameTaskVintage {
 //        verify((Logger) Whitebox.getInternalState(GameRunner.class, "logger"))
 //                .error(eq("Could not read game output!"), any(IOException.class));
 //    }
-
-
-    static class HappyGameProcess extends Process {
-
-        private final InputStream inputStream;
-
-        HappyGameProcess() {
-            inputStream = new NullInputStream(0);
-        }
-
-        HappyGameProcess(String processOutput) {
-            inputStream = new ByteArrayInputStream(processOutput.getBytes());
-        }
-
-        @Override
-        public OutputStream getOutputStream() {
-            throw new UnsupportedOperationException("Stub.");
-        }
-
-        @Override
-        public InputStream getInputStream() {
-            return inputStream;
-        }
-
-        @Override
-        public InputStream getErrorStream() {
-            throw new UnsupportedOperationException("Stub; implement if we stop merging stdout and error streams.");
-        }
-
-        @Override
-        public int waitFor() {
-            return exitValue();
-        }
-
-        /**
-         * Returns the exit value for the process.
-         *
-         * @return the exit value of the process represented by this
-         * {@code Process} object.  By convention, the value
-         * {@code 0} indicates normal termination.
-         * @throws IllegalThreadStateException if the process represented
-         *                                     by this {@code Process} object has not yet terminated
-         */
-        @Override
-        public int exitValue() {
-            return 0;
-        }
-
-        /**
-         * Kills the process.
-         * Whether the process represented by this {@code Process} object is
-         * {@linkplain #supportsNormalTermination normally terminated} or not is
-         * implementation dependent.
-         * Forcible process destruction is defined as the immediate termination of a
-         * process, whereas normal termination allows the process to shut down cleanly.
-         * If the process is not alive, no action is taken.
-         * <p>
-         * The {@link CompletableFuture} from {@link #onExit} is
-         * {@linkplain CompletableFuture#complete completed}
-         * when the process has terminated.
-         */
-        @Override
-        public void destroy() {
-
-        }
-    }
 }
