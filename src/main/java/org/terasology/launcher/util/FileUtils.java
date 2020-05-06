@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.util;
 
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.visitor.ArchiveCopyVisitor;
@@ -94,7 +95,7 @@ public final class FileUtils {
             if (Files.notExists(outputLocation)) {
                 Files.createDirectories(outputLocation);
             }
-            try (FileSystem fileSystem = FileSystems.newFileSystem(archive, null)) {
+            try (FileSystem fileSystem = FileSystems.newFileSystem(archive, ((ClassLoader) null))) {
                 for (Path rootDirectory : fileSystem.getRootDirectories()) {
                     Files.walkFileTree(rootDirectory, new ArchiveCopyVisitor(outputLocation));
                 }
