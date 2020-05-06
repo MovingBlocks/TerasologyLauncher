@@ -28,11 +28,12 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 
 public final class MockProcesses {
-    private MockProcesses() { }
-
     static final Callable<Process> EXCEPTION_THROWING_START = () -> {
         throw new OurIOException("GRUMPY \uD83D\uDC7F");
     };
+
+    private MockProcesses() {
+    }
 
     public static class HappyGameProcess extends Process {
 
@@ -95,6 +96,10 @@ public final class MockProcesses {
 
         @Override
         public InputStream getInputStream() {
+            // 🤔 If RunGameTask had a way to do
+            //        Iterator<String> lines = adapt(process)
+            //    and we could provide a different adapter for our mock process than a system
+            //    process, we could probably do without StringIteratorInputStream. ?
             return new StringIteratorInputStream(lines);
         }
     }

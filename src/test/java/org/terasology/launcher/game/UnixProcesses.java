@@ -27,8 +27,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class UnixProcesses {
-    private UnixProcesses() { }
-
     static final Callable<Process> COMPLETES_SUCCESSFULLY = runProcess("true");
     static final Callable<Process> COMPLETES_WITH_ERROR = runProcess("false");
     static final Callable<Process> NO_SUCH_COMMAND = runProcess(() -> {
@@ -40,6 +38,8 @@ public final class UnixProcesses {
             )
             .collect(Collectors.joining());
     });
+
+    private UnixProcesses() { }
 
     private static Callable<Process> runProcess(String... command) {
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
@@ -81,8 +81,7 @@ public final class UnixProcesses {
             new ScheduledThreadPoolExecutor(1).schedule(
                     // looks like destroy = SIGTERM,
                     // destroyForcibly = SIGKILL
-                    proc::destroy, 100, TimeUnit.MILLISECONDS
-            );
+                    proc::destroy, 100, TimeUnit.MILLISECONDS);
             return proc;
         }
     }
