@@ -17,7 +17,6 @@
 package org.terasology.launcher.game;
 
 import org.apache.commons.io.input.NullInputStream;
-import org.slf4j.LoggerFactory;
 import org.terasology.launcher.StringIteratorInputStream;
 
 import java.io.ByteArrayInputStream;
@@ -27,36 +26,13 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
-public class MockProcesses {
-    static final Callable<Process> COMPLETES_SUCCESSFULLY = runProcess("true");
-    static final Callable<Process> COMPLETES_WITH_ERROR = runProcess("false");
+public final class MockProcesses {
+    private MockProcesses() { }
+
     static final Callable<Process> EXCEPTION_THROWING_START = () -> {
         throw new OurIOException("GRUMPY \uD83D\uDC7F");
     };
-    static final Callable<Process> NO_SUCH_COMMAND = runProcess(() -> {
-        // If you have a program with this name on your path while running these tests,
-        // you have incredible luck.
-        return "nope" + new Random()
-            .ints(16, 0, 255).mapToObj(
-                i -> Integer.toString(i, Character.MAX_RADIX)
-            )
-            .collect(Collectors.joining());
-    });
-
-    private static Callable<Process> runProcess(String... command) {
-        final ProcessBuilder processBuilder = new ProcessBuilder(command);
-        processBuilder.redirectErrorStream(true);
-        return processBuilder::start;
-    }
-
-    private static Callable<Process> runProcess(Supplier<String> command) {
-        return runProcess(command.get());
-    }
 
     public static class HappyGameProcess extends Process {
 
@@ -107,42 +83,6 @@ public class MockProcesses {
         @Override
         public void destroy() {
             throw new UnsupportedOperationException();
-        }
-    }
-
-    private static class SlowTicker implements Callable<Process> {
-        private final int seconds;
-
-        SlowTicker(int seconds) {
-            this.seconds = seconds;
-        }
-
-        @Override
-        public Process call() throws IOException {
-            var pb = new ProcessBuilder(
-                    "/bin/bash", "-c",
-                    String.format("for i in $( seq %s ) ; do echo $i ; sleep 1 ; done", seconds)
-            );
-            var proc = pb.start();
-            LoggerFactory.getLogger(SlowTicker.class).debug(" ⏲ Ticker PID {}", proc.pid());
-            return proc;
-        }
-    }
-
-    static class SelfDestructingProcess extends SlowTicker {
-        SelfDestructingProcess(final int seconds) {
-            super(seconds);
-        }
-
-        @Override
-        public Process call() throws IOException {
-            var proc = super.call();
-            new ScheduledThreadPoolExecutor(1).schedule(
-                    // looks like destroy = SIGTERM,
-                    // destroyForcibly = SIGKILL
-                    proc::destroy, 100, TimeUnit.MILLISECONDS
-            );
-            return proc;
         }
     }
 

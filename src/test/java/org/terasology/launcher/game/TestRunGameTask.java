@@ -100,7 +100,7 @@ public class TestRunGameTask {
     @SlowTest
     @DisabledOnOs(OS.WINDOWS)
     public void testGameExitSuccessful() throws InterruptedException, ExecutionException {
-        gameTask.starter = MockProcesses.COMPLETES_SUCCESSFULLY;
+        gameTask.starter = UnixProcesses.COMPLETES_SUCCESSFULLY;
 
         // we can use TestLogger expectations without Slf4jTestRunner, we just can't
         // depend on their annotations. I think.
@@ -121,7 +121,7 @@ public class TestRunGameTask {
     @Test
     @DisabledOnOs(OS.WINDOWS)
     public void testGameExitError() {
-        gameTask.starter = MockProcesses.COMPLETES_WITH_ERROR;
+        gameTask.starter = UnixProcesses.COMPLETES_WITH_ERROR;
 
         var hasExitMessage = TestLoggers.sys().expect(
                 RunGameTask.class.getName(), Level.DEBUG,
@@ -153,7 +153,8 @@ public class TestRunGameTask {
 
     @SlowTest
     public void testExeNotFound() {
-        gameTask.starter = MockProcesses.NO_SUCH_COMMAND;
+        // not disabled-on-Windows because all platforms should be capable of failing
+        gameTask.starter = UnixProcesses.NO_SUCH_COMMAND;
 
         executor.submit(gameTask);
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
@@ -169,9 +170,7 @@ public class TestRunGameTask {
     @SlowTest
     @DisabledOnOs(OS.WINDOWS)
     public void testTerminatedProcess() {
-        // FIXME: SelfDestructionProcess is using some very arbitrary timeouts.
-        //    Which means it's unnecessarily slow and probably also flaky.
-        gameTask.starter = new MockProcesses.SelfDestructingProcess(5);
+        gameTask.starter = new UnixProcesses.SelfDestructingProcess(5);
 
         executor.submit(gameTask);
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
