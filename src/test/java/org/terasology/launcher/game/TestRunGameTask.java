@@ -189,7 +189,7 @@ public class TestRunGameTask {
         var clock = MutableClock.epochUTC();
         var hop = Duration.ofMillis(100);
 
-        final String confirmedStart = "CONFIRMED_START";
+        final String confirmedStart = "terasology.engine.TerasologyEngine - Initialization completed";
 
         final Logger logger = LoggerFactory.getLogger(TestRunGameTask.class);
 

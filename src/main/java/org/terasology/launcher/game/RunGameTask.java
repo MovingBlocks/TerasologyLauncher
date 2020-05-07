@@ -39,7 +39,8 @@ import static com.google.common.base.Verify.verifyNotNull;
 final class RunGameTask extends Task<Boolean> {
     static final int EXIT_CODE_OK = 0;
 
-    static final Predicate<String> START_MATCH = Pattern.compile("CONFIRMED").asPredicate();
+    // We'll only see this if the game's log level is INFO or higher, but it is by default.
+    static final Predicate<String> START_MATCH = Pattern.compile("TerasologyEngine.+Initialization completed").asPredicate();
 
     private static final Logger logger = LoggerFactory.getLogger(RunGameTask.class);
 
