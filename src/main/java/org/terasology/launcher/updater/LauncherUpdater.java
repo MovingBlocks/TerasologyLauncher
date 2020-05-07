@@ -45,7 +45,6 @@ public final class LauncherUpdater {
     private final Semver currentVersion;
 
     public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
-        ;
         //TODO: might not be valid semver, catch or use Try<..>
         currentVersion = new Semver(currentVersionInfo.getVersion());
     }
