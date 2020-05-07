@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.gui.javafx;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import javafx.animation.Transition;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -46,7 +47,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.game.GameStarter;
+import org.terasology.launcher.game.RunGameTask;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
@@ -61,8 +62,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -76,7 +80,7 @@ public class ApplicationController {
     private Path launcherDirectory;
     private BaseLauncherSettings launcherSettings;
     private PackageManager packageManager;
-    private GameStarter gameStarter;
+    private final ThreadPoolExecutor gameService;
     private Stage stage;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -121,6 +125,15 @@ public class ApplicationController {
 
     public ApplicationController() {
         warning = new SimpleObjectProperty<>(Optional.empty());
+        // TODO: this is way too much detail for ApplicationController to know about.
+        gameService = new ThreadPoolExecutor(
+                1, 1,
+                0, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(1),
+                new ThreadFactoryBuilder()
+                .setNameFormat("GameRunner-%d")
+                .setDaemon(true)   // TODO: also UncaughExceptionHandler
+                .build());
     }
 
     @FXML
@@ -180,18 +193,21 @@ public class ApplicationController {
     }
 
     private void startGameAction() {
-        final Path gamePath = packageManager.resolveInstallDir(selectedPackage);
-
-        if (gameStarter.isRunning()) {
+        if (gameService.getActiveCount() > 0) {
             logger.debug("The game can not be started because another game is already running.");
             GuiUtils.showInfoMessageDialog(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
-            final boolean gameStarted = gameStarter.startGame(selectedPackage, gamePath, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
-                    launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
-                    launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
-            if (!gameStarted) {
-                GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
-            } else {
+            final Path gamePath = packageManager.resolveInstallDir(selectedPackage);
+
+            var runGameTask = new RunGameTask(selectedPackage, gamePath, launcherSettings);
+
+            runGameTask.setOnFailed(
+                event -> GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart")));
+
+            // TODO: alternate success conditions
+            //   - stayed alive long enough
+            //   - valueProperty becomes true
+            runGameTask.setOnScheduled(event -> {
                 launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
                 launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
 
@@ -203,7 +219,9 @@ public class ApplicationController {
                         logger.info("The launcher can not be closed after game start, because a download is running.");
                     }
                 }
-            }
+            });
+
+            gameService.execute(runGameTask);
         }
     }
 
@@ -297,8 +315,6 @@ public class ApplicationController {
             logViewController.start(); // CHECK: do I really need to start it manually here?
             logbackLogger.addAppender(logViewController);
         }
-
-        gameStarter = new GameStarter();
 
         packageItems = FXCollections.observableArrayList();
         onSync();
@@ -458,7 +474,7 @@ public class ApplicationController {
         } catch (IOException e) {
             logger.warn("Could not store current launcher settings!");
         }
-        gameStarter.dispose();
+        gameService.shutdown();
 
         // TODO: Improve close request handling
         if (downloadTask != null) {

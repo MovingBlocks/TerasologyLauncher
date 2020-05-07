@@ -21,13 +21,11 @@ import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.Package;
-import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.LogLevel;
+import org.terasology.launcher.settings.BaseLauncherSettings;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -36,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 
-final class RunGameTask extends Task<Boolean> {
+public final class RunGameTask extends Task<Boolean> {
     static final int EXIT_CODE_OK = 0;
 
     // We'll only see this if the game's log level is INFO or higher, but it is by default.
@@ -49,21 +47,15 @@ final class RunGameTask extends Task<Boolean> {
     private final Package pkg;
     private boolean valueSet;
 
-    RunGameTask(Package pkg,
-                       Path gamePath,
-                       Path gameDataDirectory,
-                       JavaHeapSize heapMin,
-                       JavaHeapSize heapMax,
-                       List<String> javaParams,
-                       List<String> gameParams,
-                       LogLevel logLevel) {
-        this.pkg = pkg;
-        this.starter = new GameStarterWIP(
-                gamePath,  gameDataDirectory,  heapMin,  heapMax,  javaParams,  gameParams,  logLevel);
-    }
-
     protected RunGameTask(Package pkg) {
         this.pkg = pkg;
+    }
+
+    public RunGameTask(final Package pkg, final Path gamePath, final BaseLauncherSettings launcherSettings) {
+        this.pkg = pkg;
+        this.starter = new GameStarterWIP(gamePath, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
+             launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
+             launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
     }
 
     /**
