@@ -97,9 +97,7 @@ dependencies {
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.3.0-alpha5'
     implementation group: 'com.github.everit-org.json-schema', name: 'org.everit.json.schema', version: '1.12.1'
 
-    implementation group: 'com.jcabi', name: 'jcabi-github', version: '1.0'
-    // should only be used inside org.terasology.launcher.github
-    implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
+    implementation group: 'org.kohsuke', name: 'github-api', version: '1.111'
 
     implementation group: 'com.vdurmont', name: 'semver4j', version: '3.1.0'
     
