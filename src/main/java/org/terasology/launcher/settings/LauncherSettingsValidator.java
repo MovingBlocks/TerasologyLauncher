@@ -32,14 +32,8 @@ import java.util.Set;
 public final class LauncherSettingsValidator {
     private static final Logger logger = LoggerFactory.getLogger(LauncherSettingsValidator.class);
 
-    private static Set<String> deprecatedParameters =
+    private static final Set<String> DEPRECATED_PARAMETERS =
             Sets.newHashSet("-XX:+UseParNewGC", "-XX:+UseConcMarkSweepGC", "-XX:ParallelGCThreads=10");
-
-    private static String removeUnsupportedJvmParameters(final List<String> params) {
-        List<String> correctedParams = Lists.newArrayList(params);
-        correctedParams.removeAll(deprecatedParameters);
-        return String.join(" ", correctedParams);
-    }
 
     private static final List<SettingsValidationRule> RULES = Arrays.asList(
             // Rule for max heap size
@@ -57,13 +51,19 @@ public final class LauncherSettingsValidator {
             ),
 
             new SettingsValidationRule(
-                    s -> s.getUserGameParameterList().stream().anyMatch(deprecatedParameters::contains),
+                    s -> s.getUserGameParameterList().stream().anyMatch(DEPRECATED_PARAMETERS::contains),
                     "Ensure unsupported JVM arguments are removed",
                     s -> s.setUserJavaParameters(removeUnsupportedJvmParameters(s.getUserJavaParameterList()))
             )
     );
 
     private LauncherSettingsValidator() {
+    }
+
+    private static String removeUnsupportedJvmParameters(final List<String> params) {
+        List<String> correctedParams = Lists.newArrayList(params);
+        correctedParams.removeAll(DEPRECATED_PARAMETERS);
+        return String.join(" ", correctedParams);
     }
 
     /**

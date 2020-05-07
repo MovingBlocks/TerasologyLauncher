@@ -16,7 +16,6 @@
 
 package org.terasology.launcher.util;
 
-import javafx.stage.DirectoryChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +95,7 @@ public final class LauncherDirectoryUtils {
     /**
      * Should only be executed once at the start.
      *
-     * @param platform              the operating system
+     * @param platform        the operating system
      * @param applicationName the name of the application
      * @return the app. folder
      */

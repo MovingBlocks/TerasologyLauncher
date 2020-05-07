@@ -16,7 +16,6 @@
 
 package org.terasology.launcher.tasks;
 
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
