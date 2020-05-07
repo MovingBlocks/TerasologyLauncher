@@ -21,9 +21,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import org.kohsuke.github.GHRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.github.GitHubRelease;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
@@ -193,7 +193,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         boolean selfUpdaterStarted = false;
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
         final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
-        final GitHubRelease release = updater.updateAvailable();
+        final GHRelease release = updater.updateAvailable();
         if (release != null) {
             logger.info("Launcher update available: {}", release.getTagName());
             updateMessage(BundleUtils.getLabel("splash_launcherUpdateAvailable"));

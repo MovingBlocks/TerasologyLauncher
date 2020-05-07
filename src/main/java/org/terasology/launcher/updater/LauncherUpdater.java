@@ -24,10 +24,11 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.kohsuke.github.GHRelease;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.github.GitHubClient;
-import org.terasology.launcher.github.GitHubRelease;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
@@ -42,16 +43,14 @@ public final class LauncherUpdater {
     private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
 
     private final Semver currentVersion;
-    private final GitHubClient github;
 
     public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
-        github = new GitHubClient();
         //TODO: might not be valid semver, catch or use Try<..>
         currentVersion = new Semver(currentVersionInfo.getVersion());
     }
 
     //TODO: catch invalid semver and return Try<..> or Option<..> instead
-    private Semver versionOf(GitHubRelease release) {
+    private Semver versionOf(GHRelease release) {
         return new Semver(release.getTagName().replaceAll("^v(.*)$", "$1"));
     }
 
@@ -60,13 +59,15 @@ public final class LauncherUpdater {
      * <br>
      * Compares the current launcher version number to the upstream version number if an internet connection is available.
      *
-     * @return a {@link GitHubRelease} if an update is available, null otherwise
+     * @return a {@link GHRelease} if an update is available, null otherwise
      */
     //TODO: return Option<GitHubRelease>
-    public GitHubRelease updateAvailable() {
+    public GHRelease updateAvailable() {
         //TODO: only check of both version are defined and valid semver?
         try {
-            final GitHubRelease latestRelease = github.getLatestRelease("movingblocks", "terasologylauncher");
+            final GitHub github = GitHub.connectAnonymously();
+            final GHRepository repository = github.getRepository("MovingBlocks/TerasologyLauncher");
+            final GHRelease latestRelease = repository.getLatestRelease();
             final Semver latestVersion = versionOf(latestRelease);
 
             if (latestVersion.isGreaterThan(currentVersion)) {
@@ -78,7 +79,7 @@ public final class LauncherUpdater {
         return null;
     }
 
-    public boolean showUpdateDialog(Stage parentStage, final GitHubRelease release) {
+    public boolean showUpdateDialog(Stage parentStage, final GHRelease release) {
         FutureTask<Boolean> dialog = getUpdateDialog(parentStage, release);
 
         Platform.runLater(dialog);
@@ -91,7 +92,7 @@ public final class LauncherUpdater {
         return result;
     }
 
-    private FutureTask<Boolean> getUpdateDialog(Stage parentStage, GitHubRelease release) {
+    private FutureTask<Boolean> getUpdateDialog(Stage parentStage, GHRelease release) {
         final String infoText = "  " +
                 BundleUtils.getLabel("message_update_current") +
                 "  " +
