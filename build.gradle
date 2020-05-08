@@ -155,6 +155,11 @@ configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation)Classpath/
             "when available"))
     resolutionStrategy(gradlegoo.prefers("logging", "slf4j-impl-capability",
             "spf4j-slf4j-test", "tests use slf4j-test"))
+
+    // old hamcrest versions exist only to spite us
+    // http://hamcrest.org/JavaHamcrest/distributables#upgrading-from-hamcrest-1x
+    exclude group: "org.hamcrest", module: "hamcrest-core"
+    exclude group: "org.hamcrest", module: "hamcrest-library"
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)

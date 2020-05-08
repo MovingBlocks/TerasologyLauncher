@@ -51,7 +51,7 @@ import java.util.concurrent.TimeoutException;
 import static com.google.common.util.concurrent.Futures.allAsList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.describedAs;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -95,7 +95,6 @@ public class TestRunGameTask {
         assertThat(executor.shutdownNow(), empty());
         executor.awaitTermination(100, TimeUnit.MILLISECONDS);
         assertTrue(executor.isTerminated());
-        assertTrue(gameTask.isDone());
     }
 
     @Test
@@ -181,7 +180,7 @@ public class TestRunGameTask {
         var cause = exc.getCause();
         assertThat(cause, allOf(
                 instanceOf(IOException.class),
-                hasToString(containsStringIgnoringCase("no such file"))
+                hasToString(containsString("No such file"))
        ));
     }
 
