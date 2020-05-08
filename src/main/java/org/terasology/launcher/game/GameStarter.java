@@ -26,11 +26,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-class GameStarterWIP implements Callable<Process> {
+class GameStarter implements Callable<Process> {
     final ProcessBuilder processBuilder;
 
-    GameStarterWIP(Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
-                   LogLevel logLevel) {
+    GameStarter(Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
+                LogLevel logLevel) {
         final List<String> processParameters = new ArrayList<>();
         processParameters.add(getRuntimePath().toString());
 

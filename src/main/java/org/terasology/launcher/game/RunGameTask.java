@@ -53,9 +53,9 @@ public final class RunGameTask extends Task<Boolean> {
 
     public RunGameTask(final Package pkg, final Path gamePath, final BaseLauncherSettings launcherSettings) {
         this.pkg = pkg;
-        this.starter = new GameStarterWIP(gamePath, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
-             launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
-             launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
+        this.starter = new GameStarter(gamePath, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
+                                       launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
+                                       launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
     }
 
     /**

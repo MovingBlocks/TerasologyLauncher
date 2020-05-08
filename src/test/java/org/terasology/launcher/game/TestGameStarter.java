@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.terasology.launcher.Matchers.hasItemsFrom;
 
-public class TestGameStarterWIP {
+public class TestGameStarter {
     static final String JAVA_ARG_1 = "-client";
     static final String JAVA_ARG_2 = "--enable-preview";
     static final String GAME_ARG_1 = "--no-splash";
@@ -58,17 +58,17 @@ public class TestGameStarterWIP {
 
     @Test
     public void testConstruction() {
-        GameStarterWIP starter = newStarter();
+        GameStarter starter = newStarter();
         assertNotNull(starter);
     }
 
-    private GameStarterWIP newStarter() {
-        return new GameStarterWIP(gamePath, gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
+    private GameStarter newStarter() {
+        return new GameStarter(gamePath, gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
     }
 
     @Test
     public void testJre() {
-        GameStarterWIP task = newStarter();
+        GameStarter task = newStarter();
         // This is the sort of test where the code under test and the expectation are just copies
         // of the same source. But since there's a plan to separate the launcher runtime from the
         // game runtime, the runtime location seemed like a good thing to specify in its own test.
@@ -77,7 +77,7 @@ public class TestGameStarterWIP {
 
     @Test
     public void testBuildProcess() {
-        GameStarterWIP starter = newStarter();
+        GameStarter starter = newStarter();
         ProcessBuilder processBuilder = starter.processBuilder;
         final Path gameJar = gamePath.resolve(Path.of("libs", "Terasology.jar"));
 
