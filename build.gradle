@@ -43,7 +43,6 @@ plugins {
 }
 
 apply from: "./config/gradle/jre.gradle"
-apply from: "./config/gradle/swagger.gradle"
 
 // Test for right version of Java in use for running this script
 assert JavaVersion.current().isJava11Compatible()
@@ -100,13 +99,6 @@ dependencies {
     implementation group: 'org.kohsuke', name: 'github-api', version: '1.111'
 
     implementation group: 'com.vdurmont', name: 'semver4j', version: '3.1.0'
-    
-    // For Web API
-    // TODO: extract swagger dependencies into swagger.gradle
-    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.5'
-    if (new File('web-api-client').exists()) {
-        implementation project(':web-api-client')
-    }
 
     // These dependencies are only needed for running tests
 
