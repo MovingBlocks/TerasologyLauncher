@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spf4j.log.Level;
+import org.spf4j.test.log.LogAssert;
 import org.spf4j.test.log.TestLoggers;
 import org.spf4j.test.matchers.LogMatchers;
 import org.terasology.launcher.SlowTest;
@@ -95,6 +96,23 @@ public class TestRunGameTask {
         executor.awaitTermination(100, TimeUnit.MILLISECONDS);
         assertTrue(executor.isTerminated());
         assertTrue(gameTask.isDone());
+    }
+
+    @Test
+    public void testGameOutput() throws InterruptedException, RunGameTask.GameExitError {
+        String[] gameOutputLines = {"LineOne", "LineTwo"};
+        Process gameProcess = new MockProcesses.HappyGameProcess(String.join("\n", gameOutputLines));
+
+        var hasGameOutputFormat = LogMatchers.hasFormatWithPattern("^Game output.*");
+
+        LogAssert detailedExpectation = TestLoggers.sys().expect(RunGameTask.class.getName(), Level.TRACE,
+                                                                 allOf(hasGameOutputFormat, LogMatchers.hasArguments(gameOutputLines[0])),
+                                                                 allOf(hasGameOutputFormat, LogMatchers.hasArguments(gameOutputLines[1]))
+        );
+
+        gameTask.monitorProcess(gameProcess);
+
+        detailedExpectation.assertObservation();
     }
 
     @SlowTest

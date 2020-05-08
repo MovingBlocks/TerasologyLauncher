@@ -136,11 +136,6 @@ dependencies {
         because "spf4j-slf4j-test:8.8 needs slf4j-api:1.x"
     }
 
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.6.+") {
-        because "we haven't yet replaced slf4j-test Runner with a junit5 Extension"
-    }
-    testImplementation "junit:junit:4.+"
-
     testImplementation("org.testfx:testfx-core:4.0.16-alpha") {
         because "to test JavaFX Application"
         // -alpha because that's the only kind of release they have?
