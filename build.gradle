@@ -36,7 +36,6 @@ plugins {
     id 'de.undercouch.download' version '4.0.4'
     id 'java'
     id 'nebula.release' version '14.1.0'
-    id 'org.hidetake.swagger.generator' version '2.18.2'
     id 'pmd'
     id 'project-report'
     id 'org.openjfx.javafxplugin' version '0.0.8'
