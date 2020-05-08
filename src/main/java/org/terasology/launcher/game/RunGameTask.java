@@ -58,16 +58,6 @@ public final class RunGameTask extends Task<Boolean> {
                                        launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
     }
 
-    /**
-     * Invoked when the Task is executed, the call method must be overridden and
-     * implemented by subclasses. The call method actually performs the
-     * background thread logic. Only the updateProgress, updateMessage, updateValue and
-     * updateTitle methods of Task may be called from code within this method.
-     * Any other interaction with the Task from the background thread will result
-     * in runtime exceptions.
-     *
-     * @return The result of the background work, if any.
-     */
     @Override
     protected Boolean call() throws GameStartError, GameExitError, InterruptedException {
         verifyNotNull(this.starter);
