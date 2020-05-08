@@ -16,14 +16,15 @@
 
 package org.terasology.launcher.gui.javafx;
 
-import com.github.rjeschke.txtmark.Configuration;
-import com.github.rjeschke.txtmark.Processor;
 import com.google.common.io.Files;
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
@@ -41,14 +42,16 @@ import java.util.stream.Stream;
 
 /**
  * Controller for the <b>About</b> section in the tab view.
- *
+ * <p>
  * Presents static content which is compiled from Markdown and HTML documents.
  */
 public class AboutViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(AboutViewController.class);
 
-    /** Bundle key for the resources related to this view. */
+    /**
+     * Bundle key for the resources related to this view.
+     */
     private static final String ABOUT = "about";
 
     private static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -63,7 +66,7 @@ public class AboutViewController {
 
     /**
      * Update/reload the <b>About</b> view.
-     *
+     * <p>
      * This will reload and parse the files to display again!
      */
     public void update() {
@@ -122,11 +125,15 @@ public class AboutViewController {
         WebView view = null;
         try (InputStream input = url.openStream()) {
             view = new WebView();
-            String content = new StringBuilder()
-                    .append("<body style='padding-left:24px;'>\n")
-                    .append(Processor.process(input, Configuration.DEFAULT))
-                    .append("</body>")
-                    .toString();
+            Parser parser = Parser.builder().build();
+            Node document = parser.parseReader(new InputStreamReader(input));
+            HtmlRenderer renderer = HtmlRenderer.builder().build();
+            String content =
+                    new StringBuilder()
+                            .append("<body style='padding-left:24px;'>\n")
+                            .append(renderer.render(document))
+                            .append("</body>")
+                            .toString();
             view.getEngine().loadContent(content, "text/html");
         } catch (IOException e) {
             logger.warn("Could not render markdown file: {}", url);
