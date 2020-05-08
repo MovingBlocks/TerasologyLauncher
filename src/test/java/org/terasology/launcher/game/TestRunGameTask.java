@@ -104,9 +104,10 @@ public class TestRunGameTask {
 
         var hasGameOutputFormat = LogMatchers.hasFormatWithPattern("^Game output.*");
 
-        LogAssert detailedExpectation = TestLoggers.sys().expect(RunGameTask.class.getName(), Level.TRACE,
-                                                                 allOf(hasGameOutputFormat, LogMatchers.hasArguments(gameOutputLines[0])),
-                                                                 allOf(hasGameOutputFormat, LogMatchers.hasArguments(gameOutputLines[1]))
+        LogAssert detailedExpectation = TestLoggers.sys().expect(
+                RunGameTask.class.getName(), Level.INFO,
+                allOf(hasGameOutputFormat, LogMatchers.hasArguments(gameOutputLines[0])),
+                allOf(hasGameOutputFormat, LogMatchers.hasArguments(gameOutputLines[1]))
         );
 
         gameTask.monitorProcess(gameProcess);
