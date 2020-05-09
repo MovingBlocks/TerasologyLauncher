@@ -15,4 +15,6 @@ jobs:
         java-version: 14
         java-package: jdk
     - name: Build and test with Gradle
-      run: ./gradlew -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.verbose=true check
+      env:
+        JAVA_TOOL_OPTIONS: -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.verbose=true
+      run: ./gradlew check
