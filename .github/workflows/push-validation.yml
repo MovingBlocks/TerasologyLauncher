@@ -15,4 +15,4 @@ jobs:
         java-version: 14
         java-package: jdk
     - name: Build and test with Gradle
-      run: ./gradlew check
+      run: ./gradlew -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.verbose=true check

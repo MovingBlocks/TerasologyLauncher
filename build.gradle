@@ -142,6 +142,11 @@ dependencies {
     }
     testImplementation "org.testfx:testfx-junit5:4.0.16-alpha"
 
+    testImplementation("org.testfx:openjfx-monocle:[jdk-12.+,jdk-14.+]") {
+        // nobody's uploaded a jdk-14 build yet. does the jdk-12 one work?
+        because "CI builders are headless environments"
+    }
+
     testImplementation("org.threeten:threeten-extra:1.5.0") {
         because "tests use MutableClock"
     }
