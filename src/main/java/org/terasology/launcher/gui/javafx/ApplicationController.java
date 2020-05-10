@@ -226,7 +226,8 @@ public class ApplicationController {
             deleteButton.setDisable(false);
             launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
             launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
-
+            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
+            
             downloadTask = null;
         });
 
