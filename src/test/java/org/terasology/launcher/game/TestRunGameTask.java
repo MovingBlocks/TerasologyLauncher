@@ -87,7 +87,7 @@ public class TestRunGameTask {
         // to tear down for each test? What kind of assertions would we have to make between tests
         // to ensure it's in a clean state?
         executor = singleThreadExecutor("gameTask-%s");
-        gameTask = new RunGameTask(null);
+        gameTask = new RunGameTask();
     }
 
     @AfterEach

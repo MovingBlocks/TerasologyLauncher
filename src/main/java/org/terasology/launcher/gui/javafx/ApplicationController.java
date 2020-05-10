@@ -191,7 +191,7 @@ public class ApplicationController {
         } else {
             final Path gamePath = packageManager.resolveInstallDir(selectedPackage);
 
-            gameService.start(selectedPackage, gamePath, launcherSettings);
+            gameService.start(gamePath, launcherSettings);
         }
     }
 

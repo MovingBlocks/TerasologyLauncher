@@ -18,7 +18,6 @@ package org.terasology.launcher.game;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import javafx.concurrent.Service;
-import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 
 import java.nio.file.Path;
@@ -30,7 +29,6 @@ import static com.google.common.base.Verify.verifyNotNull;
 
 
 public class GameService extends Service<Boolean> {
-    private Package pkg;
     private Path gamePath;
     private BaseLauncherSettings settings;
 
@@ -46,8 +44,7 @@ public class GameService extends Service<Boolean> {
     }
 
     @SuppressWarnings("CheckStyle")
-    public void start(Package pkg, Path gamePath, BaseLauncherSettings settings) {
-        this.pkg = pkg;
+    public void start(Path gamePath, BaseLauncherSettings settings) {
         this.gamePath = gamePath;
         this.settings = settings;
 
@@ -59,7 +56,7 @@ public class GameService extends Service<Boolean> {
 
     @Override
     protected RunGameTask createTask() {
-        return new RunGameTask(verifyNotNull(pkg), verifyNotNull(gamePath), verifyNotNull(settings));
+        return new RunGameTask(verifyNotNull(gamePath), verifyNotNull(settings));
     }
 
     @Override

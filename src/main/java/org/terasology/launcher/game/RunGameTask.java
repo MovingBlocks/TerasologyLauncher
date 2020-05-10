@@ -20,7 +20,6 @@ import com.google.common.base.MoreObjects;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 
 import java.io.BufferedReader;
@@ -42,20 +41,16 @@ final class RunGameTask extends Task<Boolean> {
             .asPredicate();
 
     private static final Logger logger = LoggerFactory.getLogger(RunGameTask.class);
-    public final Package pkg;
     protected Callable<Process> starter;
     private boolean valueSet;
 
-    protected RunGameTask(Package pkg) {
-        this.pkg = pkg;
-    }
-
-    RunGameTask(final Package pkg, final Path gamePath, final BaseLauncherSettings launcherSettings) {
-        this.pkg = pkg;
+    RunGameTask(final Path gamePath, final BaseLauncherSettings launcherSettings) {
         this.starter = new GameStarter(gamePath, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
                                        launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
                                        launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
     }
+
+    RunGameTask() { }
 
     @Override
     protected Boolean call() throws GameStartError, GameExitError, InterruptedException {
