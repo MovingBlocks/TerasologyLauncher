@@ -19,6 +19,7 @@ package org.terasology.launcher.gui.javafx;
 import javafx.animation.Transition;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.WorkerStateEvent;
@@ -67,8 +68,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 public class ApplicationController {
 
@@ -197,18 +196,21 @@ public class ApplicationController {
 
             // TODO: alternate success conditions
             //   - stayed alive long enough
-            //   - valueProperty becomes true
-            runGameTask.setOnSucceeded(this::handleRunSuccess);
+            runGameTask.valueProperty().addListener(this::handleRunStarted);
 
             gameService.execute(runGameTask);
         }
     }
 
-    private void handleRunSuccess(WorkerStateEvent event) {
-        checkArgument(event.getEventType() == WorkerStateEvent.WORKER_STATE_SUCCEEDED);
-        RunGameTask task = (RunGameTask) event.getSource();
+    private <T> void handleRunStarted(ObservableValue<T> o, Boolean oldValue, Boolean newValue) {
+        if (newValue == null || !newValue) {
+            logger.warn("{} became {}", o, newValue);
+            return;
+        }
 
-        logger.debug("Controller sees RunGameTask as successful! {} {}", event, task);
+        RunGameTask task = (RunGameTask) ((SimpleObjectProperty<T>) o).getBean();
+
+        logger.debug("Game has started successfully.");
 
         launcherSettings.setLastPlayedGameJob(task.pkg.getId());
         launcherSettings.setLastPlayedGameVersion(task.pkg.getVersion());
