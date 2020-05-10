@@ -21,9 +21,7 @@ import javafx.concurrent.Service;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 
 import java.nio.file.Path;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
 
 import static com.google.common.base.Verify.verifyNotNull;
 
@@ -33,14 +31,12 @@ public class GameService extends Service<Boolean> {
     private BaseLauncherSettings settings;
 
     public GameService() {
-        setExecutor(new ThreadPoolExecutor(
-                1, 1,
-                0, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(1),
-                new ThreadFactoryBuilder()
-                        .setNameFormat("GameService-%d")
-                        .setDaemon(true)   // TODO: also UncaughtExceptionHandler
-                        .build()));
+        setExecutor(Executors.newSingleThreadExecutor(
+            new ThreadFactoryBuilder()
+                    .setNameFormat("GameService-%d")
+                    .setDaemon(true)   // TODO: also UncaughtExceptionHandler
+                    .build()
+        ));
     }
 
     @SuppressWarnings("CheckStyle")
@@ -61,11 +57,11 @@ public class GameService extends Service<Boolean> {
 
     @Override
     protected void succeeded() {
-        reset();
+        reset();  // Ready to go again!
     }
 
     @Override
     protected void failed() {
-        reset();
+        reset();  // Ready to try again!
     }
 }
