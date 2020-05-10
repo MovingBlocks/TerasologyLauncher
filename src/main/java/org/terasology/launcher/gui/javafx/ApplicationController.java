@@ -441,8 +441,15 @@ public class ApplicationController {
         cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
         cancelDownloadButton.setVisible(false);
+        
+        if (!selectedPackage.isInstalled()) {
+            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
+        } else {
+            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
 
-        startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
+        }
+
+        
         startAndDownloadButton.managedProperty().bind(startAndDownloadButton.visibleProperty());
         startAndDownloadButton.setGraphic(downloadImage);
 
