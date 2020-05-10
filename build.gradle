@@ -142,13 +142,17 @@ dependencies {
 }
 
 configurations.named("testRuntimeClasspath") {
-    gradlegoo.prefers(getResolutionStrategy(), "logging", "jcl-api-capability", "jcl-over-slf4j", "jcl should prefer slf4j when available")
-    gradlegoo.prefers(getResolutionStrategy(), "logging", "slf4j-impl-capability", "spf4j-slf4j-test", "tests use slf4j-test")
+    resolutionStrategy(gradlegoo.prefers("logging", "jcl-api-capability", "jcl-over-slf4j", "jcl should prefer slf4j " +
+            "when available"));
+    resolutionStrategy(gradlegoo.prefers("logging", "slf4j-impl-capability",
+            "spf4j-slf4j-test", "tests use slf4j-test"));
 }
 
 configurations.named("testCompileClasspath") {
-    gradlegoo.prefers(getResolutionStrategy(), "logging", "jcl-api-capability", "jcl-over-slf4j", "jcl should prefer slf4j when available")
-    gradlegoo.prefers(getResolutionStrategy(), "logging", "slf4j-impl-capability", "spf4j-slf4j-test", "tests use slf4j-test")
+    resolutionStrategy(gradlegoo.prefers("logging", "jcl-api-capability", "jcl-over-slf4j", "jcl should prefer slf4j " +
+            "when available"));
+    resolutionStrategy(gradlegoo.prefers("logging", "slf4j-impl-capability",
+            "spf4j-slf4j-test", "tests use slf4j-test"));
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
