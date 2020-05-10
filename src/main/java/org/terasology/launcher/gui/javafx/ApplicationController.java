@@ -446,10 +446,8 @@ public class ApplicationController {
             startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
         } else {
             startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
-
         }
 
-        
         startAndDownloadButton.managedProperty().bind(startAndDownloadButton.visibleProperty());
         startAndDownloadButton.setGraphic(downloadImage);
 
