@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 
-public final class RunGameTask extends Task<Boolean> {
+final class RunGameTask extends Task<Boolean> {
     static final int EXIT_CODE_OK = 0;
 
     // We'll only see this if the game's log level is INFO or higher, but it is by default.
@@ -50,7 +50,7 @@ public final class RunGameTask extends Task<Boolean> {
         this.pkg = pkg;
     }
 
-    public RunGameTask(final Package pkg, final Path gamePath, final BaseLauncherSettings launcherSettings) {
+    RunGameTask(final Package pkg, final Path gamePath, final BaseLauncherSettings launcherSettings) {
         this.pkg = pkg;
         this.starter = new GameStarter(gamePath, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
                                        launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),

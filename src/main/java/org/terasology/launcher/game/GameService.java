@@ -17,6 +17,7 @@
 package org.terasology.launcher.game;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import javafx.concurrent.Service;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 
@@ -25,45 +26,49 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.base.Verify.verifyNotNull;
 
-/**
- * TODO: interface for Controller to bind success/fail handlers to this, instead
- *         of re-binding to each Task.
- * TODO: would it help to make this a Guava Service or JavaFX Service?
- */
-public class GameService {
-    private final ThreadPoolExecutor executor;
+
+public class GameService extends Service<Boolean> {
+    private Package pkg;
+    private Path gamePath;
+    private BaseLauncherSettings settings;
 
     public GameService() {
-        // Constructing a ThreadPoolExecutor instead of using Executors.newSingleThreadExecutor
-        // because ExecutorService has no getActiveCount.
-        executor = new ThreadPoolExecutor(
+        setExecutor(new ThreadPoolExecutor(
                 1, 1,
                 0, TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(1),
                 new ThreadFactoryBuilder()
                         .setNameFormat("GameService-%d")
                         .setDaemon(true)   // TODO: also UncaughtExceptionHandler
-                        .build());
+                        .build()));
     }
 
-    public boolean isRunning() {
-        return executor.getActiveCount() > 0;
+    @SuppressWarnings("CheckStyle")
+    public void start(Package pkg, Path gamePath, BaseLauncherSettings settings) {
+        this.pkg = pkg;
+        this.gamePath = gamePath;
+        this.settings = settings;
+
+        // TODO: alternate success conditions
+        //   - stayed alive long enough
+
+        start();
     }
 
-    /**
-     * Create a new task for these game settings.
-     *
-     * Returns a task that has not yet been started.
-     *
-     * TODO: This can probably be hidden from the public interface.
-     *
-     */
-    public RunGameTask createTask(Package pkg, Path gamePath, BaseLauncherSettings settings) {
-        return new RunGameTask(pkg, gamePath, settings);
+    @Override
+    protected RunGameTask createTask() {
+        return new RunGameTask(verifyNotNull(pkg), verifyNotNull(gamePath), verifyNotNull(settings));
     }
 
-    public void execute(RunGameTask task) {
-        executor.execute(task);
+    @Override
+    protected void succeeded() {
+        reset();
+    }
+
+    @Override
+    protected void failed() {
+        reset();
     }
 }

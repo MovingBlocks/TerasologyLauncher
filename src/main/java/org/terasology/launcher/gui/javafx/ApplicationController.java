@@ -49,7 +49,6 @@ import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameService;
-import org.terasology.launcher.game.RunGameTask;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
@@ -125,6 +124,8 @@ public class ApplicationController {
     public ApplicationController() {
         warning = new SimpleObjectProperty<>(Optional.empty());
         gameService = new GameService();
+        gameService.setOnFailed(this::handleRunFailed);
+        gameService.valueProperty().addListener(this::handleRunStarted);
     }
 
     @FXML
@@ -190,30 +191,19 @@ public class ApplicationController {
         } else {
             final Path gamePath = packageManager.resolveInstallDir(selectedPackage);
 
-            var runGameTask = gameService.createTask(selectedPackage, gamePath, launcherSettings);
-
-            runGameTask.setOnFailed(this::handleRunFailed);
-
-            // TODO: alternate success conditions
-            //   - stayed alive long enough
-            runGameTask.valueProperty().addListener(this::handleRunStarted);
-
-            gameService.execute(runGameTask);
+            gameService.start(selectedPackage, gamePath, launcherSettings);
         }
     }
 
-    private <T> void handleRunStarted(ObservableValue<T> o, Boolean oldValue, Boolean newValue) {
+    private void handleRunStarted(ObservableValue<? extends Boolean> o, Boolean oldValue, Boolean newValue) {
         if (newValue == null || !newValue) {
-            logger.warn("{} became {}", o, newValue);
             return;
         }
 
-        RunGameTask task = (RunGameTask) ((SimpleObjectProperty<T>) o).getBean();
-
         logger.debug("Game has started successfully.");
 
-        launcherSettings.setLastPlayedGameJob(task.pkg.getId());
-        launcherSettings.setLastPlayedGameVersion(task.pkg.getVersion());
+        launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
+        launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
 
         if (launcherSettings.isCloseLauncherAfterGameStart()) {
             if (downloadTask == null) {
