@@ -21,6 +21,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -47,6 +48,7 @@ import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameService;
+import org.terasology.launcher.game.RunGameTask;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
@@ -65,6 +67,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 public class ApplicationController {
 
@@ -189,28 +193,38 @@ public class ApplicationController {
 
             var runGameTask = gameService.createTask(selectedPackage, gamePath, launcherSettings);
 
-            runGameTask.setOnFailed(
-                event -> GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart")));
+            runGameTask.setOnFailed(this::handleRunFailed);
 
             // TODO: alternate success conditions
             //   - stayed alive long enough
             //   - valueProperty becomes true
-            runGameTask.setOnSucceeded(event -> {
-                launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
-                launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
-
-                if (launcherSettings.isCloseLauncherAfterGameStart()) {
-                    if (downloadTask == null) {
-                        logger.info("Close launcher after game start.");
-                        close();
-                    } else {
-                        logger.info("The launcher can not be closed after game start, because a download is running.");
-                    }
-                }
-            });
+            runGameTask.setOnSucceeded(this::handleRunSuccess);
 
             gameService.execute(runGameTask);
         }
+    }
+
+    private void handleRunSuccess(WorkerStateEvent event) {
+        checkArgument(event.getEventType() == WorkerStateEvent.WORKER_STATE_SUCCEEDED);
+        RunGameTask task = (RunGameTask) event.getSource();
+
+        logger.debug("Controller sees RunGameTask as successful! {} {}", event, task);
+
+        launcherSettings.setLastPlayedGameJob(task.pkg.getId());
+        launcherSettings.setLastPlayedGameVersion(task.pkg.getVersion());
+
+        if (launcherSettings.isCloseLauncherAfterGameStart()) {
+            if (downloadTask == null) {
+                logger.info("Close launcher after game start.");
+                close();
+            } else {
+                logger.info("The launcher can not be closed after game start, because a download is running.");
+            }
+        }
+    }
+
+    void handleRunFailed(WorkerStateEvent event) {
+        GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
     }
 
     private void downloadAction() {
@@ -320,8 +334,8 @@ public class ApplicationController {
 
         initializeComboBoxSelection();
     }
-
     // To be called after database sync is done
+
     private void onSync() {
         packageItems.clear();
         packageManager.getPackages()

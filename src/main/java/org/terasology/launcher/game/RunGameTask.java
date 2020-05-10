@@ -38,13 +38,12 @@ public final class RunGameTask extends Task<Boolean> {
     static final int EXIT_CODE_OK = 0;
 
     // We'll only see this if the game's log level is INFO or higher, but it is by default.
-    static final Predicate<String> START_MATCH = Pattern.compile("TerasologyEngine.+Initialization completed").asPredicate();
+    static final Predicate<String> START_MATCH = Pattern.compile("TerasologyEngine.+Initialization completed")
+            .asPredicate();
 
     private static final Logger logger = LoggerFactory.getLogger(RunGameTask.class);
-
+    public final Package pkg;
     protected Callable<Process> starter;
-
-    private final Package pkg;
     private boolean valueSet;
 
     protected RunGameTask(Package pkg) {
