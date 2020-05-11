@@ -337,8 +337,8 @@ public class ApplicationController {
 
         initializeComboBoxSelection();
     }
-    // To be called after database sync is done
 
+    /** To be called after database sync is done. */
     private void onSync() {
         packageItems.clear();
         packageManager.getPackages()
