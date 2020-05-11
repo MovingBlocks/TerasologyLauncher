@@ -16,6 +16,8 @@
 
 package org.terasology.launcher.gui.javafx;
 
+import ch.qos.logback.classic.pattern.RootCauseFirstThrowableProxyConverter;
+import ch.qos.logback.classic.pattern.ThrowableHandlingConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import javafx.concurrent.ScheduledService;
@@ -35,12 +37,14 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
     private final StringBuffer buffer;
+    private final ThrowableHandlingConverter throwableConverter;
 
     @FXML
     private TextArea logArea;
 
     public LogViewController() {
         buffer = new StringBuffer();
+        throwableConverter = new RootCauseFirstThrowableProxyConverter();
 
         ScheduledService<Void> schedule = new ScheduledService<Void>() {
             @Override
@@ -81,5 +85,11 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
         buffer.append(String.format("%s | %-5s | ", DATE_FORMATTER.format(timestamp), loggingEvent.getLevel()));
         buffer.append(message);
         buffer.append("\n");
+
+        var error = loggingEvent.getThrowableProxy();
+        if (error != null) {
+            var s = throwableConverter.convert(loggingEvent);
+            buffer.append(s);
+        }
     }
 }
