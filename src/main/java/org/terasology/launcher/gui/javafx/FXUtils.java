@@ -45,7 +45,7 @@ public final class FXUtils {
     /**
      * Provides factory methods for timers that are manipulated from and execute their action on the JavaFX application
      * thread.
-     *
+     * <p>
      * Derived from ReactFX.
      *
      * @see <a href="https://github.com/TomasMikula/ReactFX/blob/v2.0-M5/reactfx/src/main/java/org/reactfx/util/FxTimer.java">ReactFX</a>
