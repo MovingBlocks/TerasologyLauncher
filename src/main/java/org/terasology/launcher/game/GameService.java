@@ -87,7 +87,7 @@ public class GameService extends Service<Boolean> {
 
     /**
      * Use {@link #start(Path, BaseLauncherSettings)} instead.
-     *
+     * <p>
      * It is an error to call this method before providing the configuration.
      */
     @Override
@@ -115,7 +115,7 @@ public class GameService extends Service<Boolean> {
 
     /**
      * Restarting is unsupported. Do not attempt this method.
-     *
+     * <p>
      * See {@link #cancel()} for rationale.
      */
     @Override
@@ -125,7 +125,7 @@ public class GameService extends Service<Boolean> {
 
     /**
      * Creates a new task to run the game with the current settings.
-     *
+     * <p>
      * This class's configuration fields <em>must</em> be set before this is called.
      *
      * @throws com.google.common.base.VerifyException when fields are unset
@@ -140,17 +140,13 @@ public class GameService extends Service<Boolean> {
         return new RunGameTask(starter);
     }
 
-    /**
-     * After a task completes, reset to ready for the next.
-     */
+    /** After a task completes, reset to ready for the next. */
     @Override
     protected void succeeded() {
         reset();  // Ready to go again!
     }
 
-    /**
-     * Checks to see if the failure left any exceptions behind, then resets to ready.
-     */
+    /** Checks to see if the failure left any exceptions behind, then resets to ready. */
     @Override
     protected void failed() {
         // "Uncaught" exceptions from javafx's Task are actually caught and kept in a property,
