@@ -36,6 +36,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -216,6 +218,15 @@ public class ApplicationController {
     }
 
     void handleRunFailed(WorkerStateEvent event) {
+        TabPane tabPane = (TabPane) stage.getScene().lookup("#contentTabPane");
+        if (tabPane != null) {
+            var tab = tabPane.lookup("#logTab");
+            tabPane.getSelectionModel().select((Tab) tab.getProperties().get(Tab.class));
+        } else {
+            // We're already in error-handling mode here, so avoid bailing with verifyNotNull
+            logger.warn("Failed to locate tab pane.");
+        }
+
         GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
     }
 
