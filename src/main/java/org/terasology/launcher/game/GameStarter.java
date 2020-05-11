@@ -50,7 +50,9 @@ class GameStarter implements Callable<Process> {
         processParameters.add("-homedir=" + gameDataDirectory.toAbsolutePath().toString());
         processParameters.addAll(gameParams);
 
-        processBuilder = new ProcessBuilder(processParameters).directory(gamePath.toFile());
+        processBuilder = new ProcessBuilder(processParameters)
+                .directory(gamePath.toFile())
+                .redirectErrorStream(true);
     }
 
     @Override
