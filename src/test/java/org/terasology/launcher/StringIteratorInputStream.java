@@ -18,11 +18,25 @@ package org.terasology.launcher;
 
 import com.google.common.primitives.Ints;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * An {@code InputStream} fed by an {@code Iterator<String>}.
+ * <p>
+ * Testing something that consumes an {@link InputStream} {@linkplain BufferedReader#lines() line-by-line}? Your test
+ * fixture has a list of strings to use as inputs; how hard could it be to get an InputStream that will pass them one
+ * at a time?
+ * <p>
+ * About this hard, it turns out.
+ * <p>
+ * This was <strong>not</strong> written with high-volume or high-throughput use cases in mind. It will handle a few
+ * lines (or even a few kilobytes) in your test suite just fine. I do not recommend you run your server
+ * traffic through it.
+ */
 public class StringIteratorInputStream extends InputStream {
     static final int COOLDOWN_LENGTH = 1;
 
@@ -47,6 +61,7 @@ public class StringIteratorInputStream extends InputStream {
                 return 0;
             }
             if (!loadNextLine()) {
+                // there's no more to be had. for real this time!
                 return 0;
             }
         }
@@ -76,7 +91,7 @@ public class StringIteratorInputStream extends InputStream {
             return 0;
         }
         // Even if available() says we're empty, our superclass wants us to try
-        // to come at least one byte, blocking if necessary. Otherwise
+        // to come up with at least one byte, blocking if necessary. Otherwise
         // StreamDecoder.readBytes says "Underlying input stream returned zero bytes"
         // and implodes.
         @SuppressWarnings("UnstableApiUsage") var availableLength =
@@ -96,6 +111,9 @@ public class StringIteratorInputStream extends InputStream {
         cooldown = COOLDOWN_LENGTH;
     }
 
+    /**
+     * @return true when it succeeds in getting the next line, false when the input source has no more
+     */
     private boolean loadNextLine() {
         try {
             final String nextString = source.next();
