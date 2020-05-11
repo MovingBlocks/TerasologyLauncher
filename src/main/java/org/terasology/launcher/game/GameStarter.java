@@ -26,9 +26,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+/**
+ * Takes the game and runtime options, provides something that will launch a process.
+ *
+ * @see <a href="https://docs.oracle.com/en/java/javase/14/docs/specs/man/java.html#overview-of-java-options">java command manual</a>
+ */
 class GameStarter implements Callable<Process> {
     final ProcessBuilder processBuilder;
 
+    /**
+     * @param gamePath the directory under which we will find {@code libs/Terasology.jar}, also used as the process's
+     *     working directory
+     * @param gameDataDirectory {@code -homedir}, the directory where Terasology's data files (saves & etc) are kept
+     * @param heapMin java's {@code -Xms}
+     * @param heapMax java's {@code -Xmx}
+     * @param javaParams additional arguments for the {@code java} command line
+     * @param gameParams additional arguments for the Terasology command line
+     * @param logLevel the minimum level of log events Terasology will include on its output stream to us
+     */
     GameStarter(Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
                 LogLevel logLevel) {
         final List<String> processParameters = new ArrayList<>();
@@ -55,11 +70,20 @@ class GameStarter implements Callable<Process> {
                 .redirectErrorStream(true);
     }
 
+    /**
+     * Start the game in a new process.
+     *
+     * @return the newly started process
+     * @throws IOException from {@link ProcessBuilder#start()}
+     */
     @Override
     public Process call() throws IOException {
         return processBuilder.start();
     }
 
+    /**
+     * @return the executable {@code java} file to run the game with
+     */
     Path getRuntimePath() {
         return Paths.get(System.getProperty("java.home"), "bin", "java");
     }
