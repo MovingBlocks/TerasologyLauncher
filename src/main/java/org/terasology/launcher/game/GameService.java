@@ -18,6 +18,8 @@ package org.terasology.launcher.game;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import javafx.concurrent.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 
 import java.nio.file.Path;
@@ -27,6 +29,8 @@ import static com.google.common.base.Verify.verifyNotNull;
 
 
 public class GameService extends Service<Boolean> {
+    private static final Logger logger = LoggerFactory.getLogger(GameService.class);
+
     private Path gamePath;
     private BaseLauncherSettings settings;
 
@@ -34,7 +38,8 @@ public class GameService extends Service<Boolean> {
         setExecutor(Executors.newSingleThreadExecutor(
             new ThreadFactoryBuilder()
                     .setNameFormat("GameService-%d")
-                    .setDaemon(true)   // TODO: also UncaughtExceptionHandler
+                    .setDaemon(true)
+                    .setUncaughtExceptionHandler(this::exceptionHandler)
                     .build()
         ));
     }
@@ -57,6 +62,10 @@ public class GameService extends Service<Boolean> {
         return new RunGameTask(starter);
     }
 
+    private void exceptionHandler(Thread thread, Throwable thrown) {
+        logger.error("Unhandled exception", thrown);
+    }
+
     @Override
     protected void succeeded() {
         reset();  // Ready to go again!
@@ -64,6 +73,12 @@ public class GameService extends Service<Boolean> {
 
     @Override
     protected void failed() {
+        // "Uncaught" exceptions from javafx's Task are actually caught and kept in a property,
+        // so if we want them logged we have to explicitly dig them out.
+        var error = getException();
+        if (error != null) {
+            exceptionHandler(Thread.currentThread(), error);
+        }
         reset();  // Ready to try again!
     }
 }
