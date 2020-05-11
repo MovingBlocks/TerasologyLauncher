@@ -120,7 +120,9 @@ public class ApplicationController {
      * Indicate whether the user's hard drive is running out of space for game downloads.
      */
     private final Property<Optional<Warning>> warning;
-
+    private Property<Tooltip> playButtonTooltip;
+    private Property<Package> selectedPackageProperty;
+    
     public ApplicationController() {
         warning = new SimpleObjectProperty(Optional.empty());
     }
@@ -352,6 +354,13 @@ public class ApplicationController {
                         item.getVersion().equals(launcherSettings.getLastPlayedGameVersion()));
             }
         });
+        
+        selectedPackageProperty.addListener(
+            (observable, oldValue, newValue) -> {
+            Tooltip t = new Tooltip(BundleUtils.getLabel(
+                    newValue.isInstalled() ?"launcher_start" : "launcher_download"));
+            playButtonTooltip.setValue(t);
+        });
 
         buildVersionBox.setCellFactory(list -> new VersionListCell());
         buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -362,6 +371,7 @@ public class ApplicationController {
             selectedPackage = newVal.getLinkedPackage();
 
             if (selectedPackage != null && selectedPackage.isInstalled()) {
+                selectedPackageProperty.setValue(selectedPackage);
                 startAndDownloadButton.setGraphic(playImage);
                 deleteButton.setDisable(false);
             } else {
@@ -442,11 +452,8 @@ public class ApplicationController {
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
         cancelDownloadButton.setVisible(false);
         
-        if (!selectedPackage.isInstalled()) {
-            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
-        } else {
-            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
-        }
+        playButtonTooltip = new SimpleObjectProperty<>(new Tooltip(BundleUtils.getLabel("launcher_download")));
+        startAndDownloadButton.tooltipProperty().bind(playButtonTooltip);
 
         startAndDownloadButton.managedProperty().bind(startAndDownloadButton.visibleProperty());
         startAndDownloadButton.setGraphic(downloadImage);
