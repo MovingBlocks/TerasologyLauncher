@@ -20,6 +20,7 @@ import com.google.common.base.MoreObjects;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.terasology.launcher.gui.javafx.FXUtils;
 
 import java.io.BufferedReader;
@@ -33,23 +34,71 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 
+/**
+ * Starts and manages a game process.
+ * <p>
+ * Many of the characteristics of this task are described in {@link GameService}, as it's the expected access point to
+ * this.
+ * <p>
+ * (An individual {@link Task} lasts as long as the process does, the {@link javafx.concurrent.Service Service}
+ * provides a stable reference that doesn't have to be updated with each new task.)
+ * <p>
+ * Beware javafx's treatment of exceptions that come up in {@link Task Tasks}. An uncaught exception will be stored
+ * in its {@link #exceptionProperty()} and never see its way to an executor's uncaught exception handler. It won't be
+ * until you call this object's {@link #get()} that it will be thrown again.
+ */
 final class RunGameTask extends Task<Boolean> {
     static final int EXIT_CODE_OK = 0;
-    static final Duration SURVIVAL_THRESHOLD = Duration.ofSeconds(10);
 
-    // We'll only see this if the game's log level is INFO or higher, but it is by default.
+    /**
+     * The output of the process is tested against this for a sign that it launched successfully.
+     * <p>
+     * (We don't yet have a formal protocol about this with Terasology, so it won't show up if its minimum log level is
+     * higher than {@link Level#INFO INFO}. But the default is to include {@link Level#INFO INFO}, so this should often
+     * work.)
+     */
     static final Predicate<String> START_MATCH = Pattern.compile("TerasologyEngine.+Initialization completed")
             .asPredicate();
 
+    /**
+     * How long a process has to live in order for us to call it successful.
+     * <p>
+     * If there's no output with {@link #START_MATCH} and it hasn't crashed after being up this long, it's probably
+     * okay.
+     */
+    static final Duration SURVIVAL_THRESHOLD = Duration.ofSeconds(10);
+
     private static final Logger logger = LoggerFactory.getLogger(RunGameTask.class);
-    protected Callable<Process> starter;
+
+    protected final Callable<Process> starter;
+
+    /**
+     * Indicates whether we have set the {@link Task#updateValue value} of this Task yet.
+     * <p>
+     * The value is stored in a {@link javafx.beans.property.SimpleObjectProperty property} we can't directly
+     * access from this task's thread, so it remembers it here.
+     */
     private boolean valueSet;
+
     private FXUtils.FxTimer successTimer;
 
+    /**
+     * @param starter called as soon as the Task starts to start a new process
+     */
     RunGameTask(Callable<Process> starter) {
         this.starter = starter;
     }
 
+    /**
+     * Starts the process, returns when it's done.
+     *
+     * @return true when the process exits with no error code
+     * @throws GameStartError if the process failed to start at all
+     * @throws GameExitError if the process terminates with an error code
+     * @throws InterruptedException if this thread was interrupted while waiting for something —
+     *     doesn't come up as much as you might expect, because waiting on a {@code read} call
+     *     of the process's output <em>can not be interrupted</em> (Java's rule, not ours)
+     */
     @Override
     protected Boolean call() throws GameStartError, GameExitError, InterruptedException {
         verifyNotNull(this.starter);
@@ -64,6 +113,11 @@ final class RunGameTask extends Task<Boolean> {
         return true;
     }
 
+    /**
+     * Monitors the output and exit status of a process.
+     *
+     * @param process the running process
+     */
     void monitorProcess(Process process) throws InterruptedException, GameExitError {
         checkNotNull(process);
         logger.debug("Game process is {}", process);
@@ -93,6 +147,13 @@ final class RunGameTask extends Task<Boolean> {
         }
     }
 
+    /**
+     * Called with each line of the process's output.
+     * <p>
+     * Expect the Process has {@linkplain ProcessBuilder#redirectErrorStream() merged output and error streams}.
+     *
+     * @param line a line of output, decoded to String, with trailing newline stripped
+     */
     protected void handleOutputLine(String line) {
         if ((!valueSet) && START_MATCH.test(line)) {
             declareSurvival();
@@ -101,14 +162,12 @@ final class RunGameTask extends Task<Boolean> {
     }
 
     private void declareSurvival() {
-        // we have an extra flag just for this because we can't check
-        // the content of valueProperty in this thread.
         valueSet = true;
         this.updateValue(true);
         removeTimer();
     }
 
-    protected void timerComplete() {
+    private void timerComplete() {
         logger.debug("Process has been alive at least {}, calling it good.", SURVIVAL_THRESHOLD);
         declareSurvival();
     }
@@ -127,6 +186,11 @@ final class RunGameTask extends Task<Boolean> {
 
     public abstract static class RunGameError extends Exception { }
 
+    /**
+     * The process failed to start.
+     * <p>
+     * Check its {@link #getCause() cause}.
+     */
     public static class GameStartError extends RunGameError {
         GameStartError(final Exception e) {
             super();
@@ -139,6 +203,11 @@ final class RunGameTask extends Task<Boolean> {
         }
     }
 
+    /**
+     * The process quit with an {@linkplain #exitValue error code}.
+     * <p>
+     * These codes are platform-dependent. All know for sure is that it is not {@link #EXIT_CODE_OK}.
+     */
     public static class GameExitError extends RunGameError {
         public final int exitValue;
 
