@@ -73,7 +73,6 @@ public class TestRunGameTask {
     static final int EXIT_CODE_SIGTERM = 0b10000000 + 15;  // SIGTERM = 15
 
     private ExecutorService executor;
-    private RunGameTask gameTask;
 
     @SuppressWarnings("SameParameterValue")
     static ExecutorService singleThreadExecutor(String nameFormat) {
@@ -87,7 +86,6 @@ public class TestRunGameTask {
         // to tear down for each test? What kind of assertions would we have to make between tests
         // to ensure it's in a clean state?
         executor = singleThreadExecutor("gameTask-%s");
-        gameTask = new RunGameTask();
     }
 
     @AfterEach
@@ -110,7 +108,7 @@ public class TestRunGameTask {
                 allOf(hasGameOutputFormat, LogMatchers.hasArguments(gameOutputLines[1]))
         );
 
-        gameTask.monitorProcess(gameProcess);
+        new RunGameTask(null).monitorProcess(gameProcess);
 
         detailedExpectation.assertObservation();
     }
@@ -118,7 +116,7 @@ public class TestRunGameTask {
     @SlowTest
     @DisabledOnOs(OS.WINDOWS)
     public void testGameExitSuccessful() throws InterruptedException, ExecutionException {
-        gameTask.starter = UnixProcesses.COMPLETES_SUCCESSFULLY;
+        var gameTask = new RunGameTask(UnixProcesses.COMPLETES_SUCCESSFULLY);
 
         // we can use TestLogger expectations without Slf4jTestRunner, we just can't
         // depend on their annotations. I think.
@@ -139,7 +137,7 @@ public class TestRunGameTask {
     @Test
     @DisabledOnOs(OS.WINDOWS)
     public void testGameExitError() {
-        gameTask.starter = UnixProcesses.COMPLETES_WITH_ERROR;
+        var gameTask = new RunGameTask(UnixProcesses.COMPLETES_WITH_ERROR);
 
         var hasExitMessage = TestLoggers.sys().expect(
                 RunGameTask.class.getName(), Level.DEBUG,
@@ -160,7 +158,7 @@ public class TestRunGameTask {
 
     @Test
     public void testBadStarter() {
-        gameTask.starter = MockProcesses.EXCEPTION_THROWING_START;
+        var gameTask = new RunGameTask(MockProcesses.EXCEPTION_THROWING_START);
 
         executor.submit(gameTask);
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
@@ -172,7 +170,7 @@ public class TestRunGameTask {
     @SlowTest
     public void testExeNotFound() {
         // not disabled-on-Windows because all platforms should be capable of failing
-        gameTask.starter = UnixProcesses.NO_SUCH_COMMAND;
+        var gameTask = new RunGameTask(UnixProcesses.NO_SUCH_COMMAND);
 
         executor.submit(gameTask);
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
@@ -188,7 +186,7 @@ public class TestRunGameTask {
     @SlowTest
     @DisabledOnOs(OS.WINDOWS)
     public void testTerminatedProcess() {
-        gameTask.starter = new UnixProcesses.SelfDestructingProcess(5);
+        var gameTask = new RunGameTask(new UnixProcesses.SelfDestructingProcess(5));
 
         executor.submit(gameTask);
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
@@ -218,14 +216,14 @@ public class TestRunGameTask {
             WaitForAsyncUtils.waitForFxEvents(1);
         };
 
-        gameTask.starter = () -> new MockProcesses.OneLineAtATimeProcess(
+        var gameTask = new RunGameTask(() -> new MockProcesses.OneLineAtATimeProcess(
                 spyingIterator(List.of(
                         "some babble\n",
                         confirmedStart + "\n",
                         "more babble\n",
                         "have a nice day etc\n"
                 ), handleAdvance)
-        );
+        ));
 
         final SettableFuture<Boolean> theValue = SettableFuture.create();
         final SettableFuture<Instant> gotValueAt = SettableFuture.create();

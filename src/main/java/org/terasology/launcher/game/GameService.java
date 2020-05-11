@@ -49,7 +49,12 @@ public class GameService extends Service<Boolean> {
 
     @Override
     protected RunGameTask createTask() {
-        return new RunGameTask(verifyNotNull(gamePath), verifyNotNull(settings));
+        verifyNotNull(settings);
+        var starter = new GameStarter(verifyNotNull(gamePath), settings.getGameDataDirectory(),
+                                      settings.getMaxHeapSize(), settings.getInitialHeapSize(),
+                                      settings.getUserJavaParameterList(), settings.getUserGameParameterList(),
+                                      settings.getLogLevel());
+        return new RunGameTask(starter);
     }
 
     @Override

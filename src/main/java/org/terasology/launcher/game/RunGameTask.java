@@ -21,11 +21,9 @@ import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.gui.javafx.FXUtils;
-import org.terasology.launcher.settings.BaseLauncherSettings;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
@@ -48,13 +46,9 @@ final class RunGameTask extends Task<Boolean> {
     private boolean valueSet;
     private FXUtils.FxTimer successTimer;
 
-    RunGameTask(final Path gamePath, final BaseLauncherSettings launcherSettings) {
-        this.starter = new GameStarter(gamePath, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
-                                       launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
-                                       launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
+    RunGameTask(Callable<Process> starter) {
+        this.starter = starter;
     }
-
-    RunGameTask() { }
 
     @Override
     protected Boolean call() throws GameStartError, GameExitError, InterruptedException {
