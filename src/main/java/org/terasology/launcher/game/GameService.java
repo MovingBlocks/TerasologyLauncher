@@ -44,9 +44,6 @@ public class GameService extends Service<Boolean> {
         this.gamePath = gamePath;
         this.settings = settings;
 
-        // TODO: alternate success conditions
-        //   - stayed alive long enough
-
         start();
     }
 

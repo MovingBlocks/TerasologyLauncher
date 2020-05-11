@@ -20,11 +20,13 @@ import com.google.common.base.MoreObjects;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.gui.javafx.FXUtils;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -35,6 +37,7 @@ import static com.google.common.base.Verify.verifyNotNull;
 
 final class RunGameTask extends Task<Boolean> {
     static final int EXIT_CODE_OK = 0;
+    static final Duration SURVIVAL_THRESHOLD = Duration.ofSeconds(10);
 
     // We'll only see this if the game's log level is INFO or higher, but it is by default.
     static final Predicate<String> START_MATCH = Pattern.compile("TerasologyEngine.+Initialization completed")
@@ -43,6 +46,7 @@ final class RunGameTask extends Task<Boolean> {
     private static final Logger logger = LoggerFactory.getLogger(RunGameTask.class);
     protected Callable<Process> starter;
     private boolean valueSet;
+    private FXUtils.FxTimer successTimer;
 
     RunGameTask(final Path gamePath, final BaseLauncherSettings launcherSettings) {
         this.starter = new GameStarter(gamePath, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
@@ -71,6 +75,8 @@ final class RunGameTask extends Task<Boolean> {
         logger.debug("Game process is {}", process);
         updateMessage("Game running as process " + process.pid());
 
+        successTimer = FXUtils.FxTimer.runLater(SURVIVAL_THRESHOLD, this::timerComplete);
+
         // log each line of process output
         var gameOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
         gameOutput.lines().forEachOrdered(this::handleOutputLine);
@@ -95,12 +101,34 @@ final class RunGameTask extends Task<Boolean> {
 
     protected void handleOutputLine(String line) {
         if ((!valueSet) && START_MATCH.test(line)) {
-            // we have an extra flag just for this because we can't check
-            // the content of valueProperty in this thread.
-            valueSet = true;
-            this.updateValue(true);
+            declareSurvival();
         }
         logger.info("Game output: {}", line);
+    }
+
+    private void declareSurvival() {
+        // we have an extra flag just for this because we can't check
+        // the content of valueProperty in this thread.
+        valueSet = true;
+        this.updateValue(true);
+        removeTimer();
+    }
+
+    protected void timerComplete() {
+        logger.debug("Process has been alive at least {}, calling it good.", SURVIVAL_THRESHOLD);
+        declareSurvival();
+    }
+
+    private void removeTimer() {
+        if (successTimer != null) {
+            successTimer.stop();
+            successTimer = null;
+        }
+    }
+
+    @Override
+    protected void failed() {
+        removeTimer();
     }
 
     public abstract static class RunGameError extends Exception { }
