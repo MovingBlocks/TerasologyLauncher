@@ -140,6 +140,9 @@ checkstyle {
     configProperties.samedir = checkstyle.configFile.parentFile
 }
 
+checkstyleMain.exclude "**/module-info.java"
+checkstyleTest.exclude "**/module-info.java"
+
 pmd {
     ignoreFailures = true
     ruleSetFiles = files("$rootDir/config/metrics/pmd/pmd.xml")
