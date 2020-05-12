@@ -6,7 +6,7 @@ module org.terasology.launcher {
     requires java.naming;
 
     // Automatic modules
-    requires txtmark;
+    requires org.commonmark;
     requires com.google.common;
     requires gson;
     requires java.sql; // gson requires it :(
