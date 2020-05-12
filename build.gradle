@@ -131,6 +131,8 @@ javafx {
 
 test {
     useJUnitPlatform()
+    jvmArgs("--add-exports", "org.junit.platform.commons/org.junit.platform.commons.util=ALL-UNNAMED")
+    jvmArgs("--add-exports", "org.junit.platform.commons/org.junit.platform.commons.logging=ALL-UNNAMED")
 }
 
 checkstyle {

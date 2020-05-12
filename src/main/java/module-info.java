@@ -11,14 +11,13 @@ module org.terasology.launcher {
     requires gson;
     requires java.sql; // gson requires it :(
     requires github.api;
-    requires transitive com.fasterxml.jackson.databind; // github.api required it
+    requires com.fasterxml.jackson.databind; // github.api required it
 
     // openJavaFX and AWT
     requires javafx.fxml;
     requires javafx.controls;
     requires javafx.web;
     requires java.desktop;
-
 
     exports org.terasology.launcher; // for launcher run
     exports org.terasology.launcher.log to ch.qos.logback.core; // for TempLogFilePropertyDefiner
