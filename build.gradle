@@ -95,7 +95,7 @@ dependencies {
     implementation (group: "com.google.guava", name: "guava", version: "28.1-jre") {
         exclude group: 'com.google.code.findbugs', module: 'jsr305'
     }
-    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.3.0-alpha5'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.3.0-alpha4'
     implementation group: 'com.github.everit-org.json-schema', name: 'org.everit.json.schema', version: '1.12.1'
 
     implementation group: 'org.kohsuke', name: 'github-api', version: '1.111'
@@ -131,12 +131,17 @@ javafx {
 
 test {
     useJUnitPlatform()
+    jvmArgs("--add-exports", "org.junit.platform.commons/org.junit.platform.commons.util=ALL-UNNAMED")
+    jvmArgs("--add-exports", "org.junit.platform.commons/org.junit.platform.commons.logging=ALL-UNNAMED")
 }
 
 checkstyle {
     configFile = new File("$rootDir/config/metrics/checkstyle/checkstyle.xml")
     configProperties.samedir = checkstyle.configFile.parentFile
 }
+
+checkstyleMain.exclude "**/module-info.java"
+checkstyleTest.exclude "**/module-info.java"
 
 pmd {
     ignoreFailures = true
@@ -150,7 +155,7 @@ spotbugs {
 }
 
 application {
-    mainClassName = 'org.terasology.launcher/org.terasology.launcher.TerasologyLauncher'
+    mainClassName = 'org.terasology.launcher.TerasologyLauncher'
 }
 
 
