@@ -1,17 +1,26 @@
 module org.terasology.launcher {
+    //Logging
     requires org.slf4j;
-    requires gson;
-    requires org.everit.json.schema;
-    requires org.json;
-    requires javafx.graphics;
-    requires java.desktop;
-    requires javafx.controls;
-    requires javafx.fxml;
-    requires javafx.web;
-    requires ch.qos.logback.core;
     requires ch.qos.logback.classic;
-    requires com.google.common;
-    requires txtmark;
+    requires ch.qos.logback.core;
+    requires java.naming;
 
-    exports org.terasology.launcher;
+    // Automatic modules
+    requires txtmark;
+    requires com.google.common;
+    requires gson;
+    requires java.sql; // gson requires it :(
+    requires github.api;
+    requires transitive com.fasterxml.jackson.databind; // github.api required it
+
+    // openJavaFX and AWT
+    requires javafx.fxml;
+    requires javafx.controls;
+    requires javafx.web;
+    requires java.desktop;
+
+
+    exports org.terasology.launcher; // for launcher run
+    exports org.terasology.launcher.log to ch.qos.logback.core; // for TempLogFilePropertyDefiner
+    opens org.terasology.launcher.gui.javafx to javafx.fxml; // for fxml controller access
 }
