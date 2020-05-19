@@ -87,13 +87,14 @@ repositories {
         allowInsecureProtocol true
     }
     maven {
-        name "JitPack"  // used by org.everit.json.schema
-        url "https://jitpack.io"
-    }
-    maven {
         // for spf4j dependencies that haven't been merged upstream
         // i.e. org.apache.avro:avro
+        name "spf4j dependencies"
         url  "https://dl.bintray.com/zolyfarkas/core"
+    }
+    maven {
+        name "JitPack"  // used by org.everit.json.schema
+        url "https://jitpack.io"
     }
 }
 
