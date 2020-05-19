@@ -16,54 +16,48 @@
 
 package org.terasology.launcher.game;
 
-import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import javafx.concurrent.WorkerStateEvent;
+import javafx.util.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spf4j.log.Level;
 import org.spf4j.test.log.LogAssert;
 import org.spf4j.test.log.TestLoggers;
 import org.spf4j.test.matchers.LogMatchers;
 import org.terasology.launcher.SlowTest;
 import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.util.WaitForAsyncUtils;
-import org.threeten.extra.MutableClock;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import static com.google.common.util.concurrent.Futures.allAsList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.describedAs;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
+@Timeout(5)
 @ExtendWith(ApplicationExtension.class)
 public class TestRunGameTask {
 
@@ -202,77 +196,88 @@ public class TestRunGameTask {
 
     @Test
     public void testSuccessEvent() throws Exception {
-        var clock = MutableClock.epochUTC();
-        var hop = Duration.ofMillis(100);
-
+        // Matches {@link RunGameTask.START_MATCH}
         final String confirmedStart = "terasology.engine.TerasologyEngine - Initialization completed";
 
-        final Logger logger = LoggerFactory.getLogger(TestRunGameTask.class);
+        final List<String> mockOutputLines = List.of(
+                "some babble\n",
+                confirmedStart + "\n",
+                "more babble\n",
+                "have a nice day etc\n"
+        );
 
-        Runnable handleAdvance = () -> {
-            WaitForAsyncUtils.waitForFxEvents(1);
-            clock.add(hop);
-            logger.debug("TICK {}", clock.instant().toEpochMilli());
-            WaitForAsyncUtils.waitForFxEvents(1);
-        };
+        // A record of observed events (thread-safe).
+        final Queue<Happenings.ValuedHappening<Boolean>> actualHistory = new ConcurrentLinkedQueue<>();
 
-        var gameTask = new RunGameTask(() -> new MockProcesses.OneLineAtATimeProcess(
-                spyingIterator(List.of(
-                        "some babble\n",
-                        confirmedStart + "\n",
-                        "more babble\n",
-                        "have a nice day etc\n"
-                ), handleAdvance)
-        ));
+        final List<Happenings.ValuedHappening<Boolean>> expectedHistory = List.of(
+                Happenings.PROCESS_OUTPUT_LINE.val(),
+                Happenings.PROCESS_OUTPUT_LINE.val(),
+                Happenings.TASK_VALUE_SET.val(true),  // that line was the confirmedStart event!
+                Happenings.PROCESS_OUTPUT_LINE.val(),
+                Happenings.PROCESS_OUTPUT_LINE.val(),
+                Happenings.TASK_COMPLETED.val()
+        );
 
-        final SettableFuture<Boolean> theValue = SettableFuture.create();
-        final SettableFuture<Instant> gotValueAt = SettableFuture.create();
-        final SettableFuture<Instant> taskDoneAt = SettableFuture.create();
+        final Runnable handleLineSent = () -> actualHistory.add(Happenings.PROCESS_OUTPUT_LINE.val());
 
-        gameTask.valueProperty().addListener(started -> {
-            theValue.set(gameTask.valueProperty().getValue());
-            clock.add(7, ChronoUnit.MILLIS);
-            gotValueAt.set(clock.instant());
-        });
+        // This makes our "process," which streams out its lines and runs the callback after each.
+        final Process lineAtATimeProcess = new MockProcesses.OneLineAtATimeProcess(
+                spyingIterator(mockOutputLines, handleLineSent));
 
-        WaitForAsyncUtils.asyncFx(() ->
-            gameTask.addEventHandler(
-                    WorkerStateEvent.WORKER_STATE_SUCCEEDED, (event) -> {
-                        clock.add(11, ChronoUnit.MILLIS);
-                        taskDoneAt.set(clock.instant());
-                     }
-            )
-        ).get();
+        // RunGameTask, the code under test, finally appears.
+        final var gameTask = new RunGameTask(() -> lineAtATimeProcess);
 
+        // Arrange to record when things happen.
+        gameTask.valueProperty().addListener(
+                (x, y, newValue) -> actualHistory.add(Happenings.TASK_VALUE_SET.val(newValue))
+        );
+
+        gameTask.addEventHandler(
+                WorkerStateEvent.WORKER_STATE_SUCCEEDED,
+                (event) -> actualHistory.add(Happenings.TASK_COMPLETED.val())
+        );
+
+        // Act!
         executor.submit(gameTask);
+        var actualReturnValue = gameTask.get();  // task.get blocks until it has run to completion
 
-        try {
-            //noinspection UnstableApiUsage
-            allAsList(
-                   theValue, gotValueAt, taskDoneAt
-            ).get(20, TimeUnit.SECONDS);
-        } catch (ExecutionException | TimeoutException e) {
-            logger.warn("Failed to get futures because {}", e.getLocalizedMessage());
-            var result = gameTask.get();
-            logger.warn("And yet gameTask returned? {}", result);
-            throw e;
-        }
+        // Assert!
+        assertTrue(actualReturnValue);
 
-        // get()ing the list made sure these are all complete
-        assertTrue(theValue.get());
-
-        // Assert that we got the value significantly before the process finished.
-        assertThat(Duration.between(gotValueAt.get(), taskDoneAt.get()),
-                   describedAs("Time between %0 and %1 should be greater than %2",
-                               greaterThan(hop.multipliedBy(2)),
-                               gotValueAt.get(), taskDoneAt.get(), hop.multipliedBy(2)));
+        assertIterableEquals(expectedHistory, actualHistory);
     }
 
-
-    public static Iterator<String> spyingIterator(List<String> list, Runnable onNext) {
+    /**
+     * An Iterator that runs the given callback every iteration.
+     *
+     * @param list to be iterated over
+     * @param onNext to be called each iteration
+     */
+    public static <T> Iterator<T> spyingIterator(List<T> list, Runnable onNext) {
         return list.stream().takeWhile(string -> {
             onNext.run();
             return true;
         }).iterator();
+    }
+
+    /** Things that happen in RunGameTask that we want to make assertions about. */
+    enum Happenings {
+        PROCESS_OUTPUT_LINE,
+        TASK_VALUE_SET,
+        TASK_COMPLETED;
+
+        <T> ValuedHappening<T> val(T value) {
+            return new ValuedHappening<>(this, value);
+        }
+
+        <T> ValuedHappening<T> val() {
+            return new ValuedHappening<>(this, null);
+        }
+
+        static final class ValuedHappening<T> extends Pair<Happenings, T> {
+            private ValuedHappening(final Happenings key, final T value) {
+                super(key, value);
+            }
+        }
     }
 }
