@@ -260,3 +260,9 @@ processResources.dependsOn copyIconsIntoResources
 
 //TODO: Temporary workaround for new exes / JRE bundling not quite being officially ready yet
 distZip.exclude("*.x*.exe")
+
+
+tasks.named('wrapper') {
+    // IDEA likes this distribution to better know things.
+    distributionType = Wrapper.DistributionType.ALL
+}
