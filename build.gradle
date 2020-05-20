@@ -148,10 +148,6 @@ dependencies {
         because "CI builders are headless environments"
     }
 
-    testImplementation("org.threeten:threeten-extra:1.5.0") {
-        because "tests use MutableClock"
-    }
-
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
     codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.4.0', ext: 'zip'
 }
