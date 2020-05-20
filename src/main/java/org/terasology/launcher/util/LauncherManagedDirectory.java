@@ -38,7 +38,7 @@ public enum LauncherManagedDirectory {
 
     LauncherManagedDirectory(DirectoryCreator... creators) {
         this.creators = creators;
-        this.errorLabel = String.format("message_error_{}Directory", this.name().toLowerCase());
+        this.errorLabel = String.format("message_error_%sDirectory", this.name().toLowerCase());
         this.directoryName = this.name().toLowerCase();
     }
 

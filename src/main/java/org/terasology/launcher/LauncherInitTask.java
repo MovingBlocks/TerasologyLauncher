@@ -148,7 +148,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             for (DirectoryCreator creator : creators) {
                 creator.apply(dir);
             }
-        } catch (IOException e) {
+        } catch (RuntimeException | IOException e) {
             logger.error("Directory '{}' cannot be created or used! '{}'", dir.getFileName(), dir, e);
             GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel(errorLabel) + "\n" + dir);
             throw new LauncherStartFailedException();
