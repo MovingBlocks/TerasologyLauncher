@@ -39,7 +39,7 @@ plugins {
     id 'pmd'
     id 'project-report'
     id 'org.openjfx.javafxplugin' version '0.0.8'
-    id 'org.beryx.jlink' version '2.18.0'
+    id 'org.beryx.jlink' version '2.19.0'
 }
 
 apply from: "./config/gradle/jre.gradle"
@@ -159,7 +159,8 @@ spotbugs {
 }
 
 application {
-    mainClassName = 'org.terasology.launcher.TerasologyLauncher'
+    mainModule = "org.terasology.launcher"
+    mainClass = "org.terasology.launcher.TerasologyLauncher"
 }
 
 
@@ -221,9 +222,6 @@ jar {
     exclude "logback.xml"
     rename('logback_jar.xml', 'logback.xml')
     manifest {
-        def manifestClasspath = configurations.runtimeClasspath.collect { it.getName() }.join(" ")
-        attributes("Main-Class": mainClassName)
-        attributes("Class-Path": manifestClasspath)
         attributes("Implementation-Title": project.name)
         attributes("Implementation-Version": project.version)
         attributes("SplashScreen-Image": splashImage)
