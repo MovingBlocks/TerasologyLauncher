@@ -12,6 +12,9 @@ module org.terasology.launcher {
     requires java.sql; // gson requires it :(
     requires github.api;
     requires com.fasterxml.jackson.databind; // github.api required it
+    requires org.everit.json.schema;
+    requires org.json;
+    requires semver4j;
 
     // openJavaFX and AWT
     requires javafx.fxml;
@@ -22,4 +25,5 @@ module org.terasology.launcher {
     exports org.terasology.launcher; // for launcher run
     exports org.terasology.launcher.log to ch.qos.logback.core; // for TempLogFilePropertyDefiner
     opens org.terasology.launcher.gui.javafx to javafx.fxml; // for fxml controller access
+    opens org.terasology.launcher.packages to gson;
 }
