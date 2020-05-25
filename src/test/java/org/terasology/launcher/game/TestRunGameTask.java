@@ -37,11 +37,13 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
@@ -102,7 +104,7 @@ public class TestRunGameTask {
                 allOf(hasGameOutputFormat, LogMatchers.hasArguments(gameOutputLines[1]))
         );
 
-        new RunGameTask(null).monitorProcess(gameProcess);
+        new NonTimingGameTask(null).monitorProcess(gameProcess);
 
         detailedExpectation.assertObservation();
     }
@@ -110,7 +112,7 @@ public class TestRunGameTask {
     @SlowTest
     @DisabledOnOs(OS.WINDOWS)
     public void testGameExitSuccessful() throws InterruptedException, ExecutionException {
-        var gameTask = new RunGameTask(UnixProcesses.COMPLETES_SUCCESSFULLY);
+        var gameTask = new NonTimingGameTask(UnixProcesses.COMPLETES_SUCCESSFULLY);
 
         // we can use TestLogger expectations without Slf4jTestRunner, we just can't
         // depend on their annotations. I think.
@@ -259,7 +261,8 @@ public class TestRunGameTask {
 
         final List<Happenings.ValuedHappening<Boolean>> expectedHistory = List.of(
                 Happenings.PROCESS_OUTPUT_LINE.val(),
-                Happenings.PROCESS_OUTPUT_LINE.val()
+                Happenings.PROCESS_OUTPUT_LINE.val(),
+                Happenings.TASK_FAILED.val()
         );
 
         final Runnable handleLineSent = () -> actualHistory.add(Happenings.PROCESS_OUTPUT_LINE.val());
@@ -290,7 +293,28 @@ public class TestRunGameTask {
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         assertThat(thrown.getCause(), instanceOf(RunGameTask.GameExitTooSoon.class));
 
-        assertIterableEquals(expectedHistory, actualHistory);
+        assertIterableEquals(expectedHistory, actualHistory, renderColumns(actualHistory, expectedHistory));
+    }
+
+    public static <T> Supplier<String> renderColumns(Iterable<T> actualIterable, Iterable<T> expectedIterable) {
+        return () -> {
+            var outputs = new StringBuilder(256);
+
+            var expectedIter = expectedIterable.iterator();
+            var actualIter = actualIterable.iterator();
+            var ended = "░".repeat(20);
+
+            outputs.append(String.format("%27s\t%s\n", "Expected", "Actual"));
+            do {
+                var expected = expectedIter.hasNext() ? expectedIter.next() : ended;
+                var actual = actualIter.hasNext() ? actualIter.next() : ended;
+                var compared = expected.equals(actual) ? " " : "❌";
+
+                outputs.append(String.format("%27s %s %s\n", expected, compared, actual));
+            } while (expectedIter.hasNext() || actualIter.hasNext());
+
+            return outputs.toString();
+        };
     }
 
 
@@ -326,6 +350,18 @@ public class TestRunGameTask {
             private ValuedHappening(final Happenings key, final T value) {
                 super(key, value);
             }
+        }
+    }
+
+
+    static class NonTimingGameTask extends RunGameTask {
+        NonTimingGameTask(final Callable<Process> starter) {
+            super(starter);
+        }
+
+        @Override
+        protected void startTimer() {
+            // no timers here.
         }
     }
 }

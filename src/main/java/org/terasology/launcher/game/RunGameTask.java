@@ -47,7 +47,7 @@ import static com.google.common.base.Verify.verifyNotNull;
  * in its {@link #exceptionProperty()} and never see its way to an executor's uncaught exception handler. It won't be
  * until you call this object's {@link #get()} that it will be thrown again.
  */
-final class RunGameTask extends Task<Boolean> {
+class RunGameTask extends Task<Boolean> {
     static final int EXIT_CODE_OK = 0;
 
     /**
@@ -124,7 +124,7 @@ final class RunGameTask extends Task<Boolean> {
         logger.debug("Game process is {}", process);
         updateMessage("Game running as process " + process.pid());
 
-        successTimer = FXUtils.FxTimer.runLater(SURVIVAL_THRESHOLD, this::timerComplete);
+        startTimer();
 
         // log each line of process output
         var gameOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -179,7 +179,11 @@ final class RunGameTask extends Task<Boolean> {
         declareSurvival();
     }
 
-    private void removeTimer() {
+    protected void startTimer() {
+        successTimer = FXUtils.FxTimer.runLater(SURVIVAL_THRESHOLD, this::timerComplete);
+    }
+
+    protected void removeTimer() {
         if (successTimer != null) {
             successTimer.stop();
             successTimer = null;
