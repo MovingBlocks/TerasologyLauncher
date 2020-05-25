@@ -95,12 +95,13 @@ final class RunGameTask extends Task<Boolean> {
      * @return true when the process exits with no error code
      * @throws GameStartError if the process failed to start at all
      * @throws GameExitError if the process terminates with an error code
+     * @throws GameExitError if the process quit before {@link #SURVIVAL_THRESHOLD}
      * @throws InterruptedException if this thread was interrupted while waiting for something —
      *     doesn't come up as much as you might expect, because waiting on a {@code read} call
      *     of the process's output <em>can not be interrupted</em> (Java's rule, not ours)
      */
     @Override
-    protected Boolean call() throws GameStartError, GameExitError, InterruptedException {
+    protected Boolean call() throws GameStartError, GameExitError, InterruptedException, GameExitTooSoon {
         verifyNotNull(this.starter);
         verify(!this.isDone());
         Process process;
@@ -118,7 +119,7 @@ final class RunGameTask extends Task<Boolean> {
      *
      * @param process the running process
      */
-    void monitorProcess(Process process) throws InterruptedException, GameExitError {
+    void monitorProcess(Process process) throws InterruptedException, GameExitError, GameExitTooSoon {
         checkNotNull(process);
         logger.debug("Game process is {}", process);
         updateMessage("Game running as process " + process.pid());
@@ -144,6 +145,12 @@ final class RunGameTask extends Task<Boolean> {
         } catch (InterruptedException e) {
             logger.warn("Interrupted while waiting for game process exit.", e);
             throw e;
+        }
+
+        if (successTimer != null) {
+            // No error code, but the game quit before our timer went off? That doesn't
+            // seem right!
+            throw new GameExitTooSoon();
         }
     }
 
@@ -219,5 +226,10 @@ final class RunGameTask extends Task<Boolean> {
         public String toString() {
             return MoreObjects.toStringHelper(this).add("exitValue", exitValue).toString();
         }
+    }
+
+    /** The process only lasted a brief time. */
+    public static class GameExitTooSoon extends RunGameError {
+
     }
 }

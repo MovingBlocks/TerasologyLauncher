@@ -90,7 +90,7 @@ public class TestRunGameTask {
     }
 
     @Test
-    public void testGameOutput() throws InterruptedException, RunGameTask.GameExitError {
+    public void testGameOutput() throws InterruptedException, RunGameTask.RunGameError {
         String[] gameOutputLines = {"LineOne", "LineTwo"};
         Process gameProcess = new MockProcesses.HappyGameProcess(String.join("\n", gameOutputLines));
 
@@ -247,6 +247,53 @@ public class TestRunGameTask {
         assertIterableEquals(expectedHistory, actualHistory);
     }
 
+    @Test
+    public void testFastExitDoesNotResultInSuccess() throws ExecutionException, InterruptedException {
+        final List<String> mockOutputLines = List.of(
+                "this is a line from some process\n",
+                "oh, everything is over already, goodbye"
+        );
+
+        // A record of observed events (thread-safe).
+        final Queue<Happenings.ValuedHappening<Boolean>> actualHistory = new ConcurrentLinkedQueue<>();
+
+        final List<Happenings.ValuedHappening<Boolean>> expectedHistory = List.of(
+                Happenings.PROCESS_OUTPUT_LINE.val(),
+                Happenings.PROCESS_OUTPUT_LINE.val()
+        );
+
+        final Runnable handleLineSent = () -> actualHistory.add(Happenings.PROCESS_OUTPUT_LINE.val());
+
+        // This makes our "process," which streams out its lines and runs the callback after each.
+        final Process lineAtATimeProcess = new MockProcesses.OneLineAtATimeProcess(
+                spyingIterator(mockOutputLines, handleLineSent));
+
+        // RunGameTask, the code under test, finally appears.
+        final var gameTask = new RunGameTask(() -> lineAtATimeProcess);
+
+        // Arrange to record when things happen.
+        gameTask.valueProperty().addListener(
+                (x, y, newValue) -> actualHistory.add(Happenings.TASK_VALUE_SET.val(newValue))
+        );
+
+        gameTask.addEventHandler(
+                WorkerStateEvent.WORKER_STATE_SUCCEEDED,
+                (event) -> actualHistory.add(Happenings.TASK_COMPLETED.val())
+        );
+        gameTask.addEventHandler(
+                WorkerStateEvent.WORKER_STATE_FAILED,
+                (event) -> actualHistory.add(Happenings.TASK_FAILED.val())
+        );
+
+        // Act!
+        executor.submit(gameTask);
+        var thrown = assertThrows(ExecutionException.class, gameTask::get);
+        assertThat(thrown.getCause(), instanceOf(RunGameTask.GameExitTooSoon.class));
+
+        assertIterableEquals(expectedHistory, actualHistory);
+    }
+
+
     /**
      * An Iterator that runs the given callback every iteration.
      *
@@ -264,7 +311,8 @@ public class TestRunGameTask {
     enum Happenings {
         PROCESS_OUTPUT_LINE,
         TASK_VALUE_SET,
-        TASK_COMPLETED;
+        TASK_COMPLETED,
+        TASK_FAILED;
 
         <T> ValuedHappening<T> val(T value) {
             return new ValuedHappening<>(this, value);
