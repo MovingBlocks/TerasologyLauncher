@@ -150,6 +150,7 @@ class RunGameTask extends Task<Boolean> {
         if (successTimer != null) {
             // No error code, but the game quit before our timer went off? That doesn't
             // seem right!
+            removeTimer();
             throw new GameExitTooSoon();
         }
     }
