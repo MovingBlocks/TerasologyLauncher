@@ -227,13 +227,16 @@ class RunGameTask extends Task<Boolean> {
         }
 
         @Override
+        public String getMessage() {
+            return toString();
+        }
+
+        @Override
         public String toString() {
             return MoreObjects.toStringHelper(this).add("exitValue", exitValue).toString();
         }
     }
 
     /** The process only lasted a brief time. */
-    public static class GameExitTooSoon extends RunGameError {
-
-    }
+    public static class GameExitTooSoon extends RunGameError { }
 }
