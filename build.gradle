@@ -25,7 +25,7 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
-        maven { url "https://plugins.gradle.org/m2/" }
+        gradlePluginPortal()
     }
 }
 
@@ -79,18 +79,22 @@ ext {
 repositories {
     // Main Maven repo
     mavenCentral()
-    // MovingBlocks Artifactory instance(s) for libs not readily available elsewhere plus our own libs
+    jcenter()
     maven {
-        allowInsecureProtocol true
+        // MovingBlocks Artifactory instance(s) for libs not readily available elsewhere plus our own libs
+        name "Terasology Artifactory"
         url "http://artifactory.terasology.org/artifactory/virtual-repo-live"
+        allowInsecureProtocol true
+    }
+    maven {
+        name "JitPack"  // used by org.everit.json.schema
+        url "https://jitpack.io"
     }
     maven {
         // for spf4j dependencies that haven't been merged upstream
         // i.e. org.apache.avro:avro
         url  "https://dl.bintray.com/zolyfarkas/core"
     }
-    jcenter()
-    maven { url "https://jitpack.io" }
 }
 
 // Primary dependencies definition
@@ -297,3 +301,9 @@ processResources.dependsOn copyIconsIntoResources
 
 //TODO: Temporary workaround for new exes / JRE bundling not quite being officially ready yet
 distZip.exclude("*.x*.exe")
+
+
+tasks.named('wrapper') {
+    // IDEA likes this distribution to better know things.
+    distributionType = Wrapper.DistributionType.ALL
+}
