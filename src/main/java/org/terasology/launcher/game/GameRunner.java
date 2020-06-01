@@ -42,9 +42,9 @@ public class GameRunner implements Runnable {
                 do {
                     line = r.readLine();
                     logger.trace("Game output: {}", line);
-                } while (!Thread.currentThread().isInterrupted() && line != null);
+                } while (!isInterrupted() && line != null);
             }
-            if (Thread.currentThread().isInterrupted()) {
+            if (isInterrupted()) {
                 logger.debug("Game thread interrupted.");
                 return;
             }
@@ -58,5 +58,9 @@ public class GameRunner implements Runnable {
         } catch (IOException e) {
             logger.error("Could not read game output!", e);
         }
+    }
+
+    boolean isInterrupted() {
+        return Thread.currentThread().isInterrupted();
     }
 }
