@@ -154,8 +154,7 @@ dependencies {
 
 configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation)Classpath/ }).all {
     resolutionStrategy(gradlegoo.prefers("logging", "jcl-api-capability", "jcl-over-slf4j",
-            "jcl should prefer slf4j " +
-            "when available"))
+            "jcl should prefer slf4j when available"))
     resolutionStrategy(gradlegoo.prefers("logging", "slf4j-impl-capability",
             "spf4j-slf4j-test", "tests use slf4j-test"))
 
