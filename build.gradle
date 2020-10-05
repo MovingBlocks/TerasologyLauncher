@@ -87,13 +87,14 @@ repositories {
         allowInsecureProtocol true
     }
     maven {
-        name "JitPack"  // used by org.everit.json.schema
-        url "https://jitpack.io"
-    }
-    maven {
         // for spf4j dependencies that haven't been merged upstream
         // i.e. org.apache.avro:avro
+        name "spf4j dependencies"
         url  "https://dl.bintray.com/zolyfarkas/core"
+    }
+    maven {
+        name "JitPack"  // used by org.everit.json.schema
+        url "https://jitpack.io"
     }
 }
 
@@ -136,20 +137,31 @@ dependencies {
         because "spf4j-slf4j-test:8.8 needs slf4j-api:1.x"
     }
 
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.6.+") {
-        because "we haven't yet replaced slf4j-test Runner with a junit5 Extension"
+    testImplementation("org.testfx:testfx-core:4.0.16-alpha") {
+        because "to test JavaFX Application"
+        // -alpha because that's the only kind of release they have?
     }
-    testImplementation "junit:junit:4.+"
+    testImplementation "org.testfx:testfx-junit5:4.0.16-alpha"
+
+    testImplementation("org.testfx:openjfx-monocle:jdk-12.0.1+2") {
+        // nobody's uploaded a jdk-14 build yet. does the jdk-12 one work?
+        because "CI builders are headless environments"
+    }
 
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
     codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.4.0', ext: 'zip'
 }
 
 configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation)Classpath/ }).all {
-    resolutionStrategy(gradlegoo.prefers("logging", "jcl-api-capability", "jcl-over-slf4j", "jcl should prefer slf4j " +
-            "when available"));
+    resolutionStrategy(gradlegoo.prefers("logging", "jcl-api-capability", "jcl-over-slf4j",
+            "jcl should prefer slf4j when available"))
     resolutionStrategy(gradlegoo.prefers("logging", "slf4j-impl-capability",
-            "spf4j-slf4j-test", "tests use slf4j-test"));
+            "spf4j-slf4j-test", "tests use slf4j-test"))
+
+    // old hamcrest versions exist only to spite us
+    // http://hamcrest.org/JavaHamcrest/distributables#upgrading-from-hamcrest-1x
+    exclude group: "org.hamcrest", module: "hamcrest-core"
+    exclude group: "org.hamcrest", module: "hamcrest-library"
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
@@ -157,11 +169,12 @@ sourceCompatibility = 1.11
 targetCompatibility = 1.11
 
 javafx {
-    version = "11.0.2"
+    version = "12.0.1"
     modules = [
             'javafx.graphics',
             'javafx.fxml',
-            'javafx.web']
+            'javafx.web'
+    ]
 }
 
 test {
