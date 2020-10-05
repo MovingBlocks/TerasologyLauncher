@@ -21,11 +21,11 @@ import com.google.gson.GsonBuilder;
 import javafx.concurrent.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
-import org.terasology.launcher.util.LogLevel;
 import org.terasology.launcher.util.Platform;
 
 import java.nio.file.Path;
@@ -97,7 +97,7 @@ public final class ConfigManager {
                 .maxMemory(JavaHeapSize.GB_1_5)
                 .initMemory(JavaHeapSize.GB_1)
                 .javaParam(BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT)
-                .logLevel(LogLevel.DEFAULT)
+                .logLevel(Level.INFO)
                 .build();
 
         return Config.builder()
@@ -146,7 +146,7 @@ public final class ConfigManager {
 
     /**
      * Provides an immutable {@link Config} instance.
-     *
+     * <p>
      * The initial default configuration may be changed by running the reader service.
      *
      * @return the current launcher configuration as {@link Config} instance

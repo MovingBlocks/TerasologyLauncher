@@ -18,9 +18,9 @@ package org.terasology.launcher.settings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.LogLevel;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,7 +79,7 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     private static final String COMMENT_SETTINGS = "Terasology Launcher - Settings";
 
     private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
-    private static final LogLevel LOG_LEVEL_DEFAULT = LogLevel.DEFAULT;
+    private static final Level LOG_LEVEL_DEFAULT = Level.INFO;
 
     private final Path launcherSettingsFile;
     private final Properties properties;
@@ -179,10 +179,10 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
 
     protected void initLogLevel() {
         final String logLevelStr = properties.getProperty(PROPERTY_LOG_LEVEL);
-        LogLevel logLevel = LOG_LEVEL_DEFAULT;
+        Level logLevel = LOG_LEVEL_DEFAULT;
         if (logLevelStr != null) {
             try {
-                logLevel = LogLevel.valueOf(logLevelStr);
+                logLevel = Level.valueOf(logLevelStr);
             } catch (IllegalArgumentException e) {
                 logger.warn(WARN_MSG_INVALID_VALUE, logLevelStr, PROPERTY_LOG_LEVEL);
             }
@@ -316,8 +316,8 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     }
 
     @Override
-    public synchronized LogLevel getLogLevel() {
-        return LogLevel.valueOf(properties.getProperty(PROPERTY_LOG_LEVEL));
+    public synchronized Level getLogLevel() {
+        return Level.valueOf(properties.getProperty(PROPERTY_LOG_LEVEL));
     }
 
     @Override
@@ -416,7 +416,7 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
     }
 
     @Override
-    public synchronized void setLogLevel(LogLevel logLevel) {
+    public synchronized void setLogLevel(Level logLevel) {
         properties.setProperty(PROPERTY_LOG_LEVEL, logLevel.name());
     }
 

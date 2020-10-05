@@ -19,9 +19,9 @@ package org.terasology.launcher.settings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.LogLevel;
 
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -75,7 +75,7 @@ public class TestBaseLauncherSettings {
         assertEquals(baseLauncherSettings.isKeepDownloadedFiles(), Boolean.valueOf(saveDownloadedFiles));
         assertEquals(baseLauncherSettings.getUserJavaParameters(), userJavaParameters);
         assertEquals(baseLauncherSettings.getUserGameParameters(), userGameParameters);
-        assertEquals(baseLauncherSettings.getLogLevel(), LogLevel.valueOf(logLevel));
+        assertEquals(baseLauncherSettings.getLogLevel(), Level.valueOf(logLevel));
     }
 
     @BeforeEach
@@ -139,7 +139,7 @@ public class TestBaseLauncherSettings {
         assertEquals(baseLauncherSettings.isKeepDownloadedFiles(), Boolean.valueOf(saveDownloadedFiles));
         assertEquals(baseLauncherSettings.getUserJavaParameters(), BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
         assertEquals(baseLauncherSettings.getUserGameParameters(), BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
-        assertEquals(baseLauncherSettings.getLogLevel(), LogLevel.DEFAULT);
+        assertEquals(baseLauncherSettings.getLogLevel(), Level.INFO);
     }
 
     @Test
@@ -166,7 +166,7 @@ public class TestBaseLauncherSettings {
         baseLauncherSettings.setKeepDownloadedFiles(Boolean.parseBoolean(saveDownloadedFiles));
         baseLauncherSettings.setUserJavaParameters(userJavaParameters);
         baseLauncherSettings.setUserGameParameters(userGameParameters);
-        baseLauncherSettings.setLogLevel(LogLevel.valueOf(logLevel));
+        baseLauncherSettings.setLogLevel(Level.valueOf(logLevel));
 
         assertPropertiesEqual();
     }
