@@ -30,13 +30,13 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.LogLevel;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -114,7 +114,7 @@ public class SettingsController {
     @FXML
     private TextField userGameParametersField;
     @FXML
-    private ComboBox<LogLevel> logLevelBox;
+    private ComboBox<Level> logLevelBox;
 
     @FXML
     protected void cancelSettingsAction(ActionEvent event) {
@@ -322,7 +322,7 @@ public class SettingsController {
 
     private void populateLogLevel() {
         logLevelBox.getItems().clear();
-        for (LogLevel level : LogLevel.values()) {
+        for (Level level : Level.values()) {
             logLevelBox.getItems().add(level);
         }
         updateLogLevelSelection();
