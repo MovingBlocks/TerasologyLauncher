@@ -26,7 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
+import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
@@ -44,6 +46,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
@@ -81,7 +84,8 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path cacheDirectory = getDirectoryFor(LauncherManagedDirectory.CACHE, userDataDirectory);
 
             // launcher settings
-            final BaseLauncherSettings launcherSettings = getLauncherSettings(userDataDirectory);
+            final Path settingsFile = userDataDirectory.resolve(Settings.DEFAULT_FILE_NAME);
+            final LauncherSettings launcherSettings = getLauncherSettings(settingsFile);
 
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
@@ -119,11 +123,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             launcherSettings.setGameDataDirectory(gameDataDirectory);
             // TODO: Rewrite gameVersions.fixSettingsBuildVersion(launcherSettings);
 
-            storeLauncherSettingsAfterInit(launcherSettings);
+            storeLauncherSettingsAfterInit(launcherSettings, settingsFile);
 
             logger.trace("Creating launcher frame...");
 
-            return new LauncherConfiguration(userDataDirectory, downloadDirectory, tempDirectory, cacheDirectory, launcherSettings, packageManager);
+            return new LauncherConfiguration(userDataDirectory, downloadDirectory, launcherSettings, packageManager);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
         }
@@ -172,20 +176,16 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return launcherDirectory;
     }
 
-    private BaseLauncherSettings getLauncherSettings(Path launcherDirectory) throws LauncherStartFailedException {
+    private LauncherSettings getLauncherSettings(Path settingsFile) throws LauncherStartFailedException {
         logger.trace("Init LauncherSettings...");
         updateMessage(BundleUtils.getLabel("splash_retrieveLauncherSettings"));
-        final BaseLauncherSettings launcherSettings = new BaseLauncherSettings(launcherDirectory);
-        try {
-            launcherSettings.load();
-            launcherSettings.init();
-        } catch (IOException e) {
-            logger.error("The launcher settings can not be loaded or initialized! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_loadSettings") + "\n" + launcherSettings.getLauncherSettingsFilePath());
-            throw new LauncherStartFailedException();
-        }
-        logger.debug("Launcher Settings: {}", launcherSettings);
-        return launcherSettings;
+
+        final LauncherSettings settings = Optional.ofNullable(Settings.load(settingsFile)).orElse(Settings.getDefault());
+        settings.init();
+
+        logger.debug("Launcher Settings: {}", settings);
+
+        return settings;
     }
 
     private boolean checkForLauncherUpdates(Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
@@ -289,14 +289,15 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }, javafx.application.Platform::runLater).join();
     }
 
-    private void storeLauncherSettingsAfterInit(BaseLauncherSettings launcherSettings) throws LauncherStartFailedException {
+    private void storeLauncherSettingsAfterInit(LauncherSettings launcherSettings, final Path settingsFile) throws LauncherStartFailedException {
         logger.trace("Store LauncherSettings...");
         updateMessage(BundleUtils.getLabel("splash_storeLauncherSettings"));
         try {
-            launcherSettings.store();
+            Settings.store(launcherSettings, settingsFile);
         } catch (IOException e) {
-            logger.error("The launcher settings can not be stored! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
+            logger.error("The launcher settings cannot be stored! '{}'", settingsFile, e);
             GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_storeSettings"));
+            //TODO: should we fail here, or is it fine to work with in-memory settings?
             throw new LauncherStartFailedException();
         }
         logger.debug("Launcher Settings stored: {}", launcherSettings);

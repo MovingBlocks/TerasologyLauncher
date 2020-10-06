@@ -43,7 +43,7 @@ import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_SEA
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_USER_GAME_PARAMETERS;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_USER_JAVA_PARAMETERS;
 
-public class TestBaseLauncherSettings {
+public class TestLauncherSettings {
     @TempDir
     Path tempDirectory;
     @TempDir
@@ -51,7 +51,7 @@ public class TestBaseLauncherSettings {
     @TempDir
     Path gameDataDirectory;
 
-    private BaseLauncherSettings baseLauncherSettings;
+    private LauncherSettings baseLauncherSettings;
     private Path testPropertiesFile;
 
     private String locale;
@@ -82,7 +82,7 @@ public class TestBaseLauncherSettings {
     public void setup() throws Exception {
         testPropertiesFile = tempDirectory.resolve(BaseLauncherSettings.LAUNCHER_SETTINGS_FILE_NAME);
 
-        baseLauncherSettings = new BaseLauncherSettings(tempDirectory);
+        baseLauncherSettings = Settings.getDefault();
     }
 
     @Test
@@ -117,7 +117,7 @@ public class TestBaseLauncherSettings {
             testProperties.store(output, null);
         }
 
-        baseLauncherSettings.load();
+        baseLauncherSettings = Settings.load(testPropertiesFile);
         baseLauncherSettings.init();
         assertPropertiesEqual();
     }
@@ -126,7 +126,7 @@ public class TestBaseLauncherSettings {
     public void testInitDefault() throws Exception {
         //null properties file
 
-        baseLauncherSettings.load();
+        baseLauncherSettings = Settings.getDefault();
         baseLauncherSettings.init();
 
         assertEquals(baseLauncherSettings.getLocale(), Languages.DEFAULT_LOCALE);

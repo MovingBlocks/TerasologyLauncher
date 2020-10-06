@@ -26,18 +26,17 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 
 /**
  * @deprecated to be replaced by {@link org.terasology.launcher.config.Config}
  */
 @Deprecated
-public abstract class AbstractLauncherSettings {
+public abstract class LauncherSettings {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractLauncherSettings.class);
+    private static final Logger logger = LoggerFactory.getLogger(LauncherSettings.class);
 
-    public abstract void load() throws IOException;
-
-    public abstract void store() throws IOException;
+    public abstract Properties getProperties();
 
     public synchronized void init() {
         logger.trace("Init launcher settings ...");

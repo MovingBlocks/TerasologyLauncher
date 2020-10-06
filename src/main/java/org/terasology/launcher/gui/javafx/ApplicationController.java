@@ -50,6 +50,8 @@ import org.terasology.launcher.game.GameStarter;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.settings.LauncherSettings;
+import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
 import org.terasology.launcher.tasks.DownloadTask;
 import org.terasology.launcher.util.BundleUtils;
@@ -74,7 +76,7 @@ public class ApplicationController {
     private static final long MINIMUM_FREE_SPACE = 200 * MB;
 
     private Path launcherDirectory;
-    private BaseLauncherSettings launcherSettings;
+    private LauncherSettings launcherSettings;
     private PackageManager packageManager;
     private GameStarter gameStarter;
     private Stage stage;
@@ -281,7 +283,7 @@ public class ApplicationController {
                 });
     }
 
-    public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
+    public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final LauncherSettings newLauncherSettings,
                        final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.launcherSettings = newLauncherSettings;
@@ -453,8 +455,9 @@ public class ApplicationController {
      */
     private void close() {
         logger.debug("Dispose launcher frame...");
+        final Path settingsFile = launcherDirectory.resolve(Settings.DEFAULT_FILE_NAME);
         try {
-            launcherSettings.store();
+            Settings.store(launcherSettings, settingsFile);
         } catch (IOException e) {
             logger.warn("Could not store current launcher settings!");
         }
