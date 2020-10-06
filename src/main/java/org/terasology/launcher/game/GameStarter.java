@@ -18,9 +18,9 @@ package org.terasology.launcher.game;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.LogLevel;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -50,7 +50,7 @@ public final class GameStarter {
     }
 
     public boolean startGame(Package gamePkg, Path gamePath, Path gameDataDirectory, JavaHeapSize maxHeapSize,
-                             JavaHeapSize initialHeapSize, List<String> userJavaParameters, List<String> userGameParameters, LogLevel logLevel) {
+                             JavaHeapSize initialHeapSize, List<String> userJavaParameters, List<String> userGameParameters, Level logLevel) {
         if (isRunning()) {
             logger.warn("The game can not be started because another game is already running! '{}'", gameThread);
             return false;
@@ -62,7 +62,7 @@ public final class GameStarter {
         return startProcess(gamePkg, gamePath, processParameters);
     }
 
-    private List<String> createJavaParameters(JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize, List<String> userJavaParameters, LogLevel logLevel) {
+    private List<String> createJavaParameters(JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize, List<String> userJavaParameters, Level logLevel) {
         final List<String> javaParameters = new ArrayList<>();
         if (initialHeapSize.isUsed()) {
             javaParameters.add("-Xms" + initialHeapSize.getSizeParameter());
@@ -70,9 +70,7 @@ public final class GameStarter {
         if (maxHeapSize.isUsed()) {
             javaParameters.add("-Xmx" + maxHeapSize.getSizeParameter());
         }
-        if (!logLevel.isDefault()) {
-            javaParameters.add("-DlogOverrideLevel=" + logLevel.name());
-        }
+        javaParameters.add("-DlogOverrideLevel=" + logLevel.toString());
         javaParameters.addAll(userJavaParameters);
         return javaParameters;
     }
