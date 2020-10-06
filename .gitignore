@@ -7,9 +7,10 @@
 *.iml
 *.ipr
 *.iws
-.idea/
 /out/
 .attach_*
+# Allow-list for sharing some IntelliJ IDEA configurations
+!.idea/
 
 # Ignore Eclipse
 .project
