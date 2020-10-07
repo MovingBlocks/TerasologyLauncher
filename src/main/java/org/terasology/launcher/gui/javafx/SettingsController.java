@@ -34,7 +34,6 @@ import org.slf4j.event.Level;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 
@@ -168,7 +167,7 @@ public class SettingsController {
             launcherSettings.store();
         } catch (IOException e) {
             logger.error("The launcher settings can not be stored! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
-            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_storeSettings"));
+            Dialogs.showError(stage, BundleUtils.getLabel("message_error_storeSettings"));
         } finally {
             ((Node) event.getSource()).getScene().getWindow().hide();
         }
@@ -176,17 +175,17 @@ public class SettingsController {
 
     @FXML
     protected void openGameDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, gameDirectory, BundleUtils.getLabel("message_error_gameDirectory"));
+        Dialogs.openFileBrowser(stage, gameDirectory, BundleUtils.getLabel("message_error_gameDirectory"));
     }
 
     @FXML
     protected void openGameDataDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, gameDataDirectory, BundleUtils.getLabel("message_error_gameDataDirectory"));
+        Dialogs.openFileBrowser(stage, gameDataDirectory, BundleUtils.getLabel("message_error_gameDataDirectory"));
     }
 
     @FXML
     protected void openLauncherDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, launcherDirectory, BundleUtils.getLabel("message_error_launcherDirectory"));
+        Dialogs.openFileBrowser(stage, launcherDirectory, BundleUtils.getLabel("message_error_launcherDirectory"));
     }
 
     @FXML

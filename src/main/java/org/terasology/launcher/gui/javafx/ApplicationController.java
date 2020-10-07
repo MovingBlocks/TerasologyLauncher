@@ -53,7 +53,6 @@ import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.tasks.DeleteTask;
 import org.terasology.launcher.tasks.DownloadTask;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
 
@@ -138,14 +137,14 @@ public class ApplicationController {
     @FXML
     protected void handleControlButtonMouseEntered(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = FXUtils.createScaleTransition(1.2, source);
+        final Transition t = Effects.createScaleTransition(1.2, source);
         t.playFromStart();
     }
 
     @FXML
     protected void handleControlButtonMouseExited(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = FXUtils.createScaleTransition(1, source);
+        final Transition t = Effects.createScaleTransition(1, source);
         t.playFromStart();
     }
 
@@ -184,13 +183,13 @@ public class ApplicationController {
 
         if (gameStarter.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
-            GuiUtils.showInfoMessageDialog(stage, BundleUtils.getLabel("message_information_gameRunning"));
+            Dialogs.showInfo(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
             final boolean gameStarted = gameStarter.startGame(selectedPackage, gamePath, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
                     launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
                     launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
             if (!gameStarted) {
-                GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
+                Dialogs.showError(stage, BundleUtils.getLabel("message_error_gameStart"));
             } else {
                 launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
                 launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
