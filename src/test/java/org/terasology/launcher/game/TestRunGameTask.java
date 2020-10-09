@@ -1,18 +1,5 @@
-/*
- * Copyright 2020 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.game;
 
@@ -47,6 +34,7 @@ import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -173,10 +161,11 @@ public class TestRunGameTask {
         Throwable exc = thrown.getCause();
         assertThat(exc, instanceOf(RunGameTask.GameStartError.class));
         var cause = exc.getCause();
-        assertThat(cause, allOf(
-                instanceOf(IOException.class),
-                hasToString(containsString("No such file"))
-       ));
+        assertThat(cause, instanceOf(IOException.class));
+        assertThat(cause, anyOf(
+                hasToString(containsString("No such file")),
+                hasToString(containsString("The system cannot find the file specified"))
+        ));
     }
 
     @SlowTest
