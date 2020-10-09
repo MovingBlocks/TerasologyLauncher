@@ -31,7 +31,7 @@ import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.gui.javafx.Dialogs;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
@@ -150,7 +150,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             }
         } catch (IOException e) {
             logger.error("Directory '{}' cannot be created or used! '{}'", dir.getFileName(), dir, e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel(errorLabel) + "\n" + dir);
+            Dialogs.showError(owner, BundleUtils.getLabel(errorLabel) + "\n" + dir);
             throw new LauncherStartFailedException();
         }
         logger.debug("{} directory: {}", dir.getFileName(), dir);
@@ -181,7 +181,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             launcherSettings.init();
         } catch (IOException e) {
             logger.error("The launcher settings can not be loaded or initialized! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_loadSettings") + "\n" + launcherSettings.getLauncherSettingsFilePath());
+            Dialogs.showError(owner, BundleUtils.getLabel("message_error_loadSettings") + "\n" + launcherSettings.getLauncherSettingsFilePath());
             throw new LauncherStartFailedException();
         }
         logger.debug("Launcher Settings: {}", launcherSettings);
@@ -205,7 +205,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 foundLauncherInstallationDirectory = true;
             } catch (IOException e) {
                 logger.error("The launcher installation directory can not be detected or used!", e);
-                GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
+                Dialogs.showError(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
                 // Run launcher without an update. Don't throw a LauncherStartFailedException.
             }
             if (foundLauncherInstallationDirectory) {
@@ -240,7 +240,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 FileUtils.ensureWritableDir(gameDataDirectory);
             } catch (IOException e) {
                 logger.warn("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
-                GuiUtils.showWarningMessageDialog(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n"
+                Dialogs.showWarning(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n"
                         + gameDataDirectory);
 
                 // Set gameDataDirectory to 'null' -> user has to choose new game data directory
@@ -250,7 +250,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         if (gameDataDirectory == null) {
             logger.trace("Choose data directory for the game...");
             updateMessage(BundleUtils.getLabel("splash_chooseGameDataDirectory"));
-            gameDataDirectory = GuiUtils.chooseDirectoryDialog(owner, LauncherDirectoryUtils.getGameDataDirectory(os),
+            gameDataDirectory = Dialogs.chooseDirectory(owner, LauncherDirectoryUtils.getGameDataDirectory(os),
                     BundleUtils.getLabel("message_dialog_title_chooseGameDataDirectory"));
             if (Files.notExists(gameDataDirectory)) {
                 logger.info("The new game data directory is not approved. The TerasologyLauncher is terminated.");
@@ -261,7 +261,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             FileUtils.ensureWritableDir(gameDataDirectory);
         } catch (IOException e) {
             logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
+            Dialogs.showError(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
             throw new LauncherStartFailedException();
         }
         logger.debug("Game data directory: {}", gameDataDirectory);
@@ -296,7 +296,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             launcherSettings.store();
         } catch (IOException e) {
             logger.error("The launcher settings can not be stored! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_storeSettings"));
+            Dialogs.showError(owner, BundleUtils.getLabel("message_error_storeSettings"));
             throw new LauncherStartFailedException();
         }
         logger.debug("Launcher Settings stored: {}", launcherSettings);

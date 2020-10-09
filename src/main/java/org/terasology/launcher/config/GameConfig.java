@@ -16,8 +16,8 @@
 
 package org.terasology.launcher.config;
 
+import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.LogLevel;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -34,7 +34,7 @@ public final class GameConfig {
     private final JavaHeapSize initMemory;
     private final String javaParam;
     private final String gameParam;
-    private final LogLevel logLevel;
+    private final Level logLevel;
 
     private GameConfig(final Builder builder) {
         this.installDir = builder.installDir;
@@ -70,7 +70,7 @@ public final class GameConfig {
         return gameParam;
     }
 
-    public LogLevel getLogLevel() {
+    public Level getLogLevel() {
         return logLevel;
     }
 
@@ -107,7 +107,7 @@ public final class GameConfig {
         private JavaHeapSize initMemory;
         private String javaParam;
         private String gameParam;
-        private LogLevel logLevel;
+        private Level logLevel;
 
         private Builder() {
             javaParam = "";
@@ -154,7 +154,7 @@ public final class GameConfig {
             return this;
         }
 
-        public Builder logLevel(final LogLevel newLogLevel) {
+        public Builder logLevel(final Level newLogLevel) {
             logLevel = newLogLevel;
             return this;
         }

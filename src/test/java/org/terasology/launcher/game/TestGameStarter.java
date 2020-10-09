@@ -17,8 +17,8 @@ package org.terasology.launcher.game;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.LogLevel;
 
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -27,9 +27,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.terasology.launcher.Matchers.hasItemsFrom;
 
 public class TestGameStarter {
@@ -40,7 +38,7 @@ public class TestGameStarter {
     static final String GAME_DATA_DIR = "game_data";
     static final JavaHeapSize HEAP_MIN = JavaHeapSize.NOT_USED;
     static final JavaHeapSize HEAP_MAX = JavaHeapSize.GB_4;
-    static final LogLevel LOG_LEVEL = LogLevel.INFO;
+    static final Level LOG_LEVEL = Level.INFO;
 
     private final FileSystem fs = FileSystems.getDefault();
     private Path gamePath;

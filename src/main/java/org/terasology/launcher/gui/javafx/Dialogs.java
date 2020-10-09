@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package org.terasology.launcher.util;
+package org.terasology.launcher.gui.javafx;
 
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.LauncherDirectoryUtils;
 
 import java.awt.Desktop;
 import java.awt.EventQueue;
@@ -31,17 +35,38 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
+import java.util.function.Supplier;
 
-public final class GuiUtils {
+public final class Dialogs {
 
-    private static final Logger logger = LoggerFactory.getLogger(GuiUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(Dialogs.class);
 
-    private GuiUtils() {
+    private Dialogs() {
+    }
+
+    private static <T> T runOnEventThread(Supplier<T> producer) {
+        T result = null;
+        if (Platform.isFxApplicationThread()) {
+            result = producer.get();
+        } else {
+            final Task<T> task = new Task<T>() {
+                @Override
+                protected T call() throws Exception {
+                    return producer.get();
+                }
+            };
+            Platform.runLater(task);
+            try {
+                result = task.get();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.warn("Uh oh, something went wrong running this on the event thread.", e);
+            }
+        }
+        return result;
     }
 
     private static void showMessageDialog(Alert.AlertType type, String title, String message, Stage owner) {
-        FutureTask<Void> dialog = new FutureTask<>(() -> {
+        runOnEventThread(() -> {
             final Alert alert = new Alert(type);
             alert.setTitle(title);
             alert.setContentText(message);
@@ -50,62 +75,42 @@ public final class GuiUtils {
             alert.showAndWait();
             return null;
         });
-
-        Platform.runLater(dialog);
     }
 
-    public static void showWarningMessageDialog(Stage owner, String message) {
+    public static void showWarning(Stage owner, String message) {
         showMessageDialog(Alert.AlertType.WARNING, BundleUtils.getLabel("message_error_title"), message, owner);
     }
 
-    public static void showErrorMessageDialog(Stage owner, String message) {
+    public static void showError(Stage owner, String message) {
         showMessageDialog(Alert.AlertType.ERROR, BundleUtils.getLabel("message_error_title"), message, owner);
     }
 
-    public static void showInfoMessageDialog(Stage owner, String message) {
+    public static void showInfo(Stage owner, String message) {
         showMessageDialog(Alert.AlertType.INFORMATION, BundleUtils.getLabel("message_information_title"), message, owner);
     }
 
-    public static Path chooseDirectoryDialog(Stage owner, final Path directory, final String title) {
+    public static Path chooseDirectory(Stage owner, final Path defaultDirectory, final String title) {
         try {
-            FileUtils.ensureWritableDir(directory);
+            FileUtils.ensureWritableDir(defaultDirectory);
         } catch (IOException e) {
-            logger.error("Could not use {} as default directory!", directory, e);
+            logger.error("Could not use {} as default directory!", defaultDirectory, e);
             return null;
         }
 
-        Path selected = null;
-
-        if (Platform.isFxApplicationThread()) {
+        Path selected = runOnEventThread(() -> {
             final DirectoryChooser directoryChooser = new DirectoryChooser();
-            directoryChooser.setInitialDirectory(directory.toFile());
+            directoryChooser.setInitialDirectory(defaultDirectory.toFile());
             directoryChooser.setTitle(title);
-
-            selected = Optional.ofNullable(directoryChooser.showDialog(owner)).map(File::toPath).orElse(null);
-        } else {
-            final FutureTask<Path> chooseDirectory = new FutureTask<>(() -> {
-                final DirectoryChooser directoryChooser = new DirectoryChooser();
-                directoryChooser.setInitialDirectory(directory.toFile());
-                directoryChooser.setTitle(title);
-
-                return Optional.ofNullable(directoryChooser.showDialog(owner)).map(File::toPath).orElse(null);
-            });
-
-            Platform.runLater(chooseDirectory);
-            try {
-                selected = chooseDirectory.get();
-            } catch (InterruptedException | ExecutionException e) {
-                logger.warn("Uh oh, something went wrong with the dialog!", e);
-            }
-        }
+            return Optional.ofNullable(directoryChooser.showDialog(owner)).map(File::toPath).orElse(null);
+        });
 
         // directory proposal needs to be deleted if the user chose a different one
         try {
-            if (deleteProposedDirectoryIfUnused(directory, selected)) {
-                logger.warn("Could not delete unused default directory! {}", directory);
+            if (deleteProposedDirectoryIfUnused(defaultDirectory, selected)) {
+                logger.warn("Could not delete unused default directory! {}", defaultDirectory);
             }
         } catch (IOException e) {
-            logger.error("Failed to delete unused default directory! {}", directory, e);
+            logger.error("Failed to delete unused default directory! {}", defaultDirectory, e);
         }
         return selected;
     }
@@ -126,13 +131,14 @@ public final class GuiUtils {
                         Desktop.getDesktop().open(directory.toFile());
                     } catch (IOException e) {
                         logger.error("The directory could not be opened! {}", directory, e);
-                        GuiUtils.showErrorMessageDialog(owner, errorMsg + "\n" + directory);
+                        Dialogs.showError(owner, errorMsg + "\n" + directory);
                     }
                 }
             });
         } catch (IOException e) {
             logger.error("The directory could not be opened! {}", directory, e);
-            GuiUtils.showErrorMessageDialog(owner, errorMsg + "\n" + directory);
+            Dialogs.showError(owner, errorMsg + "\n" + directory);
         }
     }
+
 }

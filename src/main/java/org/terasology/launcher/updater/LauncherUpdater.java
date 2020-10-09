@@ -30,7 +30,7 @@ import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.gui.javafx.Dialogs;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
@@ -139,7 +139,7 @@ public final class LauncherUpdater {
             }
         } catch (RuntimeException | IOException e) {
             logger.error("Launcher update failed! Aborting update process!", e);
-            GuiUtils.showErrorMessageDialog(null, BundleUtils.getLabel("update_launcher_updateFailed"));
+            Dialogs.showError(null, BundleUtils.getLabel("update_launcher_updateFailed"));
             return false;
         }
         return false;

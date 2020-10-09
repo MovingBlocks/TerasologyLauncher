@@ -71,28 +71,28 @@ public class FooterController {
     @FXML
     protected void handleSocialButtonMouseEntered(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = FXUtils.createScaleTransition(1.2, source);
+        final Transition t = Effects.createScaleTransition(1.2, source);
         t.playFromStart();
     }
 
     @FXML
     protected void handleSocialButtonMouseExited(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = FXUtils.createScaleTransition(1, source);
+        final Transition t = Effects.createScaleTransition(1, source);
         t.playFromStart();
     }
 
     @FXML
     protected void handleSocialButtonMousePressed(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = FXUtils.createScaleTransition(0.8, source);
+        final Transition t = Effects.createScaleTransition(0.8, source);
         t.playFromStart();
     }
 
     @FXML
     protected void handleSocialButtonMouseReleased(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = FXUtils.createScaleTransition(1.2, source);
+        final Transition t = Effects.createScaleTransition(1.2, source);
         t.playFromStart();
     }
 

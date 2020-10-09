@@ -16,7 +16,7 @@
 
 // Uses Bellsoft Liberica JRE
 // https://bell-sw.com/pages/liberica_install_guide-11.0.7/
-def jdkVersion = '11.0.7+10' // jre version haven't jmod (needed for jlink/jpackager)
+def jdkVersion = '11.0.8+10' // jre version haven't jmod (needed for jlink/jpackager)
 def jreUrlFilenames = [
         Linux64   : 'linux-amd64-full.tar.gz',
         Windows64 : 'windows-amd64-full.zip',
@@ -104,7 +104,7 @@ jreUrlFilenames.each { os, file ->
         }
     }
 
-    downloadJreAll.dependsOn "downolad${launcherTaskBase}"
+    downloadJreAll.dependsOn "download${launcherTaskBase}"
     unpackJreAll.dependsOn "unpack${launcherTaskBase}"
 
     createRelease.dependsOn "assemble${os}Dist"

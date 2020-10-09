@@ -132,7 +132,7 @@ public class TestRunGameTask {
 
     @Test
     @DisabledOnOs(OS.WINDOWS)
-    public void testGameExitError() {
+    public void testGameExitError() throws InterruptedException {
         var gameTask = new RunGameTask(UnixProcesses.COMPLETES_WITH_ERROR);
 
         var hasExitMessage = TestLoggers.sys().expect(

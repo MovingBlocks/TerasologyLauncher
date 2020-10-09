@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 MovingBlocks
+ * Copyright 2020 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.tasks.DeleteTask;
 import org.terasology.launcher.tasks.DownloadTask;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
 
@@ -145,14 +144,14 @@ public class ApplicationController {
     @FXML
     protected void handleControlButtonMouseEntered(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = FXUtils.createScaleTransition(1.2, source);
+        final Transition t = Effects.createScaleTransition(1.2, source);
         t.playFromStart();
     }
 
     @FXML
     protected void handleControlButtonMouseExited(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = FXUtils.createScaleTransition(1, source);
+        final Transition t = Effects.createScaleTransition(1, source);
         t.playFromStart();
     }
 
@@ -189,7 +188,7 @@ public class ApplicationController {
     private void startGameAction() {
         if (gameService.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
-            GuiUtils.showInfoMessageDialog(stage, BundleUtils.getLabel("message_information_gameRunning"));
+            Dialogs.showInfo(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
             final Path gamePath = packageManager.resolveInstallDir(selectedPackage);
 
@@ -227,7 +226,7 @@ public class ApplicationController {
             logger.warn("Failed to locate tab pane.");
         }
 
-        GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
+        Dialogs.showError(stage, BundleUtils.getLabel("message_error_gameStart"));
     }
 
     private void downloadAction() {

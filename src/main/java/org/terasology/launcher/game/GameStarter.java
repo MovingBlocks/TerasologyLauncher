@@ -16,8 +16,8 @@
 
 package org.terasology.launcher.game;
 
+import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.LogLevel;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -35,17 +35,17 @@ class GameStarter implements Callable<Process> {
     final ProcessBuilder processBuilder;
 
     /**
-     * @param gamePath the directory under which we will find {@code libs/Terasology.jar}, also used as the process's
-     *     working directory
+     * @param gamePath          the directory under which we will find {@code libs/Terasology.jar}, also used as the process's
+     *                          working directory
      * @param gameDataDirectory {@code -homedir}, the directory where Terasology's data files (saves & etc) are kept
-     * @param heapMin java's {@code -Xms}
-     * @param heapMax java's {@code -Xmx}
-     * @param javaParams additional arguments for the {@code java} command line
-     * @param gameParams additional arguments for the Terasology command line
-     * @param logLevel the minimum level of log events Terasology will include on its output stream to us
+     * @param heapMin           java's {@code -Xms}
+     * @param heapMax           java's {@code -Xmx}
+     * @param javaParams        additional arguments for the {@code java} command line
+     * @param gameParams        additional arguments for the Terasology command line
+     * @param logLevel          the minimum level of log events Terasology will include on its output stream to us
      */
     GameStarter(Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
-                LogLevel logLevel) {
+                Level logLevel) {
         final List<String> processParameters = new ArrayList<>();
         processParameters.add(getRuntimePath().toString());
 
@@ -55,9 +55,7 @@ class GameStarter implements Callable<Process> {
         if (heapMax.isUsed()) {
             processParameters.add("-Xmx" + heapMax.getSizeParameter());
         }
-        if (!logLevel.isDefault()) {
-            processParameters.add("-DlogOverrideLevel=" + logLevel.name());
-        }
+        processParameters.add("-DlogOverrideLevel=" + logLevel.name());
         processParameters.addAll(javaParams);
 
         processParameters.add("-jar");

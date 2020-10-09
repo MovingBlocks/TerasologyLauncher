@@ -21,7 +21,7 @@ import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
-import org.terasology.launcher.gui.javafx.FXUtils;
+import org.terasology.launcher.gui.javafx.FxTimer;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -80,7 +80,7 @@ class RunGameTask extends Task<Boolean> {
      */
     private boolean valueSet;
 
-    private FXUtils.FxTimer successTimer;
+    private FxTimer successTimer;
 
     /**
      * @param starter called as soon as the Task starts to start a new process
@@ -93,12 +93,12 @@ class RunGameTask extends Task<Boolean> {
      * Starts the process, returns when it's done.
      *
      * @return true when the process exits with no error code
-     * @throws GameStartError if the process failed to start at all
-     * @throws GameExitError if the process terminates with an error code
-     * @throws GameExitError if the process quit before {@link #SURVIVAL_THRESHOLD}
+     * @throws GameStartError       if the process failed to start at all
+     * @throws GameExitError        if the process terminates with an error code
+     * @throws GameExitError        if the process quit before {@link #SURVIVAL_THRESHOLD}
      * @throws InterruptedException if this thread was interrupted while waiting for something —
-     *     doesn't come up as much as you might expect, because waiting on a {@code read} call
-     *     of the process's output <em>can not be interrupted</em> (Java's rule, not ours)
+     *                              doesn't come up as much as you might expect, because waiting on a {@code read} call
+     *                              of the process's output <em>can not be interrupted</em> (Java's rule, not ours)
      */
     @Override
     protected Boolean call() throws GameStartError, GameExitError, InterruptedException, GameExitTooSoon {
@@ -181,7 +181,7 @@ class RunGameTask extends Task<Boolean> {
     }
 
     protected void startTimer() {
-        successTimer = FXUtils.FxTimer.runLater(SURVIVAL_THRESHOLD, this::timerComplete);
+        successTimer = FxTimer.runLater(SURVIVAL_THRESHOLD, this::timerComplete);
     }
 
     protected void removeTimer() {
@@ -196,7 +196,8 @@ class RunGameTask extends Task<Boolean> {
         removeTimer();
     }
 
-    public abstract static class RunGameError extends Exception { }
+    public abstract static class RunGameError extends Exception {
+    }
 
     /**
      * The process failed to start.
@@ -238,6 +239,9 @@ class RunGameTask extends Task<Boolean> {
         }
     }
 
-    /** The process only lasted a brief time. */
-    public static class GameExitTooSoon extends RunGameError { }
+    /**
+     * The process only lasted a brief time.
+     */
+    public static class GameExitTooSoon extends RunGameError {
+    }
 }
