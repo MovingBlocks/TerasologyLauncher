@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 MovingBlocks
+ * Copyright 2020 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ package org.terasology.launcher.gui.javafx;
 import javafx.animation.Transition;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -34,6 +36,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -46,7 +50,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.game.GameStarter;
+import org.terasology.launcher.game.GameService;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
@@ -75,7 +79,7 @@ public class ApplicationController {
     private Path launcherDirectory;
     private BaseLauncherSettings launcherSettings;
     private PackageManager packageManager;
-    private GameStarter gameStarter;
+    private final GameService gameService;
     private Stage stage;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -120,6 +124,9 @@ public class ApplicationController {
 
     public ApplicationController() {
         warning = new SimpleObjectProperty<>(Optional.empty());
+        gameService = new GameService();
+        gameService.setOnFailed(this::handleRunFailed);
+        gameService.valueProperty().addListener(this::handleRunStarted);
     }
 
     @FXML
@@ -179,31 +186,47 @@ public class ApplicationController {
     }
 
     private void startGameAction() {
-        final Path gamePath = packageManager.resolveInstallDir(selectedPackage);
-
-        if (gameStarter.isRunning()) {
+        if (gameService.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
             Dialogs.showInfo(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
-            final boolean gameStarted = gameStarter.startGame(selectedPackage, gamePath, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
-                    launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
-                    launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
-            if (!gameStarted) {
-                Dialogs.showError(stage, BundleUtils.getLabel("message_error_gameStart"));
-            } else {
-                launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
-                launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
+            final Path gamePath = packageManager.resolveInstallDir(selectedPackage);
 
-                if (launcherSettings.isCloseLauncherAfterGameStart()) {
-                    if (downloadTask == null) {
-                        logger.info("Close launcher after game start.");
-                        close();
-                    } else {
-                        logger.info("The launcher can not be closed after game start, because a download is running.");
-                    }
-                }
+            gameService.start(gamePath, launcherSettings);
+        }
+    }
+
+    private void handleRunStarted(ObservableValue<? extends Boolean> o, Boolean oldValue, Boolean newValue) {
+        if (newValue == null || !newValue) {
+            return;
+        }
+
+        logger.debug("Game has started successfully.");
+
+        launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
+        launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
+
+        if (launcherSettings.isCloseLauncherAfterGameStart()) {
+            if (downloadTask == null) {
+                logger.info("Close launcher after game start.");
+                close();
+            } else {
+                logger.info("The launcher can not be closed after game start, because a download is running.");
             }
         }
+    }
+
+    void handleRunFailed(WorkerStateEvent event) {
+        TabPane tabPane = (TabPane) stage.getScene().lookup("#contentTabPane");
+        if (tabPane != null) {
+            var tab = tabPane.lookup("#logTab");
+            tabPane.getSelectionModel().select((Tab) tab.getProperties().get(Tab.class));
+        } else {
+            // We're already in error-handling mode here, so avoid bailing with verifyNotNull
+            logger.warn("Failed to locate tab pane.");
+        }
+
+        Dialogs.showError(stage, BundleUtils.getLabel("message_error_gameStart"));
     }
 
     private void downloadAction() {
@@ -297,8 +320,6 @@ public class ApplicationController {
             logbackLogger.addAppender(logViewController);
         }
 
-        gameStarter = new GameStarter();
-
         packageItems = FXCollections.observableArrayList();
         onSync();
 
@@ -316,7 +337,7 @@ public class ApplicationController {
         initializeComboBoxSelection();
     }
 
-    // To be called after database sync is done
+    /** To be called after database sync is done. */
     private void onSync() {
         packageItems.clear();
         packageManager.getPackages()
@@ -457,7 +478,6 @@ public class ApplicationController {
         } catch (IOException e) {
             logger.warn("Could not store current launcher settings!");
         }
-        gameStarter.dispose();
 
         // TODO: Improve close request handling
         if (downloadTask != null) {
