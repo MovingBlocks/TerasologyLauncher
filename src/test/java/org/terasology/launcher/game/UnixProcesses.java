@@ -19,12 +19,11 @@ package org.terasology.launcher.game;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public final class UnixProcesses {
     static final Callable<Process> COMPLETES_SUCCESSFULLY = runProcess("true");
@@ -32,14 +31,11 @@ public final class UnixProcesses {
     static final Callable<Process> NO_SUCH_COMMAND = runProcess(() -> {
         // If you have a program with this name on your path while running these tests,
         // you have incredible luck.
-        return "nope" + new Random()
-            .ints(16, 0, 255).mapToObj(
-                i -> Integer.toString(i, Character.MAX_RADIX)
-            )
-            .collect(Collectors.joining());
+        return "nope" + UUID.randomUUID();
     });
 
-    private UnixProcesses() { }
+    private UnixProcesses() {
+    }
 
     private static Callable<Process> runProcess(String... command) {
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
