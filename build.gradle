@@ -185,6 +185,7 @@ test {
 }
 
 checkstyle {
+    ignoreFailures = false
     configFile = new File("$rootDir/config/metrics/checkstyle/checkstyle.xml")
     configProperties.samedir = checkstyle.configFile.parentFile
 }
