@@ -2,6 +2,9 @@ on:
   release:
     types:
       - published
+  push:
+    branches:
+      -ci/os-specific-worker-nodees
 
 name: Asset Upload
 
@@ -30,6 +33,11 @@ jobs:
           java-package: jdk
       - name: Bundle distribution for ${{ matrix.platform }}
         run: ./gradlew -Prelease.useLastTag=true ${{ matrix.platform }}DistZip
+      - name: Upload bundle for ${{ matrix.platform }} as build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: ./build/distributions/TerasologyLauncher-${{ matrix.platform }}-${{ github.event.release.name }}.zip
+          name: TerasologyLauncher-${{ matrix.platform }}.zip
       - name: Upload bundle for ${{ matrix.platform }}
         uses: actions/upload-release-asset@v1
         env:
