@@ -1,11 +1,11 @@
 /*
- * Copyright 2020 MovingBlocks
+ * Copyright 2016 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,73 +16,103 @@
 
 package org.terasology.launcher.game;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
+import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.util.JavaHeapSize;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
-/**
- * Takes the game and runtime options, provides something that will launch a process.
- *
- * @see <a href="https://docs.oracle.com/en/java/javase/14/docs/specs/man/java.html#overview-of-java-options">java command manual</a>
- */
-class GameStarter implements Callable<Process> {
-    final ProcessBuilder processBuilder;
+public final class GameStarter {
 
-    /**
-     * @param gamePath          the directory under which we will find {@code libs/Terasology.jar}, also used as the process's
-     *                          working directory
-     * @param gameDataDirectory {@code -homedir}, the directory where Terasology's data files (saves & etc) are kept
-     * @param heapMin           java's {@code -Xms}
-     * @param heapMax           java's {@code -Xmx}
-     * @param javaParams        additional arguments for the {@code java} command line
-     * @param gameParams        additional arguments for the Terasology command line
-     * @param logLevel          the minimum level of log events Terasology will include on its output stream to us
-     */
-    GameStarter(Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
-                Level logLevel) {
+    private static final Logger logger = LoggerFactory.getLogger(GameStarter.class);
+
+    private static final int PROCESS_START_SLEEP_TIME = 5000;
+
+    private Thread gameThread;
+
+    public GameStarter() {
+    }
+
+    public boolean isRunning() {
+        return gameThread != null && gameThread.isAlive();
+    }
+
+    public void dispose() {
+        if (gameThread != null) {
+            gameThread.interrupt();
+        }
+        gameThread = null;
+    }
+
+    public boolean startGame(Package gamePkg, Path gamePath, Path gameDataDirectory, JavaHeapSize maxHeapSize,
+                             JavaHeapSize initialHeapSize, List<String> userJavaParameters, List<String> userGameParameters, Level logLevel) {
+        if (isRunning()) {
+            logger.warn("The game can not be started because another game is already running! '{}'", gameThread);
+            return false;
+        }
+
+        final List<String> javaParameters = createJavaParameters(maxHeapSize, initialHeapSize, userJavaParameters, logLevel);
+        final List<String> processParameters = createProcessParameters(gamePath, gameDataDirectory, javaParameters, userGameParameters);
+
+        return startProcess(gamePkg, gamePath, processParameters);
+    }
+
+    private List<String> createJavaParameters(JavaHeapSize maxHeapSize, JavaHeapSize initialHeapSize, List<String> userJavaParameters, Level logLevel) {
+        final List<String> javaParameters = new ArrayList<>();
+        if (initialHeapSize.isUsed()) {
+            javaParameters.add("-Xms" + initialHeapSize.getSizeParameter());
+        }
+        if (maxHeapSize.isUsed()) {
+            javaParameters.add("-Xmx" + maxHeapSize.getSizeParameter());
+        }
+        javaParameters.add("-DlogOverrideLevel=" + logLevel.toString());
+        javaParameters.addAll(userJavaParameters);
+        return javaParameters;
+    }
+
+    private List<String> createProcessParameters(Path gamePath, Path gameDataDirectory, List<String> javaParameters,
+                                                 List<String> gameParameters) {
         final List<String> processParameters = new ArrayList<>();
-        processParameters.add(getRuntimePath().toString());
-
-        if (heapMin.isUsed()) {
-            processParameters.add("-Xms" + heapMin.getSizeParameter());
-        }
-        if (heapMax.isUsed()) {
-            processParameters.add("-Xmx" + heapMax.getSizeParameter());
-        }
-        processParameters.add("-DlogOverrideLevel=" + logLevel.name());
-        processParameters.addAll(javaParams);
-
+        processParameters.add(System.getProperty("java.home") + "/bin/java"); // Use the current java
+        processParameters.addAll(javaParameters);
         processParameters.add("-jar");
-        processParameters.add(gamePath.resolve(Path.of("libs", "Terasology.jar")).toString());
+        processParameters.add(gamePath.resolve("libs/Terasology.jar").toString());
         processParameters.add("-homedir=" + gameDataDirectory.toAbsolutePath().toString());
-        processParameters.addAll(gameParams);
+        processParameters.addAll(gameParameters);
 
-        processBuilder = new ProcessBuilder(processParameters)
-                .directory(gamePath.toFile())
-                .redirectErrorStream(true);
+        return processParameters;
     }
 
-    /**
-     * Start the game in a new process.
-     *
-     * @return the newly started process
-     * @throws IOException from {@link ProcessBuilder#start()}
-     */
-    @Override
-    public Process call() throws IOException {
-        return processBuilder.start();
-    }
+    private boolean startProcess(Package gamePkg, Path gamePath, List<String> processParameters) {
+        final ProcessBuilder pb = new ProcessBuilder(processParameters);
+        pb.redirectErrorStream(true);
+        pb.directory(gamePath.toFile());
+        logger.debug("Starting game process with '{}' in '{}' for '{}-{}'", processParameters, gamePath.toFile(), gamePkg.getId(), gamePkg.getVersion());
+        try {
+            final Process p = pb.start();
 
-    /**
-     * @return the executable {@code java} file to run the game with
-     */
-    Path getRuntimePath() {
-        return Paths.get(System.getProperty("java.home"), "bin", "java");
+            gameThread = new Thread(new GameRunner(p));
+            gameThread.setName("game" + gamePkg.getId() + "-" + gamePkg.getVersion());
+            gameThread.start();
+
+            Thread.sleep(PROCESS_START_SLEEP_TIME);
+
+            if (!gameThread.isAlive()) {
+                final int exitValue = p.waitFor();
+                logger.warn("The game was stopped early. It returns with the exit value '{}'.", exitValue);
+                return false;
+            } else {
+                logger.info("The game is successfully launched.");
+            }
+        } catch (InterruptedException | IOException | RuntimeException e) {
+            logger.error("The game could not be started due to an error! Parameters '{}' for '{}-{}'!", processParameters, gamePkg.getId(), gamePkg.getVersion(), e);
+            return false;
+        }
+        return true;
     }
 }

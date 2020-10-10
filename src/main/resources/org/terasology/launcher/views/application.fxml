@@ -75,7 +75,7 @@
                             <fx:include fx:id="aboutView" source="about-view.fxml"/>
                           </content>
                         </Tab>
-                        <Tab closable="false" fx:id="logTab" text="Logging">
+                        <Tab closable="false" text="Logging">
                           <content>
                             <!--TODO create `LogView` control and use it as tag: <LogView fx:id="logView" /> -->
                             <fx:include fx:id="logView" source="log-view.fxml"/>

@@ -168,9 +168,6 @@ configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation)Classpath/
 sourceCompatibility = 1.11
 targetCompatibility = 1.11
 
-compileJava.options.encoding = "UTF-8"
-compileTestJava.options.encoding = "UTF-8"
-
 javafx {
     version = "12.0.1"
     modules = [
