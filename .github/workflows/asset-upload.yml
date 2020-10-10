@@ -4,7 +4,7 @@ on:
       - published
   push:
     branches:
-      -ci/os-specific-worker-nodees
+      - ci/os-specific-worker-nodees
 
 name: Asset Upload
 
