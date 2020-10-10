@@ -2,9 +2,7 @@ on:
   release:
     types:
       - published
-  push:
-    branches:
-      - ci/os-specific-worker-nodees
+  workflow_dispatch:
 
 name: Asset Upload
 
