@@ -28,3 +28,8 @@ jobs:
       run: ./gradlew test
     - name: Static Code Analysis
       run: ./gradlew check -x test
+    - uses: actions/upload-artifact@v2
+      #TODO: use https://www.check-run-reporter.com/ or similar instead
+      with:
+        name: test-report
+        path: build/reports/tests/test/
