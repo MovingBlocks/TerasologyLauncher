@@ -8,10 +8,17 @@ name: Asset Upload
 jobs:
   build:
     name: Build and upload release assets
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        platform: [linux64, mac, windows32, windows64]
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: ubunutu-latest
+            platform: linux64
+          - os: windows-latest
+            platform: windows64
+          - os: macos-latest
+            platform: mac
       fail-fast: true
     steps:
       - name: Checkout repository
