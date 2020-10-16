@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.settings.LauncherSettings;
+import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
@@ -49,7 +51,7 @@ public class SettingsController {
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
 
     private Path launcherDirectory;
-    private BaseLauncherSettings launcherSettings;
+    private LauncherSettings launcherSettings;
     private PackageManager packageManager;
     private ApplicationController appController;
 
@@ -163,10 +165,12 @@ public class SettingsController {
         }
 
         // store changed settings
+        final Path settingsFile = launcherDirectory.resolve(Settings.DEFAULT_FILE_NAME);
         try {
-            launcherSettings.store();
+            Settings.store(launcherSettings, settingsFile);
         } catch (IOException e) {
-            logger.error("The launcher settings can not be stored! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
+            //TODO: unify error handling, probably to Settings a.k.a. SettingsController?
+            logger.error("The launcher settings cannot be stored! '{}'", settingsFile, e);
             Dialogs.showError(stage, BundleUtils.getLabel("message_error_storeSettings"));
         } finally {
             ((Node) event.getSource()).getScene().getWindow().hide();
@@ -206,7 +210,7 @@ public class SettingsController {
         }
     }
 
-    void initialize(final Path newLauncherDirectory, final BaseLauncherSettings newLauncherSettings,
+    void initialize(final Path newLauncherDirectory, final LauncherSettings newLauncherSettings,
                     final PackageManager newPackageManager, final Stage newStage, final ApplicationController newAppController) {
         this.launcherDirectory = newLauncherDirectory;
         this.launcherSettings = newLauncherSettings;

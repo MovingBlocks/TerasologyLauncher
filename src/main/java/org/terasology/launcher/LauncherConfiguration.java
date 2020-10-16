@@ -18,6 +18,7 @@ package org.terasology.launcher;
 
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.settings.LauncherSettings;
 
 import java.nio.file.Path;
 
@@ -36,21 +37,15 @@ public class LauncherConfiguration {
 
     private final Path launcherDirectory;
     private final Path downloadDirectory;
-    private final Path tempDirectory;
-    private final Path cacheDirectory;
-    private final BaseLauncherSettings launcherSettings;
+    private final LauncherSettings launcherSettings;
     private final PackageManager packageManager;
 
     public LauncherConfiguration(final Path launcherDirectory,
                                  final Path downloadDirectory,
-                                 final Path tempDirectory,
-                                 final Path cacheDirectory,
-                                 final BaseLauncherSettings launcherSettings,
+                                 final LauncherSettings launcherSettings,
                                  final PackageManager packageManager) {
         this.launcherDirectory = launcherDirectory;
         this.downloadDirectory = downloadDirectory;
-        this.tempDirectory = tempDirectory;
-        this.cacheDirectory = cacheDirectory;
         this.launcherSettings = launcherSettings;
         this.packageManager = packageManager;
     }
@@ -63,15 +58,7 @@ public class LauncherConfiguration {
         return downloadDirectory;
     }
 
-    public Path getTempDirectory() {
-        return tempDirectory;
-    }
-
-    public Path getCacheDirectory() {
-        return cacheDirectory;
-    }
-
-    public BaseLauncherSettings getLauncherSettings() {
+    public LauncherSettings getLauncherSettings() {
         return launcherSettings;
     }
 

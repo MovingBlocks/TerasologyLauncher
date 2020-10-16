@@ -22,12 +22,8 @@ import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -39,7 +35,7 @@ import java.util.Properties;
  * @deprecated to be replaced by {@link org.terasology.launcher.config.Config}
  */
 @Deprecated
-public final class BaseLauncherSettings extends AbstractLauncherSettings {
+public final class BaseLauncherSettings extends LauncherSettings {
 
     public static final String USER_JAVA_PARAMETERS_DEFAULT = "-XX:MaxGCPauseMillis=20";
     public static final String USER_GAME_PARAMETERS_DEFAULT = "";
@@ -76,49 +72,19 @@ public final class BaseLauncherSettings extends AbstractLauncherSettings {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseLauncherSettings.class);
 
-    private static final String COMMENT_SETTINGS = "Terasology Launcher - Settings";
 
     private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
     private static final Level LOG_LEVEL_DEFAULT = Level.INFO;
 
-    private final Path launcherSettingsFile;
     private final Properties properties;
 
-    public BaseLauncherSettings(Path launcherDirectory) {
-        launcherSettingsFile = launcherDirectory.resolve(LAUNCHER_SETTINGS_FILE_NAME);
-        properties = new Properties();
-    }
-
-    public String getLauncherSettingsFilePath() {
-        return launcherSettingsFile.toString();
+    BaseLauncherSettings(Properties properties) {
+        this.properties = properties;
     }
 
     @Override
-    public synchronized void load() throws IOException {
-        if (Files.exists(launcherSettingsFile)) {
-            logger.debug("Load the launcher settings from the file '{}'.", launcherSettingsFile);
-
-            // load settings
-            try (InputStream inputStream = Files.newInputStream(launcherSettingsFile)) {
-                properties.load(inputStream);
-            }
-        }
-    }
-
-    @Override
-    public synchronized void store() throws IOException {
-        logger.trace("Store the launcher settings into the file '{}'.", launcherSettingsFile);
-
-        // create directory
-        if (Files.notExists(launcherSettingsFile.getParent())) {
-            Files.createDirectories(launcherSettingsFile.getParent());
-        }
-
-        // store settings
-        try (OutputStream outputStream = Files.newOutputStream(launcherSettingsFile)) {
-            properties.store(outputStream, COMMENT_SETTINGS);
-            logger.trace("Stored settings: {}", this);
-        }
+    public Properties getProperties() {
+        return properties;
     }
 
     // --------------------------------------------------------------------- //
