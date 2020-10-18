@@ -112,7 +112,7 @@ public class TestFileUtils {
 
         if (isPosix) {
             assert d.setReadable(false);
-            assert d.setReadable(false);
+            assert d.setWritable(false);
         } else {
             view = Files.getFileAttributeView(directory, AclFileAttributeView.class);
             originalAcl = view.getAcl();
@@ -283,6 +283,8 @@ public class TestFileUtils {
             perms.remove(AclEntryPermission.WRITE_DATA);
             perms.remove(AclEntryPermission.APPEND_DATA);
             perms.remove(AclEntryPermission.ADD_SUBDIRECTORY);
+            perms.remove(AclEntryPermission.DELETE);
+            perms.remove(AclEntryPermission.DELETE_CHILD);
             if (removeRead) {
                 perms.remove(AclEntryPermission.READ_DATA);
             }
