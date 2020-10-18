@@ -17,6 +17,7 @@
 package org.terasology.launcher.util;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.spf4j.log.Level;
@@ -26,7 +27,6 @@ import org.spf4j.test.matchers.LogMatchers;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.AclEntry;
@@ -55,6 +55,12 @@ public class TestFileUtils {
 
     @TempDir
     public Path tempFolder;
+    boolean isPosix;
+
+    @BeforeEach
+    void setup() {
+        isPosix = tempFolder.getFileSystem().supportedFileAttributeViews().contains("posix");
+    }
 
     @Test
     public void testCannotCreateDirectory() throws IOException {
@@ -62,7 +68,6 @@ public class TestFileUtils {
         var tempFolderFile = tempFolder.toFile();
 
         // Unfortunately, Win is not POSIX perms compatible, it uses own ACL system
-        var isPosix = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
         List<AclEntry> originalAcl = null;
         AclFileAttributeView view = null;
 
@@ -83,6 +88,7 @@ public class TestFileUtils {
             if (isPosix) {
                 assert tempFolderFile.setWritable(true);
             } else {
+                assert view != null;
                 view.setAcl(originalAcl);
             }
         }
@@ -102,7 +108,6 @@ public class TestFileUtils {
     @Test
     public void testNoPerms() throws IOException {
         var directory = tempFolder.resolve(DIRECTORY_NAME);
-        var isPosix = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
         Files.createDirectory(directory);
         var d = directory.toFile();
 
@@ -130,6 +135,7 @@ public class TestFileUtils {
                 assert d.setReadable(true);
                 assert d.setWritable(true);
             } else {
+                assert view != null;
                 view.setAcl(originalAcl);
             }
         }
