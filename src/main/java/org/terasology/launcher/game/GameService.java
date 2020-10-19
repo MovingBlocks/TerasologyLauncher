@@ -21,7 +21,7 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.settings.LauncherSettings;
 
 import java.nio.file.Path;
 import java.util.concurrent.Executors;
@@ -31,7 +31,7 @@ import static com.google.common.base.Verify.verifyNotNull;
 /**
  * This service starts and monitors the game process.
  * <p>
- * Its {@linkplain #GameService() constructor} requires no arguments. Use {@link #start(Path, BaseLauncherSettings)} to
+ * Its {@linkplain #GameService() constructor} requires no arguments. Use {@link #start(Path, LauncherSettings)} to
  * start the game process; the zero-argument form of {@code start()} will not have enough information.
  * <p>
  * The Boolean value of this service is true when it believes the game process has started <em>successfully.</em>
@@ -58,7 +58,7 @@ public class GameService extends Service<Boolean> {
     private static final Logger logger = LoggerFactory.getLogger(GameService.class);
 
     private Path gamePath;
-    private BaseLauncherSettings settings;
+    private LauncherSettings settings;
 
     public GameService() {
         setExecutor(Executors.newSingleThreadExecutor(
@@ -78,7 +78,7 @@ public class GameService extends Service<Boolean> {
      * @param settings supplies other settings relevant to configuring a process
      */
     @SuppressWarnings("checkstyle:HiddenField")
-    public void start(Path gamePath, BaseLauncherSettings settings) {
+    public void start(Path gamePath, LauncherSettings settings) {
         this.gamePath = gamePath;
         this.settings = settings;
 
@@ -86,7 +86,7 @@ public class GameService extends Service<Boolean> {
     }
 
     /**
-     * Use {@link #start(Path, BaseLauncherSettings)} instead.
+     * Use {@link #start(Path, LauncherSettings)} instead.
      * <p>
      * It is an error to call this method before providing the configuration.
      */
