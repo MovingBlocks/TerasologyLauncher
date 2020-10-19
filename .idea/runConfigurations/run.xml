@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="run" type="Application" factoryName="Application">
+    <output_file path="$PROJECT_DIR$/out/logs/TeresologyLauncher.log" is_save="true" />
+    <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
+    <option name="MAIN_CLASS_NAME" value="org.terasology.launcher.TerasologyLauncher" />
+    <module name="TerasologyLauncher.main" />
+    <shortenClasspath name="MANIFEST" />
+    <RunnerSettings>
+      <option name="visualVMId" value="261363441443224" />
+    </RunnerSettings>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
