@@ -235,7 +235,7 @@ public class TestRunGameTask {
         // Assert!
         assertTrue(actualReturnValue);
 
-        assertIterableEquals(expectedHistory, actualHistory);
+        assertIterableEquals(expectedHistory, actualHistory, renderColumns(actualHistory, expectedHistory));
     }
 
     @Test
