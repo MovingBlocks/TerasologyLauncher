@@ -4,6 +4,7 @@
 package org.terasology.launcher.util;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -17,8 +18,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.AclEntry;
+import java.nio.file.attribute.AclEntryPermission;
+import java.nio.file.attribute.AclFileAttributeView;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -39,21 +44,43 @@ public class TestFileUtils {
 
     @TempDir
     public Path tempFolder;
+    boolean isPosix;
+
+    @BeforeEach
+    void setup() {
+        isPosix = tempFolder.getFileSystem().supportedFileAttributeViews().contains("posix");
+    }
 
     @Test
     @DisabledOnOs(OS.WINDOWS)
-    public void testCannotCreateDirectory() {
+    public void testCannotCreateDirectory() throws IOException {
         final Path directory = tempFolder.resolve(DIRECTORY_NAME);
         var tempFolderFile = tempFolder.toFile();
-        // for some reason this fails on Windows...
-        assert tempFolderFile.setWritable(false);
+
+        // Unfortunately, Win is not POSIX perms compatible, it uses own ACL system
+        List<AclEntry> originalAcl = null;
+        AclFileAttributeView view = null;
+
+        if (isPosix) {
+            assert tempFolderFile.setWritable(false);
+        } else {
+            view = Files.getFileAttributeView(directory.getParent(), AclFileAttributeView.class);
+            originalAcl = view.getAcl();
+            removeAclS(view, false);
+        }
 
         try {
             assertThrows(IOException.class, () ->
                     FileUtils.ensureWritableDir(directory)
             );
         } finally {
-            assert tempFolderFile.setWritable(true); // so @TempDir can tidy up
+            // so @TempDir can tidy up
+            if (isPosix) {
+                assert tempFolderFile.setWritable(true);
+            } else {
+                assert view != null;
+                view.setAcl(originalAcl);
+            }
         }
     }
 
@@ -72,7 +99,21 @@ public class TestFileUtils {
     @DisabledOnOs(OS.WINDOWS)
     public void testNoPerms() throws IOException {
         var directory = tempFolder.resolve(DIRECTORY_NAME);
-        Files.createDirectory(directory, PosixFilePermissions.asFileAttribute(Collections.emptySet()));
+        Files.createDirectory(directory);
+        var d = directory.toFile();
+
+        // Unfortunately, Win is not POSIX perms compatible, it uses own ACL system
+        List<AclEntry> originalAcl = null;
+        AclFileAttributeView view = null;
+
+        if (isPosix) {
+            assert d.setReadable(false);
+            assert d.setWritable(false);
+        } else {
+            view = Files.getFileAttributeView(directory, AclFileAttributeView.class);
+            originalAcl = view.getAcl();
+            removeAclS(view, true);
+        }
 
         try {
             var exc = assertThrows(IOException.class, () ->
@@ -81,9 +122,13 @@ public class TestFileUtils {
             assertThat(exc.getMessage(), startsWith("Missing read or write permissions"));
         } finally {
             // oh no, @TempDir doesn't know how to delete this! make it writable again.
-            var d = directory.toFile();
-            assert d.setReadable(true);
-            assert d.setWritable(true);
+            if (isPosix) {
+                assert d.setReadable(true);
+                assert d.setWritable(true);
+            } else {
+                assert view != null;
+                view.setAcl(originalAcl);
+            }
         }
     }
 
@@ -227,4 +272,28 @@ public class TestFileUtils {
         assertEquals(file1Contents, Files.readAllLines(extractedFileInRoot).get(0));
         assertEquals(file2Contents, Files.readAllLines(extractedFileInFolder).get(0));
     }
+
+    private void removeAclS(AclFileAttributeView view, boolean removeRead) throws IOException {
+        var entries = new ArrayList<AclEntry>();
+        for (var acl : view.getAcl()) {
+            var perms = new LinkedHashSet<>(acl.permissions());
+            perms.remove(AclEntryPermission.WRITE_DATA);
+            perms.remove(AclEntryPermission.APPEND_DATA);
+            perms.remove(AclEntryPermission.ADD_SUBDIRECTORY);
+            perms.remove(AclEntryPermission.DELETE);
+            perms.remove(AclEntryPermission.DELETE_CHILD);
+            if (removeRead) {
+                perms.remove(AclEntryPermission.READ_DATA);
+            }
+            var aclEntry = AclEntry.newBuilder()
+                    .setType(acl.type())
+                    .setPrincipal(acl.principal())
+                    .setPermissions(perms)
+                    .setFlags(acl.flags())
+                    .build();
+            entries.add(aclEntry);
+        }
+        view.setAcl(entries);
+    }
+
 }

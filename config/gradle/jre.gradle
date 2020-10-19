@@ -70,8 +70,6 @@ def createJreTasks(String taskNameBase,
         }
         into unpackDir
 
-        outputs.dir unpackDir
-
         dependsOn "download${taskNameBase}"
     }
 
