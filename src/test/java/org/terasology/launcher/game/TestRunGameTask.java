@@ -239,7 +239,7 @@ public class TestRunGameTask {
     }
 
     @Test
-    public void testFastExitDoesNotResultInSuccess() throws ExecutionException, InterruptedException {
+    public void testFastExitDoesNotResultInSuccess() {
         final List<String> mockOutputLines = List.of(
                 "this is a line from some process\n",
                 "oh, everything is over already, goodbye"
