@@ -73,7 +73,7 @@ public class GameService extends Service<Boolean> {
     /**
      * Start a new game process with these settings.
      *
-     * @param gamePath the directory under which we will find libs/Teresology.jar, also used as the process's
+     * @param gamePath the directory under which we will find libs/Terasology.jar, also used as the process's
      *     working directory
      * @param settings supplies other settings relevant to configuring a process
      */
