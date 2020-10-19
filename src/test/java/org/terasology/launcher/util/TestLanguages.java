@@ -24,99 +24,99 @@ import java.util.Locale;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public final class TestLanguages {
+final class TestLanguages {
 
-    public TestLanguages() {
+    TestLanguages() {
     }
 
     @Test
-    public void testDefaultLanguage() {
+    void testDefaultLanguage() {
         assertEquals(Locale.ENGLISH, Languages.DEFAULT_LOCALE);
     }
 
     @Test
-    public void testUpdateWithDefault() {
+    void testUpdateWithDefault() {
         Languages.update(Languages.DEFAULT_LOCALE);
         assertSame(Languages.DEFAULT_LOCALE, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testUpdateWithEnglish() {
+    void testUpdateWithEnglish() {
         Languages.update(Locale.ENGLISH);
         assertSame(Locale.ENGLISH, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testUpdateWithGerman() {
+    void testUpdateWithGerman() {
         Languages.update(Locale.GERMAN);
         assertSame(Locale.GERMAN, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testUpdateWithGermany() {
+    void testUpdateWithGermany() {
         Languages.update(Languages.DEFAULT_LOCALE);
         Languages.update(Locale.GERMANY);
         assertSame(Languages.DEFAULT_LOCALE, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testUpdateWithJapanese() {
+    void testUpdateWithJapanese() {
         Languages.update(Locale.JAPANESE);
         assertSame(Locale.JAPANESE, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testUpdateWithJapan() {
+    void testUpdateWithJapan() {
         Languages.update(Languages.DEFAULT_LOCALE);
         Languages.update(Locale.JAPAN);
         assertSame(Languages.DEFAULT_LOCALE, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testInitWithDefault() {
+    void testInitWithDefault() {
         Languages.init(Languages.DEFAULT_LOCALE.toString());
         assertSame(Languages.DEFAULT_LOCALE, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testInitWithEnglish() {
+    void testInitWithEnglish() {
         Languages.init(Locale.ENGLISH.toString());
         assertSame(Locale.ENGLISH, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testInitWithGerman() {
+    void testInitWithGerman() {
         Languages.init(Locale.GERMAN.toString());
         assertSame(Locale.GERMAN, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testInitWithGermany() {
+    void testInitWithGermany() {
         Languages.init(Languages.DEFAULT_LOCALE.toString());
         Languages.init(Locale.GERMANY.toString());
         assertSame(Languages.DEFAULT_LOCALE, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testInitWithJapanese() {
+    void testInitWithJapanese() {
         Languages.init(Locale.JAPANESE.toString());
         assertSame(Locale.JAPANESE, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testInitWithJapan() {
+    void testInitWithJapan() {
         Languages.init(Languages.DEFAULT_LOCALE.toString());
         Languages.init(Locale.JAPAN.toString());
         assertSame(Languages.DEFAULT_LOCALE, Languages.getCurrentLocale());
     }
 
     @Test
-    public void testSize() {
+    void testSize() {
         assertEquals(Languages.SUPPORTED_LOCALES.size(), Languages.SETTINGS_LABEL_KEYS.size());
     }
 
     @AfterAll
-    public static void resetLanguages() {
+    static void resetLanguages() {
         Languages.init(Languages.DEFAULT_LOCALE.toString());
     }
 }
