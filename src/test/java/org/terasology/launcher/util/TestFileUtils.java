@@ -47,14 +47,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestFileUtils {
+class TestFileUtils {
 
     private static final String FILE_NAME = "File";
     private static final String DIRECTORY_NAME = "lorem";
     private static final String SAMPLE_TEXT = "Lorem Ipsum";
 
     @TempDir
-    public Path tempFolder;
+    Path tempFolder;
     boolean isPosix;
 
     @BeforeEach
@@ -63,7 +63,7 @@ public class TestFileUtils {
     }
 
     @Test
-    public void testCannotCreateDirectory() throws IOException {
+    void testCannotCreateDirectory() throws IOException {
         final Path directory = tempFolder.resolve(DIRECTORY_NAME);
         var tempFolderFile = tempFolder.toFile();
 
@@ -95,7 +95,7 @@ public class TestFileUtils {
     }
 
     @Test
-    public void testNotDirectory() throws IOException {
+    void testNotDirectory() throws IOException {
         var notDirectory = tempFolder.resolve("notADirectory");
         Files.createFile(notDirectory);
 
@@ -106,7 +106,7 @@ public class TestFileUtils {
     }
 
     @Test
-    public void testNoPerms() throws IOException {
+    void testNoPerms() throws IOException {
         var directory = tempFolder.resolve(DIRECTORY_NAME);
         Files.createDirectory(directory);
         var d = directory.toFile();
@@ -142,7 +142,7 @@ public class TestFileUtils {
     }
 
     @Test
-    public void testDeleteFile() throws IOException {
+    void testDeleteFile() throws IOException {
         Path directory = tempFolder;
         Path file = directory.resolve(FILE_NAME);
         Files.createFile(file);
@@ -153,7 +153,7 @@ public class TestFileUtils {
     }
 
     @Test
-    public void testDeleteDirectoryContent() throws IOException {
+    void testDeleteDirectoryContent() throws IOException {
         Path directory = tempFolder;
         Path file = directory.resolve(FILE_NAME);
         Files.createFile(file);
@@ -167,7 +167,7 @@ public class TestFileUtils {
      * Test that `FileUtils.ensureEmptyDir` creates and empty directory if it does not exist.
      */
     @Test
-    public void testEnsureEmptyDirCreation() throws IOException {
+    void testEnsureEmptyDirCreation() throws IOException {
         Path context = tempFolder;
         // setup
         Path dirToTest = context.resolve(DIRECTORY_NAME);
@@ -183,7 +183,7 @@ public class TestFileUtils {
      * Test that `FileUtils.ensureEmptyDir` drains (delete all content) if the directory exists.
      */
     @Test
-    public void testEnsureEmptyDirDrain() throws IOException {
+    void testEnsureEmptyDirDrain() throws IOException {
         Path context = tempFolder;
         // setup
         Path dirToTest = context.resolve(DIRECTORY_NAME);
@@ -201,7 +201,7 @@ public class TestFileUtils {
     }
 
     @Test
-    public void testCopyFolder(@TempDir Path source, @TempDir Path destination) throws IOException {
+    void testCopyFolder(@TempDir Path source, @TempDir Path destination) throws IOException {
         Path fileInSource = source.resolve(FILE_NAME);
         Files.createFile(fileInSource);
         assertTrue(Files.exists(fileInSource));
@@ -217,7 +217,7 @@ public class TestFileUtils {
     }
 
     @Test
-    public void testDeleteFileSilently() throws IOException {
+    void testDeleteFileSilently() throws IOException {
         Path tempFile = tempFolder.resolve(FILE_NAME);
         Files.createFile(tempFile);
         assertTrue(Files.exists(tempFile));
@@ -227,7 +227,7 @@ public class TestFileUtils {
     }
 
     @Test
-    public void testDeleteFileSilentlyWithEmptyDirectory() {
+    void testDeleteFileSilentlyWithEmptyDirectory() {
         assertTrue(Files.exists(tempFolder));
 
         FileUtils.deleteFileSilently(tempFolder);
@@ -235,7 +235,7 @@ public class TestFileUtils {
     }
 
     @Test
-    public void testDeleteFileSilentlyWithNonEmptyDirectory() throws IOException {
+    void testDeleteFileSilentlyWithNonEmptyDirectory() throws IOException {
         Path tempFile = tempFolder.resolve(FILE_NAME);
         Files.createFile(tempFile);
         assertTrue(Files.exists(tempFile));
@@ -252,7 +252,7 @@ public class TestFileUtils {
     }
 
     @Test
-    public void testExtract(@TempDir Path zipDir, @TempDir Path outputDir) throws IOException {
+    void testExtract(@TempDir Path zipDir, @TempDir Path outputDir) throws IOException {
         final String fileInRoot = "fileInRoot";
         final String fileInFolder = "folder/fileInFolder";
         final String file1Contents = SAMPLE_TEXT + "1";

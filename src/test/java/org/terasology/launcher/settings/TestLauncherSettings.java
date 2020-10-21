@@ -43,7 +43,7 @@ import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_SEA
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_USER_GAME_PARAMETERS;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_USER_JAVA_PARAMETERS;
 
-public class TestLauncherSettings {
+class TestLauncherSettings {
     @TempDir
     Path tempDirectory;
     @TempDir
@@ -79,14 +79,14 @@ public class TestLauncherSettings {
     }
 
     @BeforeEach
-    public void setup() throws Exception {
+    void setup() {
         testPropertiesFile = tempDirectory.resolve(BaseLauncherSettings.LAUNCHER_SETTINGS_FILE_NAME);
 
         baseLauncherSettings = Settings.getDefault();
     }
 
     @Test
-    public void testInitWithValues() throws Exception {
+    void testInitWithValues() throws Exception {
         //initialise properties with sample values
         locale = "en";
         maxHeapSize = "GB_2_5";
@@ -123,7 +123,7 @@ public class TestLauncherSettings {
     }
 
     @Test
-    public void testInitDefault() throws Exception {
+    void testInitDefault() throws Exception {
         //null properties file
 
         baseLauncherSettings = Settings.getDefault();
@@ -143,7 +143,7 @@ public class TestLauncherSettings {
     }
 
     @Test
-    public void testSetters() throws Exception {
+    void testSetters() throws Exception {
         //re-initialise properties with sample values
         locale = "fr";
         maxHeapSize = "GB_4";
