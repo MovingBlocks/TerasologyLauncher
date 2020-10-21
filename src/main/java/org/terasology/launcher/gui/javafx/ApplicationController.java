@@ -125,6 +125,7 @@ public class ApplicationController {
     
     public ApplicationController() {
         warning = new SimpleObjectProperty(Optional.empty());
+        selectedPackageProperty = new SimpleObjectProperty<>(null);
     }
 
     @FXML
@@ -228,7 +229,6 @@ public class ApplicationController {
             deleteButton.setDisable(false);
             launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
             launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
-            startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
             
             downloadTask = null;
         });
