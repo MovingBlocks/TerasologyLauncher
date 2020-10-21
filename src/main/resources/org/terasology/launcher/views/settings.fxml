@@ -140,8 +140,6 @@
                        <Label text="Other" GridPane.rowIndex="16"/>
                        <Button disable="true" mnemonicParsing="false" text="Check now" GridPane.rowIndex="14"/>
                        <Label text="Last checked on dd/mm/yyyy" GridPane.columnIndex="1" GridPane.rowIndex="14"/>
-                       <CheckBox fx:id="searchForUpdatesBox" mnemonicParsing="false" text="Check on startup"
-                                 GridPane.columnSpan="2147483647" GridPane.rowIndex="15"/>
                        <CheckBox fx:id="closeAfterStartBox" mnemonicParsing="false" text="Close after game starts"
                                  GridPane.rowIndex="17"/>
                        <CheckBox fx:id="saveDownloadedFilesBox" mnemonicParsing="false" text="Save downloaded files"

@@ -44,7 +44,6 @@ public abstract class LauncherSettings {
         initLocale();
         initMaxHeapSize();
         initInitialHeapSize();
-        initSearchForLauncherUpdates();
         initCloseLauncherAfterGameStart();
         initSaveDownloadedFiles();
         initGameDirectory();
@@ -64,8 +63,6 @@ public abstract class LauncherSettings {
     // --------------------------------------------------------------------- //
 
     protected abstract void initInitialHeapSize();
-
-    protected abstract void initSearchForLauncherUpdates();
 
     protected abstract void initCloseLauncherAfterGameStart();
 
@@ -123,8 +120,6 @@ public abstract class LauncherSettings {
 
     public abstract Path getGameDataDirectory();
 
-    public abstract boolean isSearchForLauncherUpdates();
-
     public abstract boolean isCloseLauncherAfterGameStart();
 
     public abstract boolean isKeepDownloadedFiles();
@@ -154,8 +149,6 @@ public abstract class LauncherSettings {
     public abstract void setUserGameParameters(String userGameParameters);
 
     public abstract void setLogLevel(Level logLevel);
-
-    public abstract void setSearchForLauncherUpdates(boolean searchForLauncherUpdates);
 
     public abstract void setCloseLauncherAfterGameStart(boolean closeLauncherAfterGameStart);
 

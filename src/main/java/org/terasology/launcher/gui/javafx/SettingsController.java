@@ -93,8 +93,6 @@ public class SettingsController {
     @FXML
     private Button launcherDirectoryOpenButton;
     @FXML
-    private CheckBox searchForUpdatesBox;
-    @FXML
     private Button saveSettingsButton;
     @FXML
     private Button cancelSettingsButton;
@@ -140,9 +138,6 @@ public class SettingsController {
         // save languageBox settings
         Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectionModel().getSelectedIndex()));
         launcherSettings.setLocale(Languages.getCurrentLocale());
-
-        // save searchForLauncherUpdates
-        launcherSettings.setSearchForLauncherUpdates(searchForUpdatesBox.isSelected());
 
         // save closeLauncherAfterGameStart
         launcherSettings.setCloseLauncherAfterGameStart(closeAfterStartBox.isSelected());
@@ -221,7 +216,6 @@ public class SettingsController {
         populateHeapSize();
         populateLanguageValues();
         populateLanguageIcons();
-        populateSearchForLauncherUpdates();
         populateCloseLauncherAfterGameStart();
         populateSaveDownloadedFiles();
         populateLogLevel();
@@ -266,7 +260,6 @@ public class SettingsController {
         saveDownloadedFilesBox.setText(BundleUtils.getLabel("settings_launcher_saveDownloadedFiles"));
         launcherDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory"));
         launcherDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory_open"));
-        searchForUpdatesBox.setText(BundleUtils.getLabel("settings_launcher_searchForLauncherUpdates"));
         saveSettingsButton.setText(BundleUtils.getLabel("settings_save"));
         cancelSettingsButton.setText(BundleUtils.getLabel("settings_cancel"));
     }
@@ -309,10 +302,6 @@ public class SettingsController {
 
         // Make the icon visible in the control area for the selected locale
         languageBox.setButtonCell(languageBox.getCellFactory().call(null));
-    }
-
-    private void populateSearchForLauncherUpdates() {
-        searchForUpdatesBox.setSelected(launcherSettings.isSearchForLauncherUpdates());
     }
 
     private void populateCloseLauncherAfterGameStart() {
