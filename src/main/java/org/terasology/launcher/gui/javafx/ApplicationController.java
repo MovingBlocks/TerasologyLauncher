@@ -1,18 +1,5 @@
-/*
- * Copyright 2019 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.gui.javafx;
 
@@ -119,9 +106,12 @@ public class ApplicationController {
      * Indicate whether the user's hard drive is running out of space for game downloads.
      */
     private final Property<Optional<Warning>> warning;
+    private Property<Tooltip> playButtonTooltip;
+    private Property<Package> selectedPackageProperty;
 
     public ApplicationController() {
-        warning = new SimpleObjectProperty<>(Optional.empty());
+        warning = new SimpleObjectProperty(Optional.empty());
+        selectedPackageProperty = new SimpleObjectProperty<>(null);
     }
 
     @FXML
@@ -351,6 +341,13 @@ public class ApplicationController {
             }
         });
 
+        selectedPackageProperty.addListener(
+                (observable, oldValue, newValue) -> {
+                    Tooltip t = new Tooltip(BundleUtils.getLabel(
+                            newValue.isInstalled() ? "launcher_start" : "launcher_download"));
+                    playButtonTooltip.setValue(t);
+                });
+
         buildVersionBox.setCellFactory(list -> new VersionListCell());
         buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == null) {
@@ -360,6 +357,7 @@ public class ApplicationController {
             selectedPackage = newVal.getLinkedPackage();
 
             if (selectedPackage != null && selectedPackage.isInstalled()) {
+                selectedPackageProperty.setValue(selectedPackage);
                 startAndDownloadButton.setGraphic(playImage);
                 deleteButton.setDisable(false);
             } else {
@@ -440,7 +438,9 @@ public class ApplicationController {
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
         cancelDownloadButton.setVisible(false);
 
-        startAndDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
+        playButtonTooltip = new SimpleObjectProperty<>(new Tooltip(BundleUtils.getLabel("launcher_download")));
+        startAndDownloadButton.tooltipProperty().bind(playButtonTooltip);
+
         startAndDownloadButton.managedProperty().bind(startAndDownloadButton.visibleProperty());
         startAndDownloadButton.setGraphic(downloadImage);
 
