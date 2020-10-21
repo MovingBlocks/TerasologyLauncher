@@ -108,7 +108,7 @@ public class ApplicationController {
     private final Property<Optional<Warning>> warning;
     private Property<Tooltip> playButtonTooltip;
     private Property<Package> selectedPackageProperty;
-    
+
     public ApplicationController() {
         warning = new SimpleObjectProperty(Optional.empty());
         selectedPackageProperty = new SimpleObjectProperty<>(null);
@@ -215,7 +215,7 @@ public class ApplicationController {
             deleteButton.setDisable(false);
             launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
             launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
-            
+
             downloadTask = null;
         });
 
@@ -340,13 +340,13 @@ public class ApplicationController {
                         item.getVersion().equals(launcherSettings.getLastPlayedGameVersion()));
             }
         });
-        
+
         selectedPackageProperty.addListener(
-            (observable, oldValue, newValue) -> {
-            Tooltip t = new Tooltip(BundleUtils.getLabel(
-                    newValue.isInstalled() ?"launcher_start" : "launcher_download"));
-            playButtonTooltip.setValue(t);
-        });
+                (observable, oldValue, newValue) -> {
+                    Tooltip t = new Tooltip(BundleUtils.getLabel(
+                            newValue.isInstalled() ? "launcher_start" : "launcher_download"));
+                    playButtonTooltip.setValue(t);
+                });
 
         buildVersionBox.setCellFactory(list -> new VersionListCell());
         buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -437,7 +437,7 @@ public class ApplicationController {
         cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
         cancelDownloadButton.setVisible(false);
-        
+
         playButtonTooltip = new SimpleObjectProperty<>(new Tooltip(BundleUtils.getLabel("launcher_download")));
         startAndDownloadButton.tooltipProperty().bind(playButtonTooltip);
 
