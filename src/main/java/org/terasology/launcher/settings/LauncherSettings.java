@@ -18,26 +18,25 @@ package org.terasology.launcher.settings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.LogLevel;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 
 /**
  * @deprecated to be replaced by {@link org.terasology.launcher.config.Config}
  */
 @Deprecated
-public abstract class AbstractLauncherSettings {
+public abstract class LauncherSettings {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractLauncherSettings.class);
+    private static final Logger logger = LoggerFactory.getLogger(LauncherSettings.class);
 
-    public abstract void load() throws IOException;
-
-    public abstract void store() throws IOException;
+    public abstract Properties getProperties();
 
     public synchronized void init() {
         logger.trace("Init launcher settings ...");
@@ -118,7 +117,7 @@ public abstract class AbstractLauncherSettings {
         return Arrays.asList(getUserGameParameters().split("\\s+"));
     }
 
-    public abstract LogLevel getLogLevel();
+    public abstract Level getLogLevel();
 
     public abstract Path getGameDirectory();
 
@@ -154,7 +153,7 @@ public abstract class AbstractLauncherSettings {
 
     public abstract void setUserGameParameters(String userGameParameters);
 
-    public abstract void setLogLevel(LogLevel logLevel);
+    public abstract void setLogLevel(Level logLevel);
 
     public abstract void setSearchForLauncherUpdates(boolean searchForLauncherUpdates);
 

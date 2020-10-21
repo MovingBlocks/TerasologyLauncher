@@ -47,13 +47,14 @@ import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameStarter;
-import org.terasology.launcher.tasks.DeleteTask;
-import org.terasology.launcher.tasks.DownloadTask;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.settings.LauncherSettings;
+import org.terasology.launcher.settings.Settings;
+import org.terasology.launcher.tasks.DeleteTask;
+import org.terasology.launcher.tasks.DownloadTask;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
 
@@ -74,7 +75,7 @@ public class ApplicationController {
     private static final long MINIMUM_FREE_SPACE = 200 * MB;
 
     private Path launcherDirectory;
-    private BaseLauncherSettings launcherSettings;
+    private LauncherSettings launcherSettings;
     private PackageManager packageManager;
     private GameStarter gameStarter;
     private Stage stage;
@@ -107,8 +108,6 @@ public class ApplicationController {
     @FXML
     private ImageView downloadImage;
 
-    @FXML
-    private AboutViewController aboutViewController;
     @FXML
     private LogViewController logViewController;
     @FXML
@@ -143,14 +142,14 @@ public class ApplicationController {
     @FXML
     protected void handleControlButtonMouseEntered(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = FXUtils.createScaleTransition(1.2, source);
+        final Transition t = Effects.createScaleTransition(1.2, source);
         t.playFromStart();
     }
 
     @FXML
     protected void handleControlButtonMouseExited(MouseEvent event) {
         final Node source = (Node) event.getSource();
-        final Transition t = FXUtils.createScaleTransition(1, source);
+        final Transition t = Effects.createScaleTransition(1, source);
         t.playFromStart();
     }
 
@@ -189,13 +188,13 @@ public class ApplicationController {
 
         if (gameStarter.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
-            GuiUtils.showInfoMessageDialog(stage, BundleUtils.getLabel("message_information_gameRunning"));
+            Dialogs.showInfo(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
             final boolean gameStarted = gameStarter.startGame(selectedPackage, gamePath, launcherSettings.getGameDataDirectory(), launcherSettings.getMaxHeapSize(),
                     launcherSettings.getInitialHeapSize(), launcherSettings.getUserJavaParameterList(),
                     launcherSettings.getUserGameParameterList(), launcherSettings.getLogLevel());
             if (!gameStarted) {
-                GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_gameStart"));
+                Dialogs.showError(stage, BundleUtils.getLabel("message_error_gameStart"));
             } else {
                 launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
                 launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
@@ -286,7 +285,7 @@ public class ApplicationController {
                 });
     }
 
-    public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final BaseLauncherSettings newLauncherSettings,
+    public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final LauncherSettings newLauncherSettings,
                        final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.launcherSettings = newLauncherSettings;
@@ -468,8 +467,9 @@ public class ApplicationController {
      */
     private void close() {
         logger.debug("Dispose launcher frame...");
+        final Path settingsFile = launcherDirectory.resolve(Settings.DEFAULT_FILE_NAME);
         try {
-            launcherSettings.store();
+            Settings.store(launcherSettings, settingsFile);
         } catch (IOException e) {
             logger.warn("Could not store current launcher settings!");
         }

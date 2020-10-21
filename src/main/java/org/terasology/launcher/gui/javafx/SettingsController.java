@@ -30,13 +30,14 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.settings.LauncherSettings;
+import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.util.GuiUtils;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.LogLevel;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -50,7 +51,7 @@ public class SettingsController {
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
 
     private Path launcherDirectory;
-    private BaseLauncherSettings launcherSettings;
+    private LauncherSettings launcherSettings;
     private PackageManager packageManager;
     private ApplicationController appController;
 
@@ -114,7 +115,7 @@ public class SettingsController {
     @FXML
     private TextField userGameParametersField;
     @FXML
-    private ComboBox<LogLevel> logLevelBox;
+    private ComboBox<Level> logLevelBox;
 
     @FXML
     protected void cancelSettingsAction(ActionEvent event) {
@@ -164,11 +165,13 @@ public class SettingsController {
         }
 
         // store changed settings
+        final Path settingsFile = launcherDirectory.resolve(Settings.DEFAULT_FILE_NAME);
         try {
-            launcherSettings.store();
+            Settings.store(launcherSettings, settingsFile);
         } catch (IOException e) {
-            logger.error("The launcher settings can not be stored! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
-            GuiUtils.showErrorMessageDialog(stage, BundleUtils.getLabel("message_error_storeSettings"));
+            //TODO: unify error handling, probably to Settings a.k.a. SettingsController?
+            logger.error("The launcher settings cannot be stored! '{}'", settingsFile, e);
+            Dialogs.showError(stage, BundleUtils.getLabel("message_error_storeSettings"));
         } finally {
             ((Node) event.getSource()).getScene().getWindow().hide();
         }
@@ -176,17 +179,17 @@ public class SettingsController {
 
     @FXML
     protected void openGameDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, gameDirectory, BundleUtils.getLabel("message_error_gameDirectory"));
+        Dialogs.openFileBrowser(stage, gameDirectory, BundleUtils.getLabel("message_error_gameDirectory"));
     }
 
     @FXML
     protected void openGameDataDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, gameDataDirectory, BundleUtils.getLabel("message_error_gameDataDirectory"));
+        Dialogs.openFileBrowser(stage, gameDataDirectory, BundleUtils.getLabel("message_error_gameDataDirectory"));
     }
 
     @FXML
     protected void openLauncherDirectoryAction() {
-        GuiUtils.openFileBrowser(stage, launcherDirectory, BundleUtils.getLabel("message_error_launcherDirectory"));
+        Dialogs.openFileBrowser(stage, launcherDirectory, BundleUtils.getLabel("message_error_launcherDirectory"));
     }
 
     @FXML
@@ -207,7 +210,7 @@ public class SettingsController {
         }
     }
 
-    void initialize(final Path newLauncherDirectory, final BaseLauncherSettings newLauncherSettings,
+    void initialize(final Path newLauncherDirectory, final LauncherSettings newLauncherSettings,
                     final PackageManager newPackageManager, final Stage newStage, final ApplicationController newAppController) {
         this.launcherDirectory = newLauncherDirectory;
         this.launcherSettings = newLauncherSettings;
@@ -322,7 +325,7 @@ public class SettingsController {
 
     private void populateLogLevel() {
         logLevelBox.getItems().clear();
-        for (LogLevel level : LogLevel.values()) {
+        for (Level level : Level.values()) {
             logLevelBox.getItems().add(level);
         }
         updateLogLevelSelection();

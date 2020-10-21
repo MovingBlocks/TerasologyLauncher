@@ -67,12 +67,12 @@ public final class LauncherSettingsValidator {
     }
 
     /**
-     * Validates an {@link AbstractLauncherSettings} instance against a list of rules.
+     * Validates an {@link LauncherSettings} instance against a list of rules.
      * Also applies a correction to the settings if it breaks any rule.
      *
      * @param settings the settings to be validated
      */
-    public static void validate(AbstractLauncherSettings settings) {
+    public static void validate(LauncherSettings settings) {
         for (SettingsValidationRule rule : RULES) {
             if (rule.isBrokenBy(settings)) {
                 logger.warn(rule.getInvalidationMessage());

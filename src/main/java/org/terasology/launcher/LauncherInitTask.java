@@ -26,12 +26,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
+import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.util.GuiUtils;
+import org.terasology.launcher.gui.javafx.Dialogs;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
@@ -44,6 +46,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
@@ -81,7 +84,8 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path cacheDirectory = getDirectoryFor(LauncherManagedDirectory.CACHE, userDataDirectory);
 
             // launcher settings
-            final BaseLauncherSettings launcherSettings = getLauncherSettings(userDataDirectory);
+            final Path settingsFile = userDataDirectory.resolve(Settings.DEFAULT_FILE_NAME);
+            final LauncherSettings launcherSettings = getLauncherSettings(settingsFile);
 
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
@@ -119,11 +123,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             launcherSettings.setGameDataDirectory(gameDataDirectory);
             // TODO: Rewrite gameVersions.fixSettingsBuildVersion(launcherSettings);
 
-            storeLauncherSettingsAfterInit(launcherSettings);
+            storeLauncherSettingsAfterInit(launcherSettings, settingsFile);
 
             logger.trace("Creating launcher frame...");
 
-            return new LauncherConfiguration(userDataDirectory, downloadDirectory, tempDirectory, cacheDirectory, launcherSettings, packageManager);
+            return new LauncherConfiguration(userDataDirectory, downloadDirectory, launcherSettings, packageManager);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
         }
@@ -150,7 +154,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             }
         } catch (IOException e) {
             logger.error("Directory '{}' cannot be created or used! '{}'", dir.getFileName(), dir, e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel(errorLabel) + "\n" + dir);
+            Dialogs.showError(owner, BundleUtils.getLabel(errorLabel) + "\n" + dir);
             throw new LauncherStartFailedException();
         }
         logger.debug("{} directory: {}", dir.getFileName(), dir);
@@ -172,20 +176,16 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return launcherDirectory;
     }
 
-    private BaseLauncherSettings getLauncherSettings(Path launcherDirectory) throws LauncherStartFailedException {
+    private LauncherSettings getLauncherSettings(Path settingsFile) throws LauncherStartFailedException {
         logger.trace("Init LauncherSettings...");
         updateMessage(BundleUtils.getLabel("splash_retrieveLauncherSettings"));
-        final BaseLauncherSettings launcherSettings = new BaseLauncherSettings(launcherDirectory);
-        try {
-            launcherSettings.load();
-            launcherSettings.init();
-        } catch (IOException e) {
-            logger.error("The launcher settings can not be loaded or initialized! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_loadSettings") + "\n" + launcherSettings.getLauncherSettingsFilePath());
-            throw new LauncherStartFailedException();
-        }
-        logger.debug("Launcher Settings: {}", launcherSettings);
-        return launcherSettings;
+
+        final LauncherSettings settings = Optional.ofNullable(Settings.load(settingsFile)).orElse(Settings.getDefault());
+        settings.init();
+
+        logger.debug("Launcher Settings: {}", settings);
+
+        return settings;
     }
 
     private boolean checkForLauncherUpdates(Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
@@ -205,7 +205,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 foundLauncherInstallationDirectory = true;
             } catch (IOException e) {
                 logger.error("The launcher installation directory can not be detected or used!", e);
-                GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
+                Dialogs.showError(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
                 // Run launcher without an update. Don't throw a LauncherStartFailedException.
             }
             if (foundLauncherInstallationDirectory) {
@@ -240,7 +240,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 FileUtils.ensureWritableDir(gameDataDirectory);
             } catch (IOException e) {
                 logger.warn("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
-                GuiUtils.showWarningMessageDialog(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n"
+                Dialogs.showWarning(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n"
                         + gameDataDirectory);
 
                 // Set gameDataDirectory to 'null' -> user has to choose new game data directory
@@ -250,7 +250,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         if (gameDataDirectory == null) {
             logger.trace("Choose data directory for the game...");
             updateMessage(BundleUtils.getLabel("splash_chooseGameDataDirectory"));
-            gameDataDirectory = GuiUtils.chooseDirectoryDialog(owner, LauncherDirectoryUtils.getGameDataDirectory(os),
+            gameDataDirectory = Dialogs.chooseDirectory(owner, LauncherDirectoryUtils.getGameDataDirectory(os),
                     BundleUtils.getLabel("message_dialog_title_chooseGameDataDirectory"));
             if (Files.notExists(gameDataDirectory)) {
                 logger.info("The new game data directory is not approved. The TerasologyLauncher is terminated.");
@@ -261,7 +261,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             FileUtils.ensureWritableDir(gameDataDirectory);
         } catch (IOException e) {
             logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
+            Dialogs.showError(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
             throw new LauncherStartFailedException();
         }
         logger.debug("Game data directory: {}", gameDataDirectory);
@@ -289,14 +289,15 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }, javafx.application.Platform::runLater).join();
     }
 
-    private void storeLauncherSettingsAfterInit(BaseLauncherSettings launcherSettings) throws LauncherStartFailedException {
+    private void storeLauncherSettingsAfterInit(LauncherSettings launcherSettings, final Path settingsFile) throws LauncherStartFailedException {
         logger.trace("Store LauncherSettings...");
         updateMessage(BundleUtils.getLabel("splash_storeLauncherSettings"));
         try {
-            launcherSettings.store();
+            Settings.store(launcherSettings, settingsFile);
         } catch (IOException e) {
-            logger.error("The launcher settings can not be stored! '{}'", launcherSettings.getLauncherSettingsFilePath(), e);
-            GuiUtils.showErrorMessageDialog(owner, BundleUtils.getLabel("message_error_storeSettings"));
+            logger.error("The launcher settings cannot be stored! '{}'", settingsFile, e);
+            Dialogs.showError(owner, BundleUtils.getLabel("message_error_storeSettings"));
+            //TODO: should we fail here, or is it fine to work with in-memory settings?
             throw new LauncherStartFailedException();
         }
         logger.debug("Launcher Settings stored: {}", launcherSettings);

@@ -19,9 +19,9 @@ package org.terasology.launcher.settings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.LogLevel;
 
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -43,7 +43,7 @@ import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_SEA
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_USER_GAME_PARAMETERS;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_USER_JAVA_PARAMETERS;
 
-public class TestBaseLauncherSettings {
+class TestLauncherSettings {
     @TempDir
     Path tempDirectory;
     @TempDir
@@ -51,7 +51,7 @@ public class TestBaseLauncherSettings {
     @TempDir
     Path gameDataDirectory;
 
-    private BaseLauncherSettings baseLauncherSettings;
+    private LauncherSettings baseLauncherSettings;
     private Path testPropertiesFile;
 
     private String locale;
@@ -75,18 +75,18 @@ public class TestBaseLauncherSettings {
         assertEquals(baseLauncherSettings.isKeepDownloadedFiles(), Boolean.valueOf(saveDownloadedFiles));
         assertEquals(baseLauncherSettings.getUserJavaParameters(), userJavaParameters);
         assertEquals(baseLauncherSettings.getUserGameParameters(), userGameParameters);
-        assertEquals(baseLauncherSettings.getLogLevel(), LogLevel.valueOf(logLevel));
+        assertEquals(baseLauncherSettings.getLogLevel(), Level.valueOf(logLevel));
     }
 
     @BeforeEach
-    public void setup() throws Exception {
+    void setup() {
         testPropertiesFile = tempDirectory.resolve(BaseLauncherSettings.LAUNCHER_SETTINGS_FILE_NAME);
 
-        baseLauncherSettings = new BaseLauncherSettings(tempDirectory);
+        baseLauncherSettings = Settings.getDefault();
     }
 
     @Test
-    public void testInitWithValues() throws Exception {
+    void testInitWithValues() throws Exception {
         //initialise properties with sample values
         locale = "en";
         maxHeapSize = "GB_2_5";
@@ -117,16 +117,16 @@ public class TestBaseLauncherSettings {
             testProperties.store(output, null);
         }
 
-        baseLauncherSettings.load();
+        baseLauncherSettings = Settings.load(testPropertiesFile);
         baseLauncherSettings.init();
         assertPropertiesEqual();
     }
 
     @Test
-    public void testInitDefault() throws Exception {
+    void testInitDefault() throws Exception {
         //null properties file
 
-        baseLauncherSettings.load();
+        baseLauncherSettings = Settings.getDefault();
         baseLauncherSettings.init();
 
         assertEquals(baseLauncherSettings.getLocale(), Languages.DEFAULT_LOCALE);
@@ -139,11 +139,11 @@ public class TestBaseLauncherSettings {
         assertEquals(baseLauncherSettings.isKeepDownloadedFiles(), Boolean.valueOf(saveDownloadedFiles));
         assertEquals(baseLauncherSettings.getUserJavaParameters(), BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
         assertEquals(baseLauncherSettings.getUserGameParameters(), BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
-        assertEquals(baseLauncherSettings.getLogLevel(), LogLevel.DEFAULT);
+        assertEquals(baseLauncherSettings.getLogLevel(), Level.INFO);
     }
 
     @Test
-    public void testSetters() throws Exception {
+    void testSetters() throws Exception {
         //re-initialise properties with sample values
         locale = "fr";
         maxHeapSize = "GB_4";
@@ -166,7 +166,7 @@ public class TestBaseLauncherSettings {
         baseLauncherSettings.setKeepDownloadedFiles(Boolean.parseBoolean(saveDownloadedFiles));
         baseLauncherSettings.setUserJavaParameters(userJavaParameters);
         baseLauncherSettings.setUserGameParameters(userGameParameters);
-        baseLauncherSettings.setLogLevel(LogLevel.valueOf(logLevel));
+        baseLauncherSettings.setLogLevel(Level.valueOf(logLevel));
 
         assertPropertiesEqual();
     }

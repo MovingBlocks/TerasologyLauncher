@@ -23,21 +23,21 @@ import java.util.function.Predicate;
  * Provides methods to check settings values and correct the invalid ones.
  */
 public class SettingsValidationRule {
-    private final Predicate<AbstractLauncherSettings> condition;
+    private final Predicate<LauncherSettings> condition;
     private final String invalidationMessage;
-    private final Consumer<AbstractLauncherSettings> correction;
+    private final Consumer<LauncherSettings> correction;
 
     public SettingsValidationRule(
-            Predicate<AbstractLauncherSettings> condition,
+            Predicate<LauncherSettings> condition,
             String invalidationMessage,
-            Consumer<AbstractLauncherSettings> correction
+            Consumer<LauncherSettings> correction
     ) {
         this.condition = condition;
         this.invalidationMessage = invalidationMessage;
         this.correction = correction;
     }
 
-    public boolean isBrokenBy(AbstractLauncherSettings settings) {
+    public boolean isBrokenBy(LauncherSettings settings) {
         return !condition.test(settings);
     }
 
@@ -45,7 +45,7 @@ public class SettingsValidationRule {
         return invalidationMessage;
     }
 
-    public void correct(AbstractLauncherSettings settings) {
+    public void correct(LauncherSettings settings) {
         correction.accept(settings);
     }
 }

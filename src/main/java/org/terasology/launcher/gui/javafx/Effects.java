@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 MovingBlocks
+ * Copyright 2020 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,9 +20,9 @@ import javafx.animation.ScaleTransition;
 import javafx.scene.Node;
 import javafx.util.Duration;
 
-final class FXUtils {
-
-    private FXUtils() { }
+public final class Effects {
+    private Effects() {
+    }
 
     /**
      * Creates a {@link javafx.animation.ScaleTransition} with the given factor for the specified node element.
@@ -31,7 +31,7 @@ final class FXUtils {
      * @param node   the target node
      * @return a transition object
      */
-    static ScaleTransition createScaleTransition(final double factor, final Node node) {
+    public static ScaleTransition createScaleTransition(final double factor, final Node node) {
         final ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(200), node);
         scaleTransition.setFromX(node.getScaleX());
         scaleTransition.setFromY(node.getScaleY());
@@ -39,5 +39,4 @@ final class FXUtils {
         scaleTransition.setToY(factor);
         return scaleTransition;
     }
-
 }

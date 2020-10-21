@@ -7,8 +7,8 @@
 *.iml
 *.ipr
 *.iws
-.idea/
 /out/
+.attach_*
 
 # Ignore Eclipse
 .project

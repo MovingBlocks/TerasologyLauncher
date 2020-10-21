@@ -25,7 +25,7 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
-        maven { url "https://plugins.gradle.org/m2/" }
+        gradlePluginPortal()
     }
 }
 
@@ -35,12 +35,15 @@ plugins {
     id "com.github.spotbugs" version "4.0.4"
     id 'de.undercouch.download' version '4.0.4'
     id 'java'
+    // to help clarify conflicting logging providers
+    id 'name.remal.component-metadata' version '1.0.186'
     id 'nebula.release' version '14.1.0'
     id 'pmd'
     id 'project-report'
     id 'org.openjfx.javafxplugin' version '0.0.8'
 }
 
+apply plugin: 'org.terasology.gradlegoo'
 apply from: "./config/gradle/jre.gradle"
 
 // Test for right version of Java in use for running this script
@@ -76,23 +79,38 @@ ext {
 repositories {
     // Main Maven repo
     mavenCentral()
-    // MovingBlocks Artifactory instance(s) for libs not readily available elsewhere plus our own libs
-    maven {
-        allowInsecureProtocol true
-        url "http://artifactory.terasology.org/artifactory/virtual-repo-live"
-    }
     jcenter()
-    maven { url "https://jitpack.io" }
+    maven {
+        // MovingBlocks Artifactory instance(s) for libs not readily available elsewhere plus our own libs
+        name "Terasology Artifactory"
+        url "http://artifactory.terasology.org/artifactory/virtual-repo-live"
+        allowInsecureProtocol true
+    }
+    maven {
+        // for spf4j dependencies that haven't been merged upstream
+        // i.e. org.apache.avro:avro
+        name "spf4j dependencies"
+        url  "https://dl.bintray.com/zolyfarkas/core"
+    }
+    maven {
+        name "JitPack"  // used by org.everit.json.schema
+        url "https://jitpack.io"
+    }
 }
 
 // Primary dependencies definition
 dependencies {
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha1'
+    implementation("org.slf4j:slf4j-api:[1.7.+, 2.0.0-alpha1]") {
+        because "influenced by app or test loggers as needed"
+    }
+    implementation("ch.qos.logback:logback-classic:1.3.0-alpha5") {
+        because "1.3 series uses ServiceLoader (more packaging friendly?)"
+    }
+
     implementation group: 'com.atlassian.commonmark', name: 'commonmark', version: '0.14.0'
 
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
     implementation group: "com.google.guava", name: "guava", version: "28.1-jre"
-    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.3.0-alpha5'
     implementation group: 'com.github.everit-org.json-schema', name: 'org.everit.json.schema', version: '1.12.1'
 
     implementation group: 'org.kohsuke', name: 'github-api', version: '1.111'
@@ -102,13 +120,48 @@ dependencies {
     // These dependencies are only needed for running tests
 
     testImplementation 'org.hamcrest:hamcrest:2.2'
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.2"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.+"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.+"
 
-    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '3.3.3' // For final classes
+    testImplementation('org.mockito:mockito-inline:3.3.+') {
+        because "-inline build enables mocking final classes"
+        // https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.2
+        // > Be aware that this artifact may be abolished when the inline mock making feature is integrated into the default mock maker.
+    }
+    testImplementation "org.mockito:mockito-junit-jupiter:3.3.+"
+
+    testImplementation('org.spf4j:spf4j-slf4j-test:8.8.+') {
+        because "testable logging"
+    }
+    testImplementation("org.slf4j:slf4j-api:1.7.+!!") {
+        because "spf4j-slf4j-test:8.8 needs slf4j-api:1.x"
+    }
+
+    testImplementation("org.testfx:testfx-core:4.0.16-alpha") {
+        because "to test JavaFX Application"
+        // -alpha because that's the only kind of release they have?
+    }
+    testImplementation "org.testfx:testfx-junit5:4.0.16-alpha"
+
+    testImplementation("org.testfx:openjfx-monocle:jdk-12.0.1+2") {
+        // nobody's uploaded a jdk-14 build yet. does the jdk-12 one work?
+        because "CI builders are headless environments"
+    }
 
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
     codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.4.0', ext: 'zip'
+}
+
+configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation)Classpath/ }).all {
+    resolutionStrategy(gradlegoo.prefers("logging", "jcl-api-capability", "jcl-over-slf4j",
+            "jcl should prefer slf4j when available"))
+    resolutionStrategy(gradlegoo.prefers("logging", "slf4j-impl-capability",
+            "spf4j-slf4j-test", "tests use slf4j-test"))
+
+    // old hamcrest versions exist only to spite us
+    // http://hamcrest.org/JavaHamcrest/distributables#upgrading-from-hamcrest-1x
+    exclude group: "org.hamcrest", module: "hamcrest-core"
+    exclude group: "org.hamcrest", module: "hamcrest-library"
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
@@ -116,11 +169,12 @@ sourceCompatibility = 1.11
 targetCompatibility = 1.11
 
 javafx {
-    version = "11.0.2"
+    version = "12.0.1"
     modules = [
             'javafx.graphics',
             'javafx.fxml',
-            'javafx.web']
+            'javafx.web'
+    ]
 }
 
 test {
@@ -128,6 +182,7 @@ test {
 }
 
 checkstyle {
+    ignoreFailures = false
     configFile = new File("$rootDir/config/metrics/checkstyle/checkstyle.xml")
     configProperties.samedir = checkstyle.configFile.parentFile
 }
@@ -260,3 +315,9 @@ processResources.dependsOn copyIconsIntoResources
 
 //TODO: Temporary workaround for new exes / JRE bundling not quite being officially ready yet
 distZip.exclude("*.x*.exe")
+
+
+tasks.named('wrapper') {
+    // IDEA likes this distribution to better know things.
+    distributionType = Wrapper.DistributionType.ALL
+}
