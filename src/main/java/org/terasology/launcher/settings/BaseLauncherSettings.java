@@ -32,9 +32,7 @@ import java.util.Properties;
 /**
  * Provides access to launcher settings.
  *
- * @deprecated to be replaced by {@link org.terasology.launcher.config.Config}
  */
-@Deprecated
 public final class BaseLauncherSettings extends LauncherSettings {
 
     public static final String USER_JAVA_PARAMETERS_DEFAULT = "-XX:MaxGCPauseMillis=20";
