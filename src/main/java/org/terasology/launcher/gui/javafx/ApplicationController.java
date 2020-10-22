@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameStarter;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
-import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
