@@ -103,9 +103,6 @@ public final class TerasologyLauncher extends Application {
                 LauncherConfiguration config = launcherInitTask.getValue();
                 if (config == null) {
                     throw new LauncherStartFailedException("Launcher configuration was `null`.");
-                } else if (config instanceof NullLauncherConfiguration) {
-                    logger.info("Closing the launcher ... (empty configuration, probably due to update)");
-                    Platform.exit();
                 } else {
                     showMainStage(config);
                 }

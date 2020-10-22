@@ -39,7 +39,6 @@ import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_LOC
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_LOG_LEVEL;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_MAX_HEAP_SIZE;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_SAVE_DOWNLOADED_FILES;
-import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_USER_GAME_PARAMETERS;
 import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_USER_JAVA_PARAMETERS;
 
@@ -57,7 +56,6 @@ class TestLauncherSettings {
     private String locale;
     private String maxHeapSize;
     private String initialHeapSize;
-    private String searchForLauncherUpdates;
     private String closeLauncherAfterGameStart;
     private String saveDownloadedFiles;
     private String userJavaParameters;
@@ -68,7 +66,6 @@ class TestLauncherSettings {
         assertEquals(baseLauncherSettings.getLocale(), Locale.forLanguageTag(locale));
         assertEquals(baseLauncherSettings.getMaxHeapSize(), JavaHeapSize.valueOf(maxHeapSize));
         assertEquals(baseLauncherSettings.getInitialHeapSize(), JavaHeapSize.valueOf(initialHeapSize));
-        assertEquals(baseLauncherSettings.isSearchForLauncherUpdates(), Boolean.valueOf(searchForLauncherUpdates));
         assertEquals(baseLauncherSettings.isCloseLauncherAfterGameStart(), Boolean.valueOf(closeLauncherAfterGameStart));
         assertEquals(baseLauncherSettings.getGameDirectory(), gameDirectory);
         assertEquals(baseLauncherSettings.getGameDataDirectory(), gameDataDirectory);
@@ -91,7 +88,6 @@ class TestLauncherSettings {
         locale = "en";
         maxHeapSize = "GB_2_5";
         initialHeapSize = "GB_1_5";
-        searchForLauncherUpdates = "false";
         closeLauncherAfterGameStart = "false";
         saveDownloadedFiles = "false";
         userJavaParameters = "-XXnoSystemGC";
@@ -103,7 +99,6 @@ class TestLauncherSettings {
         testProperties.setProperty(PROPERTY_LOCALE, locale);
         testProperties.setProperty(PROPERTY_MAX_HEAP_SIZE, maxHeapSize);
         testProperties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialHeapSize);
-        testProperties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, searchForLauncherUpdates);
         testProperties.setProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START, closeLauncherAfterGameStart);
         testProperties.setProperty(PROPERTY_GAME_DIRECTORY, gameDirectory.toUri().toString());
         testProperties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toUri().toString());
@@ -132,7 +127,6 @@ class TestLauncherSettings {
         assertEquals(baseLauncherSettings.getLocale(), Languages.DEFAULT_LOCALE);
         assertEquals(baseLauncherSettings.getMaxHeapSize(), BaseLauncherSettings.MAX_HEAP_SIZE_DEFAULT);
         assertEquals(baseLauncherSettings.getInitialHeapSize(), BaseLauncherSettings.INITIAL_HEAP_SIZE_DEFAULT);
-        assertEquals(baseLauncherSettings.isSearchForLauncherUpdates(), BaseLauncherSettings.SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT);
         assertEquals(baseLauncherSettings.isCloseLauncherAfterGameStart(), BaseLauncherSettings.CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT);
         assertNull(baseLauncherSettings.getGameDirectory());
         assertNull(baseLauncherSettings.getGameDataDirectory());
@@ -148,7 +142,6 @@ class TestLauncherSettings {
         locale = "fr";
         maxHeapSize = "GB_4";
         initialHeapSize = "GB_3";
-        searchForLauncherUpdates = "true";
         closeLauncherAfterGameStart = "true";
         saveDownloadedFiles = "true";
         userJavaParameters = "-XXUseParNewGC -XXUseConcMarkSweepGC";
@@ -159,7 +152,6 @@ class TestLauncherSettings {
         baseLauncherSettings.setLocale(Locale.forLanguageTag(locale));
         baseLauncherSettings.setMaxHeapSize(JavaHeapSize.valueOf(maxHeapSize));
         baseLauncherSettings.setInitialHeapSize(JavaHeapSize.valueOf(initialHeapSize));
-        baseLauncherSettings.setSearchForLauncherUpdates(Boolean.parseBoolean(searchForLauncherUpdates));
         baseLauncherSettings.setCloseLauncherAfterGameStart(Boolean.parseBoolean(closeLauncherAfterGameStart));
         baseLauncherSettings.setGameDirectory(gameDirectory);
         baseLauncherSettings.setGameDataDirectory(gameDataDirectory);

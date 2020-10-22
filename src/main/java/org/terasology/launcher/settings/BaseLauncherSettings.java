@@ -41,7 +41,6 @@ public final class BaseLauncherSettings extends LauncherSettings {
     public static final String PROPERTY_LOCALE = "locale";
     public static final String PROPERTY_MAX_HEAP_SIZE = "maxHeapSize";
     public static final String PROPERTY_INITIAL_HEAP_SIZE = "initialHeapSize";
-    public static final String PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES = "searchForLauncherUpdates";
     public static final String PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START = "closeLauncherAfterGameStart";
     public static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
     public static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
@@ -152,15 +151,6 @@ public final class BaseLauncherSettings extends LauncherSettings {
             }
         }
         properties.setProperty(PROPERTY_LOG_LEVEL, logLevel.name());
-    }
-
-    protected void initSearchForLauncherUpdates() {
-        final String searchForLauncherUpdatesStr = properties.getProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES);
-        boolean searchForLauncherUpdates = SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT;
-        if (searchForLauncherUpdatesStr != null) {
-            searchForLauncherUpdates = Boolean.valueOf(searchForLauncherUpdatesStr);
-        }
-        properties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, Boolean.toString(searchForLauncherUpdates));
     }
 
     protected void initCloseLauncherAfterGameStart() {
@@ -311,11 +301,6 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
-    public synchronized boolean isSearchForLauncherUpdates() {
-        return Boolean.valueOf(properties.getProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES));
-    }
-
-    @Override
     public synchronized boolean isCloseLauncherAfterGameStart() {
         return Boolean.valueOf(properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START));
     }
@@ -382,11 +367,6 @@ public final class BaseLauncherSettings extends LauncherSettings {
     @Override
     public synchronized void setLogLevel(Level logLevel) {
         properties.setProperty(PROPERTY_LOG_LEVEL, logLevel.name());
-    }
-
-    @Override
-    public synchronized void setSearchForLauncherUpdates(boolean searchForLauncherUpdates) {
-        properties.setProperty(PROPERTY_SEARCH_FOR_LAUNCHER_UPDATES, Boolean.toString(searchForLauncherUpdates));
     }
 
     @Override

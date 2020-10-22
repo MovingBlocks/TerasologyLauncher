@@ -30,11 +30,9 @@ import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.gui.javafx.Dialogs;
 import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -122,26 +120,5 @@ public final class LauncherUpdater {
                     .filter(response -> response == ButtonType.YES)
                     .isPresent();
         });
-    }
-
-    public boolean update(Path downloadDirectory, Path tempDirectory) {
-        try {
-            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_download"));
-            //TODO: retrieve release asset according to platform (GitHubAsset will contain the download URL by contract)
-            //TODO: DownloadUtils.downloadToFile(assetUrl, targetArchive);
-
-            //TODO: splash.getInfoLabel().setText(BundleUtils.getLabel("splash_updatingLauncher_updating"));
-            //TODO: FileUtils.extractZipTo(targetArchive, updateDirectory);
-            //TODO: log 'installationDirectory' and 'updateDirectory'
-
-            if (false) {
-                SelfUpdater.runUpdate(null, null);
-            }
-        } catch (RuntimeException | IOException e) {
-            logger.error("Launcher update failed! Aborting update process!", e);
-            Dialogs.showError(null, BundleUtils.getLabel("update_launcher_updateFailed"));
-            return false;
-        }
-        return false;
     }
 }

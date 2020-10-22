@@ -90,15 +90,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
 
-            if (launcherSettings.isSearchForLauncherUpdates()) {
-                final boolean selfUpdaterStarted =
-                        checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
-
-                if (selfUpdaterStarted) {
-                    logger.info("Exit old TerasologyLauncher: {}", TerasologyLauncherVersionInfo.getInstance());
-                    return NullLauncherConfiguration.getInstance();
-                }
-            }
+            checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
 
             // game directories
             updateMessage(BundleUtils.getLabel("splash_initGameDirs"));
@@ -188,9 +180,8 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return settings;
     }
 
-    private boolean checkForLauncherUpdates(Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
+    private void checkForLauncherUpdates(Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
         logger.trace("Check for launcher updates...");
-        boolean selfUpdaterStarted = false;
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
         final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
         final GHRelease release = updater.updateAvailable();
@@ -212,15 +203,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 final boolean update = updater.showUpdateDialog(owner, release);
                 if (update) {
                     showDownloadPage();
-                    // TODO: start self-updater instead
-                    if (false) {
-                        final Path targetDirectory = saveDownloadedFiles ? downloadDirectory : tempDirectory;
-                        selfUpdaterStarted = updater.update(targetDirectory, tempDirectory);
-                    }
                 }
             }
         }
-        return selfUpdaterStarted;
     }
 
     private void showDownloadPage() {
