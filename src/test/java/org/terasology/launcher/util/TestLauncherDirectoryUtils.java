@@ -29,25 +29,25 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.terasology.launcher.util.LauncherDirectoryUtils.containsFiles;
 import static org.terasology.launcher.util.LauncherDirectoryUtils.containsGameData;
 
-public class TestLauncherDirectoryUtils {
+class TestLauncherDirectoryUtils {
 
     @TempDir
-    public Path tempFolder;
+    Path tempFolder;
 
     @Test
-    public void testDirectoryWithFiles() throws IOException {
+    void testDirectoryWithFiles() throws IOException {
         Path file = tempFolder.resolve("File");
         assertNotNull(Files.createFile(file));
         assertTrue(containsFiles(tempFolder));
     }
 
     @Test
-    public void testEmptyDirectory() throws IOException {
+    void testEmptyDirectory() throws IOException {
         assertFalse(containsFiles(tempFolder));
     }
 
     @Test
-    public void testGameDirectory() throws IOException {
+    void testGameDirectory() throws IOException {
         Path savesDirectory = tempFolder.resolve(GameDataDirectoryNames.SAVES.getName());
         Path saveFile = savesDirectory.resolve("saveFile");
 

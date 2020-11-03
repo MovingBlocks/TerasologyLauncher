@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.settings;
 
@@ -21,17 +8,12 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
-/**
- * @deprecated to be replaced by {@link org.terasology.launcher.config.Config}
- */
-@Deprecated
 public abstract class LauncherSettings {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherSettings.class);
@@ -44,7 +26,6 @@ public abstract class LauncherSettings {
         initLocale();
         initMaxHeapSize();
         initInitialHeapSize();
-        initSearchForLauncherUpdates();
         initCloseLauncherAfterGameStart();
         initSaveDownloadedFiles();
         initGameDirectory();
@@ -64,8 +45,6 @@ public abstract class LauncherSettings {
     // --------------------------------------------------------------------- //
 
     protected abstract void initInitialHeapSize();
-
-    protected abstract void initSearchForLauncherUpdates();
 
     protected abstract void initCloseLauncherAfterGameStart();
 
@@ -123,8 +102,6 @@ public abstract class LauncherSettings {
 
     public abstract Path getGameDataDirectory();
 
-    public abstract boolean isSearchForLauncherUpdates();
-
     public abstract boolean isCloseLauncherAfterGameStart();
 
     public abstract boolean isKeepDownloadedFiles();
@@ -154,8 +131,6 @@ public abstract class LauncherSettings {
     public abstract void setUserGameParameters(String userGameParameters);
 
     public abstract void setLogLevel(Level logLevel);
-
-    public abstract void setSearchForLauncherUpdates(boolean searchForLauncherUpdates);
 
     public abstract void setCloseLauncherAfterGameStart(boolean closeLauncherAfterGameStart);
 

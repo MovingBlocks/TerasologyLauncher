@@ -16,24 +16,12 @@
   ~ limitations under the License.
   -->
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.TitledPane?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
-<StackPane xmlns="http://javafx.com/javafx/8.0.202" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.terasology.launcher.gui.javafx.SettingsController">
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.terasology.launcher.gui.javafx.SettingsController">
    <children>
       <VBox prefHeight="600.0" prefWidth="600.0">
          <children>
@@ -46,19 +34,14 @@
                     </columnConstraints>
                     <rowConstraints>
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints maxHeight="1.7976931348623157E308" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="40.0" valignment="BOTTOM" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -73,17 +56,14 @@
                               <Font name="System Bold" size="16.0" />
                            </font>
                         </Label>
-                       <Label fx:id="gameDirectoryLabel" text="Installation directory" GridPane.rowIndex="1"/>
-                       <Label fx:id="gameDataDirectoryLabel" text="Data directory" GridPane.rowIndex="3"/>
-                       <Label fx:id="maxHeapSizeLabel" text="Maximum memory" GridPane.rowIndex="5"/>
-                       <Label fx:id="initialHeapSizeLabel" text="Initial memory" GridPane.columnIndex="1"
-                              GridPane.rowIndex="5"/>
-                       <ComboBox fx:id="maxHeapSizeBox" onAction="#updateMaxHeapSizeBox" prefWidth="150.0"
-                                 GridPane.rowIndex="6"/>
-                       <ComboBox fx:id="initialHeapSizeBox" onAction="#updateInitialHeapSizeBox" prefWidth="150.0"
-                                 GridPane.columnIndex="1" GridPane.rowIndex="6"/>
-                       <TextField fx:id="gameDirectoryPath" editable="false" GridPane.rowIndex="2"/>
-                       <TextField fx:id="gameDataDirectoryPath" editable="false" GridPane.rowIndex="4"/>
+                       <Label fx:id="gameDirectoryLabel" text="Installation directory" GridPane.rowIndex="1" />
+                       <Label fx:id="gameDataDirectoryLabel" text="Data directory" GridPane.rowIndex="3" />
+                       <Label fx:id="maxHeapSizeLabel" text="Maximum memory" GridPane.rowIndex="5" />
+                       <Label fx:id="initialHeapSizeLabel" text="Initial memory" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                       <ComboBox fx:id="maxHeapSizeBox" onAction="#updateMaxHeapSizeBox" prefWidth="150.0" GridPane.rowIndex="6" />
+                       <ComboBox fx:id="initialHeapSizeBox" onAction="#updateInitialHeapSizeBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                       <TextField fx:id="gameDirectoryPath" editable="false" GridPane.rowIndex="2" />
+                       <TextField fx:id="gameDataDirectoryPath" editable="false" GridPane.rowIndex="4" />
                        <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                            <children>
                               <Button fx:id="gameDirectoryOpenButton" mnemonicParsing="false" onAction="#openGameDirectoryAction" text="Button" />
@@ -94,8 +74,7 @@
                               <Button fx:id="gameDataDirectoryOpenButton" mnemonicParsing="false" onAction="#openGameDataDirectoryAction" text="Button" />
                            </children>
                         </HBox>
-                       <TitledPane animated="false" text="Advanced options" GridPane.columnSpan="2147483647"
-                                   GridPane.rowIndex="7" GridPane.vgrow="SOMETIMES" expanded="false">
+                       <TitledPane animated="false" expanded="false" text="Advanced options" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" GridPane.vgrow="SOMETIMES">
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
@@ -129,23 +108,14 @@
                               <Font name="System Bold" size="16.0" />
                            </font>
                         </Label>
-                       <Label fx:id="chooseLanguageLabel" text="Language" GridPane.rowIndex="9"/>
-                       <ComboBox fx:id="languageBox" prefWidth="150.0" GridPane.rowIndex="10"/>
-                       <Label fx:id="launcherDirectoryLabel" text="Data directory" GridPane.rowIndex="11"/>
-                       <TextField fx:id="launcherDirectoryPath" editable="false" GridPane.rowIndex="12"/>
-                       <Button fx:id="launcherDirectoryOpenButton" mnemonicParsing="false"
-                               onAction="#openLauncherDirectoryAction" text="Browse" GridPane.columnIndex="1"
-                               GridPane.rowIndex="12"/>
-                       <Label text="Updates" GridPane.rowIndex="13"/>
-                       <Label text="Other" GridPane.rowIndex="16"/>
-                       <Button disable="true" mnemonicParsing="false" text="Check now" GridPane.rowIndex="14"/>
-                       <Label text="Last checked on dd/mm/yyyy" GridPane.columnIndex="1" GridPane.rowIndex="14"/>
-                       <CheckBox fx:id="searchForUpdatesBox" mnemonicParsing="false" text="Check on startup"
-                                 GridPane.columnSpan="2147483647" GridPane.rowIndex="15"/>
-                       <CheckBox fx:id="closeAfterStartBox" mnemonicParsing="false" text="Close after game starts"
-                                 GridPane.rowIndex="17"/>
-                       <CheckBox fx:id="saveDownloadedFilesBox" mnemonicParsing="false" text="Save downloaded files"
-                                 GridPane.rowIndex="18"/>
+                       <Label fx:id="chooseLanguageLabel" text="Language" GridPane.rowIndex="9" />
+                       <ComboBox fx:id="languageBox" prefWidth="150.0" GridPane.rowIndex="10" />
+                       <Label fx:id="launcherDirectoryLabel" text="Data directory" GridPane.rowIndex="11" />
+                       <TextField fx:id="launcherDirectoryPath" editable="false" GridPane.rowIndex="12" />
+                       <Button fx:id="launcherDirectoryOpenButton" mnemonicParsing="false" onAction="#openLauncherDirectoryAction" text="Browse" GridPane.columnIndex="1" GridPane.rowIndex="12" />
+                       <Label text="Other" GridPane.rowIndex="13" />
+                       <CheckBox fx:id="closeAfterStartBox" mnemonicParsing="false" text="Close after game starts" GridPane.rowIndex="14" />
+                       <CheckBox fx:id="saveDownloadedFilesBox" mnemonicParsing="false" text="Save downloaded files" GridPane.rowIndex="15" />
                      </children>
                   </GridPane>
                </content>
