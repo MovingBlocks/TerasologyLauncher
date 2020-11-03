@@ -19,6 +19,7 @@ import org.spf4j.test.log.TestLoggers;
 import org.spf4j.test.matchers.LogMatchers;
 import org.terasology.launcher.SlowTest;
 import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.util.WaitForAsyncUtils;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -45,7 +46,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 
 @Timeout(5)
 @ExtendWith(ApplicationExtension.class)
@@ -230,6 +230,9 @@ public class TestRunGameTask {
 
         // Act!
         executor.submit(gameTask);
+
+        WaitForAsyncUtils.waitForFxEvents();
+
         var actualReturnValue = gameTask.get();  // task.get blocks until it has run to completion
 
         // Assert!
@@ -279,6 +282,9 @@ public class TestRunGameTask {
 
         // Act!
         executor.submit(gameTask);
+
+        WaitForAsyncUtils.waitForFxEvents();
+
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         assertThat(thrown.getCause(), instanceOf(RunGameTask.GameExitTooSoon.class));
 
