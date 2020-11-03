@@ -113,6 +113,9 @@ public class TestRunGameTask {
         );
 
         executor.submit(gameTask);
+
+        WaitForAsyncUtils.waitForFxEvents();
+
         gameTask.get();
 
         hasExitMessage.assertObservation(100, TimeUnit.MILLISECONDS);
@@ -132,6 +135,9 @@ public class TestRunGameTask {
         );
 
         executor.submit(gameTask);
+
+        WaitForAsyncUtils.waitForFxEvents();
+
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
         assertThat(exc, instanceOf(RunGameTask.GameExitError.class));
@@ -145,6 +151,9 @@ public class TestRunGameTask {
         var gameTask = new RunGameTask(MockProcesses.EXCEPTION_THROWING_START);
 
         executor.submit(gameTask);
+
+        WaitForAsyncUtils.waitForFxEvents();
+
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
         assertThat(exc, instanceOf(RunGameTask.GameStartError.class));
@@ -157,6 +166,9 @@ public class TestRunGameTask {
         var gameTask = new RunGameTask(UnixProcesses.NO_SUCH_COMMAND);
 
         executor.submit(gameTask);
+
+        WaitForAsyncUtils.waitForFxEvents();
+
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
         assertThat(exc, instanceOf(RunGameTask.GameStartError.class));
@@ -174,6 +186,9 @@ public class TestRunGameTask {
         var gameTask = new RunGameTask(new UnixProcesses.SelfDestructingProcess(5));
 
         executor.submit(gameTask);
+
+        WaitForAsyncUtils.waitForFxEvents();
+
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
         assertThat(exc, instanceOf(RunGameTask.GameExitError.class));
@@ -183,7 +198,6 @@ public class TestRunGameTask {
         // it fails with the other signal.
         assertThat(exitValue, allOf(equalTo(EXIT_CODE_SIGTERM), not(EXIT_CODE_SIGKILL)));
     }
-
 
     @Test
     public void testSuccessEvent() throws Exception {
