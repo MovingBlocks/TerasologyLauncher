@@ -23,6 +23,16 @@ public class DatabaseRepository implements Serializable {
     private String type;
     private PackageMetadata[] trackedPackages;
 
+    public DatabaseRepository() {
+
+    }
+
+    public DatabaseRepository(String url, String type, PackageMetadata[] trackedPackages) {
+        this.url = url;
+        this.type = type;
+        this.trackedPackages = trackedPackages;
+    }
+
     public String getUrl() {
         return url;
     }

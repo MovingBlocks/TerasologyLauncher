@@ -17,8 +17,10 @@
 package org.terasology.launcher.packages;
 
 import com.google.gson.Gson;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.model.Jenkins;
 import org.terasology.launcher.packages.db.DatabaseRepository;
 import org.terasology.launcher.packages.db.PackageMetadata;
 
@@ -71,57 +73,33 @@ class JenkinsHandler implements RepositoryHandler {
                     new InputStreamReader(
                             new URL(apiUrl).openStream())
             )) {
-                final ApiResult result = gson.fromJson(reader, ApiResult.class);
-                for (Build build : result.builds) {
-                    if (build.result == Build.Result.ABORTED
-                            || build.result == Build.Result.NOT_BUILT) {
+                final Jenkins.ApiResult result = gson.fromJson(reader, Jenkins.ApiResult.class);
+                for (Jenkins.Build build : result.builds) {
+                    if (build.result == Jenkins.Build.Result.ABORTED
+                            || build.result == Jenkins.Build.Result.NOT_BUILT) {
                         continue;
                     }
 
-                    // Get upstream URL
-                    final boolean hasUpstream = (result.upstreamProjects.length != 0);
-                    final String upstreamUrl;
-                    if (hasUpstream
-                            && build.actions.length != 0
-                            && build.actions[0].causes != null
-                    ) {
-                        final String version = build.actions[0].causes[0].upstreamBuild;
-                        upstreamUrl = (version != null)
-                                ? source.getUrl()
-                                    + JOB
-                                    + result.upstreamProjects[0].name
-                                    + "/" + version + "/"                 // Automated
-                                : null;                                   // Manual
-                    } else {
-                        upstreamUrl = null;
-                    }
 
-                    // Get changelog
                     final List<String> changelog = Arrays.stream(build.changeSet.items)
                             .map(change -> change.msg)
                             .collect(Collectors.toCollection(LinkedList::new));
-
-                    // Check package archive URL
-                    final String zipUrl = Arrays.stream(build.artifacts)
-                            .filter(art -> art.fileName.matches(TERASOLOGY_ZIP_PATTERN))
-                            .findFirst()
-                            .map(art -> build.url + ARTIFACT + art.relativePath)
-                            .orElse(null);
 
                     // Create a Package
                     final Package currentPkg = new Package(
                             pkgId,
                             pkg.getName(),
                             build.number,
-                            zipUrl,
+                            getArtefactUrl(build),
                             changelog
                     );
 
                     // Update tracked collections
-                    if (zipUrl != null) {
+                    if (currentPkg.getUrl() != null) {
                         pkgList.add(currentPkg);
                     }
-                    if (hasUpstream) {
+                    final String upstreamUrl = getUpstreamUrl(source, result, build);
+                    if (upstreamUrl != null) {
                         upstreamUrls.put(currentPkg, upstreamUrl);
                     }
                     syncedPackages.put(build.url, currentPkg);
@@ -133,6 +111,37 @@ class JenkinsHandler implements RepositoryHandler {
 
         appendUpstreamChangelog();
         return pkgList;
+    }
+
+    @Nullable
+    private String getArtefactUrl(Jenkins.Build build) {
+        final String zipUrl = Arrays.stream(build.artifacts)
+                .filter(art -> art.fileName.matches(TERASOLOGY_ZIP_PATTERN))
+                .findFirst()
+                .map(art -> build.url + ARTIFACT + art.relativePath)
+                .orElse(null);
+        return zipUrl;
+    }
+
+    @Nullable
+    private String getUpstreamUrl(DatabaseRepository source, Jenkins.ApiResult result, Jenkins.Build build) {
+        final String upstreamUrl;
+        final boolean hasUpstream = (result.upstreamProjects.length != 0);
+        if (hasUpstream
+                && build.actions.length != 0
+                && build.actions[0].causes != null
+        ) {
+            final String version = build.actions[0].causes[0].upstreamBuild;
+            upstreamUrl = (version != null)
+                    ? source.getUrl()
+                        + JOB
+                        + result.upstreamProjects[0].name
+                        + "/" + version + "/"                 // Automated
+                    : null;                                   // Manual
+        } else {
+            upstreamUrl = null;
+        }
+        return upstreamUrl;
     }
 
     private void appendUpstreamChangelog() {
@@ -173,54 +182,10 @@ class JenkinsHandler implements RepositoryHandler {
                 new InputStreamReader(
                         new URL(upstreamUrl + changelogApiFilter).openStream())
         )) {
-            final Build upstreamBuild = gson.fromJson(reader, Build.class);
+            final Jenkins.Build upstreamBuild = gson.fromJson(reader, Jenkins.Build.class);
             return Arrays.stream(upstreamBuild.changeSet.items)
                     .map(change -> change.msg)
                     .collect(Collectors.toList());
         }
-    }
-
-    private static class ApiResult {
-        private Build[] builds;
-        private Project[] upstreamProjects;
-    }
-
-    private static class Build {
-        private Action[] actions;
-        private String  number;
-        private Result result;
-        private Artifact[] artifacts;
-        private String url;
-        private ChangeSet changeSet;
-
-        private enum Result {
-            ABORTED, FAILURE, NOT_BUILT, SUCCESS, UNSTABLE
-        }
-    }
-
-    private static class Artifact {
-        private String fileName;
-        private String relativePath;
-    }
-
-    private static class ChangeSet {
-        private Change[] items;
-    }
-
-    private static class Change {
-        private String msg;
-    }
-
-    private static class Action {
-        private Cause[] causes;
-    }
-
-    private static class Cause {
-        private String upstreamProject;
-        private String upstreamBuild;
-    }
-
-    private static class Project {
-        private String name;
     }
 }

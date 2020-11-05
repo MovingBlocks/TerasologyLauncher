@@ -63,3 +63,6 @@ workspace.xml
 # AWS toolkit plugin
 #https://plugins.jetbrains.com/plugin/11349-aws-toolkit
 /aws.xml
+
+# Name of the project (as in VCS?) - actually generated automatically if the folder name differs from project name
+/.name
