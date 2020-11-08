@@ -4,6 +4,6 @@
 package org.terasology.launcher.model;
 
 public enum Profile {
-    FULL,
-    LIGHT
+    OMEGA,
+    MINIMAL
 }

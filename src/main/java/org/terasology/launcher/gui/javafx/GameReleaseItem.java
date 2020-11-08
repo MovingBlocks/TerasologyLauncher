@@ -24,12 +24,12 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import org.terasology.launcher.packages.Package;
 
-public class VersionItem {
+public class GameReleaseItem {
     private final ReadOnlyObjectProperty<Package> linkedPackage;
     private final ReadOnlyStringProperty version;
     private final BooleanProperty installed;
 
-    VersionItem(final Package linkedPackage) {
+    GameReleaseItem(final Package linkedPackage) {
         this.linkedPackage = new SimpleObjectProperty<>(linkedPackage);
         version = new SimpleStringProperty(linkedPackage.getVersion());
         installed = new SimpleBooleanProperty(linkedPackage.isInstalled());

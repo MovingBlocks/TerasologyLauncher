@@ -74,38 +74,6 @@ public class PackageManager {
     }
 
     /**
-     * Sets up local storage for working with game packages and cache files.
-     *
-     * @param gameDirectory  directory path for storing game packages
-     * @param cacheDirectory directory path for storing cache files
-     */
-    public void initLocalStorage(Path gameDirectory, Path cacheDirectory) {
-        try {
-            FileUtils.ensureWritableDir(gameDirectory);
-            FileUtils.ensureWritableDir(cacheDirectory);
-            localRepository = new LocalRepository(gameDirectory, cacheDirectory);
-            localRepository.loadCache();
-        } catch (IOException e) {
-            logger.error("Error initialising local storage: {}", e.getMessage());
-        }
-    }
-
-    /**
-     * Synchronizes the cached game version list with the list of game versions
-     * available online.
-     */
-    public void sync() {
-        Objects.requireNonNull(localRepository, "Local storage uninitialized");
-
-        for (PackageBuild pkgBuild : PackageBuild.values()) {
-            final List<Integer> versions = onlineRepository.getPackageVersions(pkgBuild);
-            logger.debug("Versions for job {}: {}", pkgBuild.getJobName(), versions.toString());
-            localRepository.updateCache(pkgBuild, versions);
-        }
-        localRepository.saveCache();
-    }
-
-    /**
      * Checks if the sources file contains any syntax errors or
      * schema violations. Note that the default values are copied
      * over and used when no sources file is found.
@@ -194,7 +162,7 @@ public class PackageManager {
         }
 
         if (!listener.isCancelled()) {
-            final Path extractDir = installDir.resolve(target.getId()).resolve(target.getVersion());
+            final Path extractDir = resolveInstallDir(target);
             FileUtils.extractZipTo(cachedZip, extractDir);
             target.setInstalled(true);
             logger.info("Finished installing package: {}-{}", target.getId(), target.getVersion());
@@ -250,17 +218,6 @@ public class PackageManager {
                 .getPackages();
     }
 
-    /**
-     * Provides the list of package versions available for a build by querying
-     * the cached version list.
-     *
-     * @param pkgBuild the build of the game packages
-     * @return the list of versions available for that package
-     */
-    public List<Integer> getPackageVersions(PackageBuild pkgBuild) {
-        return Objects.requireNonNull(localRepository, "Local storage uninitialized")
-                .getPackageVersions(pkgBuild);
-    }
 
     public Optional<Package> getLatestInstalledPackageForId(String packageId) {
         return database.getLatestInstalledPackageForId(packageId);

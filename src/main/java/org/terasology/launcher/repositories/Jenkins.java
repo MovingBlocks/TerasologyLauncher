@@ -1,7 +1,7 @@
 // Copyright 2020 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-package org.terasology.launcher.model;
+package org.terasology.launcher.repositories;
 
 //TODO: this should live closer to the JenkinsHandler
 public final class Jenkins {

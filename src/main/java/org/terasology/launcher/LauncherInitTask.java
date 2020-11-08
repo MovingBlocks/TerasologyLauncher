@@ -24,8 +24,11 @@ import javafx.stage.Stage;
 import org.kohsuke.github.GHRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.local.GameManager;
+import org.terasology.launcher.model.GameIdentifier;
+import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.packages.PackageManager;
-import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.settings.Settings;
@@ -47,7 +50,9 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
 
@@ -97,7 +102,24 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path gameDirectory = getDirectoryFor(LauncherManagedDirectory.GAMES, installationDirectory);
             final Path gameDataDirectory = getGameDataDirectory(platform, launcherSettings.getGameDataDirectory());
 
-            // TODO: Does this interact with any remote server for fetching/initializing the database?
+            logger.info("Fetching game releases ...");
+            final RepositoryManager repositoryManager = new RepositoryManager();
+            Set<GameRelease> releases = repositoryManager.getReleases();
+
+            logger.info(releases.stream()
+                    .map(GameRelease::getId)
+                    .map(GameIdentifier::toString)
+                    .sorted()
+                    .collect(Collectors.joining("\n")));
+
+            final GameManager gameManager = new GameManager(cacheDirectory, gameDirectory);
+            Set<GameIdentifier> installedGames = gameManager.getInstalledGames();
+
+            logger.info(installedGames.stream()
+                    .map(GameIdentifier::toString)
+                    .sorted()
+                    .collect(Collectors.joining("\n")));
+
             logger.trace("Setting up Package Manager");
             final PackageManager packageManager = new PackageManager(userDataDirectory, gameDirectory);
             if (!packageManager.validateSources()) {

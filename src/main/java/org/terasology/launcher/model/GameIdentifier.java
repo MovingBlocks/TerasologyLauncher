@@ -4,6 +4,8 @@
 package org.terasology.launcher.model;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Uniquely identify a game release.
@@ -57,5 +59,27 @@ public class GameIdentifier {
     @Override
     public int hashCode() {
         return Objects.hash(version, build, profile);
+    }
+
+    @Override
+    public String toString() {
+        return profile + "@" + version + "+" + build;
+    }
+
+    public static GameIdentifier fromString(String id) {
+        Pattern pattern = Pattern.compile("(?<profile>\\w+)@(?<version>[\\w\\.-]+)\\+(?<build>\\w+)");
+        Matcher matcher = pattern.matcher(id);
+        try {
+            matcher.find();
+            final String version = matcher.group("version");
+            final Build build = Build.valueOf(matcher.group("build"));
+            final Profile profile = Profile.valueOf(matcher.group("profile"));
+            if (version != null) {
+                return new GameIdentifier(version, build, profile);
+            }
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return null;
+        }
+        return null;
     }
 }

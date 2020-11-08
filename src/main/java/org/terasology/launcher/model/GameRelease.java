@@ -15,9 +15,36 @@ import java.net.URL;
 public class GameRelease {
     final GameIdentifier id;
     final URL url;
+    final String changelog;
+    final String sha256Checksum;
 
-    public GameRelease(GameIdentifier id, URL url) {
+    public GameRelease(GameIdentifier id, URL url, String changelog, String sha256Checksum) {
         this.id = id;
         this.url = url;
+        this.changelog = changelog;
+        this.sha256Checksum = sha256Checksum;
     }
+
+    public GameIdentifier getId() {
+        return id;
+    }
+
+    public URL getUrl() {
+        return url;
+    }
+
+    /**
+     * The changelog associated with the game release
+     */
+    public String getChangelog() {
+        return changelog;
+    }
+
+    /**
+     * The SHA256 checksum for the game release asset.
+     */
+    public String getSha256Checksum() {
+        return sha256Checksum;
+    }
+
 }

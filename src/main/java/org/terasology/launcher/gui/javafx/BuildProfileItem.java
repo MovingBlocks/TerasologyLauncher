@@ -23,13 +23,13 @@ import javafx.collections.ObservableList;
 
 import java.util.List;
 
-public class PackageItem {
+public class BuildProfileItem {
     private final ReadOnlyStringProperty name;
-    private final ObservableList<VersionItem> versionItems;
+    private final ObservableList<GameReleaseItem> gameReleaseItems;
 
-    PackageItem(final String name, final List<VersionItem> versions) {
+    BuildProfileItem(final String name, final List<GameReleaseItem> versions) {
         this.name = new SimpleStringProperty(name);
-        versionItems = FXCollections.observableList(versions);
+        gameReleaseItems = FXCollections.observableList(versions);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class PackageItem {
         return name;
     }
 
-    public ObservableList<VersionItem> getVersionItems() {
-        return versionItems;
+    public ObservableList<GameReleaseItem> getVersionItems() {
+        return gameReleaseItems;
     }
 }

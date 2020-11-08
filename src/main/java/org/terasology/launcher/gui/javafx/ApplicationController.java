@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameService;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
-import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
@@ -74,14 +73,14 @@ public class ApplicationController {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private DownloadTask downloadTask;
 
-    private VersionItem selectedVersion;
+    private GameReleaseItem selectedVersion;
     private Package selectedPackage;
-    private ObservableList<PackageItem> packageItems;
+    private ObservableList<BuildProfileItem> buildProfileItems;
 
     @FXML
-    private ComboBox<PackageItem> jobBox;
+    private ComboBox<BuildProfileItem> jobBox;
     @FXML
-    private ComboBox<VersionItem> buildVersionBox;
+    private ComboBox<GameReleaseItem> buildVersionBox;
     @FXML
     private ProgressBar progressBar;
     @FXML
@@ -312,7 +311,7 @@ public class ApplicationController {
             logbackLogger.addAppender(logViewController);
         }
 
-        packageItems = FXCollections.observableArrayList();
+        buildProfileItems = FXCollections.observableArrayList();
         onSync();
 
         //TODO: This only updates when the launcher is initialized (which should happen exactly once o.O)
@@ -331,15 +330,15 @@ public class ApplicationController {
 
     /** To be called after database sync is done. */
     private void onSync() {
-        packageItems.clear();
+        buildProfileItems.clear();
         packageManager.getPackages()
                 .stream()
                 .collect(Collectors.groupingBy(Package::getName, //TODO this should be grouped by `id`
-                        Collectors.mapping(VersionItem::new, Collectors.toList())))
+                        Collectors.mapping(GameReleaseItem::new, Collectors.toList())))
                 .forEach((name, versions) ->
-                        packageItems.add(new PackageItem(name, versions)));
+                        buildProfileItems.add(new BuildProfileItem(name, versions)));
 
-        jobBox.setItems(packageItems);
+        jobBox.setItems(buildProfileItems);
         jobBox.getSelectionModel().select(0);
     }
 
@@ -496,7 +495,7 @@ public class ApplicationController {
      * Custom ListCell used to display package versions
      * along with their installation status.
      */
-    private static final class VersionListCell extends ListCell<VersionItem> {
+    private static final class VersionListCell extends ListCell<GameReleaseItem> {
         private static final Image ICON_CHECK = BundleUtils.getFxImage("icon_check");
         private static final Insets MARGIN = new Insets(0, 8, 0, 0);
         private final HBox root;
@@ -515,7 +514,7 @@ public class ApplicationController {
         }
 
         @Override
-        protected void updateItem(VersionItem item, boolean empty) {
+        protected void updateItem(GameReleaseItem item, boolean empty) {
             super.updateItem(item, empty);
 
             if (empty || item == null) {

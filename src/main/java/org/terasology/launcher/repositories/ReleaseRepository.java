@@ -1,7 +1,7 @@
 // Copyright 2020 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-package org.terasology.launcher.releasefoo;
+package org.terasology.launcher.repositories;
 
 import org.terasology.launcher.model.GameRelease;
 

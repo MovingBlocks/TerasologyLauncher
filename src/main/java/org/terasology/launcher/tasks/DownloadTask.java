@@ -19,7 +19,7 @@ package org.terasology.launcher.tasks;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.gui.javafx.VersionItem;
+import org.terasology.launcher.gui.javafx.GameReleaseItem;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.util.DownloadException;
@@ -30,9 +30,9 @@ public final class DownloadTask extends Task<Void> implements ProgressListener {
     private static final Logger logger = LoggerFactory.getLogger(DownloadTask.class);
 
     private final PackageManager packageManager;
-    private final VersionItem target;
+    private final GameReleaseItem target;
 
-    public DownloadTask(final PackageManager packageManager, final VersionItem target) {
+    public DownloadTask(final PackageManager packageManager, final GameReleaseItem target) {
         this.packageManager = packageManager;
         this.target = target;
     }

@@ -20,7 +20,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.gui.javafx.VersionItem;
+import org.terasology.launcher.gui.javafx.GameReleaseItem;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
 
@@ -30,10 +30,10 @@ public final class DeleteTask extends Task<Void> {
     private static final Logger logger = LoggerFactory.getLogger(DeleteTask.class);
 
     private final PackageManager packageManager;
-    private final VersionItem target;
+    private final GameReleaseItem target;
     private Runnable cleanup;
 
-    public DeleteTask(PackageManager packageManager, VersionItem target) {
+    public DeleteTask(PackageManager packageManager, GameReleaseItem target) {
         this.packageManager = packageManager;
         this.target = target;
     }
