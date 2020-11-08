@@ -16,7 +16,7 @@
 
 package org.terasology.launcher;
 
-import org.terasology.launcher.local.GameManager;
+import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettings;

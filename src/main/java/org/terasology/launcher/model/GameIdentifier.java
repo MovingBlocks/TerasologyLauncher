@@ -44,6 +44,10 @@ public class GameIdentifier {
         return profile;
     }
 
+    public Semver getSemver() {
+        return semver;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

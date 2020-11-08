@@ -4,12 +4,17 @@
 package org.terasology.launcher.gui.javafx;
 
 import javafx.animation.Transition;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleSetProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -39,7 +44,7 @@ import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameService;
-import org.terasology.launcher.local.GameManager;
+import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
@@ -80,10 +85,11 @@ public class ApplicationController {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private DownloadTask downloadTask;
 
-    private Property<Profile> selectedProfile;
     private ReadOnlyObjectProperty<GameRelease> selectedRelease;
+    private Property<GameAction> gameAction;
 
     private ObservableList<GameRelease> availableGameReleases;
+    private SetProperty<GameIdentifier> installedGames;
 
     @FXML
     private ComboBox<Profile> profileComboBox;
@@ -92,6 +98,10 @@ public class ApplicationController {
     @FXML
     private ProgressBar progressBar;
     @FXML
+    private Button startButton;
+    @FXML
+    private Button downloadButton;
+    @FXML
     private Button cancelDownloadButton;
     @FXML
     private Button deleteButton;
@@ -99,12 +109,6 @@ public class ApplicationController {
     private Button settingsButton;
     @FXML
     private Button exitButton;
-    @FXML
-    private Button startAndDownloadButton;
-    @FXML
-    private ImageView playImage;
-    @FXML
-    private ImageView downloadImage;
 
     @FXML
     private LogViewController logViewController;
@@ -125,10 +129,11 @@ public class ApplicationController {
         gameService.setOnFailed(this::handleRunFailed);
         gameService.valueProperty().addListener(this::handleRunStarted);
 
-        selectedProfile = new SimpleObjectProperty<>();
         selectedRelease = new SimpleObjectProperty<>();
 
         availableGameReleases = FXCollections.observableArrayList();
+        installedGames = new SimpleSetProperty<>();
+        gameAction = new SimpleObjectProperty<>(GameAction.DOWNLOAD);
     }
 
     @FXML
@@ -149,6 +154,14 @@ public class ApplicationController {
         this.gameManager = gameManager;
 
         this.stage = stage;
+
+        gameManager.getInstalledGames().addListener(new SetChangeListener<GameIdentifier>() {
+            @Override
+            public void onChanged(Change<? extends GameIdentifier> change) {
+                installedGames.add(change.getElementAdded());
+                installedGames.remove(change.getElementRemoved());
+            }
+        });
 
         // add Logback view appender view to both the root logger and the tab
         Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -225,7 +238,8 @@ public class ApplicationController {
         }
     }
 
-    private void startGameAction() {
+    @FXML
+    protected void startGameAction() {
         if (gameService.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
             Dialogs.showInfo(stage, BundleUtils.getLabel("message_information_gameRunning"));
@@ -268,19 +282,21 @@ public class ApplicationController {
         Dialogs.showError(stage, BundleUtils.getLabel("message_error_gameStart"));
     }
 
-    private void downloadAction() {
+    @FXML
+    protected void downloadAction() {
         downloadTask = new DownloadTask(gameManager, selectedRelease.get());
 
         profileComboBox.disableProperty().bind(downloadTask.runningProperty());
         gameReleaseComboBox.disableProperty().bind(downloadTask.runningProperty());
         progressBar.visibleProperty().bind(downloadTask.runningProperty());
         cancelDownloadButton.visibleProperty().bind(downloadTask.runningProperty());
-        startAndDownloadButton.visibleProperty().bind(downloadTask.runningProperty().not());
+
+        gameAction.setValue(GameAction.CANCEL);
 
         progressBar.progressProperty().bind(downloadTask.progressProperty());
 
         downloadTask.setOnSucceeded(workerStateEvent -> {
-            startAndDownloadButton.setGraphic(playImage);
+            gameAction.setValue(GameAction.PLAY);
             deleteButton.setDisable(false);
 //            launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
 //            launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
@@ -289,17 +305,6 @@ public class ApplicationController {
         });
 
         executor.submit(downloadTask);
-    }
-
-    @FXML
-    protected void startAndDownloadAction() {
-        if (!isInstalled(selectedRelease.getValue())) {
-            logger.info("Download Game Action!");
-            downloadAction();
-        } else {
-            logger.info("Start Game Action!");
-            startGameAction();
-        }
     }
 
     @FXML
@@ -330,8 +335,9 @@ public class ApplicationController {
                     deleteButton.setDisable(true);
                     final DeleteTask deleteTask = new DeleteTask(gameManager, id);
                     deleteTask.onDone(() -> {
+                        gameAction.setValue(GameAction.DOWNLOAD);
                         if (!isInstalled(selectedRelease.getValue())) {
-                            startAndDownloadButton.setGraphic(downloadImage);
+                            gameAction.setValue(GameAction.DOWNLOAD);
                         } else {
                             deleteButton.setDisable(false);
                         }
@@ -365,15 +371,14 @@ public class ApplicationController {
         selectedRelease.addListener(
                 (observable, oldValue, newValue) -> {
                     final boolean isInstalled = isInstalled(newValue);
-                    Tooltip t = new Tooltip(BundleUtils.getLabel(
-                            isInstalled ? "launcher_start" : "launcher_download"));
-                    playButtonTooltip.setValue(t);
-                    startAndDownloadButton.setGraphic(isInstalled ? playImage : downloadImage);
+                    gameAction.setValue(isInstalled ? GameAction.PLAY : GameAction.DOWNLOAD);
                     deleteButton.setDisable(!isInstalled);
                     changelogViewController.update(newValue.getChangelog());
                 });
 
-        gameReleaseComboBox.setCellFactory(list -> new GameReleaseCell());
+        final GameReleaseCell releaseCell = new GameReleaseCell(installedGames);
+        gameReleaseComboBox.setButtonCell(releaseCell);
+        gameReleaseComboBox.setCellFactory(list -> releaseCell);
 
         selectedRelease = gameReleaseComboBox.getSelectionModel().selectedItemProperty();
     }
@@ -447,13 +452,13 @@ public class ApplicationController {
     private void initButtons() {
         cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
-        cancelDownloadButton.setVisible(false);
+        cancelDownloadButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.CANCEL));
 
-        playButtonTooltip = new SimpleObjectProperty<>(new Tooltip(BundleUtils.getLabel("launcher_download")));
-        startAndDownloadButton.tooltipProperty().bind(playButtonTooltip);
+        startButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
+        startButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.PLAY));
 
-        startAndDownloadButton.managedProperty().bind(startAndDownloadButton.visibleProperty());
-        startAndDownloadButton.setGraphic(downloadImage);
+        downloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
+        downloadButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.DOWNLOAD));
 
         deleteButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_delete")));
         settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
@@ -482,6 +487,11 @@ public class ApplicationController {
         stage.close();
     }
 
+    private static enum GameAction {
+        PLAY,
+        DOWNLOAD,
+        CANCEL
+    }
 
     /**
      * Custom {@link ListCell} used to display a {@link GameRelease} along with its installation status.
@@ -493,7 +503,10 @@ public class ApplicationController {
         private final Label labelVersion;
         private final ImageView iconStatus;
 
-        GameReleaseCell() {
+        private final ObservableSet<GameIdentifier> installedGames;
+
+        GameReleaseCell(ObservableSet<GameIdentifier> installedGames) {
+            this.installedGames = installedGames;
             root = new HBox();
             labelVersion = new Label();
             iconStatus = new ImageView(ICON_CHECK);
@@ -512,8 +525,13 @@ public class ApplicationController {
                 setText(null);
                 setGraphic(null);
             } else {
-                labelVersion.textProperty().setValue(item.getId().toString());
-//TODO                iconStatus.visibleProperty().setValue(isInstalled(newValue));
+                GameIdentifier id = item.getId();
+                boolean isInstalled = installedGames.contains(id);
+
+                String displayVersion = id.getSemver().toString();
+
+                setText(displayVersion);
+                iconStatus.setVisible(isInstalled);
                 setGraphic(root);
             }
         }

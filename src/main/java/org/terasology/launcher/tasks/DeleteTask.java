@@ -20,7 +20,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.local.GameManager;
+import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.model.GameIdentifier;
 
 import java.io.IOException;

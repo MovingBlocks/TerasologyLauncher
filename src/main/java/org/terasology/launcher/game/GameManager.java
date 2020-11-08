@@ -1,8 +1,10 @@
 // Copyright 2020 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-package org.terasology.launcher.local;
+package org.terasology.launcher.game;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.model.Build;
@@ -21,27 +23,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 public class GameManager {
 
     private static final Logger logger = LoggerFactory.getLogger(GameManager.class);
 
-    private static final String CACHE_DIRECTORY = "cache";
-
-    private Path cacheDirectory;
-    private Path installDirectory;
+    private final Path cacheDirectory;
+    private final Path installDirectory;
 
     //TODO: should this be a map to installation metadata (install date, path, ...)?
-    //TODO: this should be an observable set
-    private Set<GameIdentifier> installedGames;
+    private final ObservableSet<GameIdentifier> installedGames;
 
     public GameManager(Path cacheDirectory, Path installDirectory) {
         this.cacheDirectory = cacheDirectory;
         this.installDirectory = installDirectory;
-        installedGames = new HashSet<>();
+        installedGames = FXCollections.observableSet();
         scanInstallationDir();
     }
 
@@ -111,7 +108,7 @@ public class GameManager {
      *
      * @return the list of all packages
      */
-    public Set<GameIdentifier> getInstalledGames() {
+    public ObservableSet<GameIdentifier> getInstalledGames() {
         return installedGames;
     }
 
