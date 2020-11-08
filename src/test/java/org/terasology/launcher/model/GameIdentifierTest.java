@@ -11,7 +11,7 @@ class GameIdentifierTest {
 
     @Test
     void fromString() {
-        final GameIdentifier expected = new GameIdentifier("3.14-SNAPSHOT", Build.STABLE, Profile.MINIMAL);
+        final GameIdentifier expected = new GameIdentifier("3.14-SNAPSHOT", Build.STABLE, Profile.ENGINE);
 
         assertEquals(expected, GameIdentifier.fromString(expected.toString()), "Invariant: 'GameIdentifier.fromString(id.toString)) == id'");
         assertEquals(expected, GameIdentifier.fromString("MINIMAL@3.14-SNAPSHOT+STABLE"), "Should match from correct string");

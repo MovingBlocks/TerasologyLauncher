@@ -4,6 +4,7 @@
 package org.terasology.launcher.repositories;
 
 import com.google.gson.Gson;
+import com.vdurmont.semver4j.Semver;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,16 +15,18 @@ import org.terasology.launcher.model.Profile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
-class JenkinsRepositoryAdapter implements ReleaseRepository {
+class JenkinsOrgRepositoryAdapter implements ReleaseRepository {
 
-    private static final Logger logger = LoggerFactory.getLogger(JenkinsRepositoryAdapter.class);
+    private static final Logger logger = LoggerFactory.getLogger(JenkinsOrgRepositoryAdapter.class);
 
     private static final String JOB = "/job/";
     private static final String API_FILTER = "/api/json?tree="
@@ -45,7 +48,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     private final Build buildProfile;
     private final Profile profile;
 
-    public JenkinsRepositoryAdapter(String baseUrl, String jobName, Build buildProfile, Profile profile) {
+    public JenkinsOrgRepositoryAdapter(String baseUrl, String jobName, Build buildProfile, Profile profile) {
         this.baseUrl = baseUrl;
         this.jobName = jobName;
         this.buildProfile = buildProfile;
@@ -77,6 +80,10 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
                     final String url = getArtefactUrl(build, TERASOLOGY_ZIP_PATTERN);
                     if (url != null) {
                         final GameIdentifier id = new GameIdentifier(build.number, buildProfile, profile);
+
+                        Semver semver = deriveSemver(result, build);
+                        logger.debug("Derived SemVer for {}: \t{}", id, semver);
+
                         final GameRelease release = new GameRelease(id, new URL(url), changelog, null);
                         pkgList.add(release);
                     }
@@ -86,6 +93,34 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
             logger.warn("Failed to fetch packages from: {}", apiUrl, e);
         }
         return pkgList;
+    }
+
+    private Semver deriveSemver(Jenkins.ApiResult result, Jenkins.Build build) {
+
+        if (profile == Profile.OMEGA) {
+            final String upstreamUrl = getUpstreamUrl(result.upstreamProjects, build);
+            if (upstreamUrl != null) {
+
+            }
+        }
+
+        final String versionPropertiesUrl = getArtefactUrl(build, "versionInfo.properties");
+        if (versionPropertiesUrl != null) {
+            try (InputStream inputStream = new URL(versionPropertiesUrl).openStream()) {
+                final Properties versionProperties = new Properties();
+                versionProperties.load(inputStream);
+                final Semver engineVersion = new Semver(versionProperties.getProperty("engineVersion"));
+
+                Semver version = engineVersion.withClearedSuffixAndBuild().withBuild(build.number);
+                if (buildProfile == Build.NIGHTLY) {
+                    version = version.withSuffix("SNAPSHOT");
+                }
+                return version;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     @Nullable

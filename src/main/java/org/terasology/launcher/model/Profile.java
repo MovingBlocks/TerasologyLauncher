@@ -5,5 +5,5 @@ package org.terasology.launcher.model;
 
 public enum Profile {
     OMEGA,
-    MINIMAL
+    ENGINE
 }

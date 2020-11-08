@@ -16,7 +16,9 @@
 
 package org.terasology.launcher;
 
+import org.terasology.launcher.local.GameManager;
 import org.terasology.launcher.packages.PackageManager;
+import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettings;
 
@@ -36,15 +38,19 @@ public class LauncherConfiguration {
     private final Path downloadDirectory;
     private final LauncherSettings launcherSettings;
     private final PackageManager packageManager;
+    private final GameManager gameManager;
+    private final RepositoryManager repositoryManager;
 
     public LauncherConfiguration(final Path launcherDirectory,
                                  final Path downloadDirectory,
                                  final LauncherSettings launcherSettings,
-                                 final PackageManager packageManager) {
+                                 final PackageManager packageManager, GameManager gameManager, RepositoryManager repositoryManager) {
         this.launcherDirectory = launcherDirectory;
         this.downloadDirectory = downloadDirectory;
         this.launcherSettings = launcherSettings;
         this.packageManager = packageManager;
+        this.gameManager = gameManager;
+        this.repositoryManager = repositoryManager;
     }
 
     public Path getLauncherDirectory() {
@@ -61,5 +67,13 @@ public class LauncherConfiguration {
 
     public PackageManager getPackageManager() {
         return packageManager;
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
+    }
+
+    public RepositoryManager getRepositoryManager() {
+        return repositoryManager;
     }
 }

@@ -38,8 +38,10 @@ import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameService;
+import org.terasology.launcher.local.GameManager;
 import org.terasology.launcher.packages.Package;
 import org.terasology.launcher.packages.PackageManager;
+import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
@@ -67,6 +69,8 @@ public class ApplicationController {
     private Path launcherDirectory;
     private LauncherSettings launcherSettings;
     private PackageManager packageManager;
+    private GameManager gameManager;
+    private RepositoryManager repositoryManager;
     private final GameService gameService;
     private Stage stage;
 
@@ -295,10 +299,14 @@ public class ApplicationController {
     }
 
     public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final LauncherSettings newLauncherSettings,
-                       final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
+                       final PackageManager newPackageManager, RepositoryManager newRepositoryManager, GameManager newGameManager, final Stage newStage, final HostServices hostServices) {
         this.launcherDirectory = newLauncherDirectory;
         this.launcherSettings = newLauncherSettings;
+
         this.packageManager = newPackageManager;
+        this.repositoryManager = newRepositoryManager;
+        this.gameManager = newGameManager;
+
         this.stage = newStage;
 
         // add Logback view appender view to both the root logger and the tab

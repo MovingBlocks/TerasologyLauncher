@@ -60,7 +60,7 @@ public class GameManager {
         }
 
         if (!listener.isCancelled()) {
-            final Path extractDir = resolveInstallDir(release.getId());
+            final Path extractDir = getInstallDirectory(release.getId());
             FileUtils.extractZipTo(cachedZip, extractDir);
             installedGames.add(release.getId());
             logger.info("Finished installing package: {}", release.getId());
@@ -95,7 +95,7 @@ public class GameManager {
      */
     public void remove(GameIdentifier game) throws IOException {
         // Recursively delete all files
-        Files.walk(resolveInstallDir(game))
+        Files.walk(getInstallDirectory(game))
                 .sorted(Comparator.reverseOrder())
                 .map(Path::toFile)
                 .forEach(File::delete);
@@ -112,6 +112,10 @@ public class GameManager {
      */
     public Set<GameIdentifier> getInstalledGames() {
         return installedGames;
+    }
+
+    public Path getInstallDirectory(GameIdentifier id) {
+        return installDirectory.resolve(id.getProfile().name()).resolve(id.getBuild().name()).resolve(id.getVersion());
     }
 
     /**
@@ -140,9 +144,5 @@ public class GameManager {
                 }
             }
         }
-    }
-
-    private Path resolveInstallDir(GameIdentifier id) {
-        return installDirectory.resolve(id.getProfile().name()).resolve(id.getBuild().name()).resolve(id.getVersion());
     }
 }

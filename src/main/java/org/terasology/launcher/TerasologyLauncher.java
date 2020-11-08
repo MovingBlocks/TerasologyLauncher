@@ -137,7 +137,7 @@ public final class TerasologyLauncher extends Application {
         // launcher frame
         FXMLLoader fxmlLoader;
         Parent root;
-        /* Fall back to default language if loading the FXML file files with the current locale */
+        /* Fall back to default language if loading the FXML file fails with the current locale */
         try {
             fxmlLoader = BundleUtils.getFXMLLoader("application");
             root = (Parent) fxmlLoader.load();
@@ -152,6 +152,8 @@ public final class TerasologyLauncher extends Application {
                 launcherConfiguration.getDownloadDirectory(),
                 launcherConfiguration.getLauncherSettings(),
                 launcherConfiguration.getPackageManager(),
+                launcherConfiguration.getRepositoryManager(),
+                launcherConfiguration.getGameManager(),
                 mainStage,
                 hostServices);
 
