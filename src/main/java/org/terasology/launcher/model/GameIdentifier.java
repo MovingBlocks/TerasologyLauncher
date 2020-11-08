@@ -3,9 +3,9 @@
 
 package org.terasology.launcher.model;
 
+import com.vdurmont.semver4j.Semver;
+
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Uniquely identify a game release.
@@ -23,11 +23,13 @@ public class GameIdentifier {
     final String version;
     final Build build;
     final Profile profile;
+    final Semver semver;
 
-    public GameIdentifier(String version, Build build, Profile profile) {
+    public GameIdentifier(String version, Build build, Profile profile, Semver semver) {
         this.version = version;
         this.build = build;
         this.profile = profile;
+        this.semver = semver;
     }
 
     public String getVersion() {
@@ -63,23 +65,7 @@ public class GameIdentifier {
 
     @Override
     public String toString() {
-        return profile + "@" + version + "+" + build;
+        return profile + " @ " + version + "+" + build + " (" + semver + ")";
     }
 
-    public static GameIdentifier fromString(String id) {
-        Pattern pattern = Pattern.compile("(?<profile>\\w+)@(?<version>[\\w\\.-]+)\\+(?<build>\\w+)");
-        Matcher matcher = pattern.matcher(id);
-        try {
-            matcher.find();
-            final String version = matcher.group("version");
-            final Build build = Build.valueOf(matcher.group("build"));
-            final Profile profile = Profile.valueOf(matcher.group("profile"));
-            if (version != null) {
-                return new GameIdentifier(version, build, profile);
-            }
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return null;
-        }
-        return null;
-    }
 }

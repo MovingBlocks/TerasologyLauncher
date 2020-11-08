@@ -24,10 +24,10 @@ import javafx.stage.Stage;
 import org.kohsuke.github.GHRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.gui.javafx.Dialogs;
 import org.terasology.launcher.local.GameManager;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
-import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
@@ -36,7 +36,6 @@ import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.gui.javafx.Dialogs;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
@@ -106,7 +105,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final RepositoryManager repositoryManager = new RepositoryManager();
             Set<GameRelease> releases = repositoryManager.getReleases();
 
-            logger.info(releases.stream()
+            logger.debug("Available game releases:\n{}", releases.stream()
                     .map(GameRelease::getId)
                     .map(GameIdentifier::toString)
                     .sorted()
@@ -115,22 +114,10 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final GameManager gameManager = new GameManager(cacheDirectory, gameDirectory);
             Set<GameIdentifier> installedGames = gameManager.getInstalledGames();
 
-            logger.info(installedGames.stream()
+            logger.debug("Installed games:\n{}", installedGames.stream()
                     .map(GameIdentifier::toString)
                     .sorted()
                     .collect(Collectors.joining("\n")));
-
-            logger.trace("Setting up Package Manager");
-            final PackageManager packageManager = new PackageManager(userDataDirectory, gameDirectory);
-            if (!packageManager.validateSources()) {
-                if (confirmSourcesOverwrite()) {
-                    packageManager.copyDefaultSources();
-                } else {
-                    throw new IllegalStateException("Error reading sources file");
-                }
-            }
-            packageManager.initDatabase();
-            packageManager.syncDatabase();
 
             logger.trace("Change LauncherSettings...");
             launcherSettings.setGameDirectory(gameDirectory);
@@ -145,7 +132,6 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                     userDataDirectory,
                     downloadDirectory,
                     launcherSettings,
-                    packageManager,
                     gameManager,
                     repositoryManager);
         } catch (LauncherStartFailedException e) {

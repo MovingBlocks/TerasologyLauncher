@@ -4,6 +4,7 @@
 package org.terasology.launcher.model;
 
 import java.net.URL;
+import java.util.List;
 
 /**
  * A game release describes a game artefact (asset) that can be downloaded and installed by the launcher.
@@ -15,10 +16,10 @@ import java.net.URL;
 public class GameRelease {
     final GameIdentifier id;
     final URL url;
-    final String changelog;
+    final List<String> changelog;
     final String sha256Checksum;
 
-    public GameRelease(GameIdentifier id, URL url, String changelog, String sha256Checksum) {
+    public GameRelease(GameIdentifier id, URL url, List<String> changelog, String sha256Checksum) {
         this.id = id;
         this.url = url;
         this.changelog = changelog;
@@ -36,7 +37,7 @@ public class GameRelease {
     /**
      * The changelog associated with the game release
      */
-    public String getChangelog() {
+    public List<String> getChangelog() {
         return changelog;
     }
 

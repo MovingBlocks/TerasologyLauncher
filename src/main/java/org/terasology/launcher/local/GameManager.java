@@ -9,7 +9,6 @@ import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
-import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.tasks.ProgressListener;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
@@ -28,7 +27,7 @@ import java.util.Set;
 
 public class GameManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(PackageManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(GameManager.class);
 
     private static final String CACHE_DIRECTORY = "cache";
 
@@ -36,6 +35,7 @@ public class GameManager {
     private Path installDirectory;
 
     //TODO: should this be a map to installation metadata (install date, path, ...)?
+    //TODO: this should be an observable set
     private Set<GameIdentifier> installedGames;
 
     public GameManager(Path cacheDirectory, Path installDirectory) {
@@ -52,7 +52,8 @@ public class GameManager {
      * @param listener the object which is to be informed about task progress
      */
     public void install(GameRelease release, ProgressListener listener) throws IOException, DownloadException {
-        final Path cachedZip = cacheDirectory.resolve(release.getId() + ".zip");
+        final String file = "terasology-" + release.getId().getProfile().toString().toLowerCase() + "-" + release.getId().getVersion() + "-" + release.getId().getBuild().toString().toLowerCase() + ".zip";
+        final Path cachedZip = cacheDirectory.resolve(file);
 
         // TODO: Properly validate cache and handle exceptions
         if (Files.notExists(cachedZip)) {
@@ -139,7 +140,7 @@ public class GameManager {
                     }
                     for (File versionDirectory : Objects.requireNonNull(buildDirectory.listFiles())) {
                         String version = versionDirectory.getName();
-                        installedGames.add(new GameIdentifier(version, build, profile));
+                        installedGames.add(new GameIdentifier(version, build, profile, null));
                     }
                 }
             }

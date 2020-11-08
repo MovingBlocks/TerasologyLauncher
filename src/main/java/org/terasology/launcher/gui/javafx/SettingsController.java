@@ -31,7 +31,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
-import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.Settings;
@@ -52,7 +51,6 @@ public class SettingsController {
 
     private Path launcherDirectory;
     private LauncherSettings launcherSettings;
-    private PackageManager packageManager;
     private ApplicationController appController;
 
     private Path gameDirectory;
@@ -206,10 +204,9 @@ public class SettingsController {
     }
 
     void initialize(final Path newLauncherDirectory, final LauncherSettings newLauncherSettings,
-                    final PackageManager newPackageManager, final Stage newStage, final ApplicationController newAppController) {
+                    final Stage newStage, final ApplicationController newAppController) {
         this.launcherDirectory = newLauncherDirectory;
         this.launcherSettings = newLauncherSettings;
-        this.packageManager = newPackageManager;
         this.stage = newStage;
         this.appController = newAppController;
 

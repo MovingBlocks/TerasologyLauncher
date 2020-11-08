@@ -20,39 +20,31 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.gui.javafx.GameReleaseItem;
-import org.terasology.launcher.packages.Package;
-import org.terasology.launcher.packages.PackageManager;
+import org.terasology.launcher.local.GameManager;
+import org.terasology.launcher.model.GameIdentifier;
 
 import java.io.IOException;
 
 public final class DeleteTask extends Task<Void> {
     private static final Logger logger = LoggerFactory.getLogger(DeleteTask.class);
 
-    private final PackageManager packageManager;
-    private final GameReleaseItem target;
+    private final GameManager gameManager;
+    private final GameIdentifier game;
     private Runnable cleanup;
 
-    public DeleteTask(PackageManager packageManager, GameReleaseItem target) {
-        this.packageManager = packageManager;
-        this.target = target;
+    public DeleteTask(GameManager gameManager, GameIdentifier game) {
+        this.gameManager = gameManager;
+        this.game = game;
     }
 
     @Override
     protected Void call() {
-        final Package targetPkg = target.getLinkedPackage();
         try {
-            packageManager.remove(targetPkg);
+            gameManager.remove(game);
         } catch (IOException e) {
-            logger.error("Failed to remove package: {}-{}",
-                    targetPkg.getId(), targetPkg.getVersion(), e);
+            logger.error("Failed to remove package '{}'", game, e);
         }
         return null;
-    }
-
-    @Override
-    protected void succeeded() {
-        target.installedProperty().set(false);
     }
 
     @Override

@@ -74,14 +74,14 @@ class JenkinsOrgRepositoryAdapter implements ReleaseRepository {
             final Jenkins.ApiResult result = gson.fromJson(reader, Jenkins.ApiResult.class);
             for (Jenkins.Build build : result.builds) {
                 if (isSuccess(build)) {
-                    final String changelog = Arrays.stream(build.changeSet.items)
+                    final List<String> changelog = Arrays.stream(build.changeSet.items)
                             .map(change -> change.msg)
-                            .collect(Collectors.joining("\n"));
+                            .collect(Collectors.toList());
                     final String url = getArtefactUrl(build, TERASOLOGY_ZIP_PATTERN);
                     if (url != null) {
-                        final GameIdentifier id = new GameIdentifier(build.number, buildProfile, profile);
 
                         Semver semver = deriveSemver(result, build);
+                        final GameIdentifier id = new GameIdentifier(build.number, buildProfile, profile, semver);
                         logger.debug("Derived SemVer for {}: \t{}", id, semver);
 
                         final GameRelease release = new GameRelease(id, new URL(url), changelog, null);

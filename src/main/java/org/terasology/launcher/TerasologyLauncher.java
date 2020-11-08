@@ -151,7 +151,6 @@ public final class TerasologyLauncher extends Application {
                 launcherConfiguration.getLauncherDirectory(),
                 launcherConfiguration.getDownloadDirectory(),
                 launcherConfiguration.getLauncherSettings(),
-                launcherConfiguration.getPackageManager(),
                 launcherConfiguration.getRepositoryManager(),
                 launcherConfiguration.getGameManager(),
                 mainStage,

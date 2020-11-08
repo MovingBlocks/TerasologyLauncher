@@ -19,9 +19,10 @@ package org.terasology.launcher.tasks;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.gui.javafx.GameReleaseItem;
+import org.terasology.launcher.local.GameManager;
+import org.terasology.launcher.model.GameIdentifier;
+import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.packages.Package;
-import org.terasology.launcher.packages.PackageManager;
 import org.terasology.launcher.util.DownloadException;
 
 import java.io.IOException;
@@ -29,22 +30,21 @@ import java.io.IOException;
 public final class DownloadTask extends Task<Void> implements ProgressListener {
     private static final Logger logger = LoggerFactory.getLogger(DownloadTask.class);
 
-    private final PackageManager packageManager;
-    private final GameReleaseItem target;
+    private final GameManager gameManager;
+    private final GameRelease release;
 
-    public DownloadTask(final PackageManager packageManager, final GameReleaseItem target) {
-        this.packageManager = packageManager;
-        this.target = target;
+    public DownloadTask(GameManager gameManager, GameRelease release) {
+        this.gameManager = gameManager;
+        this.release = release;
     }
 
     @Override
     protected Void call() {
-        final Package targetPkg = target.getLinkedPackage();
         try {
-            packageManager.install(targetPkg, this);
+            gameManager.install(release, this);
         } catch (IOException | DownloadException e) {
-            logger.error("Failed to download package: {}-{}",
-                    targetPkg.getId(), targetPkg.getVersion(), e);
+            logger.error("Failed to download package '{}' from '{}'",
+                    release.getId(), release.getUrl(), e);
         }
         return null;
     }
@@ -57,10 +57,4 @@ public final class DownloadTask extends Task<Void> implements ProgressListener {
     public void update(int progress) {
         updateProgress(progress, 100);
     }
-
-    @Override
-    protected void succeeded() {
-        target.installedProperty().set(true);
-    }
-
 }
