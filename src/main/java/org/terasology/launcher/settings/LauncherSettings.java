@@ -26,6 +26,7 @@ public abstract class LauncherSettings {
         initLocale();
         initMaxHeapSize();
         initInitialHeapSize();
+        initBaseJavaParameters();
         initCloseLauncherAfterGameStart();
         initSaveDownloadedFiles();
         initGameDirectory();
@@ -53,6 +54,8 @@ public abstract class LauncherSettings {
     protected abstract void initGameDirectory();
 
     protected abstract void initGameDataDirectory();
+
+    protected abstract void initBaseJavaParameters();
 
     protected abstract void initUserJavaParameters();
 
@@ -86,8 +89,12 @@ public abstract class LauncherSettings {
 
     public abstract String getUserJavaParameters();
 
-    public synchronized List<String> getUserJavaParameterList() {
-        return Arrays.asList(getUserJavaParameters().split("\\s+"));
+    public abstract String getBaseJavaParameters();
+    
+    public synchronized List<String> getJavaParameterList() {
+        List<String> javaParameters = Arrays.asList(getBaseJavaParameters().split("\\s+"));
+        javaParameters.addAll(Arrays.asList(getUserJavaParameters().split("\\s+")));
+        return javaParameters;
     }
 
     public abstract String getUserGameParameters();
