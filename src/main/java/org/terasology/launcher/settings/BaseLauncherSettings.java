@@ -21,11 +21,13 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.util.Platform;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -45,6 +47,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
     public static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
     public static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
     public static final String PROPERTY_SAVE_DOWNLOADED_FILES = "saveDownloadedFiles";
+    public static final String PROPERTY_BASE_JAVA_PARAMETERS = "baseJavaParameters";
     public static final String PROPERTY_USER_JAVA_PARAMETERS = "userJavaParameters";
     public static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
     public static final String PROPERTY_LOG_LEVEL = "logLevel";
@@ -124,6 +127,12 @@ public final class BaseLauncherSettings extends LauncherSettings {
             }
         }
         properties.setProperty(PROPERTY_INITIAL_HEAP_SIZE, initialJavaHeapSize.name());
+    }
+
+    protected void initBaseJavaParameters() {
+        if (Platform.getPlatform().isMac()) {
+            properties.setProperty(PROPERTY_BASE_JAVA_PARAMETERS, "-XstartOnMainThread -Djava.awt.headless=true");
+        }
     }
 
     protected void initUserJavaParameters() {
@@ -257,6 +266,11 @@ public final class BaseLauncherSettings extends LauncherSettings {
     @Override
     public synchronized JavaHeapSize getInitialHeapSize() {
         return JavaHeapSize.valueOf(properties.getProperty(PROPERTY_INITIAL_HEAP_SIZE));
+    }
+
+    @Override
+    public synchronized String getBaseJavaParameters() {
+        return properties.getProperty(PROPERTY_BASE_JAVA_PARAMETERS);
     }
 
     @Override
