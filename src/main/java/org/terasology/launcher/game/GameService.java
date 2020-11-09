@@ -135,7 +135,7 @@ public class GameService extends Service<Boolean> {
         verifyNotNull(settings);
         var starter = new GameStarter(verifyNotNull(gamePath), settings.getGameDataDirectory(),
                                       settings.getMaxHeapSize(), settings.getInitialHeapSize(),
-                                      settings.getUserJavaParameterList(), settings.getUserGameParameterList(),
+                                      settings.getJavaParameterList(), settings.getUserGameParameterList(),
                                       settings.getLogLevel());
         return new RunGameTask(starter);
     }

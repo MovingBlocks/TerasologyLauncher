@@ -53,7 +53,7 @@ public final class LauncherSettingsValidator {
             new SettingsValidationRule(
                     s -> s.getUserGameParameterList().stream().anyMatch(DEPRECATED_PARAMETERS::contains),
                     "Ensure unsupported JVM arguments are removed",
-                    s -> s.setUserJavaParameters(removeUnsupportedJvmParameters(s.getUserJavaParameterList()))
+                    s -> s.setUserJavaParameters(removeUnsupportedJvmParameters(s.getJavaParameterList()))
             )
     );
 

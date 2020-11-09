@@ -91,7 +91,7 @@ public abstract class LauncherSettings {
 
     public abstract String getBaseJavaParameters();
     
-    public synchronized List<String> getUserJavaParameterList() {
+    public synchronized List<String> getJavaParameterList() {
         List<String> javaParameters = Arrays.asList(getBaseJavaParameters().split("\\s+"));
         javaParameters.addAll(Arrays.asList(getUserJavaParameters().split("\\s+")));
         return javaParameters;
