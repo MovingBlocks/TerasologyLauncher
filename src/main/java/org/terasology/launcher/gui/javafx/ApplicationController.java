@@ -87,7 +87,6 @@ public class ApplicationController {
     private Stage stage;
 
     private Property<GameRelease> selectedRelease;
-    private Property<GameIdentifier> selectedGameIdentifier;
     private Property<GameAction> gameAction;
     private BooleanProperty downloading;
 
@@ -134,7 +133,6 @@ public class ApplicationController {
         downloading = new SimpleBooleanProperty(false);
 
         selectedRelease = new SimpleObjectProperty<>();
-        selectedGameIdentifier = new SimpleObjectProperty<>();
 
         availableGameReleases = FXCollections.observableArrayList();
         installedGames = FXCollections.observableSet();
@@ -191,13 +189,12 @@ public class ApplicationController {
         });
 
         gameReleaseComboBox.setItems(availableGameReleases);
-        gameReleaseComboBox.buttonCellProperty().bind(Bindings.createObjectBinding(() -> new GameReleaseCell(installedGames), installedGames));
+        gameReleaseComboBox.buttonCellProperty().bind(Bindings.createObjectBinding(() -> new GameReleaseCell(installedGames, true), installedGames));
         gameReleaseComboBox.cellFactoryProperty().bind(Bindings.createObjectBinding(() -> list -> new GameReleaseCell(installedGames), installedGames));
 
         selectedRelease.bind(gameReleaseComboBox.getSelectionModel().selectedItemProperty());
         selectedRelease.addListener(
                 (observable, oldValue, newValue) -> changelogViewController.update(newValue != null ? newValue.getChangelog() : Collections.emptyList()));
-        selectedGameIdentifier.bind(Bindings.select(selectedRelease, "id"));
     }
 
     private void initButtons() {
@@ -214,7 +211,7 @@ public class ApplicationController {
         downloadButton.managedProperty().bind(downloadButton.visibleProperty());
 
         deleteButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_delete")));
-        deleteButton.disableProperty().bind(Bindings.createBooleanBinding(() -> !installedGames.contains(selectedGameIdentifier.getValue()), selectedGameIdentifier, installedGames));
+        deleteButton.disableProperty().bind(startButton.visibleProperty().not());
 
         settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
         exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
@@ -495,23 +492,19 @@ public class ApplicationController {
      */
     private static final class GameReleaseCell extends ListCell<GameRelease> {
         private static final Image ICON_CHECK = BundleUtils.getFxImage("icon_check");
-        private static final Insets MARGIN = new Insets(0, 8, 0, 0);
-        private final HBox root;
-        private final Label labelVersion;
         private final ImageView iconStatus;
 
         private final Set<GameIdentifier> installedGames;
+        private final boolean isButtonCell;
 
         GameReleaseCell(Set<GameIdentifier> installedGames) {
-            this.installedGames = installedGames;
-            root = new HBox();
-            labelVersion = new Label();
-            iconStatus = new ImageView(ICON_CHECK);
+            this(installedGames, false);
+        }
 
-            final Pane separator = new Pane();
-            HBox.setHgrow(separator, Priority.ALWAYS);
-            HBox.setMargin(iconStatus, MARGIN);
-            root.getChildren().addAll(labelVersion, separator, iconStatus);
+        GameReleaseCell(Set<GameIdentifier> installedGames, boolean isButtonCell) {
+            this.installedGames = installedGames;
+            this.isButtonCell = isButtonCell;
+            iconStatus = new ImageView(ICON_CHECK);
         }
 
         @Override
@@ -530,10 +523,11 @@ public class ApplicationController {
                     displayVersion += " (" + id.getSemver() + ")";
                 }
 
-                //labelVersion.setText(displayVersion);
-                iconStatus.setVisible(isInstalled);
                 setText(displayVersion);
-                setGraphic(root);
+                iconStatus.setVisible(isInstalled);
+                if (!isButtonCell) {
+                    setGraphic(iconStatus);
+                }
             }
         }
     }
