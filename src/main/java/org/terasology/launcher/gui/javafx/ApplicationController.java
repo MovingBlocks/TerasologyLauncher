@@ -5,8 +5,9 @@ package org.terasology.launcher.gui.javafx;
 
 import javafx.animation.Transition;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -88,9 +89,15 @@ public class ApplicationController {
     private Property<GameRelease> selectedRelease;
     private Property<GameIdentifier> selectedGameIdentifier;
     private Property<GameAction> gameAction;
+    private BooleanProperty downloading;
 
     private ObservableList<GameRelease> availableGameReleases;
     private ObservableSet<GameIdentifier> installedGames;
+
+    /**
+     * Indicate whether the user's hard drive is running out of space for game downloads.
+     */
+    private final Property<Optional<Warning>> warning;
 
     @FXML
     private ComboBox<Profile> profileComboBox;
@@ -118,30 +125,32 @@ public class ApplicationController {
     @FXML
     private FooterController footerController;
 
-    /**
-     * Indicate whether the user's hard drive is running out of space for game downloads.
-     */
-    private final Property<Optional<Warning>> warning;
-    private Property<Tooltip> playButtonTooltip;
-
     public ApplicationController() {
         warning = new SimpleObjectProperty<>(Optional.empty());
         gameService = new GameService();
         gameService.setOnFailed(this::handleRunFailed);
         gameService.valueProperty().addListener(this::handleRunStarted);
 
+        downloading = new SimpleBooleanProperty(false);
+
         selectedRelease = new SimpleObjectProperty<>();
         selectedGameIdentifier = new SimpleObjectProperty<>();
 
         availableGameReleases = FXCollections.observableArrayList();
         installedGames = FXCollections.observableSet();
-        gameAction = new SimpleObjectProperty<>(GameAction.DOWNLOAD);
 
+        gameAction = new SimpleObjectProperty<>(GameAction.DOWNLOAD);
         gameAction.bind(Bindings.createObjectBinding(() -> {
             final GameRelease release = selectedRelease.getValue();
             final boolean isInstalled = release != null && installedGames.contains(release.getId());
-            return isInstalled ? GameAction.PLAY : GameAction.DOWNLOAD;
-        }, selectedRelease, installedGames));
+            if (downloading.get()) {
+                return GameAction.CANCEL;
+            } else if (isInstalled) {
+                return GameAction.PLAY;
+            } else {
+                return GameAction.DOWNLOAD;
+            }
+        }, selectedRelease, installedGames, downloading));
     }
 
     @FXML
@@ -162,7 +171,22 @@ public class ApplicationController {
                     repositoryManager.getReleases().stream()
                             .filter(release -> release.getId().getProfile() == newVal)
                             .collect(Collectors.toList());
-            availableGameReleases.setAll(releasesForBuildProfile);
+            availableGameReleases.setAll(releasesForBuildProfile.stream().sorted((o1, o2) -> {
+                int compareProfile = o1.getId().getProfile().compareTo(o2.getId().getProfile());
+                if (compareProfile != 0) {
+                    return compareProfile;
+                }
+                int compareBuild = o1.getId().getBuild().compareTo(o2.getId().getBuild());
+                if (compareBuild != 0) {
+                    return compareBuild;
+                }
+
+                Integer version1 = Integer.parseInt(o1.getId().getVersion());
+                Integer version2 = Integer.parseInt(o2.getId().getVersion());
+
+                return -1 * version1.compareTo(version2);
+            }).collect(Collectors.toList()));
+
             //TODO: select last played game
         });
 
@@ -301,8 +325,8 @@ public class ApplicationController {
 
         logger.debug("Game has started successfully.");
 
-//        launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
-//        launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
+        //TODO: launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
+        //TODO: launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
 
         if (launcherSettings.isCloseLauncherAfterGameStart()) {
             if (downloadTask == null) {
@@ -330,22 +354,17 @@ public class ApplicationController {
     @FXML
     protected void downloadAction() {
         downloadTask = new DownloadTask(gameManager, selectedRelease.getValue());
+        downloading.bind(downloadTask.runningProperty());
 
         profileComboBox.disableProperty().bind(downloadTask.runningProperty());
         gameReleaseComboBox.disableProperty().bind(downloadTask.runningProperty());
         progressBar.visibleProperty().bind(downloadTask.runningProperty());
-        cancelDownloadButton.visibleProperty().bind(downloadTask.runningProperty());
-
-        //gameAction.setValue(GameAction.CANCEL);
 
         progressBar.progressProperty().bind(downloadTask.progressProperty());
 
         downloadTask.setOnSucceeded(workerStateEvent -> {
-//            gameAction.setValue(GameAction.PLAY);
-//            deleteButton.setDisable(false);
-//            launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
-//            launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
-
+            //TODO: launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
+            //TODO: launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
             downloadTask = null;
         });
 
@@ -354,7 +373,6 @@ public class ApplicationController {
 
     @FXML
     protected void cancelDownloadAction() {
-        // Cancel download
         logger.info("Cancel game download!");
         downloadTask.cancel(false);
     }
@@ -363,6 +381,7 @@ public class ApplicationController {
     protected void deleteAction() {
         final GameIdentifier id = selectedRelease.getValue().getId();
         final Path gameDir = gameManager.getInstallDirectory(id);
+
         final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setContentText(BundleUtils.getMessage("confirmDeleteGame_withoutData", gameDir));
         alert.setTitle(BundleUtils.getLabel("message_deleteGame_title"));
@@ -374,26 +393,11 @@ public class ApplicationController {
                     logger.info("Removing game '{}' from path '{}", id, gameDir);
                     // triggering a game deletion implies the player doesn't want to play this game anymore
                     // hence, we unset `lastPlayedGameJob` and `lastPlayedGameVersion` settings independent of deletion success
-//                    launcherSettings.setLastPlayedGameJob("");
-//                    launcherSettings.setLastPlayedGameVersion("");
-
-//                    deleteButton.setDisable(true);
+                    //TODO: launcherSettings.setLastPlayedGameJob("");
+                    //TODO: launcherSettings.setLastPlayedGameVersion("");
                     final DeleteTask deleteTask = new DeleteTask(gameManager, id);
-                    deleteTask.onDone(() -> {
-//                        gameAction.setValue(GameAction.DOWNLOAD);
-                        if (!isInstalled(selectedRelease.getValue())) {
-//                            gameAction.setValue(GameAction.DOWNLOAD);
-                        } else {
-//                            deleteButton.setDisable(false);
-                        }
-                    });
-
                     executor.submit(deleteTask);
                 });
-    }
-
-    private boolean isInstalled(GameRelease release) {
-        return installedGames.contains(release);
     }
 
     /**
@@ -480,7 +484,7 @@ public class ApplicationController {
         stage.close();
     }
 
-    private static enum GameAction {
+    private enum GameAction {
         PLAY,
         DOWNLOAD,
         CANCEL
@@ -521,10 +525,14 @@ public class ApplicationController {
                 GameIdentifier id = item.getId();
                 boolean isInstalled = installedGames.contains(id);
 
-                String displayVersion = id.getSemver() != null ? id.getSemver().toString() : id.getVersion() + "-" + id.getBuild();
+                String displayVersion = id.getBuild() + "-" + id.getVersion();
+                if (id.getSemver() != null) {
+                    displayVersion += " (" + id.getSemver() + ")";
+                }
 
-                setText(displayVersion);
+                //labelVersion.setText(displayVersion);
                 iconStatus.setVisible(isInstalled);
+                setText(displayVersion);
                 setGraphic(root);
             }
         }

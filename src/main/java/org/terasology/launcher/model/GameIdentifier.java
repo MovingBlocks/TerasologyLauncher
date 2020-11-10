@@ -4,6 +4,7 @@
 package org.terasology.launcher.model;
 
 import com.vdurmont.semver4j.Semver;
+import org.jetbrains.annotations.NotNull;
 
 import java.beans.JavaBean;
 import java.util.Objects;
@@ -72,5 +73,4 @@ public class GameIdentifier {
     public String toString() {
         return profile + " @ " + version + "+" + build + " (" + semver + ")";
     }
-
 }

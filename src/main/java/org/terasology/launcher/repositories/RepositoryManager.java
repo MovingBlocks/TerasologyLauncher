@@ -32,8 +32,11 @@ public class RepositoryManager {
                 Sets.newHashSet(
 //                        terasologyNightly, terasologyStable,
                         omegaNightly,
-//                        omegaStable,
-                        nanowareOmegaDevelop, nanowareOmegaMaster, nanowareTerasologyDevelop, nanowareTerasologyMaster
+                        omegaStable,
+                        nanowareOmegaDevelop,
+                        nanowareOmegaMaster
+//                        nanowareTerasologyDevelop,
+//                        nanowareTerasologyMaster
                 );
 
         releases = fetchReleases(all);
