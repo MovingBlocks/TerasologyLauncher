@@ -19,15 +19,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 /**
  * Repository adapter for the "new" Jenkins on <a href="http://jenkins.terasology.io">jenkins.terasology.io</a>.
- *
- *
  */
 class NanowareJenkinsRepositoryAdapter implements ReleaseRepository {
 
@@ -106,7 +104,7 @@ class NanowareJenkinsRepositoryAdapter implements ReleaseRepository {
                         Semver semver = deriveSemver(result, build);
                         final GameIdentifier id = new GameIdentifier(build.number, buildProfile, profile, semver);
 
-                        final GameRelease release = new GameRelease(id, new URL(url), null, null);
+                        final GameRelease release = new GameRelease(id, new URL(url), Collections.emptyList(), null);
                         pkgList.add(release);
                     }
                 }

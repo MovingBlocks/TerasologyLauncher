@@ -5,6 +5,7 @@ package org.terasology.launcher.model;
 
 import com.vdurmont.semver4j.Semver;
 
+import java.beans.JavaBean;
 import java.util.Objects;
 
 /**

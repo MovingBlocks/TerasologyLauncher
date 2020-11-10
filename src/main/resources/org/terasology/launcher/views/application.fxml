@@ -130,7 +130,7 @@
                     </VBox>
                     <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" maxWidth="300.0" spacing="32" >
                       <children >
-                        <Button id="downloadButton" fx:id="cancelDownloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#cancelDownloadAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButtonCancel">
+                        <Button fx:id="cancelDownloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#cancelDownloadAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButtonCancel">
                           <graphic>
                             <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true" >
                               <image>
@@ -138,27 +138,26 @@
                               </image>
                             </ImageView>
                           </graphic>
-                          <HBox.margin>
-                            <Insets />
-                          </HBox.margin>
                         </Button>
                         <Button fx:id="downloadButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#downloadAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
-                          <graphic></graphic>
-                          <ImageView fx:id="downloadImage" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-                              <Image url="@../images/download.png" preserveRatio="false" smooth="false" />
-                            </image>
-                          </ImageView>
+                          <graphic>
+                            <ImageView fx:id="downloadImage" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                              <image>
+                                <Image url="@../images/download.png" preserveRatio="false" smooth="false" />
+                              </image>
+                            </ImageView>
+                          </graphic>
                         </Button>
                         <Button fx:id="startButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#startGameAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
-                          <graphic></graphic>
-                          <ImageView fx:id="playImage" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-                              <Image url="@../images/play.png" preserveRatio="false" smooth="false" />
-                            </image>
-                          </ImageView>
+                          <graphic>
+                            <ImageView fx:id="playImage" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                              <image>
+                                <Image url="@../images/play.png" preserveRatio="false" smooth="false" />
+                              </image>
+                            </ImageView>
+                          </graphic>
                         </Button>
-                        <Button fx:id="deleteButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#deleteAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
+                        <Button fx:id="deleteButton" id="deleteButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#deleteAction" onMouseEntered="#handleControlButtonMouseEntered" onMouseExited="#handleControlButtonMouseExited" styleClass="controlButton">
                           <graphic>
                             <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
                               <image>
