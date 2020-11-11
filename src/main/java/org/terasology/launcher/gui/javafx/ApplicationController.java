@@ -4,6 +4,7 @@
 package org.terasology.launcher.gui.javafx;
 
 import javafx.animation.Transition;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
@@ -16,7 +17,6 @@ import javafx.collections.ObservableSet;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -24,7 +24,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
@@ -33,9 +32,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -179,10 +175,12 @@ public class ApplicationController {
                     return compareBuild;
                 }
 
-                Integer version1 = Integer.parseInt(o1.getId().getVersion());
-                Integer version2 = Integer.parseInt(o2.getId().getVersion());
+//                Integer version1 = Integer.parseInt(o1.getId().getVersion());
+//                Integer version2 = Integer.parseInt(o2.getId().getVersion());
+//
+//                return -1 * version1.compareTo(version2);
 
-                return -1 * version1.compareTo(version2);
+                return o1.getId().getVersion().compareTo(o2.getId().getVersion());
             }).collect(Collectors.toList()));
 
             //TODO: select last played game

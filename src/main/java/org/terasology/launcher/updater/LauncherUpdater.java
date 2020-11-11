@@ -63,7 +63,8 @@ public final class LauncherUpdater {
     public GHRelease updateAvailable() {
         //TODO: only check of both version are defined and valid semver?
         try {
-            final GitHub github = GitHub.connectAnonymously();
+            final GitHub github = GitHub.connect("skaldarnar", "b6f05ee18cb7f88e7060524a4c00afd8d866b867");
+            logger.debug("Github rate limit: {}", github.getRateLimit());
             final GHRepository repository = github.getRepository("MovingBlocks/TerasologyLauncher");
             final GHRelease latestRelease = repository.getLatestRelease();
             final Semver latestVersion = versionOf(latestRelease);

@@ -28,13 +28,17 @@ public class RepositoryManager {
         ReleaseRepository nanowareTerasologyDevelop = new NanowareJenkinsRepositoryAdapter(Build.NIGHTLY, Profile.ENGINE);
         ReleaseRepository nanowareTerasologyMaster = new NanowareJenkinsRepositoryAdapter(Build.STABLE, Profile.ENGINE);
 
+        ReleaseRepository github = new GithubRepositoryAdapter();
+
         Set<ReleaseRepository> all =
                 Sets.newHashSet(
-//                        terasologyNightly, terasologyStable,
-                        omegaNightly,
-                        omegaStable,
-                        nanowareOmegaDevelop,
-                        nanowareOmegaMaster
+                        github
+//                        terasologyNightly,
+//                        terasologyStable,
+//                        omegaNightly,
+//                        omegaStable
+//                        nanowareOmegaDevelop,
+//                        nanowareOmegaMaster,
 //                        nanowareTerasologyDevelop,
 //                        nanowareTerasologyMaster
                 );
