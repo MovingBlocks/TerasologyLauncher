@@ -28,12 +28,10 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.Properties;
 
 /**
  * Provides access to launcher settings.
- *
  */
 public final class BaseLauncherSettings extends LauncherSettings {
 
@@ -270,9 +268,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
 
     @Override
     public synchronized String getBaseJavaParameters() {
-        return Optional.ofNullable(
-            properties.getProperty(PROPERTY_BASE_JAVA_PARAMETERS)
-        ).orElse("");
+        return properties.getProperty(PROPERTY_BASE_JAVA_PARAMETERS);
     }
 
     @Override

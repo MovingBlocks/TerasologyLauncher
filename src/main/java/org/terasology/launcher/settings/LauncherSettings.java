@@ -93,11 +93,17 @@ public abstract class LauncherSettings {
     public abstract String getBaseJavaParameters();
 
     public synchronized List<String> getJavaParameterList() {
-        List<String> baseParams = Arrays.asList(getBaseJavaParameters().split("\\s+"));
-        List<String> userParams = Arrays.asList(getUserJavaParameters().split("\\s+"));
         List<String> javaParameters = Lists.newArrayList();
-        javaParameters.addAll(baseParams);
-        javaParameters.addAll(userParams);
+        String baseParams = getBaseJavaParameters();
+        if (baseParams != null) {
+            javaParameters.addAll(Arrays.asList(baseParams.split("\\s+")));
+        }
+
+        String userParams = getUserJavaParameters();
+        if (userParams != null) {
+            javaParameters.addAll(Arrays.asList(userParams.split("\\s+")));
+        }
+
         return javaParameters;
     }
 
