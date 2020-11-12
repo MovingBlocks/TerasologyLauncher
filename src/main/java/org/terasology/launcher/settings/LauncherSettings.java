@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.settings;
 
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -90,10 +91,13 @@ public abstract class LauncherSettings {
     public abstract String getUserJavaParameters();
 
     public abstract String getBaseJavaParameters();
-    
+
     public synchronized List<String> getJavaParameterList() {
-        List<String> javaParameters = Arrays.asList(getBaseJavaParameters().split("\\s+"));
-        javaParameters.addAll(Arrays.asList(getUserJavaParameters().split("\\s+")));
+        List<String> baseParams = Arrays.asList(getBaseJavaParameters().split("\\s+"));
+        List<String> userParams = Arrays.asList(getUserJavaParameters().split("\\s+"));
+        List<String> javaParameters = Lists.newArrayList();
+        javaParameters.addAll(baseParams);
+        javaParameters.addAll(userParams);
         return javaParameters;
     }
 
