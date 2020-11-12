@@ -136,7 +136,7 @@ public class GameManager {
                     }
                     for (File versionDirectory : Objects.requireNonNull(buildDirectory.listFiles())) {
                         String version = versionDirectory.getName();
-                        installedGames.add(new GameIdentifier(version, build, profile, null));
+                        installedGames.add(new GameIdentifier(version, build, profile));
                     }
                 }
             }
