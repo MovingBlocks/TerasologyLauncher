@@ -131,7 +131,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
 
     protected void initBaseJavaParameters() {
         if (Platform.getPlatform().isMac()) {
-            properties.setProperty(PROPERTY_BASE_JAVA_PARAMETERS, "-XstartOnMainThread -Djava.awt.headless=true");
+            properties.setProperty(PROPERTY_BASE_JAVA_PARAMETERS, "-XstartOnFirstThread -Djava.awt.headless=true");
         }
     }
 
