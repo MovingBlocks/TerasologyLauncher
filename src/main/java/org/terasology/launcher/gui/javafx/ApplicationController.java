@@ -49,6 +49,7 @@ import org.terasology.launcher.tasks.DownloadTask;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.util.Platform;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -213,11 +214,14 @@ public class ApplicationController {
         } else {
             final Path gamePath = packageManager.resolveInstallDir(selectedPackage);
             List<String> additionalJavaParameters = Lists.newArrayList();
-            if (isLwjgl3(selectedPackage)) {
+            List<String> additionalGameParameters = Lists.newArrayList();
+            if (isLwjgl3(selectedPackage) && Platform.getPlatform().isMac()) {
                 additionalJavaParameters.add("-XstartOnFirstThread");
                 additionalJavaParameters.add("-Djava.awt.headless=true");
+
+                additionalGameParameters.add("-noSplash");
             }
-            gameService.start(gamePath, launcherSettings, additionalJavaParameters);
+            gameService.start(gamePath, launcherSettings, additionalJavaParameters, additionalGameParameters);
         }
     }
 
