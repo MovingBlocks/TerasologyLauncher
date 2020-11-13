@@ -4,6 +4,7 @@
 package org.terasology.launcher.model;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,11 +18,13 @@ public class GameRelease {
     final GameIdentifier id;
     final URL url;
     final List<String> changelog;
+    final Date timestamp;
 
-    public GameRelease(GameIdentifier id, URL url, List<String> changelog) {
+    public GameRelease(GameIdentifier id, URL url, List<String> changelog, Date timestamp) {
         this.id = id;
         this.url = url;
         this.changelog = changelog;
+        this.timestamp = timestamp;
     }
 
     public GameIdentifier getId() {
@@ -37,5 +40,9 @@ public class GameRelease {
      */
     public List<String> getChangelog() {
         return changelog;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
     }
 }

@@ -55,6 +55,8 @@ import org.terasology.launcher.util.Platform;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -172,17 +174,7 @@ public class ApplicationController {
                 if (compareProfile != 0) {
                     return compareProfile;
                 }
-                int compareBuild = o1.getId().getBuild().compareTo(o2.getId().getBuild());
-                if (compareBuild != 0) {
-                    return compareBuild;
-                }
-
-//                Integer version1 = Integer.parseInt(o1.getId().getVersion());
-//                Integer version2 = Integer.parseInt(o2.getId().getVersion());
-//
-//                return -1 * version1.compareTo(version2);
-
-                return o1.getId().getVersion().compareTo(o2.getId().getVersion());
+                return o2.getTimestamp().compareTo(o1.getTimestamp());
             }).collect(Collectors.toList()));
 
             //TODO: select last played game
@@ -528,6 +520,8 @@ public class ApplicationController {
      */
     private static final class GameReleaseCell extends ListCell<GameRelease> {
         private static final Image ICON_CHECK = BundleUtils.getFxImage("icon_check");
+        private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+
         private final ImageView iconStatus;
 
         private final Set<GameIdentifier> installedGames;
@@ -552,7 +546,13 @@ public class ApplicationController {
                 setGraphic(null);
             } else {
                 final GameIdentifier id = item.getId();
-                final String displayVersion = id.getBuild() + "-" + id.getVersion();
+
+                String displayVersion;
+                if (id.getBuild().equals(Build.NIGHTLY)) {
+                    displayVersion = "preview " + id.getVersion() + " (" + DATE_FORMAT.format(item.getTimestamp()) + ")";
+                } else {
+                    displayVersion = "release " + id.getVersion();
+                }
 
                 setText(displayVersion);
                 iconStatus.setVisible(installedGames.contains(id));

@@ -3,6 +3,8 @@
 
 package org.terasology.launcher.repositories;
 
+import java.util.Date;
+
 /**
  * Data model for parsing build information from Jenkins.
  */
@@ -24,6 +26,7 @@ public final class Jenkins {
         public Artifact[] artifacts;
         public String url;
         public ChangeSet changeSet;
+        public long timestamp;
 
         public enum Result {
             ABORTED, FAILURE, NOT_BUILT, SUCCESS, UNSTABLE

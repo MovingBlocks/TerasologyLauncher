@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
             + "builds["
             + "actions[causes[upstreamBuild]]{0},"
             + "number,"
+            + "timestamp,"
             + "result,"
             + "artifacts[fileName,relativePath],"
             + "url,"
@@ -74,7 +76,8 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
                     final String url = getArtifactUrl(build, TERASOLOGY_ZIP_PATTERN);
                     if (url != null) {
                         final GameIdentifier id = new GameIdentifier(build.number, buildProfile, profile);
-                        final GameRelease release = new GameRelease(id, new URL(url), changelog);
+                        final Date timestamp = new Date(build.timestamp);
+                        final GameRelease release = new GameRelease(id, new URL(url), changelog, timestamp);
                         pkgList.add(release);
                     }
                 }
