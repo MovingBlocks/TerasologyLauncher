@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.game;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import org.slf4j.Logger;
@@ -23,7 +24,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class GameManager {
 
@@ -60,7 +63,7 @@ public class GameManager {
         if (!listener.isCancelled()) {
             final Path extractDir = getInstallDirectory(release.getId());
             FileUtils.extractZipTo(cachedZip, extractDir);
-            installedGames.add(release.getId());
+            Platform.runLater(() -> installedGames.add(release.getId()));
             logger.info("Finished installing package: {}", release.getId());
         }
     }
@@ -98,7 +101,7 @@ public class GameManager {
                 .map(Path::toFile)
                 .forEach(File::delete);
 
-        installedGames.remove(game);
+        Platform.runLater(() -> installedGames.remove(game));
         logger.info("Finished removing package: {}", game);
     }
 
@@ -119,6 +122,7 @@ public class GameManager {
      * Scans the installation directory and collects the installed games.
      */
     private void scanInstallationDir() {
+        Set<GameIdentifier> localGames = new HashSet<>();
         if (Files.exists(installDirectory)) {
             for (File profileDirectory : Objects.requireNonNull(installDirectory.toFile().listFiles())) {
                 Profile profile;
@@ -136,10 +140,11 @@ public class GameManager {
                     }
                     for (File versionDirectory : Objects.requireNonNull(buildDirectory.listFiles())) {
                         String version = versionDirectory.getName();
-                        installedGames.add(new GameIdentifier(version, build, profile));
+                        localGames.add(new GameIdentifier(version, build, profile));
                     }
                 }
             }
         }
+        Platform.runLater(() -> installedGames.addAll(localGames));
     }
 }

@@ -216,7 +216,7 @@ public class ApplicationController {
 
         this.stage = stage;
 
-        installedGames = gameManager.getInstalledGames();
+        Bindings.bindContent(installedGames, gameManager.getInstalledGames());
 
         // add Logback view appender view to both the root logger and the tab
         Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -389,6 +389,7 @@ public class ApplicationController {
         });
 
         executor.submit(downloadTask);
+
     }
 
     @FXML
