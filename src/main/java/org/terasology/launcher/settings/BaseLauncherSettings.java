@@ -32,7 +32,6 @@ import java.util.Properties;
 
 /**
  * Provides access to launcher settings.
- *
  */
 public final class BaseLauncherSettings extends LauncherSettings {
 
@@ -129,9 +128,6 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     protected void initBaseJavaParameters() {
-        if (Platform.getPlatform().isMac()) {
-            properties.setProperty(PROPERTY_BASE_JAVA_PARAMETERS, "-XstartOnMainThread -Djava.awt.headless=true");
-        }
     }
 
     protected void initUserJavaParameters() {

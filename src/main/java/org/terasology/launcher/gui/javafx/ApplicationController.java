@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.gui.javafx;
 
+import com.google.common.collect.Lists;
 import javafx.animation.Transition;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -39,8 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameService;
 import org.terasology.launcher.packages.Package;
+import org.terasology.launcher.packages.PackageBuild;
 import org.terasology.launcher.packages.PackageManager;
-import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
@@ -48,9 +49,11 @@ import org.terasology.launcher.tasks.DownloadTask;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
+import org.terasology.launcher.util.Platform;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -177,14 +180,48 @@ public class ApplicationController {
         }
     }
 
+    /**
+     * The PR upgrading the engine to LWJGL v3 (https://github.com/MovingBlocks/Terasology/pull/3969) was merged on
+     * Oct 24, 2020, 20:12 UTC as commit 'c83655fb94c02d68fb8ba31fdb1954e81dde12d6'.
+     *
+     * This method does some reverse engineering of which build on which Jenkins job contains this change. This should
+     * probably be baked into the {@link Package} while fetching the info from the remote source. With upcoming
+     * refactoring I'd like to keep this separate here for now...
+     *
+     * @param pkg
+     * @return
+     */
+    private boolean isLwjgl3(final Package pkg) {
+        if (pkg.getId().equals(PackageBuild.OMEGA_STABLE.getJobName())) {
+            return Integer.parseInt(pkg.getVersion()) > 37;
+        }
+        if (pkg.getId().equals(PackageBuild.OMEGA_UNSTABLE.getJobName())) {
+            return Integer.parseInt(pkg.getVersion()) > 1103;
+        }
+        if (pkg.getId().equals(PackageBuild.STABLE.getJobName())) {
+            return Integer.parseInt(pkg.getVersion()) > 82;
+        }
+        if (pkg.getId().equals(PackageBuild.UNSTABLE.getJobName())) {
+            return Integer.parseInt(pkg.getVersion()) > 2317;
+        }
+        return false;
+    }
+
     private void startGameAction() {
         if (gameService.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
             Dialogs.showInfo(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
             final Path gamePath = packageManager.resolveInstallDir(selectedPackage);
+            List<String> additionalJavaParameters = Lists.newArrayList();
+            List<String> additionalGameParameters = Lists.newArrayList();
+            if (isLwjgl3(selectedPackage) && Platform.getPlatform().isMac()) {
+                additionalJavaParameters.add("-XstartOnFirstThread");
+                additionalJavaParameters.add("-Djava.awt.headless=true");
 
-            gameService.start(gamePath, launcherSettings);
+                additionalGameParameters.add("-noSplash");
+            }
+            gameService.start(gamePath, launcherSettings, additionalJavaParameters, additionalGameParameters);
         }
     }
 

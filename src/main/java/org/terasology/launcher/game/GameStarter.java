@@ -16,6 +16,8 @@
 
 package org.terasology.launcher.game;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
 
@@ -32,6 +34,8 @@ import java.util.concurrent.Callable;
  * @see <a href="https://docs.oracle.com/en/java/javase/14/docs/specs/man/java.html#overview-of-java-options">java command manual</a>
  */
 class GameStarter implements Callable<Process> {
+    private static final Logger logger = LoggerFactory.getLogger(GameStarter.class);
+
     final ProcessBuilder processBuilder;
 
     /**
@@ -76,6 +80,7 @@ class GameStarter implements Callable<Process> {
      */
     @Override
     public Process call() throws IOException {
+        logger.info("Starting game with: {}", String.join(" ", processBuilder.command()));
         return processBuilder.start();
     }
 

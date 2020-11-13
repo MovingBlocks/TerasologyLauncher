@@ -16,6 +16,7 @@
 
 package org.terasology.launcher.game;
 
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import javafx.concurrent.Service;
 import javafx.concurrent.Worker;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.settings.LauncherSettings;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 import static com.google.common.base.Verify.verifyNotNull;
@@ -31,7 +33,7 @@ import static com.google.common.base.Verify.verifyNotNull;
 /**
  * This service starts and monitors the game process.
  * <p>
- * Its {@linkplain #GameService() constructor} requires no arguments. Use {@link #start(Path, LauncherSettings)} to
+ * Its {@linkplain #GameService() constructor} requires no arguments. Use {@link #start(Path, LauncherSettings, List, List)} to
  * start the game process; the zero-argument form of {@code start()} will not have enough information.
  * <p>
  * The Boolean value of this service is true when it believes the game process has started <em>successfully.</em>
@@ -59,6 +61,8 @@ public class GameService extends Service<Boolean> {
 
     private Path gamePath;
     private LauncherSettings settings;
+    private List<String> additionalJavaParameters;
+    private List<String> additionalGameParameters;
 
     public GameService() {
         setExecutor(Executors.newSingleThreadExecutor(
@@ -72,21 +76,24 @@ public class GameService extends Service<Boolean> {
 
     /**
      * Start a new game process with these settings.
-     *
      * @param gamePath the directory under which we will find libs/Terasology.jar, also used as the process's
      *     working directory
      * @param settings supplies other settings relevant to configuring a process
+     * @param additionalJavaParameters
+     * @param additionalGameParameters
      */
     @SuppressWarnings("checkstyle:HiddenField")
-    public void start(Path gamePath, LauncherSettings settings) {
+    public void start(Path gamePath, LauncherSettings settings, List<String> additionalJavaParameters, List<String> additionalGameParameters) {
         this.gamePath = gamePath;
         this.settings = settings;
+        this.additionalJavaParameters = additionalJavaParameters;
+        this.additionalGameParameters = additionalGameParameters;
 
         start();
     }
 
     /**
-     * Use {@link #start(Path, LauncherSettings)} instead.
+     * Use {@link #start(Path, LauncherSettings, List, List)} instead.
      * <p>
      * It is an error to call this method before providing the configuration.
      */
@@ -133,9 +140,18 @@ public class GameService extends Service<Boolean> {
     @Override
     protected RunGameTask createTask() {
         verifyNotNull(settings);
+
+        final List<String> javaParameters = Lists.newArrayList();
+        javaParameters.addAll(settings.getJavaParameterList());
+        javaParameters.addAll(additionalJavaParameters);
+
+        final List<String> gameParameters = Lists.newArrayList();
+        gameParameters.addAll(settings.getUserGameParameterList());
+        gameParameters.addAll(additionalGameParameters);
+
         var starter = new GameStarter(verifyNotNull(gamePath), settings.getGameDataDirectory(),
                                       settings.getMaxHeapSize(), settings.getInitialHeapSize(),
-                                      settings.getJavaParameterList(), settings.getUserGameParameterList(),
+                                      javaParameters, gameParameters,
                                       settings.getLogLevel());
         return new RunGameTask(starter);
     }
