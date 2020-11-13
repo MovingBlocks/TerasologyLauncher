@@ -6,8 +6,10 @@ package org.terasology.launcher.gui.javafx;
 import com.google.common.collect.Lists;
 import javafx.animation.Transition;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -84,7 +86,6 @@ public class ApplicationController {
     private Property<GameAction> gameAction;
     private BooleanProperty downloading;
 
-    private ObservableList<GameRelease> availableGameReleases;
     private ObservableSet<GameIdentifier> installedGames;
 
     /**
@@ -128,7 +129,6 @@ public class ApplicationController {
 
         selectedRelease = new SimpleObjectProperty<>();
 
-        availableGameReleases = FXCollections.observableArrayList();
         installedGames = FXCollections.observableSet();
 
         gameAction = new SimpleObjectProperty<>(GameAction.DOWNLOAD);
@@ -156,23 +156,26 @@ public class ApplicationController {
         profileComboBox.setCellFactory(list -> new GameProfileCell());
         profileComboBox.setButtonCell(new GameProfileCell());
         profileComboBox.setItems(FXCollections.observableList(Arrays.asList(Profile.values().clone())));
-        profileComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            List<GameRelease> releasesForBuildProfile =
-                    repositoryManager.getReleases().stream()
-                            .filter(release -> release.getId().getProfile() == newVal)
-                            .collect(Collectors.toList());
-            availableGameReleases.setAll(releasesForBuildProfile.stream().sorted((o1, o2) -> {
-                int compareProfile = o1.getId().getProfile().compareTo(o2.getId().getProfile());
-                if (compareProfile != 0) {
-                    return compareProfile;
-                }
-                return o2.getTimestamp().compareTo(o1.getTimestamp());
-            }).collect(Collectors.toList()));
 
-            //TODO: select last played game
+        ReadOnlyObjectProperty<Profile> selectedProfile = profileComboBox.getSelectionModel().selectedItemProperty();
+
+        selectedProfile.addListener((obs, oldVal, newVal) -> {
+            selectItem(gameReleaseComboBox, release -> true);
         });
 
-        gameReleaseComboBox.setItems(availableGameReleases);
+        final ObjectBinding<ObservableList<GameRelease>> releases = Bindings.createObjectBinding(() -> {
+            if (repositoryManager == null) {
+                return FXCollections.emptyObservableList();
+            }
+            List<GameRelease> releasesForProfile =
+                    repositoryManager.getReleases().stream()
+                            .filter(release -> release.getId().getProfile() == selectedProfile.get())
+                            .sorted(ApplicationController::compareReleases)
+                            .collect(Collectors.toList());
+            return FXCollections.observableList(releasesForProfile);
+        }, selectedProfile);
+
+        gameReleaseComboBox.itemsProperty().bind(releases);
         gameReleaseComboBox.buttonCellProperty().bind(Bindings.createObjectBinding(() -> new GameReleaseCell(installedGames, true), installedGames));
         gameReleaseComboBox.cellFactoryProperty().bind(Bindings.createObjectBinding(() -> list -> new GameReleaseCell(installedGames), installedGames));
 
@@ -433,17 +436,6 @@ public class ApplicationController {
     }
 
     /**
-     * Select the package item with given {@code jobId} or the first item of {@code jobBox}.
-     *
-     * @param jobId the job id of the package to be selected
-     */
-//    private void selectItemForJob(final String jobId) {
-//        selectItem(buildProfileComboBox, profile ->
-//                profile.getVersionItems().stream()
-//                        .anyMatch(vItem -> vItem.getLinkedPackage().getId().equals(jobId)));
-//    }
-
-    /**
      * Initialize selected game job and version based on last played and last installed games.
      * <p>
      * The selection is derived from the following precedence rules:
@@ -453,7 +445,7 @@ public class ApplicationController {
      *     <li>Select <b>latest version of default job</b> otherwise</li>
      * </ol>
      */
-    //TODO: Reduce boilerplate code after switching to >= Java 9
+    //TODO: Reduce boilerplate code after switching to Java 9+
     //      Use 'Optional::or' to chain logic together
     private void initializeComboBoxSelection() {
 //        String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
@@ -501,10 +493,17 @@ public class ApplicationController {
         stage.close();
     }
 
+    private static int compareReleases(GameRelease o1, GameRelease o2) {
+        int compareProfile = o1.getId().getProfile().compareTo(o2.getId().getProfile());
+        if (compareProfile != 0) {
+            return compareProfile;
+        }
+        return o2.getTimestamp().compareTo(o1.getTimestamp());
+    }
+
     private enum GameAction {
         PLAY,
         DOWNLOAD,
         CANCEL
     }
-
 }
