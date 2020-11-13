@@ -24,13 +24,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -55,14 +52,11 @@ import org.terasology.launcher.util.Platform;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
@@ -513,73 +507,4 @@ public class ApplicationController {
         CANCEL
     }
 
-    /**
-     * Custom {@link ListCell} used to display a {@link GameRelease} along with its installation status.
-     */
-    private static final class GameReleaseCell extends ListCell<GameRelease> {
-        private static final Image ICON_CHECK = BundleUtils.getFxImage("icon_check");
-        private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
-
-        private final ImageView iconStatus;
-
-        private final Set<GameIdentifier> installedGames;
-        private final boolean isButtonCell;
-
-        GameReleaseCell(Set<GameIdentifier> installedGames) {
-            this(installedGames, false);
-        }
-
-        GameReleaseCell(Set<GameIdentifier> installedGames, boolean isButtonCell) {
-            this.installedGames = installedGames;
-            this.isButtonCell = isButtonCell;
-            iconStatus = new ImageView(ICON_CHECK);
-        }
-
-        @Override
-        protected void updateItem(GameRelease item, boolean empty) {
-            super.updateItem(item, empty);
-
-            if (empty || item == null) {
-                setText(null);
-                setGraphic(null);
-            } else {
-                final GameIdentifier id = item.getId();
-
-                String displayVersion;
-                if (id.getBuild().equals(Build.NIGHTLY)) {
-                    setStyle("-fx-font-weight: normal");
-                    displayVersion = "preview " + id.getVersion() + " (" + DATE_FORMAT.format(item.getTimestamp()) + ")";
-                } else {
-                    setStyle("-fx-font-weight: bold");
-                    displayVersion = "release " + id.getVersion();
-                }
-
-                setText(displayVersion);
-                iconStatus.setVisible(installedGames.contains(id));
-                // the graphic is not shown on the button cell, so we only set it for list cells
-                if (!isButtonCell) {
-                    setGraphic(iconStatus);
-                }
-            }
-        }
-    }
-
-    private static final class GameProfileCell extends ListCell<Profile> {
-        @Override
-        protected void updateItem(Profile profile, boolean empty) {
-            super.updateItem(profile, empty);
-            if (empty) {
-                setText(null);
-            } else {
-                switch (profile) {
-                    case OMEGA:
-                        setText("Terasology");
-                        break;
-                    case ENGINE:
-                        setText("Terasology Lite (engine-only)");
-                        break;
-                }
-            }
-        }
-    }
 }
