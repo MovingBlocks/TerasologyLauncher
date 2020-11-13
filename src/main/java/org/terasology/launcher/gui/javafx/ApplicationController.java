@@ -159,10 +159,8 @@ public class ApplicationController {
     }
 
     private void initComboBoxes() {
-
-        // derive the `availableGameReleases` from the selected profile
-        // I'd prefer to write a map on bindings/properties, but I did not manage to to so in a sane fashion...
-        // (p: ReadOnlyProperty<Profile>, f: Profile -> List<GameRelease>) -> ReadOnlyProperty<List<GameRelease>>
+        profileComboBox.setCellFactory(list -> new GameProfileCell());
+        profileComboBox.setButtonCell(new GameProfileCell());
         profileComboBox.setItems(FXCollections.observableList(Arrays.asList(Profile.values().clone())));
         profileComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             List<GameRelease> releasesForBuildProfile =
@@ -549,8 +547,10 @@ public class ApplicationController {
 
                 String displayVersion;
                 if (id.getBuild().equals(Build.NIGHTLY)) {
+                    setStyle("-fx-font-weight: normal");
                     displayVersion = "preview " + id.getVersion() + " (" + DATE_FORMAT.format(item.getTimestamp()) + ")";
                 } else {
+                    setStyle("-fx-font-weight: bold");
                     displayVersion = "release " + id.getVersion();
                 }
 
@@ -564,4 +564,22 @@ public class ApplicationController {
         }
     }
 
+    private static final class GameProfileCell extends ListCell<Profile> {
+        @Override
+        protected void updateItem(Profile profile, boolean empty) {
+            super.updateItem(profile, empty);
+            if (empty) {
+                setText(null);
+            } else {
+                switch (profile) {
+                    case OMEGA:
+                        setText("Terasology");
+                        break;
+                    case ENGINE:
+                        setText("Terasology Lite (engine-only)");
+                        break;
+                }
+            }
+        }
+    }
 }
