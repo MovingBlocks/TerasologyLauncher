@@ -46,14 +46,24 @@ public class GameManager {
     }
 
     /**
+     * Derive the file name for the downloaded ZIP package from the game release.
+     */
+    private String getFileNameFor(GameRelease release) {
+        GameIdentifier id = release.getId();
+        String profileString = id.getProfile().toString().toLowerCase();
+        String versionString = id.getVersion();
+        String buildString = id.getBuild().toString().toLowerCase();
+        return "terasology-" + profileString + "-" + versionString + "-" + buildString + ".zip";
+    }
+
+    /**
      * Installs the given release to the local file system.
      *
      * @param release  the game release to be installed
      * @param listener the object which is to be informed about task progress
      */
     public void install(GameRelease release, ProgressListener listener) throws IOException, DownloadException {
-        final String file = "terasology-" + release.getId().getProfile().toString().toLowerCase() + "-" + release.getId().getVersion() + "-" + release.getId().getBuild().toString().toLowerCase() + ".zip";
-        final Path cachedZip = cacheDirectory.resolve(file);
+        final Path cachedZip = cacheDirectory.resolve(getFileNameFor(release));
 
         // TODO: Properly validate cache and handle exceptions
         if (Files.notExists(cachedZip)) {
