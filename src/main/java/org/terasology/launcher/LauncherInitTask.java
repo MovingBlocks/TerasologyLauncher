@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher;
 
@@ -24,8 +11,11 @@ import javafx.stage.Stage;
 import org.kohsuke.github.GHRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.packages.PackageManager;
-import org.terasology.launcher.settings.BaseLauncherSettings;
+import org.terasology.launcher.game.GameManager;
+import org.terasology.launcher.gui.javafx.Dialogs;
+import org.terasology.launcher.model.GameIdentifier;
+import org.terasology.launcher.model.GameRelease;
+import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.settings.Settings;
@@ -33,7 +23,6 @@ import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
 import org.terasology.launcher.util.FileUtils;
-import org.terasology.launcher.gui.javafx.Dialogs;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
@@ -47,6 +36,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
@@ -97,18 +87,12 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path gameDirectory = getDirectoryFor(LauncherManagedDirectory.GAMES, installationDirectory);
             final Path gameDataDirectory = getGameDataDirectory(platform, launcherSettings.getGameDataDirectory());
 
-            // TODO: Does this interact with any remote server for fetching/initializing the database?
-            logger.trace("Setting up Package Manager");
-            final PackageManager packageManager = new PackageManager(userDataDirectory, gameDirectory);
-            if (!packageManager.validateSources()) {
-                if (confirmSourcesOverwrite()) {
-                    packageManager.copyDefaultSources();
-                } else {
-                    throw new IllegalStateException("Error reading sources file");
-                }
-            }
-            packageManager.initDatabase();
-            packageManager.syncDatabase();
+            logger.info("Fetching game releases ...");
+            final RepositoryManager repositoryManager = new RepositoryManager();
+            Set<GameRelease> releases = repositoryManager.getReleases();
+
+            final GameManager gameManager = new GameManager(cacheDirectory, gameDirectory);
+            Set<GameIdentifier> installedGames = gameManager.getInstalledGames();
 
             logger.trace("Change LauncherSettings...");
             launcherSettings.setGameDirectory(gameDirectory);
@@ -119,7 +103,12 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             logger.trace("Creating launcher frame...");
 
-            return new LauncherConfiguration(userDataDirectory, downloadDirectory, launcherSettings, packageManager);
+            return new LauncherConfiguration(
+                    userDataDirectory,
+                    downloadDirectory,
+                    launcherSettings,
+                    gameManager,
+                    repositoryManager);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
         }

@@ -48,7 +48,9 @@ public class ChangelogViewController {
                 .append(BundleUtils.getLabel("infoHeader4"))
                 .append("</strong>")
                 .append("<ul>");
-        changes.forEach(change -> builder.append("<li>").append(escapeHtml(change)).append("</li>"));
+        if (changes != null) {
+            changes.forEach(change -> builder.append("<li>").append(escapeHtml(change)).append("</li>"));
+        }
         builder.append("</ul>");
 
         return builder.toString();

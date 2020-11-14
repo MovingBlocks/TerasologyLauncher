@@ -5,15 +5,20 @@ package org.terasology.launcher.gui.javafx;
 
 import com.google.common.collect.Lists;
 import javafx.animation.Transition;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -21,27 +26,23 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.game.GameService;
-import org.terasology.launcher.packages.Package;
-import org.terasology.launcher.packages.PackageBuild;
-import org.terasology.launcher.packages.PackageManager;
+import org.terasology.launcher.model.Build;
+import org.terasology.launcher.model.GameIdentifier;
+import org.terasology.launcher.model.GameRelease;
+import org.terasology.launcher.model.Profile;
+import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
@@ -53,6 +54,8 @@ import org.terasology.launcher.util.Platform;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -70,23 +73,36 @@ public class ApplicationController {
 
     private Path launcherDirectory;
     private LauncherSettings launcherSettings;
-    private PackageManager packageManager;
-    private final GameService gameService;
-    private Stage stage;
 
+    private GameManager gameManager;
+    private RepositoryManager repositoryManager;
+    private final GameService gameService;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private DownloadTask downloadTask;
 
-    private VersionItem selectedVersion;
-    private Package selectedPackage;
-    private ObservableList<PackageItem> packageItems;
+    private Stage stage;
+
+    private Property<GameRelease> selectedRelease;
+    private Property<GameAction> gameAction;
+    private BooleanProperty downloading;
+
+    private ObservableSet<GameIdentifier> installedGames;
+
+    /**
+     * Indicate whether the user's hard drive is running out of space for game downloads.
+     */
+    private final Property<Optional<Warning>> warning;
 
     @FXML
-    private ComboBox<PackageItem> jobBox;
+    private ComboBox<Profile> profileComboBox;
     @FXML
-    private ComboBox<VersionItem> buildVersionBox;
+    private ComboBox<GameRelease> gameReleaseComboBox;
     @FXML
     private ProgressBar progressBar;
+    @FXML
+    private Button startButton;
+    @FXML
+    private Button downloadButton;
     @FXML
     private Button cancelDownloadButton;
     @FXML
@@ -95,12 +111,6 @@ public class ApplicationController {
     private Button settingsButton;
     @FXML
     private Button exitButton;
-    @FXML
-    private Button startAndDownloadButton;
-    @FXML
-    private ImageView playImage;
-    @FXML
-    private ImageView downloadImage;
 
     @FXML
     private LogViewController logViewController;
@@ -109,26 +119,174 @@ public class ApplicationController {
     @FXML
     private FooterController footerController;
 
-    /**
-     * Indicate whether the user's hard drive is running out of space for game downloads.
-     */
-    private final Property<Optional<Warning>> warning;
-    private Property<Tooltip> playButtonTooltip;
-    private Property<Package> selectedPackageProperty;
-
     public ApplicationController() {
         warning = new SimpleObjectProperty<>(Optional.empty());
-        selectedPackageProperty = new SimpleObjectProperty<>(null);
         gameService = new GameService();
         gameService.setOnFailed(this::handleRunFailed);
         gameService.valueProperty().addListener(this::handleRunStarted);
+
+        downloading = new SimpleBooleanProperty(false);
+
+        selectedRelease = new SimpleObjectProperty<>();
+
+        installedGames = FXCollections.observableSet();
+
+        // defines which button is shown as game action (i.e., play, download, cancel download)
+        gameAction = new SimpleObjectProperty<>(GameAction.DOWNLOAD);
+        // the game action is derived from the combination of the selected release (`selectedRelease`), the currently
+        // installed games (`installedGames`), and whether there is currently a download in progress (`downloading`).
+        // the game action is updated automatically (by this binding) whenever any of the dependencies above change.
+        gameAction.bind(Bindings.createObjectBinding(() -> {
+            final GameRelease release = selectedRelease.getValue();
+            final boolean isInstalled = release != null && installedGames.contains(release.getId());
+            if (downloading.get()) {
+                return GameAction.CANCEL;
+            } else if (isInstalled) {
+                return GameAction.PLAY;
+            } else {
+                return GameAction.DOWNLOAD;
+            }
+        }, selectedRelease, installedGames, downloading));
     }
 
     @FXML
     public void initialize() {
+        // this happens after the FXML elements have been initialized, but before managers and other dependencies have
+        // been "injected" to this controller
         footerController.bind(warning);
         initComboBoxes();
         initButtons();
+    }
+
+    /**
+     * Initialize the combo boxes for version selection by setting up bindings and properties.
+     *
+     * This happens after the FXML elements have been initialized, but before managers and other dependencies have been
+     * "injected" to this controller.
+     *
+     * The combo boxes are configured with custom {@link javafx.scene.control.ListCell} implementations to display
+     * human-readable representations of game profiles and game releases. We also bind which game releases are visible
+     * to the selected profile, and derive the currently selected release from the combo box's selection model.
+     */
+    private void initComboBoxes() {
+        profileComboBox.setCellFactory(list -> new GameProfileCell());
+        profileComboBox.setButtonCell(new GameProfileCell());
+        profileComboBox.setItems(FXCollections.observableList(Arrays.asList(Profile.values().clone())));
+        ReadOnlyObjectProperty<Profile> selectedProfile = profileComboBox.getSelectionModel().selectedItemProperty();
+        // control what game release is selected when switching profiles. this is a reaction to a change of the selected
+        // profile to perform a one-time action to select a game release. afterwards, the user is in control of what is
+        // selected
+        selectedProfile.addListener((obs, oldVal, newVal) -> {
+            ObservableList<GameRelease> availableReleases = gameReleaseComboBox.getItems();
+            GameIdentifier lastPlayedGame = launcherSettings.getLastPlayedGameVersion().orElse(null);
+
+            Optional<GameRelease> lastPlayed = availableReleases.stream()
+                    .filter(release -> release.getId().equals(lastPlayedGame))
+                    .findFirst();
+            Optional<GameRelease> lastInstalled = availableReleases.stream()
+                    .filter(release -> installedGames.contains(release.getId()))
+                    .findFirst();
+
+            gameReleaseComboBox.getSelectionModel().select(lastPlayed
+                    .or(() -> lastInstalled)
+                    .or(() -> availableReleases.stream().findFirst())
+                    .orElse(null));
+        });
+
+        // derive the releases to display from the selected profile (`selectedProfile`). the resulting list is ordered
+        // in the way the launcher is supposed to display the versions (currently by release timestamp).
+        final ObjectBinding<ObservableList<GameRelease>> releases = Bindings.createObjectBinding(() -> {
+            if (repositoryManager == null) {
+                return FXCollections.emptyObservableList();
+            }
+            List<GameRelease> releasesForProfile =
+                    repositoryManager.getReleases().stream()
+                            .filter(release -> release.getId().getProfile() == selectedProfile.get())
+                            .sorted(ApplicationController::compareReleases)
+                            .collect(Collectors.toList());
+            return FXCollections.observableList(releasesForProfile);
+        }, selectedProfile);
+
+        gameReleaseComboBox.itemsProperty().bind(releases);
+        gameReleaseComboBox.buttonCellProperty().bind(Bindings.createObjectBinding(() -> new GameReleaseCell(installedGames, true), installedGames));
+        gameReleaseComboBox.cellFactoryProperty().bind(Bindings.createObjectBinding(() -> list -> new GameReleaseCell(installedGames), installedGames));
+
+        selectedRelease.bind(gameReleaseComboBox.getSelectionModel().selectedItemProperty());
+        //TODO: instead of imperatively updating the changelog view its value should be bound via property, too
+        selectedRelease.addListener(
+                (observable, oldValue, newValue) -> changelogViewController.update(newValue != null ? newValue.getChangelog() : Collections.emptyList()));
+    }
+
+    /**
+     * Initialize buttons by setting up their bindings to observable values or properties.
+     *
+     * This happens after the FXML elements have been initialized, but before managers and other dependencies have been
+     * "injected" to this controller.
+     *
+     * The buttons "Play", "Download", and "Cancel Download" share the space in the UI. We make sure that only one of
+     * them is shown at the same time by deriving their visibility from the current {@link GameAction}. As JavaFX will
+     * still occupy space for non-visible nodes, we also bind the {@code managedProperty} to the visibility (nodes that
+     * are not managed "disappear" from the scene.
+     */
+    private void initButtons() {
+        cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
+        cancelDownloadButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.CANCEL, gameAction));
+        cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
+
+        startButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
+        startButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.PLAY, gameAction));
+        startButton.managedProperty().bind(startButton.visibleProperty());
+
+        downloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
+        downloadButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.DOWNLOAD, gameAction));
+        downloadButton.managedProperty().bind(downloadButton.visibleProperty());
+
+        deleteButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_delete")));
+        deleteButton.disableProperty().bind(startButton.visibleProperty().not());
+
+        settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
+        exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
+    }
+
+    @SuppressWarnings("checkstyle:HiddenField")
+    public void update(final Path launcherDirectory, final Path downloadDirectory, final LauncherSettings launcherSettings,
+                       final RepositoryManager repositoryManager, final GameManager gameManager,
+                       final Stage stage, final HostServices hostServices) {
+        this.launcherDirectory = launcherDirectory;
+        this.launcherSettings = launcherSettings;
+
+        this.repositoryManager = repositoryManager;
+        this.gameManager = gameManager;
+
+        this.stage = stage;
+
+        // bind the application controller's view of the installed games to that of the game manager. that way, we also
+        // get notified if the installed games are changed from a different thread (DeleteTask or DownloadTask).
+        Bindings.bindContent(installedGames, gameManager.getInstalledGames());
+
+        profileComboBox.getSelectionModel().select(
+                launcherSettings.getLastPlayedGameVersion().map(GameIdentifier::getProfile).orElse(Profile.OMEGA)
+        );
+
+        // add Logback appender to both the root logger and the tab
+        Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        if (rootLogger instanceof ch.qos.logback.classic.Logger) {
+            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
+
+            logViewController.setContext(logbackLogger.getLoggerContext());
+            logViewController.start(); // CHECK: do I really need to start it manually here?
+            logbackLogger.addAppender(logViewController);
+        }
+
+        //TODO: This only updates when the launcher is initialized (which should happen exactly once o.O)
+        //      We should update this value at least every time the download directory changes (user setting).
+        //      Ideally, we would check periodically for disk space.
+        if (downloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
+            warning.setValue(Optional.of(Warning.LOW_ON_SPACE));
+        } else {
+            warning.setValue(Optional.empty());
+        }
+        footerController.setHostServices(hostServices);
     }
 
     @FXML
@@ -170,7 +328,7 @@ public class ApplicationController {
             }
 
             final SettingsController settingsController = fxmlLoader.getController();
-            settingsController.initialize(launcherDirectory, launcherSettings, packageManager, settingsStage, this);
+            settingsController.initialize(launcherDirectory, launcherSettings, settingsStage, this);
 
             Scene scene = new Scene(root);
             settingsStage.setScene(scene);
@@ -183,39 +341,41 @@ public class ApplicationController {
     /**
      * The PR upgrading the engine to LWJGL v3 (https://github.com/MovingBlocks/Terasology/pull/3969) was merged on
      * Oct 24, 2020, 20:12 UTC as commit 'c83655fb94c02d68fb8ba31fdb1954e81dde12d6'.
-     *
+     * <p>
      * This method does some reverse engineering of which build on which Jenkins job contains this change. This should
      * probably be baked into the {@link Package} while fetching the info from the remote source. With upcoming
      * refactoring I'd like to keep this separate here for now...
      *
-     * @param pkg
+     * @param release
      * @return
      */
-    private boolean isLwjgl3(final Package pkg) {
-        if (pkg.getId().equals(PackageBuild.OMEGA_STABLE.getJobName())) {
-            return Integer.parseInt(pkg.getVersion()) > 37;
+    private boolean isLwjgl3(final GameIdentifier release) {
+        if (release.getProfile().equals(Profile.OMEGA) && release.getBuild().equals(Build.STABLE)) {
+            return Integer.parseInt(release.getVersion()) > 37;
         }
-        if (pkg.getId().equals(PackageBuild.OMEGA_UNSTABLE.getJobName())) {
-            return Integer.parseInt(pkg.getVersion()) > 1103;
+        if (release.getProfile().equals(Profile.OMEGA) && release.getBuild().equals(Build.NIGHTLY)) {
+            return Integer.parseInt(release.getVersion()) > 1103;
         }
-        if (pkg.getId().equals(PackageBuild.STABLE.getJobName())) {
-            return Integer.parseInt(pkg.getVersion()) > 82;
+        if (release.getProfile().equals(Profile.ENGINE) && release.getBuild().equals(Build.STABLE)) {
+            return Integer.parseInt(release.getVersion()) > 82;
         }
-        if (pkg.getId().equals(PackageBuild.UNSTABLE.getJobName())) {
-            return Integer.parseInt(pkg.getVersion()) > 2317;
+        if (release.getProfile().equals(Profile.ENGINE) && release.getBuild().equals(Build.NIGHTLY)) {
+            return Integer.parseInt(release.getVersion()) > 2317;
         }
         return false;
     }
 
-    private void startGameAction() {
+    @FXML
+    protected void startGameAction() {
         if (gameService.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
             Dialogs.showInfo(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
-            final Path gamePath = packageManager.resolveInstallDir(selectedPackage);
+            final GameIdentifier release = selectedRelease.getValue().getId();
+            final Path gamePath = gameManager.getInstallDirectory(release);
             List<String> additionalJavaParameters = Lists.newArrayList();
             List<String> additionalGameParameters = Lists.newArrayList();
-            if (isLwjgl3(selectedPackage) && Platform.getPlatform().isMac()) {
+            if (isLwjgl3(release) && Platform.getPlatform().isMac()) {
                 additionalJavaParameters.add("-XstartOnFirstThread");
                 additionalJavaParameters.add("-Djava.awt.headless=true");
 
@@ -232,8 +392,7 @@ public class ApplicationController {
 
         logger.debug("Game has started successfully.");
 
-        launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
-        launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
+        launcherSettings.setLastPlayedGameVersion(selectedRelease.getValue().getId());
 
         if (launcherSettings.isCloseLauncherAfterGameStart()) {
             if (downloadTask == null) {
@@ -258,51 +417,36 @@ public class ApplicationController {
         Dialogs.showError(stage, BundleUtils.getLabel("message_error_gameStart"));
     }
 
-    private void downloadAction() {
-        downloadTask = new DownloadTask(packageManager, selectedVersion);
+    @FXML
+    protected void downloadAction() {
+        downloadTask = new DownloadTask(gameManager, selectedRelease.getValue());
+        downloading.bind(downloadTask.runningProperty());
 
-        jobBox.disableProperty().bind(downloadTask.runningProperty());
-        buildVersionBox.disableProperty().bind(downloadTask.runningProperty());
+        profileComboBox.disableProperty().bind(downloadTask.runningProperty());
+        gameReleaseComboBox.disableProperty().bind(downloadTask.runningProperty());
         progressBar.visibleProperty().bind(downloadTask.runningProperty());
-        cancelDownloadButton.visibleProperty().bind(downloadTask.runningProperty());
-        startAndDownloadButton.visibleProperty().bind(downloadTask.runningProperty().not());
 
         progressBar.progressProperty().bind(downloadTask.progressProperty());
 
         downloadTask.setOnSucceeded(workerStateEvent -> {
-            packageManager.syncDatabase();
-            startAndDownloadButton.setGraphic(playImage);
-            deleteButton.setDisable(false);
-            launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
-            launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
-
             downloadTask = null;
         });
 
         executor.submit(downloadTask);
-    }
 
-    @FXML
-    protected void startAndDownloadAction() {
-        if (!selectedPackage.isInstalled()) {
-            logger.info("Download Game Action!");
-            downloadAction();
-        } else {
-            logger.info("Start Game Action!");
-            startGameAction();
-        }
     }
 
     @FXML
     protected void cancelDownloadAction() {
-        // Cancel download
         logger.info("Cancel game download!");
         downloadTask.cancel(false);
     }
 
     @FXML
     protected void deleteAction() {
-        final Path gameDir = packageManager.resolveInstallDir(selectedPackage);
+        final GameIdentifier id = selectedRelease.getValue().getId();
+        final Path gameDir = gameManager.getInstallDirectory(id);
+
         final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setContentText(BundleUtils.getMessage("confirmDeleteGame_withoutData", gameDir));
         alert.setTitle(BundleUtils.getLabel("message_deleteGame_title"));
@@ -311,120 +455,13 @@ public class ApplicationController {
         alert.showAndWait()
                 .filter(response -> response == ButtonType.OK)
                 .ifPresent(response -> {
-                    logger.info("Removing game: {}-{}", selectedPackage.getId(), selectedPackage.getVersion());
-                    // triggering a game deletion implies the player doesn't want to play this game anymore
-                    // hence, we unset `lastPlayedGameJob` and `lastPlayedGameVersion` settings independent of deletion success
-                    launcherSettings.setLastPlayedGameJob("");
-                    launcherSettings.setLastPlayedGameVersion("");
-
-                    deleteButton.setDisable(true);
-                    final DeleteTask deleteTask = new DeleteTask(packageManager, selectedVersion);
-                    deleteTask.onDone(() -> {
-                        packageManager.syncDatabase();
-                        if (!selectedPackage.isInstalled()) {
-                            startAndDownloadButton.setGraphic(downloadImage);
-                        } else {
-                            deleteButton.setDisable(false);
-                        }
-                    });
-
+                    logger.info("Removing game '{}' from path '{}", id, gameDir);
+                    // triggering a game deletion implies the player doesn't want to play this game anymore. hence, we
+                    // unset `lastPlayedGameVersion` setting independent of deletion success
+                    launcherSettings.setLastPlayedGameVersion(null);
+                    final DeleteTask deleteTask = new DeleteTask(gameManager, id);
                     executor.submit(deleteTask);
                 });
-    }
-
-    public void update(final Path newLauncherDirectory, final Path newDownloadDirectory, final LauncherSettings newLauncherSettings,
-                       final PackageManager newPackageManager, final Stage newStage, final HostServices hostServices) {
-        this.launcherDirectory = newLauncherDirectory;
-        this.launcherSettings = newLauncherSettings;
-        this.packageManager = newPackageManager;
-        this.stage = newStage;
-
-        // add Logback view appender view to both the root logger and the tab
-        Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        if (rootLogger instanceof ch.qos.logback.classic.Logger) {
-            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
-
-            logViewController.setContext(logbackLogger.getLoggerContext());
-            logViewController.start(); // CHECK: do I really need to start it manually here?
-            logbackLogger.addAppender(logViewController);
-        }
-
-        packageItems = FXCollections.observableArrayList();
-        onSync();
-
-        //TODO: This only updates when the launcher is initialized (which should happen exactly once o.O)
-        //      We should update this value at least every time the download directory changes (user setting).
-        //      Ideally, we would check periodically for disk space.
-        if (newDownloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
-            warning.setValue(Optional.of(Warning.LOW_ON_SPACE));
-        } else {
-            warning.setValue(Optional.empty());
-        }
-
-        footerController.setHostServices(hostServices);
-
-        initializeComboBoxSelection();
-    }
-
-    /** To be called after database sync is done. */
-    private void onSync() {
-        packageItems.clear();
-        packageManager.getPackages()
-                .stream()
-                .collect(Collectors.groupingBy(Package::getName, //TODO this should be grouped by `id`
-                        Collectors.mapping(VersionItem::new, Collectors.toList())))
-                .forEach((name, versions) ->
-                        packageItems.add(new PackageItem(name, versions)));
-
-        jobBox.setItems(packageItems);
-        jobBox.getSelectionModel().select(0);
-    }
-
-    private void initComboBoxes() {
-        jobBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            buildVersionBox.setItems(newVal.getVersionItems());
-
-            String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
-            String selectedJobId = newVal.getVersionItems().get(0).getLinkedPackage().getId();
-            if (lastPlayedGameJob.isEmpty() || !lastPlayedGameJob.equals(selectedJobId)) {
-                // select last installed package for the selected job or the latest one if none installed
-                String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(selectedJobId)
-                        .map(Package::getVersion).orElse("");
-                selectItem(buildVersionBox, item ->
-                        item.getVersion().equals(lastInstalledVersion));
-            } else {
-                // select the package last played
-                selectItem(buildVersionBox, item ->
-                        item.getVersion().equals(launcherSettings.getLastPlayedGameVersion()));
-            }
-        });
-
-        selectedPackageProperty.addListener(
-                (observable, oldValue, newValue) -> {
-                    Tooltip t = new Tooltip(BundleUtils.getLabel(
-                            newValue.isInstalled() ? "launcher_start" : "launcher_download"));
-                    playButtonTooltip.setValue(t);
-                });
-
-        buildVersionBox.setCellFactory(list -> new VersionListCell());
-        buildVersionBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal == null) {
-                return;
-            }
-            selectedVersion = newVal;
-            selectedPackage = newVal.getLinkedPackage();
-
-            if (selectedPackage != null && selectedPackage.isInstalled()) {
-                selectedPackageProperty.setValue(selectedPackage);
-                startAndDownloadButton.setGraphic(playImage);
-                deleteButton.setDisable(false);
-            } else {
-                startAndDownloadButton.setGraphic(downloadImage);
-                deleteButton.setDisable(true);
-            }
-
-            changelogViewController.update(selectedPackage.getChangelog());
-        });
     }
 
     /**
@@ -440,71 +477,6 @@ public class ApplicationController {
                 .orElse(comboBox.getItems().get(0));
 
         comboBox.getSelectionModel().select(item);
-    }
-
-    /**
-     * Select the package item with given {@code jobId} or the first item of {@code jobBox}.
-     *
-     * @param jobId the job id of the package to be selected
-     */
-    private void selectItemForJob(final String jobId) {
-        selectItem(jobBox, jobItem ->
-                jobItem.getVersionItems().stream()
-                        .anyMatch(vItem -> vItem.getLinkedPackage().getId().equals(jobId)));
-    }
-
-    /**
-     * Initialize selected game job and version based on last played and last installed games.
-     * <p>
-     * The selection is derived from the following precedence rules:
-     * <ol>
-     *     <li>Select the <b>last played game</b></li>
-     *     <li>Select the <b>last installed game</b></li>
-     *     <li>Select <b>latest version of default job</b> otherwise</li>
-     * </ol>
-     */
-    //TODO: Reduce boilerplate code after switching to >= Java 9
-    //      Use 'Optional::or' to chain logic together
-    private void initializeComboBoxSelection() {
-        String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
-        if (!lastPlayedGameJob.isEmpty()) {
-            // select the package last played
-            selectItemForJob(launcherSettings.getLastPlayedGameJob());
-            selectItem(buildVersionBox, item ->
-                    item.getVersion().equals(launcherSettings.getLastPlayedGameVersion()));
-        } else {
-            String lastInstalledGameJob = launcherSettings.getLastInstalledGameJob();
-            if (!lastInstalledGameJob.isEmpty()) {
-                // select last installed package job and version
-                selectItemForJob(lastInstalledGameJob);
-                selectItem(buildVersionBox, item ->
-                        item.getVersion().equals(launcherSettings.getLastInstalledGameVersion()));
-            } else {
-                // select last installed package for the default job or the latest one if none installed
-                String defaultGameJob = launcherSettings.getDefaultGameJob();
-                selectItemForJob(defaultGameJob);
-                String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(defaultGameJob)
-                        .map(Package::getVersion).orElse("");
-                selectItem(buildVersionBox, item ->
-                        item.getVersion().equals(lastInstalledVersion));
-            }
-        }
-    }
-
-    private void initButtons() {
-        cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
-        cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
-        cancelDownloadButton.setVisible(false);
-
-        playButtonTooltip = new SimpleObjectProperty<>(new Tooltip(BundleUtils.getLabel("launcher_download")));
-        startAndDownloadButton.tooltipProperty().bind(playButtonTooltip);
-
-        startAndDownloadButton.managedProperty().bind(startAndDownloadButton.visibleProperty());
-        startAndDownloadButton.setGraphic(downloadImage);
-
-        deleteButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_delete")));
-        settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
-        exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
     }
 
     /**
@@ -529,41 +501,17 @@ public class ApplicationController {
         stage.close();
     }
 
-    /**
-     * Custom ListCell used to display package versions
-     * along with their installation status.
-     */
-    private static final class VersionListCell extends ListCell<VersionItem> {
-        private static final Image ICON_CHECK = BundleUtils.getFxImage("icon_check");
-        private static final Insets MARGIN = new Insets(0, 8, 0, 0);
-        private final HBox root;
-        private final Label labelVersion;
-        private final ImageView iconStatus;
-
-        VersionListCell() {
-            root = new HBox();
-            labelVersion = new Label();
-            iconStatus = new ImageView(ICON_CHECK);
-
-            final Pane separator = new Pane();
-            HBox.setHgrow(separator, Priority.ALWAYS);
-            HBox.setMargin(iconStatus, MARGIN);
-            root.getChildren().addAll(labelVersion, separator, iconStatus);
+    private static int compareReleases(GameRelease o1, GameRelease o2) {
+        int compareProfile = o1.getId().getProfile().compareTo(o2.getId().getProfile());
+        if (compareProfile != 0) {
+            return compareProfile;
         }
-
-        @Override
-        protected void updateItem(VersionItem item, boolean empty) {
-            super.updateItem(item, empty);
-
-            if (empty || item == null) {
-                setText(null);
-                setGraphic(null);
-            } else {
-                labelVersion.textProperty().bind(item.versionProperty());
-                iconStatus.visibleProperty().bind(item.installedProperty());
-                setGraphic(root);
-            }
-        }
+        return o2.getTimestamp().compareTo(o1.getTimestamp());
     }
 
+    private enum GameAction {
+        PLAY,
+        DOWNLOAD,
+        CANCEL
+    }
 }
