@@ -3,8 +3,6 @@
 
 package org.terasology.launcher.repositories;
 
-import java.util.Date;
-
 /**
  * Data model for parsing build information from Jenkins.
  */
@@ -21,7 +19,7 @@ public final class Jenkins {
 
     public static class Build {
         public Action[] actions;
-        public String  number;
+        public String number;
         public Result result;
         public Artifact[] artifacts;
         public String url;
@@ -50,12 +48,12 @@ public final class Jenkins {
         public Cause[] causes;
     }
 
-    public  static class Cause {
+    public static class Cause {
         public String upstreamProject;
         public String upstreamBuild;
     }
 
-    public  static class Project {
+    public static class Project {
         public String name;
     }
 }
