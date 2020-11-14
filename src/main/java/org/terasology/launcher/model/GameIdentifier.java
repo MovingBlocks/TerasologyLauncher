@@ -3,9 +3,9 @@
 
 package org.terasology.launcher.model;
 
-import com.vdurmont.semver4j.Semver;
-
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Uniquely identify a game release.
@@ -20,6 +20,9 @@ import java.util.Objects;
  * @see <a href="https://semver.org">https://semver.org</a>
  */
 public class GameIdentifier {
+
+    static final Pattern PATTERN = Pattern.compile("GameIdentifier\\{version='(?<version>.*)', build=(?<build>\\w+), profile=(?<profile>\\w+)\\}");
+
     final String version;
     final Build build;
     final Profile profile;
@@ -59,5 +62,27 @@ public class GameIdentifier {
     @Override
     public int hashCode() {
         return Objects.hash(version, build, profile);
+    }
+
+    @Override
+    public String toString() {
+        //TODO: move serialization somewhere else (probably to LauncherSettings?)
+        return "GameIdentifier{" +
+                "version='" + version + '\'' +
+                ", build=" + build +
+                ", profile=" + profile +
+                '}';
+    }
+
+    public static GameIdentifier fromString(String identifier) {
+        //TODO: move deserialization somewhere else (probably to LauncherSettings?)
+        Matcher matcher = PATTERN.matcher(identifier);
+        if (matcher.find()) {
+            final Build build = Build.valueOf(matcher.group("build"));
+            final Profile profile = Profile.valueOf(matcher.group("profile"));
+            final String version = matcher.group("version");
+            return new GameIdentifier(version, build, profile);
+        }
+        return null;
     }
 }

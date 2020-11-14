@@ -156,11 +156,23 @@ public class ApplicationController {
         profileComboBox.setCellFactory(list -> new GameProfileCell());
         profileComboBox.setButtonCell(new GameProfileCell());
         profileComboBox.setItems(FXCollections.observableList(Arrays.asList(Profile.values().clone())));
-
         ReadOnlyObjectProperty<Profile> selectedProfile = profileComboBox.getSelectionModel().selectedItemProperty();
-
         selectedProfile.addListener((obs, oldVal, newVal) -> {
-            selectItem(gameReleaseComboBox, release -> true);
+
+            ObservableList<GameRelease> availableReleases = gameReleaseComboBox.getItems();
+            GameIdentifier lastPlayedGame = launcherSettings.getLastPlayedGameVersion().orElse(null);
+
+            Optional<GameRelease> lastPlayed = availableReleases.stream()
+                    .filter(release -> release.getId().equals(lastPlayedGame))
+                    .findFirst();
+            Optional<GameRelease> lastInstalled = availableReleases.stream()
+                    .filter(release -> installedGames.contains(release.getId()))
+                    .findFirst();
+
+            gameReleaseComboBox.getSelectionModel().select(lastPlayed
+                    .or(() -> lastInstalled)
+                    .or(() -> availableReleases.stream().findFirst())
+                    .orElse(null));
         });
 
         final ObjectBinding<ObservableList<GameRelease>> releases = Bindings.createObjectBinding(() -> {
@@ -217,6 +229,9 @@ public class ApplicationController {
         this.stage = stage;
 
         Bindings.bindContent(installedGames, gameManager.getInstalledGames());
+        profileComboBox.getSelectionModel().select(
+                launcherSettings.getLastPlayedGameVersion().map(GameIdentifier::getProfile).orElse(Profile.OMEGA)
+        );
 
         // add Logback view appender view to both the root logger and the tab
         Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -236,9 +251,6 @@ public class ApplicationController {
         } else {
             warning.setValue(Optional.empty());
         }
-
-        initializeComboBoxSelection();
-
         footerController.setHostServices(hostServices);
     }
 
@@ -345,8 +357,7 @@ public class ApplicationController {
 
         logger.debug("Game has started successfully.");
 
-        //TODO: launcherSettings.setLastPlayedGameJob(selectedPackage.getId());
-        //TODO: launcherSettings.setLastPlayedGameVersion(selectedPackage.getVersion());
+        launcherSettings.setLastPlayedGameVersion(selectedRelease.getValue().getId());
 
         if (launcherSettings.isCloseLauncherAfterGameStart()) {
             if (downloadTask == null) {
@@ -383,8 +394,6 @@ public class ApplicationController {
         progressBar.progressProperty().bind(downloadTask.progressProperty());
 
         downloadTask.setOnSucceeded(workerStateEvent -> {
-            //TODO: launcherSettings.setLastInstalledGameJob(selectedPackage.getId());
-            //TODO: launcherSettings.setLastInstalledGameVersion(selectedPackage.getVersion());
             downloadTask = null;
         });
 
@@ -414,8 +423,7 @@ public class ApplicationController {
                     logger.info("Removing game '{}' from path '{}", id, gameDir);
                     // triggering a game deletion implies the player doesn't want to play this game anymore
                     // hence, we unset `lastPlayedGameJob` and `lastPlayedGameVersion` settings independent of deletion success
-                    //TODO: launcherSettings.setLastPlayedGameJob("");
-                    //TODO: launcherSettings.setLastPlayedGameVersion("");
+                    launcherSettings.setLastPlayedGameVersion(null);
                     final DeleteTask deleteTask = new DeleteTask(gameManager, id);
                     executor.submit(deleteTask);
                 });
@@ -434,42 +442,6 @@ public class ApplicationController {
                 .orElse(comboBox.getItems().get(0));
 
         comboBox.getSelectionModel().select(item);
-    }
-
-    /**
-     * Initialize selected game job and version based on last played and last installed games.
-     * <p>
-     * The selection is derived from the following precedence rules:
-     * <ol>
-     *     <li>Select the <b>last played game</b></li>
-     *     <li>Select the <b>last installed game</b></li>
-     *     <li>Select <b>latest version of default job</b> otherwise</li>
-     * </ol>
-     */
-    //TODO: Reduce boilerplate code after switching to Java 9+
-    //      Use 'Optional::or' to chain logic together
-    private void initializeComboBoxSelection() {
-//        String lastPlayedGameJob = launcherSettings.getLastPlayedGameJob();
-//        if (!lastPlayedGameJob.isEmpty()) {
-//            // select the package last played
-//            selectItemForJob(launcherSettings.getLastPlayedGameJob());
-//            selectItem(gameReleaseComboBox, item ->
-//                    item.getVersion().equals(launcherSettings.getLastPlayedGameVersion()));
-//        } else {
-//        String lastInstalledGameJob = launcherSettings.getLastInstalledGameJob();
-//        if (!lastInstalledGameJob.isEmpty()) {
-//            // select last installed package job and version
-//            selectItemForJob(lastInstalledGameJob);
-//            selectItem(gameReleaseComboBox, item ->
-//                    item.getVersion().equals(launcherSettings.getLastInstalledGameVersion()));
-//        } else {
-        // select last installed package for the default job or the latest one if none installed
-//        String defaultGameJob = launcherSettings.getDefaultGameJob();
-//        String lastInstalledVersion = packageManager.getLatestInstalledPackageForId(defaultGameJob)
-//                .map(Package::getVersion).orElse("");
-        selectItem(profileComboBox, profile -> true);
-        selectItem(gameReleaseComboBox, release -> true);
-//        }
     }
 
     /**

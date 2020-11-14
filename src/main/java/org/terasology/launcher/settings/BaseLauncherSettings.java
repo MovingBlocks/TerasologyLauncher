@@ -1,33 +1,21 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.settings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
+import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.Platform;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -81,7 +69,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
-    public Properties getProperties() {
+    Properties getProperties() {
         return properties;
     }
 
@@ -330,8 +318,9 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
-    public synchronized String getLastPlayedGameVersion() {
-        return properties.getProperty(PROPERTY_LAST_PLAYED_GAME_VERSION);
+    public synchronized Optional<GameIdentifier> getLastPlayedGameVersion() {
+        String property = properties.getProperty(PROPERTY_LAST_PLAYED_GAME_VERSION);
+        return Optional.ofNullable(GameIdentifier.fromString(property));
     }
 
     @Override
@@ -340,8 +329,9 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
-    public synchronized String getLastInstalledGameVersion() {
-        return properties.getProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION);
+    public synchronized Optional<GameIdentifier> getLastInstalledGameVersion() {
+        String property = properties.getProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION);
+        return Optional.ofNullable(GameIdentifier.fromString(property));
     }
 
     // --------------------------------------------------------------------- //
@@ -409,8 +399,12 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
-    public synchronized void setLastPlayedGameVersion(String lastPlayedGameVersion) {
-        properties.setProperty(PROPERTY_LAST_PLAYED_GAME_VERSION, lastPlayedGameVersion);
+    public synchronized void setLastPlayedGameVersion(GameIdentifier lastPlayedGameVersion) {
+        if (lastPlayedGameVersion == null) {
+            properties.setProperty(PROPERTY_LAST_PLAYED_GAME_VERSION, "");
+        } else {
+            properties.setProperty(PROPERTY_LAST_PLAYED_GAME_VERSION, lastPlayedGameVersion.toString());
+        }
     }
 
     @Override
@@ -419,8 +413,12 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
-    public synchronized void setLastInstalledGameVersion(String lastInstalledGameVersion) {
-        properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION, lastInstalledGameVersion);
+    public synchronized void setLastInstalledGameVersion(GameIdentifier lastInstalledGameVersion) {
+        if (lastInstalledGameVersion == null) {
+            properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION, "");
+        } else {
+            properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION, lastInstalledGameVersion.toString());
+        }
     }
 
     @Override
