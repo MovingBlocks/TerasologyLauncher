@@ -131,7 +131,11 @@ public class ApplicationController {
 
         installedGames = FXCollections.observableSet();
 
+        // defines which button is shown as game action (i.e., play, download, cancel download)
         gameAction = new SimpleObjectProperty<>(GameAction.DOWNLOAD);
+        // the game action is derived from the combination of the selected release (`selectedRelease`), the currently
+        // installed games (`installedGames`), and whether there is currently a download in progress (`downloading`).
+        // the game action is updated automatically (by this binding) whenever any of the dependencies above change.
         gameAction.bind(Bindings.createObjectBinding(() -> {
             final GameRelease release = selectedRelease.getValue();
             final boolean isInstalled = release != null && installedGames.contains(release.getId());
@@ -147,18 +151,32 @@ public class ApplicationController {
 
     @FXML
     public void initialize() {
+        // this happens after the FXML elements have been initialized, but before managers and other dependencies have
+        // been "injected" to this controller
         footerController.bind(warning);
         initComboBoxes();
         initButtons();
     }
 
+    /**
+     * Initialize the combo boxes for version selection by setting up bindings and properties.
+     *
+     * This happens after the FXML elements have been initialized, but before managers and other dependencies have been
+     * "injected" to this controller.
+     *
+     * The combo boxes are configured with custom {@link javafx.scene.control.ListCell} implementations to display
+     * human-readable representations of game profiles and game releases. We also bind which game releases are visible
+     * to the selected profile, and derive the currently selected release from the combo box's selection model.
+     */
     private void initComboBoxes() {
         profileComboBox.setCellFactory(list -> new GameProfileCell());
         profileComboBox.setButtonCell(new GameProfileCell());
         profileComboBox.setItems(FXCollections.observableList(Arrays.asList(Profile.values().clone())));
         ReadOnlyObjectProperty<Profile> selectedProfile = profileComboBox.getSelectionModel().selectedItemProperty();
-        selectedProfile.addListener((obs, oldVal, newVal) -> {
-
+        // control what game release is selected when switching profiles. this is a reaction to a change of the selected
+        // profile to perform a one-time action to select a game release. afterwards, the user is in control of what is
+        // selected
+        selectedProfile.addListener(observable -> {
             ObservableList<GameRelease> availableReleases = gameReleaseComboBox.getItems();
             GameIdentifier lastPlayedGame = launcherSettings.getLastPlayedGameVersion().orElse(null);
 
@@ -175,6 +193,8 @@ public class ApplicationController {
                     .orElse(null));
         });
 
+        // derive the releases to display from the selected profile (`selectedProfile`). the resulting list is ordered
+        // in the way the launcher is supposed to display the versions (currently by release timestamp).
         final ObjectBinding<ObservableList<GameRelease>> releases = Bindings.createObjectBinding(() -> {
             if (repositoryManager == null) {
                 return FXCollections.emptyObservableList();
@@ -192,10 +212,22 @@ public class ApplicationController {
         gameReleaseComboBox.cellFactoryProperty().bind(Bindings.createObjectBinding(() -> list -> new GameReleaseCell(installedGames), installedGames));
 
         selectedRelease.bind(gameReleaseComboBox.getSelectionModel().selectedItemProperty());
+        //TODO: instead of imperatively updating the changelog view its value should be bound via property, too
         selectedRelease.addListener(
                 (observable, oldValue, newValue) -> changelogViewController.update(newValue != null ? newValue.getChangelog() : Collections.emptyList()));
     }
 
+    /**
+     * Initialize buttons by setting up their bindings to observable values or properties.
+     *
+     * This happens after the FXML elements have been initialized, but before managers and other dependencies have been
+     * "injected" to this controller.
+     *
+     * The buttons "Play", "Download", and "Cancel Download" share the space in the UI. We make sure that only one of
+     * them is shown at the same time by deriving their visibility from the current {@link GameAction}. As JavaFX will
+     * still occupy space for non-visible nodes, we also bind the {@code managedProperty} to the visibility (nodes that
+     * are not managed "disappear" from the scene.
+     */
     private void initButtons() {
         cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
         cancelDownloadButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.CANCEL, gameAction));
@@ -228,12 +260,15 @@ public class ApplicationController {
 
         this.stage = stage;
 
+        // bind the application controller's view of the installed games to that of the game manager. that way, we also
+        // get notified if the installed games are changed from a different thread (DeleteTask or DownloadTask).
         Bindings.bindContent(installedGames, gameManager.getInstalledGames());
+
         profileComboBox.getSelectionModel().select(
                 launcherSettings.getLastPlayedGameVersion().map(GameIdentifier::getProfile).orElse(Profile.OMEGA)
         );
 
-        // add Logback view appender view to both the root logger and the tab
+        // add Logback appender to both the root logger and the tab
         Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         if (rootLogger instanceof ch.qos.logback.classic.Logger) {
             ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
@@ -421,8 +456,8 @@ public class ApplicationController {
                 .filter(response -> response == ButtonType.OK)
                 .ifPresent(response -> {
                     logger.info("Removing game '{}' from path '{}", id, gameDir);
-                    // triggering a game deletion implies the player doesn't want to play this game anymore
-                    // hence, we unset `lastPlayedGameJob` and `lastPlayedGameVersion` settings independent of deletion success
+                    // triggering a game deletion implies the player doesn't want to play this game anymore. hence, we
+                    // unset `lastPlayedGameVersion` setting independent of deletion success
                     launcherSettings.setLastPlayedGameVersion(null);
                     final DeleteTask deleteTask = new DeleteTask(gameManager, id);
                     executor.submit(deleteTask);
