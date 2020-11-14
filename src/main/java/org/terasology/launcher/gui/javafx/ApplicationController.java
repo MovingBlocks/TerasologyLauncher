@@ -176,7 +176,7 @@ public class ApplicationController {
         // control what game release is selected when switching profiles. this is a reaction to a change of the selected
         // profile to perform a one-time action to select a game release. afterwards, the user is in control of what is
         // selected
-        selectedProfile.addListener(observable -> {
+        selectedProfile.addListener((obs, oldVal, newVal) -> {
             ObservableList<GameRelease> availableReleases = gameReleaseComboBox.getItems();
             GameIdentifier lastPlayedGame = launcherSettings.getLastPlayedGameVersion().orElse(null);
 
