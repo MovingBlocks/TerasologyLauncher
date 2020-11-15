@@ -3,22 +3,25 @@
 
 package org.terasology.launcher.settings;
 
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
+import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.util.JavaHeapSize;
 
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Properties;
 
 public abstract class LauncherSettings {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherSettings.class);
 
-    public abstract Properties getProperties();
+    abstract Properties getProperties();
 
     public synchronized void init() {
         logger.trace("Init launcher settings ...");
@@ -26,6 +29,7 @@ public abstract class LauncherSettings {
         initLocale();
         initMaxHeapSize();
         initInitialHeapSize();
+        initBaseJavaParameters();
         initCloseLauncherAfterGameStart();
         initSaveDownloadedFiles();
         initGameDirectory();
@@ -53,6 +57,8 @@ public abstract class LauncherSettings {
     protected abstract void initGameDirectory();
 
     protected abstract void initGameDataDirectory();
+
+    protected abstract void initBaseJavaParameters();
 
     protected abstract void initUserJavaParameters();
 
@@ -86,8 +92,21 @@ public abstract class LauncherSettings {
 
     public abstract String getUserJavaParameters();
 
-    public synchronized List<String> getUserJavaParameterList() {
-        return Arrays.asList(getUserJavaParameters().split("\\s+"));
+    public abstract String getBaseJavaParameters();
+
+    public synchronized List<String> getJavaParameterList() {
+        List<String> javaParameters = Lists.newArrayList();
+        String baseParams = getBaseJavaParameters();
+        if (baseParams != null) {
+            javaParameters.addAll(Arrays.asList(baseParams.split("\\s+")));
+        }
+
+        String userParams = getUserJavaParameters();
+        if (userParams != null) {
+            javaParameters.addAll(Arrays.asList(userParams.split("\\s+")));
+        }
+
+        return javaParameters;
     }
 
     public abstract String getUserGameParameters();
@@ -110,11 +129,11 @@ public abstract class LauncherSettings {
 
     public abstract String getLastPlayedGameJob();
 
-    public abstract String getLastPlayedGameVersion();
+    public abstract Optional<GameIdentifier> getLastPlayedGameVersion();
 
     public abstract String getLastInstalledGameJob();
 
-    public abstract String getLastInstalledGameVersion();
+    public abstract Optional<GameIdentifier> getLastInstalledGameVersion();
 
     // --------------------------------------------------------------------- //
     // SETTERS
@@ -144,9 +163,9 @@ public abstract class LauncherSettings {
 
     public abstract void setLastPlayedGameJob(String lastPlayedGameJob);
 
-    public abstract void setLastPlayedGameVersion(String lastPlayedGameVersion);
+    public abstract void setLastPlayedGameVersion(GameIdentifier lastPlayedGameVersion);
 
     public abstract void setLastInstalledGameJob(String lastInstalledGameJob);
 
-    public abstract void setLastInstalledGameVersion(String lastInstalledGameVersion);
+    public abstract void setLastInstalledGameVersion(GameIdentifier lastInstalledGameVersion);
 }

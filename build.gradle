@@ -118,7 +118,7 @@ dependencies {
     }
     testImplementation "org.mockito:mockito-junit-jupiter:3.3.+"
 
-    testImplementation('org.spf4j:spf4j-slf4j-test:8.8.+') {
+    testImplementation('org.spf4j:spf4j-slf4j-test:8.8.5') {
         because "testable logging"
     }
     testImplementation("org.slf4j:slf4j-api:1.7.+!!") {
@@ -155,6 +155,9 @@ configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation)Classpath/
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
 sourceCompatibility = 1.11
 targetCompatibility = 1.11
+
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
 
 javafx {
     version = "12.0.1"
