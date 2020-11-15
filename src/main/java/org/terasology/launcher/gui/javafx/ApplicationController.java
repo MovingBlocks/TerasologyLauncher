@@ -36,7 +36,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.game.GameService;
 import org.terasology.launcher.model.Build;
@@ -161,10 +160,10 @@ public class ApplicationController {
 
     /**
      * Initialize the combo boxes for version selection by setting up bindings and properties.
-     *
+     * <p>
      * This happens after the FXML elements have been initialized, but before managers and other dependencies have been
      * "injected" to this controller.
-     *
+     * <p>
      * The combo boxes are configured with custom {@link javafx.scene.control.ListCell} implementations to display
      * human-readable representations of game profiles and game releases. We also bind which game releases are visible
      * to the selected profile, and derive the currently selected release from the combo box's selection model.
@@ -220,10 +219,10 @@ public class ApplicationController {
 
     /**
      * Initialize buttons by setting up their bindings to observable values or properties.
-     *
+     * <p>
      * This happens after the FXML elements have been initialized, but before managers and other dependencies have been
      * "injected" to this controller.
-     *
+     * <p>
      * The buttons "Play", "Download", and "Cancel Download" share the space in the UI. We make sure that only one of
      * them is shown at the same time by deriving their visibility from the current {@link GameAction}. As JavaFX will
      * still occupy space for non-visible nodes, we also bind the {@code managedProperty} to the visibility (nodes that

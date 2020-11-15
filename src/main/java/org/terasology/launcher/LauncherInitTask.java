@@ -11,7 +11,6 @@ import javafx.stage.Stage;
 import org.kohsuke.github.GHRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.gui.javafx.Dialogs;
 import org.terasology.launcher.model.GameIdentifier;
