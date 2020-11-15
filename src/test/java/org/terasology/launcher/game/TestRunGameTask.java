@@ -4,6 +4,7 @@
 package org.terasology.launcher.game;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import javafx.application.Platform;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Pair;
 import org.junit.jupiter.api.AfterEach;
@@ -223,7 +224,8 @@ public class TestRunGameTask {
                 Happenings.TASK_COMPLETED.val()
         );
 
-        final Runnable handleLineSent = () -> actualHistory.add(Happenings.PROCESS_OUTPUT_LINE.val());
+        final Runnable handleLineSent = () -> Platform.runLater(
+                () -> actualHistory.add(Happenings.PROCESS_OUTPUT_LINE.val()));
 
         // This makes our "process," which streams out its lines and runs the callback after each.
         final Process lineAtATimeProcess = new MockProcesses.OneLineAtATimeProcess(
@@ -245,11 +247,10 @@ public class TestRunGameTask {
         // Act!
         executor.submit(gameTask);
 
-        WaitForAsyncUtils.waitForFxEvents();
-
         var actualReturnValue = gameTask.get();  // task.get blocks until it has run to completion
 
         // Assert!
+        WaitForAsyncUtils.waitForFxEvents();
         assertTrue(actualReturnValue);
 
         assertIterableEquals(expectedHistory, actualHistory, renderColumns(actualHistory, expectedHistory));
@@ -271,7 +272,8 @@ public class TestRunGameTask {
                 Happenings.TASK_FAILED.val()
         );
 
-        final Runnable handleLineSent = () -> actualHistory.add(Happenings.PROCESS_OUTPUT_LINE.val());
+        final Runnable handleLineSent = () -> Platform.runLater(
+                () -> actualHistory.add(Happenings.PROCESS_OUTPUT_LINE.val()));
 
         // This makes our "process," which streams out its lines and runs the callback after each.
         final Process lineAtATimeProcess = new MockProcesses.OneLineAtATimeProcess(
@@ -297,9 +299,9 @@ public class TestRunGameTask {
         // Act!
         executor.submit(gameTask);
 
-        WaitForAsyncUtils.waitForFxEvents();
-
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
+
+        WaitForAsyncUtils.waitForFxEvents();
         assertThat(thrown.getCause(), instanceOf(RunGameTask.GameExitTooSoon.class));
 
         assertIterableEquals(expectedHistory, actualHistory, renderColumns(actualHistory, expectedHistory));

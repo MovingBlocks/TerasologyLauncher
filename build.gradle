@@ -118,7 +118,7 @@ dependencies {
     }
     testImplementation "org.mockito:mockito-junit-jupiter:3.3.+"
 
-    testImplementation('org.spf4j:spf4j-slf4j-test:8.8.+') {
+    testImplementation('org.spf4j:spf4j-slf4j-test:8.8.5') {
         because "testable logging"
     }
     testImplementation("org.slf4j:slf4j-api:1.7.+!!") {
