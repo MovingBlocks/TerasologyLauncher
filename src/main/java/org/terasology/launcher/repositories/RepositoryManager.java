@@ -23,7 +23,9 @@ public class RepositoryManager {
         ReleaseRepository omegaNightly = new JenkinsRepositoryAdapter(JENKINS_BASE_URL, "DistroOmega", Build.NIGHTLY, Profile.OMEGA);
         ReleaseRepository omegaStable = new JenkinsRepositoryAdapter(JENKINS_BASE_URL, "DistroOmegaRelease", Build.STABLE, Profile.OMEGA);
 
-        Set<ReleaseRepository> all = Sets.newHashSet(terasologyNightly, terasologyStable, omegaNightly, omegaStable);
+        ReleaseRepository github = new GithubRepositoryAdapter();
+
+        Set<ReleaseRepository> all = Sets.newHashSet(terasologyNightly, terasologyStable, omegaNightly, omegaStable, github);
 
         releases = fetchReleases(all);
     }
