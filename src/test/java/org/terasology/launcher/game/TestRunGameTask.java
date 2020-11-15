@@ -114,8 +114,6 @@ public class TestRunGameTask {
 
         executor.submit(gameTask);
 
-        WaitForAsyncUtils.waitForFxEvents();
-
         gameTask.get();
 
         hasExitMessage.assertObservation(100, TimeUnit.MILLISECONDS);
@@ -136,8 +134,6 @@ public class TestRunGameTask {
 
         executor.submit(gameTask);
 
-        WaitForAsyncUtils.waitForFxEvents();
-
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
         assertThat(exc, instanceOf(RunGameTask.GameExitError.class));
@@ -152,8 +148,6 @@ public class TestRunGameTask {
 
         executor.submit(gameTask);
 
-        WaitForAsyncUtils.waitForFxEvents();
-
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
         assertThat(exc, instanceOf(RunGameTask.GameStartError.class));
@@ -166,8 +160,6 @@ public class TestRunGameTask {
         var gameTask = new RunGameTask(UnixProcesses.NO_SUCH_COMMAND);
 
         executor.submit(gameTask);
-
-        WaitForAsyncUtils.waitForFxEvents();
 
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
@@ -186,8 +178,6 @@ public class TestRunGameTask {
         var gameTask = new RunGameTask(new UnixProcesses.SelfDestructingProcess(5));
 
         executor.submit(gameTask);
-
-        WaitForAsyncUtils.waitForFxEvents();
 
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
