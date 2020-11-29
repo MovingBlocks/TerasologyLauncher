@@ -35,14 +35,7 @@ public final class TerasologyLauncherVersionInfo {
     private final String version;
     private final String stringRepresentation;
 
-    private TerasologyLauncherVersionInfo(Properties versionInfoProperties) {
-        final Properties properties;
-        if (versionInfoProperties != null) {
-            properties = versionInfoProperties;
-        } else {
-            properties = loadPropertiesFromInputStream(this.getClass().getResourceAsStream(VERSION_INFO_FILE));
-        }
-
+    private TerasologyLauncherVersionInfo(Properties properties) {
         isEmpty = properties.isEmpty();
         buildNumber = properties.getProperty(BUILD_NUMBER, DEFAULT_VALUE);
         buildId = properties.getProperty(BUILD_ID, DEFAULT_VALUE);
@@ -82,32 +75,15 @@ public final class TerasologyLauncherVersionInfo {
 
     public static synchronized TerasologyLauncherVersionInfo getInstance() {
         if (instance == null) {
-            instance = new TerasologyLauncherVersionInfo(null);
+            final Properties properties = new Properties();
+            try (InputStream input = TerasologyLauncherVersionInfo.class.getResourceAsStream(VERSION_INFO_FILE)) {
+                properties.load(input);
+            } catch (IOException e) {
+                logger.error("Loading launcher version info from '{}' failed.", VERSION_INFO_FILE, e);
+            }
+            instance = new TerasologyLauncherVersionInfo(properties);
         }
         return instance;
-    }
-
-    public static TerasologyLauncherVersionInfo loadFromInputStream(InputStream inStream) {
-        return new TerasologyLauncherVersionInfo(loadPropertiesFromInputStream(inStream));
-    }
-
-    private static Properties loadPropertiesFromInputStream(InputStream inStream) {
-        final Properties properties = new Properties();
-        if (inStream != null) {
-            try {
-                properties.load(inStream);
-            } catch (IOException e) {
-                logger.error("Loading launcher version info failed!", e);
-            } finally {
-                try {
-                    inStream.close();
-                } catch (IOException e) {
-                    logger.warn("Closing InputStream failed!", e);
-                }
-            }
-        }
-
-        return properties;
     }
 
     public boolean isEmpty() {
