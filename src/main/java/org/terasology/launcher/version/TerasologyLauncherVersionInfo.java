@@ -21,7 +21,6 @@ public final class TerasologyLauncherVersionInfo {
     private static final String BUILD_TAG = "buildTag";
     private static final String BUILD_URL = "buildUrl";
     private static final String JOB_NAME = "jobName";
-    private static final String GIT_COMMIT = "gitCommit";
     private static final String DATE_TIME = "dateTime";
     private static final String VERSION = "version";
 
@@ -36,7 +35,6 @@ public final class TerasologyLauncherVersionInfo {
     private final String buildTag;
     private final String buildUrl;
     private final String jobName;
-    private final String gitCommit;
     private final String dateTime;
     private final String version;
     private final String stringRepresentation;
@@ -55,7 +53,6 @@ public final class TerasologyLauncherVersionInfo {
         buildTag = properties.getProperty(BUILD_TAG, DEFAULT_VALUE);
         buildUrl = properties.getProperty(BUILD_URL, DEFAULT_VALUE);
         jobName = properties.getProperty(JOB_NAME, DEFAULT_VALUE);
-        gitCommit = properties.getProperty(GIT_COMMIT, DEFAULT_VALUE);
         dateTime = properties.getProperty(DATE_TIME, DEFAULT_VALUE);
         version = properties.getProperty(VERSION, DEFAULT_VALUE);
 
@@ -80,10 +77,6 @@ public final class TerasologyLauncherVersionInfo {
         stringRepresentationBuilder.append(JOB_NAME);
         stringRepresentationBuilder.append("=");
         stringRepresentationBuilder.append(jobName);
-        stringRepresentationBuilder.append(", ");
-        stringRepresentationBuilder.append(GIT_COMMIT);
-        stringRepresentationBuilder.append("=");
-        stringRepresentationBuilder.append(gitCommit);
         stringRepresentationBuilder.append(", ");
         stringRepresentationBuilder.append(DATE_TIME);
         stringRepresentationBuilder.append("=");
@@ -153,10 +146,6 @@ public final class TerasologyLauncherVersionInfo {
 
     public String getJobName() {
         return jobName;
-    }
-
-    public String getGitCommit() {
-        return gitCommit;
     }
 
     public String getDateTime() {
