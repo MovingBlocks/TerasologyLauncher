@@ -204,7 +204,7 @@ task createVersionInfoFile {
 
     inputs.property('version', version.toString())
 
-    File versionInfoFileDir = new File('src/main/resources', 'org/terasology/launcher/version')
+    File versionInfoFileDir = new File('src/main/resources', 'org/terasology/launcher/model')
     File versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
 
     outputs.file(versionInfoFile)
@@ -214,11 +214,7 @@ task createVersionInfoFile {
         ant.propertyfile(file: versionInfoFile) {
             ant.entry(key: 'buildNumber', value: env.BUILD_NUMBER)
             ant.entry(key: 'buildId', value: env.BUILD_ID)
-            ant.entry(key: 'buildTag', value: env.BUILD_TAG)
-            ant.entry(key: 'buildUrl', value: env.BUILD_URL)
             ant.entry(key: 'jobName', value: env.JOB_NAME)
-            ant.entry(key: 'gitBranch', value: convertGitBranch(env.GIT_BRANCH))
-            ant.entry(key: 'gitCommit', value: env.GIT_COMMIT)
             ant.entry(key: 'dateTime', value: startDateTimeString)
             ant.entry(key: 'version', value: version)
         }
