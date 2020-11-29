@@ -3,51 +3,48 @@
 
 package org.terasology.launcher.model;
 
+import com.google.common.io.Resources;
 import com.vdurmont.semver4j.Semver;
+import com.vdurmont.semver4j.SemverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 public final class LauncherVersion {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherVersion.class);
-
-    private static final String VERSION_INFO_FILE = "/org/terasology/launcher/versionInfo.properties";
-
-    private static final String VERSION = "version";
-
-    private static final String DEFAULT_VALUE = "";
-
+    private static final String VERSION_INFO_FILE = "/org/terasology/launcher/version.txt";
     private static LauncherVersion instance;
 
-    private final String version;
     private final Semver semver;
 
-    private LauncherVersion(Properties properties) {
-        version = properties.getProperty(VERSION, DEFAULT_VALUE);
-
-        semver = new Semver(version);
+    private LauncherVersion(Semver semver) {
+        this.semver = semver;
     }
 
     //TODO: Should this be instantiated once at startup and then passed to respective classes? Prepare for dependency injection
     public static synchronized LauncherVersion getInstance() {
         if (instance == null) {
-            final Properties properties = new Properties();
-            try (InputStream input = LauncherVersion.class.getResourceAsStream(VERSION_INFO_FILE)) {
-                properties.load(input);
+            String version = "";
+            Semver semver = null;
+            try {
+                version = Resources.toString(Resources.getResource(LauncherVersion.class, VERSION_INFO_FILE), StandardCharsets.UTF_8);
+                semver = new Semver(version);
+            } catch (SemverException e) {
+                logger.error("Failed to load launcher version info from '{}': Invalid semver '{}'.", VERSION_INFO_FILE, version, e);
             } catch (IOException e) {
                 logger.error("Loading launcher version info from '{}' failed.", VERSION_INFO_FILE, e);
             }
-            instance = new LauncherVersion(properties);
+            instance = new LauncherVersion(semver);
         }
         return instance;
     }
 
     public String getDisplayName() {
-        return version;
+        return Optional.ofNullable(semver).map(Semver::getValue).orElse("n/a");
     }
 
     public Semver getSemver() {
@@ -56,6 +53,6 @@ public final class LauncherVersion {
 
     @Override
     public String toString() {
-        return version;
+        return getDisplayName();
     }
 }

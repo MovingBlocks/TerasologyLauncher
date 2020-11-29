@@ -78,7 +78,7 @@ repositories {
         // for spf4j dependencies that haven't been merged upstream
         // i.e. org.apache.avro:avro
         name "spf4j dependencies"
-        url  "https://dl.bintray.com/zolyfarkas/core"
+        url "https://dl.bintray.com/zolyfarkas/core"
     }
     maven {
         name "JitPack"  // used by org.everit.json.schema
@@ -204,15 +204,13 @@ task createVersionInfoFile {
     inputs.property('version', version.toString())
 
     File versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasology/launcher/')
-    File versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
+    File versionFile = new File(versionInfoFileDir, 'version.txt')
 
-    outputs.file(versionInfoFile)
+    outputs.file(versionFile)
 
     doLast {
         versionInfoFileDir.mkdirs()
-        ant.propertyfile(file: versionInfoFile) {
-            ant.entry(key: 'version', value: version)
-        }
+        versionFile.text = version
     }
 }
 
