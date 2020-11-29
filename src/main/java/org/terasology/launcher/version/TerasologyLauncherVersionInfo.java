@@ -18,7 +18,6 @@ public final class TerasologyLauncherVersionInfo {
 
     private static final String BUILD_NUMBER = "buildNumber";
     private static final String BUILD_ID = "buildId";
-    private static final String BUILD_URL = "buildUrl";
     private static final String JOB_NAME = "jobName";
     private static final String DATE_TIME = "dateTime";
     private static final String VERSION = "version";
@@ -31,7 +30,6 @@ public final class TerasologyLauncherVersionInfo {
     private final boolean isEmpty;
     private final String buildNumber;
     private final String buildId;
-    private final String buildUrl;
     private final String jobName;
     private final String dateTime;
     private final String version;
@@ -48,7 +46,6 @@ public final class TerasologyLauncherVersionInfo {
         isEmpty = properties.isEmpty();
         buildNumber = properties.getProperty(BUILD_NUMBER, DEFAULT_VALUE);
         buildId = properties.getProperty(BUILD_ID, DEFAULT_VALUE);
-        buildUrl = properties.getProperty(BUILD_URL, DEFAULT_VALUE);
         jobName = properties.getProperty(JOB_NAME, DEFAULT_VALUE);
         dateTime = properties.getProperty(DATE_TIME, DEFAULT_VALUE);
         version = properties.getProperty(VERSION, DEFAULT_VALUE);
@@ -62,10 +59,6 @@ public final class TerasologyLauncherVersionInfo {
         stringRepresentationBuilder.append(BUILD_ID);
         stringRepresentationBuilder.append("=");
         stringRepresentationBuilder.append(buildId);
-        stringRepresentationBuilder.append(", ");
-        stringRepresentationBuilder.append(BUILD_URL);
-        stringRepresentationBuilder.append("=");
-        stringRepresentationBuilder.append(buildUrl);
         stringRepresentationBuilder.append(", ");
         stringRepresentationBuilder.append(JOB_NAME);
         stringRepresentationBuilder.append("=");
@@ -127,10 +120,6 @@ public final class TerasologyLauncherVersionInfo {
 
     public String getBuildId() {
         return buildId;
-    }
-
-    public String getBuildUrl() {
-        return buildUrl;
     }
 
     public String getJobName() {
