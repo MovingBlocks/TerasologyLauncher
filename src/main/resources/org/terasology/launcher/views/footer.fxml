@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
-<StackPane fx:controller="org.terasology.launcher.gui.javafx.FooterController"
+<StackPane fx:controller="org.terasology.launcher.ui.FooterController"
            xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2"
            prefHeight="64.0" prefWidth="200.0">
   <children>

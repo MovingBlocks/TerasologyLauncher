@@ -1,7 +1,7 @@
 // Copyright 2020 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-package org.terasology.launcher.gui.javafx;
+package org.terasology.launcher.ui;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
