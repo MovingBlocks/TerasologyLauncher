@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.model;
 
+import com.vdurmont.semver4j.Semver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,11 +15,8 @@ public final class LauncherVersion {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherVersion.class);
 
-    private static final String VERSION_INFO_FILE = "versionInfo.properties";
+    private static final String VERSION_INFO_FILE = "/org/terasology/launcher/versionInfo.properties";
 
-    private static final String BUILD_NUMBER = "buildNumber";
-    private static final String BUILD_ID = "buildId";
-    private static final String JOB_NAME = "jobName";
     private static final String DATE_TIME = "dateTime";
     private static final String VERSION = "version";
 
@@ -28,35 +26,20 @@ public final class LauncherVersion {
 
     // Indicates whether this version info is 'empty' (usually indicates that the launcher is being run in a development environment)
     private final boolean isEmpty;
-    private final String buildNumber;
-    private final String buildId;
-    private final String jobName;
     private final String dateTime;
     private final String version;
     private final String stringRepresentation;
+    private final Semver semver;
 
     private LauncherVersion(Properties properties) {
         isEmpty = properties.isEmpty();
-        buildNumber = properties.getProperty(BUILD_NUMBER, DEFAULT_VALUE);
-        buildId = properties.getProperty(BUILD_ID, DEFAULT_VALUE);
-        jobName = properties.getProperty(JOB_NAME, DEFAULT_VALUE);
         dateTime = properties.getProperty(DATE_TIME, DEFAULT_VALUE);
         version = properties.getProperty(VERSION, DEFAULT_VALUE);
 
+        semver = new Semver(version);
+
         final StringBuilder stringRepresentationBuilder = new StringBuilder();
         stringRepresentationBuilder.append("[");
-        stringRepresentationBuilder.append(BUILD_NUMBER);
-        stringRepresentationBuilder.append("=");
-        stringRepresentationBuilder.append(buildNumber);
-        stringRepresentationBuilder.append(", ");
-        stringRepresentationBuilder.append(BUILD_ID);
-        stringRepresentationBuilder.append("=");
-        stringRepresentationBuilder.append(buildId);
-        stringRepresentationBuilder.append(", ");
-        stringRepresentationBuilder.append(JOB_NAME);
-        stringRepresentationBuilder.append("=");
-        stringRepresentationBuilder.append(jobName);
-        stringRepresentationBuilder.append(", ");
         stringRepresentationBuilder.append(DATE_TIME);
         stringRepresentationBuilder.append("=");
         stringRepresentationBuilder.append(dateTime);
@@ -73,6 +56,7 @@ public final class LauncherVersion {
         stringRepresentation = stringRepresentationBuilder.toString();
     }
 
+    //TODO: Should this be instantiated once at startup and then passed to respective classes? Prepare for dependency injection
     public static synchronized LauncherVersion getInstance() {
         if (instance == null) {
             final Properties properties = new Properties();
@@ -86,28 +70,27 @@ public final class LauncherVersion {
         return instance;
     }
 
+    //TODO: is this used or needed?
     public boolean isEmpty() {
         return isEmpty;
     }
 
-    public String getBuildNumber() {
-        return buildNumber;
-    }
-
-    public String getBuildId() {
-        return buildId;
-    }
-
-    public String getJobName() {
-        return jobName;
-    }
-
+    //TODO: is this used or needed?
     public String getDateTime() {
         return dateTime;
     }
 
+    //TODO: is this used or needed?
     public String getVersion() {
         return version;
+    }
+
+    public String getDisplayName() {
+        return version;
+    }
+
+    public Semver getSemver() {
+        return semver;
     }
 
     @Override

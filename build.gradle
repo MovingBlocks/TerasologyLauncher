@@ -201,10 +201,9 @@ def convertGitBranch = { gitBranch ->
 }
 
 task createVersionInfoFile {
-
     inputs.property('version', version.toString())
 
-    File versionInfoFileDir = new File('src/main/resources', 'org/terasology/launcher/model')
+    File versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasology/launcher/')
     File versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
 
     outputs.file(versionInfoFile)
@@ -212,9 +211,6 @@ task createVersionInfoFile {
     doLast {
         versionInfoFileDir.mkdirs()
         ant.propertyfile(file: versionInfoFile) {
-            ant.entry(key: 'buildNumber', value: env.BUILD_NUMBER)
-            ant.entry(key: 'buildId', value: env.BUILD_ID)
-            ant.entry(key: 'jobName', value: env.JOB_NAME)
             ant.entry(key: 'dateTime', value: startDateTimeString)
             ant.entry(key: 'version', value: version)
         }

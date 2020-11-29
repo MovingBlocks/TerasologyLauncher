@@ -15,9 +15,9 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.model.LauncherVersion;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.HostServices;
-import org.terasology.launcher.model.LauncherVersion;
 
 import java.util.Optional;
 
@@ -37,7 +37,7 @@ public class FooterController {
     }
 
     private void updateLabels() {
-        final String launcherVersion = LauncherVersion.getInstance().getVersion();
+        final String launcherVersion = LauncherVersion.getInstance().getDisplayName();
         if (launcherVersion.isEmpty()) {
             versionInfo.setText(BundleUtils.getLabel("launcher_versionInfo"));
         } else {
