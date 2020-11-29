@@ -1,3 +1,6 @@
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
+
 package org.terasology.launcher.settings;
 
 import org.slf4j.Logger;
@@ -12,7 +15,7 @@ import java.util.Properties;
 
 //TODO: should this be called `SettingsController` and also carry out some UI handling, e.g., displaying error messages
 //      to the user?
-public class Settings {
+public final class Settings {
     public static final String DEFAULT_FILE_NAME = "TerasologyLauncherSettings.properties";
 
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);

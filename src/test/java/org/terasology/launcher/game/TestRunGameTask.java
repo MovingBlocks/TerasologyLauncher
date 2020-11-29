@@ -4,6 +4,7 @@
 package org.terasology.launcher.game;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import javafx.application.Platform;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Pair;
 import org.junit.jupiter.api.AfterEach;
@@ -114,8 +115,6 @@ public class TestRunGameTask {
 
         executor.submit(gameTask);
 
-        WaitForAsyncUtils.waitForFxEvents();
-
         gameTask.get();
 
         hasExitMessage.assertObservation(100, TimeUnit.MILLISECONDS);
@@ -136,8 +135,6 @@ public class TestRunGameTask {
 
         executor.submit(gameTask);
 
-        WaitForAsyncUtils.waitForFxEvents();
-
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
         assertThat(exc, instanceOf(RunGameTask.GameExitError.class));
@@ -152,8 +149,6 @@ public class TestRunGameTask {
 
         executor.submit(gameTask);
 
-        WaitForAsyncUtils.waitForFxEvents();
-
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
         assertThat(exc, instanceOf(RunGameTask.GameStartError.class));
@@ -166,8 +161,6 @@ public class TestRunGameTask {
         var gameTask = new RunGameTask(UnixProcesses.NO_SUCH_COMMAND);
 
         executor.submit(gameTask);
-
-        WaitForAsyncUtils.waitForFxEvents();
 
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
@@ -186,8 +179,6 @@ public class TestRunGameTask {
         var gameTask = new RunGameTask(new UnixProcesses.SelfDestructingProcess(5));
 
         executor.submit(gameTask);
-
-        WaitForAsyncUtils.waitForFxEvents();
 
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
@@ -223,7 +214,8 @@ public class TestRunGameTask {
                 Happenings.TASK_COMPLETED.val()
         );
 
-        final Runnable handleLineSent = () -> actualHistory.add(Happenings.PROCESS_OUTPUT_LINE.val());
+        final Runnable handleLineSent = () -> Platform.runLater(
+                () -> actualHistory.add(Happenings.PROCESS_OUTPUT_LINE.val()));
 
         // This makes our "process," which streams out its lines and runs the callback after each.
         final Process lineAtATimeProcess = new MockProcesses.OneLineAtATimeProcess(
@@ -245,11 +237,10 @@ public class TestRunGameTask {
         // Act!
         executor.submit(gameTask);
 
-        WaitForAsyncUtils.waitForFxEvents();
-
         var actualReturnValue = gameTask.get();  // task.get blocks until it has run to completion
 
         // Assert!
+        WaitForAsyncUtils.waitForFxEvents();
         assertTrue(actualReturnValue);
 
         assertIterableEquals(expectedHistory, actualHistory, renderColumns(actualHistory, expectedHistory));
@@ -271,7 +262,8 @@ public class TestRunGameTask {
                 Happenings.TASK_FAILED.val()
         );
 
-        final Runnable handleLineSent = () -> actualHistory.add(Happenings.PROCESS_OUTPUT_LINE.val());
+        final Runnable handleLineSent = () -> Platform.runLater(
+                () -> actualHistory.add(Happenings.PROCESS_OUTPUT_LINE.val()));
 
         // This makes our "process," which streams out its lines and runs the callback after each.
         final Process lineAtATimeProcess = new MockProcesses.OneLineAtATimeProcess(
@@ -297,9 +289,9 @@ public class TestRunGameTask {
         // Act!
         executor.submit(gameTask);
 
-        WaitForAsyncUtils.waitForFxEvents();
-
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
+
+        WaitForAsyncUtils.waitForFxEvents();
         assertThat(thrown.getCause(), instanceOf(RunGameTask.GameExitTooSoon.class));
 
         assertIterableEquals(expectedHistory, actualHistory, renderColumns(actualHistory, expectedHistory));
