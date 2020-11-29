@@ -44,11 +44,10 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
         final String version = ghRelease.getTagName();
 
         try {
-            final Optional<GHAsset> gameAsset = ghRelease.getAssets().stream().filter(asset -> asset.getName().matches("Terasology.*zip")).findFirst();
+            final Optional<GHAsset> gameAsset = ghRelease.assets().stream().filter(asset -> asset.getName().matches("Terasology.*zip")).findFirst();
             final URL url = new URL(gameAsset.map(GHAsset::getBrowserDownloadUrl).orElse(null));
 
             final List<String> changelog = Arrays.asList(ghRelease.getBody().split("\n"));
-
             return new GameRelease(new GameIdentifier(version, build, profile), url, changelog, ghRelease.getPublished_at());
         } catch (IOException e) {
             logger.warn("Could not create game release from Github release {}", ghRelease.getHtmlUrl(), e);
