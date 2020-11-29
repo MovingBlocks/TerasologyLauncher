@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public final class TerasologyLauncherVersionInfo {
+public final class LauncherVersion {
 
-    private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncherVersionInfo.class);
+    private static final Logger logger = LoggerFactory.getLogger(LauncherVersion.class);
 
     private static final String VERSION_INFO_FILE = "versionInfo.properties";
 
@@ -24,7 +24,7 @@ public final class TerasologyLauncherVersionInfo {
 
     private static final String DEFAULT_VALUE = "";
 
-    private static TerasologyLauncherVersionInfo instance;
+    private static LauncherVersion instance;
 
     // Indicates whether this version info is 'empty' (usually indicates that the launcher is being run in a development environment)
     private final boolean isEmpty;
@@ -35,7 +35,7 @@ public final class TerasologyLauncherVersionInfo {
     private final String version;
     private final String stringRepresentation;
 
-    private TerasologyLauncherVersionInfo(Properties properties) {
+    private LauncherVersion(Properties properties) {
         isEmpty = properties.isEmpty();
         buildNumber = properties.getProperty(BUILD_NUMBER, DEFAULT_VALUE);
         buildId = properties.getProperty(BUILD_ID, DEFAULT_VALUE);
@@ -73,15 +73,15 @@ public final class TerasologyLauncherVersionInfo {
         stringRepresentation = stringRepresentationBuilder.toString();
     }
 
-    public static synchronized TerasologyLauncherVersionInfo getInstance() {
+    public static synchronized LauncherVersion getInstance() {
         if (instance == null) {
             final Properties properties = new Properties();
-            try (InputStream input = TerasologyLauncherVersionInfo.class.getResourceAsStream(VERSION_INFO_FILE)) {
+            try (InputStream input = LauncherVersion.class.getResourceAsStream(VERSION_INFO_FILE)) {
                 properties.load(input);
             } catch (IOException e) {
                 logger.error("Loading launcher version info from '{}' failed.", VERSION_INFO_FILE, e);
             }
-            instance = new TerasologyLauncherVersionInfo(properties);
+            instance = new LauncherVersion(properties);
         }
         return instance;
     }

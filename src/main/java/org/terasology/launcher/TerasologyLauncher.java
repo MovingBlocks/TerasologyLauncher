@@ -31,7 +31,7 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LauncherStartFailedException;
-import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
+import org.terasology.launcher.version.LauncherVersion;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -199,7 +199,7 @@ public final class TerasologyLauncher extends Application {
             logger.debug("Max. Memory: {} bytes", Runtime.getRuntime().maxMemory());
 
             // TerasologyLauncherVersionInfo
-            logger.debug("Launcher version: {}", TerasologyLauncherVersionInfo.getInstance());
+            logger.debug("Launcher version: {}", LauncherVersion.getInstance());
         }
     }
 

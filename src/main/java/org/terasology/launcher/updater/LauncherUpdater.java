@@ -17,7 +17,7 @@ import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
+import org.terasology.launcher.version.LauncherVersion;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -29,7 +29,7 @@ public final class LauncherUpdater {
 
     private final Semver currentVersion;
 
-    public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
+    public LauncherUpdater(LauncherVersion currentVersionInfo) {
         //TODO: might not be valid semver, catch or use Try<..>
         currentVersion = new Semver(currentVersionInfo.getVersion());
     }
