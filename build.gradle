@@ -211,7 +211,6 @@ task createVersionInfoFile {
     doLast {
         versionInfoFileDir.mkdirs()
         ant.propertyfile(file: versionInfoFile) {
-            ant.entry(key: 'dateTime', value: startDateTimeString)
             ant.entry(key: 'version', value: version)
         }
     }
