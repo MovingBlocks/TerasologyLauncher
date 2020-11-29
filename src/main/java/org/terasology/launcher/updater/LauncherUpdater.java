@@ -17,7 +17,7 @@ import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.version.LauncherVersion;
+import org.terasology.launcher.model.LauncherVersion;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;

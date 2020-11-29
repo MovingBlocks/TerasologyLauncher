@@ -28,7 +28,7 @@ import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.util.Platform;
-import org.terasology.launcher.version.LauncherVersion;
+import org.terasology.launcher.model.LauncherVersion;
 
 import java.io.IOException;
 import java.net.URI;

@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.HostServices;
-import org.terasology.launcher.version.LauncherVersion;
+import org.terasology.launcher.model.LauncherVersion;
 
 import java.util.Optional;
 

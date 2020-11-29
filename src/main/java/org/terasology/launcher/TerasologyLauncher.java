@@ -31,7 +31,7 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LauncherStartFailedException;
-import org.terasology.launcher.version.LauncherVersion;
+import org.terasology.launcher.model.LauncherVersion;
 
 import java.io.IOException;
 import java.util.Arrays;
