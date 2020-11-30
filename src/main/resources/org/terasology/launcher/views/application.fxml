@@ -35,7 +35,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import java.lang.String?>
 <?import java.net.URL?>
-<AnchorPane id="AnchorPane" fx:id="launcherFrame" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="562.140625" prefWidth="968.1666259765625" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="org.terasology.launcher.gui.javafx.ApplicationController">
+<AnchorPane id="AnchorPane" fx:id="launcherFrame" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="562.140625" prefWidth="968.1666259765625" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="org.terasology.launcher.ui.ApplicationController">
   <children>
     <StackPane prefHeight="529.0" prefWidth="756.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <children>

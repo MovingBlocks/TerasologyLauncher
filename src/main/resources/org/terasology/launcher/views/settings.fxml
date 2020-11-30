@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<StackPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.terasology.launcher.gui.javafx.SettingsController">
+<StackPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.terasology.launcher.ui.SettingsController">
    <children>
       <VBox prefHeight="600.0" prefWidth="600.0">
          <children>

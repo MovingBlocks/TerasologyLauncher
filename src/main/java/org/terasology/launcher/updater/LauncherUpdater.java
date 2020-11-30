@@ -16,8 +16,8 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.model.LauncherVersion;
 import org.terasology.launcher.util.BundleUtils;
-import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -29,9 +29,9 @@ public final class LauncherUpdater {
 
     private final Semver currentVersion;
 
-    public LauncherUpdater(TerasologyLauncherVersionInfo currentVersionInfo) {
-        //TODO: might not be valid semver, catch or use Try<..>
-        currentVersion = new Semver(currentVersionInfo.getVersion());
+    public LauncherUpdater(LauncherVersion currentVersionInfo) {
+        //TODO: might not be valid semver, thus can be null
+        currentVersion = currentVersionInfo.getSemver();
     }
 
     //TODO: catch invalid semver and return Try<..> or Option<..> instead

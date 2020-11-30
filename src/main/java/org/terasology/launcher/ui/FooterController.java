@@ -1,7 +1,7 @@
 // Copyright 2020 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-package org.terasology.launcher.gui.javafx;
+package org.terasology.launcher.ui;
 
 import javafx.animation.Transition;
 import javafx.beans.property.Property;
@@ -15,9 +15,9 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.model.LauncherVersion;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.HostServices;
-import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.util.Optional;
 
@@ -37,7 +37,7 @@ public class FooterController {
     }
 
     private void updateLabels() {
-        final String launcherVersion = TerasologyLauncherVersionInfo.getInstance().getVersion();
+        final String launcherVersion = LauncherVersion.getInstance().getDisplayName();
         if (launcherVersion.isEmpty()) {
             versionInfo.setText(BundleUtils.getLabel("launcher_versionInfo"));
         } else {
