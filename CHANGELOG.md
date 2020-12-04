@@ -1,7 +1,135 @@
-Terasology Launcher - ChangeLog
-===============================
+# Terasology Launcher - ChangeLog
 
-## 4.0.0 (not released)
+## 4.3.0 (not released)
+
+## 4.2.0 (2020-12-04)
+### 🚀 Features
+
+- #610 feature(lwjgl3): Add BaseJavaParameters for game, implement macos-specific lwgl3-related params. (@DarkWeird)
+- #600 Game Runner improvements (take 2) (@keturn)
+
+### 🐛 Bug Fixes
+
+- #608 fix(i18n): update Ukrainian locale strings (@rzats)
+- #614 fix(tests): fix flaky TestRunGameTask tests (@keturn)
+- #613 fix: various issues (@jdrueckert)
+- #574 fix: Download button tooltip error fixed (@TheShubham99)
+- #598 test: Fix Windows tests (@Malanius)
+
+### 🧰 Maintenance
+
+- #619 epic: continue launcher clean-up (@skaldarnar)
+- #618 build: update Gradle (6.4.1 >>> 6.7.1) (@skaldarnar)
+- #617 chore: update license headers (@jdrueckert)
+- #615 chore(tests): remove extraneous waitForFxEvents calls (@keturn)
+- #607 chore: fix check run annotations, use new codemetrics version (@jdrueckert)
+- #612 epic: Rework package management and UI (@skaldarnar)
+- #605 chore: remove self updater (@skaldarnar)
+- #604 chore: remove deprecations on LauncherConfig and LauncherSettings (@skaldarnar)
+- #603 chore: Remove dead code (config package) (@skaldarnar)
+- #602 chore: Remove unnecessary access modifiers on JUnit5 tests (@Malanius)
+
+## 4.1.2 (2020-10-18)
+### 🐛 Bug Fixes
+
+- #599 fix: remove doubled files when bundling the JRE (@skaldarnar) 
+- #583 build: update JDK 11.0.7 >>> 11.0.8 and fix download task (@skaldarnar)
+- #580 fix: typo in german translation of `logLevel_default` (@Seotte) 
+
+### 🧰 Maintenance
+ 
+- #590 refactoring: Streamline LauncherSettings to ease replacement (@skaldarnar) 
+- #586 chore: organize GuiUtils and FXUtils into Effects and Dialogs (@skaldarnar) 
+- #587 chore[build]: add TestFX dependency (@keturn)
+- #585 chore: replace custom LogLevel by slf4j.event.Level (@skaldarnar) 
+- #562 test: use spf4j-slf4j-test to unit test logging (@keturn) 
+- #569 chore: Remove Swagger configuration (@skaldarnar) 
+- #570 chore: Use new parser for markdown rendering (@skaldarnar) 
+- #567 chore: Replace jcabi Github client by github-api (@skaldarnar)
+- #566 chore: Prepare for Java 14 (@skaldarnar)
+- #564 chore: Remove usage of JNA to determine Windows path (@skaldarnar) 
+
+## 4.1.1 (2020-05-02)
+
+### 🐛 Bug Fixes
+
+- #560 fix: Remove Java 8 JVM arguments from settings (@skaldarnar)
+- #559 fix: Remove unitialized variable in LauncherUpdater (@keturn)
+
+## 4.1.0 (2020-05-01)
+
+### 🚀 Features
+
+- #548 feat: Upgrade to Java 11 (@keturn)
+- #543 feat: replace `OperatingSystem` enum with `Platform` object (@jdrueckert)
+
+### 🐛 Bug Fixes
+
+- #552 fix: Don't block the application thread on message dialog (@keturn)
+
+### 🧰 Maintenance
+
+- #558 fix: Bundle the JRE, not the JDK. (@keturn)
+- #556 test: Migrate to Junit5 (Jupiter) (@keturn)
+- #555 chore: remove unused GameDownloader (@keturn)
+- #540 chore: Extract private inner classes from ApplicationController (@skaldarnar)
+
+## 4.0.0 (2020-03-29)
+
+### 🚀 Features
+
+- #532 feat: Validate schema of 'sources.json' (@praj-foss)
+- #535 feat(usability): select last played or installed game (@jdrueckert)
+- #531 feat: Show dialog for available updates (again) (@skaldarnar)
+- #516 feat: Platform-specific distribution packages (@skaldarnar)
+- #512 feat: Infer version from Git (@skaldarnar)
+- #498 docs: move wiki into launcher repo (@jdrueckert)
+- #501 feat(packages)!: better names for game versions (@skaldarnar)
+- #503 feat: cleanup and clarify settings (@jdrueckert)
+- #488 feature(jre): Automatically bundle JRE with distributions (@skaldarnar, @praj-foss, @jdrueckert)
+- #486 Initializes combo boxes and buttons as soon as FXML is loaded (@praj-foss)
+- #485 Indicate installed packages (@praj-foss)
+- #484 Shows changelog of selected game package (@praj-foss)
+- #472 Logging TextArea instead of TableView (@skaldarnar)
+- #452 Provides updated PackageManager architecture (@praj-foss)
+- #448 Basic package manager implementation (@praj-foss)
+- #442 Adds gradle task to generate Web API client (@praj-foss)
+- #444 Makes the game run using the bundled JRE (@praj-foss)
+- #441 Bundles a JRE with the Launcher package (@praj-foss)
+- #431 Modify the Settings UI (@praj-foss)
+
+### 🐛 Bug Fixes
+
+- #538 fix: Remove (failing) CrashReporter (@skaldarnar)
+- #537 fix: small adjustments in settings view (@jdrueckert)
+- #523 fix(buildres): linux run script (@jdrueckert)
+- #511 fix(settings): typo in game arguments label (@jdrueckert)
+- #502 fix: reset version box scroll bar when switching jobs (@skaldarnar)
+- #500 fix(footer): Use java.awt.Desktop as fallback for HostServices (@skaldarnar)
+- #494 fix: launcher logo (@jdrueckert)
+- #457 Prevent NPEs when choosing a directories and init the Launcher (@skaldarnar)
+- #434 Check availability of Jenkins (@praj-foss)
+
+### 🧰 Maintenance
+
+- #536 feat: merge 'games' directory into launcher installation directory (@skaldarnar)
+- #534 chore: Resovle Checkstyle warnings (@skaldarnar)
+- #529 fix: remove HostServices (only working with Oracle JRE) (@skaldarnar)
+- #524 chore(settings): clean up properties (@jdrueckert)
+- #527 chore: simplify FileUtils and fix "Unknown Windows" (@skaldarnar)
+- #491 refactor(config): Dependency Inversion on `ConfigManager` and `ConfigReader` (@skaldarnar)
+- #481 Provides new Configuration API (@praj-foss, @skaldarnar)
+- #483 Fix Checkstyle errors (@skaldarnar)
+- #477 Extract ChangelogView from main application controller (@skaldarnar, @jdrueckert)
+- #478 Extract Footer from main application controller (@skaldarnar, @jdrueckert)
+- #476 Remove duplicate game (type and version) selection (@skaldarnar, @jdrueckert)
+- #480 Refactor AboutViewController (@jdrueckert, @skaldarnar)
+- #475 Extract About tab controller (@skaldarnar)
+- #458 Update Ukrainian locale with current strings (@rzats)
+- #459 Remove G+ icon :( and add Discord icon instead :) (@rzats)
+- #454 Clean-up repository (@skaldarnar)
+- #453 Remove remnants of Java Webstart (@jdrueckert)
+- #437 Simplify DownloadUtils::isJenkinsAvailable (@praj-foss)
 
 ## 3.3.0 (2019-06-08)
 * Added missing try-catch for NIO operations (#412)
