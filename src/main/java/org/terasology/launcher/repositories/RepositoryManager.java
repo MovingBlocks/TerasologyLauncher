@@ -23,7 +23,13 @@ public class RepositoryManager {
         ReleaseRepository legacyOmegaNightly = new LegacyJenkinsRepositoryAdapter(JENKINS_BASE_URL, "DistroOmega", Build.NIGHTLY, Profile.OMEGA);
         ReleaseRepository legacyOmegaStable = new LegacyJenkinsRepositoryAdapter(JENKINS_BASE_URL, "DistroOmegaRelease", Build.STABLE, Profile.OMEGA);
 
-        Set<ReleaseRepository> all = Sets.newHashSet(legacyEngineNightly, legacyEngineStable, legacyOmegaNightly, legacyOmegaStable);
+        ReleaseRepository omegaNightly = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.NIGHTLY);
+        ReleaseRepository omegaStable = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE);
+
+        Set<ReleaseRepository> all = Sets.newHashSet(
+                legacyEngineNightly, legacyEngineStable,
+                legacyOmegaNightly, legacyOmegaStable,
+                omegaNightly, omegaStable);
 
         releases = fetchReleases(all);
     }
