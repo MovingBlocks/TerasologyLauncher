@@ -37,10 +37,7 @@ public abstract class LauncherSettings {
         initUserJavaParameters();
         initUserGameParameters();
         initLogLevel();
-        initDefaultGameJob();
-        initLastPlayedGameJob();
         initLastPlayedGameVersion();
-        initLastInstalledGameJob();
         initLastInstalledGameVersion();
     }
 
@@ -70,13 +67,7 @@ public abstract class LauncherSettings {
 
     protected abstract void initLocale();
 
-    protected abstract void initDefaultGameJob();
-
-    protected abstract void initLastPlayedGameJob();
-
     protected abstract void initLastPlayedGameVersion();
-
-    protected abstract void initLastInstalledGameJob();
 
     protected abstract void initLastInstalledGameVersion();
 
@@ -125,15 +116,9 @@ public abstract class LauncherSettings {
 
     public abstract boolean isKeepDownloadedFiles();
 
-    public abstract String getDefaultGameJob();
-
-    public abstract String getLastPlayedGameJob();
-
     public abstract Optional<GameIdentifier> getLastPlayedGameVersion();
 
     public abstract String getLastInstalledGameJob();
-
-    public abstract Optional<GameIdentifier> getLastInstalledGameVersion();
 
     // --------------------------------------------------------------------- //
     // SETTERS
@@ -161,11 +146,5 @@ public abstract class LauncherSettings {
 
     public abstract void setDefaultGameJob(String lastPlayedGameJob);
 
-    public abstract void setLastPlayedGameJob(String lastPlayedGameJob);
-
     public abstract void setLastPlayedGameVersion(GameIdentifier lastPlayedGameVersion);
-
-    public abstract void setLastInstalledGameJob(String lastInstalledGameJob);
-
-    public abstract void setLastInstalledGameVersion(GameIdentifier lastInstalledGameVersion);
 }
