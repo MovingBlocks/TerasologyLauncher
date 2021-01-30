@@ -1,6 +1,12 @@
 # Terasology Launcher - ChangeLog
 
-## 4.3.0 (not released)
+## 4.4.0 (not released)
+
+## 4.3.0 (2021-01-30)
+
+### 🚀 Features
+
+- #621 feat(repositories): add adapter for new jenkins.terasology.io (@skaldarnar)
 
 ## 4.2.0 (2020-12-04)
 ### 🚀 Features
