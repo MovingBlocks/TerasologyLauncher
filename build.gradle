@@ -111,12 +111,12 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.+"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.+"
 
-    testImplementation('org.mockito:mockito-inline:3.3.+') {
+    testImplementation('org.mockito:mockito-inline:3.4.+') {
         because "-inline build enables mocking final classes"
         // https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.2
         // > Be aware that this artifact may be abolished when the inline mock making feature is integrated into the default mock maker.
     }
-    testImplementation "org.mockito:mockito-junit-jupiter:3.3.+"
+    testImplementation "org.mockito:mockito-junit-jupiter:3.4.+"
 
     testImplementation('org.spf4j:spf4j-slf4j-test:8.8.5') {
         because "testable logging"
