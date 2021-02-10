@@ -35,4 +35,19 @@ public class JenkinsRepositoryAdapterTest {
 
     Assertions.assertTrue(adapter.fetchReleases().isEmpty());  
   }
+
+  @Test
+  void fetchReleases_responseWithoutBuilds() throws IOException {
+    BufferedReader stubReader = Mockito.mock(BufferedReader.class);
+    when(stubReader.readLine()).thenReturn("");
+
+    Gson stubGson = Mockito.mock(Gson.class);
+    when(stubGson.fromJson(stubReader, Jenkins.ApiResult.class)).thenReturn(new Jenkins.ApiResult());
+
+    final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubGson);
+    final JenkinsRepositoryAdapter stub = Mockito.spy(adapter);
+    Mockito.when(stub.openConnection()).thenReturn(stubReader);
+
+    Assertions.assertTrue(adapter.fetchReleases().isEmpty());  
+  }
 }
