@@ -75,9 +75,14 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
 
         try (BufferedReader reader = openConnection()) {
             final Jenkins.ApiResult result = gson.fromJson(reader, Jenkins.ApiResult.class);
-            for (Jenkins.Build build : result.builds) {
-                computeReleaseFrom(build).ifPresent(pkgList::add);
+            if (result != null && result.builds != null) {
+                for (Jenkins.Build build : result.builds) {
+                    computeReleaseFrom(build).ifPresent(pkgList::add);
+                }
+            } else {
+                logger.debug("No build information.");
             }
+            
         } catch (IOException e) {
             logger.warn("Failed to fetch packages from: {}", apiUrl, e);
         }
