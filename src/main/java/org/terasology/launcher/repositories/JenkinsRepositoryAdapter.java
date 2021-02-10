@@ -4,7 +4,6 @@
 package org.terasology.launcher.repositories;
 
 import com.google.gson.Gson;
-import com.vdurmont.semver4j.Semver;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,17 +58,90 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     private final Build buildProfile;
     private final Profile profile;
 
-    private final String jobSelector;
+    final String apiUrl;
 
     JenkinsRepositoryAdapter(Profile profile, Build buildProfile) {
         this.buildProfile = buildProfile;
         this.profile = profile;
-        this.jobSelector = job(profileToJobName(profile)) + job(buildProfileToJobName(buildProfile));
+        this.apiUrl = BASE_URL + job(profileToJobName(profile)) + job(buildProfileToJobName(buildProfile)) + API_FILTER;
     }
 
-    private boolean isSuccess(Jenkins.Build build) {
-        return build.result == Jenkins.Build.Result.SUCCESS || build.result == Jenkins.Build.Result.UNSTABLE;
+    public List<GameRelease> fetchReleases() {
+        final List<GameRelease> pkgList = new LinkedList<>();
+
+
+
+        logger.debug("fetching releases from '{}'", apiUrl);
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(
+                        new URL(apiUrl).openStream())
+        )) {
+            final Jenkins.ApiResult result = gson.fromJson(reader, Jenkins.ApiResult.class);
+            for (Jenkins.Build build : result.builds) {
+                computeReleaseFrom(build).ifPresent(pkgList::add);
+            }
+        } catch (IOException e) {
+            logger.warn("Failed to fetch packages from: {}", apiUrl, e);
+        }
+        return pkgList;
     }
+
+    Optional<GameRelease> computeReleaseFrom(Jenkins.Build jenkinsBuildInfo) {
+        if (isSuccess(jenkinsBuildInfo)) {
+            final URL url = getArtifactUrl(jenkinsBuildInfo, TERASOLOGY_ZIP_PATTERN);
+            final Date timestamp = new Date(jenkinsBuildInfo.timestamp);     
+            final List<String> changelog = computeChangelogFrom(jenkinsBuildInfo);
+            final Optional<GameIdentifier> id = computeIdentifierFrom(jenkinsBuildInfo);
+
+            if (url != null && id.isPresent()) {
+                return Optional.of(new GameRelease(id.get(), url, changelog, timestamp));
+            } else {
+                logger.debug("Skipping build without game artifact or version identifier: '{}'", jenkinsBuildInfo.url);
+            }
+        } else {
+            logger.debug("Skipping unsuccessful build '{}'", jenkinsBuildInfo.url);
+        }
+        return Optional.empty();
+    }
+
+    Optional<GameIdentifier> computeIdentifierFrom(Jenkins.Build jenkinsBuildInfo) {
+        Properties versionInfo = fetchProperties(getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"));
+        if (versionInfo != null) {
+            String displayName = versionInfo.getProperty("displayVersion");
+            if (displayName != null)  {
+                return Optional.of(new GameIdentifier(displayName, buildProfile, profile));
+            }
+        }        
+        return Optional.empty();
+    }
+
+    List<String> computeChangelogFrom(Jenkins.Build jenkinsBuildInfo) {
+        return Optional.ofNullable(jenkinsBuildInfo.changeSet)
+                    .map(changeSet ->
+                        Arrays.stream(changeSet.items)
+                            .map(change -> change.msg)
+                            .collect(Collectors.toList())
+                        ).orElse(new ArrayList<>());
+    }
+
+    // utility IO
+
+    @Nullable
+    private Properties fetchProperties(final URL artifactUrl) {
+        if (artifactUrl != null) {
+            try (InputStream inputStream = artifactUrl.openStream()) {
+                final Properties properties = new Properties();
+                properties.load(inputStream);
+                return properties;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    // utility specific to this Jenkins adapter
 
     private static String profileToJobName(Profile profile) {
         switch (profile) {
@@ -92,83 +165,32 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
         }
     }
 
-    private String job(String job) {
+    private static String job(String job) {
         return "job/" + job;
     }
 
-    public List<GameRelease> fetchReleases() {
-        final List<GameRelease> pkgList = new LinkedList<>();
+    // generic Jenkins.Build utility
 
-        final String apiUrl = BASE_URL + jobSelector + API_FILTER;
-
-        logger.debug("fetching releases from '{}'", apiUrl);
-
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(
-                        new URL(apiUrl).openStream())
-        )) {
-            final Jenkins.ApiResult result = gson.fromJson(reader, Jenkins.ApiResult.class);
-            for (Jenkins.Build build : result.builds) {
-                if (isSuccess(build)) {
-                    final String url = getArtifactUrl(build, TERASOLOGY_ZIP_PATTERN);
-                    if (url != null) {
-
-                        Properties versionInfo = fetchProperties(getArtifactUrl(build, "versionInfo.properties"));
-
-                        final Date timestamp = new Date(build.timestamp);
-
-                        String displayName = versionInfo.getProperty("displayVersion");
-
-                        final GameIdentifier id = new GameIdentifier(displayName, buildProfile, profile);
-
-                        Semver semver = deriveSemver(versionInfo);
-                        logger.debug("Derived SemVer for {}: \t{}", id, semver);
-
-                        List<String> changelog = Optional.ofNullable(build.changeSet)
-                                .map(changeSet ->
-                                        Arrays.stream(changeSet.items)
-                                                .map(change -> change.msg)
-                                                .collect(Collectors.toList())).orElse(new ArrayList<>());
-
-
-                        final GameRelease release = new GameRelease(id, new URL(url), changelog, timestamp);
-                        pkgList.add(release);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            logger.warn("Failed to fetch packages from: {}", apiUrl, e);
-        }
-        return pkgList;
-    }
-
-    private Properties fetchProperties(final String artifactUrl) {
-        if (artifactUrl != null) {
-            try (InputStream inputStream = new URL(artifactUrl).openStream()) {
-                final Properties properties = new Properties();
-                properties.load(inputStream);
-                return properties;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
-    }
-
-    private Semver deriveSemver(final Properties versionInfo) {
-        if (versionInfo != null) {
-            final Semver engineVersion = new Semver(versionInfo.getProperty("engineVersion"));
-            return engineVersion.withBuild(versionInfo.getProperty("buildId"));
-        }
-        return null;
+    private static boolean isSuccess(Jenkins.Build build) {
+        return build.result == Jenkins.Build.Result.SUCCESS || build.result == Jenkins.Build.Result.UNSTABLE;
     }
 
     @Nullable
-    private String getArtifactUrl(Jenkins.Build build, String regex) {
-        return Arrays.stream(build.artifacts)
+    private URL getArtifactUrl(Jenkins.Build build, String regex) {
+        Optional<String> url = Arrays.stream(build.artifacts)
                 .filter(artifact -> artifact.fileName.matches(regex))
                 .findFirst()
-                .map(artifact -> build.url + ARTIFACT + artifact.relativePath)
-                .orElse(null);
+                .map(artifact -> build.url + ARTIFACT + artifact.relativePath);
+
+        if (url.isPresent()) {
+            try {
+                return new URL(url.get());
+            } catch (MalformedURLException e) {
+                logger.debug("Invalid URL: '{}'", url, e);
+            }
+        } else {
+            logger.debug("Cannot find artifact matching '{}' for build '{}'", regex, build.url);
+        }
+        return null;
     }
 }
