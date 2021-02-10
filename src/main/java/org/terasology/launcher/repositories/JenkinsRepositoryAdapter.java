@@ -58,12 +58,12 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     private final Build buildProfile;
     private final Profile profile;
 
-    final String apiUrl;
+    private final URL apiUrl;
 
     JenkinsRepositoryAdapter(Profile profile, Build buildProfile) {
         this.buildProfile = buildProfile;
         this.profile = profile;
-        this.apiUrl = BASE_URL + job(profileToJobName(profile)) + job(buildProfileToJobName(buildProfile)) + API_FILTER;
+        this.apiUrl = toURL(BASE_URL + job(profileToJobName(profile)) + job(buildProfileToJobName(buildProfile)) + API_FILTER);
     }
 
     public List<GameRelease> fetchReleases() {
@@ -73,10 +73,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
 
         logger.debug("fetching releases from '{}'", apiUrl);
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(
-                        new URL(apiUrl).openStream())
-        )) {
+        try (BufferedReader reader = openConnection()) {
             final Jenkins.ApiResult result = gson.fromJson(reader, Jenkins.ApiResult.class);
             for (Jenkins.Build build : result.builds) {
                 computeReleaseFrom(build).ifPresent(pkgList::add);
@@ -85,6 +82,10 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
             logger.warn("Failed to fetch packages from: {}", apiUrl, e);
         }
         return pkgList;
+    }
+
+    BufferedReader openConnection() throws IOException {
+        return new BufferedReader(new InputStreamReader(apiUrl.openStream()));
     }
 
     Optional<GameRelease> computeReleaseFrom(Jenkins.Build jenkinsBuildInfo) {
@@ -126,6 +127,14 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     }
 
     // utility IO
+
+    private static URL toURL(String url) {
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
+        }
+        return null;
+    }
 
     @Nullable
     private Properties fetchProperties(final URL artifactUrl) {
