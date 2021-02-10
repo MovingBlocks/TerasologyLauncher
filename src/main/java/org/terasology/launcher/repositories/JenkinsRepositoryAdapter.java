@@ -4,6 +4,7 @@
 package org.terasology.launcher.repositories;
 
 import com.google.gson.Gson;
+
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,14 +54,15 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     private static final String TERASOLOGY_ZIP_PATTERN = "Terasology.*zip";
     private static final String ARTIFACT = "artifact/";
 
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
     private final Build buildProfile;
     private final Profile profile;
 
     private final URL apiUrl;
 
-    JenkinsRepositoryAdapter(Profile profile, Build buildProfile) {
+    JenkinsRepositoryAdapter(Profile profile, Build buildProfile, Gson gson) {
+        this.gson = gson;
         this.buildProfile = buildProfile;
         this.profile = profile;
         this.apiUrl = toURL(BASE_URL + job(profileToJobName(profile)) + job(buildProfileToJobName(buildProfile)) + API_FILTER);
@@ -68,8 +70,6 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
 
     public List<GameRelease> fetchReleases() {
         final List<GameRelease> pkgList = new LinkedList<>();
-
-
 
         logger.debug("fetching releases from '{}'", apiUrl);
 
