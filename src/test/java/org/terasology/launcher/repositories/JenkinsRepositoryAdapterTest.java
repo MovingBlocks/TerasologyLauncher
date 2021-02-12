@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.repositories;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -197,6 +198,7 @@ class JenkinsRepositoryAdapterTest {
 
         @Override
         Properties requestProperties(URL artifactUrl) {
+            Preconditions.checkNotNull(artifactUrl);
             return requestProperties.apply(artifactUrl);
         }
     }
