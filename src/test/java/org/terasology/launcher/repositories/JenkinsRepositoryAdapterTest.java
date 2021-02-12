@@ -4,8 +4,8 @@
 package org.terasology.launcher.repositories;
 
 import com.google.gson.Gson;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -19,17 +19,33 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("JenkinsRepositoryAdapter#fetchReleases() should")
 class JenkinsRepositoryAdapterTest {
 
-    private static Gson gson = new Gson();
+    static Gson gson;
+    static Jenkins.ApiResult validResult;
+    static URL expectedArtifactUrl;
+    static List<Jenkins.ApiResult> incompleteResults;
+
+    @BeforeAll
+    static void setup() throws MalformedURLException {
+        gson = new Gson();
+        validResult = gson.fromJson(validPayload(), Jenkins.ApiResult.class);
+        incompleteResults = incompletePayloads().stream()
+                .map(json -> gson.fromJson(json, Jenkins.ApiResult.class))
+                .collect(Collectors.toList());
+        expectedArtifactUrl = new URL("http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/artifact/distros/omega/build/distributions/TerasologyOmega.zip");
+    }
 
     static String validPayload() {
         return "{\n" +
@@ -54,7 +70,7 @@ class JenkinsRepositoryAdapterTest {
                 "}";
     }
 
-    static String nullArtifacts() {
+    static String nullArtifactsPayload() {
         return "{ \n" +
                 "  \"builds\": [\n" +
                 "    {\n" +
@@ -65,7 +81,7 @@ class JenkinsRepositoryAdapterTest {
                 "}";
     }
 
-    static String emptyArtifacts() {
+    static String emptyArtifactsPayload() {
         return "{\n" +
                 "  \"builds\": [\n" +
                 "    {\n" +
@@ -79,7 +95,7 @@ class JenkinsRepositoryAdapterTest {
                 "}";
     }
 
-    static String incompleteArtifacts() {
+    static String incompleteArtifactsPayload() {
         return "{\n" +
                 "  \"builds\": [\n" +
                 "    {\n" +
@@ -98,75 +114,70 @@ class JenkinsRepositoryAdapterTest {
                 "}";
     }
 
-    static Stream<Arguments> incompletePayload() {
-        return Stream.of(
-                Arguments.of("{}"),
-                Arguments.of("{ \"builds\": [] }"),
-                Arguments.of(nullArtifacts()),
-                Arguments.of(emptyArtifacts()),
-                Arguments.of(incompleteArtifacts())
+    static List<String> incompletePayloads() {
+        return List.of(
+                "{}",
+                "{ \"builds\": [] }",
+                nullArtifactsPayload(),
+                emptyArtifactsPayload(),
+                incompleteArtifactsPayload()
         );
     }
 
-    @Nested
-    @DisplayName("fetchReleases")
-    class FetchReleases {
+    static Stream<Arguments> incompleteResults() {
+        return incompleteResults.stream().map(Arguments::of);
+    }
 
-        @ParameterizedTest
-        @MethodSource("incompletePayload")
-        @DisplayName("Should skip incomplete JSON payload data")
-        void shouldSkipIncompleteJsonPayloadData(String incompletePayload) {
-            final Jenkins.ApiResult apiResult = gson.fromJson(incompletePayload, Jenkins.ApiResult.class);
-            final JenkinsClient stubClient = new StubJenkinsClient(url -> apiResult, url -> null);
-            final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
-            assertTrue(adapter.fetchReleases().isEmpty());
-        }
+    @Test
+    @DisplayName("handle null Jenkins response gracefully")
+    void shouldHandleNullJenkinsResponseGracefully() {
+        final JenkinsClient nullClient = new StubJenkinsClient(url -> null, url -> null);
+        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, nullClient);
+        assertTrue(adapter.fetchReleases().isEmpty());
+    }
 
-        @Test
-        @DisplayName("Should handle null Jenkins response gracefully")
-        void shouldHandleNullJenkinsResponseGracefully() {
-            final JenkinsClient nullClient = new StubJenkinsClient(url -> null, url -> null);
-            final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, nullClient);
-            assertTrue(adapter.fetchReleases().isEmpty());
-        }
+    @Test
+    @DisplayName("skip builds without version info")
+    void shouldSkipBuildsWithoutVersionInfo() {
+        Properties emptyVersionInfo = new Properties();
 
-        @Test
-        @DisplayName("Should skip builds without version info")
-        void shouldSkipBuildsWithoutVersionInfo() {
-            Properties emptyVersionInfo = new Properties();
+        final JenkinsClient stubClient = new StubJenkinsClient(url -> validResult, url -> emptyVersionInfo);
 
-            Jenkins.ApiResult resultStub = gson.fromJson(validPayload(), Jenkins.ApiResult.class);
-            final JenkinsClient stubClient = new StubJenkinsClient(url -> resultStub, url -> emptyVersionInfo);
+        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
 
-            final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
+        assertTrue(adapter.fetchReleases().isEmpty());
+    }
 
-            assertTrue(adapter.fetchReleases().isEmpty());
-        }
+    @Test
+    @DisplayName("process valid response correctly")
+    void shouldProcessValidResponseCorrectly() {
+        String expectedVersion = "alpha 42 (preview) - 20210130";
 
-        @Test
-        @DisplayName("Should process valid response correctly")
-        void shouldProcessValidResponseCorrectly() throws MalformedURLException {
-            String expectedVersion = "alpha 42 (preview) - 20210130";
+        Properties versionInfo = new Properties();
+        versionInfo.setProperty("displayVersion", expectedVersion);
 
-            Properties versionInfo = new Properties();
-            versionInfo.setProperty("displayVersion", expectedVersion);
+        final JenkinsClient stubClient = new StubJenkinsClient(url -> validResult, url -> versionInfo);
 
-            Jenkins.ApiResult resultStub = gson.fromJson(validPayload(), Jenkins.ApiResult.class);
-            final JenkinsClient stubClient = new StubJenkinsClient(url -> resultStub, url -> versionInfo);
+        final GameIdentifier id = new GameIdentifier(expectedVersion, Build.STABLE, Profile.OMEGA);
+        final GameRelease expected = new GameRelease(id, expectedArtifactUrl, new ArrayList<>(), new Date(1604285977306L));
 
-            final URL expectedArtifactUrl = new URL("http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/artifact/distros/omega/build/distributions/TerasologyOmega.zip");
-            final GameIdentifier id = new GameIdentifier(expectedVersion, Build.STABLE, Profile.OMEGA);
-            final GameRelease expected = new GameRelease(id, expectedArtifactUrl, new ArrayList<>(), new Date(1604285977306L));
+        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
 
-            final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
+        assertAll(
+                () -> assertEquals(1, adapter.fetchReleases().size()),
+                () -> assertEquals(expected.getId(), adapter.fetchReleases().get(0).getId()),
+                () -> assertEquals(expected.getUrl(), adapter.fetchReleases().get(0).getUrl()),
+                () -> assertEquals(expected.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp())
+        );
+    }
 
-            assertAll(
-                    () -> assertEquals(1, adapter.fetchReleases().size()),
-                    () -> assertEquals(expected.getId(), adapter.fetchReleases().get(0).getId()),
-                    () -> assertEquals(expected.getUrl(), adapter.fetchReleases().get(0).getUrl()),
-                    () -> assertEquals(expected.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp())
-            );
-        }
+    @ParameterizedTest(name = "{displayName} - [{index}] {arguments}")
+    @DisplayName("skip incomplete API results")
+    @MethodSource("incompleteResults")
+    void shouldSkipIncompleteJsonPayloadData(Jenkins.ApiResult incompleteResult) {
+        final JenkinsClient stubClient = new StubJenkinsClient(url -> incompleteResult, url -> null);
+        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
+        assertTrue(adapter.fetchReleases().isEmpty());
     }
 
     static class StubJenkinsClient extends JenkinsClient {
