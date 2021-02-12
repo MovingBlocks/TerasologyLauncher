@@ -3,78 +3,170 @@
 
 package org.terasology.launcher.repositories;
 
-import com.google.common.collect.Lists;
-import org.junit.jupiter.api.Assertions;
+import com.google.gson.Gson;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.terasology.launcher.model.Build;
+import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
 
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
-public class JenkinsRepositoryAdapterTest {
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    @Test
-    void fetchReleases_emptyOnNullResult() {
-        final JenkinsClient nullClient = new StubJenkinsClient(url -> null, url -> null);
-        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, nullClient);
-        Assertions.assertTrue(adapter.fetchReleases().isEmpty());
+class JenkinsRepositoryAdapterTest {
+
+    private static Gson gson = new Gson();
+
+    static String validPayload() {
+        return "{\n" +
+                "  \"builds\": [\n" +
+                "    {\n" +
+                "      \"artifacts\": [\n" +
+                "        {\n" +
+                "          \"fileName\": \"TerasologyOmega.zip\",\n" +
+                "          \"relativePath\": \"distros/omega/build/distributions/TerasologyOmega.zip\"\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"fileName\": \"versionInfo.properties\",\n" +
+                "          \"relativePath\": \"distros/omega/versionInfo.properties\"\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"number\": 1,\n" +
+                "      \"result\": \"SUCCESS\",\n" +
+                "      \"timestamp\": 1604285977306,\n" +
+                "      \"url\": \"http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
     }
 
-    @Test
-    void fetchReleases_responseWithoutBuilds() {
-        final JenkinsClient stubClient = new StubJenkinsClient(url -> new Jenkins.ApiResult(), url -> null);
-
-        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
-
-        Assertions.assertTrue(adapter.fetchReleases().isEmpty());
+    static String nullArtifacts() {
+        return "{ \n" +
+                "  \"builds\": [\n" +
+                "    {\n" +
+                "      \"number\": 1, \"result\": \"SUCCESS\", \"timestamp\": 1604285977306, \n" +
+                "      \"url\": \"http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
     }
 
-    @Test
-    void fetchReleases_assumeInvalidRelease() {
-        Jenkins.Build buildStub = new Jenkins.Build();
-        Jenkins.ApiResult resultStub = new Jenkins.ApiResult();
-        resultStub.builds = new Jenkins.Build[]{buildStub};
-
-        final JenkinsClient stubClient = new StubJenkinsClient(url -> resultStub, url -> null);
-
-        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
-
-        Assertions.assertTrue(adapter.fetchReleases().isEmpty());
+    static String emptyArtifacts() {
+        return "{\n" +
+                "  \"builds\": [\n" +
+                "    {\n" +
+                "      \"artifacts\": [],\n" +
+                "      \"number\": 1,\n" +
+                "      \"result\": \"SUCCESS\",\n" +
+                "      \"timestamp\": 1604285977306,\n" +
+                "      \"url\": \"http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
     }
 
-    @Test
-    void fetchReleases_assumeValidRelease() {
-        String expectedVersion = "alpha 42 (preview) - 20210130";
+    static String incompleteArtifacts() {
+        return "{\n" +
+                "  \"builds\": [\n" +
+                "    {\n" +
+                "      \"artifacts\": [\n" +
+                "        {\n" +
+                "          \"fileName\": \"versionInfo.properties\",\n" +
+                "          \"relativePath\": \"distros/omega/versionInfo.properties\"\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"number\": 1,\n" +
+                "      \"result\": \"SUCCESS\",\n" +
+                "      \"timestamp\": 1604285977306,\n" +
+                "      \"url\": \"http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+    }
 
-        Properties versionInfo = new Properties();
-        versionInfo.setProperty("displayVersion", expectedVersion);
+    static Stream<Arguments> incompletePayload() {
+        return Stream.of(
+                Arguments.of("{}"),
+                Arguments.of("{ \"builds\": [] }"),
+                Arguments.of(nullArtifacts()),
+                Arguments.of(emptyArtifacts()),
+                Arguments.of(incompleteArtifacts())
+        );
+    }
 
-        Jenkins.Artifact versionArtifact = new Jenkins.Artifact();
-        versionArtifact.fileName = "versionInfo.properties";
-        versionArtifact.relativePath = "path/to/";
+    @Nested
+    @DisplayName("fetchReleases")
+    class FetchReleases {
 
-        Jenkins.Artifact gameArtifact = new Jenkins.Artifact();
-        gameArtifact.fileName = "Terasology.zip";
-        gameArtifact.relativePath = "path/to/";
+        @ParameterizedTest
+        @MethodSource("incompletePayload")
+        @DisplayName("Should skip incomplete JSON payload data")
+        void shouldSkipIncompleteJsonPayloadData(String incompletePayload) {
+            final Jenkins.ApiResult apiResult = gson.fromJson(incompletePayload, Jenkins.ApiResult.class);
+            final JenkinsClient stubClient = new StubJenkinsClient(url -> apiResult, url -> null);
+            final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
+            assertTrue(adapter.fetchReleases().isEmpty());
+        }
 
-        Jenkins.Build buildStub = new Jenkins.Build();
-        buildStub.artifacts = new Jenkins.Artifact[]{gameArtifact, versionArtifact};
-        buildStub.url = "http://jenkins.terasology.org/";
-        buildStub.result = Jenkins.Build.Result.SUCCESS;
-        Jenkins.ApiResult resultStub = new Jenkins.ApiResult();
-        resultStub.builds = new Jenkins.Build[]{buildStub};
+        @Test
+        @DisplayName("Should handle null Jenkins response gracefully")
+        void shouldHandleNullJenkinsResponseGracefully() {
+            final JenkinsClient nullClient = new StubJenkinsClient(url -> null, url -> null);
+            final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, nullClient);
+            assertTrue(adapter.fetchReleases().isEmpty());
+        }
 
-        final JenkinsClient stubClient = new StubJenkinsClient(url -> resultStub, url -> versionInfo);
+        @Test
+        @DisplayName("Should skip builds without version info")
+        void shouldSkipBuildsWithoutVersionInfo() {
+            Properties emptyVersionInfo = new Properties();
 
-        final GameRelease expected = new GameRelease(null, null, null, null);
+            Jenkins.ApiResult resultStub = gson.fromJson(validPayload(), Jenkins.ApiResult.class);
+            final JenkinsClient stubClient = new StubJenkinsClient(url -> resultStub, url -> emptyVersionInfo);
 
-        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
+            final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
 
-        Assertions.assertIterableEquals(Lists.newArrayList(expected), adapter.fetchReleases());
+            assertTrue(adapter.fetchReleases().isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should process valid response correctly")
+        void shouldProcessValidResponseCorrectly() throws MalformedURLException {
+            String expectedVersion = "alpha 42 (preview) - 20210130";
+
+            Properties versionInfo = new Properties();
+            versionInfo.setProperty("displayVersion", expectedVersion);
+
+            Jenkins.ApiResult resultStub = gson.fromJson(validPayload(), Jenkins.ApiResult.class);
+            final JenkinsClient stubClient = new StubJenkinsClient(url -> resultStub, url -> versionInfo);
+
+            final URL expectedArtifactUrl = new URL("http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/artifact/distros/omega/build/distributions/TerasologyOmega.zip");
+            final GameIdentifier id = new GameIdentifier(expectedVersion, Build.STABLE, Profile.OMEGA);
+            final GameRelease expected = new GameRelease(id, expectedArtifactUrl, new ArrayList<>(), new Date(1604285977306L));
+
+            final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
+
+            assertAll(
+                    () -> assertEquals(1, adapter.fetchReleases().size()),
+                    () -> assertEquals(expected.getId(), adapter.fetchReleases().get(0).getId()),
+                    () -> assertEquals(expected.getUrl(), adapter.fetchReleases().get(0).getUrl()),
+                    () -> assertEquals(expected.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp())
+            );
+        }
     }
 
     static class StubJenkinsClient extends JenkinsClient {
