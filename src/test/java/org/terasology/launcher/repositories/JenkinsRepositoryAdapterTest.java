@@ -45,7 +45,8 @@ class JenkinsRepositoryAdapterTest {
         incompleteResults = incompletePayloads().stream()
                 .map(json -> gson.fromJson(json, Jenkins.ApiResult.class))
                 .collect(Collectors.toList());
-        expectedArtifactUrl = new URL("http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/artifact/distros/omega/build/distributions/TerasologyOmega.zip");
+        expectedArtifactUrl = new URL("http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/"
+                + "artifact/" + "distros/omega/build/distributions/TerasologyOmega.zip");
     }
 
     static String validPayload() {
@@ -131,7 +132,7 @@ class JenkinsRepositoryAdapterTest {
 
     @Test
     @DisplayName("handle null Jenkins response gracefully")
-    void shouldHandleNullJenkinsResponseGracefully() {
+    void handleNullJenkinsResponseGracefully() {
         final JenkinsClient nullClient = new StubJenkinsClient(url -> null, url -> null);
         final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, nullClient);
         assertTrue(adapter.fetchReleases().isEmpty());
@@ -139,7 +140,7 @@ class JenkinsRepositoryAdapterTest {
 
     @Test
     @DisplayName("skip builds without version info")
-    void shouldSkipBuildsWithoutVersionInfo() {
+    void skipBuildsWithoutVersionInfo() {
         Properties emptyVersionInfo = new Properties();
 
         final JenkinsClient stubClient = new StubJenkinsClient(url -> validResult, url -> emptyVersionInfo);
@@ -151,7 +152,7 @@ class JenkinsRepositoryAdapterTest {
 
     @Test
     @DisplayName("process valid response correctly")
-    void shouldProcessValidResponseCorrectly() {
+    void processValidResponseCorrectly() {
         String expectedVersion = "alpha 42 (preview) - 20210130";
 
         Properties versionInfo = new Properties();
@@ -164,8 +165,8 @@ class JenkinsRepositoryAdapterTest {
 
         final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
 
+        assertEquals(1, adapter.fetchReleases().size());
         assertAll(
-                () -> assertEquals(1, adapter.fetchReleases().size()),
                 () -> assertEquals(expected.getId(), adapter.fetchReleases().get(0).getId()),
                 () -> assertEquals(expected.getUrl(), adapter.fetchReleases().get(0).getUrl()),
                 () -> assertEquals(expected.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp())
@@ -175,7 +176,7 @@ class JenkinsRepositoryAdapterTest {
     @ParameterizedTest(name = "{displayName} - [{index}] {arguments}")
     @DisplayName("skip incomplete API results")
     @MethodSource("incompleteResults")
-    void shouldSkipIncompleteJsonPayloadData(Jenkins.ApiResult incompleteResult) {
+    void skipIncompatibleApiResults(Jenkins.ApiResult incompleteResult) {
         final JenkinsClient stubClient = new StubJenkinsClient(url -> incompleteResult, url -> null);
         final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
         assertTrue(adapter.fetchReleases().isEmpty());

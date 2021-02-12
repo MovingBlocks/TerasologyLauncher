@@ -78,7 +78,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     }
 
     private Optional<GameRelease> computeReleaseFrom(Jenkins.Build jenkinsBuildInfo) {
-        if (isSuccess(jenkinsBuildInfo)) {
+        if (hasAcceptableResult(jenkinsBuildInfo)) {
             final URL url = getArtifactUrl(jenkinsBuildInfo, TERASOLOGY_ZIP_PATTERN);
             final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
             final List<String> changelog = computeChangelogFrom(jenkinsBuildInfo);
@@ -152,7 +152,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
 
     // generic Jenkins.Build utility
 
-    private static boolean isSuccess(Jenkins.Build build) {
+    private static boolean hasAcceptableResult(Jenkins.Build build) {
         return build.result == Jenkins.Build.Result.SUCCESS || build.result == Jenkins.Build.Result.UNSTABLE;
     }
 
