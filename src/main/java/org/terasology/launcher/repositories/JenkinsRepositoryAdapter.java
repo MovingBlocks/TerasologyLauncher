@@ -19,7 +19,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
@@ -97,12 +96,10 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     }
 
     private Optional<GameIdentifier> computeIdentifierFrom(Jenkins.Build jenkinsBuildInfo) {
-        Properties versionInfo = client.requestProperties(getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"));
-        if (versionInfo != null && versionInfo.containsKey("displayVersion")) {
-            String displayName = versionInfo.getProperty("displayVersion");
-            return Optional.of(new GameIdentifier(displayName, buildProfile, profile));
-        }
-        return Optional.empty();
+        return Optional.ofNullable(getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"))
+                .map(client::requestProperties)
+                .map(versionInfo -> versionInfo.getProperty("displayVersion"))
+                .map(displayVersion -> new GameIdentifier(displayVersion, buildProfile, profile));
     }
 
     private List<String> computeChangelogFrom(Jenkins.Build jenkinsBuildInfo) {
