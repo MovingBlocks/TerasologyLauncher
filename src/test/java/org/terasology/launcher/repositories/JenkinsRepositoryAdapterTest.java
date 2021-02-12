@@ -1,94 +1,100 @@
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
+
 package org.terasology.launcher.repositories;
 
-import static org.mockito.Mockito.when;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.Optional;
-
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Properties;
+import java.util.function.Function;
+
 public class JenkinsRepositoryAdapterTest {
 
-  @Test
-  void fetchReleases_ioExceptionOnApi() throws IOException {
-    final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, new Gson());
-    final JenkinsRepositoryAdapter stub = Mockito.spy(adapter);
-    Mockito.when(stub.openConnection()).thenThrow(IOException.class);
+    @Test
+    void fetchReleases_emptyOnNullResult() {
+        final JenkinsClient nullClient = new StubJenkinsClient(url -> null, url -> null);
+        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, nullClient);
+        Assertions.assertTrue(adapter.fetchReleases().isEmpty());
+    }
 
-    Assertions.assertTrue(adapter.fetchReleases().isEmpty());  
-  }
+    @Test
+    void fetchReleases_responseWithoutBuilds() {
+        final JenkinsClient stubClient = new StubJenkinsClient(url -> new Jenkins.ApiResult(), url -> null);
 
-  @Test
-  void fetchReleases_emptyResponse() throws IOException {
-    BufferedReader stubReader = Mockito.mock(BufferedReader.class);
-    when(stubReader.readLine()).thenReturn("");
+        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
 
-    final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, new Gson());
-    final JenkinsRepositoryAdapter stub = Mockito.spy(adapter);
-    Mockito.when(stub.openConnection()).thenReturn(stubReader);
+        Assertions.assertTrue(adapter.fetchReleases().isEmpty());
+    }
 
-    Assertions.assertTrue(adapter.fetchReleases().isEmpty());  
-  }
+    @Test
+    void fetchReleases_assumeInvalidRelease() {
+        Jenkins.Build buildStub = new Jenkins.Build();
+        Jenkins.ApiResult resultStub = new Jenkins.ApiResult();
+        resultStub.builds = new Jenkins.Build[]{buildStub};
 
-  @Test
-  void fetchReleases_responseWithoutBuilds() throws IOException {
-    BufferedReader stubReader = Mockito.mock(BufferedReader.class);
-    when(stubReader.readLine()).thenReturn("");
+        final JenkinsClient stubClient = new StubJenkinsClient(url -> resultStub, url -> null);
 
-    Gson stubGson = Mockito.mock(Gson.class);
-    when(stubGson.fromJson(stubReader, Jenkins.ApiResult.class)).thenReturn(new Jenkins.ApiResult());
+        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
 
-    final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubGson);
-    final JenkinsRepositoryAdapter stub = Mockito.spy(adapter);
-    Mockito.when(stub.openConnection()).thenReturn(stubReader);
+        Assertions.assertTrue(adapter.fetchReleases().isEmpty());
+    }
 
-    Assertions.assertTrue(adapter.fetchReleases().isEmpty());  
-  }
+    @Test
+    void fetchReleases_assumeValidRelease() {
+        String expectedVersion = "alpha 42 (preview) - 20210130";
 
-  @Test
-  void fetchReleases_assumeInvalidRelease() throws IOException {
-    Jenkins.Build buildStub = new Jenkins.Build();
-    Jenkins.ApiResult resultStub = new Jenkins.ApiResult();
-    resultStub.builds = new Jenkins.Build[]{buildStub};
+        Properties versionInfo = new Properties();
+        versionInfo.setProperty("displayVersion", expectedVersion);
 
-    Gson gsonStub = Mockito.mock(Gson.class);
-    Mockito.doReturn(resultStub).when(gsonStub).fromJson(Mockito.any(BufferedReader.class), Mockito.eq(Jenkins.ApiResult.class));
+        Jenkins.Artifact versionArtifact = new Jenkins.Artifact();
+        versionArtifact.fileName = "versionInfo.properties";
+        versionArtifact.relativePath = "path/to/";
 
-    final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, gsonStub);
-    final JenkinsRepositoryAdapter spy = Mockito.spy(adapter);
+        Jenkins.Artifact gameArtifact = new Jenkins.Artifact();
+        gameArtifact.fileName = "Terasology.zip";
+        gameArtifact.relativePath = "path/to/";
 
-    Mockito.doReturn(Optional.empty()).when(spy).computeReleaseFrom(buildStub);
+        Jenkins.Build buildStub = new Jenkins.Build();
+        buildStub.artifacts = new Jenkins.Artifact[]{gameArtifact, versionArtifact};
+        buildStub.url = "http://jenkins.terasology.org/";
+        buildStub.result = Jenkins.Build.Result.SUCCESS;
+        Jenkins.ApiResult resultStub = new Jenkins.ApiResult();
+        resultStub.builds = new Jenkins.Build[]{buildStub};
 
-    Assertions.assertTrue(spy.fetchReleases().isEmpty());
-    // behavior to ensure that we are testing the correct code path
-    Mockito.verify(spy).computeReleaseFrom(buildStub);
-  }
+        final JenkinsClient stubClient = new StubJenkinsClient(url -> resultStub, url -> versionInfo);
 
-  @Test
-  void fetchReleases_assumeValidRelease() throws IOException {
-    final GameRelease expected = new GameRelease(null, null, null, null);
+        final GameRelease expected = new GameRelease(null, null, null, null);
 
-    Jenkins.Build buildStub = new Jenkins.Build();
-    Jenkins.ApiResult resultStub = new Jenkins.ApiResult();
-    resultStub.builds = new Jenkins.Build[]{buildStub};
+        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
 
-    Gson gsonStub = Mockito.mock(Gson.class);
-    Mockito.doReturn(resultStub).when(gsonStub).fromJson(Mockito.any(BufferedReader.class), Mockito.eq(Jenkins.ApiResult.class));
+        Assertions.assertIterableEquals(Lists.newArrayList(expected), adapter.fetchReleases());
+    }
 
-    final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, gsonStub);
-    final JenkinsRepositoryAdapter spy = Mockito.spy(adapter);
+    static class StubJenkinsClient extends JenkinsClient {
+        final Function<URL, Jenkins.ApiResult> request;
+        final Function<URL, Properties> requestProperties;
 
-    Mockito.doReturn(Optional.of(expected)).when(spy).computeReleaseFrom(buildStub);
+        StubJenkinsClient(Function<URL, Jenkins.ApiResult> request, Function<URL, Properties> requestProperties) {
+            super(null);
+            this.request = request;
+            this.requestProperties = requestProperties;
+        }
 
-    Assertions.assertIterableEquals(Lists.newArrayList(expected), spy.fetchReleases());
-  }
+        @Override
+        public Jenkins.ApiResult request(URL url) {
+            return request.apply(url);
+        }
+
+        @Override
+        Properties requestProperties(URL artifactUrl) {
+            return requestProperties.apply(artifactUrl);
+        }
+    }
 }

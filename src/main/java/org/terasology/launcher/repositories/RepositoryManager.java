@@ -5,7 +5,6 @@ package org.terasology.launcher.repositories;
 
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
-
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
@@ -25,10 +24,9 @@ public class RepositoryManager {
         ReleaseRepository legacyOmegaNightly = new LegacyJenkinsRepositoryAdapter(JENKINS_BASE_URL, "DistroOmega", Build.NIGHTLY, Profile.OMEGA);
         ReleaseRepository legacyOmegaStable = new LegacyJenkinsRepositoryAdapter(JENKINS_BASE_URL, "DistroOmegaRelease", Build.STABLE, Profile.OMEGA);
 
-        Gson gson = new Gson();
-
-        ReleaseRepository omegaNightly = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.NIGHTLY, gson);
-        ReleaseRepository omegaStable = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, gson);
+        JenkinsClient client = new JenkinsClient(new Gson());
+        ReleaseRepository omegaNightly = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.NIGHTLY, client);
+        ReleaseRepository omegaStable = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, client);
 
         Set<ReleaseRepository> all = Sets.newHashSet(
                 legacyEngineNightly, legacyEngineStable,

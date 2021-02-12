@@ -3,8 +3,6 @@
 
 package org.terasology.launcher.repositories;
 
-import com.google.gson.Gson;
-
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +11,6 @@ import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -54,18 +48,18 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     private static final String TERASOLOGY_ZIP_PATTERN = "Terasology.*zip";
     private static final String ARTIFACT = "artifact/";
 
-    private final Gson gson;
+    private final JenkinsClient client;
 
     private final Build buildProfile;
     private final Profile profile;
 
     private final URL apiUrl;
 
-    JenkinsRepositoryAdapter(Profile profile, Build buildProfile, Gson gson) {
-        this.gson = gson;
+    JenkinsRepositoryAdapter(Profile profile, Build buildProfile, JenkinsClient client) {
+        this.client = client;
         this.buildProfile = buildProfile;
         this.profile = profile;
-        this.apiUrl = toURL(BASE_URL + job(profileToJobName(profile)) + job(buildProfileToJobName(buildProfile)) + API_FILTER);
+        this.apiUrl = unsafeToUrl(BASE_URL + job(profileToJobName(profile)) + job(buildProfileToJobName(buildProfile)) + API_FILTER);
     }
 
     public List<GameRelease> fetchReleases() {
@@ -73,30 +67,21 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
 
         logger.debug("fetching releases from '{}'", apiUrl);
 
-        try (BufferedReader reader = openConnection()) {
-            final Jenkins.ApiResult result = gson.fromJson(reader, Jenkins.ApiResult.class);
-            if (result != null && result.builds != null) {
-                for (Jenkins.Build build : result.builds) {
-                    computeReleaseFrom(build).ifPresent(pkgList::add);
-                }
-            } else {
-                logger.debug("No build information.");
+        final Jenkins.ApiResult result = client.request(apiUrl);
+        if (result != null && result.builds != null) {
+            for (Jenkins.Build build : result.builds) {
+                computeReleaseFrom(build).ifPresent(pkgList::add);
             }
-            
-        } catch (IOException e) {
-            logger.warn("Failed to fetch packages from: {}", apiUrl, e);
+        } else {
+            logger.warn("Failed to fetch packages from: {}", apiUrl);
         }
         return pkgList;
-    }
-
-    BufferedReader openConnection() throws IOException {
-        return new BufferedReader(new InputStreamReader(apiUrl.openStream()));
     }
 
     Optional<GameRelease> computeReleaseFrom(Jenkins.Build jenkinsBuildInfo) {
         if (isSuccess(jenkinsBuildInfo)) {
             final URL url = getArtifactUrl(jenkinsBuildInfo, TERASOLOGY_ZIP_PATTERN);
-            final Date timestamp = new Date(jenkinsBuildInfo.timestamp);     
+            final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
             final List<String> changelog = computeChangelogFrom(jenkinsBuildInfo);
             final Optional<GameIdentifier> id = computeIdentifierFrom(jenkinsBuildInfo);
 
@@ -112,45 +97,30 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     }
 
     Optional<GameIdentifier> computeIdentifierFrom(Jenkins.Build jenkinsBuildInfo) {
-        Properties versionInfo = fetchProperties(getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"));
-        if (versionInfo != null) {
+        Properties versionInfo = client.requestProperties(getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"));
+        if (versionInfo != null && versionInfo.containsKey("displayVersion")) {
             String displayName = versionInfo.getProperty("displayVersion");
-            if (displayName != null)  {
-                return Optional.of(new GameIdentifier(displayName, buildProfile, profile));
-            }
-        }        
+            return Optional.of(new GameIdentifier(displayName, buildProfile, profile));
+        }
         return Optional.empty();
     }
 
     List<String> computeChangelogFrom(Jenkins.Build jenkinsBuildInfo) {
         return Optional.ofNullable(jenkinsBuildInfo.changeSet)
-                    .map(changeSet ->
+                .map(changeSet ->
                         Arrays.stream(changeSet.items)
-                            .map(change -> change.msg)
-                            .collect(Collectors.toList())
-                        ).orElse(new ArrayList<>());
+                                .map(change -> change.msg)
+                                .collect(Collectors.toList())
+                ).orElse(new ArrayList<>());
     }
 
     // utility IO
 
-    private static URL toURL(String url) {
+    private static URL unsafeToUrl(String url) {
         try {
             return new URL(url);
         } catch (MalformedURLException e) {
-        }
-        return null;
-    }
-
-    @Nullable
-    private Properties fetchProperties(final URL artifactUrl) {
-        if (artifactUrl != null) {
-            try (InputStream inputStream = artifactUrl.openStream()) {
-                final Properties properties = new Properties();
-                properties.load(inputStream);
-                return properties;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            //TODO: at least log something here?
         }
         return null;
     }
