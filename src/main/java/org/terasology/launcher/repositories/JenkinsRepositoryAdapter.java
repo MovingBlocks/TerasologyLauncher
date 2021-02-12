@@ -78,7 +78,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
         return pkgList;
     }
 
-    Optional<GameRelease> computeReleaseFrom(Jenkins.Build jenkinsBuildInfo) {
+    private Optional<GameRelease> computeReleaseFrom(Jenkins.Build jenkinsBuildInfo) {
         if (isSuccess(jenkinsBuildInfo)) {
             final URL url = getArtifactUrl(jenkinsBuildInfo, TERASOLOGY_ZIP_PATTERN);
             final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
@@ -96,7 +96,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
         return Optional.empty();
     }
 
-    Optional<GameIdentifier> computeIdentifierFrom(Jenkins.Build jenkinsBuildInfo) {
+    private Optional<GameIdentifier> computeIdentifierFrom(Jenkins.Build jenkinsBuildInfo) {
         Properties versionInfo = client.requestProperties(getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"));
         if (versionInfo != null && versionInfo.containsKey("displayVersion")) {
             String displayName = versionInfo.getProperty("displayVersion");
@@ -105,7 +105,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
         return Optional.empty();
     }
 
-    List<String> computeChangelogFrom(Jenkins.Build jenkinsBuildInfo) {
+    private List<String> computeChangelogFrom(Jenkins.Build jenkinsBuildInfo) {
         return Optional.ofNullable(jenkinsBuildInfo.changeSet)
                 .map(changeSet ->
                         Arrays.stream(changeSet.items)
@@ -161,6 +161,9 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
 
     @Nullable
     private URL getArtifactUrl(Jenkins.Build build, String regex) {
+        if (build.artifacts == null || build.url == null) {
+            return null;
+        }
         Optional<String> url = Arrays.stream(build.artifacts)
                 .filter(artifact -> artifact.fileName.matches(regex))
                 .findFirst()
