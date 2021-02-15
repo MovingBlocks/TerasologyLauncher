@@ -13,10 +13,12 @@ import org.terasology.launcher.model.Profile;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
@@ -51,8 +53,17 @@ class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
         this.client = client;
     }
 
-    private boolean isSuccess(Jenkins.Build build) {
+    private boolean hasAcceptbleResult(Jenkins.Build build) {
         return build.result == Jenkins.Build.Result.SUCCESS || build.result == Jenkins.Build.Result.UNSTABLE;
+    }
+
+    private List<String> computeChangelogFrom(Jenkins.ChangeSet changeSet) {
+        return Optional.ofNullable(changeSet)
+                .map(changes ->
+                        Arrays.stream(changes.items)
+                                .map(change -> change.msg)
+                                .collect(Collectors.toList()))
+                .orElse(new ArrayList<>());
     }
 
     public List<GameRelease> fetchReleases() {
@@ -65,10 +76,8 @@ class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
             final Jenkins.ApiResult result = client.request(new URL(apiUrl));
             if (result != null) {
                 for (Jenkins.Build build : result.builds) {
-                    if (isSuccess(build)) {
-                        final List<String> changelog = Arrays.stream(build.changeSet.items)
-                                .map(change -> change.msg)
-                                .collect(Collectors.toList());
+                    if (hasAcceptbleResult(build)) {
+                        final List<String> changelog = computeChangelogFrom(build.changeSet);
                         final String url = getArtifactUrl(build, TERASOLOGY_ZIP_PATTERN);
                         if (url != null) {
                             final GameIdentifier id = new GameIdentifier(build.number, buildProfile, profile);
