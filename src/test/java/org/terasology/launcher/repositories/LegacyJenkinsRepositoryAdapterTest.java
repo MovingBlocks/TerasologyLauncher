@@ -29,10 +29,24 @@ class LegacyJenkinsRepositoryAdapterTest {
     static final String JOB = "DistroOmega";
 
     static Gson gson;
+    static Jenkins.ApiResult validResult;
+    static GameRelease expectedRelease;
 
     @BeforeAll
     static void setup() {
         gson = new Gson();
+        validResult = gson.fromJson(JenkinsPayload.V1.validPayload(), Jenkins.ApiResult.class);
+        expectedRelease = expectedRelease(validResult);
+    }
+
+    static GameRelease expectedRelease(Jenkins.ApiResult apiResult) {
+        try {
+            final URL expectedArtifactUrl = new URL(validResult.builds[0].url + "artifact/" + validResult.builds[0].artifacts[0].relativePath);
+            final GameIdentifier id = new GameIdentifier(validResult.builds[0].number, Build.STABLE, Profile.OMEGA);
+            return new GameRelease(id, expectedArtifactUrl, new ArrayList<>(), new Date(validResult.builds[0].timestamp));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Error in test setup!");
+        }
     }
 
     @Test
@@ -46,24 +60,18 @@ class LegacyJenkinsRepositoryAdapterTest {
 
     @Test
     @DisplayName("process valid response correctly")
-    void processValidResponseCorrectly() throws MalformedURLException {
-        final Jenkins.ApiResult validResult = gson.fromJson(JenkinsPayload.V1.validPayload(), Jenkins.ApiResult.class);
+    void processValidResponseCorrectly() {
         final JenkinsClient stubClient = new StubJenkinsClient(url -> validResult, url -> {
             throw new RuntimeException();
         });
         final LegacyJenkinsRepositoryAdapter adapter =
                 new LegacyJenkinsRepositoryAdapter(BASE_URL, JOB, Build.STABLE, Profile.OMEGA, stubClient);
 
-        final URL expectedArtifactUrl = new URL("http://jenkins.terasology.org/job/DistroOmega/1123/"
-                + "artifact/" + "distros/omega/build/distributions/TerasologyOmega.zip");
-        final GameIdentifier id = new GameIdentifier("1123", Build.STABLE, Profile.OMEGA);
-        final GameRelease expected = new GameRelease(id, expectedArtifactUrl, new ArrayList<>(), new Date(1609713454443L));
-
         assertEquals(1, adapter.fetchReleases().size());
         assertAll(
-                () -> assertEquals(expected.getId(), adapter.fetchReleases().get(0).getId()),
-                () -> assertEquals(expected.getUrl(), adapter.fetchReleases().get(0).getUrl()),
-                () -> assertEquals(expected.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp())
+                () -> assertEquals(expectedRelease.getId(), adapter.fetchReleases().get(0).getId()),
+                () -> assertEquals(expectedRelease.getUrl(), adapter.fetchReleases().get(0).getUrl()),
+                () -> assertEquals(expectedRelease.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp())
         );
     }
 

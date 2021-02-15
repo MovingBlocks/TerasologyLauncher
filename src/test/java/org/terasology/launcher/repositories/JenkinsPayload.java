@@ -16,30 +16,18 @@ public class JenkinsPayload {
     static class V1 {
         static String validPayload() {
             return "{\n" +
-                    "  \"_class\": \"hudson.model.FreeStyleProject\",\n" +
                     "  \"builds\": [\n" +
                     "    {\n" +
-                    "      \"_class\": \"hudson.model.FreeStyleBuild\",\n" +
                     "      \"actions\": [\n" +
                     "        {\n" +
-                    "          \"_class\": \"hudson.model.CauseAction\",\n" +
                     "          \"causes\": [\n" +
                     "            {\n" +
-                    "              \"_class\": \"hudson.model.Cause$UpstreamCause\",\n" +
                     "              \"upstreamBuild\": 2325\n" +
                     "            }\n" +
                     "          ]\n" +
                     "        }\n" +
                     "      ],\n" +
                     "      \"artifacts\": [\n" +
-                    "        {\n" +
-                    "          \"fileName\": \"md5sums.txt\",\n" +
-                    "          \"relativePath\": \"distros/omega/build/distributions/md5sums.txt\"\n" +
-                    "        },\n" +
-                    "        {\n" +
-                    "          \"fileName\": \"sha256sums.txt\",\n" +
-                    "          \"relativePath\": \"distros/omega/build/distributions/sha256sums.txt\"\n" +
-                    "        },\n" +
                     "        {\n" +
                     "          \"fileName\": \"TerasologyOmega.zip\",\n" +
                     "          \"relativePath\": \"distros/omega/build/distributions/TerasologyOmega.zip\"\n" +
@@ -50,7 +38,6 @@ public class JenkinsPayload {
                     "      \"timestamp\": 1609713454443,\n" +
                     "      \"url\": \"http://jenkins.terasology.org/job/DistroOmega/1123/\",\n" +
                     "      \"changeSet\": {\n" +
-                    "        \"_class\": \"hudson.plugins.git.GitChangeSetList\",\n" +
                     "        \"items\": []\n" +
                     "      }\n" +
                     "    }\n" +
