@@ -3,7 +3,6 @@
 
 package org.terasology.launcher.repositories;
 
-import com.google.gson.Gson;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +11,7 @@ import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
@@ -39,18 +36,19 @@ class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
 
     private static final String TERASOLOGY_ZIP_PATTERN = "Terasology.*zip";
 
-    private final Gson gson = new Gson();
-
     private final String baseUrl;
     private final String jobName;
     private final Build buildProfile;
     private final Profile profile;
 
-    LegacyJenkinsRepositoryAdapter(String baseUrl, String jobName, Build buildProfile, Profile profile) {
+    private final JenkinsClient client;
+
+    LegacyJenkinsRepositoryAdapter(String baseUrl, String jobName, Build buildProfile, Profile profile, JenkinsClient client) {
         this.baseUrl = baseUrl;
         this.jobName = jobName;
         this.buildProfile = buildProfile;
         this.profile = profile;
+        this.client = client;
     }
 
     private boolean isSuccess(Jenkins.Build build) {
@@ -63,11 +61,8 @@ class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
 
         logger.debug("fetching releases from '{}'", apiUrl);
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(
-                        new URL(apiUrl).openStream())
-        )) {
-            final Jenkins.ApiResult result = gson.fromJson(reader, Jenkins.ApiResult.class);
+        try {
+            final Jenkins.ApiResult result = client.request(new URL(apiUrl));
             for (Jenkins.Build build : result.builds) {
                 if (isSuccess(build)) {
                     final List<String> changelog = Arrays.stream(build.changeSet.items)
@@ -82,8 +77,8 @@ class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
                     }
                 }
             }
-        } catch (IOException e) {
-            logger.warn("Failed to fetch packages from: {}", apiUrl, e);
+        } catch (MalformedURLException e) {
+            logger.error("Invalid URL: {}", apiUrl, e);
         }
         return pkgList;
     }

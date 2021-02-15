@@ -19,12 +19,13 @@ public class RepositoryManager {
     private final Set<GameRelease> releases;
 
     public RepositoryManager() {
-        ReleaseRepository legacyEngineNightly = new LegacyJenkinsRepositoryAdapter(JENKINS_BASE_URL, "Terasology", Build.NIGHTLY, Profile.ENGINE);
-        ReleaseRepository legacyEngineStable = new LegacyJenkinsRepositoryAdapter(JENKINS_BASE_URL, "TerasologyStable", Build.STABLE, Profile.ENGINE);
-        ReleaseRepository legacyOmegaNightly = new LegacyJenkinsRepositoryAdapter(JENKINS_BASE_URL, "DistroOmega", Build.NIGHTLY, Profile.OMEGA);
-        ReleaseRepository legacyOmegaStable = new LegacyJenkinsRepositoryAdapter(JENKINS_BASE_URL, "DistroOmegaRelease", Build.STABLE, Profile.OMEGA);
-
         JenkinsClient client = new JenkinsClient(new Gson());
+
+        ReleaseRepository legacyEngineNightly = new LegacyJenkinsRepositoryAdapter(JENKINS_BASE_URL, "Terasology", Build.NIGHTLY, Profile.ENGINE, client);
+        ReleaseRepository legacyEngineStable = new LegacyJenkinsRepositoryAdapter(JENKINS_BASE_URL, "TerasologyStable", Build.STABLE, Profile.ENGINE, client);
+        ReleaseRepository legacyOmegaNightly = new LegacyJenkinsRepositoryAdapter(JENKINS_BASE_URL, "DistroOmega", Build.NIGHTLY, Profile.OMEGA, client);
+        ReleaseRepository legacyOmegaStable = new LegacyJenkinsRepositoryAdapter(JENKINS_BASE_URL, "DistroOmegaRelease", Build.STABLE, Profile.OMEGA, client);
+
         ReleaseRepository omegaNightly = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.NIGHTLY, client);
         ReleaseRepository omegaStable = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, client);
 

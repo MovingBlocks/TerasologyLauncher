@@ -3,7 +3,6 @@
 
 package org.terasology.launcher.repositories;
 
-import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,89 +39,12 @@ class JenkinsRepositoryAdapterTest {
     @BeforeAll
     static void setup() throws MalformedURLException {
         gson = new Gson();
-        validResult = gson.fromJson(validPayload(), Jenkins.ApiResult.class);
-        incompleteResults = incompletePayloads().stream()
+        validResult = gson.fromJson(JenkinsPayload.validPayload(), Jenkins.ApiResult.class);
+        incompleteResults = JenkinsPayload.incompletePayloads().stream()
                 .map(json -> gson.fromJson(json, Jenkins.ApiResult.class))
                 .collect(Collectors.toList());
         expectedArtifactUrl = new URL("http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/"
                 + "artifact/" + "distros/omega/build/distributions/TerasologyOmega.zip");
-    }
-
-    static String validPayload() {
-        return "{\n" +
-                "  \"builds\": [\n" +
-                "    {\n" +
-                "      \"artifacts\": [\n" +
-                "        {\n" +
-                "          \"fileName\": \"TerasologyOmega.zip\",\n" +
-                "          \"relativePath\": \"distros/omega/build/distributions/TerasologyOmega.zip\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "          \"fileName\": \"versionInfo.properties\",\n" +
-                "          \"relativePath\": \"distros/omega/versionInfo.properties\"\n" +
-                "        }\n" +
-                "      ],\n" +
-                "      \"number\": 1,\n" +
-                "      \"result\": \"SUCCESS\",\n" +
-                "      \"timestamp\": 1604285977306,\n" +
-                "      \"url\": \"http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/\"\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
-    }
-
-    static String nullArtifactsPayload() {
-        return "{ \n" +
-                "  \"builds\": [\n" +
-                "    {\n" +
-                "      \"number\": 1, \"result\": \"SUCCESS\", \"timestamp\": 1604285977306, \n" +
-                "      \"url\": \"http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/\"\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
-    }
-
-    static String emptyArtifactsPayload() {
-        return "{\n" +
-                "  \"builds\": [\n" +
-                "    {\n" +
-                "      \"artifacts\": [],\n" +
-                "      \"number\": 1,\n" +
-                "      \"result\": \"SUCCESS\",\n" +
-                "      \"timestamp\": 1604285977306,\n" +
-                "      \"url\": \"http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/\"\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
-    }
-
-    static String incompleteArtifactsPayload() {
-        return "{\n" +
-                "  \"builds\": [\n" +
-                "    {\n" +
-                "      \"artifacts\": [\n" +
-                "        {\n" +
-                "          \"fileName\": \"versionInfo.properties\",\n" +
-                "          \"relativePath\": \"distros/omega/versionInfo.properties\"\n" +
-                "        }\n" +
-                "      ],\n" +
-                "      \"number\": 1,\n" +
-                "      \"result\": \"SUCCESS\",\n" +
-                "      \"timestamp\": 1604285977306,\n" +
-                "      \"url\": \"http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/\"\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
-    }
-
-    static List<String> incompletePayloads() {
-        return List.of(
-                "{}",
-                "{ \"builds\": [] }",
-                nullArtifactsPayload(),
-                emptyArtifactsPayload(),
-                incompleteArtifactsPayload()
-        );
     }
 
     static Stream<Arguments> incompleteResults() {
@@ -180,27 +101,5 @@ class JenkinsRepositoryAdapterTest {
         final JenkinsClient stubClient = new StubJenkinsClient(url -> incompleteResult, url -> null);
         final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
         assertTrue(adapter.fetchReleases().isEmpty());
-    }
-
-    static class StubJenkinsClient extends JenkinsClient {
-        final Function<URL, Jenkins.ApiResult> request;
-        final Function<URL, Properties> requestProperties;
-
-        StubJenkinsClient(Function<URL, Jenkins.ApiResult> request, Function<URL, Properties> requestProperties) {
-            super(null);
-            this.request = request;
-            this.requestProperties = requestProperties;
-        }
-
-        @Override
-        public Jenkins.ApiResult request(URL url) {
-            return request.apply(url);
-        }
-
-        @Override
-        Properties requestProperties(URL artifactUrl) {
-            Preconditions.checkNotNull(artifactUrl);
-            return requestProperties.apply(artifactUrl);
-        }
     }
 }
