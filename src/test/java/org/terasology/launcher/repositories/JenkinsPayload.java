@@ -47,6 +47,35 @@ public class JenkinsPayload {
                     "  ]\n" +
                     "}\n";
         }
+
+        /**
+         * Missing build.actions, build.changeSet, and upstreamProjects
+         */
+        static String minimalValidPayload() {
+            return "{\n" +
+                    "  \"builds\": [\n" +
+                    "    {\n" +
+                    "      \"artifacts\": [\n" +
+                    "        {\n" +
+                    "          \"fileName\": \"TerasologyOmega.zip\",\n" +
+                    "          \"relativePath\": \"distros/omega/build/distributions/TerasologyOmega.zip\"\n" +
+                    "        }\n" +
+                    "      ],\n" +
+                    "      \"number\": 1123,\n" +
+                    "      \"result\": \"SUCCESS\",\n" +
+                    "      \"timestamp\": 1609713454443,\n" +
+                    "      \"url\": \"http://jenkins.terasology.org/job/DistroOmega/1123/\"\n" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}";
+        }
+
+        static List<String> incompletePayloads() {
+            return List.of(
+                    "{}",
+                    "{ \"builds\": [] }"
+            );
+        }
     }
 
     /**

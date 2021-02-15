@@ -76,9 +76,22 @@ class LegacyJenkinsRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("skip incomplete API results")
-    void skipIncompatibleApiResults() {
-        fail("not implemented");
+    @DisplayName("process minimal valid response correctly")
+    void processMinimalValidResponseCorrectly() {
+        final Jenkins.ApiResult minimalValidResult = gson.fromJson(JenkinsPayload.V1.minimalValidPayload(), Jenkins.ApiResult.class);
+        final JenkinsClient stubClient = new StubJenkinsClient(url -> minimalValidResult, url -> {
+            throw new RuntimeException();
+        });
+        final LegacyJenkinsRepositoryAdapter adapter =
+                new LegacyJenkinsRepositoryAdapter(BASE_URL, JOB, Build.STABLE, Profile.OMEGA, stubClient);
+
+        assertEquals(1, adapter.fetchReleases().size());
+        assertAll(
+                () -> assertEquals(expectedRelease.getId(), adapter.fetchReleases().get(0).getId()),
+                () -> assertEquals(expectedRelease.getUrl(), adapter.fetchReleases().get(0).getUrl()),
+                () -> assertEquals(expectedRelease.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp()),
+                () -> assertTrue(adapter.fetchReleases().get(0).getChangelog().isEmpty())
+        );
     }
 
 }
