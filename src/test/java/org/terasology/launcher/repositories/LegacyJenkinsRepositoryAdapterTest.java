@@ -38,7 +38,10 @@ class LegacyJenkinsRepositoryAdapterTest {
     @Test
     @DisplayName("handle null Jenkins response gracefully")
     void handleNullJenkinsResponseGracefully() {
-        fail("not implemented");
+        final JenkinsClient nullClient = new StubJenkinsClient(url -> null, url -> null);
+        final LegacyJenkinsRepositoryAdapter adapter =
+                new LegacyJenkinsRepositoryAdapter(BASE_URL, JOB, Build.STABLE, Profile.OMEGA, nullClient);
+        assertTrue(adapter.fetchReleases().isEmpty());
     }
 
     @Test
