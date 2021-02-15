@@ -47,7 +47,24 @@ class LegacyJenkinsRepositoryAdapterTest {
     @Test
     @DisplayName("process valid response correctly")
     void processValidResponseCorrectly() throws MalformedURLException {
-        fail("not implemented");
+        final Jenkins.ApiResult validResult = gson.fromJson(JenkinsPayload.V1.validPayload(), Jenkins.ApiResult.class);
+        final JenkinsClient stubClient = new StubJenkinsClient(url -> validResult, url -> {
+            throw new RuntimeException();
+        });
+        final LegacyJenkinsRepositoryAdapter adapter =
+                new LegacyJenkinsRepositoryAdapter(BASE_URL, JOB, Build.STABLE, Profile.OMEGA, stubClient);
+
+        final URL expectedArtifactUrl = new URL("http://jenkins.terasology.org/job/DistroOmega/1123/"
+                + "artifact/" + "distros/omega/build/distributions/TerasologyOmega.zip");
+        final GameIdentifier id = new GameIdentifier("1123", Build.STABLE, Profile.OMEGA);
+        final GameRelease expected = new GameRelease(id, expectedArtifactUrl, new ArrayList<>(), new Date(1609713454443L));
+
+        assertEquals(1, adapter.fetchReleases().size());
+        assertAll(
+                () -> assertEquals(expected.getId(), adapter.fetchReleases().get(0).getId()),
+                () -> assertEquals(expected.getUrl(), adapter.fetchReleases().get(0).getUrl()),
+                () -> assertEquals(expected.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp())
+        );
     }
 
     @Test
