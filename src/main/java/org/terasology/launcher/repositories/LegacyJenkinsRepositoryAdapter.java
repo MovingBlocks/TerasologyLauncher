@@ -63,19 +63,23 @@ class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
 
         try {
             final Jenkins.ApiResult result = client.request(new URL(apiUrl));
-            for (Jenkins.Build build : result.builds) {
-                if (isSuccess(build)) {
-                    final List<String> changelog = Arrays.stream(build.changeSet.items)
-                            .map(change -> change.msg)
-                            .collect(Collectors.toList());
-                    final String url = getArtifactUrl(build, TERASOLOGY_ZIP_PATTERN);
-                    if (url != null) {
-                        final GameIdentifier id = new GameIdentifier(build.number, buildProfile, profile);
-                        final Date timestamp = new Date(build.timestamp);
-                        final GameRelease release = new GameRelease(id, new URL(url), changelog, timestamp);
-                        pkgList.add(release);
+            if (result != null) {
+                for (Jenkins.Build build : result.builds) {
+                    if (isSuccess(build)) {
+                        final List<String> changelog = Arrays.stream(build.changeSet.items)
+                                .map(change -> change.msg)
+                                .collect(Collectors.toList());
+                        final String url = getArtifactUrl(build, TERASOLOGY_ZIP_PATTERN);
+                        if (url != null) {
+                            final GameIdentifier id = new GameIdentifier(build.number, buildProfile, profile);
+                            final Date timestamp = new Date(build.timestamp);
+                            final GameRelease release = new GameRelease(id, new URL(url), changelog, timestamp);
+                            pkgList.add(release);
+                        }
                     }
                 }
+            } else {
+                logger.warn("Failed to fetch packages from: {}", apiUrl);
             }
         } catch (MalformedURLException e) {
             logger.error("Invalid URL: {}", apiUrl, e);
