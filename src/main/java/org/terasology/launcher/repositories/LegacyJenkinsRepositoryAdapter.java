@@ -52,7 +52,7 @@ class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
         this.client = client;
     }
 
-    private boolean hasAcceptbleResult(Jenkins.Build build) {
+    private boolean hasAcceptableResult(Jenkins.Build build) {
         return build.result == Jenkins.Build.Result.SUCCESS || build.result == Jenkins.Build.Result.UNSTABLE;
     }
 
@@ -75,7 +75,7 @@ class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
             final Jenkins.ApiResult result = client.request(new URL(apiUrl));
             if (result != null && result.builds != null) {
                 for (Jenkins.Build build : result.builds) {
-                    if (hasAcceptbleResult(build)) {
+                    if (hasAcceptableResult(build)) {
                         final List<String> changelog = computeChangelogFrom(build.changeSet);
                         final URL url = client.getArtifactUrl(build, TERASOLOGY_ZIP_PATTERN);
                         if (url != null) {
