@@ -3,7 +3,6 @@
 
 package org.terasology.launcher.repositories;
 
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.model.Build;
@@ -74,16 +73,18 @@ class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
 
         try {
             final Jenkins.ApiResult result = client.request(new URL(apiUrl));
-            if (result != null) {
+            if (result != null && result.builds != null) {
                 for (Jenkins.Build build : result.builds) {
                     if (hasAcceptbleResult(build)) {
                         final List<String> changelog = computeChangelogFrom(build.changeSet);
-                        final String url = getArtifactUrl(build, TERASOLOGY_ZIP_PATTERN);
+                        final URL url = client.getArtifactUrl(build, TERASOLOGY_ZIP_PATTERN);
                         if (url != null) {
                             final GameIdentifier id = new GameIdentifier(build.number, buildProfile, profile);
                             final Date timestamp = new Date(build.timestamp);
-                            final GameRelease release = new GameRelease(id, new URL(url), changelog, timestamp);
+                            final GameRelease release = new GameRelease(id, url, changelog, timestamp);
                             pkgList.add(release);
+                        } else {
+                            logger.debug("Skipping build without game artifact: '{}'", build.url);
                         }
                     }
                 }
@@ -94,14 +95,5 @@ class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
             logger.error("Invalid URL: {}", apiUrl, e);
         }
         return pkgList;
-    }
-
-    @Nullable
-    private String getArtifactUrl(Jenkins.Build build, String regex) {
-        return Arrays.stream(build.artifacts)
-                .filter(artifact -> artifact.fileName.matches(regex))
-                .findFirst()
-                .map(artifact -> build.url + "artifact/" + artifact.relativePath)
-                .orElse(null);
     }
 }
