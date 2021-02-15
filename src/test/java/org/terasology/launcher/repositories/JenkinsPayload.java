@@ -162,6 +162,9 @@ public class JenkinsPayload {
                 "}";
     }
 
+    /**
+     * Both artifacts {@code versionInfo.properties} and {@code TerasologyOmega.zip} are required, this is missing one of them.
+     */
     static String incompleteArtifactsPayload() {
         return "{\n" +
                 "  \"builds\": [\n" +
