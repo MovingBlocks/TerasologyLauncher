@@ -3,7 +3,6 @@
 
 package org.terasology.launcher.repositories;
 
-import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -103,27 +101,5 @@ class JenkinsRepositoryAdapterTest {
         final JenkinsClient stubClient = new StubJenkinsClient(url -> incompleteResult, url -> null);
         final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
         assertTrue(adapter.fetchReleases().isEmpty());
-    }
-
-    static class StubJenkinsClient extends JenkinsClient {
-        final Function<URL, Jenkins.ApiResult> request;
-        final Function<URL, Properties> requestProperties;
-
-        StubJenkinsClient(Function<URL, Jenkins.ApiResult> request, Function<URL, Properties> requestProperties) {
-            super(null);
-            this.request = request;
-            this.requestProperties = requestProperties;
-        }
-
-        @Override
-        public Jenkins.ApiResult request(URL url) {
-            return request.apply(url);
-        }
-
-        @Override
-        Properties requestProperties(URL artifactUrl) {
-            Preconditions.checkNotNull(artifactUrl);
-            return requestProperties.apply(artifactUrl);
-        }
     }
 }
