@@ -70,10 +70,39 @@ public class JenkinsPayload {
                     "}";
         }
 
-        static List<String> incompletePayloads() {
+        static String nullArtifactsPayload() {
+            return "{\n" +
+                    "  \"builds\": [\n" +
+                    "    {\n" +
+                    "      \"number\": 1123,\n" +
+                    "      \"result\": \"SUCCESS\",\n" +
+                    "      \"timestamp\": 1609713454443,\n" +
+                    "      \"url\": \"http://jenkins.terasology.org/job/DistroOmega/1123/\"\n" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}";
+        }
+
+        static String emptyArtifactsPayload() {
+            return "{\n" +
+                    "  \"builds\": [\n" +
+                    "    {\n" +
+                    "      \"artifacts\": [],\n" +
+                    "      \"number\": 1123,\n" +
+                    "      \"result\": \"SUCCESS\",\n" +
+                    "      \"timestamp\": 1609713454443,\n" +
+                    "      \"url\": \"http://jenkins.terasology.org/job/DistroOmega/1123/\"\n" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}";
+        }
+
+        static List<String> incompatiblePayloads() {
             return List.of(
                     "{}",
-                    "{ \"builds\": [] }"
+                    "{ \"builds\": [] }",
+                    nullArtifactsPayload(),
+                    emptyArtifactsPayload()
             );
         }
     }

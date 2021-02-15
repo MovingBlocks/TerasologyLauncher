@@ -7,6 +7,9 @@ import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
@@ -16,11 +19,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("LegacyJenkinsRepositoryAdapter#fetchReleases() should")
 class LegacyJenkinsRepositoryAdapterTest {
@@ -94,4 +97,22 @@ class LegacyJenkinsRepositoryAdapterTest {
         );
     }
 
+    static Stream<Arguments> incompatibleApiResults() {
+        return JenkinsPayload.V1.incompatiblePayloads().stream()
+                .map(payload -> gson.fromJson(payload, Jenkins.ApiResult.class))
+                .map(Arguments::of);
+    }
+
+    @ParameterizedTest
+    @DisplayName("skip incomplete API results")
+    @MethodSource("incompatibleApiResults")
+    void skipIncompatibleApiResults(Jenkins.ApiResult result) {
+        final JenkinsClient stubClient = new StubJenkinsClient(url -> result, url -> {
+            throw new RuntimeException();
+        });
+        final LegacyJenkinsRepositoryAdapter adapter =
+                new LegacyJenkinsRepositoryAdapter(BASE_URL, JOB, Build.STABLE, Profile.OMEGA, stubClient);
+
+        assertTrue(adapter.fetchReleases().isEmpty());
+    }
 }
