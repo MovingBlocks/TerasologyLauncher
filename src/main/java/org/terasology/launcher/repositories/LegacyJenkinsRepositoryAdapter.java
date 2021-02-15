@@ -3,7 +3,6 @@
 
 package org.terasology.launcher.repositories;
 
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.model.Build;
@@ -13,10 +12,12 @@ import org.terasology.launcher.model.Profile;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
@@ -51,8 +52,17 @@ class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
         this.client = client;
     }
 
-    private boolean isSuccess(Jenkins.Build build) {
+    private boolean hasAcceptableResult(Jenkins.Build build) {
         return build.result == Jenkins.Build.Result.SUCCESS || build.result == Jenkins.Build.Result.UNSTABLE;
+    }
+
+    private List<String> computeChangelogFrom(Jenkins.ChangeSet changeSet) {
+        return Optional.ofNullable(changeSet)
+                .map(changes ->
+                        Arrays.stream(changes.items)
+                                .map(change -> change.msg)
+                                .collect(Collectors.toList()))
+                .orElse(new ArrayList<>());
     }
 
     public List<GameRelease> fetchReleases() {
@@ -63,32 +73,27 @@ class LegacyJenkinsRepositoryAdapter implements ReleaseRepository {
 
         try {
             final Jenkins.ApiResult result = client.request(new URL(apiUrl));
-            for (Jenkins.Build build : result.builds) {
-                if (isSuccess(build)) {
-                    final List<String> changelog = Arrays.stream(build.changeSet.items)
-                            .map(change -> change.msg)
-                            .collect(Collectors.toList());
-                    final String url = getArtifactUrl(build, TERASOLOGY_ZIP_PATTERN);
-                    if (url != null) {
-                        final GameIdentifier id = new GameIdentifier(build.number, buildProfile, profile);
-                        final Date timestamp = new Date(build.timestamp);
-                        final GameRelease release = new GameRelease(id, new URL(url), changelog, timestamp);
-                        pkgList.add(release);
+            if (result != null && result.builds != null) {
+                for (Jenkins.Build build : result.builds) {
+                    if (hasAcceptableResult(build)) {
+                        final List<String> changelog = computeChangelogFrom(build.changeSet);
+                        final URL url = client.getArtifactUrl(build, TERASOLOGY_ZIP_PATTERN);
+                        if (url != null) {
+                            final GameIdentifier id = new GameIdentifier(build.number, buildProfile, profile);
+                            final Date timestamp = new Date(build.timestamp);
+                            final GameRelease release = new GameRelease(id, url, changelog, timestamp);
+                            pkgList.add(release);
+                        } else {
+                            logger.debug("Skipping build without game artifact: '{}'", build.url);
+                        }
                     }
                 }
+            } else {
+                logger.warn("Failed to fetch packages from: {}", apiUrl);
             }
         } catch (MalformedURLException e) {
             logger.error("Invalid URL: {}", apiUrl, e);
         }
         return pkgList;
-    }
-
-    @Nullable
-    private String getArtifactUrl(Jenkins.Build build, String regex) {
-        return Arrays.stream(build.artifacts)
-                .filter(artifact -> artifact.fileName.matches(regex))
-                .findFirst()
-                .map(artifact -> build.url + "artifact/" + artifact.relativePath)
-                .orElse(null);
     }
 }

@@ -3,7 +3,6 @@
 
 package org.terasology.launcher.repositories;
 
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.model.Build;
@@ -45,7 +44,6 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
             + "url]";
 
     private static final String TERASOLOGY_ZIP_PATTERN = "Terasology.*zip";
-    private static final String ARTIFACT = "artifact/";
 
     private final JenkinsClient client;
 
@@ -79,7 +77,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
 
     private Optional<GameRelease> computeReleaseFrom(Jenkins.Build jenkinsBuildInfo) {
         if (hasAcceptableResult(jenkinsBuildInfo)) {
-            final URL url = getArtifactUrl(jenkinsBuildInfo, TERASOLOGY_ZIP_PATTERN);
+            final URL url = client.getArtifactUrl(jenkinsBuildInfo, TERASOLOGY_ZIP_PATTERN);
             final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
             final List<String> changelog = computeChangelogFrom(jenkinsBuildInfo);
             final Optional<GameIdentifier> id = computeIdentifierFrom(jenkinsBuildInfo);
@@ -96,7 +94,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     }
 
     private Optional<GameIdentifier> computeIdentifierFrom(Jenkins.Build jenkinsBuildInfo) {
-        return Optional.ofNullable(getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"))
+        return Optional.ofNullable(client.getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"))
                 .map(client::requestProperties)
                 .map(versionInfo -> versionInfo.getProperty("displayVersion"))
                 .map(displayVersion -> new GameIdentifier(displayVersion, buildProfile, profile));
@@ -154,27 +152,5 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
 
     private static boolean hasAcceptableResult(Jenkins.Build build) {
         return build.result == Jenkins.Build.Result.SUCCESS || build.result == Jenkins.Build.Result.UNSTABLE;
-    }
-
-    @Nullable
-    private URL getArtifactUrl(Jenkins.Build build, String regex) {
-        if (build.artifacts == null || build.url == null) {
-            return null;
-        }
-        Optional<String> url = Arrays.stream(build.artifacts)
-                .filter(artifact -> artifact.fileName.matches(regex))
-                .findFirst()
-                .map(artifact -> build.url + ARTIFACT + artifact.relativePath);
-
-        if (url.isPresent()) {
-            try {
-                return new URL(url.get());
-            } catch (MalformedURLException e) {
-                logger.debug("Invalid URL: '{}'", url, e);
-            }
-        } else {
-            logger.debug("Cannot find artifact matching '{}' for build '{}'", regex, build.url);
-        }
-        return null;
     }
 }
