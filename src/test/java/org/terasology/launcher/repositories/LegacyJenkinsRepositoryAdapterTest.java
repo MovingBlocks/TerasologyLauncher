@@ -14,6 +14,7 @@ import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
+import org.terasology.launcher.model.ReleaseMetadata;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -46,7 +47,8 @@ class LegacyJenkinsRepositoryAdapterTest {
         try {
             final URL expectedArtifactUrl = new URL(validResult.builds[0].url + "artifact/" + validResult.builds[0].artifacts[0].relativePath);
             final GameIdentifier id = new GameIdentifier(validResult.builds[0].number, Build.STABLE, Profile.OMEGA);
-            return new GameRelease(id, expectedArtifactUrl, new ArrayList<>(), new Date(validResult.builds[0].timestamp));
+            final ReleaseMetadata releaseMetadata = new ReleaseMetadata(new ArrayList<>(), new Date(validResult.builds[0].timestamp), true);
+            return new GameRelease(id, expectedArtifactUrl, releaseMetadata);
         } catch (MalformedURLException e) {
             throw new RuntimeException("Error in test setup!");
         }
