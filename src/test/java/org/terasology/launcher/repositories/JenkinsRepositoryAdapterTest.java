@@ -14,6 +14,7 @@ import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
+import org.terasology.launcher.model.ReleaseMetadata;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -82,7 +83,8 @@ class JenkinsRepositoryAdapterTest {
         final JenkinsClient stubClient = new StubJenkinsClient(url -> validResult, url -> versionInfo);
 
         final GameIdentifier id = new GameIdentifier(expectedVersion, Build.STABLE, Profile.OMEGA);
-        final GameRelease expected = new GameRelease(id, expectedArtifactUrl, new ArrayList<>(), new Date(1604285977306L));
+        final ReleaseMetadata releaseMetadata = new ReleaseMetadata(new ArrayList<>(), new Date(1604285977306L), true);
+        final GameRelease expected = new GameRelease(id, expectedArtifactUrl, releaseMetadata);
 
         final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
 
@@ -90,7 +92,9 @@ class JenkinsRepositoryAdapterTest {
         assertAll(
                 () -> assertEquals(expected.getId(), adapter.fetchReleases().get(0).getId()),
                 () -> assertEquals(expected.getUrl(), adapter.fetchReleases().get(0).getUrl()),
-                () -> assertEquals(expected.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp())
+                () -> assertEquals(expected.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp()),
+                () -> assertEquals(expected.isLwjgl3(), adapter.fetchReleases().get(0).isLwjgl3(),
+                        "Jenkins adapter should assume only builds for LWJGL v3 releases")
         );
     }
 

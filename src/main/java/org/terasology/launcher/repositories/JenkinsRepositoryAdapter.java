@@ -9,6 +9,7 @@ import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
+import org.terasology.launcher.model.ReleaseMetadata;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -78,12 +79,12 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     private Optional<GameRelease> computeReleaseFrom(Jenkins.Build jenkinsBuildInfo) {
         if (hasAcceptableResult(jenkinsBuildInfo)) {
             final URL url = client.getArtifactUrl(jenkinsBuildInfo, TERASOLOGY_ZIP_PATTERN);
-            final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
-            final List<String> changelog = computeChangelogFrom(jenkinsBuildInfo);
+
+            final ReleaseMetadata metadata = computeReleaseMetadataFrom(jenkinsBuildInfo);
             final Optional<GameIdentifier> id = computeIdentifierFrom(jenkinsBuildInfo);
 
             if (url != null && id.isPresent()) {
-                return Optional.of(new GameRelease(id.get(), url, changelog, timestamp));
+                return Optional.of(new GameRelease(id.get(), url, metadata));
             } else {
                 logger.debug("Skipping build without game artifact or version identifier: '{}'", jenkinsBuildInfo.url);
             }
@@ -100,10 +101,17 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
                 .map(displayVersion -> new GameIdentifier(displayVersion, buildProfile, profile));
     }
 
-    private List<String> computeChangelogFrom(Jenkins.Build jenkinsBuildInfo) {
-        return Optional.ofNullable(jenkinsBuildInfo.changeSet)
-                .map(changeSet ->
-                        Arrays.stream(changeSet.items)
+    private ReleaseMetadata computeReleaseMetadataFrom(Jenkins.Build jenkinsBuildInfo) {
+        List<String> changelog = computeChangelogFrom(jenkinsBuildInfo.changeSet);
+        final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
+        // all builds from this Jenkins are using LWJGL v3
+        return new ReleaseMetadata(changelog, timestamp, true);
+    }
+
+    private List<String> computeChangelogFrom(Jenkins.ChangeSet changeSet) {
+        return Optional.ofNullable(changeSet)
+                .map(changes ->
+                        Arrays.stream(changes.items)
                                 .map(change -> change.msg)
                                 .collect(Collectors.toList())
                 ).orElse(new ArrayList<>());
