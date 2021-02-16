@@ -5,7 +5,7 @@ package org.terasology.launcher.repositories;
 
 import java.util.List;
 
-public class JenkinsPayload {
+class JenkinsPayload {
     private JenkinsPayload() {
 
     }
@@ -14,6 +14,21 @@ public class JenkinsPayload {
      * Example payloads from the "old" Jenkins at http://jenkins.terasology.org
      */
     static class V1 {
+        static String minimalValidBuildPayload() {
+            return "{\n" +
+                    "  \"artifacts\": [\n" +
+                    "    {\n" +
+                    "      \"fileName\": \"TerasologyOmega.zip\",\n" +
+                    "      \"relativePath\": \"distros/omega/build/distributions/TerasologyOmega.zip\"\n" +
+                    "    }\n" +
+                    "  ],\n" +
+                    "  \"number\": 1123,\n" +
+                    "  \"result\": \"SUCCESS\",\n" +
+                    "  \"timestamp\": 1609713454443,\n" +
+                    "  \"url\": \"http://jenkins.terasology.org/job/DistroOmega/1123/\"\n" +
+                    "}\n";
+        }
+
         static String validPayload() {
             return "{\n" +
                     "  \"builds\": [\n" +
