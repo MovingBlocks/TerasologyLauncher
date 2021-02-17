@@ -19,18 +19,18 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
 
-public class JenkinsClient {
+class JenkinsClient {
 
     private static final Logger logger = LoggerFactory.getLogger(JenkinsClient.class);
 
     private static final String ARTIFACT = "artifact/";
     private final Gson gson;
 
-    public JenkinsClient(Gson gson) {
+    JenkinsClient(Gson gson) {
         this.gson = gson;
     }
 
-    public Jenkins.ApiResult request(URL url) {
+    Jenkins.ApiResult request(URL url) {
         Preconditions.checkNotNull(url);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
             return gson.fromJson(reader, Jenkins.ApiResult.class);
