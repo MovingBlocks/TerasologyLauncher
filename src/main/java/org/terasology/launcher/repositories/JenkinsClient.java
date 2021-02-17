@@ -5,6 +5,8 @@ package org.terasology.launcher.repositories;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,23 +21,25 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
 
-public class JenkinsClient {
+class JenkinsClient {
 
     private static final Logger logger = LoggerFactory.getLogger(JenkinsClient.class);
 
     private static final String ARTIFACT = "artifact/";
     private final Gson gson;
 
-    public JenkinsClient(Gson gson) {
+    JenkinsClient(Gson gson) {
         this.gson = gson;
     }
 
-    public Jenkins.ApiResult request(URL url) {
+    Jenkins.ApiResult request(URL url) {
         Preconditions.checkNotNull(url);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
             return gson.fromJson(reader, Jenkins.ApiResult.class);
+        } catch (JsonSyntaxException | JsonIOException e) {
+            logger.warn("Failed to read JSON from '{}'", url.toExternalForm(), e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.warn("Failed to read from URL: {}", url.toExternalForm(), e);
         }
         return null;
     }
