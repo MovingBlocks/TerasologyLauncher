@@ -98,7 +98,10 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
         return Optional.ofNullable(client.getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"))
                 .map(client::requestProperties)
                 .map(versionInfo -> versionInfo.getProperty("displayVersion"))
-                .map(displayVersion -> new GameIdentifier(displayVersion, buildProfile, profile));
+                .map(displayVersion -> {
+                    String versionString = displayVersion + "+" + jenkinsBuildInfo.number;
+                    return new GameIdentifier(versionString, buildProfile, profile);
+                });
     }
 
     private ReleaseMetadata computeReleaseMetadataFrom(Jenkins.Build jenkinsBuildInfo) {
