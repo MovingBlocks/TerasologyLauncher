@@ -2,6 +2,18 @@
 
 ## 4.4.0 (not released)
 
+## 4.3.2 (2021-02-21)
+
+### 🐛 Bug Fixes
+
+- #631 fix: append build number to version in JenkinsRepositoryAdapter (@skaldarnar)
+
+### 🧰 Maintenance
+
+- #633 chore: address checkstyle warnings (add doc, optimize imports) (@skaldarnar)
+- #632 chore: sort test payloads into V1 and V2 (addresses checkstyle warnings) (@skaldarnar)
+- #629 test(JenkinsClient): add tests for exceptional cases on JenkinsClient (@skaldarnar)
+
 ## 4.3.1 (2021-02-16)
 
 ### 🐛 Bug Fixes
