@@ -13,9 +13,9 @@ import java.util.List;
  * {@code timestamp}) or for managing and starting the game itself (e.g., {@code isLwjgl3}).
  */
 public class ReleaseMetadata {
-    final List<String> changelog;
-    final Date timestamp;
-    final boolean isLwjgl3;
+    private final List<String> changelog;
+    private final Date timestamp;
+    private final boolean isLwjgl3;
 
     public ReleaseMetadata(List<String> changelog, Date timestamp, boolean isLwjgl3) {
         this.changelog = changelog;

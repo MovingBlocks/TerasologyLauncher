@@ -44,10 +44,10 @@ public class GameRelease {
     }
 
     public Date getTimestamp() {
-        return releaseMetadata.timestamp;
+        return releaseMetadata.getTimestamp();
     }
 
     public boolean isLwjgl3() {
-        return releaseMetadata.isLwjgl3;
+        return releaseMetadata.isLwjgl3();
     }
 }
