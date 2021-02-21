@@ -40,14 +40,14 @@ public class GameRelease {
      * The changelog associated with the game release
      */
     public List<String> getChangelog() {
-        return releaseMetadata.changelog;
+        return releaseMetadata.getChangelog();
     }
 
     public Date getTimestamp() {
-        return releaseMetadata.timestamp;
+        return releaseMetadata.getTimestamp();
     }
 
     public boolean isLwjgl3() {
-        return releaseMetadata.isLwjgl3;
+        return releaseMetadata.isLwjgl3();
     }
 }
