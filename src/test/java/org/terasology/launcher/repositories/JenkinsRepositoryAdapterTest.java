@@ -40,8 +40,8 @@ class JenkinsRepositoryAdapterTest {
     @BeforeAll
     static void setup() throws MalformedURLException {
         gson = new Gson();
-        validResult = gson.fromJson(JenkinsPayload.validPayload(), Jenkins.ApiResult.class);
-        incompleteResults = JenkinsPayload.incompletePayloads().stream()
+        validResult = gson.fromJson(JenkinsPayload.V2.validPayload(), Jenkins.ApiResult.class);
+        incompleteResults = JenkinsPayload.V2.incompletePayloads().stream()
                 .map(json -> gson.fromJson(json, Jenkins.ApiResult.class))
                 .collect(Collectors.toList());
         expectedArtifactUrl = new URL("http://jenkins.terasology.io/teraorg/job/Nanoware/job/Omega/job/develop/1/"
