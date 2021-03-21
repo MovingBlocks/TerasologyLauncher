@@ -67,7 +67,6 @@ ext {
 repositories {
     // Main Maven repo
     mavenCentral()
-    jcenter()
     maven {
         // MovingBlocks Artifactory instance(s) for libs not readily available elsewhere plus our own libs
         name "Terasology Artifactory"
