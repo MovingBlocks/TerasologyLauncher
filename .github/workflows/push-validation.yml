@@ -52,3 +52,5 @@ jobs:
         label: code-analysis
         token: ${{ secrets.CHECK_RUN_REPORTER_TOKEN }}
         report: 'build/reports/**/*.xml'
+    - name: Generate start scripts
+      run: ./gradlew startScripts
