@@ -1,23 +1,12 @@
---- TerasologyLauncher.bat.orig	2020-03-26 13:32:00.000000000 +0100
-+++ TerasologyLauncher.bat	2020-03-26 13:33:26.000000000 +0100
-@@ -35,6 +35,12 @@
+--- TerasologyLauncher.bat.orig	2021-05-02 14:29:21.400926009 +0200
++++ TerasologyLauncher.bat	2021-05-02 14:29:22.976979564 +0200
+@@ -35,6 +35,9 @@
  @rem Add default JVM options here. You can also use JAVA_OPTS and TERASOLOGY_LAUNCHER_OPTS to pass JVM options to this script.
  set DEFAULT_JVM_OPTS=
  
 +@rem Use bundled JRE when available
-+if not exist %APP_HOME%\jre\ goto findJava
-+set JAVA_EXE=%APP_HOME%\jre\bin\java.exe
-+goto init
++if exist %APP_HOME%\jre\ set JAVA_HOME=%APP_HOME%\jre
 +
-+:findJava
  @rem Find java.exe
  if defined JAVA_HOME goto findJavaFromJavaHome
  
-@@ -65,6 +71,7 @@
- goto fail
- 
- :init
-+
- @rem Get command-line arguments, handling Windows variants
- 
- if not "%OS%" == "Windows_NT" goto win9xME_args
