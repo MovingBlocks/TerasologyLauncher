@@ -2,6 +2,17 @@
 
 ## 4.4.0 (not released)
 
+## 4.3.3 (2021-05-02)
+
+### 🐛 Bug Fixes
+
+- #639 fix: use custom start scripts instead of brittle patch files (@skaldarnar)
+
+### 🧰 Maintenance
+
+- #637 build: remove jcenter (@jdrueckert)
+- #636 build: remove jcenter dependency (@skaldarnar)
+
 ## 4.3.2 (2021-02-21)
 
 ### 🐛 Bug Fixes
