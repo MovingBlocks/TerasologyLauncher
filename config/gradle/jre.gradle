@@ -113,11 +113,13 @@ distributions {
 startScripts.doLast {
     ant.patch(
             originalfile: unixScript,
-            patchfile: file("$projectDir/buildres/scripts/${file(unixScript).name}.patch")
+            patchfile: file("$projectDir/buildres/scripts/${file(unixScript).name}.patch"),
+            failOnError: true
     )
 
     ant.patch(
             originalfile: windowsScript,
-            patchfile: file("$projectDir/buildres/scripts/${file(windowsScript).name}.patch")
+            patchfile: file("$projectDir/buildres/scripts/${file(windowsScript).name}.patch"),
+            failOnError: true
     )
 }
