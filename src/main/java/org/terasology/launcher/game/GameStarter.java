@@ -35,7 +35,10 @@ class GameStarter implements Callable<Process> {
      * @param gameParams        additional arguments for the Terasology command line
      * @param logLevel          the minimum level of log events Terasology will include on its output stream to us
      */
-    GameStarter(Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
+    GameStarter(Path gamePath, Path gameDataDirectory,
+                JavaHeapSize heapMin, JavaHeapSize heapMax,
+                List<String> javaParams,
+                List<String> gameParams,
                 Level logLevel) {
         final List<String> processParameters = new ArrayList<>();
         processParameters.add(getRuntimePath().toString());
@@ -49,8 +52,19 @@ class GameStarter implements Callable<Process> {
         processParameters.add("-DlogOverrideLevel=" + logLevel.name());
         processParameters.addAll(javaParams);
 
+        // Locate the main game jar. Currently, Terasology has custom build logic to put libraries into a 'libs'
+        // (plural) subdirectory. As we plan to switch to using default Gradle behavior we have to do a quick check
+        // how the game distribution was build (i.e., custom 'libs' or default 'lib').
+        //TODO: this should probably be part of ReleaseMetadata and be determined further up the hierarchy
         processParameters.add("-jar");
-        processParameters.add(gamePath.resolve(Path.of("libs", "Terasology.jar")).toString());
+        if (gamePath.resolve("libs").toFile().isDirectory()) {
+            // custom Terasology build logic puts libraries into 'libs' subdirectory
+            processParameters.add(gamePath.resolve(Path.of("libs", "Terasology.jar")).toString());
+        } else {
+            // Gradle defaults to putting libraries in a 'lib' subdirectory
+            processParameters.add(gamePath.resolve(Path.of("lib", "Terasology.jar")).toString());
+        }
+
         processParameters.add("-homedir=" + gameDataDirectory.toAbsolutePath().toString());
         processParameters.addAll(gameParams);
 
