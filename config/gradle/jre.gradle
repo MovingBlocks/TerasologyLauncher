@@ -107,17 +107,13 @@ distributions {
     }
 }
 
-/**
- * Patch start scripts to use bundled JRE. Patch files are located in 'buildres/scripts'.
- */
-startScripts.doLast {
-    ant.patch(
-            originalfile: unixScript,
-            patchfile: file("$projectDir/buildres/scripts/${file(unixScript).name}.patch")
-    )
+tasks.withType(CreateStartScripts) {
+    def unixTemplate = file("$projectDir/buildres/scripts/unixStartScript.txt")
+    def windowsTemplate = file("$projectDir/buildres/scripts/windowsStartScript.txt")
 
-    ant.patch(
-            originalfile: windowsScript,
-            patchfile: file("$projectDir/buildres/scripts/${file(windowsScript).name}.patch")
-    )
+    assert project.file(unixTemplate).exists()
+    assert project.file(windowsTemplate).exists()
+
+    unixStartScriptGenerator.template = resources.text.fromFile(unixTemplate)
+    windowsStartScriptGenerator.template = resources.text.fromFile(windowsTemplate)
 }
