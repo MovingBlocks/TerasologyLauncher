@@ -87,6 +87,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path gameDirectory = getDirectoryFor(LauncherManagedDirectory.GAMES, installationDirectory);
             final Path gameDataDirectory = getGameDataDirectory(platform, launcherSettings.getGameDataDirectory());
 
+            updateMessage(BundleUtils.getLabel("splash_fetchReleases"));
             logger.info("Fetching game releases ...");
             final RepositoryManager repositoryManager = new RepositoryManager();
             Set<GameRelease> releases = repositoryManager.getReleases();
