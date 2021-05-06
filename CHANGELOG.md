@@ -2,6 +2,12 @@
 
 ## 4.4.0 (not released)
 
+## 4.3.4 (2021-05-06)
+
+### 🐛 Bug Fixes
+
+- #641 fix: add connection timeout; remove legacy jenkins adapter (@skaldarnar)
+
 ## 4.3.3 (2021-05-02)
 
 ### 🐛 Bug Fixes
