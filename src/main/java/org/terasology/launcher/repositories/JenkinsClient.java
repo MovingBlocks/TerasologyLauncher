@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
@@ -32,14 +33,35 @@ class JenkinsClient {
         this.gson = gson;
     }
 
+    /**
+     * Open an input stream from the given URL with a default timeout configured.
+     *
+     * The shorthand {@link URL#openStream()} does not allow for setting a connection timeout. Therefore, we interleave
+     * the original implementation {@code openConnection().getInputStream()} with a step to configure a default timeout.
+     *
+     * The default timeout is 10 seconds.
+     *
+     * @param url the URL to open the stream for
+     * @return an input stream similar to {@code url.openStream()} with a connection timeout of 10 seconds
+     * @throws IOException if opening the URL connection or retrieving the input stream fails
+     */
+    static InputStream openStream(URL url) throws IOException {
+        // this is a static member to indicate that it is independent of the client itself, and to cleanly stub it for
+        // testing purposes without the need to mock the class-under-test itself.
+        URLConnection connection = url.openConnection();
+        connection.setConnectTimeout(10 * 1000);
+        return connection.getInputStream();
+    }
+
     Jenkins.ApiResult request(URL url) {
         Preconditions.checkNotNull(url);
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(openStream(url)))) {
             return gson.fromJson(reader, Jenkins.ApiResult.class);
         } catch (JsonSyntaxException | JsonIOException e) {
             logger.warn("Failed to read JSON from '{}'", url.toExternalForm(), e);
         } catch (IOException e) {
-            logger.warn("Failed to read from URL: {}", url.toExternalForm(), e);
+            logger.warn("Failed to read from URL '{}'\n\t{}", e.getMessage(), url.toExternalForm());
         }
         return null;
     }
@@ -47,7 +69,7 @@ class JenkinsClient {
     @Nullable
     Properties requestProperties(final URL artifactUrl) {
         Preconditions.checkNotNull(artifactUrl);
-        try (InputStream inputStream = artifactUrl.openStream()) {
+        try (InputStream inputStream = openStream(artifactUrl)) {
             final Properties properties = new Properties();
             properties.load(inputStream);
             return properties;
