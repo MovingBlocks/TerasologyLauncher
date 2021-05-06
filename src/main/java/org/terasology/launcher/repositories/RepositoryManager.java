@@ -38,7 +38,7 @@ public class RepositoryManager {
     }
 
     private Set<GameRelease> fetchReleases(final Set<ReleaseRepository> repositories) {
-        return repositories.stream()
+        return repositories.parallelStream()
                 .map(ReleaseRepository::fetchReleases)
                 .flatMap(List::stream)
                 .collect(Collectors.toSet());
