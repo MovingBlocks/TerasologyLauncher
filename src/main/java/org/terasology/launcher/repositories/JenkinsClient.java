@@ -45,7 +45,9 @@ class JenkinsClient {
      * @return an input stream similar to {@code url.openStream()} with a connection timeout of 10 seconds
      * @throws IOException if opening the URL connection or retrieving the input stream fails
      */
-    private InputStream openStream(URL url) throws IOException {
+    static InputStream openStream(URL url) throws IOException {
+        // this is a static member to indicate that it is independent of the client itself, and to cleanly stub it for
+        // testing purposes without the need to mock the class-under-test itself.
         URLConnection connection = url.openConnection();
         connection.setConnectTimeout(10 * 1000);
         return connection.getInputStream();
