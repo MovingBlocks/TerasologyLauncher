@@ -213,7 +213,7 @@ public class ApplicationController {
         selectedRelease.bind(gameReleaseComboBox.getSelectionModel().selectedItemProperty());
         //TODO: instead of imperatively updating the changelog view its value should be bound via property, too
         selectedRelease.addListener(
-                (observable, oldValue, newValue) -> changelogViewController.update(newValue != null ? newValue.getChangelog() : Collections.emptyList()));
+                (observable, oldValue, newValue) -> changelogViewController.update(newValue != null ? newValue.getChangelog() : ""));
     }
 
     /**

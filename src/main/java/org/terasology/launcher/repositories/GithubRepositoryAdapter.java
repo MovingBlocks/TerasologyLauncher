@@ -3,6 +3,8 @@
 
 package org.terasology.launcher.repositories;
 
+import com.vdurmont.semver4j.Semver;
+import com.vdurmont.semver4j.SemverException;
 import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHRepository;
@@ -17,7 +19,6 @@ import org.terasology.launcher.model.ReleaseMetadata;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -27,6 +28,12 @@ import java.util.stream.Collectors;
 public class GithubRepositoryAdapter implements ReleaseRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(GithubRepositoryAdapter.class);
+
+    /**
+     * The preview release of v4.1.0-rc.1 is the first release with LWJGL v3.
+     * See https://github.com/MovingBlocks/Terasology/releases/tag/v4.1.0-rc.1
+     */
+    private static final Semver FIRST_LWJGL3_RELEASE = new Semver("4.1.0-rc.1");
 
     private GitHub github;
 
@@ -42,19 +49,26 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
     static GameRelease fromGithubRelease(GHRelease ghRelease) {
         final Profile profile = Profile.OMEGA;
         final Build build = ghRelease.isPrerelease() ? Build.NIGHTLY : Build.STABLE;
-        final String version = ghRelease.getTagName();
-
+        final String tagName = ghRelease.getTagName();
         try {
-            final Optional<GHAsset> gameAsset = ghRelease.assets().stream().filter(asset -> asset.getName().matches("Terasology.*zip")).findFirst();
-            final URL url = new URL(gameAsset.map(GHAsset::getBrowserDownloadUrl).orElse(null));
+            final Semver version;
+            if (tagName.startsWith("v")) {
+                version = new Semver(tagName.substring(1));
+            } else {
+                version = new Semver(tagName);
+            }
 
-            final List<String> changelog = Arrays.asList(ghRelease.getBody().split("\n"));
-            GameIdentifier id = new GameIdentifier(version, build, profile);
-            //TODO: figure out which release first switched to LWJGL v3
-            ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at(), true);
+            final Optional<GHAsset> gameAsset = ghRelease.assets().stream().filter(asset -> asset.getName().matches("Terasology.*zip")).findFirst();
+            final URL url = new URL(gameAsset.map(GHAsset::getBrowserDownloadUrl).orElseThrow(() -> new IOException("Missing game asset.")));
+
+            final String changelog = ghRelease.getBody();
+            GameIdentifier id = new GameIdentifier(version.toString(), build, profile);
+
+            boolean isLwjgl3 = version.isGreaterThanOrEqualTo(FIRST_LWJGL3_RELEASE);
+            ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at(), isLwjgl3);
             return new GameRelease(id, url, metadata);
-        } catch (IOException e) {
-            logger.warn("Could not create game release from Github release {}", ghRelease.getHtmlUrl(), e);
+        } catch (SemverException | IOException e) {
+            logger.info("Could not create game release from Github release {}: {}", ghRelease.getHtmlUrl(), e.getMessage());
             return null;
         }
     }

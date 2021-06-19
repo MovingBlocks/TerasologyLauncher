@@ -87,7 +87,7 @@ class JenkinsRepositoryAdapterTest {
         // is the same of subsequent builds...
         final String expectedVersion = displayVersion + "+" + validResult.builds[0].number;
         final GameIdentifier id = new GameIdentifier(expectedVersion, Build.STABLE, Profile.OMEGA);
-        final ReleaseMetadata releaseMetadata = new ReleaseMetadata(new ArrayList<>(), new Date(1604285977306L), true);
+        final ReleaseMetadata releaseMetadata = new ReleaseMetadata("", new Date(1604285977306L), true);
         final GameRelease expected = new GameRelease(id, expectedArtifactUrl, releaseMetadata);
 
         final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
