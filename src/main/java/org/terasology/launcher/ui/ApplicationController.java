@@ -1,7 +1,7 @@
 // Copyright 2020 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-package org.terasology.launcher.gui.javafx;
+package org.terasology.launcher.ui;
 
 import com.google.common.collect.Lists;
 import javafx.animation.Transition;
@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.game.GameService;
-import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
@@ -338,44 +337,18 @@ public class ApplicationController {
         }
     }
 
-    /**
-     * The PR upgrading the engine to LWJGL v3 (https://github.com/MovingBlocks/Terasology/pull/3969) was merged on
-     * Oct 24, 2020, 20:12 UTC as commit 'c83655fb94c02d68fb8ba31fdb1954e81dde12d6'.
-     * <p>
-     * This method does some reverse engineering of which build on which Jenkins job contains this change. This should
-     * probably be baked into the {@link Package} while fetching the info from the remote source. With upcoming
-     * refactoring I'd like to keep this separate here for now...
-     *
-     * @param release
-     * @return
-     */
-    private boolean isLwjgl3(final GameIdentifier release) {
-        if (release.getProfile().equals(Profile.OMEGA) && release.getBuild().equals(Build.STABLE)) {
-            return Integer.parseInt(release.getVersion()) > 37;
-        }
-        if (release.getProfile().equals(Profile.OMEGA) && release.getBuild().equals(Build.NIGHTLY)) {
-            return Integer.parseInt(release.getVersion()) > 1103;
-        }
-        if (release.getProfile().equals(Profile.ENGINE) && release.getBuild().equals(Build.STABLE)) {
-            return Integer.parseInt(release.getVersion()) > 82;
-        }
-        if (release.getProfile().equals(Profile.ENGINE) && release.getBuild().equals(Build.NIGHTLY)) {
-            return Integer.parseInt(release.getVersion()) > 2317;
-        }
-        return false;
-    }
-
     @FXML
     protected void startGameAction() {
         if (gameService.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
             Dialogs.showInfo(stage, BundleUtils.getLabel("message_information_gameRunning"));
         } else {
-            final GameIdentifier release = selectedRelease.getValue().getId();
-            final Path gamePath = gameManager.getInstallDirectory(release);
+            final GameRelease release = selectedRelease.getValue();
+            final GameIdentifier id = release.getId();
+            final Path gamePath = gameManager.getInstallDirectory(id);
             List<String> additionalJavaParameters = Lists.newArrayList();
             List<String> additionalGameParameters = Lists.newArrayList();
-            if (isLwjgl3(release) && Platform.getPlatform().isMac()) {
+            if (release.isLwjgl3() && Platform.getPlatform().isMac()) {
                 additionalJavaParameters.add("-XstartOnFirstThread");
                 additionalJavaParameters.add("-Djava.awt.headless=true");
 

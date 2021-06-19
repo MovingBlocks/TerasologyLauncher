@@ -12,13 +12,14 @@ import org.kohsuke.github.GHRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameManager;
-import org.terasology.launcher.gui.javafx.Dialogs;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
+import org.terasology.launcher.model.LauncherVersion;
 import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.settings.Settings;
+import org.terasology.launcher.ui.Dialogs;
 import org.terasology.launcher.updater.LauncherUpdater;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
@@ -28,7 +29,6 @@ import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
 import org.terasology.launcher.util.Platform;
-import org.terasology.launcher.version.TerasologyLauncherVersionInfo;
 
 import java.io.IOException;
 import java.net.URI;
@@ -87,6 +87,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path gameDirectory = getDirectoryFor(LauncherManagedDirectory.GAMES, installationDirectory);
             final Path gameDataDirectory = getGameDataDirectory(platform, launcherSettings.getGameDataDirectory());
 
+            updateMessage(BundleUtils.getLabel("splash_fetchReleases"));
             logger.info("Fetching game releases ...");
             final RepositoryManager repositoryManager = new RepositoryManager();
             Set<GameRelease> releases = repositoryManager.getReleases();
@@ -172,7 +173,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
     private void checkForLauncherUpdates(Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
         logger.trace("Check for launcher updates...");
         updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
-        final LauncherUpdater updater = new LauncherUpdater(TerasologyLauncherVersionInfo.getInstance());
+        final LauncherUpdater updater = new LauncherUpdater(LauncherVersion.getInstance());
         final GHRelease release = updater.updateAvailable();
         if (release != null) {
             logger.info("Launcher update available: {}", release.getTagName());

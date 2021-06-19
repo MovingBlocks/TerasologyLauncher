@@ -3,97 +3,168 @@
 
 package org.terasology.launcher.repositories;
 
-import com.google.gson.Gson;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
+import org.terasology.launcher.model.ReleaseMetadata;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Repository adapter for http://jenkins.terasology.io, replacing the {@link LegacyJenkinsRepositoryAdapter}.
+ * <p>
+ * On the new Jenkins we can make use of the {@code versionInfo.properties} file to get the display name for the release
+ * along other metadata (for instance, the corresponding engine version).
+ * <p>
+ * However, this means that we are doing {@code n + 1} API calls for fetching {@code n} release packages on each
+ * launcher start.
+ */
 class JenkinsRepositoryAdapter implements ReleaseRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(JenkinsRepositoryAdapter.class);
 
+    private static final String BASE_URL = "http://jenkins.terasology.io/teraorg/job/Terasology/";
+
     private static final String API_FILTER = "api/json?tree="
             + "builds["
-            + "actions[causes[upstreamBuild]]{0},"
             + "number,"
             + "timestamp,"
             + "result,"
             + "artifacts[fileName,relativePath],"
-            + "url,"
-            + "changeSet[items[msg]]],"
-            + "upstreamProjects[name]";
+            + "url]";
 
     private static final String TERASOLOGY_ZIP_PATTERN = "Terasology.*zip";
 
-    private final Gson gson = new Gson();
+    private final JenkinsClient client;
 
-    private final String baseUrl;
-    private final String jobName;
     private final Build buildProfile;
     private final Profile profile;
 
-    JenkinsRepositoryAdapter(String baseUrl, String jobName, Build buildProfile, Profile profile) {
-        this.baseUrl = baseUrl;
-        this.jobName = jobName;
+    private final URL apiUrl;
+
+    JenkinsRepositoryAdapter(Profile profile, Build buildProfile, JenkinsClient client) {
+        this.client = client;
         this.buildProfile = buildProfile;
         this.profile = profile;
-    }
-
-    private boolean isSuccess(Jenkins.Build build) {
-        return build.result == Jenkins.Build.Result.SUCCESS || build.result == Jenkins.Build.Result.UNSTABLE;
+        this.apiUrl = unsafeToUrl(BASE_URL + job(profileToJobName(profile)) + job(buildProfileToJobName(buildProfile)) + API_FILTER);
     }
 
     public List<GameRelease> fetchReleases() {
         final List<GameRelease> pkgList = new LinkedList<>();
-        final String apiUrl = baseUrl + "job/" + jobName + "/" + API_FILTER;
 
         logger.debug("fetching releases from '{}'", apiUrl);
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(
-                        new URL(apiUrl).openStream())
-        )) {
-            final Jenkins.ApiResult result = gson.fromJson(reader, Jenkins.ApiResult.class);
+        final Jenkins.ApiResult result = client.request(apiUrl);
+        if (result != null && result.builds != null) {
             for (Jenkins.Build build : result.builds) {
-                if (isSuccess(build)) {
-                    final List<String> changelog = Arrays.stream(build.changeSet.items)
-                            .map(change -> change.msg)
-                            .collect(Collectors.toList());
-                    final String url = getArtifactUrl(build, TERASOLOGY_ZIP_PATTERN);
-                    if (url != null) {
-                        final GameIdentifier id = new GameIdentifier(build.number, buildProfile, profile);
-                        final Date timestamp = new Date(build.timestamp);
-                        final GameRelease release = new GameRelease(id, new URL(url), changelog, timestamp);
-                        pkgList.add(release);
-                    }
-                }
+                computeReleaseFrom(build).ifPresent(pkgList::add);
             }
-        } catch (IOException e) {
-            logger.warn("Failed to fetch packages from: {}", apiUrl, e);
+        } else {
+            logger.warn("Failed to fetch packages from: {}", apiUrl);
         }
         return pkgList;
     }
 
-    @Nullable
-    private String getArtifactUrl(Jenkins.Build build, String regex) {
-        return Arrays.stream(build.artifacts)
-                .filter(artifact -> artifact.fileName.matches(regex))
-                .findFirst()
-                .map(artifact -> build.url + "artifact/" + artifact.relativePath)
-                .orElse(null);
+    private Optional<GameRelease> computeReleaseFrom(Jenkins.Build jenkinsBuildInfo) {
+        if (hasAcceptableResult(jenkinsBuildInfo)) {
+            final URL url = client.getArtifactUrl(jenkinsBuildInfo, TERASOLOGY_ZIP_PATTERN);
+
+            final ReleaseMetadata metadata = computeReleaseMetadataFrom(jenkinsBuildInfo);
+            final Optional<GameIdentifier> id = computeIdentifierFrom(jenkinsBuildInfo);
+
+            if (url != null && id.isPresent()) {
+                return Optional.of(new GameRelease(id.get(), url, metadata));
+            } else {
+                logger.debug("Skipping build without game artifact or version identifier: '{}'", jenkinsBuildInfo.url);
+            }
+        } else {
+            logger.debug("Skipping unsuccessful build '{}'", jenkinsBuildInfo.url);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<GameIdentifier> computeIdentifierFrom(Jenkins.Build jenkinsBuildInfo) {
+        return Optional.ofNullable(client.getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"))
+                .map(client::requestProperties)
+                .map(versionInfo -> versionInfo.getProperty("displayVersion"))
+                .map(displayVersion -> {
+                    // The Jenkins adapter has to append the build number to the display version to ensure that the
+                    // version string is unique for two different builds. This is necessary because the display version
+                    // generated by the CI build is the same of subsequent builds...
+                    String versionString = displayVersion + "+" + jenkinsBuildInfo.number;
+                    return new GameIdentifier(versionString, buildProfile, profile);
+                });
+    }
+
+    private ReleaseMetadata computeReleaseMetadataFrom(Jenkins.Build jenkinsBuildInfo) {
+        List<String> changelog = computeChangelogFrom(jenkinsBuildInfo.changeSet);
+        final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
+        // all builds from this Jenkins are using LWJGL v3
+        return new ReleaseMetadata(changelog, timestamp, true);
+    }
+
+    private List<String> computeChangelogFrom(Jenkins.ChangeSet changeSet) {
+        return Optional.ofNullable(changeSet)
+                .map(changes ->
+                        Arrays.stream(changes.items)
+                                .map(change -> change.msg)
+                                .collect(Collectors.toList())
+                ).orElse(new ArrayList<>());
+    }
+
+    // utility IO
+
+    private static URL unsafeToUrl(String url) {
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
+            //TODO: at least log something here?
+        }
+        return null;
+    }
+
+    // utility specific to this Jenkins adapter
+
+    private static String profileToJobName(Profile profile) {
+        switch (profile) {
+            case OMEGA:
+                return "Omega/";
+            case ENGINE:
+                return "Terasology/";
+            default:
+                throw new IllegalStateException("Unexpected value: " + profile);
+        }
+    }
+
+    private static String buildProfileToJobName(Build buildProfile) {
+        switch (buildProfile) {
+            case STABLE:
+                return "master/";
+            case NIGHTLY:
+                return "develop/";
+            default:
+                throw new IllegalStateException("Unexpected value: " + buildProfile);
+        }
+    }
+
+    private static String job(String job) {
+        return "job/" + job;
+    }
+
+    // generic Jenkins.Build utility
+
+    private static boolean hasAcceptableResult(Jenkins.Build build) {
+        return build.result == Jenkins.Build.Result.SUCCESS || build.result == Jenkins.Build.Result.UNSTABLE;
     }
 }

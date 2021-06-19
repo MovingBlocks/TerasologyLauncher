@@ -13,6 +13,7 @@ import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
+import org.terasology.launcher.model.ReleaseMetadata;
 
 import java.io.IOException;
 import java.net.URL;
@@ -48,7 +49,10 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
             final URL url = new URL(gameAsset.map(GHAsset::getBrowserDownloadUrl).orElse(null));
 
             final List<String> changelog = Arrays.asList(ghRelease.getBody().split("\n"));
-            return new GameRelease(new GameIdentifier(version, build, profile), url, changelog, ghRelease.getPublished_at());
+            GameIdentifier id = new GameIdentifier(version, build, profile);
+            //TODO: figure out which release first switched to LWJGL v3
+            ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at(), true);
+            return new GameRelease(id, url, metadata);
         } catch (IOException e) {
             logger.warn("Could not create game release from Github release {}", ghRelease.getHtmlUrl(), e);
             return null;

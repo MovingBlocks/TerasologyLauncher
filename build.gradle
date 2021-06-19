@@ -11,7 +11,6 @@
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
         gradlePluginPortal()
     }
 }
@@ -67,18 +66,11 @@ ext {
 repositories {
     // Main Maven repo
     mavenCentral()
-    jcenter()
     maven {
         // MovingBlocks Artifactory instance(s) for libs not readily available elsewhere plus our own libs
         name "Terasology Artifactory"
         url "http://artifactory.terasology.org/artifactory/virtual-repo-live"
         allowInsecureProtocol true
-    }
-    maven {
-        // for spf4j dependencies that haven't been merged upstream
-        // i.e. org.apache.avro:avro
-        name "spf4j dependencies"
-        url  "https://dl.bintray.com/zolyfarkas/core"
     }
     maven {
         name "JitPack"  // used by org.everit.json.schema
@@ -109,14 +101,15 @@ dependencies {
 
     testImplementation 'org.hamcrest:hamcrest:2.2'
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.+"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.6.+"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.+"
 
-    testImplementation('org.mockito:mockito-inline:3.3.+') {
+    testImplementation('org.mockito:mockito-inline:3.4.+') {
         because "-inline build enables mocking final classes"
         // https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.2
         // > Be aware that this artifact may be abolished when the inline mock making feature is integrated into the default mock maker.
     }
-    testImplementation "org.mockito:mockito-junit-jupiter:3.3.+"
+    testImplementation "org.mockito:mockito-junit-jupiter:3.4.+"
 
     testImplementation('org.spf4j:spf4j-slf4j-test:8.8.5') {
         because "testable logging"
@@ -201,27 +194,16 @@ def convertGitBranch = { gitBranch ->
 }
 
 task createVersionInfoFile {
-
     inputs.property('version', version.toString())
 
-    File versionInfoFileDir = new File('src/main/resources', 'org/terasology/launcher/version')
-    File versionInfoFile = new File(versionInfoFileDir, 'versionInfo.properties')
+    File versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasology/launcher/')
+    File versionFile = new File(versionInfoFileDir, 'version.txt')
 
-    outputs.file(versionInfoFile)
+    outputs.file(versionFile)
 
     doLast {
         versionInfoFileDir.mkdirs()
-        ant.propertyfile(file: versionInfoFile) {
-            ant.entry(key: 'buildNumber', value: env.BUILD_NUMBER)
-            ant.entry(key: 'buildId', value: env.BUILD_ID)
-            ant.entry(key: 'buildTag', value: env.BUILD_TAG)
-            ant.entry(key: 'buildUrl', value: env.BUILD_URL)
-            ant.entry(key: 'jobName', value: env.JOB_NAME)
-            ant.entry(key: 'gitBranch', value: convertGitBranch(env.GIT_BRANCH))
-            ant.entry(key: 'gitCommit', value: env.GIT_COMMIT)
-            ant.entry(key: 'dateTime', value: startDateTimeString)
-            ant.entry(key: 'version', value: version)
-        }
+        versionFile.text = version
     }
 }
 

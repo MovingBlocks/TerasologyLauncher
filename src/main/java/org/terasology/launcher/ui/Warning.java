@@ -1,7 +1,7 @@
 // Copyright 2020 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-package org.terasology.launcher.gui.javafx;
+package org.terasology.launcher.ui;
 
 public enum Warning {
     LOW_ON_SPACE("message_warning_lowOnSpace");

@@ -38,20 +38,15 @@ public final class BaseLauncherSettings extends LauncherSettings {
     public static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
     public static final String PROPERTY_LOG_LEVEL = "logLevel";
     public static final String PROPERTY_DEFAULT_GAME_JOB = "defaultGameJob";
-    public static final String PROPERTY_LAST_PLAYED_GAME_JOB = "lastPlayedGameJob";
     public static final String PROPERTY_LAST_PLAYED_GAME_VERSION = "lastPlayedGameVersion";
     public static final String PROPERTY_LAST_INSTALLED_GAME_JOB = "lastInstalledGameJob";
     public static final String PROPERTY_LAST_INSTALLED_GAME_VERSION = "lastInstalledGameVersion";
 
     public static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     public static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
-    public static final boolean SEARCH_FOR_LAUNCHER_UPDATES_DEFAULT = true;
     public static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
     public static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
-    public static final String DEFAULT_GAME_JOB_DEFAULT = "DistroOmegaRelease";
-    public static final String LAST_PLAYED_GAME_JOB_DEFAULT = "";
     public static final String LAST_PLAYED_GAME_VERSION_DEFAULT = "";
-    public static final String LAST_INSTALLED_GAME_JOB_DEFAULT = "";
     public static final String LAST_INSTALLED_GAME_VERSION_DEFAULT = "";
 
     public static final String LAUNCHER_SETTINGS_FILE_NAME = "TerasologyLauncherSettings.properties";
@@ -197,31 +192,10 @@ public final class BaseLauncherSettings extends LauncherSettings {
         }
     }
 
-    protected void initDefaultGameJob() {
-        final String defaultGameJobStr = properties.getProperty(PROPERTY_DEFAULT_GAME_JOB);
-        if (defaultGameJobStr == null || defaultGameJobStr.isEmpty()) {
-            properties.setProperty(PROPERTY_DEFAULT_GAME_JOB, DEFAULT_GAME_JOB_DEFAULT);
-        }
-    }
-
-    protected void initLastPlayedGameJob() {
-        final String lastPlayedGameJobStr = properties.getProperty(PROPERTY_LAST_PLAYED_GAME_JOB);
-        if (lastPlayedGameJobStr == null || lastPlayedGameJobStr.isEmpty()) {
-            properties.setProperty(PROPERTY_LAST_PLAYED_GAME_JOB, LAST_PLAYED_GAME_JOB_DEFAULT);
-        }
-    }
-
     protected void initLastPlayedGameVersion() {
         final String lastPlayedGameVersionStr = properties.getProperty(PROPERTY_LAST_PLAYED_GAME_VERSION);
         if (lastPlayedGameVersionStr == null || lastPlayedGameVersionStr.isEmpty()) {
             properties.setProperty(PROPERTY_LAST_PLAYED_GAME_VERSION, LAST_PLAYED_GAME_VERSION_DEFAULT);
-        }
-    }
-
-    protected void initLastInstalledGameJob() {
-        final String lastInstalledGameJobStr = properties.getProperty(PROPERTY_LAST_INSTALLED_GAME_JOB);
-        if (lastInstalledGameJobStr == null || lastInstalledGameJobStr.isEmpty()) {
-            properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_JOB, LAST_INSTALLED_GAME_JOB_DEFAULT);
         }
     }
 
@@ -308,16 +282,6 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
-    public synchronized String getDefaultGameJob() {
-        return properties.getProperty(PROPERTY_DEFAULT_GAME_JOB);
-    }
-
-    @Override
-    public synchronized String getLastPlayedGameJob() {
-        return properties.getProperty(PROPERTY_LAST_PLAYED_GAME_JOB);
-    }
-
-    @Override
     public synchronized Optional<GameIdentifier> getLastPlayedGameVersion() {
         String property = properties.getProperty(PROPERTY_LAST_PLAYED_GAME_VERSION);
         return Optional.ofNullable(GameIdentifier.fromString(property));
@@ -326,12 +290,6 @@ public final class BaseLauncherSettings extends LauncherSettings {
     @Override
     public synchronized String getLastInstalledGameJob() {
         return properties.getProperty(PROPERTY_LAST_INSTALLED_GAME_JOB);
-    }
-
-    @Override
-    public synchronized Optional<GameIdentifier> getLastInstalledGameVersion() {
-        String property = properties.getProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION);
-        return Optional.ofNullable(GameIdentifier.fromString(property));
     }
 
     // --------------------------------------------------------------------- //
@@ -394,30 +352,11 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
-    public synchronized void setLastPlayedGameJob(String lastPlayedGameJob) {
-        properties.setProperty(PROPERTY_LAST_PLAYED_GAME_JOB, lastPlayedGameJob);
-    }
-
-    @Override
     public synchronized void setLastPlayedGameVersion(GameIdentifier lastPlayedGameVersion) {
         if (lastPlayedGameVersion == null) {
             properties.setProperty(PROPERTY_LAST_PLAYED_GAME_VERSION, "");
         } else {
             properties.setProperty(PROPERTY_LAST_PLAYED_GAME_VERSION, lastPlayedGameVersion.toString());
-        }
-    }
-
-    @Override
-    public synchronized void setLastInstalledGameJob(String lastInstalledGameJob) {
-        properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_JOB, lastInstalledGameJob);
-    }
-
-    @Override
-    public synchronized void setLastInstalledGameVersion(GameIdentifier lastInstalledGameVersion) {
-        if (lastInstalledGameVersion == null) {
-            properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION, "");
-        } else {
-            properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION, lastInstalledGameVersion.toString());
         }
     }
 
