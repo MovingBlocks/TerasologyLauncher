@@ -13,7 +13,6 @@ import org.terasology.launcher.model.ReleaseMetadata;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -22,7 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Repository adapter for http://jenkins.terasology.io, replacing the {@link LegacyJenkinsRepositoryAdapter}.
+ * Repository adapter for http://jenkins.terasology.io.
  * <p>
  * On the new Jenkins we can make use of the {@code versionInfo.properties} file to get the display name for the release
  * along other metadata (for instance, the corresponding engine version).
@@ -108,19 +107,19 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     }
 
     private ReleaseMetadata computeReleaseMetadataFrom(Jenkins.Build jenkinsBuildInfo) {
-        List<String> changelog = computeChangelogFrom(jenkinsBuildInfo.changeSet);
+        String changelog = computeChangelogFrom(jenkinsBuildInfo.changeSet);
         final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
         // all builds from this Jenkins are using LWJGL v3
         return new ReleaseMetadata(changelog, timestamp, true);
     }
 
-    private List<String> computeChangelogFrom(Jenkins.ChangeSet changeSet) {
+    private String computeChangelogFrom(Jenkins.ChangeSet changeSet) {
         return Optional.ofNullable(changeSet)
                 .map(changes ->
                         Arrays.stream(changes.items)
-                                .map(change -> change.msg)
-                                .collect(Collectors.toList())
-                ).orElse(new ArrayList<>());
+                                .map(change -> "- " + change.msg)
+                                .collect(Collectors.joining("\n"))
+                ).orElse("");
     }
 
     // utility IO

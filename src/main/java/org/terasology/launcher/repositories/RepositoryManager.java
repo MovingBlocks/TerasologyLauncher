@@ -21,9 +21,9 @@ public class RepositoryManager {
         JenkinsClient client = new JenkinsClient(new Gson());
 
         ReleaseRepository omegaNightly = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.NIGHTLY, client);
-        ReleaseRepository omegaStable = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, client);
+        ReleaseRepository github = new GithubRepositoryAdapter();
 
-        Set<ReleaseRepository> all = Sets.newHashSet(omegaNightly, omegaStable);
+        Set<ReleaseRepository> all = Sets.newHashSet(github, omegaNightly);
 
         releases = fetchReleases(all);
     }

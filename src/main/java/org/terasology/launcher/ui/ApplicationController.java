@@ -54,7 +54,6 @@ import org.terasology.launcher.util.Platform;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -213,7 +212,7 @@ public class ApplicationController {
         selectedRelease.bind(gameReleaseComboBox.getSelectionModel().selectedItemProperty());
         //TODO: instead of imperatively updating the changelog view its value should be bound via property, too
         selectedRelease.addListener(
-                (observable, oldValue, newValue) -> changelogViewController.update(newValue != null ? newValue.getChangelog() : Collections.emptyList()));
+                (observable, oldValue, newValue) -> changelogViewController.update(newValue != null ? newValue.getChangelog() : ""));
     }
 
     /**

@@ -4,7 +4,6 @@
 package org.terasology.launcher.model;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Data container for metadata associated with a game release.
@@ -13,20 +12,20 @@ import java.util.List;
  * {@code timestamp}) or for managing and starting the game itself (e.g., {@code isLwjgl3}).
  */
 public class ReleaseMetadata {
-    private final List<String> changelog;
+    private final String changelog;
     private final Date timestamp;
     private final boolean isLwjgl3;
 
-    public ReleaseMetadata(List<String> changelog, Date timestamp, boolean isLwjgl3) {
+    public ReleaseMetadata(String changelog, Date timestamp, boolean isLwjgl3) {
         this.changelog = changelog;
         this.timestamp = timestamp;
         this.isLwjgl3 = isLwjgl3;
     }
 
     /**
-     * The change log of this release, each line represents one logical change.
+     * The change log of this release as a single markdown string.
      */
-    public List<String> getChangelog() {
+    public String getChangelog() {
         return changelog;
     }
 

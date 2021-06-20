@@ -5,7 +5,6 @@ package org.terasology.launcher.model;
 
 import java.net.URL;
 import java.util.Date;
-import java.util.List;
 
 /**
  * A game release describes a (remote) game artifact (asset) that can be downloaded and installed by the launcher.
@@ -39,7 +38,7 @@ public class GameRelease {
     /**
      * The changelog associated with the game release
      */
-    public List<String> getChangelog() {
+    public String getChangelog() {
         return releaseMetadata.getChangelog();
     }
 
