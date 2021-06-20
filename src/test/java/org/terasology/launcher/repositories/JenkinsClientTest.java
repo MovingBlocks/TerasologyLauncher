@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
