@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.game;
@@ -51,7 +51,7 @@ class GameStarter implements Callable<Process> {
 
         processParameters.add("-jar");
         processParameters.add(gamePath.resolve(Path.of("libs", "Terasology.jar")).toString());
-        processParameters.add("-homedir=" + gameDataDirectory.toAbsolutePath().toString());
+        processParameters.add(homeDirParameter(gameDataDirectory));
         processParameters.addAll(gameParams);
 
         processBuilder = new ProcessBuilder(processParameters)
@@ -76,5 +76,13 @@ class GameStarter implements Callable<Process> {
      */
     Path getRuntimePath() {
         return Paths.get(System.getProperty("java.home"), "bin", "java");
+    }
+
+    String homeDirParameter(Path gameDataDirectory) {
+        if (true) {  // NEW, version > 5.0
+            return "--homedir=" + gameDataDirectory.toAbsolutePath();
+        } else {  // OLD, version < 5.1
+            return "-homedir=" + gameDataDirectory.toAbsolutePath();
+        }
     }
 }
