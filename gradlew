@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 
+# Copyright 2021 The Terasology Foundation
+# SPDX-License-Identifier: Apache-2.0
+
 #
 # Copyright 2015 the original author or authors.
 #
@@ -72,7 +75,7 @@ case "`uname`" in
   Darwin* )
     darwin=true
     ;;
-  MINGW* )
+  MSYS* | MINGW* )
     msys=true
     ;;
   NONSTOP* )
