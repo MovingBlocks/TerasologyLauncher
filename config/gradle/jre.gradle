@@ -1,9 +1,9 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 // Uses Bellsoft Liberica JRE
 // https://bell-sw.com/pages/liberica_install_guide-11.0.7/
-def jdkVersion = '11.0.8+10' // jre version haven't jmod (needed for jlink/jpackager)
+def jdkVersion = '11.0.12+7' // jre version haven't jmod (needed for jlink/jpackager)
 def jreUrlFilenames = [
         Linux64   : 'linux-amd64-full.tar.gz',
         Windows64 : 'windows-amd64-full.zip',
