@@ -6,6 +6,7 @@ package org.terasology.launcher.game;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
+import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.util.JavaHeapSize;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ class GameStarter implements Callable<Process> {
     final ProcessBuilder processBuilder;
 
     /**
+     * @param release           the version of the game being run
      * @param gamePath          the directory under which we will find {@code libs/Terasology.jar}, also used as the process's
      *                          working directory
      * @param gameDataDirectory {@code -homedir}, the directory where Terasology's data files (saves & etc) are kept
@@ -35,7 +37,7 @@ class GameStarter implements Callable<Process> {
      * @param gameParams        additional arguments for the Terasology command line
      * @param logLevel          the minimum level of log events Terasology will include on its output stream to us
      */
-    GameStarter(Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
+    GameStarter(GameRelease release, Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
                 Level logLevel) {
         final List<String> processParameters = new ArrayList<>();
         processParameters.add(getRuntimePath().toString());

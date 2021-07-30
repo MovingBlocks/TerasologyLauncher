@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.ui;
@@ -353,7 +353,7 @@ public class ApplicationController {
 
                 additionalGameParameters.add("-noSplash");
             }
-            gameService.start(gamePath, launcherSettings, additionalJavaParameters, additionalGameParameters);
+            gameService.start(release, gamePath, launcherSettings, additionalJavaParameters, additionalGameParameters);
         }
     }
 

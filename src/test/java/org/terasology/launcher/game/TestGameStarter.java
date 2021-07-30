@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.launcher.game;
 
@@ -50,7 +50,7 @@ public class TestGameStarter {
     }
 
     private GameStarter newStarter() {
-        return new GameStarter(gamePath, gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
+        return new GameStarter(null, gamePath, gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
     }
 
     @Test
