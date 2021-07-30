@@ -21,7 +21,7 @@ import static com.google.common.base.Verify.verifyNotNull;
 /**
  * This service starts and monitors the game process.
  * <p>
- * Its {@linkplain #GameService() constructor} requires no arguments. Use {@link #start(GameRelease, Path, LauncherSettings, List, List)} to
+ * Its {@linkplain #GameService() constructor} requires no arguments. Use {@link #start(GameRelease, Path, LauncherSettings)} to
  * start the game process; the zero-argument form of {@code start()} will not have enough information.
  * <p>
  * The Boolean value of this service is true when it believes the game process has started <em>successfully.</em>
@@ -69,22 +69,18 @@ public class GameService extends Service<Boolean> {
      * @param gamePath the directory under which we will find libs/Terasology.jar, also used as the process's
      *     working directory
      * @param settings supplies other settings relevant to configuring a process
-     * @param additionalJavaParameters
-     * @param additionalGameParameters
      */
     @SuppressWarnings("checkstyle:HiddenField")
-    public void start(GameRelease release, Path gamePath, LauncherSettings settings, List<String> additionalJavaParameters, List<String> additionalGameParameters) {
+    public void start(GameRelease release, Path gamePath, LauncherSettings settings) {
         this.release = release;
         this.gamePath = gamePath;
         this.settings = settings;
-        this.additionalJavaParameters = additionalJavaParameters;
-        this.additionalGameParameters = additionalGameParameters;
 
         start();
     }
 
     /**
-     * Use {@link #start(GameRelease, Path, LauncherSettings, List, List)} instead.
+     * Use {@link #start(GameRelease, Path, LauncherSettings)} instead.
      * <p>
      * It is an error to call this method before providing the configuration.
      */

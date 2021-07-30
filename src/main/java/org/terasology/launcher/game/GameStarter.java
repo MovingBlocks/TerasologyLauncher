@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.util.JavaHeapSize;
+import org.terasology.launcher.util.Platform;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -39,6 +40,7 @@ class GameStarter implements Callable<Process> {
      */
     GameStarter(GameRelease release, Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
                 Level logLevel) {
+        final boolean isMac = Platform.getPlatform().isMac();
         final List<String> processParameters = new ArrayList<>();
         processParameters.add(getRuntimePath().toString());
 
@@ -49,12 +51,27 @@ class GameStarter implements Callable<Process> {
             processParameters.add("-Xmx" + heapMax.getSizeParameter());
         }
         processParameters.add("-DlogOverrideLevel=" + logLevel.name());
+
+        if (isMac) {
+            if (release.isLwjgl3() && Platform.getPlatform().isMac()) {
+                processParameters.add("-XstartOnFirstThread");  // lwjgl3 requires this on OS X
+                // awt didn't work either, but maybe fixed on newer versions?
+                //   https://github.com/LWJGLX/lwjgl3-awt/issues/1
+                processParameters.add("-Djava.awt.headless=true");
+            }
+        }
+
         processParameters.addAll(javaParams);
 
         processParameters.add("-jar");
         processParameters.add(gamePath.resolve(Path.of("libs", "Terasology.jar")).toString());
         processParameters.add(homeDirParameter(gameDataDirectory));
         processParameters.addAll(gameParams);
+
+        if (isMac) {
+            // splash screen uses awt, so no awt => no splash
+            processParameters.add("-noSplash");
+        }
 
         processBuilder = new ProcessBuilder(processParameters)
                 .directory(gamePath.toFile())
