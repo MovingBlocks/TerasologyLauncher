@@ -26,6 +26,7 @@ class GameStarter implements Callable<Process> {
     private static final Logger logger = LoggerFactory.getLogger(GameStarter.class);
 
     final ProcessBuilder processBuilder;
+    final GameRelease release;
 
     /**
      * @param release           the version of the game being run
@@ -40,8 +41,11 @@ class GameStarter implements Callable<Process> {
      */
     GameStarter(GameRelease release, Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
                 Level logLevel) {
+        this.release = release;
+
         final boolean isMac = Platform.getPlatform().isMac();
         final List<String> processParameters = new ArrayList<>();
+
         processParameters.add(getRuntimePath().toString());
 
         if (heapMin.isUsed()) {
@@ -52,25 +56,25 @@ class GameStarter implements Callable<Process> {
         }
         processParameters.add("-DlogOverrideLevel=" + logLevel.name());
 
-        if (isMac) {
-            if (release.isLwjgl3() && Platform.getPlatform().isMac()) {
-                processParameters.add("-XstartOnFirstThread");  // lwjgl3 requires this on OS X
-                // awt didn't work either, but maybe fixed on newer versions?
-                //   https://github.com/LWJGLX/lwjgl3-awt/issues/1
-                processParameters.add("-Djava.awt.headless=true");
-            }
+        if (isMac && release.isLwjgl3()) {
+            processParameters.add("-XstartOnFirstThread");  // lwjgl3 requires this on OS X
+            // awt didn't work either, but maybe fixed on newer versions?
+            //   https://github.com/LWJGLX/lwjgl3-awt/issues/1
+            processParameters.add("-Djava.awt.headless=true");
         }
 
         processParameters.addAll(javaParams);
 
         processParameters.add("-jar");
         processParameters.add(gamePath.resolve(Path.of("libs", "Terasology.jar")).toString());
+
+        // Parameters after this are for the game facade, not the java runtime.
         processParameters.add(homeDirParameter(gameDataDirectory));
         processParameters.addAll(gameParams);
 
         if (isMac) {
             // splash screen uses awt, so no awt => no splash
-            processParameters.add("-noSplash");
+            processParameters.add(noSplashParameter());
         }
 
         processBuilder = new ProcessBuilder(processParameters)
@@ -98,10 +102,18 @@ class GameStarter implements Callable<Process> {
     }
 
     String homeDirParameter(Path gameDataDirectory) {
-        if (true) {  // NEW, version > 5.0
+        if (terasologyUsesPosixOptions()) {
             return "--homedir=" + gameDataDirectory.toAbsolutePath();
-        } else {  // OLD, version < 5.1
+        } else {
             return "-homedir=" + gameDataDirectory.toAbsolutePath();
         }
+    }
+
+    String noSplashParameter() {
+        return terasologyUsesPosixOptions() ? "--no-splash" : "-noSplash";
+    }
+
+    boolean terasologyUsesPosixOptions() {
+        return release.getId().getVersion().compareTo("5.1") >= 0;
     }
 }
