@@ -1,7 +1,9 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.model;
+
+import com.vdurmont.semver4j.Semver;
 
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -26,9 +28,11 @@ public class GameIdentifier {
     final String version;
     final Build build;
     final Profile profile;
+    final Semver engineVersion;
 
-    public GameIdentifier(String version, Build build, Profile profile) {
+    public GameIdentifier(String version, Semver engineVersion, Build build, Profile profile) {
         this.version = version;
+        this.engineVersion = engineVersion;
         this.build = build;
         this.profile = profile;
     }
@@ -81,7 +85,8 @@ public class GameIdentifier {
             final Build build = Build.valueOf(matcher.group("build"));
             final Profile profile = Profile.valueOf(matcher.group("profile"));
             final String version = matcher.group("version");
-            return new GameIdentifier(version, build, profile);
+            Semver engineVersion = new Semver(version, Semver.SemverType.IVY); // FIXME: assumes engineVersion==version!
+            return new GameIdentifier(version, engineVersion, build, profile);
         }
         return null;
     }

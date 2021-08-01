@@ -1,8 +1,9 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.game;
 
+import com.vdurmont.semver4j.Semver;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
@@ -150,7 +151,10 @@ public class GameManager {
                     }
                     for (File versionDirectory : Objects.requireNonNull(buildDirectory.listFiles())) {
                         String version = versionDirectory.getName();
-                        localGames.add(new GameIdentifier(version, build, profile));
+                        // FIXME: Assumes version==engineVersion. Should we pull engineVersion from the installation's
+                        //   files instead of the name of its directory?
+                        Semver engineVersion = new Semver(version, Semver.SemverType.IVY);
+                        localGames.add(new GameIdentifier(version, engineVersion, build, profile));
                     }
                 }
             }
