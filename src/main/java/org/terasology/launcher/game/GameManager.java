@@ -25,9 +25,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GameManager {
 
@@ -133,31 +133,34 @@ public class GameManager {
      * Scans the installation directory and collects the installed games.
      */
     private void scanInstallationDir() {
-        Set<GameIdentifier> localGames = new HashSet<>();
-        if (Files.exists(installDirectory)) {
-            for (File profileDirectory : Objects.requireNonNull(installDirectory.toFile().listFiles())) {
-                Profile profile;
-                try {
-                    profile = Profile.valueOf(profileDirectory.getName());
-                } catch (IllegalArgumentException e) {
-                    continue;
-                }
-                for (File buildDirectory : Objects.requireNonNull(profileDirectory.listFiles())) {
-                    Build build;
-                    try {
-                        build = Build.valueOf(buildDirectory.getName());
-                    } catch (IllegalArgumentException e) {
-                        continue;
-                    }
-                    for (File versionDirectory : Objects.requireNonNull(buildDirectory.listFiles())) {
-                        String version = versionDirectory.getName();
+        Set<GameIdentifier> localGames;
+        try (var directories = Files.walk(installDirectory, 3)) {
+            var gameDirectories = directories
+                    .filter(Files::isDirectory)
+                    // Skip the intermediate directories.
+                    .filter(d -> installDirectory.relativize(d).getNameCount() == 3);
+            localGames = gameDirectories
+                    .map(versionDirectory -> {
+                        Profile profile;
+                        Build build;
+                        try {
+                            profile = Profile.valueOf(versionDirectory.getName(1).toString());
+                            build = Build.valueOf(versionDirectory.getName(2).toString());
+                        } catch (IllegalArgumentException e) {
+                            logger.debug("Directory does not match expected profile/build names: {}", versionDirectory, e);
+                            return null;
+                        }
+                        String version = versionDirectory.getFileName().toString();
                         // FIXME: Assumes version==engineVersion. Should we pull engineVersion from the installation's
                         //   files instead of the name of its directory?
                         Semver engineVersion = new Semver(version, Semver.SemverType.IVY);
-                        localGames.add(new GameIdentifier(version, engineVersion, build, profile));
-                    }
-                }
-            }
+                        return new GameIdentifier(version, engineVersion, build, profile);
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toUnmodifiableSet());
+        } catch (IOException e) {
+            logger.warn("Error while scanning installation directory {}:", installDirectory, e);
+            return;
         }
         Platform.runLater(() -> installedGames.addAll(localGames));
     }
