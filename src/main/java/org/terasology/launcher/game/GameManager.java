@@ -3,7 +3,6 @@
 
 package org.terasology.launcher.game;
 
-import com.vdurmont.semver4j.Semver;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
@@ -19,14 +18,18 @@ import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 public class GameManager {
@@ -160,10 +163,63 @@ public class GameManager {
             logger.debug("Directory does not match expected profile/build names: {}", versionDirectory, e);
             return null;
         }
-        String version = versionDirectory.getFileName().toString();
-        // FIXME: Assumes version==engineVersion. Should we pull engineVersion from the installation's
-        //   files instead of the name of its directory?
-        Semver engineVersion = new Semver(version, Semver.SemverType.IVY);
-        return new GameIdentifier(version, engineVersion, build, profile);
+        return getInstalledVersion(profile, build, versionDirectory);
+    }
+
+    private static GameIdentifier getInstalledVersion(Profile profile, Build build, Path versionDirectory) {
+        Path engineJar;
+
+        try (var jarMatches = Files.find(versionDirectory, 3, GameManager::matchEngineJar)) {
+            var matches = jarMatches.collect(Collectors.toUnmodifiableSet());
+            if (matches.isEmpty()) {
+                logger.warn("Could not find engine jar in {}", versionDirectory);
+                return null;
+            } else if (matches.size() > 1) {
+                logger.warn("Ambiguous results while looking for engine jar in {}: {}", versionDirectory, matches);
+                return null;
+            }
+            engineJar = matches.iterator().next();
+        } catch (IOException e) {
+            logger.error("Error while looking for engine jar in {}", versionDirectory, e);
+            return null;
+        }
+
+        Properties versionInfo;
+        try {
+            versionInfo = getVersionPropertiesFromJar(engineJar);
+        } catch (IOException e) {
+            logger.error("Error while looking for version in {}.", engineJar, e);
+            return null;
+        }
+
+        return GameIdentifier.fromVersionInfo(versionInfo, build, profile).orElse(null);
+    }
+
+    private static boolean matchEngineJar(Path path, BasicFileAttributes basicFileAttributes) {
+        // Are there path-matching utilities to simplify this?
+        final var libPaths = Set.of(Path.of("lib"), Path.of("libs"));
+
+        var parent = path.getParent();
+        var file = path.getFileName();
+        return Files.isDirectory(parent)
+                && libPaths.contains(parent.getFileName())
+                && file.endsWith(".jar")
+                && file.startsWith("engine");
+    }
+
+    private static Properties getVersionPropertiesFromJar(Path jarLocation) throws IOException {
+        try (var jar = new JarFile(jarLocation.toFile())) {
+            var versionEntry = jar.stream().filter(entry ->
+                    entry.getName().equals("versionInfo.properties")  // FIXME: use const
+            ).findAny();
+            if (versionEntry.isEmpty()) {
+                throw new FileNotFoundException("Found no versionInfo.properties in " + jarLocation);
+            }
+            var properties = new Properties();
+            try (var input = jar.getInputStream(versionEntry.get())) {
+                properties.load(input);
+            }
+            return properties;
+        }
     }
 }
