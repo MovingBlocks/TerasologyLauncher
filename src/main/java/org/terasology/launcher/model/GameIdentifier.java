@@ -4,8 +4,12 @@
 package org.terasology.launcher.model;
 
 import com.vdurmont.semver4j.Semver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,8 +26,9 @@ import java.util.regex.Pattern;
  * @see <a href="https://semver.org">https://semver.org</a>
  */
 public class GameIdentifier {
-
     static final Pattern PATTERN = Pattern.compile("GameIdentifier\\{version='(?<version>.*)', build=(?<build>\\w+), profile=(?<profile>\\w+)\\}");
+
+    private static final Logger logger = LoggerFactory.getLogger(GameIdentifier.class);
 
     final String version;
     final Build build;
@@ -37,8 +42,31 @@ public class GameIdentifier {
         this.profile = profile;
     }
 
+    public GameIdentifier(String version, String engineVersion, Build build, Profile profile) {
+        this(version, new Semver(engineVersion, Semver.SemverType.IVY), build, profile);
+    }
+
+    public static Optional<GameIdentifier> fromVersionInfo(Properties versionInfo, Build build, Profile profile) {
+        var displayVersion = versionInfo.getProperty("displayVersion");
+        if (displayVersion == null) {
+            return Optional.empty();
+        }
+        try {
+            Semver engineVersion = new Semver(versionInfo.getProperty("engineVersion"), Semver.SemverType.IVY);
+            return Optional.of(new GameIdentifier(displayVersion, engineVersion, build, profile));
+        } catch (RuntimeException e) {
+            logger.error("versionInfo.properties displayVersion=\"{}\" engineVersion=\"{}\" " +
+                    "is not a valid version.", displayVersion, versionInfo.getProperty("engineVersion"), e);
+            return Optional.empty();
+        }
+    }
+
     public String getVersion() {
         return version;
+    }
+
+    public Semver getEngineVersion() {
+        return engineVersion;
     }
 
     public Build getBuild() {
