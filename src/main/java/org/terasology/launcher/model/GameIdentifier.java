@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.model;
 
+import com.google.common.base.MoreObjects;
 import com.vdurmont.semver4j.Semver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,12 +104,11 @@ public class GameIdentifier {
 
     @Override
     public String toString() {
-        //TODO: move serialization somewhere else (probably to LauncherSettings?)
-        return "GameIdentifier{" +
-                "version='" + version + '\'' +
-                ", build=" + build +
-                ", profile=" + profile +
-                '}';
-    }
+        return MoreObjects.toStringHelper(this)
+                .add("version", version)
+                .add("engineVersion", engineVersion)
+                .add("build", build)
+                .add("profile", profile)
+                .toString();
     }
 }
