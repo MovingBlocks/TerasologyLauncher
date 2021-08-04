@@ -140,22 +140,7 @@ public class GameManager {
                     // Skip the intermediate directories.
                     .filter(d -> installDirectory.relativize(d).getNameCount() == 3);
             localGames = gameDirectories
-                    .map(versionDirectory -> {
-                        Profile profile;
-                        Build build;
-                        try {
-                            profile = Profile.valueOf(versionDirectory.getName(1).toString());
-                            build = Build.valueOf(versionDirectory.getName(2).toString());
-                        } catch (IllegalArgumentException e) {
-                            logger.debug("Directory does not match expected profile/build names: {}", versionDirectory, e);
-                            return null;
-                        }
-                        String version = versionDirectory.getFileName().toString();
-                        // FIXME: Assumes version==engineVersion. Should we pull engineVersion from the installation's
-                        //   files instead of the name of its directory?
-                        Semver engineVersion = new Semver(version, Semver.SemverType.IVY);
-                        return new GameIdentifier(version, engineVersion, build, profile);
-                    })
+                    .map(GameManager::getInstalledVersion)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toUnmodifiableSet());
         } catch (IOException e) {
@@ -163,5 +148,22 @@ public class GameManager {
             return;
         }
         Platform.runLater(() -> installedGames.addAll(localGames));
+    }
+
+    private static GameIdentifier getInstalledVersion(Path versionDirectory) {
+        Profile profile;
+        Build build;
+        try {
+            profile = Profile.valueOf(versionDirectory.getName(1).toString());
+            build = Build.valueOf(versionDirectory.getName(2).toString());
+        } catch (IllegalArgumentException e) {
+            logger.debug("Directory does not match expected profile/build names: {}", versionDirectory, e);
+            return null;
+        }
+        String version = versionDirectory.getFileName().toString();
+        // FIXME: Assumes version==engineVersion. Should we pull engineVersion from the installation's
+        //   files instead of the name of its directory?
+        Semver engineVersion = new Semver(version, Semver.SemverType.IVY);
+        return new GameIdentifier(version, engineVersion, build, profile);
     }
 }
