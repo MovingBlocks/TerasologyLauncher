@@ -79,6 +79,7 @@ class JenkinsRepositoryAdapterTest {
         Semver engineVersion = new Semver("5.0.1-SNAPSHOT", Semver.SemverType.IVY);
 
         Properties versionInfo = new Properties();
+        versionInfo.setProperty("buildNumber", validResult.builds[0].number);
         versionInfo.setProperty("displayVersion", displayVersion);
         versionInfo.setProperty("engineVersion", engineVersion.getValue());
 
