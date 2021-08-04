@@ -3,6 +3,8 @@
 
 package org.terasology.launcher.settings;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -284,7 +286,17 @@ public final class BaseLauncherSettings extends LauncherSettings {
     @Override
     public synchronized Optional<GameIdentifier> getLastPlayedGameVersion() {
         String property = properties.getProperty(PROPERTY_LAST_PLAYED_GAME_VERSION);
-        return Optional.ofNullable(GameIdentifier.fromString(property));
+        if (property == null || property.isEmpty()) {
+            return Optional.empty();
+        }
+        GameIdentifier id;
+        try {
+            id = new Gson().fromJson(property, GameIdentifier.class);
+        } catch (JsonParseException e) {
+            logger.error("Failed to parse a game version from \"{}\"", property, e);
+            return Optional.empty();
+        }
+        return Optional.ofNullable(id);
     }
 
     @Override
@@ -356,7 +368,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
         if (lastPlayedGameVersion == null) {
             properties.setProperty(PROPERTY_LAST_PLAYED_GAME_VERSION, "");
         } else {
-            properties.setProperty(PROPERTY_LAST_PLAYED_GAME_VERSION, lastPlayedGameVersion.toString());
+            properties.setProperty(PROPERTY_LAST_PLAYED_GAME_VERSION, new Gson().toJson(lastPlayedGameVersion));
         }
     }
 

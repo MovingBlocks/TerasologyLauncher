@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Uniquely identify a game release.
@@ -26,14 +24,13 @@ import java.util.regex.Pattern;
  * @see <a href="https://semver.org">https://semver.org</a>
  */
 public class GameIdentifier {
-    static final Pattern PATTERN = Pattern.compile("GameIdentifier\\{version='(?<version>.*)', build=(?<build>\\w+), profile=(?<profile>\\w+)\\}");
 
     private static final Logger logger = LoggerFactory.getLogger(GameIdentifier.class);
 
     final String version;
+    final Semver engineVersion;
     final Build build;
     final Profile profile;
-    final Semver engineVersion;
 
     public GameIdentifier(String version, Semver engineVersion, Build build, Profile profile) {
         this.version = version;
@@ -94,13 +91,14 @@ public class GameIdentifier {
         }
         GameIdentifier that = (GameIdentifier) o;
         return version.equals(that.version)
+                && engineVersion.equals(that.engineVersion)
                 && build == that.build
                 && profile == that.profile;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(version, build, profile);
+        return Objects.hash(version, build, profile, engineVersion);
     }
 
     @Override
@@ -112,17 +110,5 @@ public class GameIdentifier {
                 ", profile=" + profile +
                 '}';
     }
-
-    public static GameIdentifier fromString(String identifier) {
-        //TODO: move deserialization somewhere else (probably to LauncherSettings?)
-        Matcher matcher = PATTERN.matcher(identifier);
-        if (matcher.find()) {
-            final Build build = Build.valueOf(matcher.group("build"));
-            final Profile profile = Profile.valueOf(matcher.group("profile"));
-            final String version = matcher.group("version");
-            Semver engineVersion = new Semver(version, Semver.SemverType.IVY); // FIXME: assumes engineVersion==version!
-            return new GameIdentifier(version, engineVersion, build, profile);
-        }
-        return null;
     }
 }
