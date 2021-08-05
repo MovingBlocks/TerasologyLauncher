@@ -156,9 +156,10 @@ public class GameManager {
     private static GameIdentifier getInstalledVersion(Path versionDirectory) {
         Profile profile;
         Build build;
+        var parts = versionDirectory.getNameCount();
         try {
-            profile = Profile.valueOf(versionDirectory.getName(1).toString());
-            build = Build.valueOf(versionDirectory.getName(2).toString());
+            profile = Profile.valueOf(versionDirectory.getName(parts - 3).toString());
+            build = Build.valueOf(versionDirectory.getName(parts - 2).toString());
         } catch (IllegalArgumentException e) {
             logger.debug("Directory does not match expected profile/build names: {}", versionDirectory, e);
             return null;
@@ -200,7 +201,7 @@ public class GameManager {
         final var libPaths = Set.of(Path.of("lib"), Path.of("libs"));
 
         var parent = path.getParent();
-        var file = path.getFileName();
+        var file = path.getFileName().toString();
         return Files.isDirectory(parent)
                 && libPaths.contains(parent.getFileName())
                 && file.endsWith(".jar")
