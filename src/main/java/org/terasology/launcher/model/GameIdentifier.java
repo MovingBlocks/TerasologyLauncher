@@ -44,6 +44,26 @@ public class GameIdentifier {
         this(version, new Semver(engineVersion, Semver.SemverType.IVY), build, profile);
     }
 
+    /**
+     * Attempt to create a game identifier for a specific {@link Build} and {@link Profile} from a version info file.
+     * <p>
+     * The version info properties
+     * <ul>
+     *  <li> MUST contain a {@code displayVersion} entry (any string)
+     *  <li> MUST contain a {@code engineVersion} entry holding a valid SemVer
+     *  <li> MAY contain a {@code buildNumber}
+     * </ul>
+     * Other properties are ignored.
+     * <p>
+     * If the version info properties contain a non-empty {@code buildNumber} it is appended to the
+     * {@code displayVersion} to form the {@link GameIdentifier#getVersion()}.
+     *
+     * @param versionInfo the Terasology distribution version info; must contain a {@code displayVersion} (any string)
+     *                    and a valid SemVer in {@code engineVersion}
+     * @param build       the build variant of the game release
+     * @param profile     the build profile of the game release
+     * @return Some identifier if the version info meets the requirements; empty otherwise
+     */
     public static Optional<GameIdentifier> fromVersionInfo(Properties versionInfo, Build build, Profile profile) {
         var displayVersion = versionInfo.getProperty("displayVersion");
         if (displayVersion == null) {
@@ -60,7 +80,7 @@ public class GameIdentifier {
             Semver engineVersion = new Semver(versionInfo.getProperty("engineVersion"), Semver.SemverType.IVY);
             return Optional.of(new GameIdentifier(displayVersion, engineVersion, build, profile));
         } catch (RuntimeException e) {
-            logger.error("versionInfo.properties displayVersion=\"{}\" engineVersion=\"{}\" " +
+            logger.warn("versionInfo.properties displayVersion=\"{}\" engineVersion=\"{}\" " +
                     "is not a valid version.", displayVersion, versionInfo.getProperty("engineVersion"), e);
             return Optional.empty();
         }
