@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.game;
@@ -18,15 +18,19 @@ import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
+import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 public class GameManager {
 
@@ -132,29 +136,113 @@ public class GameManager {
      * Scans the installation directory and collects the installed games.
      */
     private void scanInstallationDir() {
-        Set<GameIdentifier> localGames = new HashSet<>();
-        if (Files.exists(installDirectory)) {
-            for (File profileDirectory : Objects.requireNonNull(installDirectory.toFile().listFiles())) {
-                Profile profile;
-                try {
-                    profile = Profile.valueOf(profileDirectory.getName());
-                } catch (IllegalArgumentException e) {
-                    continue;
-                }
-                for (File buildDirectory : Objects.requireNonNull(profileDirectory.listFiles())) {
-                    Build build;
-                    try {
-                        build = Build.valueOf(buildDirectory.getName());
-                    } catch (IllegalArgumentException e) {
-                        continue;
-                    }
-                    for (File versionDirectory : Objects.requireNonNull(buildDirectory.listFiles())) {
-                        String version = versionDirectory.getName();
-                        localGames.add(new GameIdentifier(version, build, profile));
-                    }
-                }
-            }
+        Set<GameIdentifier> localGames;
+        try (var directories = Files.walk(installDirectory, 3)) {
+            var gameDirectories = directories
+                    .filter(Files::isDirectory)
+                    // Skip the intermediate directories.
+                    .filter(d -> installDirectory.relativize(d).getNameCount() == 3);
+            localGames = gameDirectories
+                    .map(GameManager::getInstalledVersion)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toUnmodifiableSet());
+        } catch (IOException e) {
+            logger.warn("Error while scanning installation directory {}:", installDirectory, e);
+            return;
         }
         Platform.runLater(() -> installedGames.addAll(localGames));
+    }
+
+    private static GameIdentifier getInstalledVersion(Path versionDirectory) {
+        Profile profile;
+        Build build;
+        var parts = versionDirectory.getNameCount();
+        try {
+            profile = Profile.valueOf(versionDirectory.getName(parts - 3).toString());
+            build = Build.valueOf(versionDirectory.getName(parts - 2).toString());
+        } catch (IllegalArgumentException e) {
+            logger.debug("Directory does not match expected profile/build names: {}", versionDirectory, e);
+            return null;
+        }
+        return getInstalledVersion(profile, build, versionDirectory);
+    }
+
+    private static GameIdentifier getInstalledVersion(Profile profile, Build build, Path versionDirectory) {
+        Path engineJar;
+
+        try (var jarMatches = Files.find(versionDirectory, 3, GameManager::matchEngineJar)) {
+            var matches = jarMatches.collect(Collectors.toUnmodifiableSet());
+            if (matches.isEmpty()) {
+                logger.warn("Could not find engine jar in {}", versionDirectory);
+                return null;
+            } else if (matches.size() > 1) {
+                logger.warn("Ambiguous results while looking for engine jar in {}: {}", versionDirectory, matches);
+                return null;
+            }
+            engineJar = matches.iterator().next();
+        } catch (IOException e) {
+            logger.error("Error while looking for engine jar in {}", versionDirectory, e);
+            return null;
+        }
+
+        Properties versionInfo;
+        try {
+            versionInfo = getVersionPropertiesFromJar(engineJar);
+        } catch (IOException e) {
+            logger.error("Error while looking for version in {}.", engineJar, e);
+            return null;
+        }
+
+        return GameIdentifier.fromVersionInfo(versionInfo, build, profile).orElse(null);
+    }
+
+    /**
+     * A {@link java.util.function.BiPredicate BiPredicate} matcher function for the Terasology Engine JAR file.
+     * <p>
+     * The Terasology Engine JAR file needs to be located within a {@code lib} or {@code libs} directory.
+     * Its file name must be of the form {@code engine*.jar}.
+     *
+     * @param path                the path of the file to match
+     * @param basicFileAttributes the file attributes of the file to match
+     * @return true iff the file matches the expected pattern for Terasology's engine JAR
+     */
+    private static boolean matchEngineJar(Path path, BasicFileAttributes basicFileAttributes) {
+        // Are there path-matching utilities to simplify this?
+        final var libPaths = Set.of(Path.of("lib"), Path.of("libs"));
+
+        var parent = path.getParent();
+        var file = path.getFileName().toString();
+        return Files.isDirectory(parent)
+                && libPaths.contains(parent.getFileName())
+                && file.endsWith(".jar")
+                && file.startsWith("engine");
+    }
+
+    /**
+     * Retrieve any {@code versionInfo.properties} from the given JAR file if it exists.
+     * <p>
+     * This method assumes that there is exactly one file named {@code versionInfo.properties} in the JAR.
+     * Note, that this will try to parse <b>any</b> file matching the naming pattern into a {@link Properties} object
+     * and return it.
+     *
+     * @param jarLocation the path to the JAR file containing a version info file
+     * @return the version info properties object
+     * @throws IOException if an I/O error occurs
+     * @throws FileNotFoundException if the version info file could not be found in the JAR file
+     */
+    private static Properties getVersionPropertiesFromJar(Path jarLocation) throws IOException {
+        try (var jar = new JarFile(jarLocation.toFile())) {
+            var versionEntry = jar.stream().filter(entry ->
+                    entry.getName().endsWith("versionInfo.properties")  // FIXME: use const
+            ).findAny();
+            if (versionEntry.isEmpty()) {
+                throw new FileNotFoundException("Found no versionInfo.properties in " + jarLocation);
+            }
+            var properties = new Properties();
+            try (var input = jar.getInputStream(versionEntry.get())) {
+                properties.load(input);
+            }
+            return properties;
+        }
     }
 }
