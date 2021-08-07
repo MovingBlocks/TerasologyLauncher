@@ -211,7 +211,7 @@ public class GameManager {
     private static Properties getVersionPropertiesFromJar(Path jarLocation) throws IOException {
         try (var jar = new JarFile(jarLocation.toFile())) {
             var versionEntry = jar.stream().filter(entry ->
-                    entry.getName().equals("versionInfo.properties")  // FIXME: use const
+                    entry.getName().endsWith("versionInfo.properties")  // FIXME: use const
             ).findAny();
             if (versionEntry.isEmpty()) {
                 throw new FileNotFoundException("Found no versionInfo.properties in " + jarLocation);
