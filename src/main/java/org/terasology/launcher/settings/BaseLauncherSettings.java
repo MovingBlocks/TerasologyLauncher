@@ -293,7 +293,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
         try {
             id = new Gson().fromJson(property, GameIdentifier.class);
         } catch (JsonParseException e) {
-            logger.error("Failed to parse a game version from \"{}\"", property, e);
+            logger.warn("Failed to parse a game version from \"{}\". This should automatically resolve when starting a game.", property, e);
             return Optional.empty();
         }
         return Optional.ofNullable(id);
