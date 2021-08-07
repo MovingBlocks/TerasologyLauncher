@@ -61,7 +61,7 @@ public class TestGameStarter {
         GameRelease release;
         try {
             release = new GameRelease(
-                    new GameIdentifier("5.1.0", Build.STABLE, Profile.OMEGA),
+                    new GameIdentifier("alpha-20", "5.1.0", Build.STABLE, Profile.OMEGA),
                     new URL("https://repository.example"),
                     new ReleaseMetadata(
                             "# CHANGES",

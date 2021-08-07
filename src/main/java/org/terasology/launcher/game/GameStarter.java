@@ -56,7 +56,7 @@ class GameStarter implements Callable<Process> {
         }
         processParameters.add("-DlogOverrideLevel=" + logLevel.name());
 
-        if (isMac && release.isLwjgl3()) {
+        if (isMac && VersionHistory.LWJGL3.isProvidedBy(release.getId())) {
             processParameters.add("-XstartOnFirstThread");  // lwjgl3 requires this on OS X
             // awt didn't work either, but maybe fixed on newer versions?
             //   https://github.com/LWJGLX/lwjgl3-awt/issues/1
@@ -114,6 +114,6 @@ class GameStarter implements Callable<Process> {
     }
 
     boolean terasologyUsesPosixOptions() {
-        return release.getId().getVersion().compareTo("5.1") >= 0;
+        return VersionHistory.PICOCLI.isProvidedBy(release.getId());
     }
 }
