@@ -29,12 +29,6 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(GithubRepositoryAdapter.class);
 
-    /**
-     * The preview release of v4.1.0-rc.1 is the first release with LWJGL v3.
-     * See https://github.com/MovingBlocks/Terasology/releases/tag/v4.1.0-rc.1
-     */
-    private static final Semver FIRST_LWJGL3_RELEASE = new Semver("4.1.0-rc.1");
-
     private GitHub github;
 
     public GithubRepositoryAdapter() {
@@ -64,8 +58,7 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
             final String changelog = ghRelease.getBody();
             GameIdentifier id = new GameIdentifier(engineVersion.toString(), engineVersion, build, profile);
 
-            boolean isLwjgl3 = engineVersion.isGreaterThanOrEqualTo(FIRST_LWJGL3_RELEASE);
-            ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at(), isLwjgl3);
+            ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at());
             return new GameRelease(id, url, metadata);
         } catch (SemverException | IOException e) {
             logger.info("Could not create game release from Github release {}: {}", ghRelease.getHtmlUrl(), e.getMessage());

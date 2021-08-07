@@ -13,6 +13,10 @@ import org.terasology.launcher.model.GameIdentifier;
  * These features change the way Launcher must interact with Terasology.
  */
 public enum VersionHistory {
+    /**
+     * The preview release of v4.1.0-rc.1 is the first release with LWJGL v3.
+     * See https://github.com/MovingBlocks/Terasology/releases/tag/v4.1.0-rc.1
+     */
     LWJGL3("[4.1.0,)"),
     PICOCLI("[5.1.0,)");
 

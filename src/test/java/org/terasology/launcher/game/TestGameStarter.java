@@ -65,8 +65,8 @@ public class TestGameStarter {
                     new URL("https://repository.example"),
                     new ReleaseMetadata(
                             "# CHANGES",
-                            (new Calendar.Builder()).setDate(2021, 1, 1).build().getTime(),
-                            true)
+                            (new Calendar.Builder()).setDate(2021, 1, 1).build().getTime()
+                    )
             );
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);

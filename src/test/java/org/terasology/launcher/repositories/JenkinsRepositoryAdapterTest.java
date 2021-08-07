@@ -90,7 +90,7 @@ class JenkinsRepositoryAdapterTest {
         // is the same of subsequent builds...
         final String expectedVersion = displayVersion + "+" + validResult.builds[0].number;
         final GameIdentifier id = new GameIdentifier(expectedVersion, engineVersion, Build.STABLE, Profile.OMEGA);
-        final ReleaseMetadata releaseMetadata = new ReleaseMetadata("", new Date(1604285977306L), true);
+        final ReleaseMetadata releaseMetadata = new ReleaseMetadata("", new Date(1604285977306L));
         final GameRelease expected = new GameRelease(id, expectedArtifactUrl, releaseMetadata);
 
         final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
@@ -99,9 +99,7 @@ class JenkinsRepositoryAdapterTest {
         assertAll(
                 () -> assertEquals(expected.getId(), adapter.fetchReleases().get(0).getId()),
                 () -> assertEquals(expected.getUrl(), adapter.fetchReleases().get(0).getUrl()),
-                () -> assertEquals(expected.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp()),
-                () -> assertEquals(expected.isLwjgl3(), adapter.fetchReleases().get(0).isLwjgl3(),
-                        "Jenkins adapter should assume only builds for LWJGL v3 releases")
+                () -> assertEquals(expected.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp())
         );
     }
 
