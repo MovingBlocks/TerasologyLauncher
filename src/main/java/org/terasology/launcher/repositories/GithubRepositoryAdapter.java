@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.repositories;
@@ -51,20 +51,20 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
         final Build build = ghRelease.isPrerelease() ? Build.NIGHTLY : Build.STABLE;
         final String tagName = ghRelease.getTagName();
         try {
-            final Semver version;
+            final Semver engineVersion;
             if (tagName.startsWith("v")) {
-                version = new Semver(tagName.substring(1));
+                engineVersion = new Semver(tagName.substring(1));
             } else {
-                version = new Semver(tagName);
+                engineVersion = new Semver(tagName);
             }
 
             final Optional<GHAsset> gameAsset = ghRelease.assets().stream().filter(asset -> asset.getName().matches("Terasology.*zip")).findFirst();
             final URL url = new URL(gameAsset.map(GHAsset::getBrowserDownloadUrl).orElseThrow(() -> new IOException("Missing game asset.")));
 
             final String changelog = ghRelease.getBody();
-            GameIdentifier id = new GameIdentifier(version.toString(), build, profile);
+            GameIdentifier id = new GameIdentifier(engineVersion.toString(), engineVersion, build, profile);
 
-            boolean isLwjgl3 = version.isGreaterThanOrEqualTo(FIRST_LWJGL3_RELEASE);
+            boolean isLwjgl3 = engineVersion.isGreaterThanOrEqualTo(FIRST_LWJGL3_RELEASE);
             ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at(), isLwjgl3);
             return new GameRelease(id, url, metadata);
         } catch (SemverException | IOException e) {
