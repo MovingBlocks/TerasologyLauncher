@@ -49,8 +49,6 @@ public class GameService extends Service<Boolean> {
 
     private Path gamePath;
     private LauncherSettings settings;
-    private List<String> additionalJavaParameters;
-    private List<String> additionalGameParameters;
     private GameRelease release;
 
     public GameService() {
@@ -130,11 +128,9 @@ public class GameService extends Service<Boolean> {
 
         final List<String> javaParameters = Lists.newArrayList();
         javaParameters.addAll(settings.getJavaParameterList());
-        javaParameters.addAll(additionalJavaParameters);
 
         final List<String> gameParameters = Lists.newArrayList();
         gameParameters.addAll(settings.getUserGameParameterList());
-        gameParameters.addAll(additionalGameParameters);
 
         var starter = new GameStarter(release, verifyNotNull(gamePath), settings.getGameDataDirectory(),
                                       settings.getMaxHeapSize(), settings.getInitialHeapSize(),
