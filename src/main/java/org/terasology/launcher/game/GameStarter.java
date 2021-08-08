@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.game;
@@ -57,6 +57,14 @@ class GameStarter implements Callable<Process> {
         processBuilder = new ProcessBuilder(processParameters)
                 .directory(gamePath.toFile())
                 .redirectErrorStream(true);
+
+        //noinspection ConstantConditions
+        if (true) {  // MANGO
+            var env = processBuilder.environment();
+                var libMangoHud = "/usr/lib/mangohud/lib/libMangoHud_dlsym.so:/usr/lib/mangohud/lib/libMangoHud.so";
+                env.put("MANGOHUD", "1");
+                env.merge("LD_PRELOAD", libMangoHud, (s, value) -> "$value:$libMangoHud");
+        }
     }
 
     /**
