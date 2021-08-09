@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.settings;
@@ -157,11 +157,9 @@ class TestLauncherSettings {
     @Test
     void canRecognizeLastGamePlayed() {
         final var displayVersion = "alpha-20";
-        final var engineVersion = "5.0.1-SNAPSHOT";
-        GameIdentifier id = new GameIdentifier(displayVersion, engineVersion, Build.NIGHTLY, Profile.OMEGA);
+        GameIdentifier id = new GameIdentifier(displayVersion, Build.NIGHTLY, Profile.OMEGA);
         // Second object so as not to rely on instance identity.
-        GameIdentifier expectedId = new GameIdentifier(displayVersion, engineVersion,
-                Build.NIGHTLY, Profile.OMEGA);
+        GameIdentifier expectedId = new GameIdentifier(displayVersion, Build.NIGHTLY, Profile.OMEGA);
 
         baseLauncherSettings.setLastPlayedGameVersion(id);
         assertEquals(Optional.of(expectedId), baseLauncherSettings.getLastPlayedGameVersion());

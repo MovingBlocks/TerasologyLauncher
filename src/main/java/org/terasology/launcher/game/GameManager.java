@@ -55,7 +55,7 @@ public class GameManager {
     private String getFileNameFor(GameRelease release) {
         GameIdentifier id = release.getId();
         String profileString = id.getProfile().toString().toLowerCase();
-        String versionString = id.getVersion();
+        String versionString = id.getDisplayVersion();
         String buildString = id.getBuild().toString().toLowerCase();
         return "terasology-" + profileString + "-" + versionString + "-" + buildString + ".zip";
     }
@@ -129,7 +129,7 @@ public class GameManager {
     }
 
     public Path getInstallDirectory(GameIdentifier id) {
-        return installDirectory.resolve(id.getProfile().name()).resolve(id.getBuild().name()).resolve(id.getVersion());
+        return installDirectory.resolve(id.getProfile().name()).resolve(id.getBuild().name()).resolve(id.getDisplayVersion());
     }
 
     /**

@@ -5,6 +5,7 @@ package org.terasology.launcher.model;
 
 import com.google.common.base.MoreObjects;
 import com.vdurmont.semver4j.Semver;
+import com.vdurmont.semver4j.SemverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,20 +29,14 @@ public class GameIdentifier {
 
     private static final Logger logger = LoggerFactory.getLogger(GameIdentifier.class);
 
-    final String version;
-    final Semver engineVersion;
+    final String displayVersion;
     final Build build;
     final Profile profile;
 
-    public GameIdentifier(String version, Semver engineVersion, Build build, Profile profile) {
-        this.version = version;
-        this.engineVersion = engineVersion;
+    public GameIdentifier(String displayVersion, Build build, Profile profile) {
+        this.displayVersion = displayVersion;
         this.build = build;
         this.profile = profile;
-    }
-
-    public GameIdentifier(String version, String engineVersion, Build build, Profile profile) {
-        this(version, new Semver(engineVersion, Semver.SemverType.IVY), build, profile);
     }
 
     /**
@@ -56,7 +51,7 @@ public class GameIdentifier {
      * Other properties are ignored.
      * <p>
      * If the version info properties contain a non-empty {@code buildNumber} it is appended to the
-     * {@code displayVersion} to form the {@link GameIdentifier#getVersion()}.
+     * {@code displayVersion} to form the {@link GameIdentifier#getDisplayVersion()}.
      *
      * @param versionInfo the Terasology distribution version info; must contain a {@code displayVersion} (any string)
      *                    and a valid SemVer in {@code engineVersion}
@@ -76,22 +71,20 @@ public class GameIdentifier {
         if (buildNumber != null && !buildNumber.isEmpty()) {
             displayVersion += "+" + buildNumber;
         }
+        return Optional.of(new GameIdentifier(displayVersion, build, profile));
+    }
+
+    public Semver getVersion() {
+        // compatibility shim until we have GameIdentifier.version
         try {
-            Semver engineVersion = new Semver(versionInfo.getProperty("engineVersion"), Semver.SemverType.IVY);
-            return Optional.of(new GameIdentifier(displayVersion, engineVersion, build, profile));
-        } catch (RuntimeException e) {
-            logger.warn("versionInfo.properties displayVersion=\"{}\" engineVersion=\"{}\" " +
-                    "is not a valid version.", displayVersion, versionInfo.getProperty("engineVersion"), e);
-            return Optional.empty();
+            return new Semver(displayVersion, Semver.SemverType.LOOSE);
+        } catch (SemverException e) {
+            return new Semver("0.0.1-" + displayVersion, Semver.SemverType.LOOSE); // FIXME ASAP
         }
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public Semver getEngineVersion() {
-        return engineVersion;
+    public String getDisplayVersion() {
+        return displayVersion;
     }
 
     public Build getBuild() {
@@ -111,22 +104,20 @@ public class GameIdentifier {
             return false;
         }
         GameIdentifier that = (GameIdentifier) o;
-        return version.equals(that.version)
-                && engineVersion.equals(that.engineVersion)
+        return displayVersion.equals(that.displayVersion)
                 && build == that.build
                 && profile == that.profile;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(version, build, profile, engineVersion);
+        return Objects.hash(displayVersion, build, profile);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("version", version)
-                .add("engineVersion", engineVersion)
+                .add("version", displayVersion)
                 .add("build", build)
                 .add("profile", profile)
                 .toString();
