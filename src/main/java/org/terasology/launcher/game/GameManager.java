@@ -132,6 +132,10 @@ public class GameManager {
         return installDirectory.resolve(id.getProfile().name()).resolve(id.getBuild().name()).resolve(id.getVersion());
     }
 
+    public Installation getInstallation(GameIdentifier id) {
+        return new Installation(getInstallDirectory(id));
+    }
+
     /**
      * Scans the installation directory and collects the installed games.
      */

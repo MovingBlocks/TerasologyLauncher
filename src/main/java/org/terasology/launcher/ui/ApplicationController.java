@@ -342,8 +342,7 @@ public class ApplicationController {
         } else {
             final GameRelease release = selectedRelease.getValue();
             final GameIdentifier id = release.getId();
-            final Path gamePath = gameManager.getInstallDirectory(id);
-            gameService.start(release, gamePath, launcherSettings);
+            gameService.start(gameManager.getInstallation(id), launcherSettings);
         }
     }
 
