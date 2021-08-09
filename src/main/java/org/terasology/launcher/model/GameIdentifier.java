@@ -123,7 +123,8 @@ public class GameIdentifier {
 
     @Override
     public int hashCode() {
-        return Objects.hash(version, build, profile, engineVersion);
+        boolean hasMeaningfulDisplayVersion = build != Build.STABLE;
+        return Objects.hash(hasMeaningfulDisplayVersion ? version : build, build, profile, engineVersion);
     }
 
     @Override
