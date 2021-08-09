@@ -21,13 +21,18 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class GithubRepositoryAdapter implements ReleaseRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(GithubRepositoryAdapter.class);
+    private static final Pattern NAME_REGEX = Pattern.compile(
+            "(.*?Engine\\s+)?v?(?<engine>\\d+\\.\\d+.*?)\\s*[/-]\\s*(?<display>.*)",
+            Pattern.CASE_INSENSITIVE);
 
     private GitHub github;
 
@@ -44,6 +49,16 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
         final Profile profile = Profile.OMEGA;
         final Build build = ghRelease.isPrerelease() ? Build.NIGHTLY : Build.STABLE;
         final String tagName = ghRelease.getTagName();
+        final String displayVersion;
+        var nameMatch = NAME_REGEX.matcher(ghRelease.getName());
+        if (nameMatch.matches()) {
+            displayVersion = nameMatch.group("display")
+                    .toLowerCase(Locale.ROOT)
+                    .replaceAll("[\\s-]+", "-");
+        } else {
+            displayVersion = ghRelease.getName();
+        }
+
         try {
             final Semver engineVersion;
             if (tagName.startsWith("v")) {
@@ -56,7 +71,7 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
             final URL url = new URL(gameAsset.map(GHAsset::getBrowserDownloadUrl).orElseThrow(() -> new IOException("Missing game asset.")));
 
             final String changelog = ghRelease.getBody();
-            GameIdentifier id = new GameIdentifier(engineVersion.toString(), engineVersion, build, profile);
+            GameIdentifier id = new GameIdentifier(displayVersion, engineVersion, build, profile);
 
             ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at());
             return new GameRelease(id, url, metadata);
