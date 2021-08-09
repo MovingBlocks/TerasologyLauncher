@@ -111,7 +111,11 @@ public class GameIdentifier {
             return false;
         }
         GameIdentifier that = (GameIdentifier) o;
-        return version.equals(that.version)
+
+        // Some repositories do not have reliable data for some fields
+        //   https://github.com/MovingBlocks/TerasologyLauncher/issues/651
+        boolean hasMeaningfulDisplayVersion = build != Build.STABLE;
+        return (!hasMeaningfulDisplayVersion || version.equals(that.version))
                 && engineVersion.equals(that.engineVersion)
                 && build == that.build
                 && profile == that.profile;
