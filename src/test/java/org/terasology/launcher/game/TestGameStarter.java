@@ -1,15 +1,23 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.launcher.game;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.event.Level;
+import org.terasology.launcher.model.Build;
+import org.terasology.launcher.model.GameIdentifier;
+import org.terasology.launcher.model.GameRelease;
+import org.terasology.launcher.model.Profile;
+import org.terasology.launcher.model.ReleaseMetadata;
 import org.terasology.launcher.util.JavaHeapSize;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.Calendar;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,7 +58,20 @@ public class TestGameStarter {
     }
 
     private GameStarter newStarter() {
-        return new GameStarter(gamePath, gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
+        GameRelease release;
+        try {
+            release = new GameRelease(
+                    new GameIdentifier("alpha-20", "5.1.0", Build.STABLE, Profile.OMEGA),
+                    new URL("https://repository.example"),
+                    new ReleaseMetadata(
+                            "# CHANGES",
+                            (new Calendar.Builder()).setDate(2021, 1, 1).build().getTime()
+                    )
+            );
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        return new GameStarter(release, gamePath, gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
     }
 
     @Test

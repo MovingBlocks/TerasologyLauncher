@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.model;
@@ -44,9 +44,5 @@ public class GameRelease {
 
     public Date getTimestamp() {
         return releaseMetadata.getTimestamp();
-    }
-
-    public boolean isLwjgl3() {
-        return releaseMetadata.isLwjgl3();
     }
 }

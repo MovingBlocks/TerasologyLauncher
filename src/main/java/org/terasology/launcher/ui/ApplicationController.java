@@ -1,9 +1,8 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.ui;
 
-import com.google.common.collect.Lists;
 import javafx.animation.Transition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
@@ -49,7 +48,6 @@ import org.terasology.launcher.tasks.DownloadTask;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.Platform;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -345,15 +343,7 @@ public class ApplicationController {
             final GameRelease release = selectedRelease.getValue();
             final GameIdentifier id = release.getId();
             final Path gamePath = gameManager.getInstallDirectory(id);
-            List<String> additionalJavaParameters = Lists.newArrayList();
-            List<String> additionalGameParameters = Lists.newArrayList();
-            if (release.isLwjgl3() && Platform.getPlatform().isMac()) {
-                additionalJavaParameters.add("-XstartOnFirstThread");
-                additionalJavaParameters.add("-Djava.awt.headless=true");
-
-                additionalGameParameters.add("-noSplash");
-            }
-            gameService.start(gamePath, launcherSettings, additionalJavaParameters, additionalGameParameters);
+            gameService.start(release, gamePath, launcherSettings);
         }
     }
 

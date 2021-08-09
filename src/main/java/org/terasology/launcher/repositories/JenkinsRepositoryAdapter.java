@@ -103,7 +103,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
         String changelog = computeChangelogFrom(jenkinsBuildInfo.changeSet);
         final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
         // all builds from this Jenkins are using LWJGL v3
-        return new ReleaseMetadata(changelog, timestamp, true);
+        return new ReleaseMetadata(changelog, timestamp);
     }
 
     private String computeChangelogFrom(Jenkins.ChangeSet changeSet) {
