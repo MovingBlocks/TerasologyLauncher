@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.ui;
@@ -50,10 +50,10 @@ final class GameReleaseCell extends ListCell<GameRelease> {
             String displayVersion;
             if (id.getBuild().equals(Build.NIGHTLY)) {
                 setStyle("-fx-font-weight: normal");
-                displayVersion = "preview " + id.getVersion() + " (" + DATE_FORMAT.format(item.getTimestamp()) + ")";
+                displayVersion = "preview " + id.getDisplayVersion() + " (" + DATE_FORMAT.format(item.getTimestamp()) + ")";
             } else {
                 setStyle("-fx-font-weight: bold");
-                displayVersion = "release " + id.getVersion();
+                displayVersion = "release " + id.getDisplayVersion();
             }
 
             setText(displayVersion);
