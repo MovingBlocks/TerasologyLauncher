@@ -30,6 +30,6 @@ public enum VersionHistory {
     }
 
     boolean isProvidedBy(GameIdentifier version) {
-        return isProvidedBy(version.getEngineVersion());
+        return isProvidedBy(version.getVersion());  // FIXME ASAP: obsoleted by PR#654
     }
 }

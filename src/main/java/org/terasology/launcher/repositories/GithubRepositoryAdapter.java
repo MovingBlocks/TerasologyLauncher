@@ -56,7 +56,7 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
             final URL url = new URL(gameAsset.map(GHAsset::getBrowserDownloadUrl).orElseThrow(() -> new IOException("Missing game asset.")));
 
             final String changelog = ghRelease.getBody();
-            GameIdentifier id = new GameIdentifier(engineVersion.toString(), engineVersion, build, profile);
+            GameIdentifier id = new GameIdentifier(engineVersion.toString(), build, profile);
 
             ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at());
             return new GameRelease(id, url, metadata);
