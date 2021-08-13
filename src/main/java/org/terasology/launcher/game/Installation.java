@@ -19,11 +19,19 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /** A local installation of a Terasology release. */
-class Installation {
+public class Installation {
     final Path path;
 
     Installation(Path installDirectory) {
         path = checkNotNull(installDirectory);
+    }
+
+    /** Return an Installation after confirming it is present. */
+    static Installation getExisting(Path directory) throws FileNotFoundException {
+        if (!Files.exists(directory)) {
+            throw new FileNotFoundException("No installation present in " + directory);
+        }
+        return new Installation(directory);
     }
 
     /**
