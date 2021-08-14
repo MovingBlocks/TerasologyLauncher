@@ -4,8 +4,6 @@
 package org.terasology.launcher.model;
 
 import com.google.common.base.MoreObjects;
-import com.vdurmont.semver4j.Semver;
-import com.vdurmont.semver4j.SemverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,15 +33,6 @@ public class GameIdentifier {
         this.displayVersion = displayVersion;
         this.build = build;
         this.profile = profile;
-    }
-
-    public Semver getVersion() {
-        // compatibility shim until we have GameIdentifier.version
-        try {
-            return new Semver(displayVersion, Semver.SemverType.LOOSE);
-        } catch (SemverException e) {
-            return new Semver("0.0.1-" + displayVersion, Semver.SemverType.LOOSE); // FIXME ASAP
-        }
     }
 
     public String getDisplayVersion() {

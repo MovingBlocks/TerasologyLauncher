@@ -4,7 +4,6 @@
 package org.terasology.launcher.game;
 
 import com.vdurmont.semver4j.Semver;
-import org.terasology.launcher.model.GameIdentifier;
 
 /**
  * Terasology versions which introduce specific features.
@@ -27,9 +26,5 @@ public enum VersionHistory {
 
     boolean isProvidedBy(Semver version) {
         return version.isGreaterThanOrEqualTo(engineVersion);
-    }
-
-    boolean isProvidedBy(GameIdentifier version) {
-        return isProvidedBy(version.getVersion());  // FIXME ASAP: obsoleted by PR#654
     }
 }

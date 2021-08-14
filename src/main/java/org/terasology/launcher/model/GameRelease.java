@@ -45,4 +45,9 @@ public class GameRelease {
     public Date getTimestamp() {
         return releaseMetadata.getTimestamp();
     }
+
+    @Override
+    public String toString() {
+        return id.getDisplayVersion();
+    }
 }

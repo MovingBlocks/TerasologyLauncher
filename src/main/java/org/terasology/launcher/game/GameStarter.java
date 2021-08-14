@@ -3,10 +3,10 @@
 
 package org.terasology.launcher.game;
 
+import com.vdurmont.semver4j.Semver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
-import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Platform;
 
@@ -26,11 +26,10 @@ class GameStarter implements Callable<Process> {
     private static final Logger logger = LoggerFactory.getLogger(GameStarter.class);
 
     final ProcessBuilder processBuilder;
-    final GameRelease release;
+    private final Semver engineVersion;
 
     /**
-     * @param release           the version of the game being run
-     * @param gamePath          the directory under which we will find {@code libs/Terasology.jar}, also used as the process's
+     * @param installation          the directory under which we will find {@code libs/Terasology.jar}, also used as the process's
      *                          working directory
      * @param gameDataDirectory {@code -homedir}, the directory where Terasology's data files (saves & etc) are kept
      * @param heapMin           java's {@code -Xms}
@@ -39,9 +38,10 @@ class GameStarter implements Callable<Process> {
      * @param gameParams        additional arguments for the Terasology command line
      * @param logLevel          the minimum level of log events Terasology will include on its output stream to us
      */
-    GameStarter(GameRelease release, Path gamePath, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax, List<String> javaParams, List<String> gameParams,
-                Level logLevel) {
-        this.release = release;
+    GameStarter(Installation installation, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax,
+                List<String> javaParams, List<String> gameParams, Level logLevel) throws IOException {
+        engineVersion = installation.getEngineVersion();
+        var gamePath = installation.path;
 
         final boolean isMac = Platform.getPlatform().isMac();
         final List<String> processParameters = new ArrayList<>();
@@ -56,7 +56,7 @@ class GameStarter implements Callable<Process> {
         }
         processParameters.add("-DlogOverrideLevel=" + logLevel.name());
 
-        if (isMac && VersionHistory.LWJGL3.isProvidedBy(release.getId())) {
+        if (isMac && VersionHistory.LWJGL3.isProvidedBy(engineVersion)) {
             processParameters.add("-XstartOnFirstThread");  // lwjgl3 requires this on OS X
             // awt didn't work either, but maybe fixed on newer versions?
             //   https://github.com/LWJGLX/lwjgl3-awt/issues/1
@@ -114,6 +114,6 @@ class GameStarter implements Callable<Process> {
     }
 
     boolean terasologyUsesPosixOptions() {
-        return VersionHistory.PICOCLI.isProvidedBy(release.getId());
+        return VersionHistory.PICOCLI.isProvidedBy(engineVersion);
     }
 }

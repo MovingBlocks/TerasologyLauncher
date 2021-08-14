@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.game.GameService;
+import org.terasology.launcher.game.Installation;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
@@ -49,6 +50,7 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -339,12 +341,20 @@ public class ApplicationController {
         if (gameService.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
             Dialogs.showInfo(stage, BundleUtils.getLabel("message_information_gameRunning"));
-        } else {
-            final GameRelease release = selectedRelease.getValue();
-            final GameIdentifier id = release.getId();
-            final Path gamePath = gameManager.getInstallDirectory(id);
-            gameService.start(release, gamePath, launcherSettings);
+            return;
         }
+        final GameRelease release = selectedRelease.getValue();
+        final Installation installation;
+        try {
+            installation = gameManager.getInstallation(release.getId());
+        } catch (FileNotFoundException e) {
+            // TODO: Refresh the list of installed games or something? This should not be reachable if
+            //     the properties are up to date.
+            logger.warn("Failed to get an installation for selection {}", release, e);
+            Dialogs.showError(stage, BundleUtils.getMessage("message_error_installationNotFound", release));
+            return;
+        }
+        gameService.start(installation, launcherSettings);
     }
 
     private void handleRunStarted(ObservableValue<? extends Boolean> o, Boolean oldValue, Boolean newValue) {

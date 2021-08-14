@@ -5,19 +5,12 @@ package org.terasology.launcher.game;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.event.Level;
-import org.terasology.launcher.model.Build;
-import org.terasology.launcher.model.GameIdentifier;
-import org.terasology.launcher.model.GameRelease;
-import org.terasology.launcher.model.Profile;
-import org.terasology.launcher.model.ReleaseMetadata;
 import org.terasology.launcher.util.JavaHeapSize;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.Calendar;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -52,30 +45,17 @@ public class TestGameStarter {
     }
 
     @Test
-    public void testConstruction() {
+    public void testConstruction() throws IOException {
         GameStarter starter = newStarter();
         assertNotNull(starter);
     }
 
-    private GameStarter newStarter() {
-        GameRelease release;
-        try {
-            release = new GameRelease(
-                    new GameIdentifier("alpha-20", Build.STABLE, Profile.OMEGA),
-                    new URL("https://repository.example"),
-                    new ReleaseMetadata(
-                            "# CHANGES",
-                            (new Calendar.Builder()).setDate(2021, 1, 1).build().getTime()
-                    )
-            );
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-        return new GameStarter(release, gamePath, gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
+    private GameStarter newStarter() throws IOException {
+        return new GameStarter(new StubInstallation(gamePath), gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
     }
 
     @Test
-    public void testJre() {
+    public void testJre() throws IOException {
         GameStarter task = newStarter();
         // This is the sort of test where the code under test and the expectation are just copies
         // of the same source. But since there's a plan to separate the launcher runtime from the
@@ -84,7 +64,7 @@ public class TestGameStarter {
     }
 
     @Test
-    public void testBuildProcess() {
+    public void testBuildProcess() throws IOException {
         GameStarter starter = newStarter();
         ProcessBuilder processBuilder = starter.processBuilder;
         final Path gameJar = gamePath.resolve(Path.of("libs", "Terasology.jar"));

@@ -18,6 +18,7 @@ import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -126,6 +127,10 @@ public class GameManager {
 
     public Path getInstallDirectory(GameIdentifier id) {
         return installDirectory.resolve(id.getProfile().name()).resolve(id.getBuild().name()).resolve(id.getDisplayVersion());
+    }
+
+    public Installation getInstallation(GameIdentifier id) throws FileNotFoundException {
+        return Installation.getExisting(getInstallDirectory(id));
     }
 
     /**
