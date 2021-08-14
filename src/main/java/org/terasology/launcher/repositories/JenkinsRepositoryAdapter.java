@@ -96,14 +96,25 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     private Optional<GameIdentifier> computeIdentifierFrom(Jenkins.Build jenkinsBuildInfo) {
         return Optional.ofNullable(client.getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"))
                 .map(client::requestProperties)
-                .flatMap(versionInfo -> GameIdentifier.fromVersionInfo(versionInfo, buildProfile, profile));
+                .map(versionInfo -> versionInfo.getProperty("displayVersion"))
+                .map(displayVersion -> {
+                    // versionInfo.properties is created during the Engine build.
+                    // jenkinsBuildInfo is the build of a Distribution.
+                    //
+                    // There may be multiple Distribution builds that come from the same Engine build.
+                    //
+                    // We can use the Engine's displayVersion, but we use the Distribution build number
+                    // to ensure uniqueness.
+                    String versionString = displayVersion + "+" + jenkinsBuildInfo.number;
+                    return new GameIdentifier(versionString, buildProfile, profile);
+                });
     }
 
     private ReleaseMetadata computeReleaseMetadataFrom(Jenkins.Build jenkinsBuildInfo) {
         String changelog = computeChangelogFrom(jenkinsBuildInfo.changeSet);
         final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
         // all builds from this Jenkins are using LWJGL v3
-        return new ReleaseMetadata(changelog, timestamp, true);
+        return new ReleaseMetadata(changelog, timestamp);
     }
 
     private String computeChangelogFrom(Jenkins.ChangeSet changeSet) {

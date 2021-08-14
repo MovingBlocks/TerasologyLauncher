@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.launcher.game;
 
@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
 
+import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -44,17 +45,17 @@ public class TestGameStarter {
     }
 
     @Test
-    public void testConstruction() {
+    public void testConstruction() throws IOException {
         GameStarter starter = newStarter();
         assertNotNull(starter);
     }
 
-    private GameStarter newStarter() {
-        return new GameStarter(gamePath, gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
+    private GameStarter newStarter() throws IOException {
+        return new GameStarter(new StubInstallation(gamePath), gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
     }
 
     @Test
-    public void testJre() {
+    public void testJre() throws IOException {
         GameStarter task = newStarter();
         // This is the sort of test where the code under test and the expectation are just copies
         // of the same source. But since there's a plan to separate the launcher runtime from the
@@ -63,7 +64,7 @@ public class TestGameStarter {
     }
 
     @Test
-    public void testBuildProcess() {
+    public void testBuildProcess() throws IOException {
         GameStarter starter = newStarter();
         ProcessBuilder processBuilder = starter.processBuilder;
         final Path gameJar = gamePath.resolve(Path.of("libs", "Terasology.jar"));
