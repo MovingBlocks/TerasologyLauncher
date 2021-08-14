@@ -4,6 +4,7 @@
 package org.terasology.launcher.repositories;
 
 import com.google.gson.Gson;
+import com.vdurmont.semver4j.Semver;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,6 @@ import org.terasology.launcher.model.ReleaseMetadata;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -76,9 +76,12 @@ class JenkinsRepositoryAdapterTest {
     @DisplayName("process valid response correctly")
     void processValidResponseCorrectly() {
         String displayVersion = "alpha 42 (preview)";
+        Semver engineVersion = new Semver("5.0.1-SNAPSHOT", Semver.SemverType.IVY);
 
         Properties versionInfo = new Properties();
+        versionInfo.setProperty("buildNumber", validResult.builds[0].number);
         versionInfo.setProperty("displayVersion", displayVersion);
+        versionInfo.setProperty("engineVersion", engineVersion.getValue());
 
         final JenkinsClient stubClient = new StubJenkinsClient(url -> validResult, url -> versionInfo);
 
@@ -87,7 +90,7 @@ class JenkinsRepositoryAdapterTest {
         // is the same of subsequent builds...
         final String expectedVersion = displayVersion + "+" + validResult.builds[0].number;
         final GameIdentifier id = new GameIdentifier(expectedVersion, Build.STABLE, Profile.OMEGA);
-        final ReleaseMetadata releaseMetadata = new ReleaseMetadata(new ArrayList<>(), new Date(1604285977306L), true);
+        final ReleaseMetadata releaseMetadata = new ReleaseMetadata("", new Date(1604285977306L));
         final GameRelease expected = new GameRelease(id, expectedArtifactUrl, releaseMetadata);
 
         final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
@@ -96,9 +99,7 @@ class JenkinsRepositoryAdapterTest {
         assertAll(
                 () -> assertEquals(expected.getId(), adapter.fetchReleases().get(0).getId()),
                 () -> assertEquals(expected.getUrl(), adapter.fetchReleases().get(0).getUrl()),
-                () -> assertEquals(expected.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp()),
-                () -> assertEquals(expected.isLwjgl3(), adapter.fetchReleases().get(0).isLwjgl3(),
-                        "Jenkins adapter should assume only builds for LWJGL v3 releases")
+                () -> assertEquals(expected.getTimestamp(), adapter.fetchReleases().get(0).getTimestamp())
         );
     }
 

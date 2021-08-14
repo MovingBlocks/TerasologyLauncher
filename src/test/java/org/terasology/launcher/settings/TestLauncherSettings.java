@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.settings;
@@ -7,6 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.event.Level;
+import org.terasology.launcher.model.Build;
+import org.terasology.launcher.model.GameIdentifier;
+import org.terasology.launcher.model.Profile;
 import org.terasology.launcher.util.JavaHeapSize;
 import org.terasology.launcher.util.Languages;
 
@@ -14,6 +17,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -148,5 +152,16 @@ class TestLauncherSettings {
         baseLauncherSettings.setLogLevel(Level.valueOf(logLevel));
 
         assertPropertiesEqual();
+    }
+
+    @Test
+    void canRecognizeLastGamePlayed() {
+        final var displayVersion = "alpha-20";
+        GameIdentifier id = new GameIdentifier(displayVersion, Build.NIGHTLY, Profile.OMEGA);
+        // Second object so as not to rely on instance identity.
+        GameIdentifier expectedId = new GameIdentifier(displayVersion, Build.NIGHTLY, Profile.OMEGA);
+
+        baseLauncherSettings.setLastPlayedGameVersion(id);
+        assertEquals(Optional.of(expectedId), baseLauncherSettings.getLastPlayedGameVersion());
     }
 }

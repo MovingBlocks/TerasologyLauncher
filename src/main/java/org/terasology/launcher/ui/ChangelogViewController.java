@@ -3,19 +3,31 @@
 
 package org.terasology.launcher.ui;
 
+import com.vladsch.flexmark.ext.emoji.EmojiExtension;
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 import javafx.fxml.FXML;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.web.WebView;
 import org.terasology.launcher.util.BundleUtils;
 
-import java.util.List;
+import java.util.Arrays;
 
 public class ChangelogViewController {
 
     @FXML
     private WebView changelogView;
 
+    private HtmlRenderer renderer;
+    private Parser parser;
+
     public ChangelogViewController() {
+        MutableDataSet options = new MutableDataSet();
+        options.set(Parser.EXTENSIONS, Arrays.asList(EmojiExtension.create()));
+        parser = Parser.builder(options).build();
+        renderer = HtmlRenderer.builder(options).build();
     }
 
     /**
@@ -23,27 +35,14 @@ public class ChangelogViewController {
      *
      * @param changes list of changes
      */
-    void update(final List<String> changes) {
+    void update(final String changes) {
         changelogView.getEngine().loadContent(makeHtml(changes));
         changelogView.setBlendMode(BlendMode.LIGHTEN);
         changelogView.getEngine().setUserStyleSheetLocation(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
     }
 
-    private String makeHtml(final List<String> changes) {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("<strong>")
-                .append(BundleUtils.getLabel("infoHeader4"))
-                .append("</strong>")
-                .append("<ul>");
-        if (changes != null) {
-            changes.forEach(change -> builder.append("<li>").append(escapeHtml(change)).append("</li>"));
-        }
-        builder.append("</ul>");
-
-        return builder.toString();
-    }
-
-    private static String escapeHtml(String text) {
-        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#x27;").replace("/", "&#x2F;");
+    private String makeHtml(final String changes) {
+        Node document = parser.parse(changes);
+        return renderer.render(document);
     }
 }

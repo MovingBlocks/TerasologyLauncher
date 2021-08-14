@@ -1,11 +1,10 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.model;
 
 import java.net.URL;
 import java.util.Date;
-import java.util.List;
 
 /**
  * A game release describes a (remote) game artifact (asset) that can be downloaded and installed by the launcher.
@@ -39,7 +38,7 @@ public class GameRelease {
     /**
      * The changelog associated with the game release
      */
-    public List<String> getChangelog() {
+    public String getChangelog() {
         return releaseMetadata.getChangelog();
     }
 
@@ -47,7 +46,8 @@ public class GameRelease {
         return releaseMetadata.getTimestamp();
     }
 
-    public boolean isLwjgl3() {
-        return releaseMetadata.isLwjgl3();
+    @Override
+    public String toString() {
+        return id.getDisplayVersion();
     }
 }

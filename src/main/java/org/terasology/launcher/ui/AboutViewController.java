@@ -4,14 +4,16 @@
 package org.terasology.launcher.ui;
 
 import com.google.common.io.Files;
+import com.vladsch.flexmark.ext.emoji.EmojiExtension;
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
-import org.commonmark.node.Node;
-import org.commonmark.parser.Parser;
-import org.commonmark.renderer.html.HtmlRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.BundleUtils;
@@ -23,6 +25,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -45,6 +48,16 @@ public class AboutViewController {
 
     @FXML
     private Accordion aboutInfoAccordion;
+
+    private final Parser parser;
+    private final HtmlRenderer renderer;
+
+    public AboutViewController() {
+        MutableDataSet options = new MutableDataSet();
+        options.set(Parser.EXTENSIONS, Arrays.asList(EmojiExtension.create()));
+        parser = Parser.builder(options).build();
+        renderer = HtmlRenderer.builder(options).build();
+    }
 
     @FXML
     public void initialize() {
@@ -112,9 +125,7 @@ public class AboutViewController {
         WebView view = null;
         try (InputStream input = url.openStream()) {
             view = new WebView();
-            Parser parser = Parser.builder().build();
             Node document = parser.parseReader(new InputStreamReader(input));
-            HtmlRenderer renderer = HtmlRenderer.builder().build();
             String content =
                     new StringBuilder()
                             .append("<body style='padding-left:24px;'>\n")

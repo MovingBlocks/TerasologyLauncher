@@ -1,6 +1,16 @@
 # Terasology Launcher - ChangeLog
 
-## 4.4.0 (not released)
+## 4.4.0 (2021-06-24)
+
+### 🚀 Features
+
+- #616 feat: add Github repository adapter to fetch releases from Github (@skaldarnar)
+
+## 4.3.4 (2021-05-06)
+
+### 🐛 Bug Fixes
+
+- #641 fix: add connection timeout; remove legacy jenkins adapter (@skaldarnar)
 
 ## 4.3.3 (2021-05-02)
 

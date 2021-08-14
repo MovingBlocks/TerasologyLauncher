@@ -6,6 +6,8 @@ package org.terasology.launcher.repositories;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -13,7 +15,6 @@ import java.io.InputStream;
 import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
@@ -32,7 +33,7 @@ class JenkinsClientTest {
         final JenkinsClient client = new JenkinsClient(gson);
 
         URL urlThrowingException = mock(URL.class);
-        doThrow(IOException.class).when(urlThrowingException).openStream();
+        doThrow(IOException.class).when(urlThrowingException).openConnection();
 
         assertNull(client.request(urlThrowingException));
     }
@@ -46,8 +47,10 @@ class JenkinsClientTest {
         InputStream invalidPayload = new ByteArrayInputStream("{ this is ] no json |[!".getBytes());
 
         URL urlToInvalidPayload = mock(URL.class);
-        doReturn(invalidPayload).when(urlToInvalidPayload).openStream();
 
-        assertNull(client.request(urlToInvalidPayload));
+        try (MockedStatic<JenkinsClient> utilities = Mockito.mockStatic(JenkinsClient.class)) {
+            utilities.when(() -> JenkinsClient.openStream(urlToInvalidPayload)).thenReturn(invalidPayload);
+            assertNull(client.request(urlToInvalidPayload));
+        }
     }
 }

@@ -1,9 +1,8 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.ui;
 
-import com.google.common.collect.Lists;
 import javafx.animation.Transition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
@@ -38,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.game.GameService;
+import org.terasology.launcher.game.Installation;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
@@ -49,12 +49,11 @@ import org.terasology.launcher.tasks.DownloadTask;
 import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.Languages;
-import org.terasology.launcher.util.Platform;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -213,7 +212,7 @@ public class ApplicationController {
         selectedRelease.bind(gameReleaseComboBox.getSelectionModel().selectedItemProperty());
         //TODO: instead of imperatively updating the changelog view its value should be bound via property, too
         selectedRelease.addListener(
-                (observable, oldValue, newValue) -> changelogViewController.update(newValue != null ? newValue.getChangelog() : Collections.emptyList()));
+                (observable, oldValue, newValue) -> changelogViewController.update(newValue != null ? newValue.getChangelog() : ""));
     }
 
     /**
@@ -342,20 +341,20 @@ public class ApplicationController {
         if (gameService.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
             Dialogs.showInfo(stage, BundleUtils.getLabel("message_information_gameRunning"));
-        } else {
-            final GameRelease release = selectedRelease.getValue();
-            final GameIdentifier id = release.getId();
-            final Path gamePath = gameManager.getInstallDirectory(id);
-            List<String> additionalJavaParameters = Lists.newArrayList();
-            List<String> additionalGameParameters = Lists.newArrayList();
-            if (release.isLwjgl3() && Platform.getPlatform().isMac()) {
-                additionalJavaParameters.add("-XstartOnFirstThread");
-                additionalJavaParameters.add("-Djava.awt.headless=true");
-
-                additionalGameParameters.add("-noSplash");
-            }
-            gameService.start(gamePath, launcherSettings, additionalJavaParameters, additionalGameParameters);
+            return;
         }
+        final GameRelease release = selectedRelease.getValue();
+        final Installation installation;
+        try {
+            installation = gameManager.getInstallation(release.getId());
+        } catch (FileNotFoundException e) {
+            // TODO: Refresh the list of installed games or something? This should not be reachable if
+            //     the properties are up to date.
+            logger.warn("Failed to get an installation for selection {}", release, e);
+            Dialogs.showError(stage, BundleUtils.getMessage("message_error_installationNotFound", release));
+            return;
+        }
+        gameService.start(installation, launcherSettings);
     }
 
     private void handleRunStarted(ObservableValue<? extends Boolean> o, Boolean oldValue, Boolean newValue) {

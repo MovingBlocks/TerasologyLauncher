@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.game;
@@ -18,15 +18,16 @@ import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GameManager {
 
@@ -51,7 +52,7 @@ public class GameManager {
     private String getFileNameFor(GameRelease release) {
         GameIdentifier id = release.getId();
         String profileString = id.getProfile().toString().toLowerCase();
-        String versionString = id.getVersion();
+        String versionString = id.getDisplayVersion();
         String buildString = id.getBuild().toString().toLowerCase();
         return "terasology-" + profileString + "-" + versionString + "-" + buildString + ".zip";
     }
@@ -125,36 +126,45 @@ public class GameManager {
     }
 
     public Path getInstallDirectory(GameIdentifier id) {
-        return installDirectory.resolve(id.getProfile().name()).resolve(id.getBuild().name()).resolve(id.getVersion());
+        return installDirectory.resolve(id.getProfile().name()).resolve(id.getBuild().name()).resolve(id.getDisplayVersion());
+    }
+
+    public Installation getInstallation(GameIdentifier id) throws FileNotFoundException {
+        return Installation.getExisting(getInstallDirectory(id));
     }
 
     /**
      * Scans the installation directory and collects the installed games.
      */
     private void scanInstallationDir() {
-        Set<GameIdentifier> localGames = new HashSet<>();
-        if (Files.exists(installDirectory)) {
-            for (File profileDirectory : Objects.requireNonNull(installDirectory.toFile().listFiles())) {
-                Profile profile;
-                try {
-                    profile = Profile.valueOf(profileDirectory.getName());
-                } catch (IllegalArgumentException e) {
-                    continue;
-                }
-                for (File buildDirectory : Objects.requireNonNull(profileDirectory.listFiles())) {
-                    Build build;
-                    try {
-                        build = Build.valueOf(buildDirectory.getName());
-                    } catch (IllegalArgumentException e) {
-                        continue;
-                    }
-                    for (File versionDirectory : Objects.requireNonNull(buildDirectory.listFiles())) {
-                        String version = versionDirectory.getName();
-                        localGames.add(new GameIdentifier(version, build, profile));
-                    }
-                }
-            }
+        Set<GameIdentifier> localGames;
+        try (var directories = Files.walk(installDirectory, 3)) {
+            var gameDirectories = directories
+                    .filter(Files::isDirectory)
+                    // Skip the intermediate directories.
+                    .filter(d -> installDirectory.relativize(d).getNameCount() == 3);
+            localGames = gameDirectories
+                    .map(GameManager::getInstalledVersion)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toUnmodifiableSet());
+        } catch (IOException e) {
+            logger.warn("Error while scanning installation directory {}:", installDirectory, e);
+            return;
         }
         Platform.runLater(() -> installedGames.addAll(localGames));
+    }
+
+    private static GameIdentifier getInstalledVersion(Path versionDirectory) {
+        Profile profile;
+        Build build;
+        var parts = versionDirectory.getNameCount();
+        try {
+            profile = Profile.valueOf(versionDirectory.getName(parts - 3).toString());
+            build = Build.valueOf(versionDirectory.getName(parts - 2).toString());
+        } catch (IllegalArgumentException e) {
+            logger.debug("Directory does not match expected profile/build names: {}", versionDirectory, e);
+            return null;
+        }
+        return new GameIdentifier(versionDirectory.getFileName().toString(), build, profile);
     }
 }

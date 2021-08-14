@@ -1,11 +1,13 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.model;
 
+import com.google.common.base.MoreObjects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Uniquely identify a game release.
@@ -21,20 +23,20 @@ import java.util.regex.Pattern;
  */
 public class GameIdentifier {
 
-    static final Pattern PATTERN = Pattern.compile("GameIdentifier\\{version='(?<version>.*)', build=(?<build>\\w+), profile=(?<profile>\\w+)\\}");
+    private static final Logger logger = LoggerFactory.getLogger(GameIdentifier.class);
 
-    final String version;
+    final String displayVersion;
     final Build build;
     final Profile profile;
 
-    public GameIdentifier(String version, Build build, Profile profile) {
-        this.version = version;
+    public GameIdentifier(String displayVersion, Build build, Profile profile) {
+        this.displayVersion = displayVersion;
         this.build = build;
         this.profile = profile;
     }
 
-    public String getVersion() {
-        return version;
+    public String getDisplayVersion() {
+        return displayVersion;
     }
 
     public Build getBuild() {
@@ -54,35 +56,22 @@ public class GameIdentifier {
             return false;
         }
         GameIdentifier that = (GameIdentifier) o;
-        return version.equals(that.version)
+        return displayVersion.equals(that.displayVersion)
                 && build == that.build
                 && profile == that.profile;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(version, build, profile);
+        return Objects.hash(displayVersion, build, profile);
     }
 
     @Override
     public String toString() {
-        //TODO: move serialization somewhere else (probably to LauncherSettings?)
-        return "GameIdentifier{" +
-                "version='" + version + '\'' +
-                ", build=" + build +
-                ", profile=" + profile +
-                '}';
-    }
-
-    public static GameIdentifier fromString(String identifier) {
-        //TODO: move deserialization somewhere else (probably to LauncherSettings?)
-        Matcher matcher = PATTERN.matcher(identifier);
-        if (matcher.find()) {
-            final Build build = Build.valueOf(matcher.group("build"));
-            final Profile profile = Profile.valueOf(matcher.group("profile"));
-            final String version = matcher.group("version");
-            return new GameIdentifier(version, build, profile);
-        }
-        return null;
+        return MoreObjects.toStringHelper(this)
+                .add("version", displayVersion)
+                .add("build", build)
+                .add("profile", profile)
+                .toString();
     }
 }
