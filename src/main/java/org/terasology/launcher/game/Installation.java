@@ -13,12 +13,16 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/** A local installation of a Terasology release. */
+/**
+ * A local installation of a Terasology release.
+ */
 public class Installation {
     final Path path;
 
@@ -26,7 +30,9 @@ public class Installation {
         path = checkNotNull(installDirectory);
     }
 
-    /** Return an Installation after confirming it is present. */
+    /**
+     * Return an Installation after confirming it is present.
+     */
     static Installation getExisting(Path directory) throws FileNotFoundException {
         if (!Files.exists(directory)) {
             throw new FileNotFoundException("No installation present in " + directory);
@@ -37,11 +43,22 @@ public class Installation {
     /**
      * The version of the Terasology engine used.
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException           if an I/O error occurs
      * @throws FileNotFoundException if the engine or the version info could not be found
      */
     Semver getEngineVersion() throws IOException {
         return getEngineVersion(path);
+    }
+
+    /**
+     * Locate the main game jar.
+     *
+     * As of August 2021, Terasology has custom build logic to put libraries into a {@code libs} (plural) subdirectory.
+     * As we plan to switch to using default Gradle behavior we have to do a quick check how the game distribution was
+     * build (i.e., custom  {@code libs} or default {@code lib}).
+     */
+    Path getGameJarPath() throws IOException {
+        return findJar(path, Installation::matchGameJar, "game");
     }
 
     @Override
@@ -70,33 +87,48 @@ public class Installation {
                 .toString();
     }
 
+    static Path findJar(Path searchPath, BiPredicate<Path, BasicFileAttributes> predicate, String displayName) throws IOException {
+        Path resultPath;
+
+        try (var jarMatches = Files.find(searchPath, 3, predicate)) {
+            var matches = jarMatches.collect(Collectors.toUnmodifiableSet());
+            if (matches.isEmpty()) {
+                throw new FileNotFoundException("Could not find " + displayName + " jar in " + searchPath);
+            } else if (matches.size() > 1) {
+                throw new FileNotFoundException(
+                        String.format("Ambiguous results while looking for " + displayName + " jar in %s: %s",
+                                searchPath, matches));
+            }
+            resultPath = matches.iterator().next();
+        }
+        return resultPath;
+    }
+
     /**
      * Find the version of the Terasology engine installed here.
      * <p>
      * This method assumes that there is exactly one file named {@code engine*.jar} in the installation.
      *
      * @param versionDirectory the location containing the installation
-     * @throws IOException if an I/O error occurs
+     * @throws IOException           if an I/O error occurs
      * @throws FileNotFoundException if the engine or the version info could not be found
      */
     static Semver getEngineVersion(Path versionDirectory) throws IOException {
-        Path engineJar;
-
-        try (var jarMatches = Files.find(versionDirectory, 3, Installation::matchEngineJar)) {
-            var matches = jarMatches.collect(Collectors.toUnmodifiableSet());
-            if (matches.isEmpty()) {
-                throw new FileNotFoundException("Could not find engine jar in " + versionDirectory);
-            } else if (matches.size() > 1) {
-                throw new FileNotFoundException(
-                        String.format("Ambiguous results while looking for engine jar in %s: %s",
-                                versionDirectory, matches));
-            }
-            engineJar = matches.iterator().next();
-        }
-
+        Path engineJar = findJar(versionDirectory, Installation::matchEngineJar, "engine");
         Properties versionInfo = getVersionPropertiesFromJar(engineJar);
-
         return new Semver(versionInfo.getProperty("engineVersion"), Semver.SemverType.IVY);
+    }
+
+    static BiPredicate<Path, BasicFileAttributes> matchJar(Predicate<String> predicate) {
+        return (path, basicFileAttributes) -> {
+            final var libPaths = Set.of(Path.of("lib"), Path.of("libs"));
+
+            var parent = path.getParent();
+            var file = path.getFileName().toString();
+            return Files.isDirectory(parent)
+                    && libPaths.contains(parent.getFileName())
+                    && predicate.test(file);
+        };
     }
 
     /**
@@ -110,15 +142,11 @@ public class Installation {
      * @return true iff the file matches the expected pattern for Terasology's engine JAR
      */
     static boolean matchEngineJar(Path path, BasicFileAttributes basicFileAttributes) {
-        // Are there path-matching utilities to simplify this?
-        final var libPaths = Set.of(Path.of("lib"), Path.of("libs"));
+        return matchJar(file -> file.endsWith(".jar") && file.startsWith("engine")).test(path, basicFileAttributes);
+    }
 
-        var parent = path.getParent();
-        var file = path.getFileName().toString();
-        return Files.isDirectory(parent)
-                && libPaths.contains(parent.getFileName())
-                && file.endsWith(".jar")
-                && file.startsWith("engine");
+    static boolean matchGameJar(Path path, BasicFileAttributes basicFileAttributes) {
+        return matchJar(file -> file.equals("Terasology.jar")).test(path, basicFileAttributes);
     }
 
     /**
@@ -130,7 +158,7 @@ public class Installation {
      *
      * @param jarLocation the path to the JAR file containing a version info file
      * @return the version info properties object
-     * @throws IOException if an I/O error occurs
+     * @throws IOException           if an I/O error occurs
      * @throws FileNotFoundException if the version info file could not be found in the JAR file
      */
     static Properties getVersionPropertiesFromJar(Path jarLocation) throws IOException {
