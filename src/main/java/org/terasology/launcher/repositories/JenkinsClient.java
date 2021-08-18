@@ -16,8 +16,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
@@ -45,22 +49,27 @@ class JenkinsClient {
      * @return an input stream similar to {@code url.openStream()} with a connection timeout of 10 seconds
      * @throws IOException if opening the URL connection or retrieving the input stream fails
      */
-    static InputStream openStream(URL url) throws IOException {
+    static InputStream openStream(URL url) throws IOException, URISyntaxException, InterruptedException {
         // this is a static member to indicate that it is independent of the client itself, and to cleanly stub it for
         // testing purposes without the need to mock the class-under-test itself.
-        URLConnection connection = url.openConnection();
-        connection.setConnectTimeout(10 * 1000);
-        return connection.getInputStream();
+        var client = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(10))
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build();
+        var request = HttpRequest.newBuilder(url.toURI()).build();
+        var response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+        logger.debug("{}", response);
+        return response.body();
     }
 
-    Jenkins.ApiResult request(URL url) {
+    Jenkins.ApiResult request(URL url) throws InterruptedException {
         Preconditions.checkNotNull(url);
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(openStream(url)))) {
             return gson.fromJson(reader, Jenkins.ApiResult.class);
         } catch (JsonSyntaxException | JsonIOException e) {
             logger.warn("Failed to read JSON from '{}'", url.toExternalForm(), e);
-        } catch (IOException e) {
+        } catch (URISyntaxException | IOException e) {
             logger.warn("Failed to read from URL '{}'\n\t{}", e.getMessage(), url.toExternalForm());
         }
         return null;
@@ -73,8 +82,8 @@ class JenkinsClient {
             final Properties properties = new Properties();
             properties.load(inputStream);
             return properties;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException | URISyntaxException | InterruptedException e) {
+            logger.warn("Error while fetching {}", artifactUrl, e);
         }
         return null;
     }

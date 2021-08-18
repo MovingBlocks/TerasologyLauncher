@@ -28,7 +28,7 @@ class JenkinsClientTest {
 
     @Test
     @DisplayName("should handle IOException on request(url) gracefully")
-    void nullOnIoException() throws IOException {
+    void nullOnIoException() throws IOException, InterruptedException {
         final Gson gson = new Gson();
         final JenkinsClient client = new JenkinsClient(gson);
 
@@ -40,7 +40,7 @@ class JenkinsClientTest {
 
     @Test
     @DisplayName("can handle invalid JSON payload")
-    void canHandleInvalidJsonPayload() throws IOException {
+    void canHandleInvalidJsonPayload() throws InterruptedException {
         final Gson gson = new Gson();
         final JenkinsClient client = new JenkinsClient(gson);
 

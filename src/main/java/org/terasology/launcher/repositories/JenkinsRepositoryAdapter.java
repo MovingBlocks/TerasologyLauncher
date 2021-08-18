@@ -14,6 +14,7 @@ import org.terasology.launcher.model.ReleaseMetadata;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,7 +65,13 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
 
         logger.debug("fetching releases from '{}'", apiUrl);
 
-        final Jenkins.ApiResult result = client.request(apiUrl);
+        final Jenkins.ApiResult result;
+        try {
+            result = client.request(apiUrl);
+        } catch (InterruptedException e) {
+            logger.warn("Interrupted while fetching packages from: {}", apiUrl, e);
+            return Collections.emptyList();
+        }
         if (result != null && result.builds != null) {
             for (Jenkins.Build build : result.builds) {
                 computeReleaseFrom(build).ifPresent(pkgList::add);
