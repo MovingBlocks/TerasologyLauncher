@@ -70,7 +70,7 @@ class JenkinsClient {
         } catch (JsonSyntaxException | JsonIOException e) {
             logger.warn("Failed to read JSON from '{}'", url.toExternalForm(), e);
         } catch (URISyntaxException | IOException e) {
-            logger.warn("Failed to read from URL '{}'\n\t{}", e.getMessage(), url.toExternalForm());
+            logger.warn("Failed to read from URL '{}'\n\t{}", url.toExternalForm(), e.getMessage());
         }
         return null;
     }

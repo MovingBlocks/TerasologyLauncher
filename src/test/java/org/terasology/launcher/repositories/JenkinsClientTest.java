@@ -6,8 +6,10 @@ package org.terasology.launcher.repositories;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -15,8 +17,9 @@ import java.io.InputStream;
 import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 
 /**
  * Note: We are testing with the default Gson parser here. This can go out of sync with the instantiation of
@@ -24,18 +27,21 @@ import static org.mockito.Mockito.mock;
  * are using the "real thing" under test here.
  */
 @DisplayName("JenkinsClient")
+@ExtendWith(MockitoExtension.class)
 class JenkinsClientTest {
 
     @Test
     @DisplayName("should handle IOException on request(url) gracefully")
     void nullOnIoException() throws IOException, InterruptedException {
         final Gson gson = new Gson();
-        final JenkinsClient client = new JenkinsClient(gson);
+        URL url = new URL("https://jenkins.example");
 
-        URL urlThrowingException = mock(URL.class);
-        doThrow(IOException.class).when(urlThrowingException).openConnection();
+        try (var mockedClientClass = mockStatic(JenkinsClient.class)) {
+            mockedClientClass.when(() -> JenkinsClient.openStream(any())).thenThrow(IOException.class);
 
-        assertNull(client.request(urlThrowingException));
+            final JenkinsClient client = new JenkinsClient(gson);
+            assertNull(client.request(url));
+        }
     }
 
     @Test
