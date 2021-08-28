@@ -66,7 +66,7 @@ class GameStarter implements Callable<Process> {
         processParameters.addAll(javaParams);
 
         processParameters.add("-jar");
-        processParameters.add(gamePath.resolve(Path.of("libs", "Terasology.jar")).toString());
+        processParameters.add(installation.getGameJarPath().toString());
 
         // Parameters after this are for the game facade, not the java runtime.
         processParameters.add(homeDirParameter(gameDataDirectory));

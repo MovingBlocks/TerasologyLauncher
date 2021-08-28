@@ -7,14 +7,23 @@ import com.vdurmont.semver4j.Semver;
 
 import java.nio.file.Path;
 
-/** An Installation that does not depend on filesystem interaction to determine engineVersion. */
+/** An Installation that does not depend on filesystem interaction to determine engineVersion or game jar. */
 class StubInstallation extends Installation {
-    StubInstallation(Path installDirectory) {
+
+    Path gameJar;
+
+    StubInstallation(Path installDirectory, Path relativeGameJarPath) {
         super(installDirectory);
+        gameJar = this.path.resolve(relativeGameJarPath);
     }
 
     @Override
     Semver getEngineVersion() {
         return new Semver("0.0.1");
+    }
+
+    @Override
+    Path getGameJarPath() {
+        return gameJar;
     }
 }
