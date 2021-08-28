@@ -248,6 +248,7 @@ public class SettingsController {
         chooseLanguageLabel.setText(BundleUtils.getLabel("settings_launcher_chooseLanguage"));
         closeAfterStartBox.setText(BundleUtils.getLabel("settings_launcher_closeLauncherAfterGameStart"));
         saveDownloadedFilesBox.setText(BundleUtils.getLabel("settings_launcher_saveDownloadedFiles"));
+        showPreReleasesBox.setText(BundleUtils.getLabel("settings_launcher_showPreReleases"));
         launcherDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory"));
         launcherDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory_open"));
         saveSettingsButton.setText(BundleUtils.getLabel("settings_save"));
