@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.settings;
@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public abstract class LauncherSettings {
 
@@ -103,7 +104,9 @@ public abstract class LauncherSettings {
     public abstract String getUserGameParameters();
 
     public synchronized List<String> getUserGameParameterList() {
-        return Arrays.asList(getUserGameParameters().split("\\s+"));
+        return Arrays.stream(getUserGameParameters().split("\\s+"))
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toUnmodifiableList());
     }
 
     public abstract Level getLogLevel();

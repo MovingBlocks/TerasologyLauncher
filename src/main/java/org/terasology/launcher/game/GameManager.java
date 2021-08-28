@@ -27,6 +27,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class GameManager {
@@ -63,7 +64,7 @@ public class GameManager {
      * @param release  the game release to be installed
      * @param listener the object which is to be informed about task progress
      */
-    public void install(GameRelease release, ProgressListener listener) throws IOException, DownloadException {
+    public void install(GameRelease release, ProgressListener listener) throws IOException, DownloadException, InterruptedException {
         final Path cachedZip = cacheDirectory.resolve(getFileNameFor(release));
 
         // TODO: Properly validate cache and handle exceptions
@@ -79,7 +80,7 @@ public class GameManager {
         }
     }
 
-    private void download(GameRelease release, Path targetLocation, ProgressListener listener) throws DownloadException, IOException {
+    private void download(GameRelease release, Path targetLocation, ProgressListener listener) throws DownloadException, IOException, InterruptedException {
         final URL downloadUrl = release.getUrl();
 
         final long contentLength = DownloadUtils.getContentLength(downloadUrl);
@@ -88,7 +89,11 @@ public class GameManager {
         if (availableSpace >= contentLength) {
             final Path cacheZipPart = targetLocation.resolveSibling(targetLocation.getFileName().toString() + ".part");
             Files.deleteIfExists(cacheZipPart);
-            DownloadUtils.downloadToFile(downloadUrl, cacheZipPart, listener);
+            try {
+                DownloadUtils.downloadToFile(downloadUrl, cacheZipPart, listener).get();
+            } catch (ExecutionException e) {
+                throw new DownloadException("Exception while downloading " + downloadUrl, e.getCause());
+            }
 
             if (!listener.isCancelled()) {
                 Files.move(cacheZipPart, targetLocation, StandardCopyOption.ATOMIC_MOVE);

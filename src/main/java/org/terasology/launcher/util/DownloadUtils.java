@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.util;
@@ -10,53 +10,56 @@ import org.terasology.launcher.tasks.ProgressListener;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 
 public final class DownloadUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
 
-    private static final int CONNECT_TIMEOUT = 1000 * 30;
-    private static final int READ_TIMEOUT = 1000 * 60 * 5;
+    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(30);
+    private static final Duration READ_TIMEOUT = Duration.ofMinutes(5);
 
     private DownloadUtils() {
     }
 
-    public static void downloadToFile(URL downloadURL, Path file, ProgressListener listener) throws DownloadException {
+    public static CompletableFuture<Void> downloadToFile(URL downloadURL, Path file, ProgressListener listener) throws DownloadException {
         listener.update(0);
 
-        final HttpURLConnection connection = getConnectedDownloadConnection(downloadURL);
+        var result = getConnectedDownloadConnection(downloadURL);
 
-        final long contentLength = connection.getContentLengthLong();
-        if (contentLength <= 0) {
-            throw new DownloadException("Wrong content length! URL=" + downloadURL + ", contentLength=" + contentLength);
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Download file '{}' ({}; {}) from URL '{}'.", file, contentLength, connection.getContentType(), downloadURL);
-        }
+        return result.thenAcceptAsync(response -> {
+            var contentLength = response.headers().firstValueAsLong("content-length").orElse(0L);
+            logger.debug("Download file '{}' ({}; {}) from URL '{}'.", file, contentLength,
+                    response.headers().firstValue("content-type"), downloadURL);
 
-        try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-             BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))) {
-            downloadToFile(listener, contentLength, in, out);
-        } catch (IOException e) {
-            throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
-        } finally {
-            connection.disconnect();
-        }
-
-        if (!listener.isCancelled()) {
-            try {
-                if (Files.size(file) != contentLength) {
-                    throw new DownloadException("Wrong file length after download! " + Files.size(file) + " != " + contentLength);
-                }
+            try (BufferedInputStream in = new BufferedInputStream(response.body());
+                 BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))) {
+                downloadToFile(listener, contentLength, in, out);
             } catch (IOException e) {
-                throw new DownloadException("Failed to read the file length after download!", e);
+                throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
             }
-            listener.update(100);
-        }
+
+            if (!listener.isCancelled()) {
+                try {
+                    if (Files.size(file) != contentLength) {
+                        throw new DownloadException("Wrong file length after download! " + Files.size(file) + " != " + contentLength);
+                    }
+                } catch (IOException e) {
+                    throw new DownloadException("Failed to read the file length after download!", e);
+                }
+                listener.update(100);
+            }
+        });
     }
 
     public static long getContentLength(URL downloadURL) throws DownloadException {
@@ -74,17 +77,19 @@ public final class DownloadUtils {
         }
     }
 
-    private static HttpURLConnection getConnectedDownloadConnection(URL downloadURL) throws DownloadException {
-        final HttpURLConnection connection;
+    private static CompletableFuture<HttpResponse<InputStream>> getConnectedDownloadConnection(URL downloadURL) throws DownloadException {
+        var client = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .connectTimeout(CONNECT_TIMEOUT)
+                .build();
+
+        HttpRequest request;
         try {
-            connection = (HttpURLConnection) downloadURL.openConnection();
-            connection.setConnectTimeout(CONNECT_TIMEOUT);
-            connection.setReadTimeout(READ_TIMEOUT);
-            connection.connect();
-        } catch (ClassCastException | IOException e) {
-            throw new DownloadException("Could not open/connect HTTP-URL connection! URL=" + downloadURL, e);
+            request = HttpRequest.newBuilder(downloadURL.toURI()).timeout(READ_TIMEOUT).build();
+        } catch (URISyntaxException e) {
+            throw new DownloadException("Error in URL: " + downloadURL, e);
         }
-        return connection;
+        return client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
     }
 
     private static void downloadToFile(ProgressListener listener, long contentLength, BufferedInputStream in,
