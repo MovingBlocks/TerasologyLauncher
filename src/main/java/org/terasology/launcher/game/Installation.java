@@ -8,6 +8,7 @@ import com.vdurmont.semver4j.Semver;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -119,6 +120,18 @@ public class Installation {
         return new Semver(versionInfo.getProperty("engineVersion"), Semver.SemverType.IVY);
     }
 
+    /**
+     * Lift a predicate taking the string form of the last component of a path to a
+     * {@link java.util.function.BiPredicate BiPredicate} that can be used with
+     * {@link Files#find(Path, int, BiPredicate, FileVisitOption...)}.
+     * <p>
+     * The resulting predicate automatically checks for the parent directory to be either {@code lib} or {@code libs}.
+     * The passed in {@code predicate} will be called with the <i>string representation of the file name</i>, i.e., the
+     * last element of each {@link Path}.
+     *
+     * @param predicate a predicate to match a file by file name
+     * @return a predicate to match files by name under a {@code lib} or {@code libs} directory
+     */
     static BiPredicate<Path, BasicFileAttributes> matchJar(Predicate<String> predicate) {
         return (path, basicFileAttributes) -> {
             final var libPaths = Set.of(Path.of("lib"), Path.of("libs"));
