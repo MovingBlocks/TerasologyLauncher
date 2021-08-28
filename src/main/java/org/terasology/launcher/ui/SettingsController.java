@@ -72,6 +72,8 @@ public class SettingsController {
     @FXML
     private CheckBox closeAfterStartBox;
     @FXML
+    private CheckBox showPreReleasesBox;
+    @FXML
     private CheckBox saveDownloadedFilesBox;
     @FXML
     private Label launcherDirectoryLabel;
@@ -126,6 +128,9 @@ public class SettingsController {
 
         // save closeLauncherAfterGameStart
         launcherSettings.setCloseLauncherAfterGameStart(closeAfterStartBox.isSelected());
+
+        // save showPreReleases
+        launcherSettings.setShowPreReleases(showPreReleasesBox.isSelected());
 
         // save saveDownloadedFiles
         launcherSettings.setKeepDownloadedFiles(saveDownloadedFilesBox.isSelected());
@@ -202,6 +207,7 @@ public class SettingsController {
         populateLanguageIcons();
         populateCloseLauncherAfterGameStart();
         populateSaveDownloadedFiles();
+        populateShowPreReleases();
         populateLogLevel();
 
         gameDirectory = newLauncherSettings.getGameDirectory();
@@ -290,6 +296,10 @@ public class SettingsController {
 
     private void populateCloseLauncherAfterGameStart() {
         closeAfterStartBox.setSelected(launcherSettings.isCloseLauncherAfterGameStart());
+    }
+
+    private void populateShowPreReleases() {
+        showPreReleasesBox.setSelected(launcherSettings.isShowPreReleases());
     }
 
     private void populateSaveDownloadedFiles() {
