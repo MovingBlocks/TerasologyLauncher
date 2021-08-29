@@ -132,9 +132,9 @@ public class GameService extends Service<Boolean> {
         GameStarter starter;
         try {
             starter = new GameStarter(verifyNotNull(gamePath), settings.getGameDataDirectory(),
-                                          settings.getMaxHeapSize(), settings.getInitialHeapSize(),
-                                          javaParameters, gameParameters,
-                                          settings.getLogLevel());
+                    settings.getInitialHeapSize(), settings.getMaxHeapSize(),
+                    javaParameters, gameParameters,
+                    settings.getLogLevel());
         } catch (IOException e) {
             throw new RuntimeException("Error using this as a game directory: " + gamePath, e);
         }
