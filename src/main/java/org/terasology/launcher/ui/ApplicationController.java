@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.game.GameService;
 import org.terasology.launcher.game.Installation;
+import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
@@ -83,6 +84,7 @@ public class ApplicationController {
     private Property<GameRelease> selectedRelease;
     private Property<GameAction> gameAction;
     private BooleanProperty downloading;
+    private BooleanProperty showPreReleases;
 
     private ObservableSet<GameIdentifier> installedGames;
 
@@ -124,6 +126,7 @@ public class ApplicationController {
         gameService.valueProperty().addListener(this::handleRunStarted);
 
         downloading = new SimpleBooleanProperty(false);
+        showPreReleases = new SimpleBooleanProperty(false);
 
         selectedRelease = new SimpleObjectProperty<>();
 
@@ -200,10 +203,11 @@ public class ApplicationController {
             List<GameRelease> releasesForProfile =
                     repositoryManager.getReleases().stream()
                             .filter(release -> release.getId().getProfile() == selectedProfile.get())
+                            .filter(release -> showPreReleases.getValue() || release.getId().getBuild().equals(Build.STABLE))
                             .sorted(ApplicationController::compareReleases)
                             .collect(Collectors.toList());
             return FXCollections.observableList(releasesForProfile);
-        }, selectedProfile);
+        }, selectedProfile, showPreReleases);
 
         gameReleaseComboBox.itemsProperty().bind(releases);
         gameReleaseComboBox.buttonCellProperty().bind(Bindings.createObjectBinding(() -> new GameReleaseCell(installedGames, true), installedGames));
@@ -252,6 +256,7 @@ public class ApplicationController {
                        final Stage stage, final HostServices hostServices) {
         this.launcherDirectory = launcherDirectory;
         this.launcherSettings = launcherSettings;
+        this.showPreReleases.bind(launcherSettings.showPreReleases());
 
         this.repositoryManager = repositoryManager;
         this.gameManager = gameManager;

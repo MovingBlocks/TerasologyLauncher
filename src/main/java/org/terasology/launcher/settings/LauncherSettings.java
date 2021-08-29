@@ -4,6 +4,7 @@
 package org.terasology.launcher.settings;
 
 import com.google.common.collect.Lists;
+import javafx.beans.property.ReadOnlyProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -33,6 +34,7 @@ public abstract class LauncherSettings {
         initBaseJavaParameters();
         initCloseLauncherAfterGameStart();
         initSaveDownloadedFiles();
+        initShowPreReleases();
         initGameDirectory();
         initGameDataDirectory();
         initUserJavaParameters();
@@ -51,6 +53,8 @@ public abstract class LauncherSettings {
     protected abstract void initCloseLauncherAfterGameStart();
 
     protected abstract void initSaveDownloadedFiles();
+
+    protected abstract void initShowPreReleases();
 
     protected abstract void initGameDirectory();
 
@@ -71,6 +75,12 @@ public abstract class LauncherSettings {
     protected abstract void initLastPlayedGameVersion();
 
     protected abstract void initLastInstalledGameVersion();
+
+    // --------------------------------------------------------------------- //
+    // PROPERTIES
+    // --------------------------------------------------------------------- //
+
+    public abstract ReadOnlyProperty<Boolean> showPreReleases();
 
     // --------------------------------------------------------------------- //
     // GETTERS
@@ -119,6 +129,8 @@ public abstract class LauncherSettings {
 
     public abstract boolean isKeepDownloadedFiles();
 
+    public abstract boolean isShowPreReleases();
+
     public abstract Optional<GameIdentifier> getLastPlayedGameVersion();
 
     public abstract String getLastInstalledGameJob();
@@ -142,6 +154,8 @@ public abstract class LauncherSettings {
     public abstract void setCloseLauncherAfterGameStart(boolean closeLauncherAfterGameStart);
 
     public abstract void setKeepDownloadedFiles(boolean keepDownloadedFiles);
+
+    public abstract void setShowPreReleases(boolean selected);
 
     public abstract void setGameDirectory(Path gameDirectory);
 

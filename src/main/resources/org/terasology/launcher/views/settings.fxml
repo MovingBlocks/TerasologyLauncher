@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<StackPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.terasology.launcher.ui.SettingsController">
+<StackPane xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.terasology.launcher.ui.SettingsController">
    <children>
       <VBox prefHeight="600.0" prefWidth="600.0">
          <children>
@@ -42,6 +42,7 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints maxHeight="1.7976931348623157E308" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="40.0" valignment="BOTTOM" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -114,8 +115,9 @@
                        <TextField fx:id="launcherDirectoryPath" editable="false" GridPane.rowIndex="12" />
                        <Button fx:id="launcherDirectoryOpenButton" mnemonicParsing="false" onAction="#openLauncherDirectoryAction" text="Browse" GridPane.columnIndex="1" GridPane.rowIndex="12" />
                        <Label text="Other" GridPane.rowIndex="13" />
-                       <CheckBox fx:id="closeAfterStartBox" mnemonicParsing="false" text="Close after game starts" GridPane.rowIndex="14" />
-                       <CheckBox fx:id="saveDownloadedFilesBox" mnemonicParsing="false" text="Save downloaded files" GridPane.rowIndex="15" />
+                       <CheckBox fx:id="showPreReleasesBox" mnemonicParsing="false" text="Show pre-releases and nightly builds" GridPane.rowIndex="14" />
+                       <CheckBox fx:id="closeAfterStartBox" mnemonicParsing="false" text="Close after game starts" GridPane.rowIndex="15" />
+                       <CheckBox fx:id="saveDownloadedFilesBox" mnemonicParsing="false" text="Save downloaded files" GridPane.rowIndex="16" />
                      </children>
                   </GridPane>
                </content>

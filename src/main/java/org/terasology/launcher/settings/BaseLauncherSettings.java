@@ -5,6 +5,9 @@ package org.terasology.launcher.settings;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
+import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -35,6 +38,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
     public static final String PROPERTY_GAME_DIRECTORY = "gameDirectory";
     public static final String PROPERTY_GAME_DATA_DIRECTORY = "gameDataDirectory";
     public static final String PROPERTY_SAVE_DOWNLOADED_FILES = "saveDownloadedFiles";
+    public static final String PROPERTY_SHOW_PRE_RELEASES = "showPreReleases";
     public static final String PROPERTY_BASE_JAVA_PARAMETERS = "baseJavaParameters";
     public static final String PROPERTY_USER_JAVA_PARAMETERS = "userJavaParameters";
     public static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
@@ -48,6 +52,7 @@ public final class BaseLauncherSettings extends LauncherSettings {
     public static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     public static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
     public static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
+    public static final boolean SHOW_PRE_RELEASES_DEFAULT = false;
     public static final String LAST_PLAYED_GAME_VERSION_DEFAULT = "";
     public static final String LAST_INSTALLED_GAME_VERSION_DEFAULT = "";
 
@@ -55,11 +60,12 @@ public final class BaseLauncherSettings extends LauncherSettings {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseLauncherSettings.class);
 
-
     private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
     private static final Level LOG_LEVEL_DEFAULT = Level.INFO;
 
     private final Properties properties;
+
+    private final Property<Boolean> showPreReleases = new SimpleBooleanProperty(SHOW_PRE_RELEASES_DEFAULT);
 
     BaseLauncherSettings(Properties properties) {
         this.properties = properties;
@@ -160,6 +166,15 @@ public final class BaseLauncherSettings extends LauncherSettings {
         properties.setProperty(PROPERTY_SAVE_DOWNLOADED_FILES, Boolean.toString(saveDownloadedFiles));
     }
 
+    protected void initShowPreReleases() {
+        final String showPreReleasesStr = properties.getProperty(PROPERTY_SHOW_PRE_RELEASES);
+        if (showPreReleasesStr != null) {
+            setShowPreReleases(Boolean.parseBoolean(showPreReleasesStr));
+        } else {
+            setShowPreReleases(SHOW_PRE_RELEASES_DEFAULT);
+        }
+    }
+
     protected void initGameDirectory() {
         final String gameDirectoryStr = properties.getProperty(PROPERTY_GAME_DIRECTORY);
         Path gameDirectory = null;
@@ -206,6 +221,15 @@ public final class BaseLauncherSettings extends LauncherSettings {
         if (lastInstalledGameVersionStr == null || lastInstalledGameVersionStr.isEmpty()) {
             properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION, LAST_INSTALLED_GAME_VERSION_DEFAULT);
         }
+    }
+
+    // --------------------------------------------------------------------- //
+    // PROPERTIES
+    // --------------------------------------------------------------------- //
+
+    @Override
+    public ReadOnlyProperty<Boolean> showPreReleases() {
+        return showPreReleases;
     }
 
     // --------------------------------------------------------------------- //
@@ -284,6 +308,11 @@ public final class BaseLauncherSettings extends LauncherSettings {
     }
 
     @Override
+    public synchronized boolean isShowPreReleases() {
+        return Boolean.parseBoolean(properties.getProperty(PROPERTY_SHOW_PRE_RELEASES));
+    }
+
+    @Override
     public synchronized Optional<GameIdentifier> getLastPlayedGameVersion() {
         String property = properties.getProperty(PROPERTY_LAST_PLAYED_GAME_VERSION);
         if (property == null || property.isEmpty()) {
@@ -346,6 +375,12 @@ public final class BaseLauncherSettings extends LauncherSettings {
     @Override
     public synchronized void setKeepDownloadedFiles(boolean keepDownloadedFiles) {
         properties.setProperty(PROPERTY_SAVE_DOWNLOADED_FILES, Boolean.toString(keepDownloadedFiles));
+    }
+
+    @Override
+    public synchronized void setShowPreReleases(boolean selected) {
+        showPreReleases.setValue(selected);
+        properties.setProperty(PROPERTY_SHOW_PRE_RELEASES, Boolean.toString(selected));
     }
 
     @Override
