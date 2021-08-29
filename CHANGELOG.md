@@ -1,5 +1,28 @@
 # Terasology Launcher - ChangeLog
 
+## 4.5.0 (2021-08-29)
+
+### 🚀 Features
+
+- #658 feat: hide pre-releases by default (@skaldarnar)
+- #638 feat: resolve Terasology.jar either from 'libs' or 'lib' (@skaldarnar)
+- #654 fix(GameStarter): do not depend on GameRelease to know the engine version (@keturn)
+- #647 feat(GameIdentifier): include the engine version (@keturn)
+- #646 feat: update command line options for Terasology (@keturn)
+
+### 🐛 Bug Fixes
+
+- #659 fix: pass JVM heap settings in correct order to GameStarter (@skaldarnar)
+- #657 fix(LauncherSettings): do not send a zero-length argument (@keturn)
+- #654 fix(GameStarter): do not depend on GameRelease to know the engine version (@keturn)
+
+### 🧰 Maintenance
+
+- #656 chore(JenkinsClient): use new HTTP client with better diagnostics (@keturn)
+- #655 chore(GameIdentifier): remove engineVersion; rename String version to displayVersion (@keturn)
+- #645 chore: update to jdk 11.0.12 from 11.0.8 (@keturn)
+- #644 build: update Gradle 6.8.2 >>> 7.1.1 (@skaldarnar)
+
 ## 4.4.0 (2021-06-24)
 
 ### 🚀 Features
