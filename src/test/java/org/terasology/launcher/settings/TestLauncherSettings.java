@@ -22,16 +22,16 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START;
-import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_GAME_DATA_DIRECTORY;
-import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_GAME_DIRECTORY;
-import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_INITIAL_HEAP_SIZE;
-import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_LOCALE;
-import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_LOG_LEVEL;
-import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_MAX_HEAP_SIZE;
-import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_SAVE_DOWNLOADED_FILES;
-import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_USER_GAME_PARAMETERS;
-import static org.terasology.launcher.settings.BaseLauncherSettings.PROPERTY_USER_JAVA_PARAMETERS;
+import static org.terasology.launcher.settings.LauncherSettings.PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START;
+import static org.terasology.launcher.settings.LauncherSettings.PROPERTY_GAME_DATA_DIRECTORY;
+import static org.terasology.launcher.settings.LauncherSettings.PROPERTY_GAME_DIRECTORY;
+import static org.terasology.launcher.settings.LauncherSettings.PROPERTY_INITIAL_HEAP_SIZE;
+import static org.terasology.launcher.settings.LauncherSettings.PROPERTY_LOCALE;
+import static org.terasology.launcher.settings.LauncherSettings.PROPERTY_LOG_LEVEL;
+import static org.terasology.launcher.settings.LauncherSettings.PROPERTY_MAX_HEAP_SIZE;
+import static org.terasology.launcher.settings.LauncherSettings.PROPERTY_SAVE_DOWNLOADED_FILES;
+import static org.terasology.launcher.settings.LauncherSettings.PROPERTY_USER_GAME_PARAMETERS;
+import static org.terasology.launcher.settings.LauncherSettings.PROPERTY_USER_JAVA_PARAMETERS;
 
 class TestLauncherSettings {
     @TempDir
@@ -41,7 +41,7 @@ class TestLauncherSettings {
     @TempDir
     Path gameDataDirectory;
 
-    private LauncherSettings baseLauncherSettings;
+    private LauncherSettings launcherSettings;
     private Path testPropertiesFile;
 
     private String locale;
@@ -54,23 +54,23 @@ class TestLauncherSettings {
     private String logLevel;
 
     private void assertPropertiesEqual() throws Exception {
-        assertEquals(baseLauncherSettings.getLocale(), Locale.forLanguageTag(locale));
-        assertEquals(baseLauncherSettings.getMaxHeapSize(), JavaHeapSize.valueOf(maxHeapSize));
-        assertEquals(baseLauncherSettings.getInitialHeapSize(), JavaHeapSize.valueOf(initialHeapSize));
-        assertEquals(baseLauncherSettings.isCloseLauncherAfterGameStart(), Boolean.valueOf(closeLauncherAfterGameStart));
-        assertEquals(baseLauncherSettings.getGameDirectory(), gameDirectory);
-        assertEquals(baseLauncherSettings.getGameDataDirectory(), gameDataDirectory);
-        assertEquals(baseLauncherSettings.isKeepDownloadedFiles(), Boolean.valueOf(saveDownloadedFiles));
-        assertEquals(baseLauncherSettings.getUserJavaParameters(), userJavaParameters);
-        assertEquals(baseLauncherSettings.getUserGameParameters(), userGameParameters);
-        assertEquals(baseLauncherSettings.getLogLevel(), Level.valueOf(logLevel));
+        assertEquals(launcherSettings.getLocale(), Locale.forLanguageTag(locale));
+        assertEquals(launcherSettings.getMaxHeapSize(), JavaHeapSize.valueOf(maxHeapSize));
+        assertEquals(launcherSettings.getInitialHeapSize(), JavaHeapSize.valueOf(initialHeapSize));
+        assertEquals(launcherSettings.isCloseLauncherAfterGameStart(), Boolean.valueOf(closeLauncherAfterGameStart));
+        assertEquals(launcherSettings.getGameDirectory(), gameDirectory);
+        assertEquals(launcherSettings.getGameDataDirectory(), gameDataDirectory);
+        assertEquals(launcherSettings.isKeepDownloadedFiles(), Boolean.valueOf(saveDownloadedFiles));
+        assertEquals(launcherSettings.getUserJavaParameters(), userJavaParameters);
+        assertEquals(launcherSettings.getUserGameParameters(), userGameParameters);
+        assertEquals(launcherSettings.getLogLevel(), Level.valueOf(logLevel));
     }
 
     @BeforeEach
     void setup() {
-        testPropertiesFile = tempDirectory.resolve(BaseLauncherSettings.LAUNCHER_SETTINGS_FILE_NAME);
+        testPropertiesFile = tempDirectory.resolve(LauncherSettings.LAUNCHER_SETTINGS_FILE_NAME);
 
-        baseLauncherSettings = Settings.getDefault();
+        launcherSettings = Settings.getDefault();
     }
 
     @Test
@@ -103,8 +103,8 @@ class TestLauncherSettings {
             testProperties.store(output, null);
         }
 
-        baseLauncherSettings = Settings.load(testPropertiesFile);
-        baseLauncherSettings.init();
+        launcherSettings = Settings.load(testPropertiesFile);
+        launcherSettings.init();
         assertPropertiesEqual();
     }
 
@@ -112,19 +112,19 @@ class TestLauncherSettings {
     void testInitDefault() throws Exception {
         //null properties file
 
-        baseLauncherSettings = Settings.getDefault();
-        baseLauncherSettings.init();
+        launcherSettings = Settings.getDefault();
+        launcherSettings.init();
 
-        assertEquals(baseLauncherSettings.getLocale(), Languages.DEFAULT_LOCALE);
-        assertEquals(baseLauncherSettings.getMaxHeapSize(), BaseLauncherSettings.MAX_HEAP_SIZE_DEFAULT);
-        assertEquals(baseLauncherSettings.getInitialHeapSize(), BaseLauncherSettings.INITIAL_HEAP_SIZE_DEFAULT);
-        assertEquals(baseLauncherSettings.isCloseLauncherAfterGameStart(), BaseLauncherSettings.CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT);
-        assertNull(baseLauncherSettings.getGameDirectory());
-        assertNull(baseLauncherSettings.getGameDataDirectory());
-        assertEquals(baseLauncherSettings.isKeepDownloadedFiles(), Boolean.valueOf(saveDownloadedFiles));
-        assertEquals(baseLauncherSettings.getUserJavaParameters(), BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
-        assertEquals(baseLauncherSettings.getUserGameParameters(), BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
-        assertEquals(baseLauncherSettings.getLogLevel(), Level.INFO);
+        assertEquals(launcherSettings.getLocale(), Languages.DEFAULT_LOCALE);
+        assertEquals(launcherSettings.getMaxHeapSize(), LauncherSettings.MAX_HEAP_SIZE_DEFAULT);
+        assertEquals(launcherSettings.getInitialHeapSize(), LauncherSettings.INITIAL_HEAP_SIZE_DEFAULT);
+        assertEquals(launcherSettings.isCloseLauncherAfterGameStart(), LauncherSettings.CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT);
+        assertNull(launcherSettings.getGameDirectory());
+        assertNull(launcherSettings.getGameDataDirectory());
+        assertEquals(launcherSettings.isKeepDownloadedFiles(), Boolean.valueOf(saveDownloadedFiles));
+        assertEquals(launcherSettings.getUserJavaParameters(), LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+        assertEquals(launcherSettings.getUserGameParameters(), LauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
+        assertEquals(launcherSettings.getLogLevel(), Level.INFO);
     }
 
     @Test
@@ -140,16 +140,16 @@ class TestLauncherSettings {
         logLevel = "INFO";
 
         //set using setters
-        baseLauncherSettings.setLocale(Locale.forLanguageTag(locale));
-        baseLauncherSettings.setMaxHeapSize(JavaHeapSize.valueOf(maxHeapSize));
-        baseLauncherSettings.setInitialHeapSize(JavaHeapSize.valueOf(initialHeapSize));
-        baseLauncherSettings.setCloseLauncherAfterGameStart(Boolean.parseBoolean(closeLauncherAfterGameStart));
-        baseLauncherSettings.setGameDirectory(gameDirectory);
-        baseLauncherSettings.setGameDataDirectory(gameDataDirectory);
-        baseLauncherSettings.setKeepDownloadedFiles(Boolean.parseBoolean(saveDownloadedFiles));
-        baseLauncherSettings.setUserJavaParameters(userJavaParameters);
-        baseLauncherSettings.setUserGameParameters(userGameParameters);
-        baseLauncherSettings.setLogLevel(Level.valueOf(logLevel));
+        launcherSettings.setLocale(Locale.forLanguageTag(locale));
+        launcherSettings.setMaxHeapSize(JavaHeapSize.valueOf(maxHeapSize));
+        launcherSettings.setInitialHeapSize(JavaHeapSize.valueOf(initialHeapSize));
+        launcherSettings.setCloseLauncherAfterGameStart(Boolean.parseBoolean(closeLauncherAfterGameStart));
+        launcherSettings.setGameDirectory(gameDirectory);
+        launcherSettings.setGameDataDirectory(gameDataDirectory);
+        launcherSettings.setKeepDownloadedFiles(Boolean.parseBoolean(saveDownloadedFiles));
+        launcherSettings.setUserJavaParameters(userJavaParameters);
+        launcherSettings.setUserGameParameters(userGameParameters);
+        launcherSettings.setLogLevel(Level.valueOf(logLevel));
 
         assertPropertiesEqual();
     }
@@ -161,7 +161,7 @@ class TestLauncherSettings {
         // Second object so as not to rely on instance identity.
         GameIdentifier expectedId = new GameIdentifier(displayVersion, Build.NIGHTLY, Profile.OMEGA);
 
-        baseLauncherSettings.setLastPlayedGameVersion(id);
-        assertEquals(Optional.of(expectedId), baseLauncherSettings.getLastPlayedGameVersion());
+        launcherSettings.setLastPlayedGameVersion(id);
+        assertEquals(Optional.of(expectedId), launcherSettings.getLastPlayedGameVersion());
     }
 }

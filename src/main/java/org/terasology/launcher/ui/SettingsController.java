@@ -18,7 +18,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
-import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.util.BundleUtils;
@@ -137,13 +136,13 @@ public class SettingsController {
 
         //save userParameters (java & game), if textfield is empty then set to defaults
         if (userJavaParametersField.getText().isEmpty()) {
-            launcherSettings.setUserJavaParameters(BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+            launcherSettings.setUserJavaParameters(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
         } else {
             logger.debug("User defined Java parameters: {}", userJavaParametersField.getText());
             launcherSettings.setUserJavaParameters(userJavaParametersField.getText());
         }
         if (userGameParametersField.getText().isEmpty()) {
-            launcherSettings.setUserGameParameters(BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
+            launcherSettings.setUserGameParameters(LauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
         } else {
             logger.debug("User defined game parameters: {}", userGameParametersField.getText());
             launcherSettings.setUserGameParameters(userGameParametersField.getText());
@@ -332,11 +331,11 @@ public class SettingsController {
 
     private void initUserParameterFields() {
         //if the VM parameters are left default do not display, the prompt message will show
-        if (!launcherSettings.getUserJavaParameters().equals(BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT)) {
+        if (!launcherSettings.getUserJavaParameters().equals(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT)) {
             userJavaParametersField.setText(launcherSettings.getUserJavaParameters());
         }
         //if the Game parameters are left default do not display, the prompt message will show
-        if (!launcherSettings.getUserGameParameters().equals(BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT)) {
+        if (!launcherSettings.getUserGameParameters().equals(LauncherSettings.USER_GAME_PARAMETERS_DEFAULT)) {
             userGameParametersField.setText(launcherSettings.getUserGameParameters());
         }
     }
