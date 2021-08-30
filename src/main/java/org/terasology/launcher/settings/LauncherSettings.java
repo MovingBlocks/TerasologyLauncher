@@ -49,9 +49,7 @@ public class LauncherSettings {
     public static final String PROPERTY_USER_JAVA_PARAMETERS = "userJavaParameters";
     public static final String PROPERTY_USER_GAME_PARAMETERS = "userGameParameters";
     public static final String PROPERTY_LOG_LEVEL = "logLevel";
-    public static final String PROPERTY_DEFAULT_GAME_JOB = "defaultGameJob";
     public static final String PROPERTY_LAST_PLAYED_GAME_VERSION = "lastPlayedGameVersion";
-    public static final String PROPERTY_LAST_INSTALLED_GAME_JOB = "lastInstalledGameJob";
     public static final String PROPERTY_LAST_INSTALLED_GAME_VERSION = "lastInstalledGameVersion";
 
     static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
@@ -336,10 +334,6 @@ public class LauncherSettings {
         return Optional.ofNullable(id);
     }
 
-    public synchronized String getLastInstalledGameJob() {
-        return properties.getProperty(PROPERTY_LAST_INSTALLED_GAME_JOB);
-    }
-
     public synchronized List<String> getJavaParameterList() {
         List<String> javaParameters = Lists.newArrayList();
         String baseParams = getBaseJavaParameters();
@@ -360,7 +354,6 @@ public class LauncherSettings {
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toUnmodifiableList());
     }
-
 
     // --------------------------------------------------------------------- //
     // SETTERS
@@ -409,10 +402,6 @@ public class LauncherSettings {
 
     public synchronized void setGameDataDirectory(Path gameDataDirectory) {
         properties.setProperty(PROPERTY_GAME_DATA_DIRECTORY, gameDataDirectory.toUri().toString());
-    }
-
-    public synchronized void setDefaultGameJob(String defaultGameJob) {
-        properties.setProperty(PROPERTY_DEFAULT_GAME_JOB, defaultGameJob);
     }
 
     public synchronized void setLastPlayedGameVersion(GameIdentifier lastPlayedGameVersion) {
