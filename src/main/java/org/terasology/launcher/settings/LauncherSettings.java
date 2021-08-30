@@ -172,7 +172,7 @@ public class LauncherSettings {
         final String closeLauncherAfterGameStartStr = properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START);
         boolean closeLauncherAfterGameStart = CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT;
         if (closeLauncherAfterGameStartStr != null) {
-            closeLauncherAfterGameStart = Boolean.valueOf(closeLauncherAfterGameStartStr);
+            closeLauncherAfterGameStart = Boolean.parseBoolean(closeLauncherAfterGameStartStr);
         }
         properties.setProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START, Boolean.toString(closeLauncherAfterGameStart));
     }
@@ -181,7 +181,7 @@ public class LauncherSettings {
         final String saveDownloadedFilesStr = properties.getProperty(PROPERTY_SAVE_DOWNLOADED_FILES);
         boolean saveDownloadedFiles = SAVE_DOWNLOADED_FILES_DEFAULT;
         if (saveDownloadedFilesStr != null) {
-            saveDownloadedFiles = Boolean.valueOf(saveDownloadedFilesStr);
+            saveDownloadedFiles = Boolean.parseBoolean(saveDownloadedFilesStr);
         }
         properties.setProperty(PROPERTY_SAVE_DOWNLOADED_FILES, Boolean.toString(saveDownloadedFiles));
     }
@@ -308,11 +308,11 @@ public class LauncherSettings {
     }
 
     public synchronized boolean isCloseLauncherAfterGameStart() {
-        return Boolean.valueOf(properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START));
+        return Boolean.parseBoolean(properties.getProperty(PROPERTY_CLOSE_LAUNCHER_AFTER_GAME_START));
     }
 
     public synchronized boolean isKeepDownloadedFiles() {
-        return Boolean.valueOf(properties.getProperty(PROPERTY_SAVE_DOWNLOADED_FILES));
+        return Boolean.parseBoolean(properties.getProperty(PROPERTY_SAVE_DOWNLOADED_FILES));
     }
 
     public synchronized boolean isShowPreReleases() {
