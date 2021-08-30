@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.settings;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import javafx.beans.property.Property;
@@ -19,10 +20,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
+/**
+ * User settings for the launcher, backed by Java {@link Properties}.
+ */
 public class LauncherSettings {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherSettings.class);
@@ -47,15 +54,15 @@ public class LauncherSettings {
     public static final String PROPERTY_LAST_INSTALLED_GAME_JOB = "lastInstalledGameJob";
     public static final String PROPERTY_LAST_INSTALLED_GAME_VERSION = "lastInstalledGameVersion";
 
-    public static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
-    public static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
-    public static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
-    public static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
-    public static final boolean SHOW_PRE_RELEASES_DEFAULT = false;
-    public static final String LAST_PLAYED_GAME_VERSION_DEFAULT = "";
-    public static final String LAST_INSTALLED_GAME_VERSION_DEFAULT = "";
+    static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
+    static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
+    static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
+    static final boolean SAVE_DOWNLOADED_FILES_DEFAULT = false;
+    static final boolean SHOW_PRE_RELEASES_DEFAULT = false;
+    static final String LAST_PLAYED_GAME_VERSION_DEFAULT = "";
+    static final String LAST_INSTALLED_GAME_VERSION_DEFAULT = "";
 
-    public static final String LAUNCHER_SETTINGS_FILE_NAME = "TerasologyLauncherSettings.properties";
+    static final String LAUNCHER_SETTINGS_FILE_NAME = "TerasologyLauncherSettings.properties";
 
     private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
     private static final Level LOG_LEVEL_DEFAULT = Level.INFO;
@@ -332,6 +339,28 @@ public class LauncherSettings {
     public synchronized String getLastInstalledGameJob() {
         return properties.getProperty(PROPERTY_LAST_INSTALLED_GAME_JOB);
     }
+
+    public synchronized List<String> getJavaParameterList() {
+        List<String> javaParameters = Lists.newArrayList();
+        String baseParams = getBaseJavaParameters();
+        if (baseParams != null) {
+            javaParameters.addAll(Arrays.asList(baseParams.split("\\s+")));
+        }
+
+        String userParams = getUserJavaParameters();
+        if (userParams != null) {
+            javaParameters.addAll(Arrays.asList(userParams.split("\\s+")));
+        }
+
+        return javaParameters;
+    }
+
+    public synchronized List<String> getUserGameParameterList() {
+        return Arrays.stream(getUserGameParameters().split("\\s+"))
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toUnmodifiableList());
+    }
+
 
     // --------------------------------------------------------------------- //
     // SETTERS
