@@ -3,6 +3,10 @@
 
 package org.terasology.launcher.util;
 
+import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.Property;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.image.Image;
 import org.slf4j.Logger;
@@ -44,6 +48,10 @@ public final class BundleUtils {
             logger.error("Missing label translation! key={}, locale={}", key, locale);
             return ResourceBundle.getBundle(LABELS_BUNDLE, Languages.DEFAULT_LOCALE).getString(key);
         }
+    }
+
+    public static Binding<String> labelBinding(Property<Locale> localeProperty, String key) {
+        return Bindings.createStringBinding(()-> getLabel(localeProperty.getValue(), key), localeProperty);
     }
 
     public static String getMessage(String key, Object... arguments) {

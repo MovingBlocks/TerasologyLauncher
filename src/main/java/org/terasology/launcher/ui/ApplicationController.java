@@ -4,8 +4,10 @@
 package org.terasology.launcher.ui;
 
 import javafx.animation.Transition;
+import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -44,7 +46,6 @@ import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
 import org.terasology.launcher.repositories.RepositoryManager;
-import org.terasology.launcher.settings.LegacyLauncherSettings;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
 import org.terasology.launcher.tasks.DownloadTask;
@@ -232,23 +233,16 @@ public class ApplicationController {
      * are not managed "disappear" from the scene.
      */
     private void initButtons() {
-        cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
         cancelDownloadButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.CANCEL, gameAction));
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
 
-        startButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
         startButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.PLAY, gameAction));
         startButton.managedProperty().bind(startButton.visibleProperty());
 
-        downloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
         downloadButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.DOWNLOAD, gameAction));
         downloadButton.managedProperty().bind(downloadButton.visibleProperty());
 
-        deleteButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_delete")));
         deleteButton.disableProperty().bind(startButton.visibleProperty().not());
-
-        settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
-        exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
     }
 
     @SuppressWarnings("checkstyle:HiddenField")
@@ -292,6 +286,20 @@ public class ApplicationController {
             warning.setValue(Optional.empty());
         }
         footerController.setHostServices(hostServices);
+
+        cancelDownloadButton.setTooltip(createTooltip(BundleUtils.labelBinding(settings.locale, "launcher_cancelDownload")));
+        startButton.setTooltip(createTooltip(BundleUtils.labelBinding(settings.locale, "launcher_start")));
+        downloadButton.setTooltip(createTooltip(BundleUtils.labelBinding(settings.locale, "launcher_download")));
+        deleteButton.setTooltip(createTooltip(BundleUtils.labelBinding(settings.locale, "launcher_delete")));
+        settingsButton.setTooltip(createTooltip(BundleUtils.labelBinding(settings.locale, "launcher_settings")));
+        exitButton.setTooltip(createTooltip(BundleUtils.labelBinding(settings.locale, "launcher_exit")));
+    }
+
+    //TODO: Move to FxUtils helper class?
+    static Tooltip createTooltip(Binding<String> textBinding) {
+        Tooltip tooltip = new Tooltip();
+        tooltip.textProperty().bind(textBinding);
+        return tooltip;
     }
 
     @FXML
