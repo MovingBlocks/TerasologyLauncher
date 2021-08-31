@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.ui;
 
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -26,11 +27,9 @@ import org.terasology.launcher.util.Languages;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.text.Collator;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.MissingResourceException;
-import java.util.stream.Collectors;
 
 public class SettingsController {
 
@@ -84,7 +83,7 @@ public class SettingsController {
     @FXML
     private ComboBox<JavaHeapSize> initialHeapSizeBox;
     @FXML
-    private ComboBox<String> languageBox;
+    private ComboBox<Locale> languageBox;
     @FXML
     private TextField gameDirectoryPath;
     @FXML
@@ -111,10 +110,6 @@ public class SettingsController {
 
         // save log level settings
         settings.logLevel.set(logLevelBox.getSelectionModel().getSelectedItem());
-
-        // save languageBox settings
-        Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectionModel().getSelectedIndex()));
-        settings.locale.set(Languages.getCurrentLocale());
 
         // save closeLauncherAfterGameStart
         settings.closeLauncherAfterGameStart.set(closeAfterStartBox.isSelected());
@@ -257,20 +252,14 @@ public class SettingsController {
     }
 
     private void populateLanguageValues() {
-        languageBox.getItems().clear();
-        for (Locale locale : Languages.SUPPORTED_LOCALES) {
-            String item = locale.toLanguageTag() + " : " + BundleUtils.getLabel(locale, Languages.SETTINGS_LABEL_KEYS.get(locale));
-            if (!locale.equals(Languages.getCurrentLocale())) {
-                item += " (" + BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale)) + ")";
-            }
-            languageBox.getItems().add(item);
 
-            if (Languages.getCurrentLocale().equals(locale)) {
-                languageBox.getSelectionModel().select(item);
-            }
-        }
-        Collator coll = Collator.getInstance();
-        languageBox.getItems().sort(coll);
+        settings.locale.bind(languageBox.getSelectionModel().selectedItemProperty());
+        settings.locale.addListener((observable, oldValue, newValue) -> {
+            Languages.update(newValue);
+        });
+
+        languageBox.setItems(FXCollections.observableList(Languages.SUPPORTED_LOCALES));
+        languageBox.getSelectionModel().select(Languages.getCurrentLocale());
     }
 
     private void populateLanguageIcons() {
@@ -326,16 +315,22 @@ public class SettingsController {
         }
     }
 
-    private static class LanguageIconListCell extends ListCell<String> {
+    private static class LanguageIconListCell extends ListCell<Locale> {
         @Override
-        protected void updateItem(String item, boolean empty) {
+        protected void updateItem(Locale locale, boolean empty) {
             // Pass along the locale text
-            super.updateItem(item, empty);
-            this.setText(item);
+            super.updateItem(locale, empty);
 
-            if (item == null || empty) {
+            if (locale == null || empty) {
                 this.setGraphic(null);
             } else {
+
+                String item = locale.toLanguageTag() + " : " + BundleUtils.getLabel(locale, Languages.SETTINGS_LABEL_KEYS.get(locale));
+                if (!locale.equals(Languages.getCurrentLocale())) {
+                    item += " (" + BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale)) + ")";
+                }
+                this.setText(item);
+
                 // Get the key that represents the locale in ImageBundle (flag_xx)
                 String countryCode = this.getText().split(":")[0].trim();
                 String id = "flag_" + countryCode;

@@ -21,7 +21,6 @@ public final class Languages {
     public static final Map<Locale, String> SETTINGS_LABEL_KEYS;
 
     static {
-
         final Locale czech = new Locale("cs");
         final Locale spanish = new Locale("es");
         final Locale french = new Locale("fr");
@@ -103,6 +102,7 @@ public final class Languages {
 
     public static void update(Locale newLocale) {
         if (SUPPORTED_LOCALES.contains(newLocale)) {
+            logger.info("Updated locale '{}' >>> '{}'.", currentLocale, newLocale);
             currentLocale = newLocale;
         } else {
             logger.warn("Unsupported locale '{}'.", newLocale);
