@@ -74,7 +74,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path cacheDirectory = getDirectoryFor(LauncherManagedDirectory.CACHE, userDataDirectory);
 
             // launcher settings
-            final Path settingsFile = userDataDirectory.resolve(Settings.DEFAULT_FILE_NAME);
+            final Path settingsFile = userDataDirectory.resolve(Settings.LEGACY_FILE_NAME);
             final LegacyLauncherSettings legacyLauncherSettings = getLauncherSettings(settingsFile);
 
             // validate the settings
