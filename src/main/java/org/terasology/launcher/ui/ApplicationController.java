@@ -43,7 +43,7 @@ import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
 import org.terasology.launcher.repositories.RepositoryManager;
-import org.terasology.launcher.settings.LauncherSettings;
+import org.terasology.launcher.settings.LegacyLauncherSettings;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
 import org.terasology.launcher.tasks.DownloadTask;
@@ -71,7 +71,7 @@ public class ApplicationController {
     private static final long MINIMUM_FREE_SPACE = 200 * MB;
 
     private Path launcherDirectory;
-    private LauncherSettings launcherSettings;
+    private LegacyLauncherSettings legacyLauncherSettings;
 
     private GameManager gameManager;
     private RepositoryManager repositoryManager;
@@ -179,7 +179,7 @@ public class ApplicationController {
         // selected
         selectedProfile.addListener((obs, oldVal, newVal) -> {
             ObservableList<GameRelease> availableReleases = gameReleaseComboBox.getItems();
-            GameIdentifier lastPlayedGame = launcherSettings.getLastPlayedGameVersion().orElse(null);
+            GameIdentifier lastPlayedGame = legacyLauncherSettings.getLastPlayedGameVersion().orElse(null);
 
             Optional<GameRelease> lastPlayed = availableReleases.stream()
                     .filter(release -> release.getId().equals(lastPlayedGame))
@@ -251,12 +251,12 @@ public class ApplicationController {
     }
 
     @SuppressWarnings("checkstyle:HiddenField")
-    public void update(final Path launcherDirectory, final Path downloadDirectory, final LauncherSettings launcherSettings,
+    public void update(final Path launcherDirectory, final Path downloadDirectory, final LegacyLauncherSettings legacyLauncherSettings,
                        final RepositoryManager repositoryManager, final GameManager gameManager,
                        final Stage stage, final HostServices hostServices) {
         this.launcherDirectory = launcherDirectory;
-        this.launcherSettings = launcherSettings;
-        this.showPreReleases.bind(launcherSettings.showPreReleases());
+        this.legacyLauncherSettings = legacyLauncherSettings;
+        this.showPreReleases.bind(legacyLauncherSettings.showPreReleases());
 
         this.repositoryManager = repositoryManager;
         this.gameManager = gameManager;
@@ -268,7 +268,7 @@ public class ApplicationController {
         Bindings.bindContent(installedGames, gameManager.getInstalledGames());
 
         profileComboBox.getSelectionModel().select(
-                launcherSettings.getLastPlayedGameVersion().map(GameIdentifier::getProfile).orElse(Profile.OMEGA)
+                legacyLauncherSettings.getLastPlayedGameVersion().map(GameIdentifier::getProfile).orElse(Profile.OMEGA)
         );
 
         // add Logback appender to both the root logger and the tab
@@ -331,7 +331,7 @@ public class ApplicationController {
             }
 
             final SettingsController settingsController = fxmlLoader.getController();
-            settingsController.initialize(launcherDirectory, launcherSettings, settingsStage, this);
+            settingsController.initialize(launcherDirectory, legacyLauncherSettings, settingsStage, this);
 
             Scene scene = new Scene(root);
             settingsStage.setScene(scene);
@@ -359,7 +359,7 @@ public class ApplicationController {
             Dialogs.showError(stage, BundleUtils.getMessage("message_error_installationNotFound", release));
             return;
         }
-        gameService.start(installation, launcherSettings);
+        gameService.start(installation, legacyLauncherSettings);
     }
 
     private void handleRunStarted(ObservableValue<? extends Boolean> o, Boolean oldValue, Boolean newValue) {
@@ -369,9 +369,9 @@ public class ApplicationController {
 
         logger.debug("Game has started successfully.");
 
-        launcherSettings.setLastPlayedGameVersion(selectedRelease.getValue().getId());
+        legacyLauncherSettings.setLastPlayedGameVersion(selectedRelease.getValue().getId());
 
-        if (launcherSettings.isCloseLauncherAfterGameStart()) {
+        if (legacyLauncherSettings.isCloseLauncherAfterGameStart()) {
             if (downloadTask == null) {
                 logger.info("Close launcher after game start.");
                 close();
@@ -435,7 +435,7 @@ public class ApplicationController {
                     logger.info("Removing game '{}' from path '{}", id, gameDir);
                     // triggering a game deletion implies the player doesn't want to play this game anymore. hence, we
                     // unset `lastPlayedGameVersion` setting independent of deletion success
-                    launcherSettings.setLastPlayedGameVersion(null);
+                    legacyLauncherSettings.setLastPlayedGameVersion(null);
                     final DeleteTask deleteTask = new DeleteTask(gameManager, id);
                     executor.submit(deleteTask);
                 });
@@ -463,7 +463,7 @@ public class ApplicationController {
         logger.debug("Dispose launcher frame...");
         final Path settingsFile = launcherDirectory.resolve(Settings.DEFAULT_FILE_NAME);
         try {
-            Settings.store(launcherSettings, settingsFile);
+            Settings.store(legacyLauncherSettings, settingsFile);
         } catch (IOException e) {
             logger.warn("Could not store current launcher settings!");
         }

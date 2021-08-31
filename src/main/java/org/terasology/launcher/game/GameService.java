@@ -9,7 +9,7 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.settings.LauncherSettings;
+import org.terasology.launcher.settings.LegacyLauncherSettings;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,7 +20,7 @@ import static com.google.common.base.Verify.verifyNotNull;
 /**
  * This service starts and monitors the game process.
  * <p>
- * Its {@linkplain #GameService() constructor} requires no arguments. Use {@link #start(Installation, LauncherSettings)} to
+ * Its {@linkplain #GameService() constructor} requires no arguments. Use {@link #start(Installation, LegacyLauncherSettings)} to
  * start the game process; the zero-argument form of {@code start()} will not have enough information.
  * <p>
  * The Boolean value of this service is true when it believes the game process has started <em>successfully.</em>
@@ -47,7 +47,7 @@ public class GameService extends Service<Boolean> {
     private static final Logger logger = LoggerFactory.getLogger(GameService.class);
 
     private Installation gamePath;
-    private LauncherSettings settings;
+    private LegacyLauncherSettings settings;
 
     public GameService() {
         setExecutor(Executors.newSingleThreadExecutor(
@@ -66,7 +66,7 @@ public class GameService extends Service<Boolean> {
      * @param settings supplies other settings relevant to configuring a process
      */
     @SuppressWarnings("checkstyle:HiddenField")
-    public void start(Installation installation, LauncherSettings settings) {
+    public void start(Installation installation, LegacyLauncherSettings settings) {
         this.gamePath = installation;
         this.settings = settings;
 
@@ -74,7 +74,7 @@ public class GameService extends Service<Boolean> {
     }
 
     /**
-     * Use {@link #start(Installation, LauncherSettings)} instead.
+     * Use {@link #start(Installation, LegacyLauncherSettings)} instead.
      * <p>
      * It is an error to call this method before providing the configuration.
      */

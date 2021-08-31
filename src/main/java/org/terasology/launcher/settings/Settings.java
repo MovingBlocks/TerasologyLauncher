@@ -46,7 +46,7 @@ public final class Settings {
     }
 
     //TODO: change contract to load a file with fixed name from the path such that this method can decide on file format
-    public static LauncherSettings load(final Path path) {
+    public static LegacyLauncherSettings load(final Path path) {
         // TODO: try to load from JSON, fall-back to Properties
         Path json = path.getParent().resolve(JSON_FILE_NAME);
         if (Files.exists(json)) {
@@ -65,7 +65,7 @@ public final class Settings {
             try (InputStream inputStream = Files.newInputStream(path)) {
                 Properties properties = new Properties();
                 properties.load(inputStream);
-                return new LauncherSettings(properties);
+                return new LegacyLauncherSettings(properties);
             } catch (IOException e) {
                 logger.error("Error while loading launcher settings from file.", e);
             }
@@ -74,7 +74,7 @@ public final class Settings {
         return null;
     }
 
-    public static synchronized void store(final LauncherSettings settings, final Path path) throws IOException {
+    public static synchronized void store(final LegacyLauncherSettings settings, final Path path) throws IOException {
         logger.debug("Writing launcher settings to '{}'.", path);
         if (Files.notExists(path.getParent())) {
             Files.createDirectories(path.getParent());
@@ -121,7 +121,7 @@ public final class Settings {
         }
     }
 
-    public static LauncherSettings getDefault() {
-        return new LauncherSettings(new Properties());
+    public static LegacyLauncherSettings getDefault() {
+        return new LegacyLauncherSettings(new Properties());
     };
 }

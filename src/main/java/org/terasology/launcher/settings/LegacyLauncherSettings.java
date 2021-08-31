@@ -30,9 +30,9 @@ import java.util.stream.Collectors;
 /**
  * User settings for the launcher, backed by Java {@link Properties}.
  */
-public class LauncherSettings {
+public class LegacyLauncherSettings {
 
-    private static final Logger logger = LoggerFactory.getLogger(LauncherSettings.class);
+    private static final Logger logger = LoggerFactory.getLogger(LegacyLauncherSettings.class);
 
     public static final String USER_JAVA_PARAMETERS_DEFAULT = "-XX:MaxGCPauseMillis=20";
     public static final String USER_GAME_PARAMETERS_DEFAULT = "";
@@ -69,7 +69,7 @@ public class LauncherSettings {
 
     private final Property<Boolean> showPreReleases = new SimpleBooleanProperty(SHOW_PRE_RELEASES_DEFAULT);
 
-    LauncherSettings(Properties properties) {
+    LegacyLauncherSettings(Properties properties) {
         this.properties = properties;
     }
 
