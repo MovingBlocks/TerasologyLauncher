@@ -30,17 +30,14 @@ import java.text.Collator;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.stream.Collectors;
 
 public class SettingsController {
 
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
 
     private Path launcherDirectory;
-    private LegacyLauncherSettings legacyLauncherSettings;
-    private ApplicationController appController;
-
-    private Path gameDirectory;
-    private Path gameDataDirectory;
+    private Settings settings;
 
     private Stage stage;
 
@@ -108,50 +105,44 @@ public class SettingsController {
 
     @FXML
     protected void saveSettingsAction(ActionEvent event) {
-        // save gameDirectory
-        legacyLauncherSettings.setGameDirectory(gameDirectory);
-
-        // save gameDataDirectory
-        legacyLauncherSettings.setGameDataDirectory(gameDataDirectory);
-
-        // save heap size settings
-        legacyLauncherSettings.setMaxHeapSize(maxHeapSizeBox.getSelectionModel().getSelectedItem());
-        legacyLauncherSettings.setInitialHeapSize(initialHeapSizeBox.getSelectionModel().getSelectedItem());
+                // save heap size settings
+        settings.maxHeapSize.set(maxHeapSizeBox.getSelectionModel().getSelectedItem());
+        settings.minHeapSize.set(initialHeapSizeBox.getSelectionModel().getSelectedItem());
 
         // save log level settings
-        legacyLauncherSettings.setLogLevel(logLevelBox.getSelectionModel().getSelectedItem());
+        settings.logLevel.set(logLevelBox.getSelectionModel().getSelectedItem());
 
         // save languageBox settings
         Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectionModel().getSelectedIndex()));
-        legacyLauncherSettings.setLocale(Languages.getCurrentLocale());
+        settings.locale.set(Languages.getCurrentLocale());
 
         // save closeLauncherAfterGameStart
-        legacyLauncherSettings.setCloseLauncherAfterGameStart(closeAfterStartBox.isSelected());
+        settings.closeLauncherAfterGameStart.set(closeAfterStartBox.isSelected());
 
         // save showPreReleases
-        legacyLauncherSettings.setShowPreReleases(showPreReleasesBox.isSelected());
+        settings.showPreReleases.set(showPreReleasesBox.isSelected());
 
         // save saveDownloadedFiles
-        legacyLauncherSettings.setKeepDownloadedFiles(saveDownloadedFilesBox.isSelected());
+        settings.keepDownloadedFiles.set(saveDownloadedFilesBox.isSelected());
 
         //save userParameters (java & game), if textfield is empty then set to defaults
         if (userJavaParametersField.getText().isEmpty()) {
-            legacyLauncherSettings.setUserJavaParameters(LegacyLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+            settings.userJavaParameters.setAll(LegacyLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
         } else {
             logger.debug("User defined Java parameters: {}", userJavaParametersField.getText());
-            legacyLauncherSettings.setUserJavaParameters(userJavaParametersField.getText());
+            settings.userJavaParameters.setAll(userJavaParametersField.getText().trim().split("\\s"));
         }
         if (userGameParametersField.getText().isEmpty()) {
-            legacyLauncherSettings.setUserGameParameters(LegacyLauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
+            settings.userGameParameters.setAll(LegacyLauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
         } else {
             logger.debug("User defined game parameters: {}", userGameParametersField.getText());
-            legacyLauncherSettings.setUserGameParameters(userGameParametersField.getText());
+            settings.userGameParameters.setAll(userGameParametersField.getText().trim().split("\\s"));
         }
 
         // store changed settings
         final Path settingsFile = launcherDirectory.resolve(Settings.LEGACY_FILE_NAME);
         try {
-            Settings.store(legacyLauncherSettings, settingsFile);
+            Settings.store(settings, settingsFile);
         } catch (IOException e) {
             //TODO: unify error handling, probably to Settings a.k.a. SettingsController?
             logger.error("The launcher settings cannot be stored! '{}'", settingsFile, e);
@@ -163,12 +154,12 @@ public class SettingsController {
 
     @FXML
     protected void openGameDirectoryAction() {
-        Dialogs.openFileBrowser(stage, gameDirectory, BundleUtils.getLabel("message_error_gameDirectory"));
+        Dialogs.openFileBrowser(stage, settings.gameDataDirectory.get(), BundleUtils.getLabel("message_error_gameDirectory"));
     }
 
     @FXML
     protected void openGameDataDirectoryAction() {
-        Dialogs.openFileBrowser(stage, gameDataDirectory, BundleUtils.getLabel("message_error_gameDataDirectory"));
+        Dialogs.openFileBrowser(stage, settings.gameDataDirectory.get(), BundleUtils.getLabel("message_error_gameDataDirectory"));
     }
 
     @FXML
@@ -194,12 +185,10 @@ public class SettingsController {
         }
     }
 
-    void initialize(final Path newLauncherDirectory, final LegacyLauncherSettings newLegacyLauncherSettings,
-                    final Stage newStage, final ApplicationController newAppController) {
+    void initialize(final Path newLauncherDirectory, final Settings newSettings, final Stage newStage) {
         this.launcherDirectory = newLauncherDirectory;
-        this.legacyLauncherSettings = newLegacyLauncherSettings;
+        this.settings = newSettings;
         this.stage = newStage;
-        this.appController = newAppController;
 
         populateHeapSize();
         populateLanguageValues();
@@ -208,9 +197,6 @@ public class SettingsController {
         populateSaveDownloadedFiles();
         populateShowPreReleases();
         populateLogLevel();
-
-        gameDirectory = newLegacyLauncherSettings.getGameDirectory();
-        gameDataDirectory = newLegacyLauncherSettings.getGameDataDirectory();
 
         updateDirectoryPathLabels();
         initUserParameterFields();
@@ -295,15 +281,15 @@ public class SettingsController {
     }
 
     private void populateCloseLauncherAfterGameStart() {
-        closeAfterStartBox.setSelected(legacyLauncherSettings.isCloseLauncherAfterGameStart());
+        closeAfterStartBox.setSelected(settings.closeLauncherAfterGameStart.get());
     }
 
     private void populateShowPreReleases() {
-        showPreReleasesBox.setSelected(legacyLauncherSettings.isShowPreReleases());
+        showPreReleasesBox.setSelected(settings.showPreReleases.get());
     }
 
     private void populateSaveDownloadedFiles() {
-        saveDownloadedFilesBox.setSelected(legacyLauncherSettings.isKeepDownloadedFiles());
+        saveDownloadedFilesBox.setSelected(settings.keepDownloadedFiles.get());
     }
 
     private void populateLogLevel() {
@@ -315,28 +301,28 @@ public class SettingsController {
     }
 
     private void updateDirectoryPathLabels() {
-        gameDirectoryPath.setText(gameDirectory.toString());
-        gameDataDirectoryPath.setText(gameDataDirectory.toString());
+        gameDirectoryPath.setText(settings.gameDirectory.get().toString());
+        gameDataDirectoryPath.setText(settings.gameDataDirectory.get().toString());
         launcherDirectoryPath.setText(launcherDirectory.toString());
     }
 
     private void updateHeapSizeSelection() {
-        maxHeapSizeBox.getSelectionModel().select(legacyLauncherSettings.getMaxHeapSize());
-        initialHeapSizeBox.getSelectionModel().select(legacyLauncherSettings.getInitialHeapSize());
+        maxHeapSizeBox.getSelectionModel().select(settings.maxHeapSize.get());
+        initialHeapSizeBox.getSelectionModel().select(settings.minHeapSize.get());
     }
 
     private void updateLogLevelSelection() {
-        logLevelBox.getSelectionModel().select(legacyLauncherSettings.getLogLevel());
+        logLevelBox.getSelectionModel().select(settings.logLevel.get());
     }
 
     private void initUserParameterFields() {
-        //if the VM parameters are left default do not display, the prompt message will show
-        if (!legacyLauncherSettings.getUserJavaParameters().equals(LegacyLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT)) {
-            userJavaParametersField.setText(legacyLauncherSettings.getUserJavaParameters());
-        }
+        userJavaParametersField.setText(
+                String.join(" ", settings.userJavaParameters)
+        );
+
         //if the Game parameters are left default do not display, the prompt message will show
-        if (!legacyLauncherSettings.getUserGameParameters().equals(LegacyLauncherSettings.USER_GAME_PARAMETERS_DEFAULT)) {
-            userGameParametersField.setText(legacyLauncherSettings.getUserGameParameters());
+        if (!settings.userGameParameters.isEmpty()) {
+            userGameParametersField.setText(String.join(" ", settings.userGameParameters));
         }
     }
 

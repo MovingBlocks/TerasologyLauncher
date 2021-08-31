@@ -35,6 +35,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.LauncherConfiguration;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.game.GameService;
 import org.terasology.launcher.game.Installation;
@@ -71,7 +72,7 @@ public class ApplicationController {
     private static final long MINIMUM_FREE_SPACE = 200 * MB;
 
     private Path launcherDirectory;
-    private LegacyLauncherSettings legacyLauncherSettings;
+    private Settings settings;
 
     private GameManager gameManager;
     private RepositoryManager repositoryManager;
@@ -179,7 +180,7 @@ public class ApplicationController {
         // selected
         selectedProfile.addListener((obs, oldVal, newVal) -> {
             ObservableList<GameRelease> availableReleases = gameReleaseComboBox.getItems();
-            GameIdentifier lastPlayedGame = legacyLauncherSettings.getLastPlayedGameVersion().orElse(null);
+            GameIdentifier lastPlayedGame = settings.lastPlayedGameVersion.get();
 
             Optional<GameRelease> lastPlayed = availableReleases.stream()
                     .filter(release -> release.getId().equals(lastPlayedGame))
@@ -251,15 +252,14 @@ public class ApplicationController {
     }
 
     @SuppressWarnings("checkstyle:HiddenField")
-    public void update(final Path launcherDirectory, final Path downloadDirectory, final LegacyLauncherSettings legacyLauncherSettings,
-                       final RepositoryManager repositoryManager, final GameManager gameManager,
+    public void update(final LauncherConfiguration configuration,
                        final Stage stage, final HostServices hostServices) {
-        this.launcherDirectory = launcherDirectory;
-        this.legacyLauncherSettings = legacyLauncherSettings;
-        this.showPreReleases.bind(legacyLauncherSettings.showPreReleases());
+        this.launcherDirectory = configuration.getLauncherDirectory();
+        this.settings = configuration.getLauncherSettings();
+        this.showPreReleases.bind(settings.showPreReleases);
 
-        this.repositoryManager = repositoryManager;
-        this.gameManager = gameManager;
+        this.repositoryManager = configuration.getRepositoryManager();
+        this.gameManager = configuration.getGameManager();
 
         this.stage = stage;
 
@@ -268,7 +268,9 @@ public class ApplicationController {
         Bindings.bindContent(installedGames, gameManager.getInstalledGames());
 
         profileComboBox.getSelectionModel().select(
-                legacyLauncherSettings.getLastPlayedGameVersion().map(GameIdentifier::getProfile).orElse(Profile.OMEGA)
+                Optional.ofNullable(settings.lastPlayedGameVersion.get())
+                        .map(GameIdentifier::getProfile)
+                        .orElse(Profile.OMEGA)
         );
 
         // add Logback appender to both the root logger and the tab
@@ -284,7 +286,7 @@ public class ApplicationController {
         //TODO: This only updates when the launcher is initialized (which should happen exactly once o.O)
         //      We should update this value at least every time the download directory changes (user setting).
         //      Ideally, we would check periodically for disk space.
-        if (downloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
+        if (configuration.getDownloadDirectory().toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
             warning.setValue(Optional.of(Warning.LOW_ON_SPACE));
         } else {
             warning.setValue(Optional.empty());
@@ -331,7 +333,7 @@ public class ApplicationController {
             }
 
             final SettingsController settingsController = fxmlLoader.getController();
-            settingsController.initialize(launcherDirectory, legacyLauncherSettings, settingsStage, this);
+            settingsController.initialize(launcherDirectory, settings, settingsStage);
 
             Scene scene = new Scene(root);
             settingsStage.setScene(scene);
@@ -359,7 +361,7 @@ public class ApplicationController {
             Dialogs.showError(stage, BundleUtils.getMessage("message_error_installationNotFound", release));
             return;
         }
-        gameService.start(installation, legacyLauncherSettings);
+        gameService.start(installation, settings);
     }
 
     private void handleRunStarted(ObservableValue<? extends Boolean> o, Boolean oldValue, Boolean newValue) {
@@ -369,9 +371,9 @@ public class ApplicationController {
 
         logger.debug("Game has started successfully.");
 
-        legacyLauncherSettings.setLastPlayedGameVersion(selectedRelease.getValue().getId());
+        settings.lastPlayedGameVersion.set(selectedRelease.getValue().getId());
 
-        if (legacyLauncherSettings.isCloseLauncherAfterGameStart()) {
+        if (settings.closeLauncherAfterGameStart.get()) {
             if (downloadTask == null) {
                 logger.info("Close launcher after game start.");
                 close();
@@ -435,7 +437,7 @@ public class ApplicationController {
                     logger.info("Removing game '{}' from path '{}", id, gameDir);
                     // triggering a game deletion implies the player doesn't want to play this game anymore. hence, we
                     // unset `lastPlayedGameVersion` setting independent of deletion success
-                    legacyLauncherSettings.setLastPlayedGameVersion(null);
+                    settings.lastPlayedGameVersion.set(null);
                     final DeleteTask deleteTask = new DeleteTask(gameManager, id);
                     executor.submit(deleteTask);
                 });
@@ -463,7 +465,7 @@ public class ApplicationController {
         logger.debug("Dispose launcher frame...");
         final Path settingsFile = launcherDirectory.resolve(Settings.LEGACY_FILE_NAME);
         try {
-            Settings.store(legacyLauncherSettings, settingsFile);
+            Settings.store(settings, settingsFile);
         } catch (IOException e) {
             logger.warn("Could not store current launcher settings!");
         }

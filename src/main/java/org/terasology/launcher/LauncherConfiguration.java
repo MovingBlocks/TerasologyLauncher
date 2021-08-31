@@ -6,6 +6,7 @@ package org.terasology.launcher;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.LegacyLauncherSettings;
+import org.terasology.launcher.settings.Settings;
 
 import java.nio.file.Path;
 
@@ -20,17 +21,17 @@ public class LauncherConfiguration {
 
     private final Path launcherDirectory;
     private final Path downloadDirectory;
-    private final LegacyLauncherSettings legacyLauncherSettings;
+    private final Settings settings;
     private final GameManager gameManager;
     private final RepositoryManager repositoryManager;
 
     public LauncherConfiguration(final Path launcherDirectory,
                                  final Path downloadDirectory,
-                                 final LegacyLauncherSettings legacyLauncherSettings,
+                                 final Settings settings,
                                  GameManager gameManager, RepositoryManager repositoryManager) {
         this.launcherDirectory = launcherDirectory;
         this.downloadDirectory = downloadDirectory;
-        this.legacyLauncherSettings = legacyLauncherSettings;
+        this.settings = settings;
         this.gameManager = gameManager;
         this.repositoryManager = repositoryManager;
     }
@@ -43,8 +44,8 @@ public class LauncherConfiguration {
         return downloadDirectory;
     }
 
-    public LegacyLauncherSettings getLauncherSettings() {
-        return legacyLauncherSettings;
+    public Settings getLauncherSettings() {
+        return settings;
     }
 
     public GameManager getGameManager() {

@@ -135,11 +135,7 @@ public final class TerasologyLauncher extends Application {
         }
         final ApplicationController controller = fxmlLoader.getController();
         controller.update(
-                launcherConfiguration.getLauncherDirectory(),
-                launcherConfiguration.getDownloadDirectory(),
-                launcherConfiguration.getLauncherSettings(),
-                launcherConfiguration.getRepositoryManager(),
-                launcherConfiguration.getGameManager(),
+                launcherConfiguration,
                 mainStage,
                 hostServices);
 

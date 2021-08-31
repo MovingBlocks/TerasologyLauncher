@@ -4,7 +4,6 @@
 package org.terasology.launcher.settings;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -17,6 +16,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import org.hildan.fxgson.FxGson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -28,7 +29,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,7 +46,7 @@ public final class Settings {
 
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);
 
-    private static Gson gson = new GsonBuilder()
+    private static Gson gson = FxGson.coreBuilder()
             .registerTypeAdapter(Path.class, new PathConverter())
             .setPrettyPrinting()
             .create();
@@ -67,7 +67,6 @@ public final class Settings {
 
     public final ObjectProperty<GameIdentifier> lastPlayedGameVersion;
 
-    public final ListProperty<String> baseJavaParameters;
     public final ListProperty<String> userJavaParameters;
     public final ListProperty<String> userGameParameters;
 
@@ -82,9 +81,13 @@ public final class Settings {
         showPreReleases = new SimpleBooleanProperty(false);
         closeLauncherAfterGameStart = new SimpleBooleanProperty(true);
         lastPlayedGameVersion = new SimpleObjectProperty<>();
-        baseJavaParameters = new SimpleListProperty<>();
-        userJavaParameters = new SimpleListProperty<>();
+        userJavaParameters = new SimpleListProperty<>(FXCollections.observableArrayList("-XX:MaxGCPauseMillis=20"));
         userGameParameters = new SimpleListProperty<>();
+    }
+
+    @Override
+    public String toString() {
+        return gson.toJson(this);
     }
 
     static Settings fromLegacy(LegacyLauncherSettings legacyLauncherSettings) {
@@ -100,8 +103,6 @@ public final class Settings {
         jsonSettings.showPreReleases.setValue(legacyLauncherSettings.isShowPreReleases());
         jsonSettings.closeLauncherAfterGameStart.setValue(legacyLauncherSettings.isCloseLauncherAfterGameStart());
         jsonSettings.lastPlayedGameVersion.setValue(legacyLauncherSettings.getLastPlayedGameVersion().orElse(null));
-        jsonSettings.baseJavaParameters.setAll(
-                Optional.ofNullable(legacyLauncherSettings.getBaseJavaParameters()).map(params -> Arrays.asList(params.split("\\s"))).orElse(null));
         jsonSettings.userJavaParameters.setAll(
                 Optional.ofNullable(legacyLauncherSettings.getUserJavaParameters()).map(params -> Arrays.asList(params.split("\\s"))).orElse(null));
         jsonSettings.userGameParameters.setAll(
@@ -111,14 +112,14 @@ public final class Settings {
     }
 
     //TODO: change contract to load a file with fixed name from the path such that this method can decide on file format
-    public static LegacyLauncherSettings load(final Path path) {
+    public static Settings load(final Path path) {
         // TODO: try to load from JSON, fall-back to Properties
         Path json = path.getParent().resolve(JSON_FILE_NAME);
         if (Files.exists(json)) {
             logger.debug("Loading launcher settings from '{}'.", json);
             try (FileReader reader = new FileReader(json.toFile())) {
                 Settings jsonSettings = gson.fromJson(reader, Settings.class);
-                logger.info(jsonSettings.toString());
+                return jsonSettings;
             } catch (IOException e) {
                 logger.error("Error while loading launcher settings from file.", e);
             }
@@ -132,40 +133,35 @@ public final class Settings {
                 properties.load(inputStream);
                 LegacyLauncherSettings legacyLauncherSettings =  new LegacyLauncherSettings(properties);
 
-                Settings jsonSettings = fromLegacy(legacyLauncherSettings);
-
-                return legacyLauncherSettings;
+                return fromLegacy(legacyLauncherSettings);
             } catch (IOException e) {
                 logger.error("Error while loading launcher settings from file.", e);
             }
         }
-
         return null;
     }
 
-    public static synchronized void store(final LegacyLauncherSettings legacyLauncherSettings, final Path path) throws IOException {
+    public static synchronized void store(final Settings settings, final Path path) throws IOException {
         logger.debug("Writing launcher settings to '{}'.", path);
         if (Files.notExists(path.getParent())) {
             Files.createDirectories(path.getParent());
         }
-        try (OutputStream outputStream = Files.newOutputStream(path)) {
-            legacyLauncherSettings.getProperties().store(outputStream, "Terasology Launcher - Settings");
-        }
-
         //TODO: For the switch, only write JSON. For some failover safety we may write both formats for one or two
         //      releases before fully deprecating the Properties.
-        Settings jsonSettings = fromLegacy(legacyLauncherSettings);
+//        try (OutputStream outputStream = Files.newOutputStream(path)) {
+//            settings.getProperties().store(outputStream, "Terasology Launcher - Settings");
+//        }
 
         Path jsonPath = path.getParent().resolve(JSON_FILE_NAME);
         logger.debug("Writing launcher settings to '{}'.", jsonPath);
         try (FileWriter writer = new FileWriter(jsonPath.toFile())) {
-            gson.toJson(jsonSettings, writer);
+            gson.toJson(settings, writer);
             writer.flush();
         }
     }
 
-    public static LegacyLauncherSettings getDefault() {
-        return new LegacyLauncherSettings(new Properties());
+    public static Settings getDefault() {
+        return new Settings();
     };
 
     static class PathConverter implements JsonDeserializer<Path>, JsonSerializer<Path> {

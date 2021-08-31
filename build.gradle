@@ -100,6 +100,10 @@ dependencies {
     implementation group: 'com.vdurmont', name: 'semver4j', version: '3.1.0'
     implementation group: 'com.vladsch.flexmark', name: 'flexmark-all', version: '0.62.2'
 
+    implementation('org.hildan.fxgson:fx-gson:4.0.0') {
+        because "de-/serialization of launcher properties to JSON"
+    }
+
     // These dependencies are only needed for running tests
 
     testImplementation 'org.hamcrest:hamcrest:2.2'
