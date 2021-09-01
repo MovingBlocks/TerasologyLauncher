@@ -460,9 +460,8 @@ public class ApplicationController {
      */
     private void close() {
         logger.debug("Dispose launcher frame...");
-        final Path settingsFile = launcherDirectory.resolve(Settings.LEGACY_FILE_NAME);
         try {
-            Settings.store(launcherSettings, settingsFile);
+            Settings.store(launcherSettings, launcherDirectory);
         } catch (IOException e) {
             logger.warn("Could not store current launcher settings!");
         }
