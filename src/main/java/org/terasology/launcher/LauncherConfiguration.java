@@ -5,7 +5,6 @@ package org.terasology.launcher;
 
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.repositories.RepositoryManager;
-import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettings;
 
 import java.nio.file.Path;
@@ -15,7 +14,7 @@ import java.nio.file.Path;
  *
  * Provides information on
  * - directories managed by the launcher
- * - user settings in form of {@link BaseLauncherSettings}
+ * - user settings in form of {@link LauncherSettings}
  */
 public class LauncherConfiguration {
 

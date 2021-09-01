@@ -33,7 +33,7 @@ public final class Settings {
             try (InputStream inputStream = Files.newInputStream(path)) {
                 Properties properties = new Properties();
                 properties.load(inputStream);
-                return new BaseLauncherSettings(properties);
+                return new LauncherSettings(properties);
             } catch (IOException e) {
                 logger.error("Error while loading launcher settings from file.", e);
             }
@@ -52,6 +52,6 @@ public final class Settings {
     }
 
     public static LauncherSettings getDefault() {
-        return new BaseLauncherSettings(new Properties());
+        return new LauncherSettings(new Properties());
     };
 }
