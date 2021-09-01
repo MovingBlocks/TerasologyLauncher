@@ -74,8 +74,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path cacheDirectory = getDirectoryFor(LauncherManagedDirectory.CACHE, userDataDirectory);
 
             // launcher settings
-            final Path settingsFile = userDataDirectory.resolve(Settings.LEGACY_FILE_NAME);
-            final LauncherSettings launcherSettings = getLauncherSettings(settingsFile);
+            final LauncherSettings launcherSettings = getLauncherSettings(userDataDirectory);
 
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
@@ -100,7 +99,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             launcherSettings.setGameDataDirectory(gameDataDirectory);
             // TODO: Rewrite gameVersions.fixSettingsBuildVersion(launcherSettings);
 
-            storeLauncherSettingsAfterInit(launcherSettings, settingsFile);
+            storeLauncherSettingsAfterInit(launcherSettings, userDataDirectory);
 
             logger.trace("Creating launcher frame...");
 
@@ -158,11 +157,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return launcherDirectory;
     }
 
-    private LauncherSettings getLauncherSettings(Path settingsFile) throws LauncherStartFailedException {
+    private LauncherSettings getLauncherSettings(Path settingsPath) throws LauncherStartFailedException {
         logger.trace("Init LauncherSettings...");
         updateMessage(BundleUtils.getLabel("splash_retrieveLauncherSettings"));
 
-        final LauncherSettings settings = Optional.ofNullable(Settings.load(settingsFile)).orElse(Settings.getDefault());
+        final LauncherSettings settings = Optional.ofNullable(Settings.load(settingsPath)).orElse(Settings.getDefault());
         settings.init();
 
         logger.debug("Launcher Settings: {}", settings);
@@ -264,13 +263,13 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }, javafx.application.Platform::runLater).join();
     }
 
-    private void storeLauncherSettingsAfterInit(LauncherSettings launcherSettings, final Path settingsFile) throws LauncherStartFailedException {
+    private void storeLauncherSettingsAfterInit(LauncherSettings launcherSettings, final Path settingsPath) throws LauncherStartFailedException {
         logger.trace("Store LauncherSettings...");
         updateMessage(BundleUtils.getLabel("splash_storeLauncherSettings"));
         try {
-            Settings.store(launcherSettings, settingsFile);
+            Settings.store(launcherSettings, settingsPath);
         } catch (IOException e) {
-            logger.error("The launcher settings cannot be stored! '{}'", settingsFile, e);
+            logger.error("The launcher settings cannot be stored to '{}'.", settingsPath, e);
             Dialogs.showError(owner, BundleUtils.getLabel("message_error_storeSettings"));
             //TODO: should we fail here, or is it fine to work with in-memory settings?
             throw new LauncherStartFailedException();
