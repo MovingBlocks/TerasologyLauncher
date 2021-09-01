@@ -35,6 +35,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.LauncherConfiguration;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.game.GameService;
 import org.terasology.launcher.game.Installation;
@@ -251,15 +252,13 @@ public class ApplicationController {
     }
 
     @SuppressWarnings("checkstyle:HiddenField")
-    public void update(final Path launcherDirectory, final Path downloadDirectory, final LauncherSettings launcherSettings,
-                       final RepositoryManager repositoryManager, final GameManager gameManager,
-                       final Stage stage, final HostServices hostServices) {
-        this.launcherDirectory = launcherDirectory;
-        this.launcherSettings = launcherSettings;
+    public void update(final LauncherConfiguration configuration, final Stage stage, final HostServices hostServices) {
+        this.launcherDirectory = configuration.getLauncherDirectory();
+        this.launcherSettings = configuration.getLauncherSettings();
         this.showPreReleases.bind(launcherSettings.showPreReleases());
 
-        this.repositoryManager = repositoryManager;
-        this.gameManager = gameManager;
+        this.repositoryManager = configuration.getRepositoryManager();
+        this.gameManager = configuration.getGameManager();
 
         this.stage = stage;
 
@@ -284,7 +283,7 @@ public class ApplicationController {
         //TODO: This only updates when the launcher is initialized (which should happen exactly once o.O)
         //      We should update this value at least every time the download directory changes (user setting).
         //      Ideally, we would check periodically for disk space.
-        if (downloadDirectory.toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
+        if (configuration.getDownloadDirectory().toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
             warning.setValue(Optional.of(Warning.LOW_ON_SPACE));
         } else {
             warning.setValue(Optional.empty());
