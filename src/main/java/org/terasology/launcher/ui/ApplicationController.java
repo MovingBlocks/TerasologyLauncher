@@ -72,7 +72,7 @@ public class ApplicationController {
     private static final long MINIMUM_FREE_SPACE = 200 * MB;
 
     private Path launcherDirectory;
-    private LauncherSettings launcherSettings;
+    private Settings launcherSettings;
 
     private GameManager gameManager;
     private RepositoryManager repositoryManager;
@@ -180,7 +180,7 @@ public class ApplicationController {
         // selected
         selectedProfile.addListener((obs, oldVal, newVal) -> {
             ObservableList<GameRelease> availableReleases = gameReleaseComboBox.getItems();
-            GameIdentifier lastPlayedGame = launcherSettings.getLastPlayedGameVersion().orElse(null);
+            GameIdentifier lastPlayedGame = launcherSettings.lastPlayedGameVersion.get();
 
             Optional<GameRelease> lastPlayed = availableReleases.stream()
                     .filter(release -> release.getId().equals(lastPlayedGame))
@@ -255,7 +255,7 @@ public class ApplicationController {
     public void update(final LauncherConfiguration configuration, final Stage stage, final HostServices hostServices) {
         this.launcherDirectory = configuration.getLauncherDirectory();
         this.launcherSettings = configuration.getLauncherSettings();
-        this.showPreReleases.bind(launcherSettings.showPreReleases());
+        this.showPreReleases.bind(launcherSettings.showPreReleases);
 
         this.repositoryManager = configuration.getRepositoryManager();
         this.gameManager = configuration.getGameManager();
@@ -267,7 +267,8 @@ public class ApplicationController {
         Bindings.bindContent(installedGames, gameManager.getInstalledGames());
 
         profileComboBox.getSelectionModel().select(
-                launcherSettings.getLastPlayedGameVersion().map(GameIdentifier::getProfile).orElse(Profile.OMEGA)
+                Optional.ofNullable(launcherSettings.lastPlayedGameVersion.get())
+                        .map(GameIdentifier::getProfile).orElse(Profile.OMEGA)
         );
 
         // add Logback appender to both the root logger and the tab
@@ -368,9 +369,9 @@ public class ApplicationController {
 
         logger.debug("Game has started successfully.");
 
-        launcherSettings.setLastPlayedGameVersion(selectedRelease.getValue().getId());
+        launcherSettings.lastPlayedGameVersion.set(selectedRelease.getValue().getId());
 
-        if (launcherSettings.isCloseLauncherAfterGameStart()) {
+        if (launcherSettings.closeLauncherAfterGameStart.get()) {
             if (downloadTask == null) {
                 logger.info("Close launcher after game start.");
                 close();
@@ -434,7 +435,7 @@ public class ApplicationController {
                     logger.info("Removing game '{}' from path '{}", id, gameDir);
                     // triggering a game deletion implies the player doesn't want to play this game anymore. hence, we
                     // unset `lastPlayedGameVersion` setting independent of deletion success
-                    launcherSettings.setLastPlayedGameVersion(null);
+                    launcherSettings.lastPlayedGameVersion.set(null);
                     final DeleteTask deleteTask = new DeleteTask(gameManager, id);
                     executor.submit(deleteTask);
                 });

@@ -120,8 +120,8 @@ class TestLauncherSettings {
         assertNull(launcherSettings.gameDirectory.get());
         assertNull(launcherSettings.gameDataDirectory.get());
         assertEquals(launcherSettings.keepDownloadedFiles.get(), Boolean.valueOf(saveDownloadedFiles));
-        assertEquals(launcherSettings.userJavaParameters.get(), LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
-        assertEquals(launcherSettings.userGameParameters.get(), LauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
+        assertEquals(String.join(" ", launcherSettings.userJavaParameters.get()), LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+        assertEquals(String.join(" ", launcherSettings.userGameParameters.get()), LauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
         assertEquals(launcherSettings.logLevel.get(), Level.INFO);
     }
 
@@ -160,6 +160,6 @@ class TestLauncherSettings {
         GameIdentifier expectedId = new GameIdentifier(displayVersion, Build.NIGHTLY, Profile.OMEGA);
 
         launcherSettings.lastPlayedGameVersion.set(id);
-        assertEquals(Optional.of(expectedId), launcherSettings.lastPlayedGameVersion.get());
+        assertEquals(expectedId, launcherSettings.lastPlayedGameVersion.get());
     }
 }

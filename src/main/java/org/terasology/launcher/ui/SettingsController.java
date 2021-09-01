@@ -28,15 +28,17 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.text.Collator;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.stream.Collectors;
 
 public class SettingsController {
 
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
 
     private Path launcherDirectory;
-    private LauncherSettings launcherSettings;
+    private Settings launcherSettings;
     private ApplicationController appController;
 
     private Path gameDirectory;
@@ -109,43 +111,43 @@ public class SettingsController {
     @FXML
     protected void saveSettingsAction(ActionEvent event) {
         // save gameDirectory
-        launcherSettings.setGameDirectory(gameDirectory);
+        launcherSettings.gameDirectory.set(gameDirectory);
 
         // save gameDataDirectory
-        launcherSettings.setGameDataDirectory(gameDataDirectory);
+        launcherSettings.gameDataDirectory.set(gameDataDirectory);
 
         // save heap size settings
-        launcherSettings.setMaxHeapSize(maxHeapSizeBox.getSelectionModel().getSelectedItem());
-        launcherSettings.setInitialHeapSize(initialHeapSizeBox.getSelectionModel().getSelectedItem());
+        launcherSettings.maxHeapSize.set(maxHeapSizeBox.getSelectionModel().getSelectedItem());
+        launcherSettings.minHeapSize.set(initialHeapSizeBox.getSelectionModel().getSelectedItem());
 
         // save log level settings
-        launcherSettings.setLogLevel(logLevelBox.getSelectionModel().getSelectedItem());
+        launcherSettings.logLevel.set(logLevelBox.getSelectionModel().getSelectedItem());
 
         // save languageBox settings
         Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectionModel().getSelectedIndex()));
-        launcherSettings.setLocale(Languages.getCurrentLocale());
+        launcherSettings.locale.set(Languages.getCurrentLocale());
 
         // save closeLauncherAfterGameStart
-        launcherSettings.setCloseLauncherAfterGameStart(closeAfterStartBox.isSelected());
+        launcherSettings.closeLauncherAfterGameStart.set(closeAfterStartBox.isSelected());
 
         // save showPreReleases
-        launcherSettings.setShowPreReleases(showPreReleasesBox.isSelected());
+        launcherSettings.showPreReleases.set(showPreReleasesBox.isSelected());
 
         // save saveDownloadedFiles
-        launcherSettings.setKeepDownloadedFiles(saveDownloadedFilesBox.isSelected());
+        launcherSettings.keepDownloadedFiles.set(saveDownloadedFilesBox.isSelected());
 
         //save userParameters (java & game), if textfield is empty then set to defaults
         if (userJavaParametersField.getText().isEmpty()) {
-            launcherSettings.setUserJavaParameters(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+            launcherSettings.userJavaParameters.setAll(asParameterList(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT));
         } else {
             logger.debug("User defined Java parameters: {}", userJavaParametersField.getText());
-            launcherSettings.setUserJavaParameters(userJavaParametersField.getText());
+            launcherSettings.userJavaParameters.setAll(asParameterList(userJavaParametersField.getText()));
         }
         if (userGameParametersField.getText().isEmpty()) {
-            launcherSettings.setUserGameParameters(LauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
+            launcherSettings.userGameParameters.setAll(asParameterList(LauncherSettings.USER_GAME_PARAMETERS_DEFAULT));
         } else {
             logger.debug("User defined game parameters: {}", userGameParametersField.getText());
-            launcherSettings.setUserGameParameters(userGameParametersField.getText());
+            launcherSettings.userGameParameters.setAll(asParameterList(userGameParametersField.getText()));
         }
 
         // store changed settings
@@ -193,7 +195,7 @@ public class SettingsController {
         }
     }
 
-    void initialize(final Path newLauncherDirectory, final LauncherSettings newLauncherSettings,
+    void initialize(final Path newLauncherDirectory, final Settings newLauncherSettings,
                     final Stage newStage, final ApplicationController newAppController) {
         this.launcherDirectory = newLauncherDirectory;
         this.launcherSettings = newLauncherSettings;
@@ -208,8 +210,8 @@ public class SettingsController {
         populateShowPreReleases();
         populateLogLevel();
 
-        gameDirectory = newLauncherSettings.getGameDirectory();
-        gameDataDirectory = newLauncherSettings.getGameDataDirectory();
+        gameDirectory = newLauncherSettings.gameDirectory.get();
+        gameDataDirectory = newLauncherSettings.gameDataDirectory.get();
 
         updateDirectoryPathLabels();
         initUserParameterFields();
@@ -294,15 +296,15 @@ public class SettingsController {
     }
 
     private void populateCloseLauncherAfterGameStart() {
-        closeAfterStartBox.setSelected(launcherSettings.isCloseLauncherAfterGameStart());
+        closeAfterStartBox.setSelected(launcherSettings.closeLauncherAfterGameStart.get());
     }
 
     private void populateShowPreReleases() {
-        showPreReleasesBox.setSelected(launcherSettings.isShowPreReleases());
+        showPreReleasesBox.setSelected(launcherSettings.showPreReleases.get());
     }
 
     private void populateSaveDownloadedFiles() {
-        saveDownloadedFilesBox.setSelected(launcherSettings.isKeepDownloadedFiles());
+        saveDownloadedFilesBox.setSelected(launcherSettings.keepDownloadedFiles.get());
     }
 
     private void populateLogLevel() {
@@ -320,23 +322,32 @@ public class SettingsController {
     }
 
     private void updateHeapSizeSelection() {
-        maxHeapSizeBox.getSelectionModel().select(launcherSettings.getMaxHeapSize());
-        initialHeapSizeBox.getSelectionModel().select(launcherSettings.getInitialHeapSize());
+        maxHeapSizeBox.getSelectionModel().select(launcherSettings.maxHeapSize.get());
+        initialHeapSizeBox.getSelectionModel().select(launcherSettings.minHeapSize.get());
     }
 
     private void updateLogLevelSelection() {
-        logLevelBox.getSelectionModel().select(launcherSettings.getLogLevel());
+        logLevelBox.getSelectionModel().select(launcherSettings.logLevel.get());
     }
 
     private void initUserParameterFields() {
         //if the VM parameters are left default do not display, the prompt message will show
-        if (!launcherSettings.getUserJavaParameters().equals(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT)) {
-            userJavaParametersField.setText(launcherSettings.getUserJavaParameters());
+        List<String> defaultParams = asParameterList(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+        List<String> userJavaParams = launcherSettings.userJavaParameters.get();
+        if (!(defaultParams.containsAll(userJavaParams) && userJavaParams.containsAll(defaultParams))) {
+            userJavaParametersField.setText(String.join(" ", launcherSettings.userJavaParameters.get()));
         }
         //if the Game parameters are left default do not display, the prompt message will show
-        if (!launcherSettings.getUserGameParameters().equals(LauncherSettings.USER_GAME_PARAMETERS_DEFAULT)) {
-            userGameParametersField.setText(launcherSettings.getUserGameParameters());
+        if (!launcherSettings.userGameParameters.get().isEmpty()) {
+            userGameParametersField.setText(String.join(" ", launcherSettings.userGameParameters.get()));
         }
+    }
+
+    private List<String> asParameterList(String text) {
+        return Arrays.stream(text.split("\\s"))
+                .filter(param -> !param.isBlank())
+                .map(String::trim)
+                .collect(Collectors.toList());
     }
 
     private static class LanguageIconListCell extends ListCell<String> {

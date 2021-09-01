@@ -16,7 +16,6 @@ import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.LauncherVersion;
 import org.terasology.launcher.repositories.RepositoryManager;
-import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.ui.Dialogs;
@@ -74,17 +73,17 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path cacheDirectory = getDirectoryFor(LauncherManagedDirectory.CACHE, userDataDirectory);
 
             // launcher settings
-            final LauncherSettings launcherSettings = getLauncherSettings(userDataDirectory);
+            final Settings launcherSettings = getLauncherSettings(userDataDirectory);
 
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
 
-            checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
+            checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.keepDownloadedFiles.get());
 
             // game directories
             updateMessage(BundleUtils.getLabel("splash_initGameDirs"));
             final Path gameDirectory = getDirectoryFor(LauncherManagedDirectory.GAMES, installationDirectory);
-            final Path gameDataDirectory = getGameDataDirectory(platform, launcherSettings.getGameDataDirectory());
+            final Path gameDataDirectory = getGameDataDirectory(platform, launcherSettings.gameDataDirectory.get());
 
             updateMessage(BundleUtils.getLabel("splash_fetchReleases"));
             logger.info("Fetching game releases ...");
@@ -95,8 +94,8 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             Set<GameIdentifier> installedGames = gameManager.getInstalledGames();
 
             logger.trace("Change LauncherSettings...");
-            launcherSettings.setGameDirectory(gameDirectory);
-            launcherSettings.setGameDataDirectory(gameDataDirectory);
+            launcherSettings.gameDirectory.set(gameDirectory);
+            launcherSettings.gameDataDirectory.set(gameDataDirectory);
             // TODO: Rewrite gameVersions.fixSettingsBuildVersion(launcherSettings);
 
             storeLauncherSettingsAfterInit(launcherSettings, userDataDirectory);
@@ -157,12 +156,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return launcherDirectory;
     }
 
-    private LauncherSettings getLauncherSettings(Path settingsPath) throws LauncherStartFailedException {
+    private Settings getLauncherSettings(Path settingsPath) throws LauncherStartFailedException {
         logger.trace("Init LauncherSettings...");
         updateMessage(BundleUtils.getLabel("splash_retrieveLauncherSettings"));
 
-        final LauncherSettings settings = Optional.ofNullable(Settings.load(settingsPath)).orElse(Settings.getDefault());
-        settings.init();
+        final Settings settings = Optional.ofNullable(Settings.load(settingsPath)).orElse(Settings.getDefault());
 
         logger.debug("Launcher Settings: {}", settings);
 
@@ -263,7 +261,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }, javafx.application.Platform::runLater).join();
     }
 
-    private void storeLauncherSettingsAfterInit(LauncherSettings launcherSettings, final Path settingsPath) throws LauncherStartFailedException {
+    private void storeLauncherSettingsAfterInit(Settings launcherSettings, final Path settingsPath) throws LauncherStartFailedException {
         logger.trace("Store LauncherSettings...");
         updateMessage(BundleUtils.getLabel("splash_storeLauncherSettings"));
         try {

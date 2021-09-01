@@ -81,7 +81,7 @@ public final class Settings {
         showPreReleases = new SimpleBooleanProperty(false);
         closeLauncherAfterGameStart = new SimpleBooleanProperty(true);
         lastPlayedGameVersion = new SimpleObjectProperty<>();
-        userJavaParameters = new SimpleListProperty<>(FXCollections.observableArrayList());
+        userJavaParameters = new SimpleListProperty<>(FXCollections.observableArrayList("-XX:MaxGCPauseMillis=20"));
         userGameParameters = new SimpleListProperty<>(FXCollections.observableArrayList());
     }
 
