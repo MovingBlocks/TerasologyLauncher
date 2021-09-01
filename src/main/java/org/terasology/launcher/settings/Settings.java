@@ -4,7 +4,6 @@
 package org.terasology.launcher.settings;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -18,6 +17,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import org.hildan.fxgson.FxGson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -34,9 +34,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.Properties;
 
 //TODO: should this be called `SettingsController` and also carry out some UI handling, e.g., displaying error messages
@@ -47,7 +45,7 @@ public final class Settings {
 
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);
 
-    private static Gson gson = new GsonBuilder()
+    private static Gson gson = FxGson.coreBuilder()
             .registerTypeAdapter(Path.class, new PathConverter())
             .setPrettyPrinting()
             .create();
@@ -126,11 +124,7 @@ public final class Settings {
             try (InputStream inputStream = Files.newInputStream(path)) {
                 Properties properties = new Properties();
                 properties.load(inputStream);
-                LauncherSettings legacyLauncherSettings =  new LauncherSettings(properties);
-
-                Settings jsonSettings = fromLegacy(legacyLauncherSettings);
-
-                return legacyLauncherSettings;
+                return new LauncherSettings(properties);
             } catch (IOException e) {
                 logger.error("Error while loading launcher settings from file.", e);
             }
