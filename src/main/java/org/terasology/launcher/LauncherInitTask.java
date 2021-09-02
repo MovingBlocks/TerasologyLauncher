@@ -8,6 +8,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import okhttp3.Cache;
+import okhttp3.OkHttpClient;
 import org.kohsuke.github.GHRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
 
@@ -82,6 +85,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
 
+            // looking for launcher updates (first network communication)
+            final var client = new OkHttpClient.Builder()
+                    .cache(new Cache(cacheDirectory.toFile(), 10L * 1024L * 1024L /*10 MiB*/))
+                    .callTimeout(10, TimeUnit.SECONDS)
+                    .build();
             checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.keepDownloadedFiles.get());
 
             // game directories
@@ -91,7 +99,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             updateMessage(BundleUtils.getLabel("splash_fetchReleases"));
             logger.info("Fetching game releases ...");
-            final RepositoryManager repositoryManager = new RepositoryManager();
+            final RepositoryManager repositoryManager = new RepositoryManager(client);
             Set<GameRelease> releases = repositoryManager.getReleases();
 
             final GameManager gameManager = new GameManager(cacheDirectory, gameDirectory);
