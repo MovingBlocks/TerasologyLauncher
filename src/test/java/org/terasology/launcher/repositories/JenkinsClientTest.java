@@ -4,22 +4,22 @@
 package org.terasology.launcher.repositories;
 
 import com.google.gson.Gson;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.mock.MockInterceptor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 /**
  * Note: We are testing with the default Gson parser here. This can go out of sync with the instantiation of
@@ -36,27 +36,39 @@ class JenkinsClientTest {
         final Gson gson = new Gson();
         URL url = new URL("https://jenkins.example");
 
-        try (var mockedClientClass = mockStatic(JenkinsClient.class)) {
-            mockedClientClass.when(() -> JenkinsClient.openStream(any())).thenThrow(IOException.class);
+        final var mockHttpCall = mock(Call.class);
+        final var mockHttpClient = mock(OkHttpClient.class);
+        final var mockHttpClientBuilder = mock(OkHttpClient.Builder.class);
 
-            final JenkinsClient client = new JenkinsClient(gson);
-            assertNull(client.request(url));
-        }
+        when(mockHttpClient.newBuilder()).thenReturn(mockHttpClientBuilder);
+        when(mockHttpClientBuilder.addNetworkInterceptor(any())).thenReturn(mockHttpClientBuilder);
+        when(mockHttpClientBuilder.build()).thenReturn(mockHttpClient);
+        when(mockHttpClient.newCall(any())).thenReturn(mockHttpCall);
+        when(mockHttpCall.execute()).thenThrow(IOException.class);
+
+        final JenkinsClient client = new JenkinsClient(mockHttpClient, gson);
+        assertNull(client.request(url));
     }
 
     @Test
     @DisplayName("can handle invalid JSON payload")
-    void canHandleInvalidJsonPayload() throws InterruptedException {
-        final Gson gson = new Gson();
-        final JenkinsClient client = new JenkinsClient(gson);
+    void canHandleInvalidJsonPayload() throws InterruptedException, MalformedURLException {
+        URL urlToInvalidPayload = new URL("https://jenkins.example");
 
-        InputStream invalidPayload = new ByteArrayInputStream("{ this is ] no json |[!".getBytes());
+        final var interceptor = new MockInterceptor();
+        interceptor.addRule()
+                //TODO: I'd like to specify the URL here, but then matcher does not match.
+                //      Somehow, the matcher surrounds the expected URL with some weird characters.
+                //      expected=\Qhttps://jenkins.example\E;actual=https://jenkins.example/; matcher=url(~=\Qhttps://jenkins.example\E)
+                .get()
+                .respond("{ this is ] no json |[!");
 
-        URL urlToInvalidPayload = mock(URL.class);
+        final var httpClient = new OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .build();
 
-        try (MockedStatic<JenkinsClient> utilities = Mockito.mockStatic(JenkinsClient.class)) {
-            utilities.when(() -> JenkinsClient.openStream(urlToInvalidPayload)).thenReturn(invalidPayload);
-            assertNull(client.request(urlToInvalidPayload));
-        }
+        final JenkinsClient client = new JenkinsClient(httpClient, new Gson());
+
+        assertNull(client.request(urlToInvalidPayload));
     }
 }
