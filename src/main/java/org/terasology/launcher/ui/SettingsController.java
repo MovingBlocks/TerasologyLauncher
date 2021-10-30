@@ -12,6 +12,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
@@ -83,6 +84,8 @@ public class SettingsController {
     @FXML
     private Button cancelSettingsButton;
     @FXML
+    private Button resetSettingsButton;
+    @FXML
     private ComboBox<JavaHeapSize> maxHeapSizeBox;
     @FXML
     private ComboBox<JavaHeapSize> initialHeapSizeBox;
@@ -100,6 +103,10 @@ public class SettingsController {
     private TextField userGameParametersField;
     @FXML
     private ComboBox<Level> logLevelBox;
+    @FXML
+    private TitledPane advancedOptionsPane;
+    @FXML
+    private Label otherSettingsLabel;
 
     @FXML
     protected void cancelSettingsAction(ActionEvent event) {
@@ -252,6 +259,9 @@ public class SettingsController {
         launcherDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory_open"));
         saveSettingsButton.setText(BundleUtils.getLabel("settings_save"));
         cancelSettingsButton.setText(BundleUtils.getLabel("settings_cancel"));
+        resetSettingsButton.setText(BundleUtils.getLabel("settings_reset"));
+        advancedOptionsPane.setText(BundleUtils.getLabel("settings_advanced_options"));
+        otherSettingsLabel.setText(BundleUtils.getLabel("settings_other"));
     }
 
     private void populateHeapSize() {
