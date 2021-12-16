@@ -103,7 +103,7 @@ class TestLauncherSettings {
             testProperties.store(output, null);
         }
 
-        launcherSettings = Settings.load(testPropertiesFile);
+        launcherSettings = Settings.load(testPropertiesFile.getParent());
         launcherSettings.init();
         assertPropertiesEqual();
     }

@@ -156,12 +156,11 @@ public class SettingsController {
         }
 
         // store changed settings
-        final Path settingsFile = launcherDirectory.resolve(Settings.LEGACY_FILE_NAME);
         try {
-            Settings.store(launcherSettings, settingsFile);
+            Settings.store(launcherSettings, launcherDirectory);
         } catch (IOException e) {
             //TODO: unify error handling, probably to Settings a.k.a. SettingsController?
-            logger.error("The launcher settings cannot be stored! '{}'", settingsFile, e);
+            logger.error("The launcher settings cannot be stored to '{}'.", launcherDirectory, e);
             Dialogs.showError(stage, BundleUtils.getLabel("message_error_storeSettings"));
         } finally {
             ((Node) event.getSource()).getScene().getWindow().hide();
