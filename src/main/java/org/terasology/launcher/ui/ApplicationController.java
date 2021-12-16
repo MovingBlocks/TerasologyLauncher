@@ -120,6 +120,13 @@ public class ApplicationController {
     @FXML
     private FooterController footerController;
 
+    @FXML
+    private Tab changelogTab;
+    @FXML
+    private Tab aboutTab;
+    @FXML
+    private Tab logTab;
+
     public ApplicationController() {
         warning = new SimpleObjectProperty<>(Optional.empty());
         gameService = new GameService();
@@ -158,6 +165,7 @@ public class ApplicationController {
         footerController.bind(warning);
         initComboBoxes();
         initButtons();
+        setLabelStrings();
     }
 
     /**
@@ -249,6 +257,17 @@ public class ApplicationController {
 
         settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
         exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
+    }
+
+    /**
+     * Used to assign localized label strings via BundleUtils.
+     * Allows for fallback strings to be assigned if the localization-specific ones
+     * are absent/empty
+     */
+    private void setLabelStrings() {
+        changelogTab.setText(BundleUtils.getLabel("tab_changelog"));
+        aboutTab.setText(BundleUtils.getLabel("tab_about"));
+        logTab.setText(BundleUtils.getLabel("tab_log"));
     }
 
     @SuppressWarnings("checkstyle:HiddenField")

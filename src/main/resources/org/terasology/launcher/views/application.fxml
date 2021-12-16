@@ -65,12 +65,12 @@
                         <URL value="@terasology.css" />
                       </stylesheets>
                       <tabs>
-                        <Tab closable="false" text="Changelog">
+                        <Tab closable="false" fx:id="changelogTab" text="Changelog">
                           <content>
                             <fx:include fx:id="changelogView" source="changelog-view.fxml"/>
                           </content>
                         </Tab>
-                        <Tab closable="false" text="About">
+                        <Tab closable="false" fx:id="aboutTab" text="About">
                           <content>
                             <fx:include fx:id="aboutView" source="about-view.fxml"/>
                           </content>

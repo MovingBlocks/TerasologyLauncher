@@ -75,7 +75,7 @@
                               <Button fx:id="gameDataDirectoryOpenButton" mnemonicParsing="false" onAction="#openGameDataDirectoryAction" text="Button" />
                            </children>
                         </HBox>
-                       <TitledPane animated="false" expanded="false" text="Advanced options" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" GridPane.vgrow="SOMETIMES">
+                       <TitledPane fx:id="advancedOptionsPane" animated="false" expanded="false" text="Advanced options" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" GridPane.vgrow="SOMETIMES">
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
@@ -114,7 +114,7 @@
                        <Label fx:id="launcherDirectoryLabel" text="Data directory" GridPane.rowIndex="11" />
                        <TextField fx:id="launcherDirectoryPath" editable="false" GridPane.rowIndex="12" />
                        <Button fx:id="launcherDirectoryOpenButton" mnemonicParsing="false" onAction="#openLauncherDirectoryAction" text="Browse" GridPane.columnIndex="1" GridPane.rowIndex="12" />
-                       <Label text="Other" GridPane.rowIndex="13" />
+                       <Label fx:id="otherSettingsLabel" text="Other" GridPane.rowIndex="13" />
                        <CheckBox fx:id="showPreReleasesBox" mnemonicParsing="false" text="Show pre-releases and nightly builds" GridPane.rowIndex="14" />
                        <CheckBox fx:id="closeAfterStartBox" mnemonicParsing="false" text="Close after game starts" GridPane.rowIndex="15" />
                        <CheckBox fx:id="saveDownloadedFilesBox" mnemonicParsing="false" text="Save downloaded files" GridPane.rowIndex="16" />
@@ -129,7 +129,7 @@
                <children>
                   <Button fx:id="saveSettingsButton" mnemonicParsing="false" onAction="#saveSettingsAction" prefWidth="80.0" text="Save" />
                   <Button fx:id="cancelSettingsButton" mnemonicParsing="false" onAction="#cancelSettingsAction" prefWidth="80.0" text="Cancel" />
-                  <Button disable="true" mnemonicParsing="false" prefWidth="80.0" text="Reset" />
+                  <Button fx:id="resetSettingsButton" disable="true" mnemonicParsing="false" prefWidth="80.0" text="Reset" />
                </children>
                <padding>
                   <Insets left="8.0" right="8.0" />
