@@ -3,17 +3,14 @@
 
 package org.terasology.launcher.game;
 
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import javafx.concurrent.Service;
 import javafx.concurrent.Worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.Settings;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.Executors;
 
 import static com.google.common.base.Verify.verifyNotNull;
