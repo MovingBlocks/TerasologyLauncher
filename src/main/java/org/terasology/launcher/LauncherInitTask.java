@@ -24,6 +24,7 @@ import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.DirectoryCreator;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.HostServices;
+import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
@@ -74,6 +75,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             // launcher settings
             final Settings launcherSettings = getLauncherSettings(userDataDirectory);
+            // By default, we initialize the launcher with the host system's default locale (if supported).
+            // The user may have chosen a different locale in the launcher settings, so apply that as soon as possible.
+            Languages.update(launcherSettings.locale.get());
 
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
