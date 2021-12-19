@@ -101,11 +101,23 @@ public final class Languages {
         }
     }
 
+    /**
+     * Update the locale used for the launcher.
+     *
+     * If the {@code newLocale} is not supported (see {@link #SUPPORTED_LOCALES}) the current locale is kept.
+     *
+     * The new locale will be returned in subsequent calls to {@link #getCurrentLocale()}.
+     *
+     * @param newLocale the new locale that should be used from now on.
+     */
     public static void update(Locale newLocale) {
-        if (SUPPORTED_LOCALES.contains(newLocale)) {
-            currentLocale = newLocale;
-        } else {
-            logger.warn("Unsupported locale '{}'.", newLocale);
+        if (!newLocale.equals(currentLocale)) {
+            if (SUPPORTED_LOCALES.contains(newLocale)) {
+                logger.debug("Updating locale to '{}' (was '{}').", newLocale, currentLocale);
+                currentLocale = newLocale;
+            } else {
+                logger.warn("Unsupported locale '{}'. Keeping current locale '{}'.", newLocale, currentLocale);
+            }
         }
     }
 

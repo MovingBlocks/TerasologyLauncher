@@ -41,7 +41,7 @@ class TestLauncherSettings {
     @TempDir
     Path gameDataDirectory;
 
-    private LauncherSettings launcherSettings;
+    private Settings launcherSettings;
     private Path testPropertiesFile;
 
     private String locale;
@@ -54,16 +54,16 @@ class TestLauncherSettings {
     private String logLevel;
 
     private void assertPropertiesEqual() throws Exception {
-        assertEquals(launcherSettings.getLocale(), Locale.forLanguageTag(locale));
-        assertEquals(launcherSettings.getMaxHeapSize(), JavaHeapSize.valueOf(maxHeapSize));
-        assertEquals(launcherSettings.getInitialHeapSize(), JavaHeapSize.valueOf(initialHeapSize));
-        assertEquals(launcherSettings.isCloseLauncherAfterGameStart(), Boolean.valueOf(closeLauncherAfterGameStart));
-        assertEquals(launcherSettings.getGameDirectory(), gameDirectory);
-        assertEquals(launcherSettings.getGameDataDirectory(), gameDataDirectory);
-        assertEquals(launcherSettings.isKeepDownloadedFiles(), Boolean.valueOf(saveDownloadedFiles));
-        assertEquals(launcherSettings.getUserJavaParameters(), userJavaParameters);
-        assertEquals(launcherSettings.getUserGameParameters(), userGameParameters);
-        assertEquals(launcherSettings.getLogLevel(), Level.valueOf(logLevel));
+        assertEquals(launcherSettings.locale.get(), Locale.forLanguageTag(locale));
+        assertEquals(launcherSettings.maxHeapSize.get(), JavaHeapSize.valueOf(maxHeapSize));
+        assertEquals(launcherSettings.minHeapSize.get(), JavaHeapSize.valueOf(initialHeapSize));
+        assertEquals(launcherSettings.closeLauncherAfterGameStart.get(), Boolean.valueOf(closeLauncherAfterGameStart));
+        assertEquals(launcherSettings.gameDirectory.get(), gameDirectory);
+        assertEquals(launcherSettings.gameDataDirectory.get(), gameDataDirectory);
+        assertEquals(launcherSettings.keepDownloadedFiles.get(), Boolean.valueOf(saveDownloadedFiles));
+        assertEquals(String.join(" ", launcherSettings.userJavaParameters.get()), userJavaParameters);
+        assertEquals(String.join(" ", launcherSettings.userGameParameters.get()), userGameParameters);
+        assertEquals(launcherSettings.logLevel.get(), Level.valueOf(logLevel));
     }
 
     @BeforeEach
@@ -104,7 +104,6 @@ class TestLauncherSettings {
         }
 
         launcherSettings = Settings.load(testPropertiesFile.getParent());
-        launcherSettings.init();
         assertPropertiesEqual();
     }
 
@@ -113,18 +112,17 @@ class TestLauncherSettings {
         //null properties file
 
         launcherSettings = Settings.getDefault();
-        launcherSettings.init();
 
-        assertEquals(launcherSettings.getLocale(), Languages.DEFAULT_LOCALE);
-        assertEquals(launcherSettings.getMaxHeapSize(), LauncherSettings.MAX_HEAP_SIZE_DEFAULT);
-        assertEquals(launcherSettings.getInitialHeapSize(), LauncherSettings.INITIAL_HEAP_SIZE_DEFAULT);
-        assertEquals(launcherSettings.isCloseLauncherAfterGameStart(), LauncherSettings.CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT);
-        assertNull(launcherSettings.getGameDirectory());
-        assertNull(launcherSettings.getGameDataDirectory());
-        assertEquals(launcherSettings.isKeepDownloadedFiles(), Boolean.valueOf(saveDownloadedFiles));
-        assertEquals(launcherSettings.getUserJavaParameters(), LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
-        assertEquals(launcherSettings.getUserGameParameters(), LauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
-        assertEquals(launcherSettings.getLogLevel(), Level.INFO);
+        assertEquals(launcherSettings.locale.get(), Languages.DEFAULT_LOCALE);
+        assertEquals(launcherSettings.maxHeapSize.get(), LauncherSettings.MAX_HEAP_SIZE_DEFAULT);
+        assertEquals(launcherSettings.minHeapSize.get(), LauncherSettings.INITIAL_HEAP_SIZE_DEFAULT);
+        assertEquals(launcherSettings.closeLauncherAfterGameStart.get(), LauncherSettings.CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT);
+        assertNull(launcherSettings.gameDirectory.get());
+        assertNull(launcherSettings.gameDataDirectory.get());
+        assertEquals(launcherSettings.keepDownloadedFiles.get(), Boolean.valueOf(saveDownloadedFiles));
+        assertEquals(String.join(" ", launcherSettings.userJavaParameters.get()), LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+        assertEquals(String.join(" ", launcherSettings.userGameParameters.get()), LauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
+        assertEquals(launcherSettings.logLevel.get(), Level.INFO);
     }
 
     @Test
@@ -140,16 +138,16 @@ class TestLauncherSettings {
         logLevel = "INFO";
 
         //set using setters
-        launcherSettings.setLocale(Locale.forLanguageTag(locale));
-        launcherSettings.setMaxHeapSize(JavaHeapSize.valueOf(maxHeapSize));
-        launcherSettings.setInitialHeapSize(JavaHeapSize.valueOf(initialHeapSize));
-        launcherSettings.setCloseLauncherAfterGameStart(Boolean.parseBoolean(closeLauncherAfterGameStart));
-        launcherSettings.setGameDirectory(gameDirectory);
-        launcherSettings.setGameDataDirectory(gameDataDirectory);
-        launcherSettings.setKeepDownloadedFiles(Boolean.parseBoolean(saveDownloadedFiles));
-        launcherSettings.setUserJavaParameters(userJavaParameters);
-        launcherSettings.setUserGameParameters(userGameParameters);
-        launcherSettings.setLogLevel(Level.valueOf(logLevel));
+        launcherSettings.locale.set(Locale.forLanguageTag(locale));
+        launcherSettings.maxHeapSize.set(JavaHeapSize.valueOf(maxHeapSize));
+        launcherSettings.minHeapSize.set(JavaHeapSize.valueOf(initialHeapSize));
+        launcherSettings.closeLauncherAfterGameStart.set(Boolean.parseBoolean(closeLauncherAfterGameStart));
+        launcherSettings.gameDirectory.set(gameDirectory);
+        launcherSettings.gameDataDirectory.set(gameDataDirectory);
+        launcherSettings.keepDownloadedFiles.set(Boolean.parseBoolean(saveDownloadedFiles));
+        launcherSettings.userJavaParameters.setAll(userJavaParameters);
+        launcherSettings.userGameParameters.setAll(userGameParameters);
+        launcherSettings.logLevel.set(Level.valueOf(logLevel));
 
         assertPropertiesEqual();
     }
@@ -161,7 +159,7 @@ class TestLauncherSettings {
         // Second object so as not to rely on instance identity.
         GameIdentifier expectedId = new GameIdentifier(displayVersion, Build.NIGHTLY, Profile.OMEGA);
 
-        launcherSettings.setLastPlayedGameVersion(id);
-        assertEquals(Optional.of(expectedId), launcherSettings.getLastPlayedGameVersion());
+        launcherSettings.lastPlayedGameVersion.set(id);
+        assertEquals(expectedId, launcherSettings.lastPlayedGameVersion.get());
     }
 }
