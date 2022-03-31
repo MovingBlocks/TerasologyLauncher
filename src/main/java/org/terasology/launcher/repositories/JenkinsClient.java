@@ -36,6 +36,12 @@ class JenkinsClient {
     JenkinsClient(OkHttpClient httpClient, Gson gson) {
         this.gson = gson;
 
+        // We have to work around some inconvenience with our own Jenkins by tweaking the cache control headers a bit.
+        // The 'Expires' header would cause the 'versionInfo.properties' file to be fetched each and every time again.
+        // To prevent this, we use an OkHttp Interceptor to remove the 'Expires' header and replace it with a custom
+        // 'Cache-control' header.
+        //
+        // See https://square.github.io/okhttp/features/interceptors/
         var interceptor = new Interceptor() {
             @Override
             public Response intercept(Interceptor.Chain chain) throws IOException {
