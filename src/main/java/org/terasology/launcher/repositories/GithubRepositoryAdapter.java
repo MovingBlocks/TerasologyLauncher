@@ -5,7 +5,6 @@ package org.terasology.launcher.repositories;
 
 import com.vdurmont.semver4j.Semver;
 import com.vdurmont.semver4j.SemverException;
-import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;
@@ -23,8 +22,6 @@ import org.terasology.launcher.model.ReleaseMetadata;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
