@@ -89,7 +89,6 @@ class JenkinsClient {
 
         try (var response = client.newCall(request).execute()) {
             logger.debug("{}{}", response.request().url(), response.cacheResponse() != null ? " (cached)" : "");
-            //logger.debug("{}", response.headers());
             final Properties properties = new Properties();
             properties.load(response.body().charStream());
             return properties;
