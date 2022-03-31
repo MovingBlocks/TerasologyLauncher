@@ -143,6 +143,9 @@ dependencies {
     testImplementation('com.github.gmazzo:okhttp-mock:1.5.0') {
         because "to easily write OkHttpClient interceptors for testing"
     }
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.3") {
+        because "to control server responses for testing"
+    }
 
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
     codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.5.1', ext: 'zip'

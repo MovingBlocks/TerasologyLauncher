@@ -6,7 +6,11 @@ package org.terasology.launcher.repositories;
 import com.google.gson.Gson;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.mock.MockInterceptor;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -67,5 +73,65 @@ class JenkinsClientTest {
         final JenkinsClient client = new JenkinsClient(httpClient, new Gson());
 
         assertNull(client.request(urlToInvalidPayload));
+    }
+
+    @Test
+    @DisplayName("should tweak requests with 'PropertiesRequest' tag to remove 'Expires' and set 'Cache-control' header")
+    void httpClientInterceptsHeadersForPropertiesRequests() throws IOException {
+        MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().addHeader("Expires", new Date(0L)));
+        server.start();
+
+        // create simple JenkinsClient for testing
+        final Gson gson = new Gson();
+        final OkHttpClient httpClient = new OkHttpClient();
+        final JenkinsClient jenkinsClient = new JenkinsClient(httpClient, gson);
+
+        // the unit under test
+        OkHttpClient client = jenkinsClient.client;
+
+        var request = new Request.Builder()
+                .url(server.url("/build/1337/versionInfo.properties"))
+                .tag(JenkinsClient.PropertiesRequest.class, new JenkinsClient.PropertiesRequest())
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertNull(response.header("Expires"));
+        assertEquals("max-age=2592000", response.header("Cache-control"));
+        assertEquals(2, response.headers().size(),
+                "should only contain 'Content-length' (default) and 'Cache-control' headers, but was: " + response.headers().toString());
+
+        // Shut down the server. Instances cannot be reused.
+        server.shutdown();
+    }
+
+    @Test
+    @DisplayName("should not tweak requests without 'PropertiesRequest' tag")
+    void httpClientDoesNotInterceptHeadersForNonPropertiesRequests() throws IOException {
+        MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().addHeader("Expires", new Date(0L)));
+        server.start();
+
+        // create simple JenkinsClient for testing
+        final Gson gson = new Gson();
+        final OkHttpClient httpClient = new OkHttpClient();
+        final JenkinsClient jenkinsClient = new JenkinsClient(httpClient, gson);
+
+        // the unit under test
+        OkHttpClient client = jenkinsClient.client;
+
+        var request = new Request.Builder()
+                .url(server.url("/build/1337/info"))
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertEquals("Thu Jan 01 01:00:00 CET 1970", response.header("Expires"));
+        assertEquals(2, response.headers().size(),
+                "should only contain 'Content-length' (default) and 'Expires' headers, but was: " + response.headers().toString());
+
+        // Shut down the server. Instances cannot be reused.
+        server.shutdown();
     }
 }

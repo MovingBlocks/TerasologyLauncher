@@ -31,7 +31,7 @@ class JenkinsClient {
 
     private final Gson gson;
 
-    private final OkHttpClient client;
+    final OkHttpClient client;
 
     JenkinsClient(OkHttpClient httpClient, Gson gson) {
         this.gson = gson;
@@ -78,6 +78,10 @@ class JenkinsClient {
         return null;
     }
 
+    // a) request for 'versionInfo.properties' have the PropertiesRequest tag
+    // b) request for other resources don't have it
+    // c) the 'Expires' header is removed from response for requests with PropertiesRequest
+
     @Nullable
     Properties requestProperties(final URL artifactUrl) {
         Preconditions.checkNotNull(artifactUrl);
@@ -118,5 +122,5 @@ class JenkinsClient {
         return null;
     }
 
-    private static final class PropertiesRequest { }
+    static final class PropertiesRequest { }
 }
