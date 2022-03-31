@@ -5,10 +5,13 @@ package org.terasology.launcher.repositories;
 
 import com.vdurmont.semver4j.Semver;
 import com.vdurmont.semver4j.SemverException;
+import okhttp3.OkHttpClient;
 import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.extras.okhttp3.OkHttpConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.model.Build;
@@ -31,9 +34,11 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
 
     private GitHub github;
 
-    public GithubRepositoryAdapter() {
+    public GithubRepositoryAdapter(final OkHttpClient httpClient) {
         try {
-            github = GitHub.connectAnonymously();
+            github = GitHubBuilder.fromEnvironment()
+                    .withConnector(new OkHttpConnector(httpClient))
+                    .build();
             logger.debug("Github rate limit: {}", github.getRateLimit());
         } catch (IOException e) {
             e.printStackTrace();
