@@ -57,10 +57,7 @@ class JenkinsClientTest {
 
         final var interceptor = new MockInterceptor();
         interceptor.addRule()
-                //TODO: I'd like to specify the URL here, but then matcher does not match.
-                //      Somehow, the matcher surrounds the expected URL with some weird characters.
-                //      expected=\Qhttps://jenkins.example\E;actual=https://jenkins.example/; matcher=url(~=\Qhttps://jenkins.example\E)
-                .get()
+                .get("https://jenkins.example/")
                 .respond("{ this is ] no json |[!");
 
         final var httpClient = new OkHttpClient.Builder()
