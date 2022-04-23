@@ -10,7 +10,7 @@ def jreUrlFilenames = [
         Windows64 : 'windows-amd64-full.zip',
         Windows32 : 'windows-i586-full.zip',
         WindowsArm: 'windows-aarch64-full.zip',
-        Mac       : 'macos-amd64-full.zip'
+        Mac       : 'macos-amd64-full.zip',
         MacArm    : 'macos-aarch64-full.zip'
 ]
 
