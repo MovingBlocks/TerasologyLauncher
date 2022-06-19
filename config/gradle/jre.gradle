@@ -7,7 +7,6 @@ def jdkVersion = '11.0.12+7' // jre version haven't jmod (needed for jlink/jpack
 def jreUrlFilenames = [
         Linux64   : 'linux-amd64-full.tar.gz',
         Windows64 : 'windows-amd64-full.zip',
-        Windows32 : 'windows-i586-full.zip',
         Mac       : 'macos-amd64-full.zip'
 ]
 
