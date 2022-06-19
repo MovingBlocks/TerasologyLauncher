@@ -18,16 +18,16 @@ buildscript {
 plugins {
     id 'application'
     id 'checkstyle'
-    id "com.github.spotbugs" version "4.0.4"
-    id 'de.undercouch.download' version '4.0.4'
+    id "com.github.spotbugs" version "5.0.8"
+    id 'de.undercouch.download' version '5.1.0'
     id 'java'
     // to help clarify conflicting logging providers
-    id 'name.remal.component-metadata' version '1.0.186'
-    id 'nebula.release' version '14.1.0'
+    id 'name.remal.component-metadata' version '1.5.0'
+    id 'nebula.release' version '16.0.0'
     id 'pmd'
     id 'project-report'
-    id 'org.openjfx.javafxplugin' version '0.0.8'
-    id "org.jetbrains.gradle.plugin.idea-ext" version "0.9"
+    id 'org.openjfx.javafxplugin' version '0.0.13'
+    id "org.jetbrains.gradle.plugin.idea-ext" version "1.1.5"
 }
 
 apply plugin: 'org.terasology.gradlegoo'
@@ -148,7 +148,7 @@ dependencies {
     }
 
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
-    codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.5.1', ext: 'zip'
+    codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.7.1', ext: 'zip'
 }
 
 configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation)Classpath/ }).all {
