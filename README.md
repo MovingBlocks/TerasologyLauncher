@@ -141,7 +141,7 @@ For more information on building and developing the Terasology Launcher, make su
 
 You'll need the following tools:
 
-- Java SE Development Kit (JDK) 8 with JavaFX. It may be possible to use a later version of the JDK for local development, but the CI will verify against this baseline version.
+- Java SE Development Kit (JDK) 11. It should be possible to use a later version of the JDK for local development, please see the definition of [push validation] for the exact CI setup.
 - Git to clone the repo and commit changes.
 
 Development is possible on all common platforms (Windows, Linux, MacOS) as long as the JDK with JavaFX is properly set up.
@@ -225,6 +225,7 @@ _Terasology Launcher_ is licensed under the [Apache License, Version 2.0][licens
 [latest-release]: https://github.com/MovingBlocks/TerasologyLauncher/releases/ "TerasologyLauncher (official releases)"
 [license]: http://www.apache.org/licenses/LICENSE-2.0.html "Apache License, Version 2.0"
 [contributing]: docs/CONTRIBUTING.md "CONTRIBUTING.md"
+[push validation]: .github/workflows/push-validation.yml
 
 [github movingblocks]: https://github.com/MovingBlocks/ "MovingBlocks"
 [github terasology]: https://github.com/MovingBlocks/Terasology/ "Terasology"
