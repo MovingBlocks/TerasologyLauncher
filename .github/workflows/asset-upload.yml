@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [linux64, mac, windows32, windows64]
+        platform: [linux64, mac, windows64]
       fail-fast: true
     steps:
       - name: Checkout repository
