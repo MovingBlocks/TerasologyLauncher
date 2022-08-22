@@ -3,7 +3,7 @@
 If you would like to contribute code, documentation, or other assets you can do so through GitHub by forking the repository and sending a pull request (PR).
 You can also simply report issues (bugs), but please search for any previous reports first.
 
-*When submitting code, please make every effort to follow existing conventions and style in order to keep the code as readable as possible.*
+_When submitting code, please make every effort to follow existing conventions and style in order to keep the code as readable as possible._
 
 Read on for an overview.
 For questions please join us in our [forum] or [Discord].
@@ -16,10 +16,10 @@ For finding easy to do issues to start with look at the [Good First Issue](https
 
 We prefer questions and support requests be posted in the [forum] or [Discord].
 
-__Please provide as much information as possible to help us solve problems and answer questions better!__
+**Please provide as much information as possible to help us solve problems and answer questions better!**
 
 [forum]: https://forum.terasology.org/forum/
-[Discord]: https://discord.gg/Terasology
+[discord]: https://discord.gg/Terasology
 
 ## PR Title / Commit Message Guidelines
 
@@ -28,7 +28,8 @@ This leads to **more readable messages** that are easy to follow when looking th
 But also, we use the git commit messages to **generate the TerasologyLauncher change log**.
 
 ### Commit Message Format
-Each commit message consists of a **header**, a **body** and a **footer**.  The header has a special
+
+Each commit message consists of a **header**, a **body** and a **footer**. The header has a special
 format that includes a **type**, a **scope** and a **subject**:
 
 ```
@@ -51,6 +52,7 @@ Samples: (even more [samples](https://github.com/angular/angular/commits/master)
 ```
 doc(changelog): update changelog to beta.5
 ```
+
 ```
 fix(release): need to depend on latest rxjs and zone.js
 
@@ -58,49 +60,56 @@ The version in our package.json gets copied to the one we publish, and users nee
 ```
 
 ### Revert
+
 If the commit reverts a previous commit, it should begin with `revert: `, followed by the header of the reverted commit.
 In the body it should say: `This reverts commit <hash>.`, where the hash is the SHA of the commit being reverted.
 
 ### Type
+
 Must be one of the following:
 
-* **build**: Changes that affect the build system or external dependencies (example scopes: gradle, git, idea)
-* **ci**: Changes to our CI configuration files and scripts (example scopes: Jenkins)
-* **doc**: Documentation only changes
-* **feat**: A new feature
-* **fix**: A bug fix for the game
-* **perf**: A code change that improves performance of the game
-* **refactor**: A code change that neither fixes a bug nor adds a feature
-* **style**: Changes that do not affect the meaning of the code (white-space, formatting, copyright, etc)
-* **test**: Adding missing tests or correcting existing tests
+- **build**: Changes that affect the build system or external dependencies (example scopes: gradle, git, idea)
+- **ci**: Changes to our CI configuration files and scripts (example scopes: Jenkins)
+- **doc**: Documentation only changes
+- **feat**: A new feature
+- **fix**: A bug fix for the game
+- **perf**: A code change that improves performance of the game
+- **refactor**: A code change that neither fixes a bug nor adds a feature
+- **style**: Changes that do not affect the meaning of the code (white-space, formatting, copyright, etc)
+- **test**: Adding missing tests or correcting existing tests
 
 ### Scope
-The scope  is optional.
+
+The scope is optional.
 It should describe the area of the code base this change affects.
 For instance, it may be the name of the package(s) affected (as perceived by the person reading the changelog generated from commit messages).
 The package prefix `org.terasology` should be omitted.
 
 Samples:
+
 ```
 feat(i18n): update translation for Sindarin
 
-fix(LauncherSettings): do not send a zero-length argument 
+fix(LauncherSettings): do not send a zero-length argument
 
 build(gradle): migrate all scripts to Kotlin
 ```
 
 ### Subject
+
 The subject contains a succinct description of the change:
 
-* use the imperative, present tense: "change" not "changed" nor "changes"
-* don't capitalize the first letter
-* no dot (.) at the end
+- use the imperative, present tense: "change" not "changed" nor "changes"
+- don't capitalize the first letter
+- no dot (.) at the end
 
 ### Body
+
 Just as in the **subject**, use the imperative, present tense: "change" not "changed" nor "changes".
 The body should include the motivation for the change and contrast this with previous behavior.
 
 ### Footer
+
 The footer should contain any information about **Breaking Changes** and is also the place to
 reference GitHub issues that this commit **Closes**.
 
@@ -118,7 +127,7 @@ If you are adding a new file it should have a header like this (automatically av
 ```java
 // Copyright 2022 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
- ```
+```
 
 ## How to Submit a Pull Request
 
@@ -132,17 +141,19 @@ Pull requests are highly appreciated! Please follow the simple guidelines below.
 1. Push your branch to your personal account and [create a pull request](https://help.github.com/articles/using-pull-requests/).
 1. Watch for comments or acceptance on your PR. The PR can be updated by just pushing to the original branch.
 
-__Please note:__ if you want to change multiple things that don't depend on each other, make sure you create a new branch off the main develop branch before making more changes - that way we can take in each change separately.
+**Please note:** if you want to change multiple things that don't depend on each other, make sure you create a new branch off the main develop branch before making more changes - that way we can take in each change separately.
 
 ## How to Merge a Pull Request
 
 For trusted contributors with push access to our root repos you are welcome to help merge pull requests.
 
 1. Consider what scope is suitable for the change being PRed.
-  * **Trivial**: If it is a single typo fix in a comment or other *inactive text* it can be merged without further review.
-  * **Patch**: Small bug fixes. Be careful: even a string value changed can have unexpected impact elsewhere if it gets used as a key somewhere, involved in our internationalization, etc. Consider any possible integrations (like our translation server) and test the change locally. Report any concerns in the PR or merge if all appears well.
-  * **Minor**: If substantial code is being changed/added please review as able and ping relevant contributors with `@username` to bring their attention to the PR for review. Probably one additional person should review then either person can merge.
-  * **Major**: If any involved code is likely to cause a backwards incompatibility of some sort the PR needs the most possible review as it would require a major release. Consider if it is possible to deprecate the old version of the feature and provide a bridge to the new version to restore backwards compatibility. Alternatively should the change be parked in a longer term branch waiting for the next major release?
+
+- **Trivial**: If it is a single typo fix in a comment or other _inactive text_ it can be merged without further review.
+- **Patch**: Small bug fixes. Be careful: even a string value changed can have unexpected impact elsewhere if it gets used as a key somewhere, involved in our internationalization, etc. Consider any possible integrations (like our translation server) and test the change locally. Report any concerns in the PR or merge if all appears well.
+- **Minor**: If substantial code is being changed/added please review as able and ping relevant contributors with `@username` to bring their attention to the PR for review. Probably one additional person should review then either person can merge.
+- **Major**: If any involved code is likely to cause a backwards incompatibility of some sort the PR needs the most possible review as it would require a major release. Consider if it is possible to deprecate the old version of the feature and provide a bridge to the new version to restore backwards compatibility. Alternatively should the change be parked in a longer term branch waiting for the next major release?
+
 1. React appropriately to the scope and test what seems appropriate locally. Remember to run local multiplayer if it seems likely the change could cause an effect there.
 1. If any issues are found or concerns noted mention them in the PR and ping anybody appropriate with a `@username` mention.
 1. If sufficient review has been done and no issues have been noted push the merged code to GitHub to auto-close the PR as merged.
