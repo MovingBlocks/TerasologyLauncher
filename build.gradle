@@ -59,7 +59,7 @@ ext {
     splashImage = 'org/terasology/launcher/images/splash.jpg'
 
     // Shared code analytics configurations via retrieved config zip
-    metricsConfigDir = 'config/metrics'
+    metricsConfigDir = layout.getProjectDirectory().dir('config/metrics')
 }
 
 // Declare remote repositories we're interested in - library files will be fetched from here
@@ -185,8 +185,7 @@ test {
 
 checkstyle {
     ignoreFailures = false
-    configFile = new File("$rootDir/config/metrics/checkstyle/checkstyle.xml")
-    configProperties.samedir = checkstyle.configFile.parentFile
+    configDirectory.set(metricsConfigDir.dir("checkstyle"))
 }
 
 pmd {
@@ -232,7 +231,7 @@ task extractCodeMetricsConfig(type: Copy) {
             zipTree(it)
         }
     }
-    into "$rootDir/$metricsConfigDir"
+    into metricsConfigDir
 }
 
 clean {
