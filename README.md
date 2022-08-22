@@ -152,7 +152,7 @@ Development is possible on all common platforms (Windows, Linux, MacOS).
 <summary>:nerd_face: Start developing</summary>
 <br>
     
-Familiarise yourself with Git's concept of repositories, branches, and commits. To get the latest changes from your remote repositories (e.g. `movingblocks`) you need to *fetch* all remote data via `git fetch --all`. This does not change your workspace, it just loads up your local Git database.
+Familiarise yourself with Git's concept of repositories, branches, and commits. To get the latest changes from remote repositories you need to *fetch* all remote data via `git fetch --all`. This does not change your workspace, it just loads up your local Git database.
 
 Apart from Git, basically everything can be done using the [Gradle][gradle] [wrapper][gradle wrapper]. The following list is an excerpt of some commonly used tasks.
 
@@ -183,9 +183,12 @@ Apart from Git, basically everything can be done using the [Gradle][gradle] [wra
   </tr>
 </table>
 
-Assume you have pushed some changes to your fork into a branch `myFeature`. In order to let us know about your work and give us the possibility to incorporate your changes you should send us a _pull request_. You can do this by selecting the `myFeature` branch on your GitHub repo and click the button which says "Open pull request".
+Assume you have pushed some changes to your fork into a branch `myFeature`.
+In order to let us know about your work and give us the possibility to incorporate your changes you should send us a _pull request_.
+You can do this by selecting the `myFeature` branch on your GitHub repo and click the button which says "Open pull request".
 
-More information on how to contribute can be found in [CONTRIBUTING.md][contributing]. Remember, that all submissions must be licensed under [Apache License, Version 2.0][license].
+More information on how to contribute can be found in [CONTRIBUTING.md][contributing].
+Remember, that all submissions must be licensed under [Apache License, Version 2.0][license].
 
 </details>
 
@@ -201,7 +204,7 @@ Tutorials and further information on Git:
 
 Developer setup tutorials for our main project, [**Terasology**][github terasology]:
 
-- [Dev Setup](https://github.com/MovingBlocks/Terasology/wiki/Dev-Setup)
+- [Contributor Quick Start Guide](https://github.com/MovingBlocks/Terasology/wiki/Contributor-Quick-Start)
 - [Dealing with Forks](https://github.com/MovingBlocks/Terasology/wiki/Dealing-with-Forks)
 
 </details>
@@ -214,7 +217,7 @@ This project uses
 
 - Font Awesome Icon for Webchat (`fa-comments`), CC BY 4.0 License, [Font Awesome Free License](https://fontawesome.com/license/free)
 - [Mark James' Flag Icons Pack](http://www.famfamfam.com/lab/icons/flags/)
-- [Bellsoft Liberica JRE 8](https://bell-sw.com/pages/java-8u232/) is bundled with the launcher
+- [Bellsoft Liberica JDK 11](https://bell-sw.com/pages/downloads/#/java-11-lts) is bundled with the launcher
 
 ## License [![](https://img.shields.io/github/license/MovingBlocks/TerasologyLauncher)][license]
 
