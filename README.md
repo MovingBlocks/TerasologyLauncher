@@ -93,7 +93,8 @@ The suggested default is in the user's home directory.
 
 ![Terasology Launcher UI](docs/images/200314_TerasologyLauncher_UI.png)
 
-The *Terasology Launcher UI* provides functionality to download, start, and delete different game versions. The game versions are grouped by the type of build they belong to:
+The *Terasology Launcher UI* provides functionality to download, start, and delete different game versions.
+The game versions are grouped by the type of build they belong to:
 
 <table align="center">
   <thead align="left"><tr>
@@ -103,22 +104,15 @@ The *Terasology Launcher UI* provides functionality to download, start, and dele
   <tr>
     <td width="40%"><b>Terasology</b></td>
     <td width="60%">Released version of Terasology core game bundled with modules</td>
-  </tr>
-  <tr>
-    <td width="40%"><b>Terasology (nightly)</b></td>
-    <td width="60%">Development build of Terasology core game bundled with modules</td>
-  </tr>
+  </tr>  
   <tr>
     <td width="40%"><b>Terasology Lite</b></td>
     <td width="60%">Released version of Terasology core game only</td>
   </tr>
-  <tr>
-    <td width="40%"><b>Terasology Lite (nightly)</b></td>
-    <td width="60%">Development build of Terasology core game only</td>
-  </tr>
 </table>
 
-In addition to this main functionality, the UI displays information about new changes of the selected game version ("Changelog"), launcher information concerning changes, licensing and contribution guidelines ("About"), and logging data for the current launcher execution. Further, you have access to the social media representation of _Terasology_.
+In addition to this main functionality, the UI displays information about new changes of the selected game version ("Changelog"), launcher information concerning changes, licensing and contribution guidelines ("About"), and logging data for the current launcher execution.
+Further, you have access to the social media representation of _Terasology_.
 
 ![Terasology Launcher Settings UI](docs/images/200314_TerasologyLauncher_UI-settings.png)
 
