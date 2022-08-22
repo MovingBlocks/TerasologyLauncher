@@ -36,10 +36,6 @@ We are present in nearly the complete round-up of social networks. Follow/friend
         <img src="./src/main/resources/org/terasology/launcher/images/discord.png" width="48px"/>
     </a>
     &nbsp;&nbsp;&nbsp;&nbsp;
-    <a title="IRC Webchat" href="http://webchat.freenode.net/?channels=terasology&uio=d4?channels=%23terasology&nick=Terasologist...&prompt=1&useUserListIcons=true">
-        <img src="./src/main/resources/org/terasology/launcher/images/webchat.png" width="48px"/>
-    </a>
-    &nbsp;&nbsp;&nbsp;&nbsp;
     <a title="Twitter" href="https://twitter.com/Terasology">
     <img src="./src/main/resources/org/terasology/launcher/images/twitter.png" width="48px"/>
     </a>
