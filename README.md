@@ -144,7 +144,7 @@ You'll need the following tools:
 - Java SE Development Kit (JDK) 11. It should be possible to use a later version of the JDK for local development, please see the definition of [push validation] for the exact CI setup.
 - Git to clone the repo and commit changes.
 
-Development is possible on all common platforms (Windows, Linux, MacOS) as long as the JDK with JavaFX is properly set up.
+Development is possible on all common platforms (Windows, Linux, MacOS).
 
 </details>
 
