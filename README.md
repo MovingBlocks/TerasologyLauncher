@@ -126,13 +126,14 @@ You can set the launcher language and decide whether the launcher should search 
 
 ## Development
 
-To be able to run **TerasologyLauncher** from source follow these steps. This guide is designed for [IntelliJ IDEA][intellij] (you can use the free community edition), but alternative setups are possible.
+To be able to run **TerasologyLauncher** from source follow these steps.
+This guide is designed for [IntelliJ IDEA][intellij] (you can use the free community edition), but alternative setups are possible.
 
 <details closed>
 <summary>:octocat: Get Ready</summary>
 <br>
 
-To contribute to this repo, please open a [pull request][github forking] from your fork of this repository.
+To contribute to this repo, please open a [pull request][github guide] from your fork of this repository.
 
 For more information on building and developing the Terasology Launcher, make sure to read the rest of this README and [CONTRIBUTING.md][contributing].
 
@@ -233,4 +234,5 @@ _Terasology Launcher_ is licensed under the [Apache License, Version 2.0][licens
 [gradle]: http://gradle.org "Gradle"
 [gradle wrapper]: http://gradle.org/docs/current/userguide/gradle_wrapper.html "Gradle Wrapper"
 [intellij]: http://www.jetbrains.com/idea/ "IntelliJ IDEA"
-[github forking]: https://guides.github.com/activities/forking/ "GitHub Forking Guide"
+
+[github guide]: https://docs.github.com/en/get-started/quickstart/contributing-to-projects "GitHub Contributing to projects"
