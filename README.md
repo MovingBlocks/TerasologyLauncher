@@ -84,10 +84,12 @@ We are present in nearly the complete round-up of social networks. Follow/friend
 
 ## Features
 
-On first start-up, the _Terasology Launcher_ will prompt you with the selection of the _Terasology_ installation and data directories.
-The *installation directory* is the application directory of _Terasology_ and contains downloaded and extracted game packages.
+The *launcher installation directory* is the folder you extracted the launcher archive to.
+This directory will also hold different versions of _Terasology_ that are installed via the launcher.
+
+On first start-up, the _Terasology Launcher_ will prompt you with the selection of the _Terasology_ data directory.
 The *data directory* is the place for configuration data and user-specific files such as key bindings and save games.
-Note, that these directories are different from the *launcher installation directory*, which is the folder you extracted the launcher archive to.
+The suggested default is in the user's home directory.
 
 ![Terasology Launcher UI](docs/images/200314_TerasologyLauncher_UI.png)
 
