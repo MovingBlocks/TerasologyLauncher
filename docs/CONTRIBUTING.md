@@ -12,9 +12,9 @@ For questions please join us in our [forum] or [Discord].
 
 You can report bugs and feature requests to [GitHub Issues](https://github.com/MovingBlocks/TerasologyLauncher/issues). As mentioned please look for a similar existing issue before submitting a new one.
 
-For finding easy to do issues to start with look at the [Good First Issue](https://github.com/MovingBlocks/TerasologyLauncher/labels/Good%20First%20Issue) issues.
+For finding easy to do issues to start with, look at the [Good First Issue](https://github.com/MovingBlocks/TerasologyLauncher/labels/Good%20First%20Issue) issues.
 
-We prefer questions and support requests be posted in the [forum] or [Discord].
+We prefer questions and support requests to be posted on [Discord].
 
 **Please provide as much information as possible to help us solve problems and answer questions better!**
 

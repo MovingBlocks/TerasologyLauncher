@@ -89,7 +89,7 @@ This directory will also hold different versions of _Terasology_ that are instal
 
 On first start-up, the _Terasology Launcher_ will prompt you with the selection of the _Terasology_ data directory.
 The *data directory* is the place for configuration data and user-specific files such as key bindings and save games.
-The suggested default is in the user's home directory.
+The suggested default is a new directory in the user's home directory.
 
 ![Terasology Launcher UI](docs/images/200314_TerasologyLauncher_UI.png)
 
