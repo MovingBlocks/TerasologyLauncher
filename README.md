@@ -84,7 +84,7 @@ We are present in nearly the complete round-up of social networks. Follow/friend
 
 ## Features
 
-The *launcher installation directory* is the folder you extracted the launcher archive to.
+The *launcher installation directory* is the folder you extracted the launcher archive into.
 This directory will also hold different versions of _Terasology_ that are installed via the launcher.
 
 On first start-up, the _Terasology Launcher_ will prompt you with the selection of the _Terasology_ data directory.
