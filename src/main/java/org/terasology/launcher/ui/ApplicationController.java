@@ -28,7 +28,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -44,13 +43,11 @@ import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
 import org.terasology.launcher.repositories.RepositoryManager;
-import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
 import org.terasology.launcher.tasks.DownloadTask;
-import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.HostServices;
-import org.terasology.launcher.util.Languages;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -240,23 +237,16 @@ public class ApplicationController {
      * are not managed "disappear" from the scene.
      */
     private void initButtons() {
-        cancelDownloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_cancelDownload")));
         cancelDownloadButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.CANCEL, gameAction));
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
 
-        startButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_start")));
         startButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.PLAY, gameAction));
         startButton.managedProperty().bind(startButton.visibleProperty());
 
-        downloadButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_download")));
         downloadButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> gameAction.getValue() == GameAction.DOWNLOAD, gameAction));
         downloadButton.managedProperty().bind(downloadButton.visibleProperty());
 
-        deleteButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_delete")));
         deleteButton.disableProperty().bind(startButton.visibleProperty().not());
-
-        settingsButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_settings")));
-        exitButton.setTooltip(new Tooltip(BundleUtils.getLabel("launcher_exit")));
     }
 
     /**
@@ -265,9 +255,9 @@ public class ApplicationController {
      * are absent/empty
      */
     private void setLabelStrings() {
-        changelogTab.setText(BundleUtils.getLabel("tab_changelog"));
-        aboutTab.setText(BundleUtils.getLabel("tab_about"));
-        logTab.setText(BundleUtils.getLabel("tab_log"));
+        changelogTab.textProperty().bind(I18N.labelBinding("tab_changelog"));
+        aboutTab.textProperty().bind(I18N.labelBinding("tab_about"));
+        logTab.textProperty().bind(I18N.labelBinding("tab_log"));
     }
 
     @SuppressWarnings("checkstyle:HiddenField")
@@ -309,6 +299,13 @@ public class ApplicationController {
             warning.setValue(Optional.empty());
         }
         footerController.setHostServices(hostServices);
+
+        cancelDownloadButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_cancelDownload")));
+        startButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_start")));
+        downloadButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_download")));
+        deleteButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_delete")));
+        settingsButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_settings")));
+        exitButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_exit")));
     }
 
     @FXML
@@ -333,7 +330,7 @@ public class ApplicationController {
     @FXML
     protected void openSettingsAction() {
         try {
-            logger.info("Current Locale: {}", Languages.getCurrentLocale());
+            logger.info("Current Locale: {}", I18N.getCurrentLocale());
             Stage settingsStage = new Stage(StageStyle.UNDECORATED);
             settingsStage.initModality(Modality.APPLICATION_MODAL);
 
@@ -341,11 +338,12 @@ public class ApplicationController {
             Parent root;
             /* Fall back to default language if loading the FXML file files with the current locale */
             try {
-                fxmlLoader = BundleUtils.getFXMLLoader("settings");
+                fxmlLoader = I18N.getFXMLLoader("settings");
                 root = fxmlLoader.load();
             } catch (IOException e) {
-                fxmlLoader = BundleUtils.getFXMLLoader("settings");
-                fxmlLoader.setResources(ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", Languages.DEFAULT_LOCALE));
+                fxmlLoader = I18N.getFXMLLoader("settings");
+                //FIXME whut?
+                fxmlLoader.setResources(ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", I18N.getDefaultLocale()));
                 root = fxmlLoader.load();
             }
 
@@ -364,7 +362,7 @@ public class ApplicationController {
     protected void startGameAction() {
         if (gameService.isRunning()) {
             logger.debug("The game can not be started because another game is already running.");
-            Dialogs.showInfo(stage, BundleUtils.getLabel("message_information_gameRunning"));
+            Dialogs.showInfo(stage, I18N.getLabel("message_information_gameRunning"));
             return;
         }
         final GameRelease release = selectedRelease.getValue();
@@ -375,7 +373,7 @@ public class ApplicationController {
             // TODO: Refresh the list of installed games or something? This should not be reachable if
             //     the properties are up to date.
             logger.warn("Failed to get an installation for selection {}", release, e);
-            Dialogs.showError(stage, BundleUtils.getMessage("message_error_installationNotFound", release));
+            Dialogs.showError(stage, I18N.getMessage("message_error_installationNotFound", release));
             return;
         }
         gameService.start(installation, launcherSettings);
@@ -410,7 +408,7 @@ public class ApplicationController {
             logger.warn("Failed to locate tab pane.");
         }
 
-        Dialogs.showError(stage, BundleUtils.getLabel("message_error_gameStart"));
+        Dialogs.showError(stage, I18N.getLabel("message_error_gameStart"));
     }
 
     @FXML
@@ -444,8 +442,8 @@ public class ApplicationController {
         final Path gameDir = gameManager.getInstallDirectory(id);
 
         final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setContentText(BundleUtils.getMessage("confirmDeleteGame_withoutData", gameDir));
-        alert.setTitle(BundleUtils.getLabel("message_deleteGame_title"));
+        alert.setContentText(I18N.getMessage("confirmDeleteGame_withoutData", gameDir));
+        alert.setTitle(I18N.getLabel("message_deleteGame_title"));
         alert.initOwner(stage);
 
         alert.showAndWait()

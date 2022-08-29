@@ -16,7 +16,7 @@ import javafx.scene.input.MouseEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.model.LauncherVersion;
-import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.HostServices;
 
 import java.util.Optional;
@@ -39,7 +39,7 @@ public class FooterController {
     private void updateLabels() {
         final String launcherVersion = LauncherVersion.getInstance().getDisplayName();
         if (launcherVersion.isEmpty()) {
-            versionInfo.setText(BundleUtils.getLabel("launcher_versionInfo"));
+            versionInfo.setText(I18N.getLabel("launcher_versionInfo"));
         } else {
             versionInfo.setText(launcherVersion);
         }
@@ -85,32 +85,32 @@ public class FooterController {
 
     @FXML
     protected void openFacebook() {
-        hostServices.tryOpenUri(BundleUtils.getURI("terasology_facebook"));
+        hostServices.tryOpenUri(I18N.getURI("terasology_facebook"));
     }
 
     @FXML
     protected void openGithub() {
-        hostServices.tryOpenUri(BundleUtils.getURI("terasology_github"));
+        hostServices.tryOpenUri(I18N.getURI("terasology_github"));
     }
 
     @FXML
     protected void openDiscord() {
-        hostServices.tryOpenUri(BundleUtils.getURI("terasology_discord"));
+        hostServices.tryOpenUri(I18N.getURI("terasology_discord"));
     }
 
     @FXML
     protected void openReddit() {
-        hostServices.tryOpenUri(BundleUtils.getURI("terasology_reddit"));
+        hostServices.tryOpenUri(I18N.getURI("terasology_reddit"));
     }
 
     @FXML
     protected void openTwitter() {
-        hostServices.tryOpenUri(BundleUtils.getURI("terasology_twitter"));
+        hostServices.tryOpenUri(I18N.getURI("terasology_twitter"));
     }
 
     @FXML
     protected void openYoutube() {
-        hostServices.tryOpenUri(BundleUtils.getURI("terasology_youtube"));
+        hostServices.tryOpenUri(I18N.getURI("terasology_youtube"));
     }
 
     @FXML
@@ -122,7 +122,7 @@ public class FooterController {
     private void updateWarningButton(Optional<Warning> warning) {
         warningButton.setVisible(warning.isPresent());
         warning.ifPresent(w -> {
-            String msg = BundleUtils.getLabel(w.getMessageKey());
+            String msg = I18N.getLabel(w.getMessageKey());
             warningButton.setTooltip(new Tooltip(msg));
             logger.warn(msg);
         });
