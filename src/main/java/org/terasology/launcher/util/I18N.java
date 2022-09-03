@@ -93,7 +93,9 @@ public final class I18N {
         }
     }
 
-    public static ObjectProperty<Locale> localeProperty() { return locale; }
+    public static ObjectProperty<Locale> localeProperty() {
+        return locale;
+    }
 
     public static List<Locale> getSupportedLocales() {
         return supportedLocales;
