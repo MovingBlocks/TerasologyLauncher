@@ -1,5 +1,35 @@
 # Terasology Launcher - ChangeLog
 
+## 4.6.0 (2022-09-03)
+
+### 🚀 Features
+
+- #670 feat(i18n): Update Ukrainian language strings & fill in missing i18n (@rzats)
+- #668 feat: add request caching with OkHttp (@skaldarnar)
+- #667 feat: 1:1 migration from LauncherSettings >>> Settings (@skaldarnar)
+- #665 feat: prepare for JavaFX-property-based launcher settings (@skaldarnar)
+- #658 feat: hide pre-releases by default (@skaldarnar)
+
+### 🐛 Bug Fixes
+
+- #659 fix: pass JVM heap settings in correct order to GameStarter (@skaldarnar)
+
+### 🧰 Maintenance
+
+- #666 refactor: change API of Settings#load/store to use folder path (@skaldarnar)
+- #664 chore: pass LauncherConfiguration to ApplicationController#update (@skaldarnar)
+- #662 chore: merge BaseLauncherSettings into LauncherSettings (@skaldarnar)
+
+### 📚 Documentation
+
+- #676 doc: update documentation (@skaldarnar)
+
+### ⚙️ Logistics
+
+- #674 build(github): update actions (@skaldarnar)
+- #673 build!: remove 32-bit Windows build (@keturn)
+- #672 build: runtime upgrade to Java 11.0.16.1 (from 11.0.7) (@keturn)
+
 ## 4.5.0 (2021-08-29)
 
 ### 🚀 Features
@@ -370,3 +400,5 @@
 - Download, install and start the launcher (self updatable)
 - Supports multiple languages (english, german)
 - Displays many "Terasology"-related links
+Special thanks to everyone that contributed to this release:
+@keturn, @rzats, @skaldarnar.
