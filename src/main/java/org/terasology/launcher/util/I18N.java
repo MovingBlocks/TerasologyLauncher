@@ -3,6 +3,8 @@
 
 package org.terasology.launcher.util;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -40,6 +42,10 @@ public final class I18N {
     private static final ObjectProperty<Locale> locale;
     private static final List<Locale> supportedLocales;
 
+    /**
+     * Build up an index of missing translation to make sure we only log them once per launcher run.
+     */
+    private static final Multimap<String, Locale> missingTranslations = ArrayListMultimap.create();
 
     static {
         final Locale czech = new Locale("cs");
@@ -107,16 +113,19 @@ public final class I18N {
     }
 
     public static String getLabel(Locale locale, String key) {
-        try {
-            String label = ResourceBundle.getBundle(LABELS_BUNDLE, locale).getString(key);
-            if (label.length() == 0) {
-                throw new IllegalArgumentException();
+        if (!missingTranslations.containsEntry(key, locale)) {
+            try {
+                String label = ResourceBundle.getBundle(LABELS_BUNDLE, locale).getString(key);
+                if (label.length() == 0) {
+                    throw new IllegalArgumentException();
+                }
+                return label;
+            } catch (MissingResourceException | IllegalArgumentException e) {
+                logger.warn("Missing label translation! locale={}, key={}", locale, key);
+                missingTranslations.put(key, locale);
             }
-            return label;
-        } catch (MissingResourceException | IllegalArgumentException e) {
-            logger.error("Missing label translation! key={}, locale={}", key, locale);
-            return ResourceBundle.getBundle(LABELS_BUNDLE, getDefaultLocale()).getString(key);
         }
+        return ResourceBundle.getBundle(LABELS_BUNDLE, getDefaultLocale()).getString(key);
     }
 
     public static Binding<String> labelBinding(String key) {
