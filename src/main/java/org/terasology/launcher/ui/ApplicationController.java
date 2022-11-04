@@ -178,7 +178,7 @@ public class ApplicationController {
     private void initComboBoxes() {
         profileComboBox.setCellFactory(list -> new GameProfileCell());
         profileComboBox.setButtonCell(new GameProfileCell());
-        profileComboBox.setItems(FXCollections.observableList(Arrays.asList(Profile.values().clone())));
+        profileComboBox.setItems(FXCollections.observableList(Arrays.asList(Profile.OMEGA)));
         ReadOnlyObjectProperty<Profile> selectedProfile = profileComboBox.getSelectionModel().selectedItemProperty();
         // control what game release is selected when switching profiles. this is a reaction to a change of the selected
         // profile to perform a one-time action to select a game release. afterwards, the user is in control of what is
