@@ -193,6 +193,14 @@ Remember, that all submissions must be licensed under [Apache License, Version 2
 </details>
 
 <details closed>
+<summary>:flags: Translation</summary>
+<br>
+
+If you want to contribute by translating the Terasology Launcher to a new language or by improving an existing translation check out the [Translation Guide](./docs/i18n.md).
+
+</details>
+
+<details closed>
 <summary>:books: Related Resources</summary>
 <br>
 
