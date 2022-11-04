@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.terasology.launcher.model.GameIdentifier;
+import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.Languages;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -105,13 +105,14 @@ public class LauncherSettings {
     void initLocale() {
         final String localeStr = properties.getProperty(PROPERTY_LOCALE);
         if (localeStr != null) {
-            Languages.init(localeStr);
+            Locale l = I18N.getSupportedLocales().stream().filter(x -> x.toLanguageTag().equals(localeStr)).findFirst().orElse(I18N.getDefaultLocale());
+            I18N.setLocale(l);
 
-            if (!Languages.getCurrentLocale().toString().equals(localeStr)) {
+            if (!I18N.getCurrentLocale().toString().equals(localeStr)) {
                 logger.warn(WARN_MSG_INVALID_VALUE, localeStr, PROPERTY_LOCALE);
             }
         }
-        properties.setProperty(PROPERTY_LOCALE, Languages.getCurrentLocale().toString());
+        properties.setProperty(PROPERTY_LOCALE, I18N.getCurrentLocale().toString());
     }
 
     void initMaxHeapSize() {

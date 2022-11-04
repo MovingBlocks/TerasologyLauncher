@@ -28,9 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.model.LauncherVersion;
 import org.terasology.launcher.ui.ApplicationController;
-import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.HostServices;
-import org.terasology.launcher.util.Languages;
 import org.terasology.launcher.util.LauncherStartFailedException;
 
 import java.io.IOException;
@@ -58,14 +57,14 @@ public final class TerasologyLauncher extends Application {
 
     @Override
     public void init() {
-        ImageView splash = new ImageView(BundleUtils.getFxImage("splash"));
+        ImageView splash = new ImageView(I18N.getFxImage("splash"));
         loadProgress = new ProgressBar();
         loadProgress.setPrefWidth(SPLASH_WIDTH);
         progressText = new Label();
         splashLayout = new VBox();
         splashLayout.getChildren().addAll(splash, loadProgress, progressText);
         progressText.setAlignment(Pos.CENTER);
-        splashLayout.getStylesheets().add(BundleUtils.getStylesheet("css_splash"));
+        splashLayout.getStylesheets().add(I18N.getStylesheet("css_splash"));
         splashLayout.setEffect(new DropShadow());
         hostServices = new HostServices();
     }
@@ -76,7 +75,6 @@ public final class TerasologyLauncher extends Application {
         logSystemInformation();
 
         initProxy();
-        initLanguage();
 
         final Task<LauncherConfiguration> launcherInitTask = new LauncherInitTask(initialStage, hostServices);
 
@@ -126,18 +124,18 @@ public final class TerasologyLauncher extends Application {
         Parent root;
         /* Fall back to default language if loading the FXML file fails with the current locale */
         try {
-            fxmlLoader = BundleUtils.getFXMLLoader("application");
+            fxmlLoader = I18N.getFXMLLoader("application");
             root = (Parent) fxmlLoader.load();
         } catch (IOException e) {
-            fxmlLoader = BundleUtils.getFXMLLoader("application");
-            fxmlLoader.setResources(ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", Languages.DEFAULT_LOCALE));
+            fxmlLoader = I18N.getFXMLLoader("application");
+            fxmlLoader.setResources(ResourceBundle.getBundle("org.terasology.launcher.bundle.LabelsBundle", I18N.getDefaultLocale()));
             root = (Parent) fxmlLoader.load();
         }
         final ApplicationController controller = fxmlLoader.getController();
         controller.update(launcherConfiguration, mainStage, hostServices);
 
         Scene scene = new Scene(root);
-        scene.getStylesheets().add(BundleUtils.getStylesheet("css_terasology"));
+        scene.getStylesheets().add(I18N.getStylesheet("css_terasology"));
 
         decorateStage(mainStage);
 
@@ -196,12 +194,6 @@ public final class TerasologyLauncher extends Application {
         }
     }
 
-    private void initLanguage() {
-        logger.trace("Init Languages...");
-        Languages.init();
-        logger.debug("Language: {}", Languages.getCurrentLocale());
-    }
-
     /**
      * Adds title and icons to a stage.
      *
@@ -213,7 +205,7 @@ public final class TerasologyLauncher extends Application {
 
         for (String id : iconIds) {
             try {
-                Image image = BundleUtils.getFxImage(id);
+                Image image = I18N.getFxImage(id);
                 stage.getIcons().add(image);
             } catch (MissingResourceException e) {
                 logger.warn("Could not load icon image", e);

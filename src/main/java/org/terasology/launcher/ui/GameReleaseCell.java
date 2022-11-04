@@ -9,7 +9,7 @@ import javafx.scene.image.ImageView;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
-import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.I18N;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -19,7 +19,7 @@ import java.util.Set;
  * Custom {@link ListCell} used to display a {@link GameRelease} along with its installation status.
  */
 final class GameReleaseCell extends ListCell<GameRelease> {
-    private static final Image ICON_CHECK = BundleUtils.getFxImage("icon_check");
+    private static final Image ICON_CHECK = I18N.getFxImage("icon_check");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 
     private final ImageView iconStatus;
