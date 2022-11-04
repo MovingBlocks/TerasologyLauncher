@@ -3,8 +3,6 @@
 
 package org.terasology.launcher.util;
 
-import javafx.beans.binding.Binding;
-
 public enum JavaHeapSize {
 
     NOT_USED("", "heapsize_notUsed"),

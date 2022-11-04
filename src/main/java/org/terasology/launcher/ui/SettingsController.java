@@ -278,8 +278,8 @@ public class SettingsController {
                 ? Arrays.copyOfRange(JavaHeapSize.values(), 0, JavaHeapSize.GB_1_5.ordinal() + 1)
                 : JavaHeapSize.values();
 
-        maxHeapSizeBox.getItems().clear();
         initialHeapSizeBox.getItems().clear();
+        maxHeapSizeBox.getItems().clear();
 
         initialHeapSizeBox.setButtonCell(new MemorySizeCell());
         maxHeapSizeBox.setButtonCell(new MemorySizeCell());
