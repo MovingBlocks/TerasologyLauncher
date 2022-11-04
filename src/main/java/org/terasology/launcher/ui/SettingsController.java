@@ -273,18 +273,25 @@ public class SettingsController {
     }
 
     private void populateHeapSize() {
-        maxHeapSizeBox.getItems().clear();
-        initialHeapSizeBox.getItems().clear();
-
         // Limit items till 1.5 GB for 32-bit JVM
         final JavaHeapSize[] heapSizeRange = System.getProperty("os.arch").equals("x86")
                 ? Arrays.copyOfRange(JavaHeapSize.values(), 0, JavaHeapSize.GB_1_5.ordinal() + 1)
                 : JavaHeapSize.values();
 
+        maxHeapSizeBox.getItems().clear();
+        initialHeapSizeBox.getItems().clear();
+
+        initialHeapSizeBox.setButtonCell(new MemorySizeCell());
+        maxHeapSizeBox.setButtonCell(new MemorySizeCell());
+
+        initialHeapSizeBox.setCellFactory(param -> new MemorySizeCell());
+        maxHeapSizeBox.setCellFactory(param -> new MemorySizeCell());
+
         for (JavaHeapSize heapSize : heapSizeRange) {
             maxHeapSizeBox.getItems().add(heapSize);
             initialHeapSizeBox.getItems().add(heapSize);
         }
+
         updateHeapSizeSelection();
     }
 
@@ -392,6 +399,19 @@ public class SettingsController {
                 } catch (NullPointerException e) {
                     logger.warn("Flag icon in ImageBundle key {} missing or corrupt", id);
                 }
+            }
+        }
+    }
+
+    private static class MemorySizeCell extends ListCell<JavaHeapSize> {
+        @Override
+        protected void updateItem(JavaHeapSize item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                this.textProperty().unbind();
+                this.setText(null);
+            } else {
+                this.textProperty().bind(I18N.labelBinding(item.getLabelKey()));
             }
         }
     }
