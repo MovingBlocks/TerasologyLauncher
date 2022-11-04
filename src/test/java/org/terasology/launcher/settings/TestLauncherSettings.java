@@ -10,14 +10,13 @@ import org.slf4j.event.Level;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.Profile;
+import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.Languages;
 
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -113,7 +112,7 @@ class TestLauncherSettings {
 
         launcherSettings = Settings.getDefault();
 
-        assertEquals(launcherSettings.locale.get(), Languages.DEFAULT_LOCALE);
+        assertEquals(launcherSettings.locale.get(), I18N.getDefaultLocale());
         assertEquals(launcherSettings.maxHeapSize.get(), LauncherSettings.MAX_HEAP_SIZE_DEFAULT);
         assertEquals(launcherSettings.minHeapSize.get(), LauncherSettings.INITIAL_HEAP_SIZE_DEFAULT);
         assertEquals(launcherSettings.closeLauncherAfterGameStart.get(), LauncherSettings.CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT);

@@ -44,8 +44,12 @@ public enum JavaHeapSize {
         return sizeParameter;
     }
 
+    public String getLabelKey() {
+        return labelKey;
+    }
+
     @Override
     public final String toString() {
-        return BundleUtils.getLabel(labelKey);
+        return I18N.getLabel(labelKey);
     }
 }

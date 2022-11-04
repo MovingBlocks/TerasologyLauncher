@@ -10,7 +10,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 
@@ -65,15 +65,15 @@ public final class Dialogs {
     }
 
     public static void showWarning(Stage owner, String message) {
-        showMessageDialog(Alert.AlertType.WARNING, BundleUtils.getLabel("message_error_title"), message, owner);
+        showMessageDialog(Alert.AlertType.WARNING, I18N.getLabel("message_error_title"), message, owner);
     }
 
     public static void showError(Stage owner, String message) {
-        showMessageDialog(Alert.AlertType.ERROR, BundleUtils.getLabel("message_error_title"), message, owner);
+        showMessageDialog(Alert.AlertType.ERROR, I18N.getLabel("message_error_title"), message, owner);
     }
 
     public static void showInfo(Stage owner, String message) {
-        showMessageDialog(Alert.AlertType.INFORMATION, BundleUtils.getLabel("message_information_title"), message, owner);
+        showMessageDialog(Alert.AlertType.INFORMATION, I18N.getLabel("message_information_title"), message, owner);
     }
 
     public static Path chooseDirectory(Stage owner, final Path defaultDirectory, final String title) {

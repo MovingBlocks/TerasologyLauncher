@@ -22,8 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.terasology.launcher.model.GameIdentifier;
+import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.Languages;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -39,7 +39,7 @@ import java.util.Properties;
 
 //TODO: should this be called `SettingsController` and also carry out some UI handling, e.g., displaying error messages
 //      to the user?
-public final class Settings {
+public final class  Settings {
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);
 
     private static final String LEGACY_FILE_NAME = "TerasologyLauncherSettings.properties";
@@ -71,7 +71,7 @@ public final class Settings {
     public final ListProperty<String> userGameParameters;
 
     Settings() {
-        locale = new SimpleObjectProperty<>(Languages.getCurrentLocale());
+        locale = new SimpleObjectProperty<>(I18N.getCurrentLocale());
         maxHeapSize = new SimpleObjectProperty<>(JavaHeapSize.NOT_USED);
         minHeapSize = new SimpleObjectProperty<>(JavaHeapSize.NOT_USED);
         logLevel = new SimpleObjectProperty<>(Level.INFO);
