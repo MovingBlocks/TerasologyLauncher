@@ -13,6 +13,9 @@ buildscript {
         mavenCentral()
         gradlePluginPortal()
     }
+    configurations.classpath {
+        resolutionStrategy.activateDependencyLocking()
+    }
 }
 
 plugins {
@@ -44,6 +47,9 @@ def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
 
 configurations {
+    compileClasspath {
+        resolutionStrategy.activateDependencyLocking()
+    }
     codeMetrics
 }
 
