@@ -8,7 +8,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -46,13 +45,12 @@ import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
 import org.terasology.launcher.tasks.DownloadTask;
-import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.HostServices;
+import org.terasology.launcher.util.I18N;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -79,6 +77,8 @@ public class ApplicationController {
 
     private Stage stage;
 
+    private Property<LauncherConfiguration> config;
+
     private Property<GameRelease> selectedRelease;
     private Property<GameAction> gameAction;
     private BooleanProperty downloading;
@@ -91,8 +91,6 @@ public class ApplicationController {
      */
     private final Property<Optional<Warning>> warning;
 
-    @FXML
-    private ComboBox<Profile> profileComboBox;
     @FXML
     private ComboBox<GameRelease> gameReleaseComboBox;
     @FXML
@@ -130,6 +128,8 @@ public class ApplicationController {
         gameService.setOnFailed(this::handleRunFailed);
         gameService.valueProperty().addListener(this::handleRunStarted);
 
+        config = new SimpleObjectProperty<>();
+
         downloading = new SimpleBooleanProperty(false);
         showPreReleases = new SimpleBooleanProperty(false);
 
@@ -163,6 +163,37 @@ public class ApplicationController {
         initComboBoxes();
         initButtons();
         setLabelStrings();
+
+        cancelDownloadButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_cancelDownload")));
+        startButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_start")));
+        downloadButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_download")));
+        deleteButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_delete")));
+        settingsButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_settings")));
+        exitButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_exit")));
+
+        // add Logback appender to both the root logger and the tab
+        Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        if (rootLogger instanceof ch.qos.logback.classic.Logger) {
+            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
+
+            logViewController.setContext(logbackLogger.getLoggerContext());
+            logViewController.start(); // CHECK: do I really need to start it manually here?
+            logbackLogger.addAppender(logViewController);
+        }
+
+        //TODO: This only updates when the launcher is initialized (which should happen exactly once o.O)
+        //      We should update this value at least every time the download directory changes (user setting).
+        //      Ideally, we would check periodically for disk space.
+        warning.bind(Bindings.createObjectBinding(() -> {
+            logger.info("Checking for remaining disk space ...");
+            LauncherConfiguration cfg = config.getValue();
+            if (cfg != null && cfg.getDownloadDirectory().toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
+                return Optional.of(Warning.LOW_ON_SPACE);
+            } else {
+                return Optional.empty();
+            }
+        }, config, installedGames));
+
     }
 
     /**
@@ -176,19 +207,15 @@ public class ApplicationController {
      * to the selected profile, and derive the currently selected release from the combo box's selection model.
      */
     private void initComboBoxes() {
-        profileComboBox.setCellFactory(list -> new GameProfileCell());
-        profileComboBox.setButtonCell(new GameProfileCell());
-        profileComboBox.setItems(FXCollections.observableList(Arrays.asList(Profile.values().clone())));
-        ReadOnlyObjectProperty<Profile> selectedProfile = profileComboBox.getSelectionModel().selectedItemProperty();
-        // control what game release is selected when switching profiles. this is a reaction to a change of the selected
-        // profile to perform a one-time action to select a game release. afterwards, the user is in control of what is
-        // selected
-        selectedProfile.addListener((obs, oldVal, newVal) -> {
+        // derive the releases to display from the selected profile (`selectedProfile`). the resulting list is ordered
+        // in the way the launcher is supposed to display the versions (currently by release timestamp).
+        config.addListener((obs, oldVal, cfg) -> {
             ObservableList<GameRelease> availableReleases = gameReleaseComboBox.getItems();
-            GameIdentifier lastPlayedGame = launcherSettings.lastPlayedGameVersion.get();
+            GameIdentifier lastPlayedGame = cfg.getLauncherSettings().lastPlayedGameVersion.get();
 
             Optional<GameRelease> lastPlayed = availableReleases.stream()
                     .filter(release -> release.getId().equals(lastPlayedGame))
+                    .filter(release -> installedGames.contains(release.getId()))
                     .findFirst();
             Optional<GameRelease> lastInstalled = availableReleases.stream()
                     .filter(release -> installedGames.contains(release.getId()))
@@ -200,20 +227,21 @@ public class ApplicationController {
                     .orElse(null));
         });
 
-        // derive the releases to display from the selected profile (`selectedProfile`). the resulting list is ordered
-        // in the way the launcher is supposed to display the versions (currently by release timestamp).
         final ObjectBinding<ObservableList<GameRelease>> releases = Bindings.createObjectBinding(() -> {
-            if (repositoryManager == null) {
+            LauncherConfiguration cfg = config.getValue();
+            if (cfg == null || cfg.getRepositoryManager() == null) {
                 return FXCollections.emptyObservableList();
+            } else {
+                RepositoryManager mngr = config.getValue().getRepositoryManager();
+                List<GameRelease> releasesForProfile =
+                        mngr.getReleases().stream()
+                                .filter(release -> release.getId().getProfile() == Profile.OMEGA)
+                                .filter(release -> showPreReleases.getValue() || release.getId().getBuild().equals(Build.STABLE))
+                                .sorted(ApplicationController::compareReleases)
+                                .collect(Collectors.toList());
+                return FXCollections.observableList(releasesForProfile);
             }
-            List<GameRelease> releasesForProfile =
-                    repositoryManager.getReleases().stream()
-                            .filter(release -> release.getId().getProfile() == selectedProfile.get())
-                            .filter(release -> showPreReleases.getValue() || release.getId().getBuild().equals(Build.STABLE))
-                            .sorted(ApplicationController::compareReleases)
-                            .collect(Collectors.toList());
-            return FXCollections.observableList(releasesForProfile);
-        }, selectedProfile, showPreReleases);
+        }, config, showPreReleases);
 
         gameReleaseComboBox.itemsProperty().bind(releases);
         gameReleaseComboBox.buttonCellProperty().bind(Bindings.createObjectBinding(() -> new GameReleaseCell(installedGames, true), installedGames));
@@ -262,6 +290,8 @@ public class ApplicationController {
 
     @SuppressWarnings("checkstyle:HiddenField")
     public void update(final LauncherConfiguration configuration, final Stage stage, final HostServices hostServices) {
+        this.config.setValue(configuration);
+
         this.launcherDirectory = configuration.getLauncherDirectory();
         this.launcherSettings = configuration.getLauncherSettings();
         this.showPreReleases.bind(launcherSettings.showPreReleases);
@@ -275,37 +305,7 @@ public class ApplicationController {
         // get notified if the installed games are changed from a different thread (DeleteTask or DownloadTask).
         Bindings.bindContent(installedGames, gameManager.getInstalledGames());
 
-        profileComboBox.getSelectionModel().select(
-                Optional.ofNullable(launcherSettings.lastPlayedGameVersion.get())
-                        .map(GameIdentifier::getProfile).orElse(Profile.OMEGA)
-        );
-
-        // add Logback appender to both the root logger and the tab
-        Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        if (rootLogger instanceof ch.qos.logback.classic.Logger) {
-            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
-
-            logViewController.setContext(logbackLogger.getLoggerContext());
-            logViewController.start(); // CHECK: do I really need to start it manually here?
-            logbackLogger.addAppender(logViewController);
-        }
-
-        //TODO: This only updates when the launcher is initialized (which should happen exactly once o.O)
-        //      We should update this value at least every time the download directory changes (user setting).
-        //      Ideally, we would check periodically for disk space.
-        if (configuration.getDownloadDirectory().toFile().getUsableSpace() <= MINIMUM_FREE_SPACE) {
-            warning.setValue(Optional.of(Warning.LOW_ON_SPACE));
-        } else {
-            warning.setValue(Optional.empty());
-        }
         footerController.setHostServices(hostServices);
-
-        cancelDownloadButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_cancelDownload")));
-        startButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_start")));
-        downloadButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_download")));
-        deleteButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_delete")));
-        settingsButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_settings")));
-        exitButton.setTooltip(I18N.createTooltip(I18N.labelBinding("launcher_exit")));
     }
 
     @FXML
@@ -416,7 +416,6 @@ public class ApplicationController {
         downloadTask = new DownloadTask(gameManager, selectedRelease.getValue());
         downloading.bind(downloadTask.runningProperty());
 
-        profileComboBox.disableProperty().bind(downloadTask.runningProperty());
         gameReleaseComboBox.disableProperty().bind(downloadTask.runningProperty());
         progressBar.visibleProperty().bind(downloadTask.runningProperty());
 

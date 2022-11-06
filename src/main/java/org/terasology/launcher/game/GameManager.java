@@ -40,10 +40,17 @@ public class GameManager {
     //TODO: should this be a map to installation metadata (install date, path, ...)?
     private final ObservableSet<GameIdentifier> installedGames;
 
+    /**
+     * Create a game manager and immediately scan the installation directory for installed games.
+     *
+     * @param cacheDirectory directory for cached downloads
+     * @param installDirectory directory for installed games
+     */
     public GameManager(Path cacheDirectory, Path installDirectory) {
         this.cacheDirectory = cacheDirectory;
         this.installDirectory = installDirectory;
         installedGames = FXCollections.observableSet();
+        //TODO: separate IO operation/remote call from construction of the manager object?
         scanInstallationDir();
     }
 

@@ -147,6 +147,7 @@ public final class I18N {
         return messageFormat.format(arguments, new StringBuffer(), null).toString();
     }
 
+    //TODO: move to 'Resources' helper class, unrelated to I18n
     public static URI getURI(String key) {
         final String uriStr = ResourceBundle.getBundle(URI_BUNDLE, getCurrentLocale()).getString(key);
         try {

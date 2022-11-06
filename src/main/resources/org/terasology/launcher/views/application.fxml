@@ -105,23 +105,7 @@
                   <children>
                     <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="8.0" HBox.hgrow="ALWAYS">
                       <children>
-                        <ComboBox fx:id="profileComboBox" maxWidth="1.7976931348623157E308">
-                          <items>
-                            <FXCollections fx:factory="observableArrayList">
-                              <String fx:value="Item 1" />
-                              <String fx:value="Item 2" />
-                              <String fx:value="Item 3" />
-                            </FXCollections>
-                          </items>
-                        </ComboBox>
                         <ComboBox fx:id="gameReleaseComboBox" maxWidth="1.7976931348623157E308">
-                          <items>
-                            <FXCollections fx:factory="observableArrayList">
-                              <String fx:value="Item 1" />
-                              <String fx:value="Item 2" />
-                              <String fx:value="Item 3" />
-                            </FXCollections>
-                          </items>
                         </ComboBox>
                       </children>
                       <padding>
