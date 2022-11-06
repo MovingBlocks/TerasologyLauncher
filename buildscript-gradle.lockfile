@@ -1,0 +1,47 @@
+# This is a Gradle generated file for dependency locking.
+# Manual edits can break the build and are not advised.
+# This file is expected to be part of source control.
+com.fasterxml.jackson:jackson-bom:2.11.0=classpath
+com.github.spotbugs.snom:spotbugs-gradle-plugin:5.0.13=classpath
+com.github.spotbugs:com.github.spotbugs.gradle.plugin:5.0.13=classpath
+com.github.zafarkhaja:java-semver:0.9.0=classpath
+com.google.code.findbugs:jsr305:3.0.2=classpath
+com.google.code.gson:gson:2.8.6=classpath
+com.google.errorprone:error_prone_annotations:2.3.4=classpath
+com.google.gradle:osdetector-gradle-plugin:1.7.0=classpath
+com.google.guava:failureaccess:1.0.1=classpath
+com.google.guava:guava:28.2-jre=classpath
+com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava=classpath
+com.google.j2objc:j2objc-annotations:1.3=classpath
+com.googlecode.javaewah:JavaEWAH:1.1.7=classpath
+com.jcraft:jsch:0.1.55=classpath
+com.jcraft:jzlib:1.1.1=classpath
+com.netflix.nebula:nebula-release-plugin:16.0.0=classpath
+de.undercouch.download:de.undercouch.download.gradle.plugin:5.3.0=classpath
+de.undercouch:gradle-download-task:5.3.0=classpath
+gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.5=classpath
+kr.motd.maven:os-maven-plugin:1.7.0=classpath
+name.remal.component-metadata:name.remal.component-metadata.gradle.plugin:1.5.0=classpath
+name.remal.gradle-plugins.test-source-sets:test-source-sets:2.2.0=classpath
+name.remal.tools:common:1.26.147=classpath
+name.remal:gradle-plugins-api:1.5.0=classpath
+name.remal:gradle-plugins-kotlin-dsl:1.5.0=classpath
+name.remal:gradle-plugins:1.5.0=classpath
+nebula.release:nebula.release.gradle.plugin:16.0.0=classpath
+org.ajoberstar.grgit:grgit-core:4.0.2=classpath
+org.checkerframework:checker-qual:2.10.0=classpath
+org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:5.12.0.202106070339-r=classpath
+org.eclipse.jgit:org.eclipse.jgit:5.12.0.202106070339-r=classpath
+org.javamodularity:moduleplugin:1.8.10=classpath
+org.jdom:jdom2:2.0.6=classpath
+org.jetbrains.gradle.plugin.idea-ext:org.jetbrains.gradle.plugin.idea-ext.gradle.plugin:1.1.5=classpath
+org.jooq:joor:0.9.13=classpath
+org.openjfx.javafxplugin:org.openjfx.javafxplugin.gradle.plugin:0.0.13=classpath
+org.openjfx:javafx-plugin:0.0.13=classpath
+org.ow2.asm:asm-analysis:9.2=classpath
+org.ow2.asm:asm-commons:9.2=classpath
+org.ow2.asm:asm-tree:9.2=classpath
+org.ow2.asm:asm-util:9.2=classpath
+org.ow2.asm:asm:9.2=classpath
+org.slf4j:slf4j-api:1.7.30=classpath
+empty=
