@@ -157,7 +157,7 @@ dependencies {
     codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.7.1', ext: 'zip'
 }
 
-configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation)Classpath/ }).all {
+configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation|PmdAux)Classpath/ }).all {
     resolutionStrategy(gradlegoo.prefers("logging", "jcl-api-capability", "jcl-over-slf4j",
             "jcl should prefer slf4j when available"))
     resolutionStrategy(gradlegoo.prefers("logging", "slf4j-impl-capability",
