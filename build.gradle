@@ -191,12 +191,14 @@ test {
 
 checkstyle {
     ignoreFailures = false
-    configDirectory.set(metricsConfigDir.dir("checkstyle"))
-}
+    config = resources.text.fromArchiveEntry(configurations.codeMetrics, "checkstyle/checkstyle.xml")}
 
 pmd {
+    toolVersion = "6.39.0"
     ignoreFailures = true
-    ruleSetFiles = files("$rootDir/config/metrics/pmd/pmd.xml")
+    threads = 4
+    ruleSetFiles "config/pmd.xml"
+    ruleSets = []
 }
 
 spotbugs {
@@ -230,22 +232,11 @@ task createVersionInfoFile {
     }
 }
 
-task extractCodeMetricsConfig(type: Copy) {
-    description = "Extract code metrics configuration to '$metricsConfigDir'"
-    from {
-        configurations.codeMetrics.collect {
-            zipTree(it)
-        }
-    }
-    into metricsConfigDir
-}
-
 clean {
     delete createVersionInfoFile.outputs.files
-    delete extractCodeMetricsConfig.destinationDir
 }
 
-processResources.dependsOn(createVersionInfoFile, extractCodeMetricsConfig)
+processResources.dependsOn(createVersionInfoFile)
 
 jar {
     //TODO we only use this name because the `.exe` start scripts require the JAR to be named 'TerasologyLauncher.jar'
