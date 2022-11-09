@@ -1,5 +1,26 @@
 # Terasology Launcher - ChangeLog
 
+## 4.7.0 (2022-11-09)
+
+### 🚀 Features
+
+- #684 feat: remove game profile selection (fixed on OMEGA) (@skaldarnar)
+- #682 feat(i18n): add missing german translations (@jdrueckert)
+- #679 feat(i18n): use properties and bindings for i18n of resources bundles (@skaldarnar)
+
+### 🐛 Bug Fixes
+
+- #681 fix(i18n): reduce log spam for missing labels (@skaldarnar)
+
+### 🧰 Maintenance
+
+- #685 chore: update Gradle (7.1.1 >>> 7.5.1) and dependencies (@skaldarnar)
+
+### 📚 Documentation
+
+- #683 doc: udpate documentation (@skaldarnar)
+- #680 doc: add release guide (@skaldarnar)
+
 ## 4.6.0 (2022-09-03)
 
 ### 🚀 Features
