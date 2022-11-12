@@ -179,9 +179,12 @@ public final class TerasologyLauncher extends Application {
     private void logSystemInformation() {
         if (logger.isDebugEnabled()) {
             // Java
-            logger.debug("Java: {} {} {}", System.getProperty("java.version"), System.getProperty("java.vendor"), System.getProperty("java.home"));
-            logger.debug("Java VM: {} {} {}", System.getProperty("java.vm.name"), System.getProperty("java.vm.vendor"), System.getProperty("java.vm.version"));
-            logger.debug("Java classpath: {}", System.getProperty("java.class.path"));
+            logger.debug("Java: {} {} {}",
+                    System.getProperty("java.version"), System.getProperty("java.vendor"), System.getProperty("java.home"));
+            logger.debug("Java VM: {} {} {}",
+                    System.getProperty("java.vm.name"), System.getProperty("java.vm.vendor"), System.getProperty("java.vm.version"));
+            logger.debug("Java classpath: {}",
+                    System.getProperty("java.class.path"));
 
             // OS
             logger.debug("OS: {} {} {}", System.getProperty("os.name"), System.getProperty("os.arch"), System.getProperty("os.version"));

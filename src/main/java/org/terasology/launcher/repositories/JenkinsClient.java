@@ -29,9 +29,9 @@ class JenkinsClient {
 
     private static final String ARTIFACT = "artifact/";
 
-    private final Gson gson;
-
     final OkHttpClient client;
+
+    private final Gson gson;
 
     JenkinsClient(OkHttpClient httpClient, Gson gson) {
         this.gson = gson;

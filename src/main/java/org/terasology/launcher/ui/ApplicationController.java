@@ -244,8 +244,10 @@ public class ApplicationController {
         }, config, showPreReleases);
 
         gameReleaseComboBox.itemsProperty().bind(releases);
-        gameReleaseComboBox.buttonCellProperty().bind(Bindings.createObjectBinding(() -> new GameReleaseCell(installedGames, true), installedGames));
-        gameReleaseComboBox.cellFactoryProperty().bind(Bindings.createObjectBinding(() -> list -> new GameReleaseCell(installedGames), installedGames));
+        gameReleaseComboBox.buttonCellProperty()
+                .bind(Bindings.createObjectBinding(() -> new GameReleaseCell(installedGames, true), installedGames));
+        gameReleaseComboBox.cellFactoryProperty()
+                .bind(Bindings.createObjectBinding(() -> list -> new GameReleaseCell(installedGames), installedGames));
 
         selectedRelease.bind(gameReleaseComboBox.getSelectionModel().selectedItemProperty());
         //TODO: instead of imperatively updating the changelog view its value should be bound via property, too

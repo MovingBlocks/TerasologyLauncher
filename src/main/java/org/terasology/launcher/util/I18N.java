@@ -25,7 +25,7 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-@SuppressWarnings("PMD.FieldNamingConventions")
+@SuppressWarnings({"PMD.FieldNamingConventions", "checkstyle:ConstantName"})
 public final class I18N {
 
     private static final Logger logger = LoggerFactory.getLogger(I18N.class);
@@ -40,7 +40,7 @@ public final class I18N {
      * The currently selected locale.
      */
     private static final Locale systemLocale;
-    private static final ObjectProperty<Locale> locale;
+    private static final ObjectProperty<Locale> localeProperty;
     private static final List<Locale> supportedLocales;
 
     /**
@@ -78,8 +78,8 @@ public final class I18N {
 
         systemLocale = getDefaultLocale();
 
-        locale = new SimpleObjectProperty<>(getDefaultLocale());
-        locale.addListener((observable, oldValue, newValue) -> Locale.setDefault(newValue));
+        localeProperty = new SimpleObjectProperty<>(getDefaultLocale());
+        localeProperty.addListener((observable, oldValue, newValue) -> Locale.setDefault(newValue));
     }
 
     private I18N() {
@@ -90,7 +90,7 @@ public final class I18N {
     }
 
     public static Locale getCurrentLocale() {
-        return locale.get();
+        return localeProperty.get();
     }
 
     public static void setLocale(Locale locale) {
@@ -101,13 +101,12 @@ public final class I18N {
     }
 
     public static ObjectProperty<Locale> localeProperty() {
-        return locale;
+        return localeProperty;
     }
 
     public static List<Locale> getSupportedLocales() {
         return supportedLocales;
     }
-
 
     public static String getLabel(String key) {
         return getLabel(getCurrentLocale(), key);
@@ -130,7 +129,7 @@ public final class I18N {
     }
 
     public static Binding<String> labelBinding(String key) {
-        return Bindings.createStringBinding(() -> getLabel(locale.getValue(), key), locale);
+        return Bindings.createStringBinding(() -> getLabel(localeProperty.getValue(), key), localeProperty);
     }
 
     public static String getMessage(String key, Object... arguments) {
