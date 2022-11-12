@@ -5,6 +5,7 @@ package org.terasology.launcher.repositories;
 
 import java.util.List;
 
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class JenkinsPayload {
     private JenkinsPayload() {
 

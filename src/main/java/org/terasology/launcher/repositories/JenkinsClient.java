@@ -83,6 +83,7 @@ class JenkinsClient {
     // c) the 'Expires' header is removed from response for requests with PropertiesRequest
 
     @Nullable
+    @SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
     Properties requestProperties(final URL artifactUrl) {
         Preconditions.checkNotNull(artifactUrl);
 

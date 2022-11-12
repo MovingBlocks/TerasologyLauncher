@@ -31,7 +31,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.MissingResourceException;
 import java.util.stream.Collectors;
 
 public class SettingsController {
@@ -386,18 +385,16 @@ public class SettingsController {
                 String countryCode = item.toLanguageTag();
                 String id = "flag_" + countryCode;
 
-                try {
-                    // Get the appropriate flag icon via BundleUtils
-                    Image icon = I18N.getFxImage(id);
-
+                // Get the appropriate flag icon via BundleUtils
+                Image icon = I18N.getFxImage(id);
+                if (icon != null) {
                     ImageView iconImageView = new ImageView(icon);
                     iconImageView.setFitHeight(11);
                     iconImageView.setPreserveRatio(true);
                     this.setGraphic(iconImageView);
-                } catch (MissingResourceException e) {
-                    logger.warn("ImageBundle key {} not found", id);
-                } catch (NullPointerException e) {
-                    logger.warn("Flag icon in ImageBundle key {} missing or corrupt", id);
+                } else {
+                    logger.warn("Flag icon for key '{}' could not be loaded.", id);
+
                 }
             }
         }

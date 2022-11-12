@@ -98,7 +98,7 @@ public final class TerasologyLauncher extends Application {
         });
 
         launcherInitTask.setOnFailed(event -> {
-            logger.error("The TerasologyLauncher could not be started!", event.getSource().getException());
+            logger.error("The TerasologyLauncher could not be started!", event.getSource().getException()); //NOPMD
             System.exit(1);
         });
 

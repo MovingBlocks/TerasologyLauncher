@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+@SuppressWarnings("PMD.FieldNamingConventions")
 public final class I18N {
 
     private static final Logger logger = LoggerFactory.getLogger(I18N.class);
@@ -162,12 +163,15 @@ public final class I18N {
      * Loads a JavaFX {@code Image} from the image path specified by the key in the image bundle file.
      *
      * @param key the key as specified in the image bundle file
-     * @return the JavaFX image
-     * @throws MissingResourceException if no resource for the specified key can be found
+     * @return the JavaFX image, or null if the image cannot be found or loaded
      */
     public static Image getFxImage(String key) throws MissingResourceException {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, getCurrentLocale()).getString(key);
-        return new Image(I18N.class.getResource(imagePath).toExternalForm());
+        URL resource = I18N.class.getResource(imagePath);
+        if (resource != null) {
+            return new Image(resource.toExternalForm());
+        }
+        return null;
     }
 
     public static FXMLLoader getFXMLLoader(String key) {
