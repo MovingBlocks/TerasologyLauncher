@@ -190,14 +190,16 @@ test {
 }
 
 checkstyle {
+    toolVersion = "10.4"
     ignoreFailures = false
-    config = resources.text.fromArchiveEntry(configurations.codeMetrics, "checkstyle/checkstyle.xml")}
+    configDirectory.set(metricsConfigDir.dir("checkstyle"))
+}
 
 pmd {
     toolVersion = "6.39.0"
     consoleOutput = true
     threads = 4
-    ruleSetFiles "config/pmd.xml"
+    ruleSetFiles "${rootDir}/config/pmd.xml"
     ruleSets = []
 }
 
@@ -232,8 +234,21 @@ task createVersionInfoFile {
     }
 }
 
+task extractCodeMetricsConfig(type: Copy) {
+    description = "Extract code metrics configuration to '$metricsConfigDir'"
+    from {
+        configurations.codeMetrics.collect {
+            zipTree(it)
+        }
+    }
+    into metricsConfigDir
+}
+
+processResources.dependsOn(createVersionInfoFile, extractCodeMetricsConfig)
+
 clean {
     delete createVersionInfoFile.outputs.files
+    delete extractCodeMetricsConfig.destinationDir
 }
 
 processResources.dependsOn(createVersionInfoFile)
