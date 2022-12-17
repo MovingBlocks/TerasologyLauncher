@@ -29,7 +29,7 @@ public final class FxTimer {
         this.action = action;
 
         timeline.getKeyFrames().add(new KeyFrame(this.actionTime)); // used as placeholder
-        if (period != actionTime) {
+        if (!period.equals(actionTime)) {
             timeline.getKeyFrames().add(new KeyFrame(Duration.millis(period.toMillis())));
         }
 

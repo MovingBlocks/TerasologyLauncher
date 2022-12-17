@@ -138,7 +138,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     private static URL unsafeToUrl(String url) {
         try {
             return new URL(url);
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException e) { //NOPMD
             //TODO: at least log something here?
         }
         return null;

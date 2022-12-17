@@ -22,7 +22,7 @@ import java.util.concurrent.Callable;
  *
  * @see <a href="https://docs.oracle.com/en/java/javase/14/docs/specs/man/java.html#overview-of-java-options">java command manual</a>
  */
-class GameStarter implements Callable<Process> {
+final class GameStarter implements Callable<Process> {
     private static final Logger logger = LoggerFactory.getLogger(GameStarter.class);
 
     final ProcessBuilder processBuilder;

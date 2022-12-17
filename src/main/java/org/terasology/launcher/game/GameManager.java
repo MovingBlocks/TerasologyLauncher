@@ -87,7 +87,8 @@ public class GameManager {
         }
     }
 
-    private void download(GameRelease release, Path targetLocation, ProgressListener listener) throws DownloadException, IOException, InterruptedException {
+    private void download(GameRelease release, Path targetLocation, ProgressListener listener)
+            throws DownloadException, IOException, InterruptedException {
         final URL downloadUrl = release.getUrl();
 
         final long contentLength = DownloadUtils.getContentLength(downloadUrl);

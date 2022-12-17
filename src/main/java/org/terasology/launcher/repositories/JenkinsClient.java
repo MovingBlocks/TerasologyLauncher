@@ -29,9 +29,9 @@ class JenkinsClient {
 
     private static final String ARTIFACT = "artifact/";
 
-    private final Gson gson;
-
     final OkHttpClient client;
+
+    private final Gson gson;
 
     JenkinsClient(OkHttpClient httpClient, Gson gson) {
         this.gson = gson;
@@ -83,6 +83,7 @@ class JenkinsClient {
     // c) the 'Expires' header is removed from response for requests with PropertiesRequest
 
     @Nullable
+    @SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
     Properties requestProperties(final URL artifactUrl) {
         Preconditions.checkNotNull(artifactUrl);
 

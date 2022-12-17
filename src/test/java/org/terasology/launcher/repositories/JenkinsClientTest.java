@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
  */
 @DisplayName("JenkinsClient")
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.CloseResource", "PMD.AvoidDuplicateLiterals"})
 class JenkinsClientTest {
 
     @Test

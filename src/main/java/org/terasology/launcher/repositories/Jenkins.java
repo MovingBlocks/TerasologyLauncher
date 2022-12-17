@@ -5,12 +5,10 @@ package org.terasology.launcher.repositories;
 
 /**
  * Data model for parsing build information from Jenkins.
+ *
+ * Instances of this class will be created by JSON parsers (e.g., GSON) and are usually not instantiated by hand.
  */
 public final class Jenkins {
-
-    private Jenkins() {
-    }
-
     public static class ApiResult {
         public Build[] builds;
     }
