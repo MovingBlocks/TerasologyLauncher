@@ -14,8 +14,6 @@ import org.kohsuke.github.GHRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameManager;
-import org.terasology.launcher.model.GameIdentifier;
-import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.LauncherVersion;
 import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
@@ -37,7 +35,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -98,11 +95,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
             updateMessage(I18N.getLabel("splash_fetchReleases"));
             logger.info("Fetching game releases ...");
+            // implicitly fetches game releases and cache them
             final RepositoryManager repositoryManager = new RepositoryManager(client);
-            Set<GameRelease> releases = repositoryManager.getReleases();
 
+            // implicitly scans the game directory for installed games and cache them
             final GameManager gameManager = new GameManager(cacheDirectory, gameDirectory);
-            Set<GameIdentifier> installedGames = gameManager.getInstalledGames();
 
             logger.trace("Change LauncherSettings...");
             launcherSettings.gameDirectory.set(gameDirectory);

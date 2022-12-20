@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+@SuppressWarnings({"PMD.FieldNamingConventions", "checkstyle:ConstantName"})
 public final class I18N {
 
     private static final Logger logger = LoggerFactory.getLogger(I18N.class);
@@ -39,7 +40,7 @@ public final class I18N {
      * The currently selected locale.
      */
     private static final Locale systemLocale;
-    private static final ObjectProperty<Locale> locale;
+    private static final ObjectProperty<Locale> localeProperty;
     private static final List<Locale> supportedLocales;
 
     /**
@@ -77,8 +78,8 @@ public final class I18N {
 
         systemLocale = getDefaultLocale();
 
-        locale = new SimpleObjectProperty<>(getDefaultLocale());
-        locale.addListener((observable, oldValue, newValue) -> Locale.setDefault(newValue));
+        localeProperty = new SimpleObjectProperty<>(getDefaultLocale());
+        localeProperty.addListener((observable, oldValue, newValue) -> Locale.setDefault(newValue));
     }
 
     private I18N() {
@@ -89,7 +90,7 @@ public final class I18N {
     }
 
     public static Locale getCurrentLocale() {
-        return locale.get();
+        return localeProperty.get();
     }
 
     public static void setLocale(Locale locale) {
@@ -100,13 +101,12 @@ public final class I18N {
     }
 
     public static ObjectProperty<Locale> localeProperty() {
-        return locale;
+        return localeProperty;
     }
 
     public static List<Locale> getSupportedLocales() {
         return supportedLocales;
     }
-
 
     public static String getLabel(String key) {
         return getLabel(getCurrentLocale(), key);
@@ -129,7 +129,7 @@ public final class I18N {
     }
 
     public static Binding<String> labelBinding(String key) {
-        return Bindings.createStringBinding(() -> getLabel(locale.getValue(), key), locale);
+        return Bindings.createStringBinding(() -> getLabel(localeProperty.getValue(), key), localeProperty);
     }
 
     public static String getMessage(String key, Object... arguments) {
@@ -147,6 +147,7 @@ public final class I18N {
         return messageFormat.format(arguments, new StringBuffer(), null).toString();
     }
 
+    //TODO: move to 'Resources' helper class, unrelated to I18n
     public static URI getURI(String key) {
         final String uriStr = ResourceBundle.getBundle(URI_BUNDLE, getCurrentLocale()).getString(key);
         try {
@@ -161,12 +162,15 @@ public final class I18N {
      * Loads a JavaFX {@code Image} from the image path specified by the key in the image bundle file.
      *
      * @param key the key as specified in the image bundle file
-     * @return the JavaFX image
-     * @throws MissingResourceException if no resource for the specified key can be found
+     * @return the JavaFX image, or null if the image cannot be found or loaded
      */
     public static Image getFxImage(String key) throws MissingResourceException {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, getCurrentLocale()).getString(key);
-        return new Image(I18N.class.getResource(imagePath).toExternalForm());
+        URL resource = I18N.class.getResource(imagePath);
+        if (resource != null) {
+            return new Image(resource.toExternalForm());
+        }
+        return null;
     }
 
     public static FXMLLoader getFXMLLoader(String key) {

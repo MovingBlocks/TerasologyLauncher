@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +29,8 @@ import java.util.stream.Collectors;
 /**
  * User settings for the launcher, backed by Java {@link Properties}.
  */
+@SuppressWarnings("checkstyle:DeclarationOrder")
 public class LauncherSettings {
-
-    private static final Logger logger = LoggerFactory.getLogger(LauncherSettings.class);
 
     public static final String USER_JAVA_PARAMETERS_DEFAULT = "-XX:MaxGCPauseMillis=20";
     public static final String USER_GAME_PARAMETERS_DEFAULT = "";
@@ -54,6 +52,11 @@ public class LauncherSettings {
     public static final String PROPERTY_LAST_INSTALLED_GAME_JOB = "lastInstalledGameJob";
     public static final String PROPERTY_LAST_INSTALLED_GAME_VERSION = "lastInstalledGameVersion";
 
+    private static final Logger logger = LoggerFactory.getLogger(LauncherSettings.class);
+
+    private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
+    private static final Level LOG_LEVEL_DEFAULT = Level.INFO;
+
     static final JavaHeapSize MAX_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     static final JavaHeapSize INITIAL_HEAP_SIZE_DEFAULT = JavaHeapSize.NOT_USED;
     static final boolean CLOSE_LAUNCHER_AFTER_GAME_START_DEFAULT = true;
@@ -63,9 +66,6 @@ public class LauncherSettings {
     static final String LAST_INSTALLED_GAME_VERSION_DEFAULT = "";
 
     static final String LAUNCHER_SETTINGS_FILE_NAME = "TerasologyLauncherSettings.properties";
-
-    private static final String WARN_MSG_INVALID_VALUE = "Invalid value '{}' for the parameter '{}'!";
-    private static final Level LOG_LEVEL_DEFAULT = Level.INFO;
 
     private final Properties properties;
 
@@ -105,7 +105,9 @@ public class LauncherSettings {
     void initLocale() {
         final String localeStr = properties.getProperty(PROPERTY_LOCALE);
         if (localeStr != null) {
-            Locale l = I18N.getSupportedLocales().stream().filter(x -> x.toLanguageTag().equals(localeStr)).findFirst().orElse(I18N.getDefaultLocale());
+            Locale l = I18N.getSupportedLocales().stream()
+                    .filter(x -> x.toLanguageTag().equals(localeStr))
+                    .findFirst().orElse(I18N.getDefaultLocale());
             I18N.setLocale(l);
 
             if (!I18N.getCurrentLocale().toString().equals(localeStr)) {
@@ -244,14 +246,6 @@ public class LauncherSettings {
         if (lastInstalledGameVersionStr == null || lastInstalledGameVersionStr.isEmpty()) {
             properties.setProperty(PROPERTY_LAST_INSTALLED_GAME_VERSION, LAST_INSTALLED_GAME_VERSION_DEFAULT);
         }
-    }
-
-    // --------------------------------------------------------------------- //
-    // PROPERTIES
-    // --------------------------------------------------------------------- //
-
-    public ReadOnlyProperty<Boolean> showPreReleases() {
-        return showPreReleases;
     }
 
     // --------------------------------------------------------------------- //

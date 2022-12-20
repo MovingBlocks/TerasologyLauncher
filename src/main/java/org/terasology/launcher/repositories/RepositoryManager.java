@@ -18,6 +18,11 @@ public class RepositoryManager {
 
     private final Set<GameRelease> releases;
 
+    /**
+     * Create a repository manager and immediately fetch for game releases.
+     *
+     * @param httpClient the HTTP client to be used for remote requests
+     */
     public RepositoryManager(OkHttpClient httpClient) {
         JenkinsClient client = new JenkinsClient(httpClient, new Gson());
 
@@ -26,6 +31,7 @@ public class RepositoryManager {
 
         Set<ReleaseRepository> all = Sets.newHashSet(github, omegaNightly);
 
+        //TODO: separate IO operation/remote call from construction of the manager object?
         releases = fetchReleases(all);
     }
 

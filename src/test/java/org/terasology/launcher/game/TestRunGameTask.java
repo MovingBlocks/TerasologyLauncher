@@ -87,15 +87,16 @@ public class TestRunGameTask {
 
         var hasGameOutputFormat = LogMatchers.hasFormatWithPattern("^Game output.*");
 
-        LogAssert detailedExpectation = TestLoggers.sys().expect(
+        // try-with-resources to auto-close LogAssert
+        try (LogAssert detailedExpectation = TestLoggers.sys().expect(
                 RunGameTask.class.getName(), Level.INFO,
                 allOf(hasGameOutputFormat, LogMatchers.hasArguments(gameOutputLines[0])),
                 allOf(hasGameOutputFormat, LogMatchers.hasArguments(gameOutputLines[1]))
-        );
+        )) {
+            new NonTimingGameTask(null).monitorProcess(gameProcess);
 
-        new NonTimingGameTask(null).monitorProcess(gameProcess);
-
-        detailedExpectation.assertObservation();
+            detailedExpectation.assertObservation();
+        }
     }
 
     @SlowTest
@@ -108,8 +109,8 @@ public class TestRunGameTask {
         var hasExitMessage = TestLoggers.sys().expect(
                 RunGameTask.class.getName(), Level.DEBUG,
                 allOf(
-                    LogMatchers.hasFormatWithPattern("Game closed with the exit value.*"),
-                    LogMatchers.hasArguments(EXIT_CODE_OK)
+                        LogMatchers.hasFormatWithPattern("Game closed with the exit value.*"),
+                        LogMatchers.hasArguments(EXIT_CODE_OK)
                 )
         );
 
@@ -128,8 +129,8 @@ public class TestRunGameTask {
         var hasExitMessage = TestLoggers.sys().expect(
                 RunGameTask.class.getName(), Level.DEBUG,
                 allOf(
-                    LogMatchers.hasFormatWithPattern("Game closed with the exit value.*"),
-                    LogMatchers.hasArguments(EXIT_CODE_ERROR)
+                        LogMatchers.hasFormatWithPattern("Game closed with the exit value.*"),
+                        LogMatchers.hasArguments(EXIT_CODE_ERROR)
                 )
         );
 
@@ -322,7 +323,7 @@ public class TestRunGameTask {
     /**
      * An Iterator that runs the given callback every iteration.
      *
-     * @param list to be iterated over
+     * @param list   to be iterated over
      * @param onNext to be called each iteration
      */
     public static <T> Iterator<T> spyingIterator(List<T> list, Runnable onNext) {
@@ -332,7 +333,9 @@ public class TestRunGameTask {
         }).iterator();
     }
 
-    /** Things that happen in RunGameTask that we want to make assertions about. */
+    /**
+     * Things that happen in RunGameTask that we want to make assertions about.
+     */
     enum Happenings {
         PROCESS_OUTPUT_LINE,
         TASK_VALUE_SET,

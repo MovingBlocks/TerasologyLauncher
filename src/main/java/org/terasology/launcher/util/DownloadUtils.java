@@ -99,7 +99,7 @@ public final class DownloadUtils {
         long writtenBytes = 0;
         int n;
         if (!listener.isCancelled()) {
-            while ((n = in.read(buffer)) != -1) {
+            while ((n = in.read(buffer)) != -1) { //NOPMD(AssignmentInOperand)
                 if (listener.isCancelled()) {
                     break;
                 }
@@ -110,7 +110,7 @@ public final class DownloadUtils {
                 int percentage = (int) (sizeFactor * writtenBytes);
                 if (percentage < 1) {
                     percentage = 1;
-                } else if (percentage >= 100) {
+                } else if (percentage >= 100) { //NOPMD(AvoidLiteralsInIfCondition)
                     percentage = 99;
                 }
                 listener.update(percentage);
