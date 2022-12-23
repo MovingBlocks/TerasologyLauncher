@@ -147,7 +147,7 @@ Downloading Terasology via the launcher can fail for multiple reasons including:
 To check whether GitHub is available, please refer to https://www.githubstatus.com/.
 
 To check whether the Terasology artifact is available, please go to our [Terasology release page](https://github.com/MovingBlocks/Terasology/releases) and look for the version you were trying to download.
-You should find it at https://github.com/MovingBlocks/Terasology/releases/tag/v<version>.
+You should find it at `https://github.com/MovingBlocks/Terasology/releases/tag/v<version>`, e.g. `https://github.com/MovingBlocks/Terasology/releases/tag/v5.3.0`.
 At the bottom of the release information below the changelogs, there should be an "Asset" section.
 If this section includes a `TerasologyOmega.zip` file, the Terasology artifact is available.
 If not, please open up a [GitHub Issue](https://github.com/MovingBlocks/TerasologyLauncher/issues/new) or inform us about this on [Discord](https://discord.gg/terasology).
@@ -158,28 +158,20 @@ In this case, you can either try to hunt down the issue yourself or try to work 
 ### Manual Download Timeout Workaround
 
 You can work around the launcher's timeout logic by downloading the Terasology artifact manually.
-If you have Java installed and set up, you can start Terasology directly from the artifact (scenario 1 below).
-Otherwise, you'll need to copy the artifact into the launcher directory (scenario 2 below).
-If scenario 1 should not work, you might have an incompatible version or flavor of Java installed or an incompatible setup.
-In this case, please go for scenario 2.
 
 Workaround steps:
 1. Download the desired Terasology artifact from GitHub: https://github.com/MovingBlocks/Terasology/releases/download/v<version>/TerasologyOmega.zip
 2. Extract the artifact (zip archive)
-
-Scenario 1: You have Java installed and set up
-3. Start Terasology<br>
-   On Windows: Execute `Terasology.bat`<br>
-   On Linux: Execute `Terasology`
-
-Scenario 2: You don't have Java installed or set up
-3. Create a new path in the `games` sub-directory of the TerasologyLauncher download directory<br>
-   Path for stable releases: `<games-subdir>/OMEGA/STABLE/<version>`<br>
-   Path for pre-releases: `<games-subdir>/OMEGA/NIGHTLY/<version>`
-4. Copy the contents of the previously downloaded and extracted Terasology artifact into the newly created version directory at the end of the path
-5. Start the launcher and select the desired version, the play icon (:arrow_forward:) should now be available for you to start Terasology
-
-![Download Timeout Workaround](docs/images/221220_TerasologyLauncher_download-timeout-workaround.png)
+3. Rename the archive<br/>
+   For stable releases to `terasology-omega-<version>-stable.zip`, e.g. `terasology-omega-5.3.0-stable.zip`<br/>
+   For nightly and pre-releases to `terasology-omega-<version>-nightly.zip`, e.g. `terasology-omega-5.3.0-rc.2-nightly.zip`
+4. Copy the renamed archive into the `cache` directory located in the launcher managed directory<br/>
+   On Windows: `C:\Users\AppData\Roaming\TerasologyLauncher\cache`<br/>
+   On Linux/Unix: `/home/<user>/.terasologylauncher`
+5. Start the launcher and select the version you downloaded the artifact for, click on the download icon (:arrow_down:) and wait for the download to complete.
+   This should happen quickly as the launcher should use the already downloaded Terasology artifact from the cache.<br/>
+   On completion the download icon (:arrow_down:) should turn into a play icon (:arrow_forward:)
+6. Click on the play icon (:arrow_forward:) to start Terasology
 
 </details>
 
