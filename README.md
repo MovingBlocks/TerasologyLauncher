@@ -147,7 +147,7 @@ Downloading Terasology via the launcher can fail for multiple reasons including:
 To check whether GitHub is available, please refer to https://www.githubstatus.com/.
 
 To check whether the Terasology artifact is available, please go to our [Terasology release page](https://github.com/MovingBlocks/Terasology/releases) and look for the version you were trying to download.
-You should find it at `https://github.com/MovingBlocks/Terasology/releases/tag/v<version>`, e.g. https://github.com/MovingBlocks/Terasology/releases/tag/v5.3.0.
+You should find it at `https://github.com/MovingBlocks/Terasology/releases/tag/v<version>`, for example, https://github.com/MovingBlocks/Terasology/releases/tag/v5.3.0.
 At the bottom of the release information below the changelogs, there should be an "Asset" section.
 If this section includes a `TerasologyOmega.zip` file, the Terasology artifact is available.
 If not, please open up a [GitHub Issue](https://github.com/MovingBlocks/TerasologyLauncher/issues/new) or inform us about this on [Discord](https://discord.gg/terasology).
@@ -163,8 +163,8 @@ Workaround steps:
 1. Download the desired Terasology artifact from GitHub: `https://github.com/MovingBlocks/Terasology/releases/download/v<version>/TerasologyOmega.zip`
 2. Extract the artifact (zip archive)
 3. Rename the archive<br/>
-   For stable releases to `terasology-omega-<version>-stable.zip`, e.g. `terasology-omega-5.3.0-stable.zip`<br/>
-   For nightly and pre-releases to `terasology-omega-<version>-nightly.zip`, e.g. `terasology-omega-5.3.0-rc.2-nightly.zip`
+   For stable releases to `terasology-omega-<version>-stable.zip`, for example, `terasology-omega-5.3.0-stable.zip`<br/>
+   For nightly and pre-releases to `terasology-omega-<version>-nightly.zip`, for example, `terasology-omega-5.3.0-rc.2-nightly.zip`
 4. Copy the renamed archive into the `cache` directory located in the launcher managed directory<br/>
    On Windows: `C:\Users\AppData\Roaming\TerasologyLauncher\cache`<br/>
    On Linux/Unix: `/home/<user>/.terasologylauncher`
