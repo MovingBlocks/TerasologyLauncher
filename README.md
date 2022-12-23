@@ -12,7 +12,8 @@
 <h3 align="center"><b>
     <a href="#community">Community</a> | 
     <a href="#installation-">Installation</a> | 
-    <a href="#features">Features</a>  | 
+    <a href="#features">Features</a>  |
+    <a href="#troubleshooting">Troubleshooting</a>  |
     <a href="#development">Development</a>  | 
     <a href="#acknowledgements">Acknowledgements</a>  | 
     <a href="#license-">License</a> 
@@ -123,6 +124,56 @@ The actual resource consumption may be higher due to additional resources requir
 
 The remaining settings can be used to configure the launcher.
 You can set the launcher language and decide whether the launcher should search for updates, close when a game is started and save downloaded game package files.
+
+## Troubleshooting
+
+Find below common issues you may run into and how to resolve or work around them.
+If you cannot find help for an issue you might be facing, please open a [GitHub Issue](https://github.com/MovingBlocks/TerasologyLauncher/issues/new) including the information available in the "Logging" tab.
+
+<details closed>
+<summary>:arrow_down: Download Issues</summary>
+<br>
+
+An indication of a download issue is the download starting but at some point suddenly stopping / failing.
+First information about the failure can be found in the "Logging" tab.
+The most common indicator you'll see there is a log message similar to "request timed out".
+
+Downloading Terasology via the launcher can fail for multiple reasons including:
+1. GitHub being unavailable
+2. the Terasology artifact being unavailable
+3. your internet connection being slow
+4. something on your computer or in your network slowing down the download
+
+To check whether GitHub is available, please refer to https://www.githubstatus.com/.
+
+To check whether the Terasology artifact is available, please go to our [Terasology release page](https://github.com/MovingBlocks/Terasology/releases) and look for the version you were trying to download.
+You should find it at `https://github.com/MovingBlocks/Terasology/releases/tag/v<version>`, for example, https://github.com/MovingBlocks/Terasology/releases/tag/v5.3.0.
+At the bottom of the release information below the changelogs, there should be an "Asset" section.
+If this section includes a `TerasologyOmega.zip` file, the Terasology artifact is available.
+If not, please open up a [GitHub Issue](https://github.com/MovingBlocks/TerasologyLauncher/issues/new) or inform us about this on [Discord](https://discord.gg/terasology).
+
+If the Terasology artifact and GitHub are available, but your download timed out, this is likely due to a slow internet connection or something on your computer or in your network slowing down the download.
+In this case, you can either try to hunt down the issue yourself or try to work around the issue manually
+
+### Manual Download Timeout Workaround
+
+You can work around the launcher's timeout logic by downloading the Terasology artifact manually.
+
+Workaround steps:
+1. Download the desired Terasology artifact from GitHub: `https://github.com/MovingBlocks/Terasology/releases/download/v<version>/TerasologyOmega.zip`
+2. Extract the artifact (zip archive)
+3. Rename the archive<br/>
+   For stable releases to `terasology-omega-<version>-stable.zip`, for example, `terasology-omega-5.3.0-stable.zip`<br/>
+   For nightly and pre-releases to `terasology-omega-<version>-nightly.zip`, for example, `terasology-omega-5.3.0-rc.2-nightly.zip`
+4. Copy the renamed archive into the `cache` directory located in the launcher managed directory<br/>
+   On Windows: `C:\Users\AppData\Roaming\TerasologyLauncher\cache`<br/>
+   On Linux/Unix: `/home/<user>/.terasologylauncher`
+5. Start the launcher and select the version you downloaded the artifact for, click on the download icon (:arrow_down:) and wait for the download to complete.
+   This should happen quickly as the launcher should use the already downloaded Terasology artifact from the cache.<br/>
+   On completion the download icon (:arrow_down:) should turn into a play icon (:arrow_forward:)
+6. Click on the play icon (:arrow_forward:) to start Terasology
+
+</details>
 
 ## Development
 
