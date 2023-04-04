@@ -204,7 +204,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
     }
 
     private void showDownloadPage() {
-        final String downloadPage = "https://terasology.org/download";
+        final String downloadPage = "https://terasology.org/downloads/";
         try {
             hostServices.tryOpenUri(new URI(downloadPage));
         } catch (URISyntaxException e) {
