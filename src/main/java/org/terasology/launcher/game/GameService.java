@@ -1,18 +1,16 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.game;
 
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import javafx.concurrent.Service;
 import javafx.concurrent.Worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.settings.LauncherSettings;
+import org.terasology.launcher.settings.Settings;
 
-import java.nio.file.Path;
-import java.util.List;
+import java.io.IOException;
 import java.util.concurrent.Executors;
 
 import static com.google.common.base.Verify.verifyNotNull;
@@ -20,7 +18,7 @@ import static com.google.common.base.Verify.verifyNotNull;
 /**
  * This service starts and monitors the game process.
  * <p>
- * Its {@linkplain #GameService() constructor} requires no arguments. Use {@link #start(Path, LauncherSettings, List, List)} to
+ * Its {@linkplain #GameService() constructor} requires no arguments. Use {@link #start(Installation, Settings)} to
  * start the game process; the zero-argument form of {@code start()} will not have enough information.
  * <p>
  * The Boolean value of this service is true when it believes the game process has started <em>successfully.</em>
@@ -46,10 +44,8 @@ import static com.google.common.base.Verify.verifyNotNull;
 public class GameService extends Service<Boolean> {
     private static final Logger logger = LoggerFactory.getLogger(GameService.class);
 
-    private Path gamePath;
-    private LauncherSettings settings;
-    private List<String> additionalJavaParameters;
-    private List<String> additionalGameParameters;
+    private Installation gamePath;
+    private Settings settings;
 
     public GameService() {
         setExecutor(Executors.newSingleThreadExecutor(
@@ -63,24 +59,20 @@ public class GameService extends Service<Boolean> {
 
     /**
      * Start a new game process with these settings.
-     * @param gamePath the directory under which we will find libs/Terasology.jar, also used as the process's
+     * @param installation the directory under which we will find libs/Terasology.jar, also used as the process's
      *     working directory
      * @param settings supplies other settings relevant to configuring a process
-     * @param additionalJavaParameters
-     * @param additionalGameParameters
      */
     @SuppressWarnings("checkstyle:HiddenField")
-    public void start(Path gamePath, LauncherSettings settings, List<String> additionalJavaParameters, List<String> additionalGameParameters) {
-        this.gamePath = gamePath;
+    public void start(Installation installation, Settings settings) {
+        this.gamePath = installation;
         this.settings = settings;
-        this.additionalJavaParameters = additionalJavaParameters;
-        this.additionalGameParameters = additionalGameParameters;
 
         start();
     }
 
     /**
-     * Use {@link #start(Path, LauncherSettings, List, List)} instead.
+     * Use {@link #start(Installation, Settings)} instead.
      * <p>
      * It is an error to call this method before providing the configuration.
      */
@@ -123,23 +115,22 @@ public class GameService extends Service<Boolean> {
      * This class's configuration fields <em>must</em> be set before this is called.
      *
      * @throws com.google.common.base.VerifyException when fields are unset
+     * @throws RuntimeException when required files in the game directory are missing or inaccessible
      */
     @Override
     protected RunGameTask createTask() {
         verifyNotNull(settings);
 
-        final List<String> javaParameters = Lists.newArrayList();
-        javaParameters.addAll(settings.getJavaParameterList());
-        javaParameters.addAll(additionalJavaParameters);
-
-        final List<String> gameParameters = Lists.newArrayList();
-        gameParameters.addAll(settings.getUserGameParameterList());
-        gameParameters.addAll(additionalGameParameters);
-
-        var starter = new GameStarter(verifyNotNull(gamePath), settings.getGameDataDirectory(),
-                                      settings.getMaxHeapSize(), settings.getInitialHeapSize(),
-                                      javaParameters, gameParameters,
-                                      settings.getLogLevel());
+        GameStarter starter;
+        try {
+            starter = new GameStarter(verifyNotNull(gamePath), settings.gameDataDirectory.get(),
+                    settings.minHeapSize.get(), settings.maxHeapSize.get(),
+                    settings.userJavaParameters.get(),
+                    settings.userGameParameters.get(),
+                    settings.logLevel.get());
+        } catch (IOException e) {
+            throw new RuntimeException("Error using this as a game directory: " + gamePath, e);
+        }
         return new RunGameTask(starter);
     }
 

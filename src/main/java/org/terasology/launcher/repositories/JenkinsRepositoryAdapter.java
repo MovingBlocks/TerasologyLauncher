@@ -14,6 +14,7 @@ import org.terasology.launcher.model.ReleaseMetadata;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,7 +65,13 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
 
         logger.debug("fetching releases from '{}'", apiUrl);
 
-        final Jenkins.ApiResult result = client.request(apiUrl);
+        final Jenkins.ApiResult result;
+        try {
+            result = client.request(apiUrl);
+        } catch (InterruptedException e) {
+            logger.warn("Interrupted while fetching packages from: {}", apiUrl, e);
+            return Collections.emptyList();
+        }
         if (result != null && result.builds != null) {
             for (Jenkins.Build build : result.builds) {
                 computeReleaseFrom(build).ifPresent(pkgList::add);
@@ -96,14 +103,25 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     private Optional<GameIdentifier> computeIdentifierFrom(Jenkins.Build jenkinsBuildInfo) {
         return Optional.ofNullable(client.getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"))
                 .map(client::requestProperties)
-                .flatMap(versionInfo -> GameIdentifier.fromVersionInfo(versionInfo, buildProfile, profile));
+                .map(versionInfo -> versionInfo.getProperty("displayVersion"))
+                .map(displayVersion -> {
+                    // versionInfo.properties is created during the Engine build.
+                    // jenkinsBuildInfo is the build of a Distribution.
+                    //
+                    // There may be multiple Distribution builds that come from the same Engine build.
+                    //
+                    // We can use the Engine's displayVersion, but we use the Distribution build number
+                    // to ensure uniqueness.
+                    String versionString = displayVersion + "+" + jenkinsBuildInfo.number;
+                    return new GameIdentifier(versionString, buildProfile, profile);
+                });
     }
 
     private ReleaseMetadata computeReleaseMetadataFrom(Jenkins.Build jenkinsBuildInfo) {
         String changelog = computeChangelogFrom(jenkinsBuildInfo.changeSet);
         final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
         // all builds from this Jenkins are using LWJGL v3
-        return new ReleaseMetadata(changelog, timestamp, true);
+        return new ReleaseMetadata(changelog, timestamp);
     }
 
     private String computeChangelogFrom(Jenkins.ChangeSet changeSet) {
@@ -120,7 +138,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     private static URL unsafeToUrl(String url) {
         try {
             return new URL(url);
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException e) { //NOPMD
             //TODO: at least log something here?
         }
         return null;

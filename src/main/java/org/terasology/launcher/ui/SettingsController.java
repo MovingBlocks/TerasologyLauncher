@@ -3,6 +3,8 @@
 
 package org.terasology.launcher.ui;
 
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -12,38 +14,39 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
-import org.terasology.launcher.settings.BaseLauncherSettings;
 import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.Settings;
-import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.Languages;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.text.Collator;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
-import java.util.MissingResourceException;
+import java.util.stream.Collectors;
 
 public class SettingsController {
 
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
 
     private Path launcherDirectory;
-    private LauncherSettings launcherSettings;
+    private Settings launcherSettings;
     private ApplicationController appController;
 
     private Path gameDirectory;
     private Path gameDataDirectory;
 
     private Stage stage;
+
+    private Locale oldLocale;
 
     @FXML
     private Label gameSettingsTitle;
@@ -72,6 +75,8 @@ public class SettingsController {
     @FXML
     private CheckBox closeAfterStartBox;
     @FXML
+    private CheckBox showPreReleasesBox;
+    @FXML
     private CheckBox saveDownloadedFilesBox;
     @FXML
     private Label launcherDirectoryLabel;
@@ -82,11 +87,13 @@ public class SettingsController {
     @FXML
     private Button cancelSettingsButton;
     @FXML
+    private Button resetSettingsButton;
+    @FXML
     private ComboBox<JavaHeapSize> maxHeapSizeBox;
     @FXML
     private ComboBox<JavaHeapSize> initialHeapSizeBox;
     @FXML
-    private ComboBox<String> languageBox;
+    private ComboBox<Locale> languageBox;
     @FXML
     private TextField gameDirectoryPath;
     @FXML
@@ -99,59 +106,68 @@ public class SettingsController {
     private TextField userGameParametersField;
     @FXML
     private ComboBox<Level> logLevelBox;
+    @FXML
+    private TitledPane advancedOptionsPane;
+    @FXML
+    private Label otherSettingsLabel;
 
     @FXML
     protected void cancelSettingsAction(ActionEvent event) {
+        I18N.localeProperty().unbind();
+        if (!I18N.getCurrentLocale().equals(oldLocale)) {
+            Platform.runLater(() -> I18N.setLocale(oldLocale));
+        }
         ((Node) event.getSource()).getScene().getWindow().hide();
     }
 
     @FXML
     protected void saveSettingsAction(ActionEvent event) {
         // save gameDirectory
-        launcherSettings.setGameDirectory(gameDirectory);
+        launcherSettings.gameDirectory.set(gameDirectory);
 
         // save gameDataDirectory
-        launcherSettings.setGameDataDirectory(gameDataDirectory);
+        launcherSettings.gameDataDirectory.set(gameDataDirectory);
 
         // save heap size settings
-        launcherSettings.setMaxHeapSize(maxHeapSizeBox.getSelectionModel().getSelectedItem());
-        launcherSettings.setInitialHeapSize(initialHeapSizeBox.getSelectionModel().getSelectedItem());
+        launcherSettings.maxHeapSize.set(maxHeapSizeBox.getSelectionModel().getSelectedItem());
+        launcherSettings.minHeapSize.set(initialHeapSizeBox.getSelectionModel().getSelectedItem());
 
         // save log level settings
-        launcherSettings.setLogLevel(logLevelBox.getSelectionModel().getSelectedItem());
+        launcherSettings.logLevel.set(logLevelBox.getSelectionModel().getSelectedItem());
 
         // save languageBox settings
-        Languages.update(Languages.SUPPORTED_LOCALES.get(languageBox.getSelectionModel().getSelectedIndex()));
-        launcherSettings.setLocale(Languages.getCurrentLocale());
+        launcherSettings.locale.set(I18N.getCurrentLocale());
 
         // save closeLauncherAfterGameStart
-        launcherSettings.setCloseLauncherAfterGameStart(closeAfterStartBox.isSelected());
+        launcherSettings.closeLauncherAfterGameStart.set(closeAfterStartBox.isSelected());
+
+        // save showPreReleases
+        launcherSettings.showPreReleases.set(showPreReleasesBox.isSelected());
 
         // save saveDownloadedFiles
-        launcherSettings.setKeepDownloadedFiles(saveDownloadedFilesBox.isSelected());
+        launcherSettings.keepDownloadedFiles.set(saveDownloadedFilesBox.isSelected());
 
         //save userParameters (java & game), if textfield is empty then set to defaults
         if (userJavaParametersField.getText().isEmpty()) {
-            launcherSettings.setUserJavaParameters(BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+            launcherSettings.userJavaParameters.setAll(asParameterList(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT));
         } else {
             logger.debug("User defined Java parameters: {}", userJavaParametersField.getText());
-            launcherSettings.setUserJavaParameters(userJavaParametersField.getText());
+            launcherSettings.userJavaParameters.setAll(asParameterList(userJavaParametersField.getText()));
         }
         if (userGameParametersField.getText().isEmpty()) {
-            launcherSettings.setUserGameParameters(BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT);
+            launcherSettings.userGameParameters.setAll(asParameterList(LauncherSettings.USER_GAME_PARAMETERS_DEFAULT));
         } else {
             logger.debug("User defined game parameters: {}", userGameParametersField.getText());
-            launcherSettings.setUserGameParameters(userGameParametersField.getText());
+            launcherSettings.userGameParameters.setAll(asParameterList(userGameParametersField.getText()));
         }
 
         // store changed settings
-        final Path settingsFile = launcherDirectory.resolve(Settings.DEFAULT_FILE_NAME);
         try {
-            Settings.store(launcherSettings, settingsFile);
+            Settings.store(launcherSettings, launcherDirectory);
         } catch (IOException e) {
             //TODO: unify error handling, probably to Settings a.k.a. SettingsController?
-            logger.error("The launcher settings cannot be stored! '{}'", settingsFile, e);
-            Dialogs.showError(stage, BundleUtils.getLabel("message_error_storeSettings"));
+            logger.error("The launcher settings cannot be stored to '{}'.", launcherDirectory, e);
+            Dialogs.showError(stage, I18N.getLabel("message_error_storeSettings"));
         } finally {
             ((Node) event.getSource()).getScene().getWindow().hide();
         }
@@ -159,17 +175,17 @@ public class SettingsController {
 
     @FXML
     protected void openGameDirectoryAction() {
-        Dialogs.openFileBrowser(stage, gameDirectory, BundleUtils.getLabel("message_error_gameDirectory"));
+        Dialogs.openFileBrowser(stage, gameDirectory, I18N.getLabel("message_error_gameDirectory"));
     }
 
     @FXML
     protected void openGameDataDirectoryAction() {
-        Dialogs.openFileBrowser(stage, gameDataDirectory, BundleUtils.getLabel("message_error_gameDataDirectory"));
+        Dialogs.openFileBrowser(stage, gameDataDirectory, I18N.getLabel("message_error_gameDataDirectory"));
     }
 
     @FXML
     protected void openLauncherDirectoryAction() {
-        Dialogs.openFileBrowser(stage, launcherDirectory, BundleUtils.getLabel("message_error_launcherDirectory"));
+        Dialogs.openFileBrowser(stage, launcherDirectory, I18N.getLabel("message_error_launcherDirectory"));
     }
 
     @FXML
@@ -190,22 +206,25 @@ public class SettingsController {
         }
     }
 
-    void initialize(final Path newLauncherDirectory, final LauncherSettings newLauncherSettings,
+    void initialize(final Path newLauncherDirectory, final Settings newLauncherSettings,
                     final Stage newStage, final ApplicationController newAppController) {
         this.launcherDirectory = newLauncherDirectory;
         this.launcherSettings = newLauncherSettings;
         this.stage = newStage;
         this.appController = newAppController;
 
+        // back up the current locale before doing anything else
+        oldLocale = I18N.getCurrentLocale();
+
         populateHeapSize();
         populateLanguageValues();
-        populateLanguageIcons();
         populateCloseLauncherAfterGameStart();
         populateSaveDownloadedFiles();
+        populateShowPreReleases();
         populateLogLevel();
 
-        gameDirectory = newLauncherSettings.getGameDirectory();
-        gameDataDirectory = newLauncherSettings.getGameDataDirectory();
+        gameDirectory = newLauncherSettings.gameDirectory.get();
+        gameDataDirectory = newLauncherSettings.gameDataDirectory.get();
 
         updateDirectoryPathLabels();
         initUserParameterFields();
@@ -221,79 +240,92 @@ public class SettingsController {
     private void setLabelStrings() {
         // Game settings
 
-        gameSettingsTitle.setText(BundleUtils.getLabel("settings_game_title"));
-        maxHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_maxHeapSize"));
-        initialHeapSizeLabel.setText(BundleUtils.getLabel("settings_game_initialHeapSize"));
-        gameDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDirectory_open"));
-        gameDataDirectoryOpenButton.setText(BundleUtils.getLabel("settings_game_gameDataDirectory_open"));
-        gameDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDirectory"));
-        gameDataDirectoryLabel.setText(BundleUtils.getLabel("settings_game_gameDataDirectory"));
+        gameSettingsTitle.textProperty().bind(I18N.labelBinding("settings_game_title"));
+        maxHeapSizeLabel.textProperty().bind(I18N.labelBinding("settings_game_maxHeapSize"));
+        initialHeapSizeLabel.textProperty().bind(I18N.labelBinding("settings_game_initialHeapSize"));
+        gameDirectoryOpenButton.textProperty().bind(I18N.labelBinding("settings_game_gameDirectory_open"));
+        gameDataDirectoryOpenButton.textProperty().bind(I18N.labelBinding("settings_game_gameDataDirectory_open"));
+        gameDirectoryLabel.textProperty().bind(I18N.labelBinding("settings_game_gameDirectory"));
+        gameDataDirectoryLabel.textProperty().bind(I18N.labelBinding("settings_game_gameDataDirectory"));
 
-        userJavaParametersField.setPromptText(BundleUtils.getLabel("settings_game_javaParsPrompt"));
-        userGameParametersField.setPromptText(BundleUtils.getLabel("settings_game_gameParsPrompt"));
+        userJavaParametersField.promptTextProperty().bind(I18N.labelBinding("settings_game_javaParsPrompt"));
+        userGameParametersField.promptTextProperty().bind(I18N.labelBinding("settings_game_gameParsPrompt"));
 
-        javaParametersLabel.setText(BundleUtils.getLabel("settings_game_javaParameters"));
-        gameParametersLabel.setText(BundleUtils.getLabel("settings_game_gameParameters"));
-        logLevelLabel.setText(BundleUtils.getLabel("settings_game_logLevel"));
+        javaParametersLabel.textProperty().bind(I18N.labelBinding("settings_game_javaParameters"));
+        gameParametersLabel.textProperty().bind(I18N.labelBinding("settings_game_gameParameters"));
+        logLevelLabel.textProperty().bind(I18N.labelBinding("settings_game_logLevel"));
 
         // Launcher settings
 
-        launcherSettingsTitle.setText(BundleUtils.getLabel("settings_launcher_title"));
-        chooseLanguageLabel.setText(BundleUtils.getLabel("settings_launcher_chooseLanguage"));
-        closeAfterStartBox.setText(BundleUtils.getLabel("settings_launcher_closeLauncherAfterGameStart"));
-        saveDownloadedFilesBox.setText(BundleUtils.getLabel("settings_launcher_saveDownloadedFiles"));
-        launcherDirectoryLabel.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory"));
-        launcherDirectoryOpenButton.setText(BundleUtils.getLabel("settings_launcher_launcherDirectory_open"));
-        saveSettingsButton.setText(BundleUtils.getLabel("settings_save"));
-        cancelSettingsButton.setText(BundleUtils.getLabel("settings_cancel"));
+        launcherSettingsTitle.textProperty().bind(I18N.labelBinding("settings_launcher_title"));
+        chooseLanguageLabel.textProperty().bind(I18N.labelBinding("settings_launcher_chooseLanguage"));
+        closeAfterStartBox.textProperty().bind(I18N.labelBinding("settings_launcher_closeLauncherAfterGameStart"));
+        saveDownloadedFilesBox.textProperty().bind(I18N.labelBinding("settings_launcher_saveDownloadedFiles"));
+        showPreReleasesBox.textProperty().bind(I18N.labelBinding("settings_launcher_showPreReleases"));
+        launcherDirectoryLabel.textProperty().bind(I18N.labelBinding("settings_launcher_launcherDirectory"));
+        launcherDirectoryOpenButton.textProperty().bind(I18N.labelBinding("settings_launcher_launcherDirectory_open"));
+        saveSettingsButton.textProperty().bind(I18N.labelBinding("settings_save"));
+        cancelSettingsButton.textProperty().bind(I18N.labelBinding("settings_cancel"));
+        resetSettingsButton.textProperty().bind(I18N.labelBinding("settings_reset"));
+        advancedOptionsPane.textProperty().bind(I18N.labelBinding("settings_advanced_options"));
+        otherSettingsLabel.textProperty().bind(I18N.labelBinding("settings_other"));
     }
 
     private void populateHeapSize() {
-        maxHeapSizeBox.getItems().clear();
-        initialHeapSizeBox.getItems().clear();
-
         // Limit items till 1.5 GB for 32-bit JVM
         final JavaHeapSize[] heapSizeRange = System.getProperty("os.arch").equals("x86")
                 ? Arrays.copyOfRange(JavaHeapSize.values(), 0, JavaHeapSize.GB_1_5.ordinal() + 1)
                 : JavaHeapSize.values();
 
+        initialHeapSizeBox.getItems().clear();
+        maxHeapSizeBox.getItems().clear();
+
+        initialHeapSizeBox.setButtonCell(new MemorySizeCell());
+        maxHeapSizeBox.setButtonCell(new MemorySizeCell());
+
+        initialHeapSizeBox.setCellFactory(param -> new MemorySizeCell());
+        maxHeapSizeBox.setCellFactory(param -> new MemorySizeCell());
+
         for (JavaHeapSize heapSize : heapSizeRange) {
             maxHeapSizeBox.getItems().add(heapSize);
             initialHeapSizeBox.getItems().add(heapSize);
         }
+
         updateHeapSizeSelection();
     }
 
     private void populateLanguageValues() {
         languageBox.getItems().clear();
-        for (Locale locale : Languages.SUPPORTED_LOCALES) {
-            String item = locale.toLanguageTag() + " : " + BundleUtils.getLabel(locale, Languages.SETTINGS_LABEL_KEYS.get(locale));
-            if (!locale.equals(Languages.getCurrentLocale())) {
-                item += " (" + BundleUtils.getLabel(Languages.SETTINGS_LABEL_KEYS.get(locale)) + ")";
-            }
-            languageBox.getItems().add(item);
-
-            if (Languages.getCurrentLocale().equals(locale)) {
-                languageBox.getSelectionModel().select(item);
+        for (Locale locale : I18N.getSupportedLocales()) {
+            languageBox.getItems().add(locale);
+            if (I18N.getCurrentLocale().equals(locale)) {
+                languageBox.getSelectionModel().select(locale);
             }
         }
-        Collator coll = Collator.getInstance();
-        languageBox.getItems().sort(coll);
-    }
 
-    private void populateLanguageIcons() {
+        // Set up custom cell factory to render the Locales with flag and translation
         languageBox.setCellFactory(p -> new LanguageIconListCell());
 
         // Make the icon visible in the control area for the selected locale
         languageBox.setButtonCell(languageBox.getCellFactory().call(null));
+
+        I18N.localeProperty().bind(
+                Bindings.createObjectBinding(() -> languageBox.selectionModelProperty().getValue().selectedItemProperty().get(),
+                        languageBox.selectionModelProperty(),
+                        languageBox.selectionModelProperty().getValue().selectedItemProperty()));
+
     }
 
     private void populateCloseLauncherAfterGameStart() {
-        closeAfterStartBox.setSelected(launcherSettings.isCloseLauncherAfterGameStart());
+        closeAfterStartBox.setSelected(launcherSettings.closeLauncherAfterGameStart.get());
+    }
+
+    private void populateShowPreReleases() {
+        showPreReleasesBox.setSelected(launcherSettings.showPreReleases.get());
     }
 
     private void populateSaveDownloadedFiles() {
-        saveDownloadedFilesBox.setSelected(launcherSettings.isKeepDownloadedFiles());
+        saveDownloadedFilesBox.setSelected(launcherSettings.keepDownloadedFiles.get());
     }
 
     private void populateLogLevel() {
@@ -311,52 +343,72 @@ public class SettingsController {
     }
 
     private void updateHeapSizeSelection() {
-        maxHeapSizeBox.getSelectionModel().select(launcherSettings.getMaxHeapSize());
-        initialHeapSizeBox.getSelectionModel().select(launcherSettings.getInitialHeapSize());
+        maxHeapSizeBox.getSelectionModel().select(launcherSettings.maxHeapSize.get());
+        initialHeapSizeBox.getSelectionModel().select(launcherSettings.minHeapSize.get());
     }
 
     private void updateLogLevelSelection() {
-        logLevelBox.getSelectionModel().select(launcherSettings.getLogLevel());
+        logLevelBox.getSelectionModel().select(launcherSettings.logLevel.get());
     }
 
     private void initUserParameterFields() {
         //if the VM parameters are left default do not display, the prompt message will show
-        if (!launcherSettings.getUserJavaParameters().equals(BaseLauncherSettings.USER_JAVA_PARAMETERS_DEFAULT)) {
-            userJavaParametersField.setText(launcherSettings.getUserJavaParameters());
+        List<String> defaultParams = asParameterList(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+        List<String> userJavaParams = launcherSettings.userJavaParameters.get();
+        if (!(defaultParams.containsAll(userJavaParams) && userJavaParams.containsAll(defaultParams))) {
+            userJavaParametersField.setText(String.join(" ", launcherSettings.userJavaParameters.get()));
         }
         //if the Game parameters are left default do not display, the prompt message will show
-        if (!launcherSettings.getUserGameParameters().equals(BaseLauncherSettings.USER_GAME_PARAMETERS_DEFAULT)) {
-            userGameParametersField.setText(launcherSettings.getUserGameParameters());
+        if (!launcherSettings.userGameParameters.get().isEmpty()) {
+            userGameParametersField.setText(String.join(" ", launcherSettings.userGameParameters.get()));
         }
     }
 
-    private static class LanguageIconListCell extends ListCell<String> {
+    private List<String> asParameterList(String text) {
+        return Arrays.stream(text.split("\\s"))
+                .filter(param -> !param.isBlank())
+                .map(String::trim)
+                .collect(Collectors.toList());
+    }
+
+    private static class LanguageIconListCell extends ListCell<Locale> {
         @Override
-        protected void updateItem(String item, boolean empty) {
+        protected void updateItem(Locale item, boolean empty) {
             // Pass along the locale text
             super.updateItem(item, empty);
-            this.setText(item);
 
             if (item == null || empty) {
                 this.setGraphic(null);
             } else {
+                this.setText(item.toLanguageTag() + ": " + I18N.getLabel("settings_language_" + item.toLanguageTag()));
                 // Get the key that represents the locale in ImageBundle (flag_xx)
-                String countryCode = this.getText().split(":")[0].trim();
+                String countryCode = item.toLanguageTag();
                 String id = "flag_" + countryCode;
 
-                try {
-                    // Get the appropriate flag icon via BundleUtils
-                    Image icon = BundleUtils.getFxImage(id);
-
+                // Get the appropriate flag icon via BundleUtils
+                Image icon = I18N.getFxImage(id);
+                if (icon != null) {
                     ImageView iconImageView = new ImageView(icon);
                     iconImageView.setFitHeight(11);
                     iconImageView.setPreserveRatio(true);
                     this.setGraphic(iconImageView);
-                } catch (MissingResourceException e) {
-                    logger.warn("ImageBundle key {} not found", id);
-                } catch (NullPointerException e) {
-                    logger.warn("Flag icon in ImageBundle key {} missing or corrupt", id);
+                } else {
+                    logger.warn("Flag icon for key '{}' could not be loaded.", id);
+
                 }
+            }
+        }
+    }
+
+    private static class MemorySizeCell extends ListCell<JavaHeapSize> {
+        @Override
+        protected void updateItem(JavaHeapSize item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                this.textProperty().unbind();
+                this.setText(null);
+            } else {
+                this.textProperty().bind(I18N.labelBinding(item.getLabelKey()));
             }
         }
     }

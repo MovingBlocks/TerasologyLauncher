@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.repositories;
@@ -23,7 +23,7 @@ public interface ReleaseRepository {
      *
      * @return a list of available game releases (an empty list if fetching was not successful)
      */
-    //TODO: this should probably throw an IOException in case of connection erros so that the UI can decide whether to
+    //TODO: this should probably throw an IOException in case of connection errors so that the UI can decide whether to
     //      notify the user about that.
     List<GameRelease> fetchReleases();
 }

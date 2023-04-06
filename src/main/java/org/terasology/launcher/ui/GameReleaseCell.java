@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.ui;
@@ -9,7 +9,7 @@ import javafx.scene.image.ImageView;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
-import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.I18N;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -19,7 +19,7 @@ import java.util.Set;
  * Custom {@link ListCell} used to display a {@link GameRelease} along with its installation status.
  */
 final class GameReleaseCell extends ListCell<GameRelease> {
-    private static final Image ICON_CHECK = BundleUtils.getFxImage("icon_check");
+    private static final Image ICON_CHECK = I18N.getFxImage("icon_check");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 
     private final ImageView iconStatus;
@@ -50,10 +50,10 @@ final class GameReleaseCell extends ListCell<GameRelease> {
             String displayVersion;
             if (id.getBuild().equals(Build.NIGHTLY)) {
                 setStyle("-fx-font-weight: normal");
-                displayVersion = "preview " + id.getVersion() + " (" + DATE_FORMAT.format(item.getTimestamp()) + ")";
+                displayVersion = "preview " + id.getDisplayVersion() + " (" + DATE_FORMAT.format(item.getTimestamp()) + ")";
             } else {
                 setStyle("-fx-font-weight: bold");
-                displayVersion = "release " + id.getVersion();
+                displayVersion = "release " + id.getDisplayVersion();
             }
 
             setText(displayVersion);

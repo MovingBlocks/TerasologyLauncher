@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.launcher.tasks;
@@ -24,7 +24,7 @@ public final class DownloadTask extends Task<Void> implements ProgressListener {
     }
 
     @Override
-    protected Void call() {
+    protected Void call() throws InterruptedException {
         try {
             gameManager.install(release, this);
         } catch (IOException | DownloadException e) {

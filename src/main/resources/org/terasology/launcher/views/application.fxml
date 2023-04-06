@@ -65,12 +65,12 @@
                         <URL value="@terasology.css" />
                       </stylesheets>
                       <tabs>
-                        <Tab closable="false" text="Changelog">
+                        <Tab closable="false" fx:id="changelogTab" text="Changelog">
                           <content>
                             <fx:include fx:id="changelogView" source="changelog-view.fxml"/>
                           </content>
                         </Tab>
-                        <Tab closable="false" text="About">
+                        <Tab closable="false" fx:id="aboutTab" text="About">
                           <content>
                             <fx:include fx:id="aboutView" source="about-view.fxml"/>
                           </content>
@@ -105,23 +105,7 @@
                   <children>
                     <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="8.0" HBox.hgrow="ALWAYS">
                       <children>
-                        <ComboBox fx:id="profileComboBox" maxWidth="1.7976931348623157E308">
-                          <items>
-                            <FXCollections fx:factory="observableArrayList">
-                              <String fx:value="Item 1" />
-                              <String fx:value="Item 2" />
-                              <String fx:value="Item 3" />
-                            </FXCollections>
-                          </items>
-                        </ComboBox>
                         <ComboBox fx:id="gameReleaseComboBox" maxWidth="1.7976931348623157E308">
-                          <items>
-                            <FXCollections fx:factory="observableArrayList">
-                              <String fx:value="Item 1" />
-                              <String fx:value="Item 2" />
-                              <String fx:value="Item 3" />
-                            </FXCollections>
-                          </items>
                         </ComboBox>
                       </children>
                       <padding>

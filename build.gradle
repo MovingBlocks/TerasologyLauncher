@@ -13,21 +13,24 @@ buildscript {
         mavenCentral()
         gradlePluginPortal()
     }
+    configurations.classpath {
+        resolutionStrategy.activateDependencyLocking()
+    }
 }
 
 plugins {
     id 'application'
     id 'checkstyle'
-    id "com.github.spotbugs" version "4.0.4"
-    id 'de.undercouch.download' version '4.0.4'
+    id "com.github.spotbugs" version "5.0.13"
+    id 'de.undercouch.download' version '5.3.0'
     id 'java'
     // to help clarify conflicting logging providers
-    id 'name.remal.component-metadata' version '1.0.186'
-    id 'nebula.release' version '14.1.0'
+    id 'name.remal.component-metadata' version '1.5.0'
+    id 'nebula.release' version '16.0.0'
     id 'pmd'
     id 'project-report'
-    id 'org.openjfx.javafxplugin' version '0.0.8'
-    id "org.jetbrains.gradle.plugin.idea-ext" version "0.9"
+    id 'org.openjfx.javafxplugin' version '0.0.13'
+    id "org.jetbrains.gradle.plugin.idea-ext" version "1.1.5"
 }
 
 apply plugin: 'org.terasology.gradlegoo'
@@ -44,6 +47,9 @@ def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
 
 configurations {
+    compileClasspath {
+        resolutionStrategy.activateDependencyLocking()
+    }
     codeMetrics
 }
 
@@ -59,7 +65,7 @@ ext {
     splashImage = 'org/terasology/launcher/images/splash.jpg'
 
     // Shared code analytics configurations via retrieved config zip
-    metricsConfigDir = 'config/metrics'
+    metricsConfigDir = layout.getProjectDirectory().dir('config/metrics')
 }
 
 // Declare remote repositories we're interested in - library files will be fetched from here
@@ -85,36 +91,44 @@ repositories {
 
 // Primary dependencies definition
 dependencies {
-    implementation("org.slf4j:slf4j-api:[1.7.+, 2.0.0-alpha1]") {
+    implementation("org.slf4j:slf4j-api:[1.7.+, 2.0.0-alpha7]") {
         because "influenced by app or test loggers as needed"
     }
-    implementation("ch.qos.logback:logback-classic:1.3.0-alpha5") {
+    implementation("ch.qos.logback:logback-classic:1.3.0-alpha16") {
         because "1.3 series uses ServiceLoader (more packaging friendly?)"
     }
 
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
-    implementation group: "com.google.guava", name: "guava", version: "28.1-jre"
-    implementation group: 'com.github.everit-org.json-schema', name: 'org.everit.json.schema', version: '1.12.1'
+    implementation group: "com.google.guava", name: "guava", version: "31.1-jre"
+    implementation group: 'com.github.everit-org.json-schema', name: 'org.everit.json.schema', version: '1.14.1'
 
-    implementation group: 'org.kohsuke', name: 'github-api', version: '1.131'
+    implementation group: 'org.kohsuke', name: 'github-api', version: '1.306'
     implementation group: 'com.vdurmont', name: 'semver4j', version: '3.1.0'
-    implementation group: 'com.vladsch.flexmark', name: 'flexmark-all', version: '0.62.2'
+    implementation group: 'com.vladsch.flexmark', name: 'flexmark-all', version: '0.64.0'
+
+    implementation('org.hildan.fxgson:fx-gson:4.0.1') {
+        because "de-/serialization of launcher properties to JSON"
+    }
+
+    implementation('com.squareup.okhttp3:okhttp:4.10.0') {
+        because "built-in caching of HTTP requests"
+    }
 
     // These dependencies are only needed for running tests
 
     testImplementation 'org.hamcrest:hamcrest:2.2'
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.+"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:5.6.+"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.+"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
 
-    testImplementation('org.mockito:mockito-inline:3.4.+') {
+    testImplementation('org.mockito:mockito-inline:4.8.0') {
         because "-inline build enables mocking final classes"
         // https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.2
         // > Be aware that this artifact may be abolished when the inline mock making feature is integrated into the default mock maker.
     }
-    testImplementation "org.mockito:mockito-junit-jupiter:3.4.+"
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.8.0'
 
-    testImplementation('org.spf4j:spf4j-slf4j-test:8.8.5') {
+    testImplementation('org.spf4j:spf4j-slf4j-test:8.9.5') {
         because "testable logging"
     }
     testImplementation("org.slf4j:slf4j-api:1.7.+!!") {
@@ -132,11 +146,18 @@ dependencies {
         because "CI builders are headless environments"
     }
 
+    testImplementation('com.github.gmazzo:okhttp-mock:1.5.0') {
+        because "to easily write OkHttpClient interceptors for testing"
+    }
+    testImplementation('com.squareup.okhttp3:mockwebserver:4.10.0') {
+        because "to control server responses for testing"
+    }
+
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
-    codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.5.1', ext: 'zip'
+    codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.7.1', ext: 'zip'
 }
 
-configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation)Classpath/ }).all {
+configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation|PmdAux)Classpath/ }).all {
     resolutionStrategy(gradlegoo.prefers("logging", "jcl-api-capability", "jcl-over-slf4j",
             "jcl should prefer slf4j when available"))
     resolutionStrategy(gradlegoo.prefers("logging", "slf4j-impl-capability",
@@ -156,7 +177,7 @@ compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
 
 javafx {
-    version = "12.0.1"
+    version = "17.0.2"
     modules = [
             'javafx.graphics',
             'javafx.fxml',
@@ -169,14 +190,18 @@ test {
 }
 
 checkstyle {
+    toolVersion = "10.4"
     ignoreFailures = false
-    configFile = new File("$rootDir/config/metrics/checkstyle/checkstyle.xml")
-    configProperties.samedir = checkstyle.configFile.parentFile
+    configDirectory.set(metricsConfigDir.dir("checkstyle"))
 }
 
 pmd {
-    ignoreFailures = true
-    ruleSetFiles = files("$rootDir/config/metrics/pmd/pmd.xml")
+    toolVersion = "6.39.0"
+    ignoreFailures = false
+    consoleOutput = true
+    threads = 4
+    ruleSetFiles "${rootDir}/config/pmd.xml"
+    ruleSets = []
 }
 
 spotbugs {
@@ -217,15 +242,17 @@ task extractCodeMetricsConfig(type: Copy) {
             zipTree(it)
         }
     }
-    into "$rootDir/$metricsConfigDir"
+    into metricsConfigDir
 }
+
+processResources.dependsOn(createVersionInfoFile, extractCodeMetricsConfig)
 
 clean {
     delete createVersionInfoFile.outputs.files
     delete extractCodeMetricsConfig.destinationDir
 }
 
-processResources.dependsOn(createVersionInfoFile, extractCodeMetricsConfig)
+processResources.dependsOn(createVersionInfoFile)
 
 jar {
     //TODO we only use this name because the `.exe` start scripts require the JAR to be named 'TerasologyLauncher.jar'

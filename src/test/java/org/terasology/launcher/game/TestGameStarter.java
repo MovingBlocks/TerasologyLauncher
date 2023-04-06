@@ -1,16 +1,21 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.launcher.game;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
 
+import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -43,18 +48,23 @@ public class TestGameStarter {
         gameParams = List.of(GAME_ARG_1);
     }
 
+    private GameStarter newStarter() throws IOException {
+        return newStarter(Path.of("libs", "Terasology.jar"));
+    }
+
+    private GameStarter newStarter(Path relativeGameJarPath) throws IOException {
+        return new GameStarter(new StubInstallation(gamePath, relativeGameJarPath),
+                gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
+    }
+
     @Test
-    public void testConstruction() {
+    public void testConstruction() throws IOException {
         GameStarter starter = newStarter();
         assertNotNull(starter);
     }
 
-    private GameStarter newStarter() {
-        return new GameStarter(gamePath, gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
-    }
-
     @Test
-    public void testJre() {
+    public void testJre() throws IOException {
         GameStarter task = newStarter();
         // This is the sort of test where the code under test and the expectation are just copies
         // of the same source. But since there's a plan to separate the launcher runtime from the
@@ -62,11 +72,19 @@ public class TestGameStarter {
         assertTrue(task.getRuntimePath().startsWith(Path.of(System.getProperty("java.home"))));
     }
 
-    @Test
-    public void testBuildProcess() {
-        GameStarter starter = newStarter();
+    static Stream<Arguments> provideJarPaths() {
+        return Stream.of(
+                Arguments.of(Path.of("libs", "Terasology.jar")),
+                Arguments.of(Path.of("Terasology-5.2.0-SNAPSHOT", "lib", "Terasology.jar"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideJarPaths")
+    public void testBuildProcess(Path jarRelativePath) throws IOException {
+        GameStarter starter = newStarter(jarRelativePath);
         ProcessBuilder processBuilder = starter.processBuilder;
-        final Path gameJar = gamePath.resolve(Path.of("libs", "Terasology.jar"));
+        final Path gameJar = gamePath.resolve(jarRelativePath);
 
         assertNotNull(processBuilder.directory());
         assertEquals(gamePath, processBuilder.directory().toPath());

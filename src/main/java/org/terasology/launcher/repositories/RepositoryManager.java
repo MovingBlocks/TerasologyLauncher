@@ -5,6 +5,7 @@ package org.terasology.launcher.repositories;
 
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
+import okhttp3.OkHttpClient;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
@@ -17,14 +18,20 @@ public class RepositoryManager {
 
     private final Set<GameRelease> releases;
 
-    public RepositoryManager() {
-        JenkinsClient client = new JenkinsClient(new Gson());
+    /**
+     * Create a repository manager and immediately fetch for game releases.
+     *
+     * @param httpClient the HTTP client to be used for remote requests
+     */
+    public RepositoryManager(OkHttpClient httpClient) {
+        JenkinsClient client = new JenkinsClient(httpClient, new Gson());
 
         ReleaseRepository omegaNightly = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.NIGHTLY, client);
-        ReleaseRepository github = new GithubRepositoryAdapter();
+        ReleaseRepository github = new GithubRepositoryAdapter(httpClient);
 
         Set<ReleaseRepository> all = Sets.newHashSet(github, omegaNightly);
 
+        //TODO: separate IO operation/remote call from construction of the manager object?
         releases = fetchReleases(all);
     }
 

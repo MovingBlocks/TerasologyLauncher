@@ -16,7 +16,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.I18N;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -73,7 +73,7 @@ public class AboutViewController {
         aboutInfoAccordion.getPanes().clear();
 
         Stream.of("README.md", "CHANGELOG.md", "CONTRIBUTING.md", "LICENSE")
-                .map(filename -> BundleUtils.getFXMLUrl(ABOUT, filename))
+                .map(filename -> I18N.getFXMLUrl(ABOUT, filename))
                 .filter(Objects::nonNull)
                 .map(this::createPaneFor)
                 .filter(Optional::isPresent)
@@ -88,7 +88,7 @@ public class AboutViewController {
     private Optional<TitledPane> createPaneFor(URL url) {
         return createViewFor(url)
                 .map(view -> {
-                    view.getStylesheets().add(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
+                    view.getStylesheets().add(I18N.getFXMLUrl("css_webview").toExternalForm());
                     view.setContextMenuEnabled(false);
                     return view;
                 })

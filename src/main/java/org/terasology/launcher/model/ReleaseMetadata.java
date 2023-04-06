@@ -8,18 +8,16 @@ import java.util.Date;
 /**
  * Data container for metadata associated with a game release.
  *
- * The metadata in this class is either relevant for displaying more information to the user (e.g., {@code changelog},
- * {@code timestamp}) or for managing and starting the game itself (e.g., {@code isLwjgl3}).
+ * The metadata in this class is relevant for displaying more information to the user, e.g., {@code changelog},
+ * {@code timestamp}.
  */
 public class ReleaseMetadata {
     private final String changelog;
     private final Date timestamp;
-    private final boolean isLwjgl3;
 
-    public ReleaseMetadata(String changelog, Date timestamp, boolean isLwjgl3) {
+    public ReleaseMetadata(String changelog, Date timestamp) {
         this.changelog = changelog;
         this.timestamp = timestamp;
-        this.isLwjgl3 = isLwjgl3;
     }
 
     /**
@@ -34,12 +32,5 @@ public class ReleaseMetadata {
      */
     public Date getTimestamp() {
         return timestamp;
-    }
-
-    /**
-     * Whether this release uses LWJGL v3 or not.
-     */
-    public boolean isLwjgl3() {
-        return isLwjgl3;
     }
 }

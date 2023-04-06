@@ -7,17 +7,18 @@ import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
@@ -27,54 +28,77 @@ class JenkinsClient {
     private static final Logger logger = LoggerFactory.getLogger(JenkinsClient.class);
 
     private static final String ARTIFACT = "artifact/";
+
+    final OkHttpClient client;
+
     private final Gson gson;
 
-    JenkinsClient(Gson gson) {
+    JenkinsClient(OkHttpClient httpClient, Gson gson) {
         this.gson = gson;
+
+        // We have to work around some inconvenience with our own Jenkins by tweaking the cache control headers a bit.
+        // The 'Expires' header would cause the 'versionInfo.properties' file to be fetched each and every time again.
+        // To prevent this, we use an OkHttp Interceptor to remove the 'Expires' header and replace it with a custom
+        // 'Cache-control' header.
+        //
+        // See https://square.github.io/okhttp/features/interceptors/
+        var interceptor = new Interceptor() {
+            @Override
+            public Response intercept(Interceptor.Chain chain) throws IOException {
+                var request = chain.request();
+                var originalResponse = chain.proceed(request);
+                if (request.tag(PropertiesRequest.class) != null) {
+                    // for requests for properties (e.g., versionInfo.properties) we use a long caching period
+                    return originalResponse.newBuilder()
+                            .removeHeader("Expires")
+                            .header("Cache-control", "max-age=" + Duration.ofDays(30).toSeconds())
+                            .build();
+                }
+                return originalResponse;
+            }
+        };
+
+        client = httpClient.newBuilder()
+                .addNetworkInterceptor(interceptor)
+                .build();
     }
 
-    /**
-     * Open an input stream from the given URL with a default timeout configured.
-     *
-     * The shorthand {@link URL#openStream()} does not allow for setting a connection timeout. Therefore, we interleave
-     * the original implementation {@code openConnection().getInputStream()} with a step to configure a default timeout.
-     *
-     * The default timeout is 10 seconds.
-     *
-     * @param url the URL to open the stream for
-     * @return an input stream similar to {@code url.openStream()} with a connection timeout of 10 seconds
-     * @throws IOException if opening the URL connection or retrieving the input stream fails
-     */
-    static InputStream openStream(URL url) throws IOException {
-        // this is a static member to indicate that it is independent of the client itself, and to cleanly stub it for
-        // testing purposes without the need to mock the class-under-test itself.
-        URLConnection connection = url.openConnection();
-        connection.setConnectTimeout(10 * 1000);
-        return connection.getInputStream();
-    }
-
-    Jenkins.ApiResult request(URL url) {
+    Jenkins.ApiResult request(URL url) throws InterruptedException {
         Preconditions.checkNotNull(url);
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(openStream(url)))) {
-            return gson.fromJson(reader, Jenkins.ApiResult.class);
+        var request = new Request.Builder().url(url).build();
+        try (var response = client.newCall(request).execute()) {
+            logger.debug("{}{}", response, response.cacheResponse() != null ? " (cached)" : "");
+            return gson.fromJson(response.body().string(), Jenkins.ApiResult.class);
         } catch (JsonSyntaxException | JsonIOException e) {
             logger.warn("Failed to read JSON from '{}'", url.toExternalForm(), e);
         } catch (IOException e) {
-            logger.warn("Failed to read from URL '{}'\n\t{}", e.getMessage(), url.toExternalForm());
+            logger.warn("Failed to read from URL '{}'\n\t{}", url.toExternalForm(), e.getMessage());
         }
         return null;
     }
 
+    // a) request for 'versionInfo.properties' have the PropertiesRequest tag
+    // b) request for other resources don't have it
+    // c) the 'Expires' header is removed from response for requests with PropertiesRequest
+
     @Nullable
+    @SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
     Properties requestProperties(final URL artifactUrl) {
         Preconditions.checkNotNull(artifactUrl);
-        try (InputStream inputStream = openStream(artifactUrl)) {
+
+        var request = new Request.Builder()
+                .url(artifactUrl)
+                .tag(PropertiesRequest.class, new PropertiesRequest())
+                .build();
+
+        try (var response = client.newCall(request).execute()) {
+            logger.debug("{}{}", response.request().url(), response.cacheResponse() != null ? " (cached)" : "");
             final Properties properties = new Properties();
-            properties.load(inputStream);
+            properties.load(response.body().charStream());
             return properties;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.warn("Error while fetching {}", artifactUrl, e);
         }
         return null;
     }
@@ -98,4 +122,6 @@ class JenkinsClient {
         }
         return null;
     }
+
+    static final class PropertiesRequest { }
 }

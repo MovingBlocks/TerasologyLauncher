@@ -11,7 +11,7 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 import javafx.fxml.FXML;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.web.WebView;
-import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.I18N;
 
 import java.util.Arrays;
 
@@ -38,7 +38,7 @@ public class ChangelogViewController {
     void update(final String changes) {
         changelogView.getEngine().loadContent(makeHtml(changes));
         changelogView.setBlendMode(BlendMode.LIGHTEN);
-        changelogView.getEngine().setUserStyleSheetLocation(BundleUtils.getFXMLUrl("css_webview").toExternalForm());
+        changelogView.getEngine().setUserStyleSheetLocation(I18N.getFXMLUrl("css_webview").toExternalForm());
     }
 
     private String makeHtml(final String changes) {

@@ -4,6 +4,7 @@
 package org.terasology.launcher.repositories;
 
 import com.google.common.base.Preconditions;
+import okhttp3.OkHttpClient;
 
 import java.net.URL;
 import java.util.Properties;
@@ -14,7 +15,7 @@ class StubJenkinsClient extends JenkinsClient {
     final Function<URL, Properties> requestProperties;
 
     StubJenkinsClient(Function<URL, Jenkins.ApiResult> request, Function<URL, Properties> requestProperties) {
-        super(null);
+        super(new OkHttpClient(), null);
         this.request = request;
         this.requestProperties = requestProperties;
     }

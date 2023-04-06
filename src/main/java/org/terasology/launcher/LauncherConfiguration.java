@@ -5,8 +5,7 @@ package org.terasology.launcher;
 
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.repositories.RepositoryManager;
-import org.terasology.launcher.settings.BaseLauncherSettings;
-import org.terasology.launcher.settings.LauncherSettings;
+import org.terasology.launcher.settings.Settings;
 
 import java.nio.file.Path;
 
@@ -15,19 +14,19 @@ import java.nio.file.Path;
  *
  * Provides information on
  * - directories managed by the launcher
- * - user settings in form of {@link BaseLauncherSettings}
+ * - user settings in form of {@link Settings}
  */
 public class LauncherConfiguration {
 
     private final Path launcherDirectory;
     private final Path downloadDirectory;
-    private final LauncherSettings launcherSettings;
+    private final Settings launcherSettings;
     private final GameManager gameManager;
     private final RepositoryManager repositoryManager;
 
     public LauncherConfiguration(final Path launcherDirectory,
                                  final Path downloadDirectory,
-                                 final LauncherSettings launcherSettings,
+                                 final Settings launcherSettings,
                                  GameManager gameManager, RepositoryManager repositoryManager) {
         this.launcherDirectory = launcherDirectory;
         this.downloadDirectory = downloadDirectory;
@@ -44,7 +43,7 @@ public class LauncherConfiguration {
         return downloadDirectory;
     }
 
-    public LauncherSettings getLauncherSettings() {
+    public Settings getLauncherSettings() {
         return launcherSettings;
     }
 

@@ -4,6 +4,9 @@
 package org.terasology.launcher.ui;
 
 import javafx.animation.Transition;
+import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -13,11 +16,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
+import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.model.LauncherVersion;
-import org.terasology.launcher.util.BundleUtils;
 import org.terasology.launcher.util.HostServices;
+import org.terasology.launcher.util.I18N;
 
 import java.util.Optional;
 
@@ -29,20 +33,12 @@ public class FooterController {
     private Button warningButton;
     @FXML
     private Label versionInfo;
+
     private HostServices hostServices;
-    private Property<Optional<Warning>> warningProperty;
+    private final Property<Optional<Warning>> warningProperty;
 
     public FooterController() {
         warningProperty = new SimpleObjectProperty<>(Optional.empty());
-    }
-
-    private void updateLabels() {
-        final String launcherVersion = LauncherVersion.getInstance().getDisplayName();
-        if (launcherVersion.isEmpty()) {
-            versionInfo.setText(BundleUtils.getLabel("launcher_versionInfo"));
-        } else {
-            versionInfo.setText(launcherVersion);
-        }
     }
 
     public void setHostServices(HostServices hostServices) {
@@ -51,8 +47,42 @@ public class FooterController {
 
     @FXML
     public void initialize() {
-        updateLabels();
-        warningProperty.addListener((value, oldValue, newValue) -> updateWarningButton(newValue));
+        initLabels();
+        initWarningButton();
+    }
+
+    private void initLabels() {
+        Binding<String> experimental = I18N.labelBinding("launcher_versionInfo");
+        StringBinding versionString = Bindings.createStringBinding(() -> {
+            final String launcherVersion = LauncherVersion.getInstance().getDisplayName();
+            if (launcherVersion.isEmpty()) {
+                return experimental.getValue();
+            } else {
+                return launcherVersion;
+            }
+        }, experimental);
+
+        versionInfo.textProperty().bind(versionString);
+    }
+
+    private void initWarningButton() {
+        warningButton.visibleProperty().bind(
+                Bindings.createBooleanBinding(() -> warningProperty.getValue().isPresent(), warningProperty));
+
+        Binding<String> warningText = Bindings.createObjectBinding(
+                () -> warningProperty.getValue().map(Warning::getMessageKey).map(I18N::getLabel).orElse(null),
+                warningProperty);
+
+        Tooltip tooltip = new Tooltip();
+        tooltip.textProperty().bind(warningText);
+        tooltip.setShowDelay(Duration.millis(50));
+        warningButton.setTooltip(tooltip);
+
+        warningText.addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                logger.warn(newValue);
+            }
+        });
     }
 
     @FXML
@@ -85,47 +115,38 @@ public class FooterController {
 
     @FXML
     protected void openFacebook() {
-        hostServices.tryOpenUri(BundleUtils.getURI("terasology_facebook"));
+        hostServices.tryOpenUri(I18N.getURI("terasology_facebook"));
     }
 
     @FXML
     protected void openGithub() {
-        hostServices.tryOpenUri(BundleUtils.getURI("terasology_github"));
+        hostServices.tryOpenUri(I18N.getURI("terasology_github"));
     }
 
     @FXML
     protected void openDiscord() {
-        hostServices.tryOpenUri(BundleUtils.getURI("terasology_discord"));
+        hostServices.tryOpenUri(I18N.getURI("terasology_discord"));
     }
 
     @FXML
     protected void openReddit() {
-        hostServices.tryOpenUri(BundleUtils.getURI("terasology_reddit"));
+        hostServices.tryOpenUri(I18N.getURI("terasology_reddit"));
     }
 
     @FXML
     protected void openTwitter() {
-        hostServices.tryOpenUri(BundleUtils.getURI("terasology_twitter"));
+        hostServices.tryOpenUri(I18N.getURI("terasology_twitter"));
     }
 
     @FXML
     protected void openYoutube() {
-        hostServices.tryOpenUri(BundleUtils.getURI("terasology_youtube"));
+        hostServices.tryOpenUri(I18N.getURI("terasology_youtube"));
     }
 
     @FXML
     protected void openLogs() {
         //TODO: how to control the main launcher view from here?
         //contentTabPane.getSelectionModel().select(2);
-    }
-
-    private void updateWarningButton(Optional<Warning> warning) {
-        warningButton.setVisible(warning.isPresent());
-        warning.ifPresent(w -> {
-            String msg = BundleUtils.getLabel(w.getMessageKey());
-            warningButton.setTooltip(new Tooltip(msg));
-            logger.warn(msg);
-        });
     }
 
     void bind(ReadOnlyProperty<Optional<Warning>> property) {

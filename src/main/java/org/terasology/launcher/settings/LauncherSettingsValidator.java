@@ -25,32 +25,32 @@ public final class LauncherSettingsValidator {
     private static final List<SettingsValidationRule> RULES = Arrays.asList(
             // Rule for max heap size
             new SettingsValidationRule(
-                    s -> !(System.getProperty("os.arch").equals("x86") && s.getMaxHeapSize().compareTo(JavaHeapSize.GB_1_5) > 0),
+                    s -> !(System.getProperty("os.arch").equals("x86") && s.maxHeapSize.get().compareTo(JavaHeapSize.GB_1_5) > 0),
                     "Max heap size cannot be greater than 1.5 GB for a 32-bit JVM",
-                    s -> s.setMaxHeapSize(JavaHeapSize.GB_1_5)
+                    s -> s.maxHeapSize.set(JavaHeapSize.GB_1_5)
             ),
 
             // Rule for initial heap size
             new SettingsValidationRule(
-                    s -> s.getInitialHeapSize().compareTo(s.getMaxHeapSize()) < 0,
+                    s -> s.minHeapSize.get().compareTo(s.maxHeapSize.get()) < 0,
                     "Initial heap size cannot be greater than max heap size",
-                    s -> s.setInitialHeapSize(s.getMaxHeapSize())
+                    s -> s.minHeapSize.set(s.maxHeapSize.get())
             ),
 
             new SettingsValidationRule(
-                    s -> s.getUserGameParameterList().stream().anyMatch(DEPRECATED_PARAMETERS::contains),
+                    s -> s.userJavaParameters.get().stream().anyMatch(DEPRECATED_PARAMETERS::contains),
                     "Ensure unsupported JVM arguments are removed",
-                    s -> s.setUserJavaParameters(removeUnsupportedJvmParameters(s.getJavaParameterList()))
+                    s -> s.userJavaParameters.setAll(removeUnsupportedJvmParameters(s.userJavaParameters.get()))
             )
     );
 
     private LauncherSettingsValidator() {
     }
 
-    private static String removeUnsupportedJvmParameters(final List<String> params) {
+    private static List<String> removeUnsupportedJvmParameters(final List<String> params) {
         List<String> correctedParams = Lists.newArrayList(params);
         correctedParams.removeAll(DEPRECATED_PARAMETERS);
-        return String.join(" ", correctedParams);
+        return correctedParams;
     }
 
     /**
@@ -59,7 +59,7 @@ public final class LauncherSettingsValidator {
      *
      * @param settings the settings to be validated
      */
-    public static void validate(LauncherSettings settings) {
+    public static void validate(Settings settings) {
         for (SettingsValidationRule rule : RULES) {
             if (rule.isBrokenBy(settings)) {
                 logger.warn(rule.getInvalidationMessage());

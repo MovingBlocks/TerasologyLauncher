@@ -8,20 +8,19 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import okhttp3.Cache;
+import okhttp3.OkHttpClient;
 import org.kohsuke.github.GHRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameManager;
-import org.terasology.launcher.model.GameIdentifier;
-import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.LauncherVersion;
 import org.terasology.launcher.repositories.RepositoryManager;
-import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.ui.Dialogs;
 import org.terasology.launcher.updater.LauncherUpdater;
-import org.terasology.launcher.util.BundleUtils;
+import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.DirectoryCreator;
 import org.terasology.launcher.util.FileUtils;
 import org.terasology.launcher.util.HostServices;
@@ -36,8 +35,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
 
@@ -65,7 +64,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Platform platform = getPlatform();
 
             // init directories
-            updateMessage(BundleUtils.getLabel("splash_initLauncherDirs"));
+            updateMessage(I18N.getLabel("splash_initLauncherDirs"));
             final Path installationDirectory = LauncherDirectoryUtils.getInstallationDirectory();
             final Path userDataDirectory = getLauncherDirectory(platform);
 
@@ -74,33 +73,40 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path cacheDirectory = getDirectoryFor(LauncherManagedDirectory.CACHE, userDataDirectory);
 
             // launcher settings
-            final Path settingsFile = userDataDirectory.resolve(Settings.DEFAULT_FILE_NAME);
-            final LauncherSettings launcherSettings = getLauncherSettings(settingsFile);
+            final Settings launcherSettings = getLauncherSettings(userDataDirectory);
+            // By default, we initialize the launcher with the host system's default locale (if supported).
+            // The user may have chosen a different locale in the launcher settings, so apply that as soon as possible.
+            I18N.setLocale(launcherSettings.locale.get());
 
             // validate the settings
             LauncherSettingsValidator.validate(launcherSettings);
 
-            checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.isKeepDownloadedFiles());
+            // looking for launcher updates (first network communication)
+            final var client = new OkHttpClient.Builder()
+                    .cache(new Cache(cacheDirectory.toFile(), 10L * 1024L * 1024L /*10 MiB*/))
+                    .callTimeout(10, TimeUnit.SECONDS)
+                    .build();
+            checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.keepDownloadedFiles.get());
 
             // game directories
-            updateMessage(BundleUtils.getLabel("splash_initGameDirs"));
+            updateMessage(I18N.getLabel("splash_initGameDirs"));
             final Path gameDirectory = getDirectoryFor(LauncherManagedDirectory.GAMES, installationDirectory);
-            final Path gameDataDirectory = getGameDataDirectory(platform, launcherSettings.getGameDataDirectory());
+            final Path gameDataDirectory = getGameDataDirectory(platform, launcherSettings.gameDataDirectory.get());
 
-            updateMessage(BundleUtils.getLabel("splash_fetchReleases"));
+            updateMessage(I18N.getLabel("splash_fetchReleases"));
             logger.info("Fetching game releases ...");
-            final RepositoryManager repositoryManager = new RepositoryManager();
-            Set<GameRelease> releases = repositoryManager.getReleases();
+            // implicitly fetches game releases and cache them
+            final RepositoryManager repositoryManager = new RepositoryManager(client);
 
+            // implicitly scans the game directory for installed games and cache them
             final GameManager gameManager = new GameManager(cacheDirectory, gameDirectory);
-            Set<GameIdentifier> installedGames = gameManager.getInstalledGames();
 
             logger.trace("Change LauncherSettings...");
-            launcherSettings.setGameDirectory(gameDirectory);
-            launcherSettings.setGameDataDirectory(gameDataDirectory);
+            launcherSettings.gameDirectory.set(gameDirectory);
+            launcherSettings.gameDataDirectory.set(gameDataDirectory);
             // TODO: Rewrite gameVersions.fixSettingsBuildVersion(launcherSettings);
 
-            storeLauncherSettingsAfterInit(launcherSettings, settingsFile);
+            storeLauncherSettingsAfterInit(launcherSettings, userDataDirectory);
 
             logger.trace("Creating launcher frame...");
 
@@ -119,7 +125,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
     private Platform getPlatform() {
         logger.trace("Init Platform...");
-        updateMessage(BundleUtils.getLabel("splash_checkOS"));
+        updateMessage(I18N.getLabel("splash_checkOS"));
         final Platform platform = Platform.getPlatform();
         if (!platform.isLinux() && !platform.isMac() && !platform.isWindows()) {
             logger.warn("Detected unexpected platform: {}", platform);
@@ -136,7 +142,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             }
         } catch (IOException e) {
             logger.error("Directory '{}' cannot be created or used! '{}'", dir.getFileName(), dir, e);
-            Dialogs.showError(owner, BundleUtils.getLabel(errorLabel) + "\n" + dir);
+            Dialogs.showError(owner, I18N.getLabel(errorLabel) + "\n" + dir);
             throw new LauncherStartFailedException();
         }
         logger.debug("{} directory: {}", dir.getFileName(), dir);
@@ -158,12 +164,11 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return launcherDirectory;
     }
 
-    private LauncherSettings getLauncherSettings(Path settingsFile) throws LauncherStartFailedException {
+    private Settings getLauncherSettings(Path settingsPath) throws LauncherStartFailedException {
         logger.trace("Init LauncherSettings...");
-        updateMessage(BundleUtils.getLabel("splash_retrieveLauncherSettings"));
+        updateMessage(I18N.getLabel("splash_retrieveLauncherSettings"));
 
-        final LauncherSettings settings = Optional.ofNullable(Settings.load(settingsFile)).orElse(Settings.getDefault());
-        settings.init();
+        final Settings settings = Optional.ofNullable(Settings.load(settingsPath)).orElse(Settings.getDefault());
 
         logger.debug("Launcher Settings: {}", settings);
 
@@ -172,12 +177,12 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
 
     private void checkForLauncherUpdates(Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
         logger.trace("Check for launcher updates...");
-        updateMessage(BundleUtils.getLabel("splash_launcherUpdateCheck"));
+        updateMessage(I18N.getLabel("splash_launcherUpdateCheck"));
         final LauncherUpdater updater = new LauncherUpdater(LauncherVersion.getInstance());
         final GHRelease release = updater.updateAvailable();
         if (release != null) {
             logger.info("Launcher update available: {}", release.getTagName());
-            updateMessage(BundleUtils.getLabel("splash_launcherUpdateAvailable"));
+            updateMessage(I18N.getLabel("splash_launcherUpdateAvailable"));
             boolean foundLauncherInstallationDirectory = false;
             try {
                 final Path installationDir = LauncherDirectoryUtils.getInstallationDirectory();
@@ -186,7 +191,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 foundLauncherInstallationDirectory = true;
             } catch (IOException e) {
                 logger.error("The launcher installation directory can not be detected or used!", e);
-                Dialogs.showError(owner, BundleUtils.getLabel("message_error_launcherInstallationDirectory"));
+                Dialogs.showError(owner, I18N.getLabel("message_error_launcherInstallationDirectory"));
                 // Run launcher without an update. Don't throw a LauncherStartFailedException.
             }
             if (foundLauncherInstallationDirectory) {
@@ -215,7 +220,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                 FileUtils.ensureWritableDir(gameDataDirectory);
             } catch (IOException e) {
                 logger.warn("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
-                Dialogs.showWarning(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n"
+                Dialogs.showWarning(owner, I18N.getLabel("message_error_gameDataDirectory") + "\n"
                         + gameDataDirectory);
 
                 // Set gameDataDirectory to 'null' -> user has to choose new game data directory
@@ -224,9 +229,9 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }
         if (gameDataDirectory == null) {
             logger.trace("Choose data directory for the game...");
-            updateMessage(BundleUtils.getLabel("splash_chooseGameDataDirectory"));
+            updateMessage(I18N.getLabel("splash_chooseGameDataDirectory"));
             gameDataDirectory = Dialogs.chooseDirectory(owner, LauncherDirectoryUtils.getGameDataDirectory(os),
-                    BundleUtils.getLabel("message_dialog_title_chooseGameDataDirectory"));
+                    I18N.getLabel("message_dialog_title_chooseGameDataDirectory"));
             if (Files.notExists(gameDataDirectory)) {
                 logger.info("The new game data directory is not approved. The TerasologyLauncher is terminated.");
                 javafx.application.Platform.exit();
@@ -236,7 +241,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             FileUtils.ensureWritableDir(gameDataDirectory);
         } catch (IOException e) {
             logger.error("The game data directory can not be created or used! '{}'", gameDataDirectory, e);
-            Dialogs.showError(owner, BundleUtils.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
+            Dialogs.showError(owner, I18N.getLabel("message_error_gameDataDirectory") + "\n" + gameDataDirectory);
             throw new LauncherStartFailedException();
         }
         logger.debug("Game data directory: {}", gameDataDirectory);
@@ -253,10 +258,10 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return CompletableFuture.supplyAsync(() -> {
             final Alert alert = new Alert(
                     Alert.AlertType.WARNING,
-                    BundleUtils.getLabel("message_error_sourcesFile_content"),
+                    I18N.getLabel("message_error_sourcesFile_content"),
                     ButtonType.OK,
-                    new ButtonType(BundleUtils.getLabel("launcher_exit")));
-            alert.setHeaderText(BundleUtils.getLabel("message_error_sourcesFile_header"));
+                    new ButtonType(I18N.getLabel("launcher_exit")));
+            alert.setHeaderText(I18N.getLabel("message_error_sourcesFile_header"));
             alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
             return alert.showAndWait()
                     .map(btn -> btn == ButtonType.OK)
@@ -264,14 +269,14 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }, javafx.application.Platform::runLater).join();
     }
 
-    private void storeLauncherSettingsAfterInit(LauncherSettings launcherSettings, final Path settingsFile) throws LauncherStartFailedException {
+    private void storeLauncherSettingsAfterInit(Settings launcherSettings, final Path settingsPath) throws LauncherStartFailedException {
         logger.trace("Store LauncherSettings...");
-        updateMessage(BundleUtils.getLabel("splash_storeLauncherSettings"));
+        updateMessage(I18N.getLabel("splash_storeLauncherSettings"));
         try {
-            Settings.store(launcherSettings, settingsFile);
+            Settings.store(launcherSettings, settingsPath);
         } catch (IOException e) {
-            logger.error("The launcher settings cannot be stored! '{}'", settingsFile, e);
-            Dialogs.showError(owner, BundleUtils.getLabel("message_error_storeSettings"));
+            logger.error("The launcher settings cannot be stored to '{}'.", settingsPath, e);
+            Dialogs.showError(owner, I18N.getLabel("message_error_storeSettings"));
             //TODO: should we fail here, or is it fine to work with in-memory settings?
             throw new LauncherStartFailedException();
         }

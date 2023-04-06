@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<StackPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.terasology.launcher.ui.SettingsController">
+<StackPane xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.terasology.launcher.ui.SettingsController">
    <children>
       <VBox prefHeight="600.0" prefWidth="600.0">
          <children>
@@ -42,6 +42,7 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints maxHeight="1.7976931348623157E308" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="40.0" valignment="BOTTOM" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -74,7 +75,7 @@
                               <Button fx:id="gameDataDirectoryOpenButton" mnemonicParsing="false" onAction="#openGameDataDirectoryAction" text="Button" />
                            </children>
                         </HBox>
-                       <TitledPane animated="false" expanded="false" text="Advanced options" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" GridPane.vgrow="SOMETIMES">
+                       <TitledPane fx:id="advancedOptionsPane" animated="false" expanded="false" text="Advanced options" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" GridPane.vgrow="SOMETIMES">
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
@@ -113,9 +114,10 @@
                        <Label fx:id="launcherDirectoryLabel" text="Data directory" GridPane.rowIndex="11" />
                        <TextField fx:id="launcherDirectoryPath" editable="false" GridPane.rowIndex="12" />
                        <Button fx:id="launcherDirectoryOpenButton" mnemonicParsing="false" onAction="#openLauncherDirectoryAction" text="Browse" GridPane.columnIndex="1" GridPane.rowIndex="12" />
-                       <Label text="Other" GridPane.rowIndex="13" />
-                       <CheckBox fx:id="closeAfterStartBox" mnemonicParsing="false" text="Close after game starts" GridPane.rowIndex="14" />
-                       <CheckBox fx:id="saveDownloadedFilesBox" mnemonicParsing="false" text="Save downloaded files" GridPane.rowIndex="15" />
+                       <Label fx:id="otherSettingsLabel" text="Other" GridPane.rowIndex="13" />
+                       <CheckBox fx:id="showPreReleasesBox" mnemonicParsing="false" text="Show pre-releases and nightly builds" GridPane.rowIndex="14" />
+                       <CheckBox fx:id="closeAfterStartBox" mnemonicParsing="false" text="Close after game starts" GridPane.rowIndex="15" />
+                       <CheckBox fx:id="saveDownloadedFilesBox" mnemonicParsing="false" text="Save downloaded files" GridPane.rowIndex="16" />
                      </children>
                   </GridPane>
                </content>
@@ -127,7 +129,7 @@
                <children>
                   <Button fx:id="saveSettingsButton" mnemonicParsing="false" onAction="#saveSettingsAction" prefWidth="80.0" text="Save" />
                   <Button fx:id="cancelSettingsButton" mnemonicParsing="false" onAction="#cancelSettingsAction" prefWidth="80.0" text="Cancel" />
-                  <Button disable="true" mnemonicParsing="false" prefWidth="80.0" text="Reset" />
+                  <Button fx:id="resetSettingsButton" disable="true" mnemonicParsing="false" prefWidth="80.0" text="Reset" />
                </children>
                <padding>
                   <Insets left="8.0" right="8.0" />
