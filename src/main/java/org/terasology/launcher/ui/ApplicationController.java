@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
@@ -237,19 +238,27 @@ public class ApplicationController {
             } else {
                 RepositoryManager mngr = config.getValue().getRepositoryManager();
 
-                Stream<GameRelease> onlineReleases = mngr.getReleases().stream();
+                Set<GameRelease> onlineReleases = mngr.getReleases();
                 // Create dummy game release objects from locally installed games.
                 // We need this in case of running the launcher in "offline" mode
                 // and the list of game releases fetched via the repository manager
                 // is empty, but there are still games installed locally.
+                //
+                // However, we only want to add these dummy releases if they are 
+                // not listed in the online releases. Thus, filtering out everything
+                // with a GameIdentifier that is already part of the releases fetched
+                // from online sources.
+                //
                 //TODO: This is a weird place to create these dummy releases.
                 //      Move this code somewhere else, and make sure that we 
                 //      have all the necessary information stored locally, like
                 //      the timestamp or the changelog.
+                Set<GameIdentifier> onlineIds = onlineReleases.stream().map(GameRelease::getId).collect(Collectors.toSet());
                 Stream<GameRelease> localGames = installedGames.stream()
+                    .filter(id -> !onlineIds.contains(id))
                     .map(id -> new GameRelease(id, null, new ReleaseMetadata("", new Date())));
 
-                Stream<GameRelease> allReleases = Stream.concat(onlineReleases, localGames);
+                Stream<GameRelease> allReleases = Stream.concat(onlineReleases.stream(), localGames);
 
                 List<GameRelease> releasesForProfile =
                         allReleases
