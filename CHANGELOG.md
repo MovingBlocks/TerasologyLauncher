@@ -1,5 +1,34 @@
 # Terasology Launcher - ChangeLog
 
+## 4.8.0 (2023-06-30)
+
+Special thanks to everyone that contributed to this release:
+@anshukrs, @jdrueckert, @skaldarnar.
+
+# Changelog
+
+## 🐛 Bug Fixes
+
+- #699 fix: show locally installed games in drop-down when offline (@skaldarnar)
+- #691 fix: updated the download URL (@anshukrs)
+
+## 🧰 Maintenance
+
+- #698 chore: handle offline mode more graceful (@skaldarnar)
+- #697 chore: Remove unused code (@skaldarnar)
+
+## 🧪 Tests
+
+- #688 test: add test to ensure that all supported languages have language flag icons (@skaldarnar)
+
+## 📚 Documentation
+
+- #689 doc: add troubleshooting section and download timeout workaround (@jdrueckert)
+
+## ⚙️ Logistics
+
+- #687 build(pmd): update PMD rules and fix issues (@skaldarnar)
+
 ## 4.7.0 (2022-11-09)
 
 ### 🚀 Features
@@ -421,5 +450,3 @@
 - Download, install and start the launcher (self updatable)
 - Supports multiple languages (english, german)
 - Displays many "Terasology"-related links
-Special thanks to everyone that contributed to this release:
-@keturn, @rzats, @skaldarnar.
