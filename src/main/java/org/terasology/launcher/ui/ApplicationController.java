@@ -211,26 +211,6 @@ public class ApplicationController {
      * to the selected profile, and derive the currently selected release from the combo box's selection model.
      */
     private void initComboBoxes() {
-        // derive the releases to display from the selected profile (`selectedProfile`). the resulting list is ordered
-        // in the way the launcher is supposed to display the versions (currently by release timestamp).
-        config.addListener((obs, oldVal, cfg) -> {
-            ObservableList<GameRelease> availableReleases = gameReleaseComboBox.getItems();
-            GameIdentifier lastPlayedGame = cfg.getLauncherSettings().lastPlayedGameVersion.get();
-
-            Optional<GameRelease> lastPlayed = availableReleases.stream()
-                    .filter(release -> release.getId().equals(lastPlayedGame))
-                    .filter(release -> installedGames.contains(release.getId()))
-                    .findFirst();
-            Optional<GameRelease> lastInstalled = availableReleases.stream()
-                    .filter(release -> installedGames.contains(release.getId()))
-                    .findFirst();
-
-            gameReleaseComboBox.getSelectionModel().select(lastPlayed
-                    .or(() -> lastInstalled)
-                    .or(() -> availableReleases.stream().findFirst())
-                    .orElse(null));
-        });
-
         final ObjectBinding<ObservableList<GameRelease>> releases = Bindings.createObjectBinding(() -> {
             LauncherConfiguration cfg = config.getValue();
             if (cfg == null || cfg.getRepositoryManager() == null) {
@@ -270,6 +250,31 @@ public class ApplicationController {
                 return FXCollections.observableList(releasesForProfile);
             }
         }, config, showPreReleases, installedGames);
+
+        // derive the releases to display from the selected profile (`selectedProfile`). the resulting list is ordered
+        // in the way the launcher is supposed to display the versions (currently by release timestamp).
+        final ObjectBinding<GameRelease> releaseToSelect = Bindings.createObjectBinding(()-> {
+            GameIdentifier lastPlayedGame = Optional.ofNullable(config.getValue())
+                .map(cfg -> cfg.getLauncherSettings().lastPlayedGameVersion.get())
+                .orElse(null);
+
+            Optional<GameRelease> lastPlayed = releases.get().stream()
+                    .filter(release -> release.getId().equals(lastPlayedGame))
+                    .filter(release -> installedGames.contains(release.getId()))
+                    .findFirst();
+            Optional<GameRelease> lastInstalled = releases.get().stream()
+                    .filter(release -> installedGames.contains(release.getId()))
+                    .findFirst();
+
+            return lastPlayed
+                    .or(() -> lastInstalled)
+                    .or(() -> releases.get().stream().findFirst())
+                    .orElse(null);
+        }, releases, config);
+
+        releaseToSelect.addListener((obs, old, now) -> {
+            gameReleaseComboBox.getSelectionModel().select(now);
+        }); 
 
         gameReleaseComboBox.itemsProperty().bind(releases);
         gameReleaseComboBox.buttonCellProperty()
