@@ -4,9 +4,6 @@
 package org.terasology.launcher;
 
 import javafx.concurrent.Task;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
@@ -35,7 +32,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
