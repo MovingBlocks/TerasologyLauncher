@@ -42,7 +42,7 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
                     .build();
             logger.debug("Github rate limit: {}", github.getRateLimit());
         } catch (HttpException e) {
-            if (e.getResponseCode() == -1) {
+            if (e.getResponseCode() == -1) { // NOPMD
                 // no internet connection, do nothing
             } else {
                 e.printStackTrace();
@@ -92,7 +92,7 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
                 logger.debug("Github rate limit: {}", github.getRateLimit());
                 return releases;
             } catch (HttpException e) {
-                if (e.getResponseCode() == -1) {
+                if (e.getResponseCode() == -1) { // NOPMD
                     // no internet connection, do nothing
                 } else {
                     e.printStackTrace();
