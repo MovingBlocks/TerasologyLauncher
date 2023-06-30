@@ -5,6 +5,7 @@ package org.terasology.launcher.model;
 
 import java.net.URL;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * A game release describes a (remote) game artifact (asset) that can be downloaded and installed by the launcher.
@@ -49,5 +50,28 @@ public class GameRelease {
     @Override
     public String toString() {
         return id.getDisplayVersion();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof GameRelease)) {
+            return false;
+        }
+        GameRelease other = (GameRelease) o;
+
+        boolean sameId = this.id.equals(other.id);
+        boolean sameTimestamp = (this.releaseMetadata == null && other.releaseMetadata == null) 
+            || (this.releaseMetadata != null && other.releaseMetadata != null 
+                && this.releaseMetadata.getTimestamp().equals(other.releaseMetadata.getTimestamp()));
+
+        return  sameId && sameTimestamp;
+    }
+
+        @Override
+    public int hashCode() {
+        return Objects.hash(id, releaseMetadata.getTimestamp());
     }
 }

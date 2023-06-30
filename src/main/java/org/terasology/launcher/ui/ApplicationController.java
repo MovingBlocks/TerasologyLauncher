@@ -41,6 +41,7 @@ import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
+import org.terasology.launcher.model.ReleaseMetadata;
 import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
@@ -51,13 +52,16 @@ import org.terasology.launcher.util.I18N;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ApplicationController {
 
@@ -207,41 +211,70 @@ public class ApplicationController {
      * to the selected profile, and derive the currently selected release from the combo box's selection model.
      */
     private void initComboBoxes() {
-        // derive the releases to display from the selected profile (`selectedProfile`). the resulting list is ordered
-        // in the way the launcher is supposed to display the versions (currently by release timestamp).
-        config.addListener((obs, oldVal, cfg) -> {
-            ObservableList<GameRelease> availableReleases = gameReleaseComboBox.getItems();
-            GameIdentifier lastPlayedGame = cfg.getLauncherSettings().lastPlayedGameVersion.get();
-
-            Optional<GameRelease> lastPlayed = availableReleases.stream()
-                    .filter(release -> release.getId().equals(lastPlayedGame))
-                    .filter(release -> installedGames.contains(release.getId()))
-                    .findFirst();
-            Optional<GameRelease> lastInstalled = availableReleases.stream()
-                    .filter(release -> installedGames.contains(release.getId()))
-                    .findFirst();
-
-            gameReleaseComboBox.getSelectionModel().select(lastPlayed
-                    .or(() -> lastInstalled)
-                    .or(() -> availableReleases.stream().findFirst())
-                    .orElse(null));
-        });
-
         final ObjectBinding<ObservableList<GameRelease>> releases = Bindings.createObjectBinding(() -> {
             LauncherConfiguration cfg = config.getValue();
             if (cfg == null || cfg.getRepositoryManager() == null) {
                 return FXCollections.emptyObservableList();
             } else {
                 RepositoryManager mngr = config.getValue().getRepositoryManager();
+
+                Set<GameRelease> onlineReleases = mngr.getReleases();
+                // Create dummy game release objects from locally installed games.
+                // We need this in case of running the launcher in "offline" mode
+                // and the list of game releases fetched via the repository manager
+                // is empty, but there are still games installed locally.
+                //
+                // However, we only want to add these dummy releases if they are 
+                // not listed in the online releases. Thus, filtering out everything
+                // with a GameIdentifier that is already part of the releases fetched
+                // from online sources.
+                //
+                //TODO: This is a weird place to create these dummy releases.
+                //      Move this code somewhere else, and make sure that we 
+                //      have all the necessary information stored locally, like
+                //      the timestamp or the changelog.
+                Set<GameIdentifier> onlineIds = onlineReleases.stream().map(GameRelease::getId).collect(Collectors.toSet());
+                Stream<GameRelease> localGames = installedGames.stream()
+                    .filter(id -> !onlineIds.contains(id))
+                    .map(id -> new GameRelease(id, null, new ReleaseMetadata("", new Date())));
+
+                Stream<GameRelease> allReleases = Stream.concat(onlineReleases.stream(), localGames);
+
                 List<GameRelease> releasesForProfile =
-                        mngr.getReleases().stream()
+                        allReleases
                                 .filter(release -> release.getId().getProfile() == Profile.OMEGA)
                                 .filter(release -> showPreReleases.getValue() || release.getId().getBuild().equals(Build.STABLE))
                                 .sorted(ApplicationController::compareReleases)
                                 .collect(Collectors.toList());
+                
                 return FXCollections.observableList(releasesForProfile);
             }
-        }, config, showPreReleases);
+        }, config, showPreReleases, installedGames);
+
+        // derive the releases to display from the selected profile (`selectedProfile`). the resulting list is ordered
+        // in the way the launcher is supposed to display the versions (currently by release timestamp).
+        final ObjectBinding<GameRelease> releaseToSelect = Bindings.createObjectBinding(()-> {
+            GameIdentifier lastPlayedGame = Optional.ofNullable(config.getValue())
+                .map(cfg -> cfg.getLauncherSettings().lastPlayedGameVersion.get())
+                .orElse(null);
+
+            Optional<GameRelease> lastPlayed = releases.get().stream()
+                    .filter(release -> release.getId().equals(lastPlayedGame))
+                    .filter(release -> installedGames.contains(release.getId()))
+                    .findFirst();
+            Optional<GameRelease> lastInstalled = releases.get().stream()
+                    .filter(release -> installedGames.contains(release.getId()))
+                    .findFirst();
+
+            return lastPlayed
+                    .or(() -> lastInstalled)
+                    .or(() -> releases.get().stream().findFirst())
+                    .orElse(null);
+        }, releases, config);
+
+        releaseToSelect.addListener((obs, old, now) -> {
+            gameReleaseComboBox.getSelectionModel().select(now);
+        }); 
 
         gameReleaseComboBox.itemsProperty().bind(releases);
         gameReleaseComboBox.buttonCellProperty()
