@@ -11,6 +11,7 @@ import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.HttpException;
 import org.kohsuke.github.extras.okhttp3.OkHttpConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,14 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
                     .withConnector(new OkHttpConnector(httpClient))
                     .build();
             logger.debug("Github rate limit: {}", github.getRateLimit());
+        } catch (HttpException e) {
+            if (e.getResponseCode() == -1) {
+                // no internet connection, do nothing
+            } else {
+                e.printStackTrace();
+            }
         } catch (IOException e) {
+
             e.printStackTrace();
         }
     }
@@ -83,6 +91,12 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
                         .collect(Collectors.toList());
                 logger.debug("Github rate limit: {}", github.getRateLimit());
                 return releases;
+            } catch (HttpException e) {
+                if (e.getResponseCode() == -1) {
+                    // no internet connection, do nothing
+                } else {
+                    e.printStackTrace();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
