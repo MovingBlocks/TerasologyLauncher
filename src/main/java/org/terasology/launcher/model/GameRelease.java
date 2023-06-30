@@ -50,4 +50,16 @@ public class GameRelease {
     public String toString() {
         return id.getDisplayVersion();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof GameRelease)) {
+            return false;
+        }
+        GameRelease other = (GameRelease) o;
+        return this.id.equals(other.id);
+    }
 }
