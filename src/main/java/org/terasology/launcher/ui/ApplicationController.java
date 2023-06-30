@@ -41,6 +41,7 @@ import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
+import org.terasology.launcher.model.ReleaseMetadata;
 import org.terasology.launcher.repositories.RepositoryManager;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
@@ -51,6 +52,7 @@ import org.terasology.launcher.util.I18N;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -58,6 +60,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ApplicationController {
 
@@ -233,15 +236,31 @@ public class ApplicationController {
                 return FXCollections.emptyObservableList();
             } else {
                 RepositoryManager mngr = config.getValue().getRepositoryManager();
+
+                Stream<GameRelease> onlineReleases = mngr.getReleases().stream();
+                // Create dummy game release objects from locally installed games.
+                // We need this in case of running the launcher in "offline" mode
+                // and the list of game releases fetched via the repository manager
+                // is empty, but there are still games installed locally.
+                //TODO: This is a weird place to create these dummy releases.
+                //      Move this code somewhere else, and make sure that we 
+                //      have all the necessary information stored locally, like
+                //      the timestamp or the changelog.
+                Stream<GameRelease> localGames = installedGames.stream()
+                    .map(id -> new GameRelease(id, null, new ReleaseMetadata("", new Date())));
+
+                Stream<GameRelease> allReleases = Stream.concat(onlineReleases, localGames);
+
                 List<GameRelease> releasesForProfile =
-                        mngr.getReleases().stream()
+                        allReleases
                                 .filter(release -> release.getId().getProfile() == Profile.OMEGA)
                                 .filter(release -> showPreReleases.getValue() || release.getId().getBuild().equals(Build.STABLE))
                                 .sorted(ApplicationController::compareReleases)
                                 .collect(Collectors.toList());
+                
                 return FXCollections.observableList(releasesForProfile);
             }
-        }, config, showPreReleases);
+        }, config, showPreReleases, installedGames);
 
         gameReleaseComboBox.itemsProperty().bind(releases);
         gameReleaseComboBox.buttonCellProperty()
