@@ -248,27 +248,6 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return gameDataDirectory;
     }
 
-    /**
-     * Shows a confirmation dialog for overwriting current sources file
-     * with default values.
-     *
-     * @return whether the user confirms this overwrite
-     */
-    private boolean confirmSourcesOverwrite() {
-        return CompletableFuture.supplyAsync(() -> {
-            final Alert alert = new Alert(
-                    Alert.AlertType.WARNING,
-                    I18N.getLabel("message_error_sourcesFile_content"),
-                    ButtonType.OK,
-                    new ButtonType(I18N.getLabel("launcher_exit")));
-            alert.setHeaderText(I18N.getLabel("message_error_sourcesFile_header"));
-            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-            return alert.showAndWait()
-                    .map(btn -> btn == ButtonType.OK)
-                    .orElse(false);
-        }, javafx.application.Platform::runLater).join();
-    }
-
     private void storeLauncherSettingsAfterInit(Settings launcherSettings, final Path settingsPath) throws LauncherStartFailedException {
         logger.trace("Store LauncherSettings...");
         updateMessage(I18N.getLabel("splash_storeLauncherSettings"));
