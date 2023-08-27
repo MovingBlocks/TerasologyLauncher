@@ -65,7 +65,7 @@ public class LauncherSettings {
     static final String LAST_PLAYED_GAME_VERSION_DEFAULT = "";
     static final String LAST_INSTALLED_GAME_VERSION_DEFAULT = "";
 
-    static final String LAUNCHER_SETTINGS_FILE_NAME = "TerasologyLauncherSettings.properties";
+    static final String LAUNCHER_LEGACY_SETTINGS_FILE_NAME = "TerasologyLauncherSettings.properties";
 
     private final Properties properties;
 
