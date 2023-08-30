@@ -67,7 +67,7 @@ class TestLauncherSettings {
 
     @BeforeEach
     void setup() {
-        testPropertiesFile = tempDirectory.resolve(LauncherSettings.LAUNCHER_SETTINGS_FILE_NAME);
+        testPropertiesFile = tempDirectory.resolve(LauncherSettings.LAUNCHER_LEGACY_SETTINGS_FILE_NAME);
 
         launcherSettings = Settings.getDefault();
     }
