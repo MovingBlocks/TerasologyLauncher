@@ -21,7 +21,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
-import org.terasology.launcher.settings.LauncherSettings;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.JavaHeapSize;
@@ -149,13 +148,15 @@ public class SettingsController {
 
         //save userParameters (java & game), if textfield is empty then set to defaults
         if (userJavaParametersField.getText().isEmpty()) {
-            launcherSettings.userJavaParameters.setAll(asParameterList(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT));
+            logger.debug("Reapplying default Java parameters: {}", Settings.getDefault().userJavaParameters);
+            launcherSettings.userJavaParameters.setAll(Settings.getDefault().userJavaParameters);
         } else {
             logger.debug("User defined Java parameters: {}", userJavaParametersField.getText());
             launcherSettings.userJavaParameters.setAll(asParameterList(userJavaParametersField.getText()));
         }
         if (userGameParametersField.getText().isEmpty()) {
-            launcherSettings.userGameParameters.setAll(asParameterList(LauncherSettings.USER_GAME_PARAMETERS_DEFAULT));
+            logger.debug("Reapplying default game parameters: {}", Settings.getDefault().userGameParameters);
+            launcherSettings.userGameParameters.setAll(Settings.getDefault().userGameParameters);
         } else {
             logger.debug("User defined game parameters: {}", userGameParametersField.getText());
             launcherSettings.userGameParameters.setAll(asParameterList(userGameParametersField.getText()));
@@ -353,7 +354,7 @@ public class SettingsController {
 
     private void initUserParameterFields() {
         //if the VM parameters are left default do not display, the prompt message will show
-        List<String> defaultParams = asParameterList(LauncherSettings.USER_JAVA_PARAMETERS_DEFAULT);
+        List<String> defaultParams = Settings.getDefault().userJavaParameters;
         List<String> userJavaParams = launcherSettings.userJavaParameters.get();
         if (!(defaultParams.containsAll(userJavaParams) && userJavaParams.containsAll(defaultParams))) {
             userJavaParametersField.setText(String.join(" ", launcherSettings.userJavaParameters.get()));
