@@ -236,7 +236,7 @@ public class ApplicationController {
                 Set<GameIdentifier> onlineIds = onlineReleases.stream().map(GameRelease::getId).collect(Collectors.toSet());
                 Stream<GameRelease> localGames = installedGames.stream()
                     .filter(id -> !onlineIds.contains(id))
-                    .map(id -> new GameRelease(id, null, new ReleaseMetadata("", new Date())));
+                    .map(id -> new GameRelease(id, null, new ReleaseMetadata("", new Date(), new Semver("0.0.1"))));
 
                 Stream<GameRelease> allReleases = Stream.concat(onlineReleases.stream(), localGames);
 

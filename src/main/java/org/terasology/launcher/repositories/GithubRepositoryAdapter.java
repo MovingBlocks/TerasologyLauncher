@@ -71,12 +71,15 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
             final String changelog = ghRelease.getBody();
             GameIdentifier id = new GameIdentifier(engineVersion.toString(), build, profile);
 
-            ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at());
+            final Semver minJavaVersion = VersionHistory.javaVersionForEngine(engineVersion);
+            ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at(), minJavaVersion);
             return new GameRelease(id, url, metadata);
+        } catch (GameVersionNotSupportedException e) {
+            logger.debug("Game release {} with engine version {} is not supported. ({})", ghRelease.getHtmlUrl(), tagName, e.getMessage());
         } catch (SemverException | IOException e) {
             logger.info("Could not create game release from Github release {}: {}", ghRelease.getHtmlUrl(), e.getMessage());
-            return null;
         }
+        return null;
     }
 
     @Override
