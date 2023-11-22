@@ -60,7 +60,6 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -494,21 +493,6 @@ public class ApplicationController {
                     final DeleteTask deleteTask = new DeleteTask(gameManager, id);
                     executor.submit(deleteTask);
                 });
-    }
-
-    /**
-     * Select the first item matching given predicate, select the first item otherwise.
-     *
-     * @param comboBox  the combo box to change the selection for
-     * @param predicate first item matching this predicate will be selected
-     */
-    private <T> void selectItem(final ComboBox<T> comboBox, Predicate<T> predicate) {
-        final T item = comboBox.getItems().stream()
-                .filter(predicate)
-                .findFirst()
-                .orElse(comboBox.getItems().get(0));
-
-        comboBox.getSelectionModel().select(item);
     }
 
     /**
