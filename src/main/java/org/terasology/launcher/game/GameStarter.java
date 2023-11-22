@@ -26,10 +26,9 @@ final class GameStarter implements Callable<Process> {
     private static final Logger logger = LoggerFactory.getLogger(GameStarter.class);
 
     final ProcessBuilder processBuilder;
-    private final Semver engineVersion;
 
     /**
-     * @param installation          the directory under which we will find {@code libs/Terasology.jar}, also used as the process's
+     * @param installation      the directory under which we will find {@code libs/Terasology.jar}, also used as the process's
      *                          working directory
      * @param gameDataDirectory {@code -homedir}, the directory where Terasology's data files (saves & etc) are kept
      * @param heapMin           java's {@code -Xms}
@@ -39,14 +38,14 @@ final class GameStarter implements Callable<Process> {
      * @param logLevel          the minimum level of log events Terasology will include on its output stream to us
      */
     GameStarter(Installation installation, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax,
-                List<String> javaParams, List<String> gameParams, Level logLevel) throws IOException {
-        engineVersion = installation.getEngineVersion();
+                List<String> javaParams, List<String> gameParams, Level logLevel) throws IOException, GameVersionNotSupportedException {
+        Semver engineVersion = installation.getEngineVersion();
         var gamePath = installation.path;
 
         final boolean isMac = Platform.getPlatform().isMac();
         final List<String> processParameters = new ArrayList<>();
 
-        processParameters.add(getRuntimePath().toString());
+        processParameters.add(getRuntimePath(engineVersion).toString());
 
         if (heapMin.isUsed()) {
             processParameters.add("-Xms" + heapMin.getSizeParameter());
@@ -69,12 +68,12 @@ final class GameStarter implements Callable<Process> {
         processParameters.add(installation.getGameJarPath().toString());
 
         // Parameters after this are for the game facade, not the java runtime.
-        processParameters.add(homeDirParameter(gameDataDirectory));
+        processParameters.add(homeDirParameter(gameDataDirectory, engineVersion));
         processParameters.addAll(gameParams);
 
         if (isMac) {
             // splash screen uses awt, so no awt => no splash
-            processParameters.add(noSplashParameter());
+            processParameters.add(noSplashParameter(engineVersion));
         }
 
         processBuilder = new ProcessBuilder(processParameters)
@@ -97,23 +96,27 @@ final class GameStarter implements Callable<Process> {
     /**
      * @return the executable {@code java} file to run the game with
      */
-    Path getRuntimePath() {
+    Path getRuntimePath(Semver engineVersion) throws GameVersionNotSupportedException {
+        if (VersionHistory.JAVA17.isProvidedBy(engineVersion)) {
+            // throw exception as the version is not supported
+            throw new GameVersionNotSupportedException(engineVersion);
+        }
         return Paths.get(System.getProperty("java.home"), "bin", "java");
     }
 
-    String homeDirParameter(Path gameDataDirectory) {
-        if (terasologyUsesPosixOptions()) {
+    String homeDirParameter(Path gameDataDirectory, Semver engineVersion) {
+        if (terasologyUsesPosixOptions(engineVersion)) {
             return "--homedir=" + gameDataDirectory.toAbsolutePath();
         } else {
             return "-homedir=" + gameDataDirectory.toAbsolutePath();
         }
     }
 
-    String noSplashParameter() {
-        return terasologyUsesPosixOptions() ? "--no-splash" : "-noSplash";
+    String noSplashParameter(Semver engineVersion) {
+        return terasologyUsesPosixOptions(engineVersion) ? "--no-splash" : "-noSplash";
     }
 
-    boolean terasologyUsesPosixOptions() {
+    boolean terasologyUsesPosixOptions(Semver engineVersion) {
         return VersionHistory.PICOCLI.isProvidedBy(engineVersion);
     }
 }
