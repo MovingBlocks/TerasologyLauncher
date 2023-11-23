@@ -69,7 +69,11 @@ class JenkinsClient {
         var request = new Request.Builder().url(url).build();
         try (var response = client.newCall(request).execute()) {
             logger.debug("{}{}", response, response.cacheResponse() != null ? " (cached)" : "");
-            return gson.fromJson(response.body().string(), Jenkins.ApiResult.class);
+            if (response.isSuccessful()) {
+                return gson.fromJson(response.body().string(), Jenkins.ApiResult.class);
+            } else {
+                logger.warn("Failed to read from URL '{}' with status code {}.", url.toExternalForm(), response.code());
+            }
         } catch (JsonSyntaxException | JsonIOException e) {
             logger.warn("Failed to read JSON from '{}'", url.toExternalForm(), e);
         } catch (IOException e) {
