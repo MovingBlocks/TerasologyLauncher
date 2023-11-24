@@ -103,7 +103,7 @@ dependencies {
     implementation group: 'com.github.everit-org.json-schema', name: 'org.everit.json.schema', version: '1.14.1'
 
     implementation group: 'org.kohsuke', name: 'github-api', version: '1.318'
-    implementation group: 'com.vdurmont', name: 'semver4j', version: '3.1.0'
+    implementation group: 'org.semver4j', name: 'semver4j', version: '5.2.2'
     implementation group: 'com.vladsch.flexmark', name: 'flexmark-all', version: '0.64.0'
 
     implementation('org.hildan.fxgson:fx-gson:4.0.1') {

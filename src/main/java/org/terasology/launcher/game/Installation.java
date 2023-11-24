@@ -4,7 +4,7 @@
 package org.terasology.launcher.game;
 
 import com.google.common.base.MoreObjects;
-import com.vdurmont.semver4j.Semver;
+import org.semver4j.Semver;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -117,7 +117,7 @@ public class Installation {
     static Semver getEngineVersion(Path versionDirectory) throws IOException {
         Path engineJar = findJar(versionDirectory, Installation::matchEngineJar, "engine");
         Properties versionInfo = getVersionPropertiesFromJar(engineJar);
-        return new Semver(versionInfo.getProperty("engineVersion"), Semver.SemverType.IVY);
+        return new Semver(versionInfo.getProperty("engineVersion"));
     }
 
     /**

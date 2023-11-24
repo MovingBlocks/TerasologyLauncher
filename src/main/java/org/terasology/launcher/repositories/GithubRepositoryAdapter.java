@@ -3,8 +3,8 @@
 
 package org.terasology.launcher.repositories;
 
-import com.vdurmont.semver4j.Semver;
-import com.vdurmont.semver4j.SemverException;
+import org.semver4j.Semver;
+import org.semver4j.SemverException;
 import okhttp3.OkHttpClient;
 import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;

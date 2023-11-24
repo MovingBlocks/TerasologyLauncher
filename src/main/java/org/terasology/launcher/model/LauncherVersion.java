@@ -4,8 +4,8 @@
 package org.terasology.launcher.model;
 
 import com.google.common.io.Resources;
-import com.vdurmont.semver4j.Semver;
-import com.vdurmont.semver4j.SemverException;
+import org.semver4j.Semver;
+import org.semver4j.SemverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public final class LauncherVersion {
     }
 
     public String getDisplayName() {
-        return Optional.ofNullable(semver).map(Semver::getValue).orElse("n/a");
+        return Optional.ofNullable(semver).map(Semver::getVersion).orElse("n/a");
     }
 
     public Semver getSemver() {
