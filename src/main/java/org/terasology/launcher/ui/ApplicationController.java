@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherConfiguration;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.game.GameService;
+import org.terasology.launcher.game.GameVersionNotSupportedException;
 import org.terasology.launcher.game.Installation;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
@@ -59,7 +60,6 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,21 +74,21 @@ public class ApplicationController {
     private Settings launcherSettings;
 
     private GameManager gameManager;
-    private RepositoryManager repositoryManager;
+
     private final GameService gameService;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private DownloadTask downloadTask;
 
     private Stage stage;
 
-    private Property<LauncherConfiguration> config;
+    private final Property<LauncherConfiguration> config;
 
-    private Property<GameRelease> selectedRelease;
-    private Property<GameAction> gameAction;
-    private BooleanProperty downloading;
-    private BooleanProperty showPreReleases;
+    private final Property<GameRelease> selectedRelease;
+    private final Property<GameAction> gameAction;
+    private final BooleanProperty downloading;
+    private final BooleanProperty showPreReleases;
 
-    private ObservableSet<GameIdentifier> installedGames;
+    private final ObservableSet<GameIdentifier> installedGames;
 
     /**
      * Indicate whether the user's hard drive is running out of space for game downloads.
@@ -331,7 +331,6 @@ public class ApplicationController {
         this.launcherSettings = configuration.getLauncherSettings();
         this.showPreReleases.bind(launcherSettings.showPreReleases);
 
-        this.repositoryManager = configuration.getRepositoryManager();
         this.gameManager = configuration.getGameManager();
 
         this.stage = stage;
@@ -411,7 +410,11 @@ public class ApplicationController {
             Dialogs.showError(stage, I18N.getMessage("message_error_installationNotFound", release));
             return;
         }
-        gameService.start(installation, launcherSettings);
+        try {
+            gameService.start(installation, launcherSettings);
+        } catch (GameVersionNotSupportedException e) {
+            Dialogs.showError(stage, e.getMessage());
+        }
     }
 
     private void handleRunStarted(ObservableValue<? extends Boolean> o, Boolean oldValue, Boolean newValue) {
@@ -490,21 +493,6 @@ public class ApplicationController {
                     final DeleteTask deleteTask = new DeleteTask(gameManager, id);
                     executor.submit(deleteTask);
                 });
-    }
-
-    /**
-     * Select the first item matching given predicate, select the first item otherwise.
-     *
-     * @param comboBox  the combo box to change the selection for
-     * @param predicate first item matching this predicate will be selected
-     */
-    private <T> void selectItem(final ComboBox<T> comboBox, Predicate<T> predicate) {
-        final T item = comboBox.getItems().stream()
-                .filter(predicate)
-                .findFirst()
-                .orElse(comboBox.getItems().get(0));
-
-        comboBox.getSelectionModel().select(item);
     }
 
     /**

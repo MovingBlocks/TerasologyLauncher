@@ -118,7 +118,7 @@ public class GameService extends Service<Boolean> {
      * @throws RuntimeException when required files in the game directory are missing or inaccessible
      */
     @Override
-    protected RunGameTask createTask() {
+    protected RunGameTask createTask() throws GameVersionNotSupportedException{
         verifyNotNull(settings);
 
         GameStarter starter;
