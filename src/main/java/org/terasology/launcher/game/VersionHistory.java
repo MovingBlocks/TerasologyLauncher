@@ -63,8 +63,8 @@ public enum VersionHistory {
         } else if (JAVA11.isProvidedBy(engineVersion)) {
             return new Semver("11.0.0");
         } else if (JAVA8.isProvidedBy(engineVersion)) {
-            //TODO: return new Semver("8.0.0");
-            throw new GameVersionNotSupportedException(engineVersion);
+            //TODO: figure out whether we can use Java 11 for all previous game releases or not
+            return new Semver("11.0.0");
         } else {
             throw new GameVersionNotSupportedException(engineVersion);
         }
