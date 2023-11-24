@@ -20,6 +20,8 @@ import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
 import org.terasology.launcher.model.ReleaseMetadata;
+import org.terasology.launcher.game.VersionHistory;
+import org.terasology.launcher.game.GameVersionNotSupportedException;
 
 import java.io.IOException;
 import java.net.URL;
