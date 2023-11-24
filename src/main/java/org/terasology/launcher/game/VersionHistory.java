@@ -58,11 +58,13 @@ public enum VersionHistory {
     //TODO: Should this return a range instead?
     public static Semver javaVersionForEngine(Semver engineVersion) throws GameVersionNotSupportedException {
         if (JAVA17.isProvidedBy(engineVersion)) {
-            return new Semver("17.0.0");
+            //TODO: return new Semver("17.0.0");
+            throw new GameVersionNotSupportedException(engineVersion);
         } else if (JAVA11.isProvidedBy(engineVersion)) {
             return new Semver("11.0.0");
         } else if (JAVA8.isProvidedBy(engineVersion)) {
-            return new Semver("8.0.0");
+            //TODO: return new Semver("8.0.0");
+            throw new GameVersionNotSupportedException(engineVersion);
         } else {
             throw new GameVersionNotSupportedException(engineVersion);
         }
