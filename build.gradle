@@ -102,11 +102,11 @@ dependencies {
     implementation group: "com.google.guava", name: "guava", version: "31.1-jre"
     implementation group: 'com.github.everit-org.json-schema', name: 'org.everit.json.schema', version: '1.14.1'
 
-    implementation group: 'org.kohsuke', name: 'github-api', version: '1.306'
-    implementation group: 'com.vdurmont', name: 'semver4j', version: '3.1.0'
+    implementation group: 'org.kohsuke', name: 'github-api', version: '1.318'
+    implementation group: 'org.semver4j', name: 'semver4j', version: '5.2.2'
     implementation group: 'com.vladsch.flexmark', name: 'flexmark-all', version: '0.64.0'
 
-    implementation('org.hildan.fxgson:fx-gson:4.0.1') {
+    implementation('org.hildan.fxgson:fx-gson:5.0.0') {
         because "de-/serialization of launcher properties to JSON"
     }
 
@@ -117,16 +117,16 @@ dependencies {
     // These dependencies are only needed for running tests
 
     testImplementation 'org.hamcrest:hamcrest:2.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 
-    testImplementation('org.mockito:mockito-inline:4.8.0') {
+    testImplementation('org.mockito:mockito-inline:5.2.0') {
         because "-inline build enables mocking final classes"
         // https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.2
         // > Be aware that this artifact may be abolished when the inline mock making feature is integrated into the default mock maker.
     }
-    testImplementation 'org.mockito:mockito-junit-jupiter:4.8.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.2.0'
 
     testImplementation('org.spf4j:spf4j-slf4j-test:8.9.5') {
         because "testable logging"

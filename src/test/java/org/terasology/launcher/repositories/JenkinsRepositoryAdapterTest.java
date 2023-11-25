@@ -4,7 +4,7 @@
 package org.terasology.launcher.repositories;
 
 import com.google.gson.Gson;
-import com.vdurmont.semver4j.Semver;
+import org.semver4j.Semver;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -76,12 +76,12 @@ class JenkinsRepositoryAdapterTest {
     @DisplayName("process valid response correctly")
     void processValidResponseCorrectly() {
         String displayVersion = "alpha 42 (preview)";
-        Semver engineVersion = new Semver("5.0.1-SNAPSHOT", Semver.SemverType.IVY);
+        Semver engineVersion = new Semver("5.0.1-SNAPSHOT");
 
         Properties versionInfo = new Properties();
         versionInfo.setProperty("buildNumber", validResult.builds[0].number);
         versionInfo.setProperty("displayVersion", displayVersion);
-        versionInfo.setProperty("engineVersion", engineVersion.getValue());
+        versionInfo.setProperty("engineVersion", engineVersion.getVersion());
 
         final JenkinsClient stubClient = new StubJenkinsClient(url -> validResult, url -> versionInfo);
 

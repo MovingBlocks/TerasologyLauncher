@@ -3,7 +3,7 @@
 
 package org.terasology.launcher.updater;
 
-import com.vdurmont.semver4j.Semver;
+import org.semver4j.Semver;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
@@ -81,12 +81,12 @@ public final class LauncherUpdater {
         final String infoText = "  " +
                 I18N.getLabel("message_update_current") +
                 "  " +
-                currentVersion.getValue() +
+                currentVersion.getVersion() +
                 "  \n" +
                 "  " +
                 I18N.getLabel("message_update_latest") +
                 "  " +
-                versionOf(release).getValue() +
+                versionOf(release).getVersion() +
                 "  ";
 
         return new FutureTask<>(() -> {

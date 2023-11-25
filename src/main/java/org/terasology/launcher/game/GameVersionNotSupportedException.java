@@ -3,7 +3,7 @@
 
 package org.terasology.launcher.game;
 
-import com.vdurmont.semver4j.Semver;
+import org.semver4j.Semver;
 
 public class GameVersionNotSupportedException extends RuntimeException {
     private final Semver engineVersion;

@@ -3,7 +3,7 @@
 
 package org.terasology.launcher.game;
 
-import com.vdurmont.semver4j.Semver;
+import org.semver4j.Semver;
 
 /**
  * Terasology versions which introduce specific features.
@@ -31,7 +31,7 @@ public enum VersionHistory {
     public final Semver engineVersion;
 
     VersionHistory(String s) {
-        engineVersion = new Semver(s, Semver.SemverType.IVY);
+        engineVersion = new Semver(s);
     }
 
     boolean isProvidedBy(Semver version) {
