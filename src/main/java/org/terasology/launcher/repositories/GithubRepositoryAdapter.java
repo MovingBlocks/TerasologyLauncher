@@ -73,8 +73,7 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
             final String changelog = ghRelease.getBody();
             GameIdentifier id = new GameIdentifier(engineVersion.toString(), build, profile);
 
-            final Semver minJavaVersion = VersionHistory.javaVersionForEngine(engineVersion);
-            ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at(), minJavaVersion);
+            ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at());
             return new GameRelease(id, url, metadata);
         } catch (GameVersionNotSupportedException e) {
             logger.debug("Game release {} with engine version {} is not supported. ({})", ghRelease.getHtmlUrl(), tagName, e.getMessage());

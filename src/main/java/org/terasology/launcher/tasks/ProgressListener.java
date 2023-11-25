@@ -5,10 +5,11 @@ package org.terasology.launcher.tasks;
 
 public interface ProgressListener {
 
-    void update();
+    default void update() {}
 
-    void update(int progress);
+    default void update(int progress) {}
 
-    boolean isCancelled();
-
+    default boolean isCancelled() {
+        return false;
+    }
 }

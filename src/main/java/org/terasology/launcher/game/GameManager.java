@@ -15,7 +15,10 @@ import org.terasology.launcher.model.Profile;
 import org.terasology.launcher.tasks.ProgressListener;
 import org.terasology.launcher.util.DownloadException;
 import org.terasology.launcher.util.DownloadUtils;
+import org.terasology.launcher.util.Downloadable;
 import org.terasology.launcher.util.FileUtils;
+import org.terasology.launcher.util.Installation;
+import org.terasology.launcher.util.Manager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,10 +30,11 @@ import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-public class GameManager {
+public class GameManager implements Manager<GameIdentifier> {
 
     private static final Logger logger = LoggerFactory.getLogger(GameManager.class);
 
@@ -56,13 +60,23 @@ public class GameManager {
 
     /**
      * Derive the file name for the downloaded ZIP package from the game release.
+     *
+     * @deprecated Use {@link GameRelease#getFilename()} instead.
      */
+    @Deprecated
     private String getFileNameFor(GameRelease release) {
-        GameIdentifier id = release.getId();
-        String profileString = id.getProfile().toString().toLowerCase();
-        String versionString = id.getDisplayVersion();
-        String buildString = id.getBuild().toString().toLowerCase();
-        return "terasology-" + profileString + "-" + versionString + "-" + buildString + ".zip";
+        return release.getFilename();
+    }
+
+    @Override
+    public CompletableFuture<Installation<GameIdentifier>> install(Downloadable<GameIdentifier> downloadable, ProgressListener listener) throws IOException {
+        final Path cachedZip = cacheDirectory.resolve(downloadable.getFilename());
+        if (Files.notExists(cachedZip)) {
+            final Path cacheZipPart = cachedZip.resolveSibling(cachedZip.getFileName().toString() + ".part");
+            Files.deleteIfExists(cacheZipPart);
+            DownloadUtils.downloadToFile(downloadable.getUrl(), cacheZipPart, listener);
+        }
+        return null;
     }
 
     /**
@@ -87,6 +101,7 @@ public class GameManager {
         }
     }
 
+    //TODO: should move to DownloadUtils (or a common DownloadManager abstract class)
     private void download(GameRelease release, Path targetLocation, ProgressListener listener)
             throws DownloadException, IOException, InterruptedException {
         final URL downloadUrl = release.getUrl();
@@ -142,8 +157,8 @@ public class GameManager {
         return installDirectory.resolve(id.getProfile().name()).resolve(id.getBuild().name()).resolve(id.getDisplayVersion());
     }
 
-    public Installation getInstallation(GameIdentifier id) throws FileNotFoundException {
-        return Installation.getExisting(getInstallDirectory(id));
+    public GameInstallation getInstallation(GameIdentifier id) throws FileNotFoundException {
+        return GameInstallation.getExisting(getInstallDirectory(id));
     }
 
     /**

@@ -15,12 +15,10 @@ import com.vdurmont.semver4j.Semver;
 public class ReleaseMetadata {
     private final String changelog;
     private final Date timestamp;
-    private final Semver minJavaVersion;
 
-    public ReleaseMetadata(String changelog, Date timestamp, Semver minJavaVersion) {
+    public ReleaseMetadata(String changelog, Date timestamp) {
         this.changelog = changelog;
         this.timestamp = timestamp;
-        this.minJavaVersion = minJavaVersion;
     }
 
     /**
@@ -35,9 +33,5 @@ public class ReleaseMetadata {
      */
     public Date getTimestamp() {
         return timestamp;
-    }
-
-    public Semver getMinJavaVersion() {
-        return minJavaVersion;
     }
 }

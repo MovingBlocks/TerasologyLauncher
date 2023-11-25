@@ -269,7 +269,7 @@ Special thanks to everyone that contributed to this release:
 
 ### 🧰 Maintenance
 
-- #536 feat: merge 'games' directory into launcher installation directory (@skaldarnar)
+- #536 feat: merge 'games' directory into launcher gameInstallation directory (@skaldarnar)
 - #534 chore: Resovle Checkstyle warnings (@skaldarnar)
 - #529 fix: remove HostServices (only working with Oracle JRE) (@skaldarnar)
 - #524 chore(settings): clean up properties (@jdrueckert)
@@ -386,7 +386,7 @@ Special thanks to everyone that contributed to this release:
 
 - Allow all memory (heap size) values (512 MB - 16 GB)
 - Optimize zip file download (checks, logging, timeout, file name, ...)
-- Delete content of game installation sub directory before downloading and extracting a game version
+- Delete content of game gameInstallation sub directory before downloading and extracting a game version
 
 ## 1.3.0 (2014-02-23)
 
@@ -440,7 +440,7 @@ Special thanks to everyone that contributed to this release:
 ## 1.0.0 (2013-07-22)
 
 - Download, install and start the game _Terasology_
-  - Supports setting a custom game installation directory and managing multiple installations / versions
+  - Supports setting a custom game gameInstallation directory and managing multiple installations / versions
   - Supports three game types
     - STABLE : TerasologyStable (master)
     - NIGHTLY : Terasology (develop)

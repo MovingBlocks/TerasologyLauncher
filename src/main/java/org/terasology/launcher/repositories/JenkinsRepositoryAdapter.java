@@ -127,9 +127,8 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
     private ReleaseMetadata computeReleaseMetadataFrom(Jenkins.Build jenkinsBuildInfo, Semver engineVersion) throws GameVersionNotSupportedException {
         String changelog = computeChangelogFrom(jenkinsBuildInfo.changeSet);
         final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
-        Semver minJavaVersion = VersionHistory.javaVersionForEngine(engineVersion);
         // all builds from this Jenkins are using LWJGL v3
-        return new ReleaseMetadata(changelog, timestamp, minJavaVersion);
+        return new ReleaseMetadata(changelog, timestamp);
     }
 
     private String computeChangelogFrom(Jenkins.ChangeSet changeSet) {

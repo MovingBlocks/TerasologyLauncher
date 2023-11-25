@@ -32,12 +32,12 @@ public final class DownloadUtils {
     private DownloadUtils() {
     }
 
-    public static CompletableFuture<Void> downloadToFile(URL downloadURL, Path file, ProgressListener listener) throws DownloadException {
+    public static CompletableFuture<Path> downloadToFile(URL downloadURL, Path file, ProgressListener listener) throws DownloadException {
         listener.update(0);
 
         var result = getConnectedDownloadConnection(downloadURL);
 
-        return result.thenAcceptAsync(response -> {
+        return result.thenApply(response -> {
             var contentLength = response.headers().firstValueAsLong("content-length").orElse(0L);
             logger.debug("Download file '{}' ({}; {}) from URL '{}'.", file, contentLength,
                     response.headers().firstValue("content-type"), downloadURL);
@@ -58,7 +58,9 @@ public final class DownloadUtils {
                     throw new DownloadException("Failed to read the file length after download!", e);
                 }
                 listener.update(100);
+                return file;
             }
+            return null;
         });
     }
 
