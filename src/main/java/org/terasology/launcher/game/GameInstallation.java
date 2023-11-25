@@ -212,19 +212,21 @@ public class GameInstallation implements Installation<GameIdentifier> {
         try {
             profile = Profile.valueOf(path.getName(parts - 3).toString());
             build = Build.valueOf(path.getName(parts - 2).toString());
+            return new GameIdentifier(path.getFileName().toString(), build, profile);
         } catch (IllegalArgumentException e) {
             logger.debug("Cannot derive game information from installation: "
                     + "Expected directory format '.../<profile>/<build>/<game>' but got {}", path);
             return null;
         }
-        try {
-            Path jarPath = getGameJarPath();
-            Properties info = getVersionPropertiesFromJar(jarPath);
-            return new GameIdentifier(info.getProperty("displayVersion"), build, profile);
-        } catch (IOException e) {
-            logger.debug("Cannot derive game information from installation: "
-                    + "Cannot read 'displayVersion' from version info file.", path);
-            return null;
-        }
+        //TODO: this is not working as I expected - probably don't fully understand this code I copied from somewhere else...
+//        try {
+//            Path jarPath = getGameJarPath();
+//            Properties info = getVersionPropertiesFromJar(jarPath);
+//            return new GameIdentifier(info.getProperty("displayVersion"), build, profile);
+//        } catch (IOException e) {
+//            logger.debug("Cannot derive game information from installation: "
+//                    + "Cannot read 'displayVersion' from version info file for installation in {}.", path, e);
+//            return null;
+//        }
     }
 }
