@@ -37,7 +37,7 @@ import org.terasology.launcher.LauncherConfiguration;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.game.GameService;
 import org.terasology.launcher.game.GameVersionNotSupportedException;
-import org.terasology.launcher.game.Installation;
+import org.terasology.launcher.game.GameInstallation;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
@@ -400,9 +400,9 @@ public class ApplicationController {
             return;
         }
         final GameRelease release = selectedRelease.getValue();
-        final Installation installation;
+        final GameInstallation gameInstallation;
         try {
-            installation = gameManager.getInstallation(release.getId());
+            gameInstallation = gameManager.getInstallation(release.getId());
         } catch (FileNotFoundException e) {
             // TODO: Refresh the list of installed games or something? This should not be reachable if
             //     the properties are up to date.
@@ -411,7 +411,7 @@ public class ApplicationController {
             return;
         }
         try {
-            gameService.start(installation, launcherSettings);
+            gameService.start(gameInstallation, launcherSettings);
         } catch (GameVersionNotSupportedException e) {
             Dialogs.showError(stage, e.getMessage());
         }

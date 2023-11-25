@@ -8,11 +8,11 @@ import org.semver4j.Semver;
 import java.nio.file.Path;
 
 /** An Installation that does not depend on filesystem interaction to determine engineVersion or game jar. */
-class StubInstallation extends Installation {
+class StubGameInstallation extends GameInstallation {
 
     Path gameJar;
 
-    StubInstallation(Path installDirectory, Path relativeGameJarPath) {
+    StubGameInstallation(Path installDirectory, Path relativeGameJarPath) {
         super(installDirectory);
         gameJar = this.path.resolve(relativeGameJarPath);
     }

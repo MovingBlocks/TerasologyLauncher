@@ -142,8 +142,8 @@ public class GameManager {
         return installDirectory.resolve(id.getProfile().name()).resolve(id.getBuild().name()).resolve(id.getDisplayVersion());
     }
 
-    public Installation getInstallation(GameIdentifier id) throws FileNotFoundException {
-        return Installation.getExisting(getInstallDirectory(id));
+    public GameInstallation getInstallation(GameIdentifier id) throws FileNotFoundException {
+        return GameInstallation.getExisting(getInstallDirectory(id));
     }
 
     /**

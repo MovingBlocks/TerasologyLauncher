@@ -24,21 +24,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A local installation of a Terasology release.
  */
-public class Installation {
+public class GameInstallation {
     final Path path;
 
-    Installation(Path installDirectory) {
+    GameInstallation(Path installDirectory) {
         path = checkNotNull(installDirectory);
     }
 
     /**
      * Return an Installation after confirming it is present.
      */
-    static Installation getExisting(Path directory) throws FileNotFoundException {
+    static GameInstallation getExisting(Path directory) throws FileNotFoundException {
         if (!Files.exists(directory)) {
             throw new FileNotFoundException("No installation present in " + directory);
         }
-        return new Installation(directory);
+        return new GameInstallation(directory);
     }
 
     /**
@@ -59,7 +59,7 @@ public class Installation {
      * build (i.e., custom  {@code libs} or default {@code lib}).
      */
     Path getGameJarPath() throws IOException {
-        return findJar(path, Installation::matchGameJar, "game");
+        return findJar(path, GameInstallation::matchGameJar, "game");
     }
 
     @Override
@@ -67,11 +67,11 @@ public class Installation {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Installation)) {
+        if (!(o instanceof GameInstallation)) {
             return false;
         }
 
-        Installation that = (Installation) o;
+        GameInstallation that = (GameInstallation) o;
 
         return path.equals(that.path);
     }
@@ -115,7 +115,7 @@ public class Installation {
      * @throws FileNotFoundException if the engine or the version info could not be found
      */
     static Semver getEngineVersion(Path versionDirectory) throws IOException {
-        Path engineJar = findJar(versionDirectory, Installation::matchEngineJar, "engine");
+        Path engineJar = findJar(versionDirectory, GameInstallation::matchEngineJar, "engine");
         Properties versionInfo = getVersionPropertiesFromJar(engineJar);
         return new Semver(versionInfo.getProperty("engineVersion"));
     }
