@@ -57,12 +57,9 @@ public class GameManager {
     /**
      * Derive the file name for the downloaded ZIP package from the game release.
      */
+    @Deprecated
     private String getFileNameFor(GameRelease release) {
-        GameIdentifier id = release.getId();
-        String profileString = id.getProfile().toString().toLowerCase();
-        String versionString = id.getDisplayVersion();
-        String buildString = id.getBuild().toString().toLowerCase();
-        return "terasology-" + profileString + "-" + versionString + "-" + buildString + ".zip";
+        return release.getFilename();
     }
 
     /**
