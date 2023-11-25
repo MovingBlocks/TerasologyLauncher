@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.model.LauncherVersion;
-import org.terasology.launcher.repositories.RepositoryManager;
+import org.terasology.launcher.repositories.CombinedRepository;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.ui.Dialogs;
@@ -92,7 +92,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             updateMessage(I18N.getLabel("splash_fetchReleases"));
             logger.info("Fetching game releases ...");
             // implicitly fetches game releases and cache them
-            final RepositoryManager repositoryManager = new RepositoryManager(client);
+            final CombinedRepository releaseRepository = new CombinedRepository(client);
 
             // implicitly scans the game directory for installed games and cache them
             final GameManager gameManager = new GameManager(cacheDirectory, gameDirectory);
@@ -111,7 +111,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                     downloadDirectory,
                     launcherSettings,
                     gameManager,
-                    repositoryManager);
+                    releaseRepository);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
         }
