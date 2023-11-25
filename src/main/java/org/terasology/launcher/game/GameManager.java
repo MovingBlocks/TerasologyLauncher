@@ -158,7 +158,8 @@ public class GameManager {
                     // Skip the intermediate directories.
                     .filter(d -> installDirectory.relativize(d).getNameCount() == 3);
             localGames = gameDirectories
-                    .map(GameManager::getInstalledVersion)
+                    .map(GameInstallation::new)
+                    .map(GameInstallation::getInfo)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toUnmodifiableSet());
         } catch (IOException e) {
@@ -166,24 +167,5 @@ public class GameManager {
             return;
         }
         Platform.runLater(() -> installedGames.addAll(localGames));
-    }
-
-
-    /**
-     * Use {@link Installation#getInfo()} instead.
-     */
-    @Deprecated
-    private static GameIdentifier getInstalledVersion(Path versionDirectory) {
-        Profile profile;
-        Build build;
-        var parts = versionDirectory.getNameCount();
-        try {
-            profile = Profile.valueOf(versionDirectory.getName(parts - 3).toString());
-            build = Build.valueOf(versionDirectory.getName(parts - 2).toString());
-        } catch (IllegalArgumentException e) {
-            logger.debug("Directory does not match expected profile/build names: {}", versionDirectory, e);
-            return null;
-        }
-        return new GameIdentifier(versionDirectory.getFileName().toString(), build, profile);
     }
 }

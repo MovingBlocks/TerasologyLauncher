@@ -205,6 +205,7 @@ public class GameInstallation implements Installation<GameIdentifier> {
 
     @Override
     public GameIdentifier getInfo() {
+        //TODO: compute this information on instance creation (and fail creation in case it is not a valid installation)
         Profile profile;
         Build build;
         var parts = path.getNameCount();
