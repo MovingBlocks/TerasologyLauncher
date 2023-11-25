@@ -3,6 +3,9 @@
 
 package org.terasology.launcher.model;
 
+import org.terasology.launcher.game.GameInstallation;
+import org.terasology.launcher.util.Downloadable;
+
 import java.net.URL;
 import java.util.Date;
 import java.util.Objects;
@@ -17,7 +20,7 @@ import java.util.Objects;
  *     <li>TODO: define what the <b>artifact</b> is, and what requirements/restrictions there are</li>
  * </ul>
  */
-public class GameRelease {
+public class GameRelease implements Downloadable<GameIdentifier> {
     final GameIdentifier id;
     final ReleaseMetadata releaseMetadata;
     final URL url;
@@ -32,8 +35,22 @@ public class GameRelease {
         return id;
     }
 
+    @Override
     public URL getUrl() {
         return url;
+    }
+
+    @Override
+    public String getFilename() {
+        String profileString = id.getProfile().toString().toLowerCase();
+        String versionString = id.getDisplayVersion();
+        String buildString = id.getBuild().toString().toLowerCase();
+        return "terasology-" + profileString + "-" + versionString + "-" + buildString + ".zip";
+    }
+
+    @Override
+    public GameIdentifier getInfo() {
+        return id;
     }
 
     /**

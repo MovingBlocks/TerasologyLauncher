@@ -10,11 +10,12 @@ import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class RepositoryManager {
+public class RepositoryManager implements ReleaseRepository {
 
     private final Set<GameRelease> releases;
 
@@ -42,8 +43,16 @@ public class RepositoryManager {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * @deprecated use {@link #fetchReleases()} instead.
+     */
+    @Deprecated
     public Set<GameRelease> getReleases() {
         return releases;
     }
 
+    @Override
+    public List<GameRelease> fetchReleases() {
+        return new ArrayList<>(getReleases());
+    }
 }

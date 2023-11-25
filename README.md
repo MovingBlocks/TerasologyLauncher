@@ -11,7 +11,7 @@
 
 <h3 align="center"><b>
     <a href="#community">Community</a> | 
-    <a href="#installation-">Installation</a> | 
+    <a href="#gameInstallation-">Installation</a> | 
     <a href="#features">Features</a>  |
     <a href="#troubleshooting">Troubleshooting</a>  |
     <a href="#development">Development</a>  | 
@@ -85,7 +85,7 @@ We are present in nearly the complete round-up of social networks. Follow/friend
 
 ## Features
 
-The *launcher installation directory* is the folder you extracted the launcher archive into.
+The *launcher gameInstallation directory* is the folder you extracted the launcher archive into.
 This directory will also hold different versions of _Terasology_ that are installed via the launcher.
 
 On first start-up, the _Terasology Launcher_ will prompt you with the selection of the _Terasology_ data directory.
@@ -117,7 +117,7 @@ Further, you have access to the social media representation of _Terasology_.
 
 ![Terasology Launcher Settings UI](docs/images/200314_TerasologyLauncher_UI-settings.png)
 
-The *settings view* enables you to open the launcher installation, game installation and data directories for quick access.
+The *settings view* enables you to open the launcher gameInstallation, game gameInstallation and data directories for quick access.
 You can configure the memory settings for the game and even specify additional Java or game arguments as well as the logging level for the game.
 Please note, that the "Initial Game Memory" and "Maximum Game Memory" settings only apply to the game itself.
 The actual resource consumption may be higher due to additional resources required by the Java Virtual Machine (JVM).
@@ -218,7 +218,7 @@ Apart from Git, basically everything can be done using the [Gradle][gradle] [wra
   </tr>
   <tr>
       <td width="50%"><code>gradlew install</code></td>
-      <td width="50%"><i>Create a local runnable installation (placed in <code>./build/install/TerasologyLauncher</code>).</i></td>
+      <td width="50%"><i>Create a local runnable gameInstallation (placed in <code>./build/install/TerasologyLauncher</code>).</i></td>
   </tr>
   <tr>
       <td width="50%"><code>gradlew run</code></td>

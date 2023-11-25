@@ -3,8 +3,11 @@
 
 package org.terasology.launcher.repositories;
 
+import com.vdurmont.semver4j.Semver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.game.GameVersionNotSupportedException;
+import org.terasology.launcher.game.VersionHistory;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
@@ -86,11 +89,15 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
         if (hasAcceptableResult(jenkinsBuildInfo)) {
             final URL url = client.getArtifactUrl(jenkinsBuildInfo, TERASOLOGY_ZIP_PATTERN);
 
-            final ReleaseMetadata metadata = computeReleaseMetadataFrom(jenkinsBuildInfo);
-            final Optional<GameIdentifier> id = computeIdentifierFrom(jenkinsBuildInfo);
-
-            if (url != null && id.isPresent()) {
-                return Optional.of(new GameRelease(id.get(), url, metadata));
+            final Optional<GameIdentifier> maybeId = computeIdentifierFrom(jenkinsBuildInfo);
+            if (url != null && maybeId.isPresent()) {
+                GameIdentifier id = maybeId.get();
+                try {
+                    final ReleaseMetadata metadata = computeReleaseMetadataFrom(jenkinsBuildInfo, new Semver(id.getDisplayVersion()));
+                    return Optional.of(new GameRelease(id, url, metadata));
+                } catch (GameVersionNotSupportedException e) {
+                    logger.debug("Skipping build for unsupported engine version {} from {}", id.getDisplayVersion(), jenkinsBuildInfo.url);
+                }
             } else {
                 logger.debug("Skipping build without game artifact or version identifier: '{}'", jenkinsBuildInfo.url);
             }
@@ -117,7 +124,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
                 });
     }
 
-    private ReleaseMetadata computeReleaseMetadataFrom(Jenkins.Build jenkinsBuildInfo) {
+    private ReleaseMetadata computeReleaseMetadataFrom(Jenkins.Build jenkinsBuildInfo, Semver engineVersion) throws GameVersionNotSupportedException {
         String changelog = computeChangelogFrom(jenkinsBuildInfo.changeSet);
         final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
         // all builds from this Jenkins are using LWJGL v3

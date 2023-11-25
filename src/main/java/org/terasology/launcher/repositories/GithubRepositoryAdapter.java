@@ -20,6 +20,8 @@ import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
 import org.terasology.launcher.model.ReleaseMetadata;
+import org.terasology.launcher.game.VersionHistory;
+import org.terasology.launcher.game.GameVersionNotSupportedException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -73,10 +75,12 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
 
             ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at());
             return new GameRelease(id, url, metadata);
+        } catch (GameVersionNotSupportedException e) {
+            logger.debug("Game release {} with engine version {} is not supported. ({})", ghRelease.getHtmlUrl(), tagName, e.getMessage());
         } catch (SemverException | IOException e) {
             logger.info("Could not create game release from Github release {}: {}", ghRelease.getHtmlUrl(), e.getMessage());
-            return null;
         }
+        return null;
     }
 
     @Override

@@ -56,7 +56,7 @@ public class TestGameStarter {
     }
 
     private GameStarter newStarter(Path relativeGameJarPath) throws IOException {
-        return new GameStarter(new StubInstallation(gamePath, relativeGameJarPath),
+        return new GameStarter(new StubGameInstallation(gamePath, relativeGameJarPath),
                 gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
     }
 

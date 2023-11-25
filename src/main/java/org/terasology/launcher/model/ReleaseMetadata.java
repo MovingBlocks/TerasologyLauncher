@@ -4,6 +4,7 @@
 package org.terasology.launcher.model;
 
 import java.util.Date;
+import com.vdurmont.semver4j.Semver;
 
 /**
  * Data container for metadata associated with a game release.
