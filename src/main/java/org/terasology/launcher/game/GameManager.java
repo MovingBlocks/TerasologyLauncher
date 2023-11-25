@@ -13,8 +13,8 @@ import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
 import org.terasology.launcher.tasks.ProgressListener;
-import org.terasology.launcher.util.DownloadException;
-import org.terasology.launcher.util.DownloadUtils;
+import org.terasology.launcher.remote.DownloadException;
+import org.terasology.launcher.remote.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 
 import java.io.File;
