@@ -40,7 +40,7 @@ final class GameStarter implements Callable<Process> {
     GameStarter(GameInstallation gameInstallation, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax,
                 List<String> javaParams, List<String> gameParams, Level logLevel) throws IOException, GameVersionNotSupportedException {
         Semver engineVersion = gameInstallation.getEngineVersion();
-        var gamePath = gameInstallation.path;
+        var gamePath = gameInstallation.getPath();
 
         final boolean isMac = Platform.getPlatform().isMac();
         final List<String> processParameters = new ArrayList<>();

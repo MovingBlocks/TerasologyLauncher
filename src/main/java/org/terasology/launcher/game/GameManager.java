@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.io.Installation;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
@@ -167,6 +168,11 @@ public class GameManager {
         Platform.runLater(() -> installedGames.addAll(localGames));
     }
 
+
+    /**
+     * Use {@link Installation#getInfo()} instead.
+     */
+    @Deprecated
     private static GameIdentifier getInstalledVersion(Path versionDirectory) {
         Profile profile;
         Build build;

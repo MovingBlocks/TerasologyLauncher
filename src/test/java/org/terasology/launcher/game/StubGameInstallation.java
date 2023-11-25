@@ -14,7 +14,7 @@ class StubGameInstallation extends GameInstallation {
 
     StubGameInstallation(Path installDirectory, Path relativeGameJarPath) {
         super(installDirectory);
-        gameJar = this.path.resolve(relativeGameJarPath);
+        gameJar = this.getPath().resolve(relativeGameJarPath);
     }
 
     @Override

@@ -5,7 +5,9 @@ package org.terasology.launcher.io;
 
 import java.nio.file.Path;
 
+//TODO: define behavior in error cases, annotate non-null, etc.
 public interface Installation<T> {
+
     /**
      * @return The full path to the location of the installation.
      */
