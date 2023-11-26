@@ -6,21 +6,17 @@ package org.terasology.launcher.game;
 import org.semver4j.Semver;
 
 public class GameVersionNotSupportedException extends RuntimeException {
-    private final Semver engineVersion;
-    private final String message;
-
     public GameVersionNotSupportedException(Semver engineVersion) {
         this(engineVersion, null);
     }
 
     public GameVersionNotSupportedException(Semver engineVersion, String message) {
-        this.engineVersion = engineVersion;
-        this.message = message;
+        super(errorMessage(engineVersion, message));
     }
 
-    @Override
-    public String getMessage() {
-        String details = (message != null) ? " (" + message + ")" : "";
-        return "Unsupported engine version: " + engineVersion.toString() + details;
+    private static String errorMessage(Semver engineVersion, String additionalInfo) {
+        String message = "Unsupported engine version: " + engineVersion.toString();
+        String details = ((additionalInfo != null) ? " (" + additionalInfo + ")" : "");
+        return message + details;
     }
 }
