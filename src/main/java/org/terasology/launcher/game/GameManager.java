@@ -12,18 +12,17 @@ import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
-import org.terasology.launcher.tasks.ProgressListener;
 import org.terasology.launcher.remote.DownloadException;
 import org.terasology.launcher.remote.DownloadUtils;
+import org.terasology.launcher.remote.RemoteResource;
+import org.terasology.launcher.tasks.ProgressListener;
 import org.terasology.launcher.util.FileUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
@@ -84,30 +83,18 @@ public class GameManager {
         }
     }
 
+    /**
+     * @deprecated Use {@link DownloadUtils#download(RemoteResource, Path, ProgressListener)} instead.
+     */
+    @Deprecated
     private void download(GameRelease release, Path targetLocation, ProgressListener listener)
             throws DownloadException, IOException, InterruptedException {
-        final URL downloadUrl = release.getUrl();
-
-        final long contentLength = DownloadUtils.getContentLength(downloadUrl);
-        final long availableSpace = targetLocation.getParent().toFile().getUsableSpace();
-
-        if (availableSpace >= contentLength) {
-            final Path cacheZipPart = targetLocation.resolveSibling(targetLocation.getFileName().toString() + ".part");
-            Files.deleteIfExists(cacheZipPart);
-            try {
-                DownloadUtils.downloadToFile(downloadUrl, cacheZipPart, listener).get();
-            } catch (ExecutionException e) {
-                throw new DownloadException("Exception while downloading " + downloadUrl, e.getCause());
-            }
-
-            if (!listener.isCancelled()) {
-                Files.move(cacheZipPart, targetLocation, StandardCopyOption.ATOMIC_MOVE);
-            }
-        } else {
-            throw new DownloadException("Insufficient space for downloading package");
+        DownloadUtils downloader = new DownloadUtils();
+        try {
+            downloader.download(release, targetLocation, listener).get();
+        } catch (ExecutionException e) {
+            throw new DownloadException("Download failed.", e.getCause());
         }
-
-        logger.info("Finished downloading package: {}", release.getId());
     }
 
     /**
