@@ -29,13 +29,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class GithubRepositoryAdapter implements ReleaseRepository {
+public class GithubRepository implements ReleaseRepository {
 
-    private static final Logger logger = LoggerFactory.getLogger(GithubRepositoryAdapter.class);
+    private static final Logger logger = LoggerFactory.getLogger(GithubRepository.class);
 
     private GitHub github;
 
-    public GithubRepositoryAdapter(final OkHttpClient httpClient) {
+    public GithubRepository(final OkHttpClient httpClient) {
         try {
             github = GitHubBuilder.fromEnvironment()
                     .withConnector(new OkHttpConnector(httpClient))
@@ -86,7 +86,7 @@ public class GithubRepositoryAdapter implements ReleaseRepository {
                 final GHRepository repository = github.getRepository("MovingBlocks/Terasology");
                 final List<GHRelease> githubReleases = repository.listReleases().toList();
                 final List<GameRelease> releases = githubReleases.stream()
-                        .map(GithubRepositoryAdapter::fromGithubRelease)
+                        .map(GithubRepository::fromGithubRelease)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
                 logger.debug("Github rate limit: {}", github.getRateLimit());

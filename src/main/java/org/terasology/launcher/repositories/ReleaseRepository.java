@@ -13,7 +13,7 @@ import java.util.List;
  * <p>
  * Each release repository provides a list of game releases. This is a common API for potentially different sources,
  * such as GitHub, Jenkins build servers, or other similar. A new release repository has to be added in-code by
- * implementing this interface and registering it in the {@link RepositoryManager}.
+ * implementing this interface and registering it in the {@link CombinedRepository}.
  * </p>
  */
 public interface ReleaseRepository {

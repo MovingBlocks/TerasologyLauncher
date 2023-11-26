@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.ui;
 
+import com.google.common.collect.Sets;
 import javafx.animation.Transition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
@@ -43,7 +44,7 @@ import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
 import org.terasology.launcher.model.ReleaseMetadata;
-import org.terasology.launcher.repositories.RepositoryManager;
+import org.terasology.launcher.repositories.ReleaseRepository;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
 import org.terasology.launcher.tasks.DownloadTask;
@@ -213,12 +214,11 @@ public class ApplicationController {
     private void initComboBoxes() {
         final ObjectBinding<ObservableList<GameRelease>> releases = Bindings.createObjectBinding(() -> {
             LauncherConfiguration cfg = config.getValue();
-            if (cfg == null || cfg.getRepositoryManager() == null) {
+            if (cfg == null || cfg.getReleaseRepository() == null) {
                 return FXCollections.emptyObservableList();
             } else {
-                RepositoryManager mngr = config.getValue().getRepositoryManager();
-
-                Set<GameRelease> onlineReleases = mngr.getReleases();
+                ReleaseRepository repository = config.getValue().getReleaseRepository();
+                Set<GameRelease> onlineReleases = Sets.newHashSet(repository.fetchReleases());
                 // Create dummy game release objects from locally installed games.
                 // We need this in case of running the launcher in "offline" mode
                 // and the list of game releases fetched via the repository manager
