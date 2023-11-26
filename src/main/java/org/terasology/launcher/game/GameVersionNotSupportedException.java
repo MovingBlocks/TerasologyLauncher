@@ -20,7 +20,7 @@ public class GameVersionNotSupportedException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return "Unsupported engine version: " + engineVersion.toString()
-                + message != null ? "(" + message + ")" : "";
+        String details = (message != null) ? " (" + message + ")" : "";
+        return "Unsupported engine version: " + engineVersion.toString() + details;
     }
 }
