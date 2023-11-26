@@ -5,7 +5,7 @@ package org.terasology.launcher.game;
 
 import org.semver4j.Semver;
 
-public class GameVersionNotSupportedException extends Exception {
+public class GameVersionNotSupportedException extends RuntimeException {
     private final Semver engineVersion;
     private final String message;
 
