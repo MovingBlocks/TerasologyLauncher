@@ -14,6 +14,9 @@ import java.util.Set;
  */
 public final class Platform {
 
+    final private OS os;
+    final private Arch arch;
+
     //TODO(skaldarnar): I'm not fully settled on how to model the Platform. I thought splitting this up into two enums
     //  for OS and Architecture would help with more type-safe construction of these values, simplify comparison to
     //  select the right JRE for a game, etc.
@@ -28,16 +31,11 @@ public final class Platform {
     //      MAC_AARCH64
     //  The biggest drawback of being super-strict here is that development on non-supported platforms becomes
     //  impossible where it was just "not ideal" before.
-
-
     public static final Set<Platform> SUPPORTED_PLATFORMS = Sets.newHashSet(
             new Platform(OS.WINDOWS, Arch.X64),
             new Platform(OS.LINUX, Arch.X64),
             new Platform(OS.MAC, Arch.X64)
     );
-
-    final private OS os;
-    final private Arch arch;
 
     public Platform(OS os, Arch arch) {
         this.os = os;

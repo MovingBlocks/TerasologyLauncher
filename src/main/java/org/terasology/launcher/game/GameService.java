@@ -50,19 +50,20 @@ public class GameService extends Service<Boolean> {
 
     public GameService() {
         setExecutor(Executors.newSingleThreadExecutor(
-            new ThreadFactoryBuilder()
-                    .setNameFormat("GameService-%d")
-                    .setDaemon(true)
-                    .setUncaughtExceptionHandler(this::exceptionHandler)
-                    .build()
+                new ThreadFactoryBuilder()
+                        .setNameFormat("GameService-%d")
+                        .setDaemon(true)
+                        .setUncaughtExceptionHandler(this::exceptionHandler)
+                        .build()
         ));
     }
 
     /**
      * Start a new game process with these settings.
+     *
      * @param installation the directory under which we will find libs/Terasology.jar, also used as the process's
-     *     working directory
-     * @param settings supplies other settings relevant to configuring a process
+     *                     working directory
+     * @param settings     supplies other settings relevant to configuring a process
      */
     @SuppressWarnings("checkstyle:HiddenField")
     public void start(Installation installation, Settings settings) {
@@ -116,10 +117,10 @@ public class GameService extends Service<Boolean> {
      * This class's configuration fields <em>must</em> be set before this is called.
      *
      * @throws com.google.common.base.VerifyException when fields are unset
-     * @throws RuntimeException when required files in the game directory are missing or inaccessible
+     * @throws RuntimeException                       when required files in the game directory are missing or inaccessible
      */
     @Override
-    protected RunGameTask createTask() throws GameVersionNotSupportedException{
+    protected RunGameTask createTask() throws GameVersionNotSupportedException {
         verifyNotNull(settings);
 
         GameStarter starter;
@@ -135,13 +136,17 @@ public class GameService extends Service<Boolean> {
         return new RunGameTask(starter);
     }
 
-    /** After a task completes, reset to ready for the next. */
+    /**
+     * After a task completes, reset to ready for the next.
+     */
     @Override
     protected void succeeded() {
         reset();  // Ready to go again!
     }
 
-    /** Checks to see if the failure left any exceptions behind, then resets to ready. */
+    /**
+     * Checks to see if the failure left any exceptions behind, then resets to ready.
+     */
     @Override
     protected void failed() {
         // "Uncaught" exceptions from javafx's Task are actually caught and kept in a property,
