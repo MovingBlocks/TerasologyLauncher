@@ -8,6 +8,7 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.platform.UnsupportedPlatformException;
 import org.terasology.launcher.settings.Settings;
 
 import java.io.IOException;
@@ -128,7 +129,7 @@ public class GameService extends Service<Boolean> {
                     settings.userJavaParameters.get(),
                     settings.userGameParameters.get(),
                     settings.logLevel.get());
-        } catch (IOException e) {
+        } catch (IOException | UnsupportedPlatformException e) {
             throw new RuntimeException("Error using this as a game directory: " + gamePath, e);
         }
         return new RunGameTask(starter);

@@ -7,8 +7,9 @@ import org.semver4j.Semver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
+import org.terasology.launcher.platform.UnsupportedPlatformException;
 import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.Platform;
+import org.terasology.launcher.platform.Platform;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,7 +39,7 @@ final class GameStarter implements Callable<Process> {
      * @param logLevel          the minimum level of log events Terasology will include on its output stream to us
      */
     GameStarter(Installation installation, Path gameDataDirectory, JavaHeapSize heapMin, JavaHeapSize heapMax,
-                List<String> javaParams, List<String> gameParams, Level logLevel) throws IOException, GameVersionNotSupportedException {
+                List<String> javaParams, List<String> gameParams, Level logLevel) throws IOException, GameVersionNotSupportedException, UnsupportedPlatformException {
         Semver engineVersion = installation.getEngineVersion();
         var gamePath = installation.path;
 
