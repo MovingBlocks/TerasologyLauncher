@@ -15,6 +15,8 @@ import org.kohsuke.github.HttpException;
 import org.kohsuke.github.extras.okhttp3.OkHttpConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.game.GameVersionNotSupportedException;
+import org.terasology.launcher.game.VersionHistory;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
@@ -64,6 +66,8 @@ public class GithubRepository implements ReleaseRepository {
             } else {
                 engineVersion = new Semver(tagName);
             }
+            //TODO: check whether the launcher can fulfil this requirement
+            final Semver minJavaVersion = VersionHistory.getJavaVersionForEngine(engineVersion);
 
             final Optional<GHAsset> gameAsset = ghRelease.assets().stream().filter(asset -> asset.getName().matches("Terasology.*zip")).findFirst();
             final URL url = new URL(gameAsset.map(GHAsset::getBrowserDownloadUrl).orElseThrow(() -> new IOException("Missing game asset.")));
@@ -74,9 +78,13 @@ public class GithubRepository implements ReleaseRepository {
             ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at());
             return new GameRelease(id, url, metadata);
         } catch (SemverException | IOException e) {
-            logger.info("Could not create game release from Github release {}: {}", ghRelease.getHtmlUrl(), e.getMessage());
-            return null;
+            logger.info("Could not create game release from Github release {}: {}",
+                    ghRelease.getHtmlUrl(), e.getMessage());
+        } catch (GameVersionNotSupportedException e) {
+            logger.debug("Game release {} with engine version {} is not supported. ({})",
+                    ghRelease.getHtmlUrl(), tagName, e.getMessage());
         }
+        return null;
     }
 
     @Override

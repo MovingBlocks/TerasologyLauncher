@@ -89,6 +89,9 @@ class JenkinsRepository implements ReleaseRepository {
             final ReleaseMetadata metadata = computeReleaseMetadataFrom(jenkinsBuildInfo);
             final Optional<GameIdentifier> id = computeIdentifierFrom(jenkinsBuildInfo);
 
+            //TODO: check whether the game release is supported (minimal Java version)
+            //      we probably need to encode the engine version explicitly in the GameIdentifier (instead of just the display version)
+
             if (url != null && id.isPresent()) {
                 return Optional.of(new GameRelease(id.get(), url, metadata));
             } else {
