@@ -18,7 +18,7 @@ import static com.google.common.base.Verify.verifyNotNull;
 /**
  * This service starts and monitors the game process.
  * <p>
- * Its {@linkplain #GameService() constructor} requires no arguments. Use {@link #start(Installation, Settings)} to
+ * Its {@linkplain #GameService() constructor} requires no arguments. Use {@link #start(GameInstallation, Settings)} to
  * start the game process; the zero-argument form of {@code start()} will not have enough information.
  * <p>
  * The Boolean value of this service is true when it believes the game process has started <em>successfully.</em>
@@ -44,7 +44,7 @@ import static com.google.common.base.Verify.verifyNotNull;
 public class GameService extends Service<Boolean> {
     private static final Logger logger = LoggerFactory.getLogger(GameService.class);
 
-    private Installation gamePath;
+    private GameInstallation gamePath;
     private Settings settings;
 
     public GameService() {
@@ -59,20 +59,20 @@ public class GameService extends Service<Boolean> {
 
     /**
      * Start a new game process with these settings.
-     * @param installation the directory under which we will find libs/Terasology.jar, also used as the process's
+     * @param gameInstallation the directory under which we will find libs/Terasology.jar, also used as the process's
      *     working directory
      * @param settings supplies other settings relevant to configuring a process
      */
     @SuppressWarnings("checkstyle:HiddenField")
-    public void start(Installation installation, Settings settings) {
-        this.gamePath = installation;
+    public void start(GameInstallation gameInstallation, Settings settings) {
+        this.gamePath = gameInstallation;
         this.settings = settings;
 
         start();
     }
 
     /**
-     * Use {@link #start(Installation, Settings)} instead.
+     * Use {@link #start(GameInstallation, Settings)} instead.
      * <p>
      * It is an error to call this method before providing the configuration.
      */
@@ -118,7 +118,7 @@ public class GameService extends Service<Boolean> {
      * @throws RuntimeException when required files in the game directory are missing or inaccessible
      */
     @Override
-    protected RunGameTask createTask() throws GameVersionNotSupportedException{
+    protected RunGameTask createTask() throws GameVersionNotSupportedException {
         verifyNotNull(settings);
 
         GameStarter starter;
