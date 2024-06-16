@@ -3,7 +3,7 @@
 
 // Uses Bellsoft Liberica JRE
 // https://bell-sw.com/pages/liberica_install_guide-11.0.16.1/
-def jdkVersion = '11.0.16.1+1'
+def jdkVersion = '21.0.3+10'
 def jreUrlFilenames = [
         Linux64   : 'linux-amd64-full.tar.gz',
         Windows64 : 'windows-amd64-full.zip',
