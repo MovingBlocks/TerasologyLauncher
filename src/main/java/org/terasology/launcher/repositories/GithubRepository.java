@@ -44,13 +44,11 @@ public class GithubRepository implements ReleaseRepository {
                     .build();
             logger.debug("Github rate limit: {}", github.getRateLimit());
         } catch (HttpException e) {
-            if (e.getResponseCode() == -1) { // NOPMD
-                // no internet connection, do nothing
-            } else {
+            if (e.getResponseCode() != -1) {
+                // if -1, no internet connection, do nothing, otherwise print stacktrace
                 e.printStackTrace();
             }
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
