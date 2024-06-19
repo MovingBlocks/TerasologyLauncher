@@ -109,16 +109,16 @@ dependencies {
         because "de-/serialization of launcher properties to JSON"
     }
 
-    implementation('com.squareup.okhttp3:okhttp:4.10.0') {
+    implementation('com.squareup.okhttp3:okhttp:4.12.0') {
         because "built-in caching of HTTP requests"
     }
 
     // These dependencies are only needed for running tests
 
     testImplementation 'org.hamcrest:hamcrest:2.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
 
     testImplementation('org.mockito:mockito-inline:5.2.0') {
         because "-inline build enables mocking final classes"
@@ -134,18 +134,18 @@ dependencies {
         because "spf4j-slf4j-test:8.8 needs slf4j-api:1.x"
     }
 
-    testImplementation("org.testfx:testfx-core:4.0.16-alpha") {
+    testImplementation("org.testfx:testfx-core:4.0.18") {
         because "to test JavaFX Application"
         // -alpha because that's the only kind of release they have?
     }
-    testImplementation "org.testfx:testfx-junit5:4.0.16-alpha"
+    testImplementation "org.testfx:testfx-junit5:4.0.18"
 
-    testImplementation("org.testfx:openjfx-monocle:jdk-12.0.1+2") {
+    testImplementation("org.testfx:openjfx-monocle:17.0.10") {
         // nobody's uploaded a jdk-14 build yet. does the jdk-12 one work?
         because "CI builders are headless environments"
     }
 
-    testImplementation('com.github.gmazzo:okhttp-mock:1.5.0') {
+    testImplementation('com.github.gmazzo.okhttp.mock:mock-client:2.0.0') {
         because "to easily write OkHttpClient interceptors for testing"
     }
     testImplementation('com.squareup.okhttp3:mockwebserver:4.10.0') {
