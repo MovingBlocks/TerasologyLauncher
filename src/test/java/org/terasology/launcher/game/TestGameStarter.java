@@ -33,8 +33,6 @@ public class TestGameStarter {
     static final String GAME_ARG_1 = "--no-splash";
     static final String GAME_DIR = "game";
     static final String GAME_DATA_DIR = "game_data";
-    static final JavaHeapSize HEAP_MIN = JavaHeapSize.NOT_USED;
-    static final JavaHeapSize HEAP_MAX = JavaHeapSize.GB_4;
     static final Level LOG_LEVEL = Level.INFO;
 
     private final FileSystem fs = FileSystems.getDefault();
@@ -56,8 +54,9 @@ public class TestGameStarter {
     }
 
     private GameStarter newStarter(Path relativeGameJarPath) throws IOException {
-        return new GameStarter(new StubGameInstallation(gamePath, relativeGameJarPath),
-                gameDataPath, HEAP_MIN, HEAP_MAX, javaParams, gameParams, LOG_LEVEL);
+        StubGameInstallation stubgameinstall = new StubGameInstallation(gamePath, relativeGameJarPath);
+        return new GameStarter(stubgameinstall,
+                gameDataPath, JavaHeapSize.NOT_USED, JavaHeapSize.GB_4, javaParams, gameParams, LOG_LEVEL);
     }
 
     @Test

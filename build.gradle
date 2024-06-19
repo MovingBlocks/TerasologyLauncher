@@ -127,12 +127,10 @@ dependencies {
     }
     testImplementation 'org.mockito:mockito-junit-jupiter:5.2.0'
 
-    testImplementation('org.spf4j:spf4j-slf4j-test:8.9.5') {
+    testImplementation('org.spf4j:spf4j-slf4j-test:8.9.8') {
         because "testable logging"
     }
-    testImplementation("org.slf4j:slf4j-api:1.7.+!!") {
-        because "spf4j-slf4j-test:8.8 needs slf4j-api:1.x"
-    }
+    testImplementation('org.slf4j:slf4j-api:2.0.13')
 
     testImplementation("org.testfx:testfx-core:4.0.18") {
         because "to test JavaFX Application"
