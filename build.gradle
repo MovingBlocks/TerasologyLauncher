@@ -75,7 +75,7 @@ repositories {
     maven {
         // MovingBlocks Artifactory instance(s) for libs not readily available elsewhere plus our own libs
         name "Terasology Artifactory"
-        url "http://artifactory.terasology.org/artifactory/virtual-repo-live"
+        url "https://artifactory.terasology.io/artifactory/virtual-repo-live"
         allowInsecureProtocol true
     }
     maven {
