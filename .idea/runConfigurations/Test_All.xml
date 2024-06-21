@@ -7,6 +7,7 @@
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="directory" />
+    <option name="VM_PARAMETERS" value="-ea --add-opens=java.logging/java.util.logging=ALL-UNNAMED" />
     <option name="PARAMETERS" value="" />
     <dir value="$PROJECT_DIR$/src/test/java" />
     <method v="2">
