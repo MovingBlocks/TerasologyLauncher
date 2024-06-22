@@ -53,21 +53,13 @@ public class GameManager {
     }
 
     /**
-     * Derive the file name for the downloaded ZIP package from the game release.
-     */
-    @Deprecated
-    private String getFileNameFor(GameRelease release) {
-        return release.getFilename();
-    }
-
-    /**
      * Installs the given release to the local file system.
      *
      * @param release  the game release to be installed
      * @param listener the object which is to be informed about task progress
      */
     public void install(GameRelease release, ProgressListener listener) throws IOException, DownloadException, InterruptedException {
-        final Path cachedZip = cacheDirectory.resolve(getFileNameFor(release));
+        final Path cachedZip = cacheDirectory.resolve(release.getFilename());
 
         // TODO: Properly validate cache and handle exceptions
         if (Files.notExists(cachedZip)) {
