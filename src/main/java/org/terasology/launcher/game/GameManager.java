@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
-import org.terasology.launcher.model.Profile;
 import org.terasology.launcher.remote.DownloadException;
 import org.terasology.launcher.remote.DownloadUtils;
 import org.terasology.launcher.remote.RemoteResource;
