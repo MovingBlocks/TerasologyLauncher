@@ -10,18 +10,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
+import org.terasology.launcher.remote.DownloadException;
+import org.terasology.launcher.remote.DownloadUtils;
+import org.terasology.launcher.remote.RemoteResource;
 import org.terasology.launcher.tasks.ProgressListener;
-import org.terasology.launcher.util.DownloadException;
-import org.terasology.launcher.util.DownloadUtils;
 import org.terasology.launcher.util.FileUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
@@ -53,24 +52,13 @@ public class GameManager {
     }
 
     /**
-     * Derive the file name for the downloaded ZIP package from the game release.
-     */
-    private String getFileNameFor(GameRelease release) {
-        GameIdentifier id = release.getId();
-        String profileString = id.getProfile().toString().toLowerCase();
-        String versionString = id.getDisplayVersion();
-        String buildString = id.getBuild().toString().toLowerCase();
-        return "terasology-" + profileString + "-" + versionString + "-" + buildString + ".zip";
-    }
-
-    /**
      * Installs the given release to the local file system.
      *
      * @param release  the game release to be installed
      * @param listener the object which is to be informed about task progress
      */
     public void install(GameRelease release, ProgressListener listener) throws IOException, DownloadException, InterruptedException {
-        final Path cachedZip = cacheDirectory.resolve(getFileNameFor(release));
+        final Path cachedZip = cacheDirectory.resolve(release.getFilename());
 
         // TODO: Properly validate cache and handle exceptions
         if (Files.notExists(cachedZip)) {
@@ -85,30 +73,18 @@ public class GameManager {
         }
     }
 
+    /**
+     * @deprecated Use {@link DownloadUtils#download(RemoteResource, Path, ProgressListener)} instead.
+     */
+    @Deprecated
     private void download(GameRelease release, Path targetLocation, ProgressListener listener)
             throws DownloadException, IOException, InterruptedException {
-        final URL downloadUrl = release.getUrl();
-
-        final long contentLength = DownloadUtils.getContentLength(downloadUrl);
-        final long availableSpace = targetLocation.getParent().toFile().getUsableSpace();
-
-        if (availableSpace >= contentLength) {
-            final Path cacheZipPart = targetLocation.resolveSibling(targetLocation.getFileName().toString() + ".part");
-            Files.deleteIfExists(cacheZipPart);
-            try {
-                DownloadUtils.downloadToFile(downloadUrl, cacheZipPart, listener).get();
-            } catch (ExecutionException e) {
-                throw new DownloadException("Exception while downloading " + downloadUrl, e.getCause());
-            }
-
-            if (!listener.isCancelled()) {
-                Files.move(cacheZipPart, targetLocation, StandardCopyOption.ATOMIC_MOVE);
-            }
-        } else {
-            throw new DownloadException("Insufficient space for downloading package");
+        DownloadUtils downloader = new DownloadUtils();
+        try {
+            downloader.download(release, targetLocation, listener).get();
+        } catch (ExecutionException e) {
+            throw new DownloadException("Download failed.", e.getCause());
         }
-
-        logger.info("Finished downloading package: {}", release.getId());
     }
 
     /**

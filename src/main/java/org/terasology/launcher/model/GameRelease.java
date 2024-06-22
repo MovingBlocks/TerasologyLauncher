@@ -3,6 +3,8 @@
 
 package org.terasology.launcher.model;
 
+import org.terasology.launcher.remote.RemoteResource;
+
 import java.net.URL;
 import java.util.Date;
 import java.util.Objects;
@@ -17,7 +19,7 @@ import java.util.Objects;
  *     <li>TODO: define what the <b>artifact</b> is, and what requirements/restrictions there are</li>
  * </ul>
  */
-public class GameRelease {
+public class GameRelease implements RemoteResource<GameIdentifier> {
     final GameIdentifier id;
     final ReleaseMetadata releaseMetadata;
     final URL url;
@@ -34,6 +36,19 @@ public class GameRelease {
 
     public URL getUrl() {
         return url;
+    }
+
+    @Override
+    public String getFilename() {
+        String profileString = id.getProfile().toString().toLowerCase();
+        String versionString = id.getDisplayVersion();
+        String buildString = id.getBuild().toString().toLowerCase();
+        return "terasology-" + profileString + "-" + versionString + "-" + buildString + ".zip";
+    }
+
+    @Override
+    public GameIdentifier getInfo() {
+        return id;
     }
 
     /**
