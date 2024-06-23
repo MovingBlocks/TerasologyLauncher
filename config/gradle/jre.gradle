@@ -3,31 +3,31 @@
 
 // Uses Bellsoft Liberica JRE
 // https://bell-sw.com/pages/liberica_install_guide-11.0.16.1/
-def jdkVersion = '17.0.11+12'
+def jdkVersion = "17.0.11+12"
 def jreUrlFilenames = [
-        Linux64   : 'linux-amd64-full.tar.gz',
-        Windows64 : 'windows-amd64-full.zip',
-        Mac       : 'macos-amd64-full.zip'
+        Linux64   : "linux-amd64-full.tar.gz",
+        Windows64 : "windows-amd64-full.zip",
+        Mac       : "macos-amd64-full.zip"
 ]
 
-task createRelease() {
-    group 'Distribution'
-    description 'Bundles the project with a JRE for each platform'
+tasks.register("createRelease") {
+    group "Distribution"
+    description "Bundles the project with a JRE for each platform"
     dependsOn distZip
 
     doLast {
-        println 'Created release: ' + version
+        println "Created release: " + version
     }
 }
 
-task downloadJreAll {
-    group 'JRE'
-    description 'Downloads Launcher JREs for all platforms'
+tasks.register("downloadJreAll") {
+    group "JRE"
+    description "Downloads Launcher JREs for all platforms"
 }
 
-task unpackJreAll {
-    group 'JRE'
-    description 'Unpack JREs for all platforms'
+tasks.register("unpackJreAll") {
+    group "JRE"
+    description "Unpack JREs for all platforms"
 }
 
 
@@ -36,15 +36,15 @@ def createJreTasks(String taskNameBase,
                    String downloadFile,
                    String unpackDir) {
 
-    task "download$taskNameBase"(type: Download) {
-        group 'JRE'
+    tasks.register("download$taskNameBase", Download) {
+        group "JRE"
         src downloadUrl
         dest downloadFile
         overwrite false
     }
 
     def unpackTask = task "unpack$taskNameBase"(type: Copy) {
-        group 'JRE'
+        group "JRE"
         from(downloadFile.endsWith("zip")
                 ? zipTree(downloadFile)
                 : tarTree(downloadFile)) {
@@ -55,7 +55,9 @@ def createJreTasks(String taskNameBase,
             includeEmptyDirs = false
         }
         into unpackDir
-
+        filePermissions {
+            user.write = true
+        }
         dependsOn "download${taskNameBase}"
     }
 
@@ -78,7 +80,7 @@ jreUrlFilenames.each { os, file ->
             contents {
                 with distributions.main.contents
 
-                into('jre') {
+                into("jre") {
                     from unpackTask
                 }
 
@@ -97,8 +99,8 @@ jreUrlFilenames.each { os, file ->
 distributions {
     mac {
         contents {
-            into 'TerasologyLauncher.app/Contents'
-            exclude '**/*.bat'
+            into "TerasologyLauncher.app/Contents"
+            exclude "**/*.bat"
             eachFile { details ->
                 details.path = details.path.toString().replaceAll("(Contents)/bin/(.+)", "\$1/MacOS/\$2")
             }
@@ -106,7 +108,7 @@ distributions {
     }
 }
 
-tasks.withType(CreateStartScripts) {
+tasks.withType(CreateStartScripts).configureEach {
     def unixTemplate = file("$projectDir/buildres/scripts/unixStartScript.txt")
     def windowsTemplate = file("$projectDir/buildres/scripts/windowsStartScript.txt")
 
