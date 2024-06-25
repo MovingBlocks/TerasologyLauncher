@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.terasology.launcher.util.JavaHeapSize;
-import org.terasology.launcher.util.Platform;
+import org.terasology.launcher.platform.Platform;
 
 import java.io.IOException;
 import java.nio.file.Path;
