@@ -81,11 +81,11 @@
 }
 
 .controlButton:hover {
-    -fx-effect: innershadow(three-pass-box, #72cc00, 64.0, 0.0, 0, 0);
+    -fx-effect: innershadow(three-pass-box, #3E5E21, 64.0, 0.0, 0, 0);
 }
 
 .controlButton:hover:pressed {
-    -fx-effect: innershadow(three-pass-box, #00993d, 64.0, 0.0, 0, 0);
+    -fx-effect: innershadow(three-pass-box, #99EB52, 64.0, 0.0, 0, 0);
 }
 
 .controlButtonCancel {
@@ -94,11 +94,11 @@
 }
 
 .controlButtonCancel:hover {
-    -fx-effect: innershadow(three-pass-box, #cc0500, 64.0, 0.0, 0, 0);
+    -fx-effect: innershadow(three-pass-box, #3E5E21, 64.0, 0.0, 0, 0);
 }
 
 .controlButtonCancel:hover:pressed {
-    -fx-effect: innershadow(three-pass-box, #980500, 64.0, 0.0, 0, 0);
+    -fx-effect: innershadow(three-pass-box, #99EB52, 64.0, 0.0, 0, 0);
 }
 
 .socialButton, .warningButton {
