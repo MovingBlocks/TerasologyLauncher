@@ -3,58 +3,29 @@
 
 package org.terasology.launcher.platform;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.Sets;
-
-import java.util.Locale;
-import java.util.Set;
-
 /**
  * A simplified representation of a computer platform as `os` and `arch`
  */
-public final class Platform {
+public enum Platform {
 
-    final private OS os;
-    final private Arch arch;
+    // unsupported platforms commented out, but might be useful for local development
+    // MACOS_X64(OS.MAC, Arch.X64),
+    // supported platforms by both the game and the launcher
+    WINDOWS_X64(OS.WINDOWS, Arch.X64),
+    LINUX_X64(OS.LINUX, Arch.X64);
 
-    //TODO(skaldarnar): I'm not fully settled on how to model the Platform. I thought splitting this up into two enums
-    //  for OS and Architecture would help with more type-safe construction of these values, simplify comparison to
-    //  select the right JRE for a game, etc.
-    //
-    //  On the other hand, the set of supported platforms is so limited, and continuing on a non-supported platform
-    //  does not make much sense. So, maybe it is better to have a rather restrictive and explicit enum in the form of
-    //      WINDOWS_X64
-    //      LINUX_X64
-    //  I'm adding the architecture to this list, as I hope that we'll be able to support old Intel and new M1 Macs at
-    //  some point in the future, adding the following to the list:
-    //      MAC_X64
-    //      MAC_AARCH64
-    //  The biggest drawback of being super-strict here is that development on non-supported platforms becomes
-    //  impossible where it was just "not ideal" before.
-    public static final Set<Platform> SUPPORTED_PLATFORMS = Sets.newHashSet(
-            new Platform(OS.WINDOWS, Arch.X64),
-            new Platform(OS.LINUX, Arch.X64),
-            new Platform(OS.MAC, Arch.X64)
-    );
+    /**
+     * The simplified operating system identifier.
+     */
+    public final OS os;
+    /**
+     * The simplified architecture identifier.
+     */
+    public final Arch arch;
 
-    public Platform(OS os, Arch arch) {
+    Platform(OS os, Arch arch) {
         this.os = os;
         this.arch = arch;
-    }
-
-    /**
-     * @return the simplified operating system name as platform os
-     */
-    public String getOs() {
-        //TODO: change return type to OS
-        return os.name().toLowerCase(Locale.ENGLISH);
-    }
-
-    /**
-     * @return the simplified operating system architecture as platform arch
-     */
-    public Arch getArch() {
-        return arch;
     }
 
     public boolean isLinux() {
@@ -71,23 +42,6 @@ public final class Platform {
 
     public String toString() {
         return "OS '" + os + "', arch '" + arch + "'";
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Platform platform = (Platform) o;
-        return os == platform.os && arch == platform.arch;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(os, arch);
     }
 
     /**
@@ -127,6 +81,23 @@ public final class Platform {
                 throw new UnsupportedPlatformException("Architecture not supported: " + platformArch);
         }
 
-        return new Platform(os, arch);
+        return fromOsAndArch(os, arch);
+    }
+
+    /**
+     * Derive the {@link Platform} from the given {@link OS} and {@link Arch}
+     *
+     * @throws UnsupportedPlatformException if the given OS and Arch combination is not supported
+     */
+    public static Platform fromOsAndArch(OS os, Arch arch) throws UnsupportedPlatformException {
+        if (os.equals(OS.WINDOWS) && arch.equals(Arch.X64)) {
+            return WINDOWS_X64;
+        } else if (os.equals(OS.LINUX) && arch.equals(Arch.X64)) {
+            return LINUX_X64;
+//        } else if (os.equals(OS.MAC) && arch.equals(Arch.X64)) {
+//            return MACOS_X64;
+        } else {
+            throw new UnsupportedPlatformException("Unsupported platform: " + os + " " + arch);
+        }
     }
 }
