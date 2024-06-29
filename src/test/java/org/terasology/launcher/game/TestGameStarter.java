@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.event.Level;
+import org.terasology.launcher.platform.UnsupportedPlatformException;
 import org.terasology.launcher.util.JavaHeapSize;
 
 import java.io.IOException;
@@ -49,24 +50,24 @@ public class TestGameStarter {
         gameParams = List.of(GAME_ARG_1);
     }
 
-    private GameStarter newStarter() throws IOException {
+    private GameStarter newStarter() throws IOException, UnsupportedPlatformException {
         return newStarter(Path.of("libs", "Terasology.jar"));
     }
 
-    private GameStarter newStarter(Path relativeGameJarPath) throws IOException {
+    private GameStarter newStarter(Path relativeGameJarPath) throws IOException, UnsupportedPlatformException {
         StubGameInstallation stubgameinstall = new StubGameInstallation(gamePath, relativeGameJarPath);
         return new GameStarter(stubgameinstall,
                 gameDataPath, JavaHeapSize.NOT_USED, JavaHeapSize.GB_4, javaParams, gameParams, LOG_LEVEL);
     }
 
     @Test
-    public void testConstruction() throws IOException {
+    public void testConstruction() throws IOException, UnsupportedPlatformException {
         GameStarter starter = newStarter();
         assertNotNull(starter);
     }
 
     @Test
-    public void testJre() throws IOException {
+    public void testJre() throws IOException, UnsupportedPlatformException {
         Semver engineVersion = new Semver("5.0.0");
         GameStarter task = newStarter();
         // This is the sort of test where the code under test and the expectation are just copies
@@ -84,7 +85,7 @@ public class TestGameStarter {
 
     @ParameterizedTest
     @MethodSource("provideJarPaths")
-    public void testBuildProcess(Path jarRelativePath) throws IOException {
+    public void testBuildProcess(Path jarRelativePath) throws IOException, UnsupportedPlatformException {
         GameStarter starter = newStarter(jarRelativePath);
         ProcessBuilder processBuilder = starter.processBuilder;
         final Path gameJar = gamePath.resolve(jarRelativePath);
@@ -100,14 +101,14 @@ public class TestGameStarter {
     }
 
     @Test
-    public void testSupportedJava11() throws IOException {
+    public void testSupportedJava11() throws IOException, UnsupportedPlatformException {
         Semver engineVersion = new Semver("5.3.0");
         GameStarter task = newStarter();
         assertDoesNotThrow(() -> task.getRuntimePath(engineVersion));
     }
 
     @Test
-    public void testUnsupportedJava17() throws IOException {
+    public void testUnsupportedJava17() throws IOException, UnsupportedPlatformException {
         Semver engineVersion = new Semver("6.0.0");
         GameStarter task = newStarter();
         assertThrows(GameVersionNotSupportedException.class, () -> task.getRuntimePath(engineVersion));

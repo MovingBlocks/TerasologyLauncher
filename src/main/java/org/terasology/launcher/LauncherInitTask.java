@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.model.LauncherVersion;
+import org.terasology.launcher.platform.UnsupportedPlatformException;
 import org.terasology.launcher.repositories.CombinedRepository;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.settings.Settings;
@@ -24,7 +25,7 @@ import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
-import org.terasology.launcher.util.Platform;
+import org.terasology.launcher.platform.Platform;
 
 import java.io.IOException;
 import java.net.URI;
@@ -114,18 +115,17 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                     releaseRepository);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
+        } catch (UnsupportedPlatformException e) {
+            logger.error("Unsupported OS or architecture: {}", e.getMessage());
         }
 
         return null;
     }
 
-    private Platform getPlatform() {
+    private Platform getPlatform() throws UnsupportedPlatformException {
         logger.trace("Init Platform...");
         updateMessage(I18N.getLabel("splash_checkOS"));
         final Platform platform = Platform.getPlatform();
-        if (!platform.isLinux() && !platform.isMac() && !platform.isWindows()) {
-            logger.warn("Detected unexpected platform: {}", platform);
-        }
         logger.debug("Platform: {}", platform);
         return platform;
     }
