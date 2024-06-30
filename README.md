@@ -29,12 +29,12 @@ We are present in nearly the complete round-up of social networks. Follow/friend
 &nbsp;
 
 <p align="center">
-    <a title="Terasology Forum" href="https://forum.terasology.org">
-        <img src="./src/main/resources/org/terasology/launcher/images/forum.png" width="48px"/>
-    </a>
-    &nbsp;&nbsp;&nbsp;&nbsp;
     <a title="Discord" href="https://discord.gg/terasology">
         <img src="./src/main/resources/org/terasology/launcher/images/discord.png" width="48px"/>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a title="GitHub Issues" href="https://github.com/MovingBlocks/TerasologyLauncher/issues">
+        <img src="./src/main/resources/org/terasology/launcher/images/github.png" width="48px"/>
     </a>
     &nbsp;&nbsp;&nbsp;&nbsp;
     <a title="Twitter" href="https://twitter.com/Terasology">
@@ -57,8 +57,8 @@ We are present in nearly the complete round-up of social networks. Follow/friend
         <img src="./src/main/resources/org/terasology/launcher/images/patreon.jpg" width="48px"/>
     </a>
     &nbsp;&nbsp;&nbsp;&nbsp;
-    <a title="GitHub Issues" href="https://github.com/MovingBlocks/TerasologyLauncher/issues">
-        <img src="./src/main/resources/org/terasology/launcher/images/github.png" width="48px"/>
+    <a title="Terasology Forum" href="https://forum.terasology.org">
+        <img src="./src/main/resources/org/terasology/launcher/images/forum.png" width="48px"/>
     </a>
 </p>
 
