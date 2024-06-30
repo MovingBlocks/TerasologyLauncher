@@ -3,7 +3,7 @@
 
 package org.terasology.launcher.game;
 
-import com.vdurmont.semver4j.Semver;
+import org.semver4j.Semver;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -16,13 +16,13 @@ class VersionHistoryTest {
     @ParameterizedTest
     @ValueSource(strings = {"5.2.0-SNAPSHOT", "5.2.0", "5.2.1", "6.0.0"})
     void hasPicocli(String version) {
-        assertTrue(VersionHistory.PICOCLI.isProvidedBy(new Semver(version, Semver.SemverType.IVY)));
+        assertTrue(VersionHistory.PICOCLI.isProvidedBy(new Semver(version)));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"5.1.0", "5.1.0-SNAPSHOT", "5.1.1"})
     void lacksPicocli(String version) {
-        assertFalse(VersionHistory.PICOCLI.isProvidedBy(new Semver(version, Semver.SemverType.IVY)));
+        assertFalse(VersionHistory.PICOCLI.isProvidedBy(new Semver(version)));
     }
 
 }

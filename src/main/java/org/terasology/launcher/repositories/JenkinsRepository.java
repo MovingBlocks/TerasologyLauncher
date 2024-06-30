@@ -30,9 +30,9 @@ import java.util.stream.Collectors;
  * However, this means that we are doing {@code n + 1} API calls for fetching {@code n} release packages on each
  * launcher start.
  */
-class JenkinsRepositoryAdapter implements ReleaseRepository {
+class JenkinsRepository implements ReleaseRepository {
 
-    private static final Logger logger = LoggerFactory.getLogger(JenkinsRepositoryAdapter.class);
+    private static final Logger logger = LoggerFactory.getLogger(JenkinsRepository.class);
 
     private static final String BASE_URL = "http://jenkins.terasology.io/teraorg/job/Terasology/";
 
@@ -53,7 +53,7 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
 
     private final URL apiUrl;
 
-    JenkinsRepositoryAdapter(Profile profile, Build buildProfile, JenkinsClient client) {
+    JenkinsRepository(Profile profile, Build buildProfile, JenkinsClient client) {
         this.client = client;
         this.buildProfile = buildProfile;
         this.profile = profile;
@@ -88,6 +88,9 @@ class JenkinsRepositoryAdapter implements ReleaseRepository {
 
             final ReleaseMetadata metadata = computeReleaseMetadataFrom(jenkinsBuildInfo);
             final Optional<GameIdentifier> id = computeIdentifierFrom(jenkinsBuildInfo);
+
+            //TODO: check whether the game release is supported (minimal Java version)
+            //      we probably need to encode the engine version explicitly in the GameIdentifier (instead of just the display version)
 
             if (url != null && id.isPresent()) {
                 return Optional.of(new GameRelease(id.get(), url, metadata));

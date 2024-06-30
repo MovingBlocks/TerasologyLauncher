@@ -4,7 +4,7 @@
 package org.terasology.launcher.repositories;
 
 import com.google.gson.Gson;
-import com.vdurmont.semver4j.Semver;
+import org.semver4j.Semver;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("JenkinsRepositoryAdapter#fetchReleases() should")
-class JenkinsRepositoryAdapterTest {
+class JenkinsRepositoryTest {
 
     static Gson gson;
     static Jenkins.ApiResult validResult;
@@ -56,7 +56,7 @@ class JenkinsRepositoryAdapterTest {
     @DisplayName("handle null Jenkins response gracefully")
     void handleNullJenkinsResponseGracefully() {
         final JenkinsClient nullClient = new StubJenkinsClient(url -> null, url -> null);
-        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, nullClient);
+        final JenkinsRepository adapter = new JenkinsRepository(Profile.OMEGA, Build.STABLE, nullClient);
         assertTrue(adapter.fetchReleases().isEmpty());
     }
 
@@ -67,7 +67,7 @@ class JenkinsRepositoryAdapterTest {
 
         final JenkinsClient stubClient = new StubJenkinsClient(url -> validResult, url -> emptyVersionInfo);
 
-        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
+        final JenkinsRepository adapter = new JenkinsRepository(Profile.OMEGA, Build.STABLE, stubClient);
 
         assertTrue(adapter.fetchReleases().isEmpty());
     }
@@ -76,12 +76,12 @@ class JenkinsRepositoryAdapterTest {
     @DisplayName("process valid response correctly")
     void processValidResponseCorrectly() {
         String displayVersion = "alpha 42 (preview)";
-        Semver engineVersion = new Semver("5.0.1-SNAPSHOT", Semver.SemverType.IVY);
+        Semver engineVersion = new Semver("5.0.1-SNAPSHOT");
 
         Properties versionInfo = new Properties();
         versionInfo.setProperty("buildNumber", validResult.builds[0].number);
         versionInfo.setProperty("displayVersion", displayVersion);
-        versionInfo.setProperty("engineVersion", engineVersion.getValue());
+        versionInfo.setProperty("engineVersion", engineVersion.getVersion());
 
         final JenkinsClient stubClient = new StubJenkinsClient(url -> validResult, url -> versionInfo);
 
@@ -93,7 +93,7 @@ class JenkinsRepositoryAdapterTest {
         final ReleaseMetadata releaseMetadata = new ReleaseMetadata("", new Date(1604285977306L));
         final GameRelease expected = new GameRelease(id, expectedArtifactUrl, releaseMetadata);
 
-        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
+        final JenkinsRepository adapter = new JenkinsRepository(Profile.OMEGA, Build.STABLE, stubClient);
 
         assertEquals(1, adapter.fetchReleases().size());
         assertAll(
@@ -108,7 +108,7 @@ class JenkinsRepositoryAdapterTest {
     @MethodSource("incompleteResults")
     void skipIncompatibleApiResults(Jenkins.ApiResult incompleteResult) {
         final JenkinsClient stubClient = new StubJenkinsClient(url -> incompleteResult, url -> null);
-        final JenkinsRepositoryAdapter adapter = new JenkinsRepositoryAdapter(Profile.OMEGA, Build.STABLE, stubClient);
+        final JenkinsRepository adapter = new JenkinsRepository(Profile.OMEGA, Build.STABLE, stubClient);
         assertTrue(adapter.fetchReleases().isEmpty());
     }
 }

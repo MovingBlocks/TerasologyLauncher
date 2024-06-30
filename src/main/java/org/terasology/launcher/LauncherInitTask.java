@@ -4,9 +4,6 @@
 package org.terasology.launcher;
 
 import javafx.concurrent.Task;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
@@ -15,7 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.model.LauncherVersion;
-import org.terasology.launcher.repositories.RepositoryManager;
+import org.terasology.launcher.platform.UnsupportedPlatformException;
+import org.terasology.launcher.repositories.CombinedRepository;
 import org.terasology.launcher.settings.LauncherSettingsValidator;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.ui.Dialogs;
@@ -27,7 +25,7 @@ import org.terasology.launcher.util.HostServices;
 import org.terasology.launcher.util.LauncherDirectoryUtils;
 import org.terasology.launcher.util.LauncherManagedDirectory;
 import org.terasology.launcher.util.LauncherStartFailedException;
-import org.terasology.launcher.util.Platform;
+import org.terasology.launcher.platform.Platform;
 
 import java.io.IOException;
 import java.net.URI;
@@ -35,7 +33,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class LauncherInitTask extends Task<LauncherConfiguration> {
@@ -96,7 +93,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             updateMessage(I18N.getLabel("splash_fetchReleases"));
             logger.info("Fetching game releases ...");
             // implicitly fetches game releases and cache them
-            final RepositoryManager repositoryManager = new RepositoryManager(client);
+            final CombinedRepository releaseRepository = new CombinedRepository(client);
 
             // implicitly scans the game directory for installed games and cache them
             final GameManager gameManager = new GameManager(cacheDirectory, gameDirectory);
@@ -115,21 +112,20 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                     downloadDirectory,
                     launcherSettings,
                     gameManager,
-                    repositoryManager);
+                    releaseRepository);
         } catch (LauncherStartFailedException e) {
             logger.warn("Could not configure launcher.");
+        } catch (UnsupportedPlatformException e) {
+            logger.error("Unsupported OS or architecture: {}", e.getMessage());
         }
 
         return null;
     }
 
-    private Platform getPlatform() {
+    private Platform getPlatform() throws UnsupportedPlatformException {
         logger.trace("Init Platform...");
         updateMessage(I18N.getLabel("splash_checkOS"));
         final Platform platform = Platform.getPlatform();
-        if (!platform.isLinux() && !platform.isMac() && !platform.isWindows()) {
-            logger.warn("Detected unexpected platform: {}", platform);
-        }
         logger.debug("Platform: {}", platform);
         return platform;
     }
@@ -204,7 +200,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
     }
 
     private void showDownloadPage() {
-        final String downloadPage = "https://terasology.org/download";
+        final String downloadPage = "https://terasology.org/downloads/";
         try {
             hostServices.tryOpenUri(new URI(downloadPage));
         } catch (URISyntaxException e) {
@@ -246,27 +242,6 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         }
         logger.debug("Game data directory: {}", gameDataDirectory);
         return gameDataDirectory;
-    }
-
-    /**
-     * Shows a confirmation dialog for overwriting current sources file
-     * with default values.
-     *
-     * @return whether the user confirms this overwrite
-     */
-    private boolean confirmSourcesOverwrite() {
-        return CompletableFuture.supplyAsync(() -> {
-            final Alert alert = new Alert(
-                    Alert.AlertType.WARNING,
-                    I18N.getLabel("message_error_sourcesFile_content"),
-                    ButtonType.OK,
-                    new ButtonType(I18N.getLabel("launcher_exit")));
-            alert.setHeaderText(I18N.getLabel("message_error_sourcesFile_header"));
-            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-            return alert.showAndWait()
-                    .map(btn -> btn == ButtonType.OK)
-                    .orElse(false);
-        }, javafx.application.Platform::runLater).join();
     }
 
     private void storeLauncherSettingsAfterInit(Settings launcherSettings, final Path settingsPath) throws LauncherStartFailedException {

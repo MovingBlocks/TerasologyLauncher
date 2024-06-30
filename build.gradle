@@ -1,12 +1,6 @@
 // Copyright 2020 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-/*
- * This is a Gradle build file:
- * - Gradle Homepage: http://gradle.org/
- * - Gradle Documentation: http://gradle.org/documentation
- * - View tasks for this project: $ gradlew tasks
- */
 
 buildscript {
     repositories {
@@ -19,21 +13,21 @@ buildscript {
 }
 
 plugins {
-    id 'application'
-    id 'checkstyle'
-    id "com.github.spotbugs" version "5.0.13"
-    id 'de.undercouch.download' version '5.3.0'
-    id 'java'
+    id("application")
+    id("checkstyle")
+    id("com.github.spotbugs") version "5.2.3"
+    id("de.undercouch.download") version "5.3.0"
+    id("java")
     // to help clarify conflicting logging providers
-    id 'name.remal.component-metadata' version '1.5.0'
-    id 'nebula.release' version '16.0.0'
-    id 'pmd'
-    id 'project-report'
-    id 'org.openjfx.javafxplugin' version '0.0.13'
-    id "org.jetbrains.gradle.plugin.idea-ext" version "1.1.5"
+    id("name.remal.component-metadata") version "1.5.0"
+    id("nebula.release") version "16.0.0"
+    id("pmd")
+    id("project-report")
+    id("org.openjfx.javafxplugin") version "0.0.13"
+    id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.5"
 }
 
-apply plugin: 'org.terasology.gradlegoo'
+apply plugin: "org.terasology.gradlegoo"
 apply from: "./config/gradle/jre.gradle"
 
 // Test for right version of Java in use for running this script
@@ -62,10 +56,10 @@ ext {
     startDateTimeString = dateTimeFormat.format(new Date())
 
     // Splash image for the JAR
-    splashImage = 'org/terasology/launcher/images/splash.jpg'
+    splashImage = "org/terasology/launcher/images/splash.jpg"
 
     // Shared code analytics configurations via retrieved config zip
-    metricsConfigDir = layout.getProjectDirectory().dir('config/metrics')
+    metricsConfigDir = layout.getProjectDirectory().dir("config/metrics")
 }
 
 // Declare remote repositories we're interested in - library files will be fetched from here
@@ -75,8 +69,7 @@ repositories {
     maven {
         // MovingBlocks Artifactory instance(s) for libs not readily available elsewhere plus our own libs
         name "Terasology Artifactory"
-        url "http://artifactory.terasology.org/artifactory/virtual-repo-live"
-        allowInsecureProtocol true
+        url "https://artifactory.terasology.io/artifactory/virtual-repo-live"
     }
     maven {
         name "JitPack"  // used by org.everit.json.schema
@@ -98,63 +91,61 @@ dependencies {
         because "1.3 series uses ServiceLoader (more packaging friendly?)"
     }
 
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
-    implementation group: "com.google.guava", name: "guava", version: "31.1-jre"
-    implementation group: 'com.github.everit-org.json-schema', name: 'org.everit.json.schema', version: '1.14.1'
+    implementation("com.google.code.gson:gson:2.8.5")
+    implementation("com.google.guava:guava:31.1-jre")
+    implementation("com.github.everit-org.json-schema:org.everit.json.schema:1.14.1")
 
-    implementation group: 'org.kohsuke', name: 'github-api', version: '1.306'
-    implementation group: 'com.vdurmont', name: 'semver4j', version: '3.1.0'
-    implementation group: 'com.vladsch.flexmark', name: 'flexmark-all', version: '0.64.0'
+    implementation("org.kohsuke:github-api:1.318")
+    implementation("org.semver4j:semver4j:5.2.2")
+    implementation("com.vladsch.flexmark:flexmark-all:0.64.0")
 
-    implementation('org.hildan.fxgson:fx-gson:4.0.1') {
+    implementation("org.hildan.fxgson:fx-gson:5.0.0") {
         because "de-/serialization of launcher properties to JSON"
     }
 
-    implementation('com.squareup.okhttp3:okhttp:4.10.0') {
+    implementation("com.squareup.okhttp3:okhttp:4.12.0") {
         because "built-in caching of HTTP requests"
     }
 
     // These dependencies are only needed for running tests
 
-    testImplementation 'org.hamcrest:hamcrest:2.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    testImplementation("org.hamcrest:hamcrest:2.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
 
-    testImplementation('org.mockito:mockito-inline:4.8.0') {
+    testImplementation("org.mockito:mockito-inline:5.2.0") {
         because "-inline build enables mocking final classes"
         // https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.2
         // > Be aware that this artifact may be abolished when the inline mock making feature is integrated into the default mock maker.
     }
-    testImplementation 'org.mockito:mockito-junit-jupiter:4.8.0'
+    testImplementation("org.mockito:mockito-junit-jupiter:5.2.0")
 
-    testImplementation('org.spf4j:spf4j-slf4j-test:8.9.5') {
+    testImplementation("org.spf4j:spf4j-slf4j-test:8.10.0") {
         because "testable logging"
     }
-    testImplementation("org.slf4j:slf4j-api:1.7.+!!") {
-        because "spf4j-slf4j-test:8.8 needs slf4j-api:1.x"
-    }
+    testImplementation("org.slf4j:slf4j-api:2.0.13")
 
-    testImplementation("org.testfx:testfx-core:4.0.16-alpha") {
+    testImplementation("org.testfx:testfx-core:4.0.18") {
         because "to test JavaFX Application"
         // -alpha because that's the only kind of release they have?
     }
-    testImplementation "org.testfx:testfx-junit5:4.0.16-alpha"
+    testImplementation("org.testfx:testfx-junit5:4.0.18")
 
-    testImplementation("org.testfx:openjfx-monocle:jdk-12.0.1+2") {
+    testImplementation("org.testfx:openjfx-monocle:17.0.10") {
         // nobody's uploaded a jdk-14 build yet. does the jdk-12 one work?
         because "CI builders are headless environments"
     }
 
-    testImplementation('com.github.gmazzo:okhttp-mock:1.5.0') {
+    testImplementation("com.github.gmazzo.okhttp.mock:mock-client:2.0.0") {
         because "to easily write OkHttpClient interceptors for testing"
     }
-    testImplementation('com.squareup.okhttp3:mockwebserver:4.10.0') {
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.10.0") {
         because "to control server responses for testing"
     }
 
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
-    codeMetrics group: 'org.terasology.config', name: 'codemetrics', version: '1.7.1', ext: 'zip'
+    codeMetrics group: "org.terasology.config", name: "codemetrics", version: "1.7.1", ext: "zip"
 }
 
 configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation|PmdAux)Classpath/ }).all {
@@ -163,6 +154,8 @@ configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation|PmdAux)Cla
     resolutionStrategy(gradlegoo.prefers("logging", "slf4j-impl-capability",
             "spf4j-slf4j-test", "tests use slf4j-test"))
 
+    // SPF4J has a dependency on "avro-logical-types-gen:1.3", which does not exist. However, version "1.3p" does.
+    resolutionStrategy.force("org.spf4j:avro-logical-types-gen:1.3p")
     // old hamcrest versions exist only to spite us
     // http://hamcrest.org/JavaHamcrest/distributables#upgrading-from-hamcrest-1x
     exclude group: "org.hamcrest", module: "hamcrest-core"
@@ -179,14 +172,18 @@ compileTestJava.options.encoding = "UTF-8"
 javafx {
     version = "17.0.2"
     modules = [
-            'javafx.graphics',
-            'javafx.fxml',
-            'javafx.web'
+            "javafx.graphics",
+            "javafx.fxml",
+            "javafx.web"
     ]
 }
 
 test {
     useJUnitPlatform()
+
+    // The SPF4J test dependency relies on some forbidden reflection to improve logging performance.
+    // Java 17 will not tolerate this without a bit of encouragement.
+    jvmArgs("--add-opens=java.logging/java.util.logging=ALL-UNNAMED")
 }
 
 checkstyle {
@@ -206,11 +203,11 @@ pmd {
 
 spotbugs {
     ignoreFailures = true
-    effort = 'max'
-    reportLevel = 'medium'
+    effort = "max"
+    reportLevel = "medium"
 }
 
-mainClassName = 'org.terasology.launcher.TerasologyLauncher'
+mainClassName = "org.terasology.launcher.TerasologyLauncher"
 
 def convertGitBranch = { gitBranch ->
     if (gitBranch != null) {
@@ -222,10 +219,10 @@ def convertGitBranch = { gitBranch ->
 }
 
 task createVersionInfoFile {
-    inputs.property('version', version.toString())
+    inputs.property("version", version.toString())
 
-    File versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, 'org/terasology/launcher/')
-    File versionFile = new File(versionInfoFileDir, 'version.txt')
+    File versionInfoFileDir = new File(sourceSets.main.output.resourcesDir, "org/terasology/launcher/")
+    File versionFile = new File(versionInfoFileDir, "version.txt")
 
     outputs.file(versionFile)
 
@@ -255,11 +252,11 @@ clean {
 processResources.dependsOn(createVersionInfoFile)
 
 jar {
-    //TODO we only use this name because the `.exe` start scripts require the JAR to be named 'TerasologyLauncher.jar'
+    //TODO we only use this name because the `.exe` start scripts require the JAR to be named "TerasologyLauncher.jar"
     jar.archiveFileName = "${project.name}.jar"
     // replace development "logback.xml" with productive "logback_jar.xml"
     exclude "logback.xml"
-    rename('logback_jar.xml', 'logback.xml')
+    rename("logback_jar.xml", "logback.xml")
     manifest {
         def manifestClasspath = configurations.runtimeClasspath.collect { it.getName() }.join(" ")
         attributes("Main-Class": mainClassName)
@@ -269,50 +266,50 @@ jar {
         attributes("SplashScreen-Image": splashImage)
 
         // allow everything
-        attributes('Permissions': 'all-permissions')
-        attributes('Codebase': '*')
-        attributes('Application-Name': project.name)
-        attributes('Application-Library-Allowable-Codebase': '*')
-        attributes('Caller-Allowable-Codebase': '*')
-        attributes('Trusted-Only': 'false')
+        attributes("Permissions": "all-permissions")
+        attributes("Codebase": "*")
+        attributes("Application-Name": project.name)
+        attributes("Application-Library-Allowable-Codebase": "*")
+        attributes("Caller-Allowable-Codebase": "*")
+        attributes("Trusted-Only": "false")
     }
 }
 
 task copyExtra(type: Copy) {
     filter(FixCrLfFilter, eol: FixCrLfFilter.CrLf.newInstance("crlf"))
 
-    from('README.md') {
-        rename('README.md', 'README.txt')
+    from("README.md") {
+        rename("README.md", "README.txt")
     }
 
-    from('CHANGELOG.md') {
-        rename('CHANGELOG.md', 'CHANGELOG.txt')
+    from("CHANGELOG.md") {
+        rename("CHANGELOG.md", "CHANGELOG.txt")
     }
 
-    from('CONTRIBUTING.md') {
-        rename('CONTRIBUTING.md', 'CONTRIBUTING.txt')
+    from("CONTRIBUTING.md") {
+        rename("CONTRIBUTING.md", "CONTRIBUTING.txt")
     }
 
-    from('LICENSE')
-    from('NOTICE')
+    from("LICENSE")
+    from("NOTICE")
 
     into "$buildDir/distributions"
 }
 
 task copyExtraIntoResources(type: Copy) {
-    from('README.md')
-    from('CHANGELOG.md')
-    from('docs/CONTRIBUTING.md')
-    from('LICENSE')
+    from("README.md")
+    from("CHANGELOG.md")
+    from("docs/CONTRIBUTING.md")
+    from("LICENSE")
 
-    into('src/main/resources/org/terasology/launcher/about')
+    into("src/main/resources/org/terasology/launcher/about")
 }
 processResources.dependsOn copyExtraIntoResources
 
 task copyIconsIntoResources(type: Copy) {
-    from('icons')
+    from("icons")
 
-    into('src/main/resources/org/terasology/launcher/icons')
+    into("src/main/resources/org/terasology/launcher/icons")
 }
 processResources.dependsOn copyIconsIntoResources
 
@@ -326,7 +323,7 @@ idea {
     }
 }
 
-tasks.named('wrapper') {
+tasks.named("wrapper") {
     // IDEA likes this distribution to better know things.
     distributionType = Wrapper.DistributionType.ALL
 }

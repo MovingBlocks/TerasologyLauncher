@@ -4,7 +4,13 @@
 package org.terasology.launcher.game;
 
 import com.google.common.base.MoreObjects;
-import com.vdurmont.semver4j.Semver;
+import org.semver4j.Semver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.terasology.launcher.io.Installation;
+import org.terasology.launcher.model.Build;
+import org.terasology.launcher.model.GameIdentifier;
+import org.terasology.launcher.model.Profile;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,21 +30,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A local installation of a Terasology release.
  */
-public class Installation {
-    final Path path;
+public class GameInstallation implements Installation<GameIdentifier> {
 
-    Installation(Path installDirectory) {
+    private static final Logger logger = LoggerFactory.getLogger(GameInstallation.class);
+    private final Path path;
+
+    GameInstallation(Path installDirectory) {
         path = checkNotNull(installDirectory);
     }
 
     /**
      * Return an Installation after confirming it is present.
      */
-    static Installation getExisting(Path directory) throws FileNotFoundException {
+    static GameInstallation getExisting(Path directory) throws FileNotFoundException {
         if (!Files.exists(directory)) {
             throw new FileNotFoundException("No installation present in " + directory);
         }
-        return new Installation(directory);
+        return new GameInstallation(directory);
     }
 
     /**
@@ -53,13 +61,13 @@ public class Installation {
 
     /**
      * Locate the main game jar.
-     *
+     * <p>
      * As of August 2021, Terasology has custom build logic to put libraries into a {@code libs} (plural) subdirectory.
      * As we plan to switch to using default Gradle behavior we have to do a quick check how the game distribution was
      * build (i.e., custom  {@code libs} or default {@code lib}).
      */
     Path getGameJarPath() throws IOException {
-        return findJar(path, Installation::matchGameJar, "game");
+        return findJar(path, GameInstallation::matchGameJar, "game");
     }
 
     @Override
@@ -67,11 +75,11 @@ public class Installation {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Installation)) {
+        if (!(o instanceof GameInstallation)) {
             return false;
         }
 
-        Installation that = (Installation) o;
+        GameInstallation that = (GameInstallation) o;
 
         return path.equals(that.path);
     }
@@ -115,9 +123,9 @@ public class Installation {
      * @throws FileNotFoundException if the engine or the version info could not be found
      */
     static Semver getEngineVersion(Path versionDirectory) throws IOException {
-        Path engineJar = findJar(versionDirectory, Installation::matchEngineJar, "engine");
+        Path engineJar = findJar(versionDirectory, GameInstallation::matchEngineJar, "engine");
         Properties versionInfo = getVersionPropertiesFromJar(engineJar);
-        return new Semver(versionInfo.getProperty("engineVersion"), Semver.SemverType.IVY);
+        return new Semver(versionInfo.getProperty("engineVersion"));
     }
 
     /**
@@ -188,5 +196,37 @@ public class Installation {
             }
             return properties;
         }
+    }
+
+    @Override
+    public Path getPath() {
+        return path;
+    }
+
+    @Override
+    public GameIdentifier getInfo() {
+        //TODO: compute this information on instance creation (and fail creation in case it is not a valid installation)
+        Profile profile;
+        Build build;
+        var parts = path.getNameCount();
+        try {
+            profile = Profile.valueOf(path.getName(parts - 3).toString());
+            build = Build.valueOf(path.getName(parts - 2).toString());
+            return new GameIdentifier(path.getFileName().toString(), build, profile);
+        } catch (IllegalArgumentException e) {
+            logger.debug("Cannot derive game information from installation: "
+                    + "Expected directory format '.../<profile>/<build>/<game>' but got {}", path);
+            return null;
+        }
+        //TODO: this is not working as I expected - probably don't fully understand this code I copied from somewhere else...
+//        try {
+//            Path jarPath = getGameJarPath();
+//            Properties info = getVersionPropertiesFromJar(jarPath);
+//            return new GameIdentifier(info.getProperty("displayVersion"), build, profile);
+//        } catch (IOException e) {
+//            logger.debug("Cannot derive game information from installation: "
+//                    + "Cannot read 'displayVersion' from version info file for installation in {}.", path, e);
+//            return null;
+//        }
     }
 }

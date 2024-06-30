@@ -29,7 +29,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -105,26 +104,6 @@ public final class  Settings {
         return jsonSettings;
     }
 
-    static LauncherSettings toLegacy(Settings settings) {
-        LauncherSettings legacy = new LauncherSettings(new Properties());
-
-        legacy.setLocale(settings.locale.get());
-        legacy.setMaxHeapSize(settings.maxHeapSize.get());
-        legacy.setInitialHeapSize(settings.minHeapSize.get());
-        legacy.setLogLevel(settings.logLevel.get());
-        legacy.setGameDirectory(settings.gameDirectory.get());
-        legacy.setGameDirectory(settings.gameDataDirectory.get());
-        legacy.setKeepDownloadedFiles(settings.keepDownloadedFiles.get());
-        legacy.setShowPreReleases(settings.showPreReleases.get());
-        legacy.setCloseLauncherAfterGameStart(settings.closeLauncherAfterGameStart.get());
-        legacy.setLastPlayedGameVersion(settings.lastPlayedGameVersion.get());
-
-        legacy.setUserJavaParameters(String.join(" ", settings.userJavaParameters.get()));
-        legacy.setUserGameParameters(String.join(" ", settings.userGameParameters.get()));
-
-        return legacy;
-    }
-
     /**
      * Load the launcher settings from disk.
      *
@@ -168,20 +147,13 @@ public final class  Settings {
     }
 
     /**
-     * Write the launcher settings to disk.
+     * Write the launcher settings to disk in JSON format.
      *
      * The given {@code path} must be the direct parent folder of where the launcher settings should be stored.
      *
-     * The launcher settings are persisted to different formats (to have a fail-over phase before deprecating the legacy
-     * format). Calling this method will store the settings in the following format:
-     * <ul>
-     *     <li>JSON</li>
-     *     <li>Java {@link Properties}</li>
-     * </ul>
-     *
      * @param settings the launcher settings to persist
      * @param path the path to the folder where the launcher settings file should be written to
-     * @throws IOException
+     * @throws IOException if the file cannot be written
      */
     public static synchronized void store(final Settings settings, final Path path) throws IOException {
         logger.debug("Writing launcher settings to '{}'.", path);
@@ -189,13 +161,6 @@ public final class  Settings {
             Files.createDirectories(path);
         }
 
-        Path legacyPath = path.resolve(LEGACY_FILE_NAME);
-        try (OutputStream outputStream = Files.newOutputStream(legacyPath)) {
-            toLegacy(settings).getProperties().store(outputStream, "Terasology Launcher - Settings");
-        }
-
-        //TODO: For the switch, only write JSON. For some failover safety we may write both formats for one or two
-        //      releases before fully deprecating the Properties.
         Path jsonPath = path.resolve(JSON_FILE_NAME);
         logger.debug("Writing launcher settings to '{}'.", jsonPath);
         try (FileWriter writer = new FileWriter(jsonPath.toFile())) {

@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.ui;
 
+import com.google.common.collect.Sets;
 import javafx.animation.Transition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
@@ -36,12 +37,14 @@ import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherConfiguration;
 import org.terasology.launcher.game.GameManager;
 import org.terasology.launcher.game.GameService;
-import org.terasology.launcher.game.Installation;
+import org.terasology.launcher.game.GameVersionNotSupportedException;
+import org.terasology.launcher.game.GameInstallation;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.model.Profile;
-import org.terasology.launcher.repositories.RepositoryManager;
+import org.terasology.launcher.model.ReleaseMetadata;
+import org.terasology.launcher.repositories.ReleaseRepository;
 import org.terasology.launcher.settings.Settings;
 import org.terasology.launcher.tasks.DeleteTask;
 import org.terasology.launcher.tasks.DownloadTask;
@@ -51,13 +54,15 @@ import org.terasology.launcher.util.I18N;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ApplicationController {
 
@@ -70,21 +75,21 @@ public class ApplicationController {
     private Settings launcherSettings;
 
     private GameManager gameManager;
-    private RepositoryManager repositoryManager;
+
     private final GameService gameService;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private DownloadTask downloadTask;
 
     private Stage stage;
 
-    private Property<LauncherConfiguration> config;
+    private final Property<LauncherConfiguration> config;
 
-    private Property<GameRelease> selectedRelease;
-    private Property<GameAction> gameAction;
-    private BooleanProperty downloading;
-    private BooleanProperty showPreReleases;
+    private final Property<GameRelease> selectedRelease;
+    private final Property<GameAction> gameAction;
+    private final BooleanProperty downloading;
+    private final BooleanProperty showPreReleases;
 
-    private ObservableSet<GameIdentifier> installedGames;
+    private final ObservableSet<GameIdentifier> installedGames;
 
     /**
      * Indicate whether the user's hard drive is running out of space for game downloads.
@@ -207,41 +212,69 @@ public class ApplicationController {
      * to the selected profile, and derive the currently selected release from the combo box's selection model.
      */
     private void initComboBoxes() {
-        // derive the releases to display from the selected profile (`selectedProfile`). the resulting list is ordered
-        // in the way the launcher is supposed to display the versions (currently by release timestamp).
-        config.addListener((obs, oldVal, cfg) -> {
-            ObservableList<GameRelease> availableReleases = gameReleaseComboBox.getItems();
-            GameIdentifier lastPlayedGame = cfg.getLauncherSettings().lastPlayedGameVersion.get();
-
-            Optional<GameRelease> lastPlayed = availableReleases.stream()
-                    .filter(release -> release.getId().equals(lastPlayedGame))
-                    .filter(release -> installedGames.contains(release.getId()))
-                    .findFirst();
-            Optional<GameRelease> lastInstalled = availableReleases.stream()
-                    .filter(release -> installedGames.contains(release.getId()))
-                    .findFirst();
-
-            gameReleaseComboBox.getSelectionModel().select(lastPlayed
-                    .or(() -> lastInstalled)
-                    .or(() -> availableReleases.stream().findFirst())
-                    .orElse(null));
-        });
-
         final ObjectBinding<ObservableList<GameRelease>> releases = Bindings.createObjectBinding(() -> {
             LauncherConfiguration cfg = config.getValue();
-            if (cfg == null || cfg.getRepositoryManager() == null) {
+            if (cfg == null || cfg.getReleaseRepository() == null) {
                 return FXCollections.emptyObservableList();
             } else {
-                RepositoryManager mngr = config.getValue().getRepositoryManager();
+                ReleaseRepository repository = config.getValue().getReleaseRepository();
+                Set<GameRelease> onlineReleases = Sets.newHashSet(repository.fetchReleases());
+                // Create dummy game release objects from locally installed games.
+                // We need this in case of running the launcher in "offline" mode
+                // and the list of game releases fetched via the repository manager
+                // is empty, but there are still games installed locally.
+                //
+                // However, we only want to add these dummy releases if they are 
+                // not listed in the online releases. Thus, filtering out everything
+                // with a GameIdentifier that is already part of the releases fetched
+                // from online sources.
+                //
+                //TODO: This is a weird place to create these dummy releases.
+                //      Move this code somewhere else, and make sure that we 
+                //      have all the necessary information stored locally, like
+                //      the timestamp or the changelog.
+                Set<GameIdentifier> onlineIds = onlineReleases.stream().map(GameRelease::getId).collect(Collectors.toSet());
+                Stream<GameRelease> localGames = installedGames.stream()
+                    .filter(id -> !onlineIds.contains(id))
+                    .map(id -> new GameRelease(id, null, new ReleaseMetadata("", new Date())));
+
+                Stream<GameRelease> allReleases = Stream.concat(onlineReleases.stream(), localGames);
+
                 List<GameRelease> releasesForProfile =
-                        mngr.getReleases().stream()
+                        allReleases
                                 .filter(release -> release.getId().getProfile() == Profile.OMEGA)
                                 .filter(release -> showPreReleases.getValue() || release.getId().getBuild().equals(Build.STABLE))
                                 .sorted(ApplicationController::compareReleases)
                                 .collect(Collectors.toList());
+                
                 return FXCollections.observableList(releasesForProfile);
             }
-        }, config, showPreReleases);
+        }, config, showPreReleases, installedGames);
+
+        // derive the releases to display from the selected profile (`selectedProfile`). the resulting list is ordered
+        // in the way the launcher is supposed to display the versions (currently by release timestamp).
+        final ObjectBinding<GameRelease> releaseToSelect = Bindings.createObjectBinding(()-> {
+            GameIdentifier lastPlayedGame = Optional.ofNullable(config.getValue())
+                .map(cfg -> cfg.getLauncherSettings().lastPlayedGameVersion.get())
+                .orElse(null);
+
+            Optional<GameRelease> lastPlayed = releases.get().stream()
+                    .filter(release -> release.getId().equals(lastPlayedGame))
+                    .filter(release -> installedGames.contains(release.getId()))
+                    .findFirst();
+            Optional<GameRelease> lastInstalled = releases.get().stream()
+                    .filter(release -> installedGames.contains(release.getId()))
+                    .findFirst();
+
+            return lastPlayed
+                    .or(() -> lastInstalled)
+                    .or(() -> releases.get().stream().findFirst())
+                    .orElse(null);
+        }, releases, config);
+
+        releaseToSelect.addListener((obs, old, now) -> {
+            gameReleaseComboBox.getSelectionModel().select(now);
+        }); 
 
         gameReleaseComboBox.itemsProperty().bind(releases);
         gameReleaseComboBox.buttonCellProperty()
@@ -298,7 +331,6 @@ public class ApplicationController {
         this.launcherSettings = configuration.getLauncherSettings();
         this.showPreReleases.bind(launcherSettings.showPreReleases);
 
-        this.repositoryManager = configuration.getRepositoryManager();
         this.gameManager = configuration.getGameManager();
 
         this.stage = stage;
@@ -368,9 +400,9 @@ public class ApplicationController {
             return;
         }
         final GameRelease release = selectedRelease.getValue();
-        final Installation installation;
+        final GameInstallation gameInstallation;
         try {
-            installation = gameManager.getInstallation(release.getId());
+            gameInstallation = gameManager.getInstallation(release.getId());
         } catch (FileNotFoundException e) {
             // TODO: Refresh the list of installed games or something? This should not be reachable if
             //     the properties are up to date.
@@ -378,7 +410,11 @@ public class ApplicationController {
             Dialogs.showError(stage, I18N.getMessage("message_error_installationNotFound", release));
             return;
         }
-        gameService.start(installation, launcherSettings);
+        try {
+            gameService.start(gameInstallation, launcherSettings);
+        } catch (GameVersionNotSupportedException e) {
+            Dialogs.showError(stage, e.getMessage());
+        }
     }
 
     private void handleRunStarted(ObservableValue<? extends Boolean> o, Boolean oldValue, Boolean newValue) {
@@ -457,21 +493,6 @@ public class ApplicationController {
                     final DeleteTask deleteTask = new DeleteTask(gameManager, id);
                     executor.submit(deleteTask);
                 });
-    }
-
-    /**
-     * Select the first item matching given predicate, select the first item otherwise.
-     *
-     * @param comboBox  the combo box to change the selection for
-     * @param predicate first item matching this predicate will be selected
-     */
-    private <T> void selectItem(final ComboBox<T> comboBox, Predicate<T> predicate) {
-        final T item = comboBox.getItems().stream()
-                .filter(predicate)
-                .findFirst()
-                .orElse(comboBox.getItems().get(0));
-
-        comboBox.getSelectionModel().select(item);
     }
 
     /**
