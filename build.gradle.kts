@@ -135,13 +135,16 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    // Gradle 9 no longer resolves this transitively - without it, `test` fails before running
+    // anything: "Failed to load JUnit Platform... including the JUnit Platform launcher."
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("org.mockito:mockito-inline:5.2.0") {
-        because("-inline build enables mocking final classes")
-        // https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.2
-        // > Be aware that this artifact may be abolished when the inline mock making feature is integrated into the default mock maker.
+    testImplementation("org.mockito:mockito-core:5.18.0") {
+        because("mockito-inline (used previously) was discontinued after 5.2.0 - inline mock making " +
+                "(mocking final classes) is the default in mockito-core since Mockito 5. Also, 5.2.0's " +
+                "bundled Byte Buddy predates Java 25/26 class file support.")
     }
-    testImplementation("org.mockito:mockito-junit-jupiter:5.2.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.18.0")
 
     testImplementation("org.spf4j:spf4j-slf4j-test:8.10.0") {
         because("testable logging")
@@ -172,10 +175,10 @@ dependencies {
 
 val testClasspathNamePattern = Regex("test(Runtime|Compile|Implementation|PmdAux)Classpath")
 configurations.matching { testClasspathNamePattern.containsMatchIn(it.name) }.all {
-    resolutionStrategy(GradleGooExtension.prefers("logging", "jcl-api-capability", "jcl-over-slf4j",
-            "jcl should prefer slf4j when available"))
-    resolutionStrategy(GradleGooExtension.prefers("logging", "slf4j-impl-capability",
-            "spf4j-slf4j-test", "tests use slf4j-test"))
+    GradleGooExtension.prefers(resolutionStrategy, "logging", "jcl-api-capability", "jcl-over-slf4j",
+            "jcl should prefer slf4j when available")
+    GradleGooExtension.prefers(resolutionStrategy, "logging", "slf4j-impl-capability",
+            "spf4j-slf4j-test", "tests use slf4j-test")
 
     // SPF4J has a dependency on "avro-logical-types-gen:1.3", which does not exist. However, version "1.3p" does.
     resolutionStrategy.force("org.spf4j:avro-logical-types-gen:1.3p")
@@ -222,7 +225,9 @@ checkstyle {
 }
 
 pmd {
-    toolVersion = "6.39.0"
+    // 6.39.0's bundled ASM can't read Java 25 class files during type resolution
+    // ("Unsupported class file major version 69"), erroring on every source file.
+    toolVersion = "7.13.0"
     isIgnoreFailures = false
     isConsoleOutput = true
     threads = 4

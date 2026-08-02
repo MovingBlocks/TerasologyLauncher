@@ -7,9 +7,6 @@ import java.util.List;
 
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class JenkinsPayload {
-    private JenkinsPayload() {
-
-    }
 
     /**
      * Example payloads from the "old" Jenkins at http://jenkins.terasology.org

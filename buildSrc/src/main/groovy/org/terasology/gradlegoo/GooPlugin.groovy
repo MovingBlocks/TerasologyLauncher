@@ -18,7 +18,10 @@ class GradleGooPlugin implements Plugin<Project> {
         target.extensions.create("gradlegoo", GradleGooExtension)
         target.dependencies {
             components {
+                // Both sides of the preference need the same capability, or Gradle sees no
+                // conflict to resolve and leaves both jars on the classpath - see prefers() below.
                 withModule("org.spf4j:spf4j-slf4j-test", Slf4jImplementationRule)
+                withModule("ch.qos.logback:logback-classic", Slf4jImplementationRule)
             }
         }
     }
