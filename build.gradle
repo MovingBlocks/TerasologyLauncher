@@ -41,7 +41,8 @@ tasks.register("createTerasologyExe", edu.sc.seis.launch4j.tasks.Launch4jLibrary
     mainClassName = "org.terasology.launcher.Terasology"
     headerType = "console"
     jarTask = tasks.named("jar")
-    classpath = ["lib/*.jar"]
+    dontWrapJar = true
+    classpath = ["lib/*"]
     jreMinVersion = "25"
     requires64Bit = true
 }
