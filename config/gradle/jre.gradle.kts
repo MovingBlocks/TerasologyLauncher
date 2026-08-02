@@ -1,0 +1,175 @@
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
+
+// Scripts applied via apply(from = ...) don't inherit the root script's plugins{}-resolved
+// classpath for their own compilation (a known Kotlin DSL limitation) - this script needs its
+// own buildscript{} to resolve the Download task type and launch4j's task types by name.
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("de.undercouch:gradle-download-task:5.3.0")
+    }
+}
+
+import de.undercouch.gradle.tasks.download.Download
+import org.gradle.api.distribution.DistributionContainer
+import org.gradle.api.file.RelativePath
+import org.gradle.api.tasks.application.CreateStartScripts
+import org.gradle.kotlin.dsl.the
+import org.gradle.kotlin.dsl.withGroovyBuilder
+
+// Applied scripts don't get the main script's plugins{}-generated type-safe accessors (like the
+// top-level "distributions {}" function build.gradle.kts gets for free) - look the container up
+// explicitly instead.
+val distributions = the<DistributionContainer>()
+
+// Uses Bellsoft Liberica JRE - the "full" edition specifically, since it's the only free,
+// redistributable build that bundles JavaFX in (JavaFX was split out of the JDK since Java 11).
+// https://bell-sw.com/pages/downloads/
+val jdkVersion = "25+37"
+val jreUrlFilenames = mapOf(
+        "Linux64" to "linux-amd64-full.tar.gz",
+        "Windows64" to "windows-amd64-full.zip",
+        "Mac" to "macos-amd64-full.zip"
+)
+
+val createRelease = tasks.register("createRelease") {
+    group = "Distribution"
+    description = "Bundles the project with a JRE for each platform"
+    dependsOn(tasks.named("distZip"))
+
+    doLast {
+        println("Created release: $version")
+    }
+}
+
+val downloadJreAll = tasks.register("downloadJreAll") {
+    group = "JRE"
+    description = "Downloads Launcher JREs for all platforms"
+}
+
+val unpackJreAll = tasks.register("unpackJreAll") {
+    group = "JRE"
+    description = "Unpack JREs for all platforms"
+}
+
+fun createJreTasks(
+        taskNameBase: String,
+        downloadUrl: String,
+        downloadFile: String,
+        unpackDir: String
+): TaskProvider<Copy> {
+
+    tasks.register<Download>("download$taskNameBase") {
+        group = "JRE"
+        src(downloadUrl)
+        dest(downloadFile)
+        overwrite(false)
+    }
+
+    val unpackTask = tasks.register<Copy>("unpack$taskNameBase") {
+        group = "JRE"
+        from(if (downloadFile.endsWith("zip")) zipTree(downloadFile) else tarTree(downloadFile)) {
+            eachFile {
+                relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
+                // filePermissions{} below overrides every copied entry's mode with a
+                // fresh default, discarding the executable bit the zip/tar recorded for
+                // bin/* (java, javaw, ...) - restore it explicitly or the bundled JRE
+                // can't be executed after unpacking.
+                if (relativePath.segments.isNotEmpty() && relativePath.segments[0] == "bin") {
+                    permissions { unix("755") }
+                }
+            }
+            includeEmptyDirs = false
+        }
+        into(unpackDir)
+        filePermissions {
+            user.write = true
+        }
+        dependsOn("download$taskNameBase")
+    }
+
+    return unpackTask
+}
+
+jreUrlFilenames.forEach { (os, file) ->
+    val launcherTaskBase = "Jre$os"
+    val unpackTask = createJreTasks(
+            launcherTaskBase,
+            "https://download.bell-sw.com/java/$jdkVersion/bellsoft-jre$jdkVersion-$file",
+            "$projectDir/jre/$os-$jdkVersion-$file",
+            "$projectDir/jre/$os")
+
+    val distName = os.lowercase()
+    val distBase = distName.replace(Regex("\\d"), "") // drop '32' or '64'
+
+    distributions.create(distName) {
+        contents {
+            with(distributions["main"].contents)
+
+            into("jre") {
+                from(unpackTask)
+                // The dist Zip/Tar tasks don't carry over the executable bit
+                // unpackTask's own eachFile restored on disk - re-apply it here so
+                // jre/bin/java is actually executable inside the packaged archive.
+                eachFile {
+                    val segs = relativePath.segments
+                    // relativePath here is rooted at the whole distribution, not the
+                    // "jre" subtree, so match on the file's immediate parent dir
+                    // rather than assuming "bin" is segments[0].
+                    if (segs.size >= 2 && segs[segs.size - 2] == "bin") {
+                        permissions { unix("755") }
+                    }
+                }
+            }
+
+            from("$projectDir/buildres/$distBase")
+            from("$projectDir/buildres/$distName")
+
+            if (os == "Windows64") {
+                // Dynamically generated by launch4j (see the launch4j {} block in
+                // build.gradle.kts) instead of the checked-in static binary this replaces.
+                from(tasks.named("createExe"))
+                // Second, independent exe that launches the game directly instead of the GUI
+                // (see createTerasologyExe in build.gradle.kts) - rides along in the same zip
+                // since it shares the same jar/lib set, even though it doesn't use the bundled jre/.
+                from(tasks.named("createTerasologyExe"))
+            }
+        }
+    }
+
+    downloadJreAll.configure { dependsOn("download$launcherTaskBase") }
+    unpackJreAll.configure { dependsOn("unpack$launcherTaskBase") }
+
+    createRelease.configure { dependsOn("assemble${os}Dist") }
+}
+
+distributions.named("mac") {
+    contents {
+        into("TerasologyLauncher.app/Contents")
+        exclude("**/*.bat")
+        eachFile {
+            path = Regex("(Contents)/bin/(.+)").replace(path) { m ->
+                "${m.groupValues[1]}/MacOS/${m.groupValues[2]}"
+            }
+        }
+    }
+}
+
+tasks.withType<CreateStartScripts>().configureEach {
+    val unixTemplate = file("$projectDir/buildres/scripts/unixStartScript.txt")
+    val windowsTemplate = file("$projectDir/buildres/scripts/windowsStartScript.txt")
+
+    assert(project.file(unixTemplate).exists())
+    assert(project.file(windowsTemplate).exists())
+
+    unixStartScriptGenerator.withGroovyBuilder {
+        setProperty("template", resources.text.fromFile(unixTemplate))
+    }
+    windowsStartScriptGenerator.withGroovyBuilder {
+        setProperty("template", resources.text.fromFile(windowsTemplate))
+    }
+}

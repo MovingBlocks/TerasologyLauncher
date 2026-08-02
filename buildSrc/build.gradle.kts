@@ -3,7 +3,7 @@
 
 plugins {
     id("java-gradle-plugin")
-    id("groovy")
+    groovy
 }
 
 repositories {
@@ -11,12 +11,12 @@ repositories {
 }
 
 dependencies {
-    localGroovy()
+    implementation(localGroovy())
 }
 
 gradlePlugin {
     plugins {
-        simplePlugin {
+        create("simplePlugin") {
             id = "org.terasology.gradlegoo"
             implementationClass = "org.terasology.gradlegoo.GradleGooPlugin"
         }
