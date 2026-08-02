@@ -52,6 +52,13 @@ def createJreTasks(String taskNameBase,
             eachFile { fcd ->
                 fcd.relativePath = new RelativePath(
                         true, fcd.relativePath.segments.drop(1))
+                // filePermissions{} below overrides every copied entry's mode with a
+                // fresh default, discarding the executable bit the zip/tar recorded for
+                // bin/* (java, javaw, ...) - restore it explicitly or the bundled JRE
+                // can't be executed after unpacking.
+                if (fcd.relativePath.segments.length > 0 && fcd.relativePath.segments[0] == "bin") {
+                    fcd.permissions { unix(0755) }
+                }
             }
             includeEmptyDirs = false
         }
@@ -83,6 +90,18 @@ jreUrlFilenames.each { os, file ->
 
                 into("jre") {
                     from unpackTask
+                    // The dist Zip/Tar tasks don't carry over the executable bit
+                    // unpackTask's own eachFile restored on disk - re-apply it here so
+                    // jre/bin/java is actually executable inside the packaged archive.
+                    eachFile { fcd ->
+                        def segs = fcd.relativePath.segments
+                        // relativePath here is rooted at the whole distribution, not the
+                        // "jre" subtree, so match on the file's immediate parent dir
+                        // rather than assuming "bin" is segments[0].
+                        if (segs.length >= 2 && segs[segs.length - 2] == "bin") {
+                            fcd.permissions { unix(0755) }
+                        }
+                    }
                 }
 
                 from("${projectDir}/buildres/${distBase}")
