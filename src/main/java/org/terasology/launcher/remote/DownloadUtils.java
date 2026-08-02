@@ -130,7 +130,11 @@ public final class DownloadUtils {
         } catch (URISyntaxException e) {
             throw new DownloadException("Error in URL: " + downloadURL, e);
         }
-        return client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+        // client.close() blocks until outstanding exchanges finish, so it can't be try-with-resources
+        // here without defeating sendAsync's whole point - close it once the future it returns
+        // actually completes instead.
+        return client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+                .whenComplete((response, throwable) -> client.close());
     }
 
     private static void downloadToFile(ProgressListener listener, long contentLength, BufferedInputStream in,

@@ -188,6 +188,12 @@ class RunGameTask extends Task<Boolean> {
     }
 
     public abstract static class RunGameError extends Exception {
+        RunGameError() {
+        }
+
+        RunGameError(final Throwable cause) {
+            super(cause);
+        }
     }
 
     /**
@@ -197,8 +203,7 @@ class RunGameTask extends Task<Boolean> {
      */
     public static class GameStartError extends RunGameError {
         GameStartError(final Exception e) {
-            super();
-            this.initCause(e);
+            super(e);
         }
 
         @Override
