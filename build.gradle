@@ -356,7 +356,8 @@ launch4j {
     headerType = "gui"
     jarTask = tasks.named("jar")
     copyConfigurable = []
-    classpath = ["lib/*.jar"]
+    dontWrapJar = true
+    classpath = ["lib/*"]
     bundledJrePath = "jre"
     jreMinVersion = "25"
     requires64Bit = true
