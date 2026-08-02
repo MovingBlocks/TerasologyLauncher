@@ -61,15 +61,17 @@ class JenkinsRepositoryTest {
     }
 
     @Test
-    @DisplayName("skip builds without version info")
-    void skipBuildsWithoutVersionInfo() {
+    @DisplayName("fall back to the build number for builds without version info")
+    void fallBackToBuildNumberWithoutVersionInfo() {
         Properties emptyVersionInfo = new Properties();
 
         final JenkinsClient stubClient = new StubJenkinsClient(url -> validResult, url -> emptyVersionInfo);
 
         final JenkinsRepository adapter = new JenkinsRepository(Profile.OMEGA, Build.STABLE, stubClient);
 
-        assertTrue(adapter.fetchReleases().isEmpty());
+        List<GameRelease> releases = adapter.fetchReleases();
+        assertEquals(1, releases.size());
+        assertEquals("build-" + validResult.builds[0].number, releases.get(0).getId().getDisplayVersion());
     }
 
     @Test

@@ -34,7 +34,8 @@ class JenkinsRepository implements ReleaseRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(JenkinsRepository.class);
 
-    private static final String BASE_URL = "http://jenkins.terasology.io/teraorg/job/Terasology/";
+    // No "/teraorg/" prefix - that folder no longer exists on this Jenkins instance and 404s.
+    private static final String BASE_URL = "https://jenkins.terasology.io/job/Terasology/";
 
     private static final String API_FILTER = "api/json?tree="
             + "builds["
@@ -86,16 +87,15 @@ class JenkinsRepository implements ReleaseRepository {
         if (hasAcceptableResult(jenkinsBuildInfo)) {
             final URL url = client.getArtifactUrl(jenkinsBuildInfo, TERASOLOGY_ZIP_PATTERN);
 
-            final ReleaseMetadata metadata = computeReleaseMetadataFrom(jenkinsBuildInfo);
-            final Optional<GameIdentifier> id = computeIdentifierFrom(jenkinsBuildInfo);
-
             //TODO: check whether the game release is supported (minimal Java version)
             //      we probably need to encode the engine version explicitly in the GameIdentifier (instead of just the display version)
 
-            if (url != null && id.isPresent()) {
-                return Optional.of(new GameRelease(id.get(), url, metadata));
+            if (url != null) {
+                final ReleaseMetadata metadata = computeReleaseMetadataFrom(jenkinsBuildInfo);
+                final GameIdentifier id = computeIdentifierFrom(jenkinsBuildInfo);
+                return Optional.of(new GameRelease(id, url, metadata));
             } else {
-                logger.debug("Skipping build without game artifact or version identifier: '{}'", jenkinsBuildInfo.url);
+                logger.debug("Skipping build without game artifact: '{}'", jenkinsBuildInfo.url);
             }
         } else {
             logger.debug("Skipping unsuccessful build '{}'", jenkinsBuildInfo.url);
@@ -103,21 +103,22 @@ class JenkinsRepository implements ReleaseRepository {
         return Optional.empty();
     }
 
-    private Optional<GameIdentifier> computeIdentifierFrom(Jenkins.Build jenkinsBuildInfo) {
-        return Optional.ofNullable(client.getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"))
+    private GameIdentifier computeIdentifierFrom(Jenkins.Build jenkinsBuildInfo) {
+        // versionInfo.properties is created during the Engine build. jenkinsBuildInfo is the build
+        // of a Distribution - there may be multiple Distribution builds from the same Engine build,
+        // so when it's available we use the Engine's displayVersion plus the Distribution build
+        // number to ensure uniqueness. It isn't always archived though (e.g. it's currently missing
+        // from the upstream engine job's own artifacts) - fall back to the build number alone rather
+        // than silently dropping the release from the list entirely.
+        String displayVersion = Optional.ofNullable(client.getArtifactUrl(jenkinsBuildInfo, "versionInfo.properties"))
                 .map(client::requestProperties)
                 .map(versionInfo -> versionInfo.getProperty("displayVersion"))
-                .map(displayVersion -> {
-                    // versionInfo.properties is created during the Engine build.
-                    // jenkinsBuildInfo is the build of a Distribution.
-                    //
-                    // There may be multiple Distribution builds that come from the same Engine build.
-                    //
-                    // We can use the Engine's displayVersion, but we use the Distribution build number
-                    // to ensure uniqueness.
-                    String versionString = displayVersion + "+" + jenkinsBuildInfo.number;
-                    return new GameIdentifier(versionString, buildProfile, profile);
-                });
+                .orElse(null);
+
+        String versionString = displayVersion != null
+                ? displayVersion + "+" + jenkinsBuildInfo.number
+                : "build-" + jenkinsBuildInfo.number;
+        return new GameIdentifier(versionString, buildProfile, profile);
     }
 
     private ReleaseMetadata computeReleaseMetadataFrom(Jenkins.Build jenkinsBuildInfo) {
