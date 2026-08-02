@@ -17,21 +17,21 @@ plugins {
     id("checkstyle")
     id("com.github.spotbugs") version "5.2.3"
     id("de.undercouch.download") version "5.3.0"
+    id("edu.sc.seis.launch4j") version "4.0.0"
     id("java")
-    // to help clarify conflicting logging providers
-    id("name.remal.component-metadata") version "1.5.0"
-    id("nebula.release") version "16.0.0"
+    id("nebula.release") version "21.0.0"
     id("pmd")
     id("project-report")
-    id("org.openjfx.javafxplugin") version "0.0.13"
+    id("org.openjfx.javafxplugin") version "0.1.0"
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.5"
 }
 
 apply plugin: "org.terasology.gradlegoo"
 apply from: "./config/gradle/jre.gradle"
 
-// Test for right version of Java in use for running this script
-assert JavaVersion.current().isJava11Compatible()
+// Test for right version of Java in use for running this script - compiling for
+// sourceCompatibility 25 below requires the JDK actually running Gradle to be >= 25 too.
+assert JavaVersion.current() >= JavaVersion.VERSION_25
 
 import org.apache.tools.ant.filters.FixCrLfFilter
 
@@ -163,14 +163,16 @@ configurations.matching({ it =~ ~/test(Runtime|Compile|Implementation|PmdAux)Cla
 }
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
-sourceCompatibility = 1.11
-targetCompatibility = 1.11
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
 
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
 
 javafx {
-    version = "17.0.2"
+    version = "24.0.1"
     modules = [
             "javafx.graphics",
             "javafx.fxml",
@@ -207,7 +209,13 @@ spotbugs {
     reportLevel = "medium"
 }
 
-mainClassName = "org.terasology.launcher.TerasologyLauncher"
+application {
+    mainClass.set("org.terasology.launcher.TerasologyLauncher")
+}
+// Groovy scripts elsewhere in this file (jar manifest, launch4j) read this as a plain
+// variable - the application plugin's own top-level property setter was removed in
+// modern Gradle, but reading mainClass back out and aliasing it like this still works.
+def mainClassName = application.mainClass.get()
 
 def convertGitBranch = { gitBranch ->
     if (gitBranch != null) {
@@ -313,7 +321,31 @@ task copyIconsIntoResources(type: Copy) {
 }
 processResources.dependsOn copyIconsIntoResources
 
-//TODO: Temporary workaround for new exes / JRE bundling not quite being officially ready yet
+// Wraps TerasologyLauncher.jar into a real Windows .exe - see jre.gradle, where windows64's
+// distribution contents pulls in this task's output (replacing the previously checked-in,
+// statically-generated buildres/windows64/TerasologyLauncher.x64.exe).
+//
+// mainClassName is set (not left to jar's own manifest Class-Path) deliberately: the plugin
+// only respects a jar's manifest Class-Path when dontWrapJar=true; setting mainClassName here
+// switches it to explicit classpath mode instead, so classpath below is authoritative - avoids
+// depending on which mode is in effect. bundledJrePath doesn't copy anything at generation
+// time; it's a search path baked into the exe, relative to itself at runtime, matching where
+// unpackJreWindows64 (in jre.gradle) already places the bundled JRE in the same distribution.
+launch4j {
+    outfile = "TerasologyLauncher.exe"
+    mainClassName = "org.terasology.launcher.TerasologyLauncher"
+    headerType = "gui"
+    jarTask = tasks.named("jar")
+    copyConfigurable = []
+    classpath = ["lib/*.jar"]
+    bundledJrePath = "jre"
+    jreMinVersion = "25"
+    requires64Bit = true
+}
+
+// distZip is the plain, OS-agnostic application-plugin zip (unix + windows start scripts, no
+// platform split) and was never meant to carry a platform-specific exe - guard against one
+// leaking in regardless of how it got named.
 distZip.exclude("*.x*.exe")
 
 
