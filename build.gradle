@@ -27,6 +27,25 @@ plugins {
 }
 
 apply plugin: "org.terasology.gradlegoo"
+
+// A second, independent exe: launches the game directly (org.terasology.launcher.Terasology),
+// skipping the GUI entirely - see DirectPlay's javadoc for why it avoids javafx.graphics. The
+// launch4j{} extension below only wires up one exe (the plugin's fixed "createExe" task), so this
+// is a second task of the same underlying type with its own config. Deliberately no bundledJrePath:
+// unlike TerasologyLauncher.exe, this one has no JavaFX dependency, so it only needs a plain Java
+// 25 runtime - callers are expected to provide their own (e.g. a winget PackageDependencies entry).
+// Registered here, before jre.gradle is applied, since that script references this task by name
+// and (unlike the plugin's own "createExe") its registration doesn't exist until this line runs.
+tasks.register("createTerasologyExe", edu.sc.seis.launch4j.tasks.Launch4jLibraryTask) {
+    outfile = "Terasology.exe"
+    mainClassName = "org.terasology.launcher.Terasology"
+    headerType = "console"
+    jarTask = tasks.named("jar")
+    classpath = ["lib/*.jar"]
+    jreMinVersion = "25"
+    requires64Bit = true
+}
+
 apply from: "./config/gradle/jre.gradle"
 
 // Test for right version of Java in use for running this script - compiling for
