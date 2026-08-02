@@ -118,6 +118,9 @@ public final class DownloadUtils {
         }
     }
 
+    // PMD's CloseResource only recognizes try-with-resources or a same-scope close() call - it
+    // can't trace the close() below, called from a lambda once sendAsync's future completes.
+    @SuppressWarnings("PMD.CloseResource")
     private static CompletableFuture<HttpResponse<InputStream>> getConnectedDownloadConnection(URL downloadURL) throws DownloadException {
         var client = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)
