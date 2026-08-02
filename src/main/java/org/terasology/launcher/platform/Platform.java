@@ -8,11 +8,10 @@ package org.terasology.launcher.platform;
  */
 public enum Platform {
 
-    // unsupported platforms commented out, but might be useful for local development
-    // MACOS_X64(OS.MAC, Arch.X64),
-    // supported platforms by both the game and the launcher
     WINDOWS_X64(OS.WINDOWS, Arch.X64),
-    LINUX_X64(OS.LINUX, Arch.X64);
+    LINUX_X64(OS.LINUX, Arch.X64),
+    MACOS_X64(OS.MAC, Arch.X64),
+    MACOS_ARM64(OS.MAC, Arch.ARM64);
 
     /**
      * The simplified operating system identifier.
@@ -94,8 +93,10 @@ public enum Platform {
             return WINDOWS_X64;
         } else if (os.equals(OS.LINUX) && arch.equals(Arch.X64)) {
             return LINUX_X64;
-//        } else if (os.equals(OS.MAC) && arch.equals(Arch.X64)) {
-//            return MACOS_X64;
+        } else if (os.equals(OS.MAC) && arch.equals(Arch.X64)) {
+            return MACOS_X64;
+        } else if (os.equals(OS.MAC) && arch.equals(Arch.ARM64)) {
+            return MACOS_ARM64;
         } else {
             throw new UnsupportedPlatformException("Unsupported platform: " + os + " " + arch);
         }
