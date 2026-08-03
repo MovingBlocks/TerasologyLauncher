@@ -96,7 +96,7 @@ final class GameStarter implements Callable<Process> {
     }
 
     /**
-     * @return the executable {@code java} file to run the game with
+     * Returns the executable {@code java} file to run the game with.
      */
     Path getRuntimePath(Semver engineVersion) throws GameVersionNotSupportedException {
         //TODO: Select the right JRE based on VersionHistory#getJavaVersionForEngine. Probably something along the lines

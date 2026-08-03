@@ -6,7 +6,8 @@ package org.terasology.launcher.model;
 import org.terasology.launcher.remote.RemoteResource;
 
 import java.net.URL;
-import java.util.Date;
+import java.time.Instant;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -34,15 +35,16 @@ public class GameRelease implements RemoteResource<GameIdentifier> {
         return id;
     }
 
+    @Override
     public URL getUrl() {
         return url;
     }
 
     @Override
     public String getFilename() {
-        String profileString = id.getProfile().toString().toLowerCase();
+        String profileString = id.getProfile().toString().toLowerCase(Locale.ROOT);
         String versionString = id.getDisplayVersion();
-        String buildString = id.getBuild().toString().toLowerCase();
+        String buildString = id.getBuild().toString().toLowerCase(Locale.ROOT);
         return "terasology-" + profileString + "-" + versionString + "-" + buildString + ".zip";
     }
 
@@ -58,7 +60,7 @@ public class GameRelease implements RemoteResource<GameIdentifier> {
         return releaseMetadata.getChangelog();
     }
 
-    public Date getTimestamp() {
+    public Instant getTimestamp() {
         return releaseMetadata.getTimestamp();
     }
 
@@ -72,10 +74,9 @@ public class GameRelease implements RemoteResource<GameIdentifier> {
         if (o == this) {
             return true;
         }
-        if (!(o instanceof GameRelease)) {
+        if (!(o instanceof GameRelease other)) {
             return false;
         }
-        GameRelease other = (GameRelease) o;
 
         boolean sameId = this.id.equals(other.id);
         boolean sameTimestamp = (this.releaseMetadata == null && other.releaseMetadata == null) 

@@ -172,7 +172,7 @@ public final class TerasologyLauncher extends Application {
         final Rectangle2D bounds = Screen.getPrimary().getBounds();
         initialStage.setScene(splashScene);
         initialStage.setX(bounds.getMinX() + bounds.getWidth() / 2 - SPLASH_WIDTH / 2);
-        initialStage.setY(bounds.getMinY() + bounds.getHeight() / 2 - SPLASH_HEIGHT / 2);
+        initialStage.setY(bounds.getMinY() + bounds.getHeight() / 2 - SPLASH_HEIGHT / 2.0);
         initialStage.show();
     }
 

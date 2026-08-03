@@ -3,6 +3,8 @@
 
 package org.terasology.launcher.platform;
 
+import java.util.Locale;
+
 /**
  * A simplified representation of a computer platform as `os` and `arch`
  */
@@ -39,6 +41,7 @@ public enum Platform {
         return os == OS.WINDOWS;
     }
 
+    @Override
     public String toString() {
         return "OS '" + os + "', arch '" + arch + "'";
     }
@@ -49,7 +52,7 @@ public enum Platform {
      * @return the platform
      */
     public static Platform getPlatform() throws UnsupportedPlatformException {
-        final String platformOs = System.getProperty("os.name").toLowerCase();
+        final String platformOs = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         final OS os;
         if (platformOs.startsWith("linux")) {
             os = OS.LINUX;
@@ -62,23 +65,12 @@ public enum Platform {
         }
 
         final String platformArch = System.getProperty("os.arch");
-        final Arch arch;
-        switch (platformArch) {
-            case "x86_64":
-            case "amd64":
-                arch = Arch.X64;
-                break;
-            case "x86":
-            case "i386":
-                arch = Arch.X86;
-                break;
-            case "aarch64":
-            case "arm64":
-                arch = Arch.ARM64;
-                break;
-            default:
-                throw new UnsupportedPlatformException("Architecture not supported: " + platformArch);
-        }
+        final Arch arch = switch (platformArch) {
+            case "x86_64", "amd64" -> Arch.X64;
+            case "x86", "i386" -> Arch.X86;
+            case "aarch64", "arm64" -> Arch.ARM64;
+            default -> throw new UnsupportedPlatformException("Architecture not supported: " + platformArch);
+        };
 
         return fromOsAndArch(os, arch);
     }

@@ -3,8 +3,6 @@
 # This file is expected to be part of source control.
 # To regenerate this file, run: ./gradlew dependencies --write-locks
 com.fasterxml.jackson:jackson-bom:2.14.2=classpath
-com.github.spotbugs.snom:spotbugs-gradle-plugin:5.2.3=classpath
-com.github.spotbugs:com.github.spotbugs.gradle.plugin:5.2.3=classpath
 com.github.zafarkhaja:java-semver:0.9.0=classpath
 com.google.code.findbugs:jsr305:3.0.2=classpath
 com.google.code.gson:gson:2.8.6=classpath
@@ -24,6 +22,8 @@ gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.5=classpa
 io.github.x-stream:mxparser:1.2.2=classpath
 kr.motd.maven:os-maven-plugin:1.7.1=classpath
 nebula.release:nebula.release.gradle.plugin:21.0.0=classpath
+net.ltgt.errorprone:net.ltgt.errorprone.gradle.plugin:5.1.0=classpath
+net.ltgt.gradle:gradle-errorprone-plugin:5.1.0=classpath
 net.sf.launch4j:launch4j:3.50=classpath
 org.checkerframework:checker-qual:2.10.0=classpath
 org.jetbrains.gradle.plugin.idea-ext:org.jetbrains.gradle.plugin.idea-ext.gradle.plugin:1.1.5=classpath

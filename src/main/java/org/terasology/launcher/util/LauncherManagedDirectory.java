@@ -3,7 +3,10 @@
 
 package org.terasology.launcher.util;
 
+import com.google.common.collect.ImmutableList;
+
 import java.nio.file.Path;
+import java.util.Locale;
 
 /**
  * A list of directories managed by the launcher.
@@ -19,14 +22,14 @@ public enum LauncherManagedDirectory {
     DOWNLOAD(FileUtils::ensureWritableDir),
     GAMES(FileUtils::ensureWritableDir);
 
-    private final DirectoryCreator[] creators;
+    private final ImmutableList<DirectoryCreator> creators;
     private final String errorLabel;
     private final String directoryName;
 
     LauncherManagedDirectory(DirectoryCreator... creators) {
-        this.creators = creators;
-        this.errorLabel = String.format("message_error_{}Directory", this.name().toLowerCase());
-        this.directoryName = this.name().toLowerCase();
+        this.creators = ImmutableList.copyOf(creators);
+        this.errorLabel = String.format("message_error_%sDirectory", this.name().toLowerCase(Locale.ROOT));
+        this.directoryName = this.name().toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -34,7 +37,7 @@ public enum LauncherManagedDirectory {
      *
      * @return ordered list of {@link DirectoryCreator}s which can be used to create/prepare the directory.
      */
-    public DirectoryCreator[] getCreators() {
+    public ImmutableList<DirectoryCreator> getCreators() {
         return creators;
     }
 

@@ -11,7 +11,6 @@ import okhttp3.Response;
 import okhttp3.mock.MockInterceptor;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.joda.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -80,7 +80,7 @@ class JenkinsClientTest {
     @DisplayName("should tweak requests with 'PropertiesRequest' tag to remove 'Expires' and set 'Cache-control' header")
     void httpClientInterceptsHeadersForPropertiesRequests() throws IOException {
         MockWebServer server = new MockWebServer();
-        server.enqueue(new MockResponse().addHeader("Expires", new Instant(0L)));
+        server.enqueue(new MockResponse().addHeader("Expires", Instant.ofEpochMilli(0L)));
         server.start();
 
         // create simple JenkinsClient for testing
@@ -111,7 +111,7 @@ class JenkinsClientTest {
     @DisplayName("should not tweak requests without 'PropertiesRequest' tag")
     void httpClientDoesNotInterceptHeadersForNonPropertiesRequests() throws IOException {
         MockWebServer server = new MockWebServer();
-        server.enqueue(new MockResponse().addHeader("Expires", new Instant(0L)));
+        server.enqueue(new MockResponse().addHeader("Expires", Instant.ofEpochMilli(0L)));
         server.start();
 
         // create simple JenkinsClient for testing
@@ -128,7 +128,7 @@ class JenkinsClientTest {
 
         Response response = client.newCall(request).execute();
 
-        assertEquals("1970-01-01T00:00:00.000Z", response.header("Expires"));
+        assertEquals("1970-01-01T00:00:00Z", response.header("Expires"));
         assertEquals(2, response.headers().size(),
                 "should only contain 'Content-length' (default) and 'Expires' headers, but was: " + response.headers().toString());
 

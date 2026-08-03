@@ -8,6 +8,7 @@ import com.google.common.primitives.Ints;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -104,7 +105,7 @@ public class StringIteratorInputStream extends InputStream {
     private boolean loadNextLine() {
         try {
             final String nextString = source.next();
-            currentLine = nextString.getBytes();
+            currentLine = nextString.getBytes(StandardCharsets.UTF_8);
         } catch (NoSuchElementException e) {
             return false;
         } finally {

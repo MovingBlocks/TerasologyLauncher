@@ -11,8 +11,8 @@ import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
 import org.terasology.launcher.util.I18N;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 /**
@@ -20,7 +20,7 @@ import java.util.Set;
  */
 final class GameReleaseCell extends ListCell<GameRelease> {
     private static final Image ICON_CHECK = I18N.getFxImage("icon_check");
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd").withZone(ZoneId.systemDefault());
 
     private final ImageView iconStatus;
 

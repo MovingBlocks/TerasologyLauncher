@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -108,30 +109,19 @@ public class AboutViewController {
     }
 
     private Optional<WebView> createViewFor(URL url) {
-        switch (Files.getFileExtension(url.getFile().toLowerCase())) {
-            case "md":
-            case "markdown":
-                return renderMarkdown(url);
-            case "htm":
-            case "html":
-                return renderHtml(url);
-            default:
-                return renderUnknown(url);
-        }
-
+        return switch (Files.getFileExtension(url.getFile().toLowerCase(Locale.ROOT))) {
+            case "md", "markdown" -> renderMarkdown(url);
+            case "htm", "html" -> renderHtml(url);
+            default -> renderUnknown(url);
+        };
     }
 
     private Optional<WebView> renderMarkdown(URL url) {
         WebView view = null;
         try (InputStream input = url.openStream()) {
             view = new WebView();
-            Node document = parser.parseReader(new InputStreamReader(input));
-            String content =
-                    new StringBuilder()
-                            .append("<body style='padding-left:24px;'>\n")
-                            .append(renderer.render(document))
-                            .append("</body>")
-                            .toString();
+            Node document = parser.parseReader(new InputStreamReader(input, UTF_8));
+            String content = "<body style='padding-left:24px;'>\n" + renderer.render(document) + "</body>";
             view.getEngine().loadContent(content, "text/html");
         } catch (IOException e) {
             logger.warn("Could not render markdown file: {}", url);

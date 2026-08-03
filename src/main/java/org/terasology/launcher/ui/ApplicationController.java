@@ -54,7 +54,7 @@ import org.terasology.launcher.util.I18N;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -178,9 +178,7 @@ public class ApplicationController {
 
         // add Logback appender to both the root logger and the tab
         Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        if (rootLogger instanceof ch.qos.logback.classic.Logger) {
-            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
-
+        if (rootLogger instanceof ch.qos.logback.classic.Logger logbackLogger) {
             logViewController.setContext(logbackLogger.getLoggerContext());
             logViewController.start(); // CHECK: do I really need to start it manually here?
             logbackLogger.addAppender(logViewController);
@@ -236,7 +234,7 @@ public class ApplicationController {
                 Set<GameIdentifier> onlineIds = onlineReleases.stream().map(GameRelease::getId).collect(Collectors.toSet());
                 Stream<GameRelease> localGames = installedGames.stream()
                     .filter(id -> !onlineIds.contains(id))
-                    .map(id -> new GameRelease(id, null, new ReleaseMetadata("", new Date())));
+                    .map(id -> new GameRelease(id, null, new ReleaseMetadata("", Instant.now())));
 
                 Stream<GameRelease> allReleases = Stream.concat(onlineReleases.stream(), localGames);
 
@@ -382,7 +380,7 @@ public class ApplicationController {
             }
 
             final SettingsController settingsController = fxmlLoader.getController();
-            settingsController.initialize(launcherDirectory, launcherSettings, settingsStage, this);
+            settingsController.initialize(launcherDirectory, launcherSettings, settingsStage);
 
             Scene scene = new Scene(root);
             settingsStage.setScene(scene);
@@ -463,7 +461,7 @@ public class ApplicationController {
             downloadTask = null;
         });
 
-        executor.submit(downloadTask);
+        var _ = executor.submit(downloadTask);
 
     }
 
@@ -491,7 +489,7 @@ public class ApplicationController {
                     // unset `lastPlayedGameVersion` setting independent of deletion success
                     launcherSettings.lastPlayedGameVersion.set(null);
                     final DeleteTask deleteTask = new DeleteTask(gameManager, id);
-                    executor.submit(deleteTask);
+                    var _ = executor.submit(deleteTask);
                 });
     }
 

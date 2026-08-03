@@ -24,9 +24,9 @@ buildscript {
 plugins {
     application
     checkstyle
-    id("com.github.spotbugs") version "5.2.3"
     id("de.undercouch.download") version "5.3.0"
     id("edu.sc.seis.launch4j") version "4.0.0"
+    id("net.ltgt.errorprone") version "5.1.0"
     java
     id("nebula.release") version "21.0.0"
     pmd
@@ -171,6 +171,9 @@ dependencies {
 
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
     "codeMetrics"("org.terasology.config:codemetrics:1.7.1@zip")
+
+    errorprone("com.google.errorprone:error_prone_core:2.50.0")
+    compileOnly("com.google.errorprone:error_prone_annotations:2.50.0")
 }
 
 val testClasspathNamePattern = Regex("test(Runtime|Compile|Implementation|PmdAux)Classpath")
@@ -219,9 +222,14 @@ tasks.named<Test>("test") {
 }
 
 checkstyle {
-    toolVersion = "10.4"
+    // 10.18.0 fixes LocalVariableNameCheck incorrectly flagging the JEP 456 unnamed
+    // variable "_" (checkstyle#14688) - needed to accept error-prone's own suggested
+    // fix for FutureReturnValueIgnored. Config is copied in under config/checkstyle/
+    // (was pulled from the external, gitignored codemetrics zip) so we're not stuck
+    // waiting on that shared config to catch up.
+    toolVersion = "10.18.2"
     isIgnoreFailures = false
-    configDirectory.set(metricsConfigDir.dir("checkstyle"))
+    configDirectory.set(layout.projectDirectory.dir("config/checkstyle"))
 }
 
 pmd {
@@ -233,12 +241,6 @@ pmd {
     threads = 4
     ruleSetFiles = files("${rootDir}/config/pmd.xml")
     ruleSets = listOf()
-}
-
-configure<com.github.spotbugs.snom.SpotBugsExtension> {
-    ignoreFailures.set(true)
-    effort.set(com.github.spotbugs.snom.Effort.MAX)
-    reportLevel.set(com.github.spotbugs.snom.Confidence.MEDIUM)
 }
 
 application {

@@ -31,18 +31,6 @@ public final class DownloadUtils {
     private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(30);
     private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofMinutes(5);
 
-    private final Duration connectTimeout; //TODO: use instead of default
-    private final Duration readTimeout; //TODO: use instead of default
-
-    public DownloadUtils() {
-        this(DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT);
-    }
-
-    public DownloadUtils(Duration connectTimeout, Duration readTimeout) {
-        this.connectTimeout = connectTimeout;
-        this.readTimeout = readTimeout;
-    }
-
     public <T> CompletableFuture<Path> download(RemoteResource<T> resource, Path path, ProgressListener listener)
             throws DownloadException, IOException, InterruptedException {
         final URL downloadUrl = resource.getUrl();

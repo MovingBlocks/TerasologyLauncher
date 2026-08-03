@@ -4,8 +4,6 @@
 package org.terasology.launcher.model;
 
 import com.google.common.base.MoreObjects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
@@ -22,8 +20,6 @@ import java.util.Objects;
  * @see <a href="https://semver.org">https://semver.org</a>
  */
 public class GameIdentifier {
-
-    private static final Logger logger = LoggerFactory.getLogger(GameIdentifier.class);
 
     final String displayVersion;
     final Build build;
@@ -52,10 +48,9 @@ public class GameIdentifier {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof GameIdentifier that)) {
             return false;
         }
-        GameIdentifier that = (GameIdentifier) o;
         return displayVersion.equals(that.displayVersion)
                 && build == that.build
                 && profile == that.profile;

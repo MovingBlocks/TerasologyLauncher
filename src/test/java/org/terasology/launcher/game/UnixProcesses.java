@@ -61,7 +61,7 @@ public final class UnixProcesses {
         @Override
         public Process call() throws IOException {
             var proc = super.call();
-            new ScheduledThreadPoolExecutor(1).schedule(
+            var _ = new ScheduledThreadPoolExecutor(1).schedule(
                     // looks like destroy = SIGTERM,
                     // destroyForcibly = SIGKILL
                     proc::destroy, 100, TimeUnit.MILLISECONDS);

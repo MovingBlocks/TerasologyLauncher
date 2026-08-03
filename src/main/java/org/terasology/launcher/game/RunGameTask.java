@@ -13,6 +13,7 @@ import org.terasology.launcher.ui.FxTimer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
@@ -115,7 +116,7 @@ class RunGameTask extends Task<Boolean> {
         startTimer();
 
         // log each line of process output
-        try (var gameOutput = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+        try (var gameOutput = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
             gameOutput.lines().forEachOrdered(this::handleOutputLine);
         } catch (IOException e) {
             logger.error("Exception reading process output.", e);
@@ -154,7 +155,7 @@ class RunGameTask extends Task<Boolean> {
      * @param line a line of output, decoded to String, with trailing newline stripped
      */
     protected void handleOutputLine(String line) {
-        if ((!valueSet) && START_MATCH.test(line)) {
+        if (!valueSet && START_MATCH.test(line)) {
             declareSurvival();
         }
         logger.info("Game output: {}", line);
@@ -207,7 +208,7 @@ class RunGameTask extends Task<Boolean> {
         }
 
         @Override
-        public String toString() {
+        public String getMessage() {
             return MoreObjects.toStringHelper(this).addValue(this.getCause()).toString();
         }
     }

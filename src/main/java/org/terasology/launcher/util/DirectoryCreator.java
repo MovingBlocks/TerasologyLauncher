@@ -3,12 +3,15 @@
 
 package org.terasology.launcher.util;
 
+import com.google.errorprone.annotations.Immutable;
+
 import java.io.IOException;
 import java.nio.file.Path;
 
 /**
  * Functional interface to abstract over directory creation.
  */
+@Immutable
 public interface DirectoryCreator {
     /**
      * Create a directory.

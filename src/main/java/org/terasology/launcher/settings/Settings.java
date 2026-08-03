@@ -25,11 +25,10 @@ import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.JavaHeapSize;
 
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -123,7 +122,7 @@ public final class  Settings {
         Path json = path.resolve(JSON_FILE_NAME);
         if (Files.exists(json)) {
             logger.debug("Loading launcher settings from '{}'.", json);
-            try (FileReader reader = new FileReader(json.toFile())) {
+            try (var reader = Files.newBufferedReader(json, StandardCharsets.UTF_8)) {
                 return gson.fromJson(reader, Settings.class);
             } catch (IOException e) {
                 logger.error("Error while loading launcher settings from file.", e);
@@ -163,7 +162,7 @@ public final class  Settings {
 
         Path jsonPath = path.resolve(JSON_FILE_NAME);
         logger.debug("Writing launcher settings to '{}'.", jsonPath);
-        try (FileWriter writer = new FileWriter(jsonPath.toFile())) {
+        try (var writer = Files.newBufferedWriter(jsonPath, StandardCharsets.UTF_8)) {
             gson.toJson(settings, writer);
             writer.flush();
         }

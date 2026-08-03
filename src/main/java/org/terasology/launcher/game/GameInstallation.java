@@ -75,11 +75,9 @@ public class GameInstallation implements Installation<GameIdentifier> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof GameInstallation)) {
+        if (!(o instanceof GameInstallation that)) {
             return false;
         }
-
-        GameInstallation that = (GameInstallation) o;
 
         return path.equals(that.path);
     }
@@ -105,8 +103,8 @@ public class GameInstallation implements Installation<GameIdentifier> {
                 throw new FileNotFoundException("Could not find " + displayName + " jar in " + searchPath);
             } else if (matches.size() > 1) {
                 throw new FileNotFoundException(
-                        String.format("Ambiguous results while looking for " + displayName + " jar in %s: %s",
-                                searchPath, matches));
+                        String.format("Ambiguous results while looking for %s jar in %s: %s",
+                                displayName, searchPath, matches));
             }
             resultPath = matches.iterator().next();
         }

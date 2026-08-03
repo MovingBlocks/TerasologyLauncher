@@ -17,12 +17,8 @@ final class GameProfileCell extends ListCell<Profile> {
             setText(null);
         } else {
             switch (profile) {
-                case OMEGA:
-                    setText("Terasology");
-                    break;
-                case ENGINE:
-                    setText("Terasology Lite (engine-only)");
-                    break;
+                case OMEGA -> setText("Terasology");
+                case ENGINE -> setText("Terasology Lite (engine-only)");
             }
         }
     }

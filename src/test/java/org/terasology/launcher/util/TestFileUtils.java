@@ -168,7 +168,9 @@ class TestFileUtils {
         FileUtils.ensureEmptyDir(dirToTest);
         assertTrue(Files.exists(dirToTest));
         assertTrue(Files.isDirectory(dirToTest));
-        assertEquals(0, Files.list(dirToTest).count());
+        try (var files = Files.list(dirToTest)) {
+            assertEquals(0, files.count());
+        }
     }
 
     /**
@@ -189,7 +191,9 @@ class TestFileUtils {
         FileUtils.ensureEmptyDir(dirToTest);
         assertTrue(Files.exists(dirToTest));
         assertTrue(Files.isDirectory(dirToTest));
-        assertEquals(0, Files.list(dirToTest).count());
+        try (var files = Files.list(dirToTest)) {
+            assertEquals(0, files.count());
+        }
     }
 
     @Test
@@ -259,10 +263,10 @@ class TestFileUtils {
         Path zipFile = zipDir.resolve(FILE_NAME + ".zip");
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile))) {
             zipOutputStream.putNextEntry(new ZipEntry(fileInRoot));
-            zipOutputStream.write(file1Contents.getBytes());
+            zipOutputStream.write(file1Contents.getBytes(StandardCharsets.UTF_8));
             zipOutputStream.closeEntry();
             zipOutputStream.putNextEntry(new ZipEntry(fileInFolder));
-            zipOutputStream.write(file2Contents.getBytes());
+            zipOutputStream.write(file2Contents.getBytes(StandardCharsets.UTF_8));
             zipOutputStream.closeEntry();
         }
 

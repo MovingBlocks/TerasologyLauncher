@@ -144,7 +144,7 @@ public final class I18N {
             pattern = ResourceBundle.getBundle(MESSAGE_BUNDLE, getDefaultLocale()).getString(key);
         }
         final MessageFormat messageFormat = new MessageFormat(pattern, getCurrentLocale());
-        return messageFormat.format(arguments, new StringBuffer(), null).toString();
+        return messageFormat.format((Object) arguments);
     }
 
     //TODO: move to 'Resources' helper class, unrelated to I18n

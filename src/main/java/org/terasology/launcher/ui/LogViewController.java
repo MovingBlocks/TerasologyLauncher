@@ -14,23 +14,23 @@ import javafx.scene.control.TextArea;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 public class LogViewController extends AppenderBase<ILoggingEvent> {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
-    private final StringBuffer buffer;
+    private final StringBuilder buffer;
     private final ThrowableHandlingConverter throwableConverter;
 
     @FXML
     private TextArea logArea;
 
     public LogViewController() {
-        buffer = new StringBuffer();
+        buffer = new StringBuilder();
         throwableConverter = new RootCauseFirstThrowableProxyConverter();
 
         ScheduledService<Void> schedule = new ScheduledService<Void>() {
@@ -39,9 +39,12 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
                 return new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        logArea.appendText(buffer.toString());
-                        //TODO figure out whether this is thread-safe (I suspect it's not)
-                        buffer.delete(0, buffer.length());
+                        final String drained;
+                        synchronized (buffer) {
+                            drained = buffer.toString();
+                            buffer.setLength(0);
+                        }
+                        logArea.appendText(drained);
                         return null;
                     }
                 };
@@ -58,8 +61,7 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
     }
 
     private LocalDateTime timestampFromEvent(ILoggingEvent loggingEvent) {
-        return new Date(loggingEvent.getTimeStamp())
-                .toInstant()
+        return Instant.ofEpochMilli(loggingEvent.getTimeStamp())
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
     }
@@ -69,14 +71,16 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
         final String message = loggingEvent.getFormattedMessage();
         final LocalDateTime timestamp = timestampFromEvent(loggingEvent);
 
-        buffer.append(String.format("%s | %-5s | ", DATE_FORMATTER.format(timestamp), loggingEvent.getLevel()));
-        buffer.append(message);
-        buffer.append("\n");
+        synchronized (buffer) {
+            buffer.append(String.format("%s | %-5s | ", DATE_FORMATTER.format(timestamp), loggingEvent.getLevel()));
+            buffer.append(message);
+            buffer.append("\n");
 
-        var error = loggingEvent.getThrowableProxy();
-        if (error != null) {
-            var s = throwableConverter.convert(loggingEvent);
-            buffer.append(s);
+            var error = loggingEvent.getThrowableProxy();
+            if (error != null) {
+                var s = throwableConverter.convert(loggingEvent);
+                buffer.append(s);
+            }
         }
     }
 }

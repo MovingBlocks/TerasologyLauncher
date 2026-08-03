@@ -13,10 +13,9 @@ import org.terasology.launcher.model.ReleaseMetadata;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,8 +60,9 @@ class JenkinsRepository implements ReleaseRepository {
         this.apiUrl = unsafeToUrl(BASE_URL + job(profileToJobName(profile)) + job(buildProfileToJobName(buildProfile)) + API_FILTER);
     }
 
+    @Override
     public List<GameRelease> fetchReleases() {
-        final List<GameRelease> pkgList = new LinkedList<>();
+        final List<GameRelease> pkgList = new ArrayList<>();
 
         logger.debug("fetching releases from '{}'", apiUrl);
 
@@ -71,7 +71,7 @@ class JenkinsRepository implements ReleaseRepository {
             result = client.request(apiUrl);
         } catch (InterruptedException e) {
             logger.warn("Interrupted while fetching packages from: {}", apiUrl, e);
-            return Collections.emptyList();
+            return pkgList;
         }
         if (result != null && result.builds != null) {
             for (Jenkins.Build build : result.builds) {
@@ -123,7 +123,7 @@ class JenkinsRepository implements ReleaseRepository {
 
     private ReleaseMetadata computeReleaseMetadataFrom(Jenkins.Build jenkinsBuildInfo) {
         String changelog = computeChangelogFrom(jenkinsBuildInfo.changeSet);
-        final Date timestamp = new Date(jenkinsBuildInfo.timestamp);
+        final Instant timestamp = Instant.ofEpochMilli(jenkinsBuildInfo.timestamp);
         // all builds from this Jenkins are using LWJGL v3
         return new ReleaseMetadata(changelog, timestamp);
     }
@@ -151,25 +151,19 @@ class JenkinsRepository implements ReleaseRepository {
     // utility specific to this Jenkins adapter
 
     private static String profileToJobName(Profile profile) {
-        switch (profile) {
-            case OMEGA:
-                return "Omega/";
-            case ENGINE:
-                return "Terasology/";
-            default:
-                throw new IllegalStateException("Unexpected value: " + profile);
-        }
+        return switch (profile) {
+            case OMEGA -> "Omega/";
+            case ENGINE -> "Terasology/";
+            default -> throw new IllegalStateException("Unexpected value: " + profile);
+        };
     }
 
     private static String buildProfileToJobName(Build buildProfile) {
-        switch (buildProfile) {
-            case STABLE:
-                return "master/";
-            case NIGHTLY:
-                return "develop/";
-            default:
-                throw new IllegalStateException("Unexpected value: " + buildProfile);
-        }
+        return switch (buildProfile) {
+            case STABLE -> "master/";
+            case NIGHTLY -> "develop/";
+            default -> throw new IllegalStateException("Unexpected value: " + buildProfile);
+        };
     }
 
     private static String job(String job) {
