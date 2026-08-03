@@ -79,14 +79,19 @@ public final class DownloadUtils {
     public static CompletableFuture<Void> downloadToFile(URL downloadURL, Path file, ProgressListener listener) throws DownloadException {
         listener.update(0);
 
-        var result = getConnectedDownloadConnection(downloadURL);
+        var connection = getConnectedDownloadConnection(downloadURL);
 
-        return result.thenAcceptAsync(response -> {
+        return connection.response().thenAcceptAsync(response -> {
             var contentLength = response.headers().firstValueAsLong("content-length").orElse(0L);
             logger.debug("Download file '{}' ({}; {}) from URL '{}'.", file, contentLength,
                     response.headers().firstValue("content-type"), downloadURL);
 
-            try (BufferedInputStream in = new BufferedInputStream(response.body());
+            // The client has to stay open for as long as the body InputStream is being read - it
+            // must not close until this block (the actual transfer) is done, so it's closed here
+            // via try-with-resources rather than as soon as sendAsync's future completes (which
+            // happens once headers arrive, before the body has been consumed at all).
+            try (HttpClient client = connection.client();
+                 BufferedInputStream in = new BufferedInputStream(response.body());
                  BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))) {
                 downloadToFile(listener, contentLength, in, out);
             } catch (IOException e) {
@@ -118,10 +123,7 @@ public final class DownloadUtils {
         }
     }
 
-    // PMD's CloseResource only recognizes try-with-resources or a same-scope close() call - it
-    // can't trace the close() below, called from a lambda once sendAsync's future completes.
-    @SuppressWarnings("PMD.CloseResource")
-    private static CompletableFuture<HttpResponse<InputStream>> getConnectedDownloadConnection(URL downloadURL) throws DownloadException {
+    private static DownloadConnection getConnectedDownloadConnection(URL downloadURL) throws DownloadException {
         var client = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(DEFAULT_CONNECT_TIMEOUT)
@@ -133,11 +135,7 @@ public final class DownloadUtils {
         } catch (URISyntaxException e) {
             throw new DownloadException("Error in URL: " + downloadURL, e);
         }
-        // client.close() blocks until outstanding exchanges finish, so it can't be try-with-resources
-        // here without defeating sendAsync's whole point - close it once the future it returns
-        // actually completes instead.
-        return client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
-                .whenComplete((response, throwable) -> client.close());
+        return new DownloadConnection(client, client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()));
     }
 
     private static void downloadToFile(ProgressListener listener, long contentLength, BufferedInputStream in,
@@ -168,5 +166,12 @@ public final class DownloadUtils {
                 }
             }
         }
+    }
+
+    /**
+     * The client can't be closed until the response body has actually been read - see the
+     * try-with-resources in {@link #downloadToFile(URL, Path, ProgressListener)}.
+     */
+    private record DownloadConnection(HttpClient client, CompletableFuture<HttpResponse<InputStream>> response) {
     }
 }
