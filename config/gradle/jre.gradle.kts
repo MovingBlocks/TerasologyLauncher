@@ -30,10 +30,23 @@ val distributions = the<DistributionContainer>()
 // redistributable build that bundles JavaFX in (JavaFX was split out of the JDK since Java 11).
 // https://bell-sw.com/pages/downloads/
 val jdkVersion = "25+37"
-val jreUrlFilenames = mapOf(
-        "Linux64" to "linux-amd64-full.tar.gz",
-        "Windows64" to "windows-amd64-full.zip",
-        "Mac" to "macos-amd64-full.zip"
+
+// Each target is a fixed (OS, arch) pair - the resulting zip/tar always bundles the same
+// JRE regardless of which machine runs Gradle, so a single host can build every dist.
+// distBase groups Linux64/LinuxArm64 (etc.) under the same buildres/ resources and the
+// same eachFile handling, since the family - not the arch - determines those.
+data class JrePlatform(val distBase: String, val urlFile: String)
+
+val jrePlatforms = mapOf(
+        "Linux64" to JrePlatform("linux", "linux-amd64-full.tar.gz"),
+        "LinuxArm64" to JrePlatform("linux", "linux-aarch64-full.tar.gz"),
+        "Windows64" to JrePlatform("windows", "windows-amd64-full.zip"),
+        "WindowsArm64" to JrePlatform("windows", "windows-aarch64-full.zip"),
+        // Bundling the amd64 JRE unconditionally used to make the game fail to launch on
+        // Apple Silicon: running under Rosetta, the launcher's JVM intermittently can't
+        // posix_spawn the game's child JVM (posix_spawn failed, error: 0).
+        "Mac" to JrePlatform("mac", "macos-amd64-full.zip"),
+        "MacArm64" to JrePlatform("mac", "macos-aarch64-full.zip")
 )
 
 val createRelease = tasks.register("createRelease") {
@@ -77,9 +90,13 @@ fun createJreTasks(
                 relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
                 // filePermissions{} below overrides every copied entry's mode with a
                 // fresh default, discarding the executable bit the zip/tar recorded for
-                // bin/* (java, javaw, ...) - restore it explicitly or the bundled JRE
-                // can't be executed after unpacking.
-                if (relativePath.segments.isNotEmpty() && relativePath.segments[0] == "bin") {
+                // bin/* (java, javaw, ...) and jspawnhelper - restore it explicitly or
+                // the bundled JRE can't be executed after unpacking. jspawnhelper lives
+                // under lib/, not bin/: without exec permission on it, ProcessBuilder
+                // (used to launch the game) fails with "posix_spawn failed, error: 0"
+                // since JDK uses this helper binary for process spawning on macOS/Linux.
+                if ((relativePath.segments.isNotEmpty() && relativePath.segments[0] == "bin")
+                        || relativePath.lastName == "jspawnhelper") {
                     permissions { unix("755") }
                 }
             }
@@ -95,16 +112,16 @@ fun createJreTasks(
     return unpackTask
 }
 
-jreUrlFilenames.forEach { (os, file) ->
+jrePlatforms.forEach { (os, platform) ->
     val launcherTaskBase = "Jre$os"
     val unpackTask = createJreTasks(
             launcherTaskBase,
-            "https://download.bell-sw.com/java/$jdkVersion/bellsoft-jre$jdkVersion-$file",
-            "$projectDir/jre/$os-$jdkVersion-$file",
+            "https://download.bell-sw.com/java/$jdkVersion/bellsoft-jre$jdkVersion-${platform.urlFile}",
+            "$projectDir/jre/$os-$jdkVersion-${platform.urlFile}",
             "$projectDir/jre/$os")
 
     val distName = os.lowercase()
-    val distBase = distName.replace(Regex("\\d"), "") // drop '32' or '64'
+    val distBase = platform.distBase
 
     distributions.create(distName) {
         contents {
@@ -119,8 +136,9 @@ jreUrlFilenames.forEach { (os, file) ->
                     val segs = relativePath.segments
                     // relativePath here is rooted at the whole distribution, not the
                     // "jre" subtree, so match on the file's immediate parent dir
-                    // rather than assuming "bin" is segments[0].
-                    if (segs.size >= 2 && segs[segs.size - 2] == "bin") {
+                    // rather than assuming "bin" is segments[0]. See the matching
+                    // comment on unpackTask above for why jspawnhelper needs this too.
+                    if ((segs.size >= 2 && segs[segs.size - 2] == "bin") || relativePath.lastName == "jspawnhelper") {
                         permissions { unix("755") }
                     }
                 }
@@ -147,13 +165,15 @@ jreUrlFilenames.forEach { (os, file) ->
     createRelease.configure { dependsOn("assemble${os}Dist") }
 }
 
-distributions.named("mac") {
-    contents {
-        into("TerasologyLauncher.app/Contents")
-        exclude("**/*.bat")
-        eachFile {
-            path = Regex("(Contents)/bin/(.+)").replace(path) { m ->
-                "${m.groupValues[1]}/MacOS/${m.groupValues[2]}"
+jrePlatforms.filterValues { it.distBase == "mac" }.keys.forEach { os ->
+    distributions.named(os.lowercase()) {
+        contents {
+            into("TerasologyLauncher.app/Contents")
+            exclude("**/*.bat")
+            eachFile {
+                path = Regex("(Contents)/bin/(.+)").replace(path) { m ->
+                    "${m.groupValues[1]}/MacOS/${m.groupValues[2]}"
+                }
             }
         }
     }
