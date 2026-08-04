@@ -57,6 +57,11 @@ final class GameStarter implements Callable<Process> {
         }
         processParameters.add("-DlogOverrideLevel=" + logLevel.name());
 
+        // Opts in to installing a SecurityManager for the module sandbox (ModuleManager.setupSandbox()) -
+        // disabled by default since JDK 18, and removed entirely (JEP 486) starting with JDK 24, so this
+        // only actually works because we bundle a JDK 21 JRE. See terasology#5357.
+        processParameters.add("-Djava.security.manager=allow");
+
         if (isMac && VersionHistory.LWJGL3.isProvidedBy(engineVersion)) {
             processParameters.add("-XstartOnFirstThread");  // lwjgl3 requires this on OS X
             // awt didn't work either, but maybe fixed on newer versions?

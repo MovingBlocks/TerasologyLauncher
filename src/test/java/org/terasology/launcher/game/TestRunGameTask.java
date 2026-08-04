@@ -114,7 +114,7 @@ public class TestRunGameTask {
                         LogMatchers.hasArguments(EXIT_CODE_OK)
                 )
         )) {
-            var _ = executor.submit(gameTask);
+            var unused = executor.submit(gameTask);
 
             gameTask.get();
 
@@ -135,7 +135,7 @@ public class TestRunGameTask {
                         LogMatchers.hasArguments(EXIT_CODE_ERROR)
                 )
         )) {
-            var _ = executor.submit(gameTask);
+            var unused = executor.submit(gameTask);
 
             var thrown = assertThrows(ExecutionException.class, gameTask::get);
             Throwable exc = thrown.getCause();
@@ -150,7 +150,7 @@ public class TestRunGameTask {
     public void testBadStarter() {
         var gameTask = new RunGameTask(MockProcesses.EXCEPTION_THROWING_START);
 
-        var _ = executor.submit(gameTask);
+        var unused = executor.submit(gameTask);
 
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
@@ -163,7 +163,7 @@ public class TestRunGameTask {
         // not disabled-on-Windows because all platforms should be capable of failing
         var gameTask = new RunGameTask(UnixProcesses.NO_SUCH_COMMAND);
 
-        var _ = executor.submit(gameTask);
+        var unused = executor.submit(gameTask);
 
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
@@ -181,7 +181,7 @@ public class TestRunGameTask {
     public void testTerminatedProcess() {
         var gameTask = new RunGameTask(new UnixProcesses.SelfDestructingProcess(5));
 
-        var _ = executor.submit(gameTask);
+        var unused = executor.submit(gameTask);
 
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
@@ -238,7 +238,7 @@ public class TestRunGameTask {
         );
 
         // Act!
-        var _ = executor.submit(gameTask);
+        var unused = executor.submit(gameTask);
 
         var actualReturnValue = gameTask.get();  // task.get blocks until it has run to completion
 
@@ -290,7 +290,7 @@ public class TestRunGameTask {
         );
 
         // Act!
-        var _ = executor.submit(gameTask);
+        var unused = executor.submit(gameTask);
 
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
 

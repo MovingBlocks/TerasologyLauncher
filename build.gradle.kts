@@ -42,7 +42,7 @@ apply(plugin = "org.terasology.gradlegoo")
 // launch4j{} extension below only wires up one exe (the plugin's fixed "createExe" task), so this
 // is a second task of the same underlying type with its own config. Deliberately no bundledJrePath:
 // unlike TerasologyLauncher.exe, this one has no JavaFX dependency, so it only needs a plain Java
-// 25 runtime - callers are expected to provide their own (e.g. a winget PackageDependencies entry).
+// 21 runtime - callers are expected to provide their own (e.g. a winget PackageDependencies entry).
 // Registered here, before jre.gradle.kts is applied, since that script references this task by name
 // and (unlike the plugin's own "createExe") its registration doesn't exist until this line runs.
 tasks.register<Launch4jLibraryTask>("createTerasologyExe") {
@@ -52,15 +52,18 @@ tasks.register<Launch4jLibraryTask>("createTerasologyExe") {
     setJarTask(tasks.named("jar"))
     dontWrapJar.set(true)
     classpath.set(listOf("lib/*"))
-    jreMinVersion.set("25")
+    jreMinVersion.set("21")
     requires64Bit.set(true)
 }
 
 apply(from = "./config/gradle/jre.gradle.kts")
 
 // Test for right version of Java in use for running this script - compiling for
-// sourceCompatibility 25 below requires the JDK actually running Gradle to be >= 25 too.
-assert(JavaVersion.current() >= JavaVersion.VERSION_25)
+// sourceCompatibility 21 below requires the JDK actually running Gradle to be >= 21 too.
+// Pinned to 21 (not the newer 25) so the launcher's own JRE and the game's bundled JRE can be
+// the same one - the game still needs Java 21 to install a SecurityManager for its module
+// sandbox, which JEP 486 removed entirely starting with JDK 24.
+assert(JavaVersion.current() >= JavaVersion.VERSION_21)
 
 val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -193,8 +196,8 @@ configurations.matching { testClasspathNamePattern.containsMatchIn(it.name) }.al
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
 java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks.named<JavaCompile>("compileJava") {
@@ -378,7 +381,7 @@ configure<edu.sc.seis.launch4j.Launch4jPluginExtension> {
     dontWrapJar.set(true)
     classpath.set(listOf("lib/*"))
     bundledJrePath.set("jre")
-    jreMinVersion.set("25")
+    jreMinVersion.set("21")
     requires64Bit.set(true)
 }
 

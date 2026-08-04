@@ -461,7 +461,7 @@ public class ApplicationController {
             downloadTask = null;
         });
 
-        var _ = executor.submit(downloadTask);
+        var unused = executor.submit(downloadTask);
 
     }
 
@@ -489,7 +489,7 @@ public class ApplicationController {
                     // unset `lastPlayedGameVersion` setting independent of deletion success
                     launcherSettings.lastPlayedGameVersion.set(null);
                     final DeleteTask deleteTask = new DeleteTask(gameManager, id);
-                    var _ = executor.submit(deleteTask);
+                    var unused = executor.submit(deleteTask);
                 });
     }
 
