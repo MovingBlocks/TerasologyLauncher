@@ -4,6 +4,7 @@
 package org.terasology.launcher.ui;
 
 import com.vladsch.flexmark.ext.emoji.EmojiExtension;
+import com.vladsch.flexmark.ext.emoji.EmojiImageType;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Node;
@@ -26,6 +27,11 @@ public class ChangelogViewController {
     public ChangelogViewController() {
         MutableDataSet options = new MutableDataSet();
         options.set(Parser.EXTENSIONS, Arrays.asList(EmojiExtension.create()));
+        // Default is IMAGE_ONLY, rendering "<img src="/img/rocket.png" ...>" - a relative path with
+        // no configured image root, so it never resolves to anything real and shows as a broken-image
+        // glyph in the WebView. Render as an actual Unicode character instead - no external resource
+        // needed at all.
+        options.set(EmojiExtension.USE_IMAGE_TYPE, EmojiImageType.UNICODE_ONLY);
         parser = Parser.builder(options).build();
         renderer = HtmlRenderer.builder(options).build();
     }

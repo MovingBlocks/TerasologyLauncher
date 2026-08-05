@@ -123,7 +123,10 @@ dependencies {
 
     implementation("org.kohsuke:github-api:1.318")
     implementation("org.semver4j:semver4j:5.2.2")
-    implementation("com.vladsch.flexmark:flexmark-all:0.64.0")
+    // 0.64.0's bundled EmojiReference.txt predates flexmark's 2023 data overhaul and is missing
+    // shortcut aliases for many emoji (e.g. :toolbox:), so they fell through to literal text
+    // instead of rendering. 0.64.8 has the fix - see vsch/flexmark-java@0.64.6..0.64.8.
+    implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
 
     implementation("org.hildan.fxgson:fx-gson:5.0.0") {
         because("de-/serialization of launcher properties to JSON")
@@ -176,8 +179,10 @@ dependencies {
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
     "codeMetrics"("org.terasology.config:codemetrics:1.7.1@zip")
 
-    errorprone("com.google.errorprone:error_prone_core:2.50.0")
-    compileOnly("com.google.errorprone:error_prone_annotations:2.50.0")
+    // 2.43.0 bumped error-prone's own minimum runtime to JDK 21 - pinned to the last version that
+    // still runs as a javac plugin on JDK 17, which is what we compile with (see PR #719 review).
+    errorprone("com.google.errorprone:error_prone_core:2.42.0")
+    compileOnly("com.google.errorprone:error_prone_annotations:2.42.0")
 }
 
 val testClasspathNamePattern = Regex("test(Runtime|Compile|Implementation|PmdAux)Classpath")
