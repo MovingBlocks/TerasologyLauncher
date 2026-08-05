@@ -160,12 +160,10 @@ dependencies {
 
     testImplementation("org.testfx:testfx-core:4.0.18") {
         because("to test JavaFX Application")
-        // -alpha because that's the only kind of release they have?
     }
     testImplementation("org.testfx:testfx-junit5:4.0.18")
 
     testImplementation("org.testfx:openjfx-monocle:17.0.10") {
-        // nobody's uploaded a jdk-14 build yet. does the jdk-12 one work?
         because("CI builders are headless environments")
     }
 
@@ -376,12 +374,7 @@ tasks.named("processResources") {
 // statically-generated buildres/windows64/TerasologyLauncher.x64.exe).
 //
 // dontWrapJar = true keeps the jar as an external lib/TerasologyLauncher.jar reference instead of
-// embedding a copy inside the exe - embedding broke class loading on real Windows (see the fix
-// commit for the exact symptom). classpath uses the bare "*" wildcard, not "*.jar" - Java's
-// classpath wildcard syntax only expands a bare *. bundledJrePath doesn't copy anything at
-// generation time; it's a search path baked into the exe, relative to itself at runtime, matching
-// where unpackJreWindows64 (in jre.gradle.kts) already places the bundled JRE in the same
-// distribution.
+// embedding a copy inside the exe - embedding broke class loading on real Windows.
 configure<edu.sc.seis.launch4j.Launch4jPluginExtension> {
     outfile.set("TerasologyLauncher.exe")
     mainClassName.set("org.terasology.launcher.TerasologyLauncher")

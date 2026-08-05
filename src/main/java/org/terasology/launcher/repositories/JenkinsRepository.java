@@ -33,7 +33,6 @@ class JenkinsRepository implements ReleaseRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(JenkinsRepository.class);
 
-    // No "/teraorg/" prefix - that folder no longer exists on this Jenkins instance and 404s.
     private static final String BASE_URL = "https://jenkins.terasology.io/job/Terasology/";
 
     private static final String API_FILTER = "api/json?tree="

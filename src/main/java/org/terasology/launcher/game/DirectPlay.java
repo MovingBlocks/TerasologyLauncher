@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  * and {@code javafx.concurrent.Service} for the GUI's benefit - both live in the {@code javafx.graphics} module, which
  * pulls in native platform libraries and the "full" JRE this project otherwise avoids bundling for a plain "launch the
  * game directly" entry point (see {@code Terasology.exe} in build.gradle). Everything here only touches plain-Java and
- * {@code javafx.base} types (via {@link Settings}), so it works with an ordinary Java 25 runtime.
+ * {@code javafx.base} types (via {@link Settings}), so it works with an ordinary Java 17 runtime.
  */
 public final class DirectPlay {
 

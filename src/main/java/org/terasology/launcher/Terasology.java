@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  * arguments are passed through to the game, same as {@code Terasology.bat} in the game's own distribution.
  * <p>
  * Deliberately independent of {@code javafx.graphics} (see {@link DirectPlay}) - unlike {@link TerasologyLauncher},
- * this entry point only needs a plain Java 25 runtime, not one bundling JavaFX.
+ * this entry point only needs a plain Java 17 runtime, not one bundling JavaFX.
  */
 public final class Terasology {
 
