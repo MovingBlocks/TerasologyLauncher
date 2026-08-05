@@ -74,7 +74,7 @@ public final class LauncherDirectoryUtils {
         }
 
         try (Stream<Path> stream = Files.list(directory)) {
-            return stream.anyMatch(file -> Files.isRegularFile(file) || Files.isDirectory(file) && containsFiles(file));
+            return stream.anyMatch(file -> Files.isRegularFile(file) || (Files.isDirectory(file) && containsFiles(file)));
         } catch (IOException e) {
             return false;
         }

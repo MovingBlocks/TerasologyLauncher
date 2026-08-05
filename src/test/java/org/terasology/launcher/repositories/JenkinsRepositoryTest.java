@@ -19,7 +19,7 @@ import org.terasology.launcher.model.ReleaseMetadata;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -61,15 +61,17 @@ class JenkinsRepositoryTest {
     }
 
     @Test
-    @DisplayName("skip builds without version info")
-    void skipBuildsWithoutVersionInfo() {
+    @DisplayName("fall back to the build number for builds without version info")
+    void fallBackToBuildNumberWithoutVersionInfo() {
         Properties emptyVersionInfo = new Properties();
 
         final JenkinsClient stubClient = new StubJenkinsClient(url -> validResult, url -> emptyVersionInfo);
 
         final JenkinsRepository adapter = new JenkinsRepository(Profile.OMEGA, Build.STABLE, stubClient);
 
-        assertTrue(adapter.fetchReleases().isEmpty());
+        List<GameRelease> releases = adapter.fetchReleases();
+        assertEquals(1, releases.size());
+        assertEquals("build-" + validResult.builds[0].number, releases.get(0).getId().getDisplayVersion());
     }
 
     @Test
@@ -90,7 +92,7 @@ class JenkinsRepositoryTest {
         // is the same of subsequent builds...
         final String expectedVersion = displayVersion + "+" + validResult.builds[0].number;
         final GameIdentifier id = new GameIdentifier(expectedVersion, Build.STABLE, Profile.OMEGA);
-        final ReleaseMetadata releaseMetadata = new ReleaseMetadata("", new Date(1604285977306L));
+        final ReleaseMetadata releaseMetadata = new ReleaseMetadata("", Instant.ofEpochMilli(1604285977306L));
         final GameRelease expected = new GameRelease(id, expectedArtifactUrl, releaseMetadata);
 
         final JenkinsRepository adapter = new JenkinsRepository(Profile.OMEGA, Build.STABLE, stubClient);

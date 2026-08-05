@@ -5,6 +5,7 @@ package org.terasology.launcher.game;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,25 +116,36 @@ public class GameService extends Service<Boolean> {
      * Creates a new task to run the game with the current settings.
      * <p>
      * This class's configuration fields <em>must</em> be set before this is called.
+     * <p>
+     * If the game installation itself can't be used (missing/unreadable files, unsupported engine
+     * version, unsupported platform), this deliberately does not throw synchronously - {@link Service#start()}
+     * does not route an exception from {@code createTask()} through the normal FAILED-state handling
+     * ({@link #failed()}, {@code setOnFailed}), so it would otherwise escape unlogged and invisible
+     * to the user instead of showing the "Could not start the game!" dialog. Returning a task that
+     * fails as soon as it runs lets that existing handling work as designed.
      *
      * @throws com.google.common.base.VerifyException when fields are unset
-     * @throws RuntimeException                       when required files in the game directory are missing or inaccessible
      */
     @Override
-    protected RunGameTask createTask() throws GameVersionNotSupportedException {
+    protected Task<Boolean> createTask() {
         verifyNotNull(settings);
 
-        GameStarter starter;
         try {
-            starter = new GameStarter(verifyNotNull(gamePath), settings.gameDataDirectory.get(),
+            GameStarter starter = new GameStarter(verifyNotNull(gamePath), settings.gameDataDirectory.get(),
                     settings.minHeapSize.get(), settings.maxHeapSize.get(),
                     settings.userJavaParameters.get(),
                     settings.userGameParameters.get(),
                     settings.logLevel.get());
-        } catch (IOException | UnsupportedPlatformException e) {
-            throw new RuntimeException("Error using this as a game directory: " + gamePath, e);
+            return new RunGameTask(starter);
+        } catch (IOException | UnsupportedPlatformException | GameVersionNotSupportedException e) {
+            logger.error("Error using this as a game directory: {}", gamePath, e);
+            return new Task<>() {
+                @Override
+                protected Boolean call() throws Exception {
+                    throw new RuntimeException("Error using this as a game directory: " + gamePath, e);
+                }
+            };
         }
-        return new RunGameTask(starter);
     }
 
     /**

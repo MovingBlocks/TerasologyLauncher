@@ -38,7 +38,6 @@ public class SettingsController {
 
     private Path launcherDirectory;
     private Settings launcherSettings;
-    private ApplicationController appController;
 
     private Path gameDirectory;
     private Path gameDataDirectory;
@@ -208,11 +207,10 @@ public class SettingsController {
     }
 
     void initialize(final Path newLauncherDirectory, final Settings newLauncherSettings,
-                    final Stage newStage, final ApplicationController newAppController) {
+                    final Stage newStage) {
         this.launcherDirectory = newLauncherDirectory;
         this.launcherSettings = newLauncherSettings;
         this.stage = newStage;
-        this.appController = newAppController;
 
         // back up the current locale before doing anything else
         oldLocale = I18N.getCurrentLocale();
@@ -275,7 +273,9 @@ public class SettingsController {
     private void populateHeapSize() {
         // Limit items till 1.5 GB for 32-bit JVM
         final JavaHeapSize[] heapSizeRange = System.getProperty("os.arch").equals("x86")
-                ? Arrays.copyOfRange(JavaHeapSize.values(), 0, JavaHeapSize.GB_1_5.ordinal() + 1)
+                ? Arrays.stream(JavaHeapSize.values())
+                        .filter(size -> size.compareTo(JavaHeapSize.GB_1_5) <= 0)
+                        .toArray(JavaHeapSize[]::new)
                 : JavaHeapSize.values();
 
         initialHeapSizeBox.getItems().clear();

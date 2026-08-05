@@ -10,6 +10,7 @@ import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.spf4j.log.Level;
+import org.spf4j.test.log.LogAssert;
 import org.spf4j.test.log.TestLoggers;
 import org.spf4j.test.matchers.LogMatchers;
 
@@ -167,7 +168,9 @@ class TestFileUtils {
         FileUtils.ensureEmptyDir(dirToTest);
         assertTrue(Files.exists(dirToTest));
         assertTrue(Files.isDirectory(dirToTest));
-        assertEquals(0, Files.list(dirToTest).count());
+        try (var files = Files.list(dirToTest)) {
+            assertEquals(0, files.count());
+        }
     }
 
     /**
@@ -188,7 +191,9 @@ class TestFileUtils {
         FileUtils.ensureEmptyDir(dirToTest);
         assertTrue(Files.exists(dirToTest));
         assertTrue(Files.isDirectory(dirToTest));
-        assertEquals(0, Files.list(dirToTest).count());
+        try (var files = Files.list(dirToTest)) {
+            assertEquals(0, files.count());
+        }
     }
 
     @Test
@@ -232,14 +237,15 @@ class TestFileUtils {
         assertTrue(Files.exists(tempFile));
 
         // DirectoryNotEmptyException will be logged but not thrown
-        var loggedException = TestLoggers.sys().expect("", Level.ERROR,
+        // try-with-resources to auto-close LogAssert
+        try (LogAssert loggedException = TestLoggers.sys().expect("", Level.ERROR,
                 LogMatchers.hasMatchingExtraThrowable(Matchers.instanceOf(DirectoryNotEmptyException.class))
-        );
+        )) {
+            FileUtils.deleteFileSilently(tempFolder);
 
-        FileUtils.deleteFileSilently(tempFolder);
-
-        assertTrue(Files.exists(tempFolder));
-        loggedException.assertObservation();
+            assertTrue(Files.exists(tempFolder));
+            loggedException.assertObservation();
+        }
     }
 
     @Test
@@ -257,10 +263,10 @@ class TestFileUtils {
         Path zipFile = zipDir.resolve(FILE_NAME + ".zip");
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile))) {
             zipOutputStream.putNextEntry(new ZipEntry(fileInRoot));
-            zipOutputStream.write(file1Contents.getBytes());
+            zipOutputStream.write(file1Contents.getBytes(StandardCharsets.UTF_8));
             zipOutputStream.closeEntry();
             zipOutputStream.putNextEntry(new ZipEntry(fileInFolder));
-            zipOutputStream.write(file2Contents.getBytes());
+            zipOutputStream.write(file2Contents.getBytes(StandardCharsets.UTF_8));
             zipOutputStream.closeEntry();
         }
 

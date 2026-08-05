@@ -5,6 +5,8 @@ package org.terasology.launcher.ui;
 
 import com.google.common.io.Files;
 import com.vladsch.flexmark.ext.emoji.EmojiExtension;
+import com.vladsch.flexmark.ext.emoji.EmojiImageType;
+import com.vladsch.flexmark.ext.emoji.EmojiShortcutType;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Node;
@@ -17,6 +19,7 @@ import javafx.scene.web.WebView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.I18N;
+import org.terasology.launcher.util.UnicodeEmojiImages;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,6 +29,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -55,6 +59,14 @@ public class AboutViewController {
     public AboutViewController() {
         MutableDataSet options = new MutableDataSet();
         options.set(Parser.EXTENSIONS, Arrays.asList(EmojiExtension.create()));
+        // Default is IMAGE_ONLY with USE_SHORTCUT_TYPE=EMOJI_CHEAT_SHEET, rendering a relative path
+        // like "<img src="/img/rocket.png" ...>" with no image root configured, so it never resolves.
+        // Rendering as a Unicode character instead avoids that, but JavaFX's bundled WebKit can't
+        // render supplementary-plane emoji (anything outside the BMP, e.g. rocket/toolbox) - they
+        // show as tofu boxes regardless of the system font. Use GitHub's own emoji CDN images
+        // instead: real PNGs, so WebView's font support is irrelevant.
+        options.set(EmojiExtension.USE_SHORTCUT_TYPE, EmojiShortcutType.GITHUB);
+        options.set(EmojiExtension.USE_IMAGE_TYPE, EmojiImageType.IMAGE_ONLY);
         parser = Parser.builder(options).build();
         renderer = HtmlRenderer.builder(options).build();
     }
@@ -108,30 +120,23 @@ public class AboutViewController {
     }
 
     private Optional<WebView> createViewFor(URL url) {
-        switch (Files.getFileExtension(url.getFile().toLowerCase())) {
-            case "md":
-            case "markdown":
-                return renderMarkdown(url);
-            case "htm":
-            case "html":
-                return renderHtml(url);
-            default:
-                return renderUnknown(url);
-        }
-
+        return switch (Files.getFileExtension(url.getFile().toLowerCase(Locale.ROOT))) {
+            case "md", "markdown" -> renderMarkdown(url);
+            case "htm", "html" -> renderHtml(url);
+            default -> renderUnknown(url);
+        };
     }
 
     private Optional<WebView> renderMarkdown(URL url) {
         WebView view = null;
         try (InputStream input = url.openStream()) {
             view = new WebView();
-            Node document = parser.parseReader(new InputStreamReader(input));
-            String content =
-                    new StringBuilder()
-                            .append("<body style='padding-left:24px;'>\n")
-                            .append(renderer.render(document))
-                            .append("</body>")
-                            .toString();
+            String markdown = new String(input.readAllBytes(), UTF_8);
+            // GitHub release notes sometimes use literal emoji characters instead of :shortcode:
+            // syntax - flexmark's emoji extension only handles the latter, so replace the former
+            // with GitHub CDN images first (see UnicodeEmojiImages).
+            Node document = parser.parse(UnicodeEmojiImages.replace(markdown));
+            String content = "<body style='padding-left:24px;'>\n" + renderer.render(document) + "</body>";
             view.getEngine().loadContent(content, "text/html");
         } catch (IOException e) {
             logger.warn("Could not render markdown file: {}", url);

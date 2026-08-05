@@ -106,19 +106,20 @@ public class TestRunGameTask {
 
         // we can use TestLogger expectations without Slf4jTestRunner, we just can't
         // depend on their annotations. I think.
-        var hasExitMessage = TestLoggers.sys().expect(
+        // try-with-resources to auto-close LogAssert
+        try (LogAssert hasExitMessage = TestLoggers.sys().expect(
                 RunGameTask.class.getName(), Level.DEBUG,
                 allOf(
                         LogMatchers.hasFormatWithPattern("Game closed with the exit value.*"),
                         LogMatchers.hasArguments(EXIT_CODE_OK)
                 )
-        );
+        )) {
+            var unused = executor.submit(gameTask);
 
-        executor.submit(gameTask);
+            gameTask.get();
 
-        gameTask.get();
-
-        hasExitMessage.assertObservation(100, TimeUnit.MILLISECONDS);
+            hasExitMessage.assertObservation(100, TimeUnit.MILLISECONDS);
+        }
     }
 
     @Test
@@ -126,29 +127,30 @@ public class TestRunGameTask {
     public void testGameExitError() throws InterruptedException {
         var gameTask = new RunGameTask(UnixProcesses.COMPLETES_WITH_ERROR);
 
-        var hasExitMessage = TestLoggers.sys().expect(
+        // try-with-resources to auto-close LogAssert
+        try (LogAssert hasExitMessage = TestLoggers.sys().expect(
                 RunGameTask.class.getName(), Level.DEBUG,
                 allOf(
                         LogMatchers.hasFormatWithPattern("Game closed with the exit value.*"),
                         LogMatchers.hasArguments(EXIT_CODE_ERROR)
                 )
-        );
+        )) {
+            var unused = executor.submit(gameTask);
 
-        executor.submit(gameTask);
+            var thrown = assertThrows(ExecutionException.class, gameTask::get);
+            Throwable exc = thrown.getCause();
+            assertThat(exc, instanceOf(RunGameTask.GameExitError.class));
+            assertEquals(EXIT_CODE_ERROR, ((RunGameTask.GameExitError) exc).exitValue);
 
-        var thrown = assertThrows(ExecutionException.class, gameTask::get);
-        Throwable exc = thrown.getCause();
-        assertThat(exc, instanceOf(RunGameTask.GameExitError.class));
-        assertEquals(EXIT_CODE_ERROR, ((RunGameTask.GameExitError) exc).exitValue);
-
-        hasExitMessage.assertObservation(100, TimeUnit.MILLISECONDS);
+            hasExitMessage.assertObservation(100, TimeUnit.MILLISECONDS);
+        }
     }
 
     @Test
     public void testBadStarter() {
         var gameTask = new RunGameTask(MockProcesses.EXCEPTION_THROWING_START);
 
-        executor.submit(gameTask);
+        var unused = executor.submit(gameTask);
 
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
@@ -161,7 +163,7 @@ public class TestRunGameTask {
         // not disabled-on-Windows because all platforms should be capable of failing
         var gameTask = new RunGameTask(UnixProcesses.NO_SUCH_COMMAND);
 
-        executor.submit(gameTask);
+        var unused = executor.submit(gameTask);
 
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
@@ -179,7 +181,7 @@ public class TestRunGameTask {
     public void testTerminatedProcess() {
         var gameTask = new RunGameTask(new UnixProcesses.SelfDestructingProcess(5));
 
-        executor.submit(gameTask);
+        var unused = executor.submit(gameTask);
 
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
         Throwable exc = thrown.getCause();
@@ -236,7 +238,7 @@ public class TestRunGameTask {
         );
 
         // Act!
-        executor.submit(gameTask);
+        var unused = executor.submit(gameTask);
 
         var actualReturnValue = gameTask.get();  // task.get blocks until it has run to completion
 
@@ -288,7 +290,7 @@ public class TestRunGameTask {
         );
 
         // Act!
-        executor.submit(gameTask);
+        var unused = executor.submit(gameTask);
 
         var thrown = assertThrows(ExecutionException.class, gameTask::get);
 

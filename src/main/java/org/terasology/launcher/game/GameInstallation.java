@@ -75,11 +75,9 @@ public class GameInstallation implements Installation<GameIdentifier> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof GameInstallation)) {
+        if (!(o instanceof GameInstallation that)) {
             return false;
         }
-
-        GameInstallation that = (GameInstallation) o;
 
         return path.equals(that.path);
     }
@@ -105,8 +103,8 @@ public class GameInstallation implements Installation<GameIdentifier> {
                 throw new FileNotFoundException("Could not find " + displayName + " jar in " + searchPath);
             } else if (matches.size() > 1) {
                 throw new FileNotFoundException(
-                        String.format("Ambiguous results while looking for " + displayName + " jar in %s: %s",
-                                searchPath, matches));
+                        String.format("Ambiguous results while looking for %s jar in %s: %s",
+                                displayName, searchPath, matches));
             }
             resultPath = matches.iterator().next();
         }
@@ -124,8 +122,22 @@ public class GameInstallation implements Installation<GameIdentifier> {
      */
     static Semver getEngineVersion(Path versionDirectory) throws IOException {
         Path engineJar = findJar(versionDirectory, GameInstallation::matchEngineJar, "engine");
-        Properties versionInfo = getVersionPropertiesFromJar(engineJar);
-        return new Semver(versionInfo.getProperty("engineVersion"));
+        try {
+            Properties versionInfo = getVersionPropertiesFromJar(engineJar);
+            return new Semver(versionInfo.getProperty("engineVersion"));
+        } catch (FileNotFoundException e) {
+            // Not every build embeds versionInfo.properties - some release artifacts simply don't
+            // have it, even though the game itself runs fine regardless (verified directly: running
+            // such a build's Terasology.jar works completely normally). Refusing to even attempt a
+            // launch over a missing metadata file the engine itself doesn't need is worse than a
+            // best-effort fallback, so parse the version out of the jar's own filename instead
+            // (matchEngineJar guarantees it's "engine*.jar", typically "engine-5.4.0-SNAPSHOT.jar").
+            String filename = engineJar.getFileName().toString();
+            String fallbackVersion = filename.replaceFirst("^engine-?", "").replaceFirst("\\.jar$", "");
+            logger.warn("No versionInfo.properties in {} - falling back to version parsed from filename: {}",
+                    engineJar, fallbackVersion, e);
+            return new Semver(fallbackVersion);
+        }
     }
 
     /**

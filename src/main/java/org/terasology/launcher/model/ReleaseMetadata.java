@@ -3,7 +3,7 @@
 
 package org.terasology.launcher.model;
 
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * Data container for metadata associated with a game release.
@@ -13,9 +13,9 @@ import java.util.Date;
  */
 public class ReleaseMetadata {
     private final String changelog;
-    private final Date timestamp;
+    private final Instant timestamp;
 
-    public ReleaseMetadata(String changelog, Date timestamp) {
+    public ReleaseMetadata(String changelog, Instant timestamp) {
         this.changelog = changelog;
         this.timestamp = timestamp;
     }
@@ -30,7 +30,7 @@ public class ReleaseMetadata {
     /**
      * The timestamp of the CI run that built this release.
      */
-    public Date getTimestamp() {
+    public Instant getTimestamp() {
         return timestamp;
     }
 }

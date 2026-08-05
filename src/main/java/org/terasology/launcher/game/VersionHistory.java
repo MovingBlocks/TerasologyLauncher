@@ -41,6 +41,8 @@ public enum VersionHistory {
      */
     JAVA17("6.0.0-SNAPSHOT");
 
+    // Semver (org.semver4j) is an immutable value type, but it isn't annotated as such.
+    @SuppressWarnings("Immutable")
     public final Semver engineVersion;
 
     VersionHistory(String s) {

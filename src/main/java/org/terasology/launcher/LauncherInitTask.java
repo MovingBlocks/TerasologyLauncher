@@ -32,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -66,7 +67,8 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             final Path userDataDirectory = getLauncherDirectory(platform);
 
             final Path downloadDirectory = getDirectoryFor(LauncherManagedDirectory.DOWNLOAD, userDataDirectory);
-            final Path tempDirectory = getDirectoryFor(LauncherManagedDirectory.TEMP, userDataDirectory);
+            // side effect: ensures the temp directory exists (and is emptied) even though its path isn't needed here
+            getDirectoryFor(LauncherManagedDirectory.TEMP, userDataDirectory);
             final Path cacheDirectory = getDirectoryFor(LauncherManagedDirectory.CACHE, userDataDirectory);
 
             // launcher settings
@@ -83,7 +85,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
                     .cache(new Cache(cacheDirectory.toFile(), 10L * 1024L * 1024L /*10 MiB*/))
                     .callTimeout(10, TimeUnit.SECONDS)
                     .build();
-            checkForLauncherUpdates(downloadDirectory, tempDirectory, launcherSettings.keepDownloadedFiles.get());
+            checkForLauncherUpdates();
 
             // game directories
             updateMessage(I18N.getLabel("splash_initGameDirs"));
@@ -130,7 +132,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return platform;
     }
 
-    private void initDirectory(Path dir, String errorLabel, DirectoryCreator... creators)
+    private void initDirectory(Path dir, String errorLabel, List<DirectoryCreator> creators)
             throws LauncherStartFailedException {
         try {
             for (DirectoryCreator creator : creators) {
@@ -156,7 +158,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
     private Path getLauncherDirectory(Platform platform) throws LauncherStartFailedException {
         final Path launcherDirectory =
                 LauncherDirectoryUtils.getApplicationDirectory(platform, LauncherDirectoryUtils.LAUNCHER_APPLICATION_DIR_NAME);
-        initDirectory(launcherDirectory, "message_error_launcherDirectory", FileUtils::ensureWritableDir);
+        initDirectory(launcherDirectory, "message_error_launcherDirectory", List.of(FileUtils::ensureWritableDir));
         return launcherDirectory;
     }
 
@@ -171,7 +173,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
         return settings;
     }
 
-    private void checkForLauncherUpdates(Path downloadDirectory, Path tempDirectory, boolean saveDownloadedFiles) {
+    private void checkForLauncherUpdates() {
         logger.trace("Check for launcher updates...");
         updateMessage(I18N.getLabel("splash_launcherUpdateCheck"));
         final LauncherUpdater updater = new LauncherUpdater(LauncherVersion.getInstance());

@@ -15,17 +15,24 @@
         <exclude name="AvoidFieldNameMatchingMethodName"/>
         <exclude name="AvoidFieldNameMatchingTypeName"/>
         <exclude name="AvoidLiteralsInIfCondition"/>
-        <exclude name="BeanMembersShouldSerialize"/>
+        <!-- BeanMembersShouldSerialize was renamed to NonSerializableClass in PMD 6.52.0. -->
+        <exclude name="NonSerializableClass"/>
         <exclude name="DoNotTerminateVM"/>
         <exclude name="MissingSerialVersionUID"/>
         <exclude name="NullAssignment"/>
         <exclude name="SimpleDateFormatNeedsLocale"/>
         <exclude name="UseLocaleWithCaseConversions"/>
+        <!-- Flags the SLF4J "trailing Throwable, no matching {} placeholder for it" convention
+             (logger.error("msg {}", arg, exception)) as a placeholder/argument-count mismatch -
+             that's the documented, correct way to attach a stack trace, not a bug. -->
+        <exclude name="InvalidLogMessageFormat"/>
     </rule>
 
     <rule ref="category/java/codestyle.xml/FieldNamingConventions">
         <properties>
-            <property name="exclusions" value="logger|gson|serialVersionUID"/>
+            <!-- PMD 7's "exclusions" is a comma-separated list of names, not a regex - the old
+                 pipe-separated value silently stopped matching anything after the 6->7 upgrade. -->
+            <property name="exclusions" value="logger,gson,serialVersionUID"/>
         </properties>
     </rule>
 

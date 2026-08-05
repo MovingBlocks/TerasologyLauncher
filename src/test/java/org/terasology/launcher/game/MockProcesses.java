@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -32,7 +33,7 @@ public final class MockProcesses {
         }
 
         HappyGameProcess(String processOutput) {
-            inputStream = new ByteArrayInputStream(processOutput.getBytes());
+            inputStream = new ByteArrayInputStream(processOutput.getBytes(StandardCharsets.UTF_8));
         }
 
         @Override

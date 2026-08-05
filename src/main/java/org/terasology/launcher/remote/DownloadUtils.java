@@ -12,6 +12,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.Reference;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.http.HttpClient;
@@ -30,18 +31,6 @@ public final class DownloadUtils {
 
     private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(30);
     private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofMinutes(5);
-
-    private final Duration connectTimeout; //TODO: use instead of default
-    private final Duration readTimeout; //TODO: use instead of default
-
-    public DownloadUtils() {
-        this(DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT);
-    }
-
-    public DownloadUtils(Duration connectTimeout, Duration readTimeout) {
-        this.connectTimeout = connectTimeout;
-        this.readTimeout = readTimeout;
-    }
 
     public <T> CompletableFuture<Path> download(RemoteResource<T> resource, Path path, ProgressListener listener)
             throws DownloadException, IOException, InterruptedException {
@@ -79,9 +68,9 @@ public final class DownloadUtils {
     public static CompletableFuture<Void> downloadToFile(URL downloadURL, Path file, ProgressListener listener) throws DownloadException {
         listener.update(0);
 
-        var result = getConnectedDownloadConnection(downloadURL);
+        var connection = getConnectedDownloadConnection(downloadURL);
 
-        return result.thenAcceptAsync(response -> {
+        return connection.response().thenAcceptAsync(response -> {
             var contentLength = response.headers().firstValueAsLong("content-length").orElse(0L);
             logger.debug("Download file '{}' ({}; {}) from URL '{}'.", file, contentLength,
                     response.headers().firstValue("content-type"), downloadURL);
@@ -91,6 +80,13 @@ public final class DownloadUtils {
                 downloadToFile(listener, contentLength, in, out);
             } catch (IOException e) {
                 throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
+            } finally {
+                // HttpClient only gained close()/shutdown() in JDK 21 (we target 17) - before that,
+                // it relies on being kept strongly reachable for as long as a request is in flight,
+                // since an unreachable client's underlying connection can be torn down prematurely.
+                // This keeps it reachable through the whole body read above, immune to the JIT
+                // otherwise treating the reference as dead once its last real use has passed.
+                Reference.reachabilityFence(connection.client());
             }
 
             if (!listener.isCancelled()) {
@@ -118,7 +114,7 @@ public final class DownloadUtils {
         }
     }
 
-    private static CompletableFuture<HttpResponse<InputStream>> getConnectedDownloadConnection(URL downloadURL) throws DownloadException {
+    private static DownloadConnection getConnectedDownloadConnection(URL downloadURL) throws DownloadException {
         var client = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(DEFAULT_CONNECT_TIMEOUT)
@@ -130,7 +126,7 @@ public final class DownloadUtils {
         } catch (URISyntaxException e) {
             throw new DownloadException("Error in URL: " + downloadURL, e);
         }
-        return client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+        return new DownloadConnection(client, client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()));
     }
 
     private static void downloadToFile(ProgressListener listener, long contentLength, BufferedInputStream in,
@@ -161,5 +157,12 @@ public final class DownloadUtils {
                 }
             }
         }
+    }
+
+    /**
+     * The client must stay strongly reachable until the response body has actually been read -
+     * see the {@link Reference#reachabilityFence} in {@link #downloadToFile(URL, Path, ProgressListener)}.
+     */
+    private record DownloadConnection(HttpClient client, CompletableFuture<HttpResponse<InputStream>> response) {
     }
 }

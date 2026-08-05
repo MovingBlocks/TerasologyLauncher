@@ -24,13 +24,13 @@ public final class FxTimer {
 
 
     private FxTimer(java.time.Duration actionTime, java.time.Duration period, Runnable action, int cycles) {
-        this.actionTime = Duration.millis(actionTime.toMillis());
+        this.actionTime = Duration.millis((double) actionTime.toMillis());
         this.timeline = new Timeline();
         this.action = action;
 
         timeline.getKeyFrames().add(new KeyFrame(this.actionTime)); // used as placeholder
         if (!period.equals(actionTime)) {
-            timeline.getKeyFrames().add(new KeyFrame(Duration.millis(period.toMillis())));
+            timeline.getKeyFrames().add(new KeyFrame(Duration.millis((double) period.toMillis())));
         }
 
         timeline.setCycleCount(cycles);

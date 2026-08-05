@@ -45,11 +45,11 @@ public class GithubRepository implements ReleaseRepository {
             logger.debug("Github rate limit: {}", github.getRateLimit());
         } catch (HttpException e) {
             if (e.getResponseCode() != -1) {
-                // if -1, no internet connection, do nothing, otherwise print stacktrace
-                e.printStackTrace();
+                // if -1, no internet connection, do nothing, otherwise log it
+                logger.warn("Failed to initialize Github client", e);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.warn("Failed to initialize Github client", e);
         }
     }
 
@@ -65,7 +65,7 @@ public class GithubRepository implements ReleaseRepository {
                 engineVersion = new Semver(tagName);
             }
             //TODO: check whether the launcher can fulfil this requirement
-            final Semver minJavaVersion = VersionHistory.getJavaVersionForEngine(engineVersion);
+            VersionHistory.getJavaVersionForEngine(engineVersion);
 
             final Optional<GHAsset> gameAsset = ghRelease.assets().stream().filter(asset -> asset.getName().matches("Terasology.*zip")).findFirst();
             final URL url = new URL(gameAsset.map(GHAsset::getBrowserDownloadUrl).orElseThrow(() -> new IOException("Missing game asset.")));
@@ -73,7 +73,7 @@ public class GithubRepository implements ReleaseRepository {
             final String changelog = ghRelease.getBody();
             GameIdentifier id = new GameIdentifier(engineVersion.toString(), build, profile);
 
-            ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at());
+            ReleaseMetadata metadata = new ReleaseMetadata(changelog, ghRelease.getPublished_at().toInstant());
             return new GameRelease(id, url, metadata);
         } catch (SemverException | IOException e) {
             logger.info("Could not create game release from Github release {}: {}",
@@ -101,10 +101,10 @@ public class GithubRepository implements ReleaseRepository {
                 if (e.getResponseCode() == -1) { // NOPMD
                     // no internet connection, do nothing
                 } else {
-                    e.printStackTrace();
+                    logger.warn("Failed to fetch releases from Github", e);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.warn("Failed to fetch releases from Github", e);
             }
         }
         return Collections.emptyList();

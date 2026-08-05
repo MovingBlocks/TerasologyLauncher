@@ -94,10 +94,11 @@ public class GameManager {
      */
     public void remove(GameIdentifier game) throws IOException {
         // Recursively delete all files
-        Files.walk(getInstallDirectory(game))
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
+        try (var paths = Files.walk(getInstallDirectory(game))) {
+            paths.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        }
 
         Platform.runLater(() -> installedGames.remove(game));
         logger.info("Finished removing package: {}", game);
