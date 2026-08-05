@@ -106,15 +106,15 @@ final class GameStarter implements Callable<Process> {
      * Returns the executable {@code java} file to run the game with.
      */
     Path getRuntimePath(Semver engineVersion) throws GameVersionNotSupportedException {
-        //TODO: Select the right JRE based on VersionHistory#getJavaVersionForEngine. Probably something along the lines
-        //      of the following:
-        //        Semver minJavaVersion = VersionHistory.getJavaVersionForEngine(engineVersion); // may throw GameVersionNotSupportedException
-        //        <Installation> JRE jre = JreManager.getJreFor(platform, minJavaVersion);       // may throw GameVersionNotSupportedException
+        //TODO: Once we bundle more than one JRE, select the right one based on
+        //      VersionHistory#getJavaVersionForEngine, e.g.:
+        //        Semver minJavaVersion = VersionHistory.getJavaVersionForEngine(engineVersion);
+        //        <Installation> JRE jre = JreManager.getJreFor(platform, minJavaVersion);
         //        return Paths.get(jre.getPath(), "bin", "java");
-        if (VersionHistory.JAVA17.isProvidedBy(engineVersion)) {
-            // throw exception as the version is not supported
-            throw new GameVersionNotSupportedException(engineVersion);
-        }
+        // For now we always bundle a single Java 17 JRE, which satisfies every minimum
+        // getJavaVersionForEngine can return (its highest floor is 17 itself) - so this call only
+        // needs to reject the genuinely-too-old case that method throws for on its own.
+        VersionHistory.getJavaVersionForEngine(engineVersion);
         return Paths.get(System.getProperty("java.home"), "bin", "java");
     }
 

@@ -21,7 +21,7 @@ class StubGameInstallation extends GameInstallation {
 
     @Override
     Semver getEngineVersion() {
-        return new Semver("0.0.1");
+        return new Semver("5.4.0");
     }
 
     @Override

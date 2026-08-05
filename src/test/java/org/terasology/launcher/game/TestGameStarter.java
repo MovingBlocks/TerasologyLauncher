@@ -108,8 +108,17 @@ public class TestGameStarter {
     }
 
     @Test
-    public void testUnsupportedJava17() throws IOException, UnsupportedPlatformException {
+    public void testSupportedJava17() throws IOException, UnsupportedPlatformException {
+        // We bundle a Java 17 JRE, so an engine version that requires Java 17 is expected to work,
+        // not be rejected - see the discussion on TerasologyLauncher PR #719.
         Semver engineVersion = new Semver("6.0.0");
+        GameStarter task = newStarter();
+        assertDoesNotThrow(() -> task.getRuntimePath(engineVersion));
+    }
+
+    @Test
+    public void testUnsupportedPreJava8() throws IOException, UnsupportedPlatformException {
+        Semver engineVersion = new Semver("0.10.0");
         GameStarter task = newStarter();
         assertThrows(GameVersionNotSupportedException.class, () -> task.getRuntimePath(engineVersion));
     }
