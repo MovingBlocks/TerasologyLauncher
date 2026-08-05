@@ -57,9 +57,11 @@ final class GameStarter implements Callable<Process> {
         }
         processParameters.add("-DlogOverrideLevel=" + logLevel.name());
 
-        // Opts in to installing a SecurityManager for the module sandbox (ModuleManager.setupSandbox()) -
-        // disabled by default since JDK 18, and removed entirely (JEP 486) starting with JDK 24, so this
-        // only actually works because we bundle a JDK 21 JRE. See terasology#5357.
+        // Opts in to installing a SecurityManager for the module sandbox (ModuleManager.setupSandbox()).
+        // We bundle a JDK 17 JRE, where SecurityManager still works unconditionally and this flag is a
+        // no-op - kept anyway so the game keeps working correctly if we're ever bumped to JDK 18-23,
+        // where it becomes required. It stops working entirely (no flag can fix it) on JDK 24+, since
+        // JEP 486 removed the capability outright. See terasology#5357.
         processParameters.add("-Djava.security.manager=allow");
 
         if (isMac && VersionHistory.LWJGL3.isProvidedBy(engineVersion)) {

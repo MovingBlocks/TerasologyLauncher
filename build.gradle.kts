@@ -42,7 +42,7 @@ apply(plugin = "org.terasology.gradlegoo")
 // launch4j{} extension below only wires up one exe (the plugin's fixed "createExe" task), so this
 // is a second task of the same underlying type with its own config. Deliberately no bundledJrePath:
 // unlike TerasologyLauncher.exe, this one has no JavaFX dependency, so it only needs a plain Java
-// 21 runtime - callers are expected to provide their own (e.g. a winget PackageDependencies entry).
+// 17 runtime - callers are expected to provide their own (e.g. a winget PackageDependencies entry).
 // Registered here, before jre.gradle.kts is applied, since that script references this task by name
 // and (unlike the plugin's own "createExe") its registration doesn't exist until this line runs.
 tasks.register<Launch4jLibraryTask>("createTerasologyExe") {
@@ -52,18 +52,19 @@ tasks.register<Launch4jLibraryTask>("createTerasologyExe") {
     setJarTask(tasks.named("jar"))
     dontWrapJar.set(true)
     classpath.set(listOf("lib/*"))
-    jreMinVersion.set("21")
+    jreMinVersion.set("17")
     requires64Bit.set(true)
 }
 
 apply(from = "./config/gradle/jre.gradle.kts")
 
 // Test for right version of Java in use for running this script - compiling for
-// sourceCompatibility 21 below requires the JDK actually running Gradle to be >= 21 too.
-// Pinned to 21 (not the newer 25) so the launcher's own JRE and the game's bundled JRE can be
-// the same one - the game still needs Java 21 to install a SecurityManager for its module
-// sandbox, which JEP 486 removed entirely starting with JDK 24.
-assert(JavaVersion.current() >= JavaVersion.VERSION_21)
+// sourceCompatibility 17 below requires the JDK actually running Gradle to be >= 17 too.
+// Pinned to 17, matching what Terasology (the engine) itself targets, so the launcher can be
+// developed with the same JDK - see review discussion on PR #719. This also means the game's
+// module sandbox SecurityManager (see terasology#5357) works with no opt-in flag needed at all;
+// it's only disabled-by-default starting with JDK 18, and removed entirely (JEP 486) on 24+.
+assert(JavaVersion.current() >= JavaVersion.VERSION_17)
 
 val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -196,8 +197,8 @@ configurations.matching { testClasspathNamePattern.containsMatchIn(it.name) }.al
 
 // Set the expected module Java level (can use a higher Java to run, but should not use features from a higher Java)
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.named<JavaCompile>("compileJava") {
@@ -208,10 +209,11 @@ tasks.named<JavaCompile>("compileTestJava") {
 }
 
 configure<org.openjfx.gradle.JavaFXOptions> {
-    // Pinned to the 21.x line to match the JDK 21 we compile/bundle for - JavaFX's own artifacts
-    // are compiled targeting roughly their own major version's bytecode (24.0.1 needs a JDK 22+
-    // runtime to even load the classes), independent of our sourceCompatibility setting.
-    version = "21.0.12"
+    // Pinned to the 17.x line to match the JDK 17 we compile/bundle for - JavaFX's own artifacts
+    // are compiled targeting roughly their own major version's bytecode (a newer JavaFX version
+    // needs a newer JDK runtime just to load its classes), independent of our sourceCompatibility
+    // setting.
+    version = "17.0.20"
     modules = listOf(
             "javafx.graphics",
             "javafx.fxml",
@@ -384,7 +386,7 @@ configure<edu.sc.seis.launch4j.Launch4jPluginExtension> {
     dontWrapJar.set(true)
     classpath.set(listOf("lib/*"))
     bundledJrePath.set("jre")
-    jreMinVersion.set("21")
+    jreMinVersion.set("17")
     requires64Bit.set(true)
 }
 

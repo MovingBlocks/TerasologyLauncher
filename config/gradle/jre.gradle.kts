@@ -29,10 +29,11 @@ val distributions = the<DistributionContainer>()
 // Uses Bellsoft Liberica JRE - the "full" edition specifically, since it's the only free,
 // redistributable build that bundles JavaFX in (JavaFX was split out of the JDK since Java 11).
 // https://bell-sw.com/pages/downloads/
-// Pinned to 21 (an LTS, not the newer 25) because the game still needs to be able to install a
-// SecurityManager for its module sandbox (see terasology#5357) - JEP 486 removed that capability
-// entirely starting with JDK 24, with no replacement, so anything 24+ can't do this at all.
-val jdkVersion = "21.0.12+10"
+// Pinned to 17, matching what Terasology (the engine) itself targets, so the launcher can be
+// developed with the same JDK - see review discussion on PR #719. This also means the game's
+// module sandbox SecurityManager (see terasology#5357) works with no opt-in flag needed; that's
+// only disabled-by-default starting with JDK 18, and removed entirely (JEP 486) on 24+.
+val jdkVersion = "17.0.20+10"
 
 // Each target is a fixed (OS, arch) pair - the resulting zip/tar always bundles the same
 // JRE regardless of which machine runs Gradle, so a single host can build every dist.
