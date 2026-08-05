@@ -208,7 +208,10 @@ tasks.named<JavaCompile>("compileTestJava") {
 }
 
 configure<org.openjfx.gradle.JavaFXOptions> {
-    version = "24.0.1"
+    // Pinned to the 21.x line to match the JDK 21 we compile/bundle for - JavaFX's own artifacts
+    // are compiled targeting roughly their own major version's bytecode (24.0.1 needs a JDK 22+
+    // runtime to even load the classes), independent of our sourceCompatibility setting.
+    version = "21.0.12"
     modules = listOf(
             "javafx.graphics",
             "javafx.fxml",
