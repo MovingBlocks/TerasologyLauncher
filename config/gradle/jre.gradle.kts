@@ -166,7 +166,9 @@ jrePlatforms.forEach { (os, platform) ->
     downloadJreAll.configure { dependsOn("download$launcherTaskBase") }
     unpackJreAll.configure { dependsOn("unpack$launcherTaskBase") }
 
-    createRelease.configure { dependsOn("assemble${os}Dist") }
+    // Gradle's distribution plugin names the assemble task after distName (all-lowercase, e.g.
+    // "macarm64") with only its first letter capitalized - not after the mixed-case "os" map key.
+    createRelease.configure { dependsOn("assemble${distName.replaceFirstChar { it.uppercase() }}Dist") }
 }
 
 jrePlatforms.filterValues { it.distBase == "mac" }.keys.forEach { os ->
