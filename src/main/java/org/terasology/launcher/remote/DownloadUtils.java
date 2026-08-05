@@ -12,6 +12,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.Reference;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.http.HttpClient;
@@ -74,16 +75,18 @@ public final class DownloadUtils {
             logger.debug("Download file '{}' ({}; {}) from URL '{}'.", file, contentLength,
                     response.headers().firstValue("content-type"), downloadURL);
 
-            // The client has to stay open for as long as the body InputStream is being read - it
-            // must not close until this block (the actual transfer) is done, so it's closed here
-            // via try-with-resources rather than as soon as sendAsync's future completes (which
-            // happens once headers arrive, before the body has been consumed at all).
-            try (HttpClient client = connection.client();
-                 BufferedInputStream in = new BufferedInputStream(response.body());
+            try (BufferedInputStream in = new BufferedInputStream(response.body());
                  BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))) {
                 downloadToFile(listener, contentLength, in, out);
             } catch (IOException e) {
                 throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
+            } finally {
+                // HttpClient only gained close()/shutdown() in JDK 21 (we target 17) - before that,
+                // it relies on being kept strongly reachable for as long as a request is in flight,
+                // since an unreachable client's underlying connection can be torn down prematurely.
+                // This keeps it reachable through the whole body read above, immune to the JIT
+                // otherwise treating the reference as dead once its last real use has passed.
+                Reference.reachabilityFence(connection.client());
             }
 
             if (!listener.isCancelled()) {
@@ -157,8 +160,8 @@ public final class DownloadUtils {
     }
 
     /**
-     * The client can't be closed until the response body has actually been read - see the
-     * try-with-resources in {@link #downloadToFile(URL, Path, ProgressListener)}.
+     * The client must stay strongly reachable until the response body has actually been read -
+     * see the {@link Reference#reachabilityFence} in {@link #downloadToFile(URL, Path, ProgressListener)}.
      */
     private record DownloadConnection(HttpClient client, CompletableFuture<HttpResponse<InputStream>> response) {
     }
