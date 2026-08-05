@@ -110,19 +110,19 @@ repositories {
 
 // Primary dependencies definition
 dependencies {
-    implementation("org.slf4j:slf4j-api:[1.7.+, 2.0.0-alpha7]") {
+    implementation("org.slf4j:slf4j-api:[1.7.+, 2.0.18]") {
         because("influenced by app or test loggers as needed")
     }
-    implementation("ch.qos.logback:logback-classic:1.3.0-alpha16") {
-        because("1.3 series uses ServiceLoader (more packaging friendly?)")
+    implementation("ch.qos.logback:logback-classic:1.6.1") {
+        because("1.3+ series uses ServiceLoader (more packaging friendly?)")
     }
 
-    implementation("com.google.code.gson:gson:2.8.5")
-    implementation("com.google.guava:guava:31.1-jre")
-    implementation("com.github.everit-org.json-schema:org.everit.json.schema:1.14.1")
+    implementation("com.google.code.gson:gson:2.14.0")
+    implementation("com.google.guava:guava:33.6.0-jre")
+    implementation("com.github.everit-org.json-schema:org.everit.json.schema:1.14.6")
 
-    implementation("org.kohsuke:github-api:1.318")
-    implementation("org.semver4j:semver4j:5.2.2")
+    implementation("org.kohsuke:github-api:1.330")
+    implementation("org.semver4j:semver4j:6.0.0")
     // 0.64.0's bundled EmojiReference.txt predates flexmark's 2023 data overhaul and is missing
     // shortcut aliases for many emoji (e.g. :toolbox:), so they fell through to literal text
     // instead of rendering. 0.64.8 has the fix - see vsch/flexmark-java@0.64.6..0.64.8.
@@ -139,31 +139,31 @@ dependencies {
         because("de-/serialization of launcher properties to JSON")
     }
 
-    implementation("com.squareup.okhttp3:okhttp:4.12.0") {
+    implementation("com.squareup.okhttp3:okhttp:5.4.0") {
         because("built-in caching of HTTP requests")
     }
 
     // These dependencies are only needed for running tests
 
-    testImplementation("org.hamcrest:hamcrest:2.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    testImplementation("org.hamcrest:hamcrest:3.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:6.1.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:6.1.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.1.2")
     // Gradle 9 no longer resolves this transitively - without it, `test` fails before running
     // anything: "Failed to load JUnit Platform... including the JUnit Platform launcher."
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("org.mockito:mockito-core:5.18.0") {
+    testImplementation("org.mockito:mockito-core:5.23.0") {
         because("mockito-inline (used previously) was discontinued after 5.2.0 - inline mock making " +
                 "(mocking final classes) is the default in mockito-core since Mockito 5. Also, 5.2.0's " +
                 "bundled Byte Buddy predates Java 25/26 class file support.")
     }
-    testImplementation("org.mockito:mockito-junit-jupiter:5.18.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
 
     testImplementation("org.spf4j:spf4j-slf4j-test:8.10.0") {
         because("testable logging")
     }
-    testImplementation("org.slf4j:slf4j-api:2.0.13")
+    testImplementation("org.slf4j:slf4j-api:2.0.18")
 
     testImplementation("org.testfx:testfx-core:4.0.18") {
         because("to test JavaFX Application")
@@ -174,10 +174,10 @@ dependencies {
         because("CI builders are headless environments")
     }
 
-    testImplementation("com.github.gmazzo.okhttp.mock:mock-client:2.0.0") {
+    testImplementation("com.github.gmazzo.okhttp.mock:mock-client:2.1.0") {
         because("to easily write OkHttpClient interceptors for testing")
     }
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.10.0") {
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.4.0") {
         because("to control server responses for testing")
     }
 
