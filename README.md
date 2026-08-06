@@ -238,6 +238,29 @@ Apart from Git, basically everything can be done using the [Gradle][gradle] [wra
   </tr>
 </table>
 
+#### Dependency versions
+
+`compileClasspath` uses [Gradle's dependency locking][gradle dependency locking]: dependency versions in `build.gradle.kts` are mostly open-ended ranges (e.g. `[2.14.0,)`, meaning "2.14.0 or newer"), but `gradle.lockfile` pins the exact versions actually used, so everyone's build is reproducible regardless of what's newest upstream on a given day. Three ways to build, depending on what you want:
+
+<table align="center">
+  <thead align="left"><tr>
+    <th width="35%">Command</th>
+    <th width="65%"><i>Behavior</i></th>
+  </tr></thead>
+  <tr>
+      <td width="35%"><code>gradlew build</code></td>
+      <td width="65%"><i>Normal build. Uses exactly the versions in <code>gradle.lockfile</code>, ignoring whatever's newest upstream. Never modifies the lockfile.</i></td>
+  </tr>
+  <tr>
+      <td width="35%"><code>gradlew build --write-locks</code></td>
+      <td width="65%"><i>Re-resolves every version range against what's currently newest, and overwrites <code>gradle.lockfile</code> to match. This is the deliberate "update dependencies" action - commit the resulting lockfile change.</i></td>
+  </tr>
+  <tr>
+      <td width="35%"><code>gradlew build -PnoLock</code></td>
+      <td width="65%"><i>Resolves every version range fresh against what's currently newest, same as <code>--write-locks</code>, but doesn't touch <code>gradle.lockfile</code> at all. Useful for trying out an update locally before committing to it.</i></td>
+  </tr>
+</table>
+
 Assume you have pushed some changes to your fork into a branch `myFeature`.
 In order to let us know about your work and give us the possibility to incorporate your changes you should send us a _pull request_.
 You can do this by selecting the `myFeature` branch on your GitHub repo and click the button which says "Open pull request".
@@ -300,6 +323,7 @@ _Terasology Launcher_ is licensed under the [Apache License, Version 2.0][licens
 
 [gradle]: http://gradle.org "Gradle"
 [gradle wrapper]: http://gradle.org/docs/current/userguide/gradle_wrapper.html "Gradle Wrapper"
+[gradle dependency locking]: https://docs.gradle.org/current/userguide/dependency_locking.html "Gradle Dependency Locking"
 [intellij]: http://www.jetbrains.com/idea/ "IntelliJ IDEA"
 
 [github guide]: https://docs.github.com/en/get-started/quickstart/contributing-to-projects "GitHub Contributing to projects"
