@@ -148,7 +148,16 @@ jrePlatforms.forEach { (os, platform) ->
                 }
             }
 
-            from("$projectDir/buildres/$distBase")
+            from("$projectDir/buildres/$distBase") {
+                // Same issue as the jre/bin executable-bit loss above: the dist Zip/Tar tasks
+                // don't carry over the source file's executable bit on their own. TerasologyLauncher.run
+                // (buildres/linux/) needs it restored explicitly or it isn't runnable after extraction.
+                eachFile {
+                    if (relativePath.lastName == "TerasologyLauncher.run") {
+                        permissions { unix("755") }
+                    }
+                }
+            }
             from("$projectDir/buildres/$distName")
 
             if (os == "Windows64") {
