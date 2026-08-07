@@ -6,8 +6,8 @@ on:
   pull_request:
     branches: [master]
   schedule:
-    # Weekly scan catches new query/advisory coverage even without a code change.
-    - cron: '30 4 * * 1'
+    # Monthly scan catches new query/advisory coverage even without a code change.
+    - cron: '30 4 1 * *'
 
 jobs:
   analyze:
