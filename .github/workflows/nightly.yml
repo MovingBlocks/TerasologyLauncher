@@ -5,6 +5,17 @@ on:
 
 name: Nightly
 
+# Serializes across all triggers (push or manual dispatch, from any ref) since
+# every run competes to replace the same `nightly` release/tag - without this,
+# an older run finishing after a newer one can repoint `nightly` at a stale
+# commit.
+concurrency:
+  group: nightly-release
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build nightly asset for ${{ matrix.platform }}
@@ -34,6 +45,7 @@ jobs:
         with:
           name: dist-${{ matrix.platform }}
           path: build/distributions/TerasologyLauncher-${{ matrix.platform }}-*.zip
+          if-no-files-found: error
           retention-days: 1
 
   publish:
@@ -52,8 +64,19 @@ jobs:
       - name: Remove previous nightly release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release delete nightly --yes --cleanup-tag --repo ${{ github.repository }}
-        continue-on-error: true
+        # `gh release delete` fails if there's no prior `nightly` release (e.g. first
+        # run ever) - that case is fine to skip. Any other failure means the old
+        # release/tag may still be around, which would make the next step attach the
+        # new release to the stale tag's commit (--target is ignored for existing
+        # tags), so that must stop the job rather than being swallowed.
+        run: |
+          if ! gh release delete nightly --yes --cleanup-tag --repo ${{ github.repository }}; then
+            if gh release view nightly --repo ${{ github.repository }} >/dev/null 2>&1; then
+              echo "::error::Failed to delete the existing nightly release/tag; refusing to publish onto it."
+              exit 1
+            fi
+            echo "No existing nightly release to delete."
+          fi
       - name: Publish nightly release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
