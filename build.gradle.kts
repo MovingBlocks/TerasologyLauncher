@@ -69,16 +69,24 @@ assert(JavaVersion.current() >= JavaVersion.VERSION_17)
 val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
 
-configurations {
-    compileClasspath {
-        // Pass -PnoLock to resolve every dependency range fresh against whatever's currently
-        // newest, ignoring gradle.lockfile entirely for that one build - useful for locally
-        // trying out an update before committing to it. Since locking isn't activated at all in
-        // that case, nothing gets checked against or written to the lockfile either.
-        if (!project.hasProperty("noLock")) {
-            resolutionStrategy.activateDependencyLocking()
-        }
+// Pass -PnoLock to resolve every dependency range fresh against whatever version satisfies it in
+// Gradle's already-cached repository metadata (which is itself refreshed at most once per 24h for a
+// dynamic version - add --refresh-dependencies too if you need to force a check past that), ignoring
+// gradle.lockfile entirely for that one build - useful for locally trying out an update before
+// committing to it. Since locking isn't activated at all in that case, nothing gets checked against
+// or written to the lockfile either.
+//
+// Locks every resolvable configuration (compileClasspath, runtimeClasspath, the test and
+// annotationProcessor classpaths, etc.), not just compileClasspath - otherwise dependencies unique
+// to those other configurations could still silently float to a newer version picked up from their
+// declared range, undermining the "everyone's build uses the same versions" guarantee this is for.
+if (!project.hasProperty("noLock")) {
+    dependencyLocking {
+        lockAllConfigurations()
     }
+}
+
+configurations {
     create("codeMetrics")
 }
 
@@ -131,6 +139,13 @@ dependencies {
     // comparator isn't guaranteed to sort "2.0-rc.x" the way a "<2.0" bound would assume, so an
     // open range risks silently picking up a release candidate on some future --write-locks run.
     implementation("org.kohsuke:github-api:1.330")
+    // github-api above transitively pulls in Jackson, which without this floats down to whatever
+    // it declares (last seen: 2.20.0, vulnerable to several 2026 CVEs - GHSA-72hv-8253-57qq,
+    // GHSA-r7wm-3cxj-wff9, GHSA-3pjw-73gf-8qr5, GHSA-5jmj-h7xm-6q6v, GHSA-hgj6-7826-r7m5,
+    // GHSA-j3rv-43j4-c7qm, GHSA-rmj7-2vxq-3g9f). Importing the BOM as a platform constraint (rather
+    // than declaring jackson-core/-databind/-annotations directly) lets Jackson's own release
+    // keep every jackson-* module's version aligned, without us tracking that by hand.
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
     implementation("org.semver4j:semver4j:[6.0.0,)") {
         because("6.0.0 itself requires JDK 17 minimum - matches our pin")
     }

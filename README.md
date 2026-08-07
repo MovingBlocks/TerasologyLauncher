@@ -240,7 +240,7 @@ Apart from Git, basically everything can be done using the [Gradle][gradle] [wra
 
 #### Dependency versions
 
-`compileClasspath` uses [Gradle's dependency locking][gradle dependency locking]: dependency versions in `build.gradle.kts` are mostly open-ended ranges (e.g. `[2.14.0,)`, meaning "2.14.0 or newer"), but `gradle.lockfile` pins the exact versions actually used, so everyone's build is reproducible regardless of what's newest upstream on a given day. Three ways to build, depending on what you want:
+Every resolvable configuration (`compileClasspath`, `runtimeClasspath`, the test classpaths, etc.) uses [Gradle's dependency locking][gradle dependency locking]: dependency versions in `build.gradle.kts` are mostly open-ended ranges (e.g. `[2.14.0,)`, meaning "2.14.0 or newer"), but `gradle.lockfile` pins the exact versions actually used, so everyone's build is reproducible regardless of what's newest upstream on a given day. Three ways to build, depending on what you want:
 
 <table align="center">
   <thead align="left"><tr>
@@ -253,11 +253,11 @@ Apart from Git, basically everything can be done using the [Gradle][gradle] [wra
   </tr>
   <tr>
       <td width="35%"><code>gradlew build --write-locks</code></td>
-      <td width="65%"><i>Re-resolves every version range against what's currently newest, and overwrites <code>gradle.lockfile</code> to match. This is the deliberate "update dependencies" action - commit the resulting lockfile change.</i></td>
+      <td width="65%"><i>Re-resolves every version range against Gradle's currently cached repository metadata (itself refreshed at most once per 24h for a dynamic version - add <code>--refresh-dependencies</code> too if you need to force a check past that), and overwrites <code>gradle.lockfile</code> to match. This is the deliberate "update dependencies" action - commit the resulting lockfile change.</i></td>
   </tr>
   <tr>
       <td width="35%"><code>gradlew build -PnoLock</code></td>
-      <td width="65%"><i>Resolves every version range fresh against what's currently newest, same as <code>--write-locks</code>, but doesn't touch <code>gradle.lockfile</code> at all. Useful for trying out an update locally before committing to it.</i></td>
+      <td width="65%"><i>Resolves every version range the same way as <code>--write-locks</code>, but doesn't touch <code>gradle.lockfile</code> at all. Useful for trying out an update locally before committing to it.</i></td>
   </tr>
 </table>
 
