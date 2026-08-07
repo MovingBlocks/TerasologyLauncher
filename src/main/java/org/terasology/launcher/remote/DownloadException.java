@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.remote;
 
+import org.jspecify.annotations.Nullable;
 
 public final class DownloadException extends RuntimeException {
 
@@ -16,11 +17,14 @@ public final class DownloadException extends RuntimeException {
         super(message);
     }
 
-    public DownloadException(String message, Throwable cause) {
+    // Throwable.getCause() (e.g. ExecutionException's) is @Nullable itself, and callers pass it straight
+    // through here - matching that, rather than forcing every caller to null-check first, since
+    // Throwable(String, Throwable) already treats a null cause as "none".
+    public DownloadException(String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
-    public DownloadException(Throwable cause) {
+    public DownloadException(@Nullable Throwable cause) {
         super(cause);
     }
 }

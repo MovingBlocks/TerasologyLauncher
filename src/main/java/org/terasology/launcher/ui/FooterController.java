@@ -25,6 +25,9 @@ import org.terasology.launcher.util.I18N;
 
 import java.util.Optional;
 
+// The @FXML fields are injected by FXMLLoader after construction, before initialize() runs.
+// hostServices is set by setHostServices(), called once right after that, same reasoning.
+@SuppressWarnings("NullAway.Init")
 public class FooterController {
 
     private static final Logger logger = LoggerFactory.getLogger(FooterController.class);

@@ -35,9 +35,16 @@ public final class DownloadUtils {
     public <T> CompletableFuture<Path> download(RemoteResource<T> resource, Path path, ProgressListener listener)
             throws DownloadException, IOException, InterruptedException {
         final URL downloadUrl = resource.getUrl();
+        if (downloadUrl == null) {
+            throw new DownloadException("Resource has no download URL: " + resource.getInfo());
+        }
 
         final long contentLength = DownloadUtils.getContentLength(downloadUrl);
-        final long availableSpace = path.getParent().toFile().getUsableSpace();
+        final Path parent = path.getParent();
+        if (parent == null) {
+            throw new DownloadException("Download destination has no parent directory: " + path);
+        }
+        final long availableSpace = parent.toFile().getUsableSpace();
 
         if (availableSpace >= contentLength) {
             final Path cacheZipPart = path.resolveSibling(path.getFileName().toString() + ".part");

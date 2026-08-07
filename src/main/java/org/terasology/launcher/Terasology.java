@@ -5,6 +5,7 @@ package org.terasology.launcher;
 
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.game.DirectPlay;
@@ -93,7 +94,7 @@ public final class Terasology {
      * Find (or install) the game to launch: the last-played version if it's still installed, else the newest
      * installed version, else a freshly auto-installed latest stable release.
      */
-    private static GameInstallation resolveInstallation(Settings settings, Path cacheDirectory, Path gameDirectory)
+    private static @Nullable GameInstallation resolveInstallation(Settings settings, Path cacheDirectory, Path gameDirectory)
             throws IOException, InterruptedException {
         Set<GameIdentifier> installed = DirectPlay.scanInstalled(gameDirectory);
 

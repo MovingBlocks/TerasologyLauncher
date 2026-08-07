@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.util;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,7 @@ public class HostServices {
 
     private static final Logger logger = LoggerFactory.getLogger(HostServices.class);
 
-    private final Desktop desktop;
+    private final @Nullable Desktop desktop;
 
     public HostServices() {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
@@ -39,10 +40,11 @@ public class HostServices {
      * @param uri the URI to open
      */
     public void tryOpenUri(URI uri) {
-        if (desktop != null) {
+        final Desktop currentDesktop = desktop;
+        if (currentDesktop != null) {
             EventQueue.invokeLater(() -> {
                 try {
-                    desktop.browse(uri);
+                    currentDesktop.browse(uri);
                 } catch (IOException e) {
                     logger.warn("Unable to open URI '{}': {}", uri.toString(), e.getMessage());
                 }

@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.model;
 
+import org.jspecify.annotations.Nullable;
 import org.terasology.launcher.remote.RemoteResource;
 
 import java.net.URL;
@@ -23,9 +24,11 @@ import java.util.Objects;
 public class GameRelease implements RemoteResource<GameIdentifier> {
     final GameIdentifier id;
     final ReleaseMetadata releaseMetadata;
-    final URL url;
+    // Null for a dummy release synthesized from a locally-installed game that isn't in any online
+    // repository's listing (see ApplicationController) - there's no remote asset to point at.
+    final @Nullable URL url;
 
-    public GameRelease(GameIdentifier id, URL url, ReleaseMetadata releaseMetadata) {
+    public GameRelease(GameIdentifier id, @Nullable URL url, ReleaseMetadata releaseMetadata) {
         this.id = id;
         this.url = url;
         this.releaseMetadata = releaseMetadata;
@@ -36,7 +39,7 @@ public class GameRelease implements RemoteResource<GameIdentifier> {
     }
 
     @Override
-    public URL getUrl() {
+    public @Nullable URL getUrl() {
         return url;
     }
 

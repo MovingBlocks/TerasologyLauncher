@@ -21,6 +21,8 @@ import org.terasology.launcher.util.UnicodeEmojiImages;
 
 import java.util.Arrays;
 
+// changelogView is injected by FXMLLoader after construction, before this is used.
+@SuppressWarnings("NullAway.Init")
 public class ChangelogViewController {
 
     private static final double PREF_HEIGHT = 336.0;

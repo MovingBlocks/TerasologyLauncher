@@ -32,6 +32,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+// The @FXML fields are injected by FXMLLoader after construction, before initialize() runs. The
+// plain fields alongside them are set by the (differently-signatured) initialize(Path, Settings, ...)
+// below, called once by ApplicationController right after FXML loading - same two-phase pattern.
+@SuppressWarnings("NullAway.Init")
 public class SettingsController {
 
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);

@@ -6,6 +6,7 @@ package org.terasology.launcher.repositories;
 import org.semver4j.Semver;
 import org.semver4j.SemverException;
 import okhttp3.OkHttpClient;
+import org.jspecify.annotations.Nullable;
 import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHRepository;
@@ -35,7 +36,9 @@ public class GithubRepository implements ReleaseRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(GithubRepository.class);
 
-    private GitHub github;
+    // Stays null if the constructor's client setup fails below - fetchReleases() already treats that
+    // as "no Github access this session" rather than throwing.
+    private @Nullable GitHub github;
 
     public GithubRepository(final OkHttpClient httpClient) {
         try {
@@ -53,7 +56,7 @@ public class GithubRepository implements ReleaseRepository {
         }
     }
 
-    static GameRelease fromGithubRelease(GHRelease ghRelease) {
+    static @Nullable GameRelease fromGithubRelease(GHRelease ghRelease) {
         final Profile profile = Profile.OMEGA;
         final Build build = ghRelease.isPrerelease() ? Build.NIGHTLY : Build.STABLE;
         final String tagName = ghRelease.getTagName();

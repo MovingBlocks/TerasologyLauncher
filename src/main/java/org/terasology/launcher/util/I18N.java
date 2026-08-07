@@ -153,24 +153,28 @@ public final class I18N {
         try {
             return new URI(uriStr);
         } catch (URISyntaxException e) {
-            logger.error("Could not create URI '{}' for key '{}'!", uriStr, key, e);
+            // Every caller passes a bundled key and uses the result unchecked - a malformed URI here is
+            // a bundle-content bug, not something to hand callers null to silently work around.
+            throw new IllegalStateException("Malformed URI '" + uriStr + "' for key '" + key + "'", e);
         }
-        return null;
     }
 
     /**
      * Loads a JavaFX {@code Image} from the image path specified by the key in the image bundle file.
      *
      * @param key the key as specified in the image bundle file
-     * @return the JavaFX image, or null if the image cannot be found or loaded
+     * @return the JavaFX image
+     * @throws MissingResourceException if the image cannot be found
      */
     public static Image getFxImage(String key) throws MissingResourceException {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, getCurrentLocale()).getString(key);
         URL resource = I18N.class.getResource(imagePath);
-        if (resource != null) {
-            return new Image(resource.toExternalForm());
+        if (resource == null) {
+            // Same reasoning as getURI() above: every caller uses the result unchecked.
+            throw new MissingResourceException("Could not find image for key '" + key + "' at " + imagePath,
+                    I18N.class.getName(), key);
         }
-        return null;
+        return new Image(resource.toExternalForm());
     }
 
     public static FXMLLoader getFXMLLoader(String key) {

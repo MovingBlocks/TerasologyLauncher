@@ -3,6 +3,8 @@
 
 package org.terasology.launcher.io;
 
+import org.jspecify.annotations.Nullable;
+
 import java.nio.file.Path;
 
 //TODO: define behavior in error cases, annotate non-null, etc.
@@ -14,8 +16,9 @@ public interface Installation<T> {
     Path getPath();
 
     /**
-     * Returns the information object describing <i>what</i> is installed.
+     * Returns the information object describing <i>what</i> is installed, or {@code null} if it
+     * can't be derived (e.g. the installation directory doesn't match the expected layout).
      */
-    T getInfo();
+    @Nullable T getInfo();
 
 }
