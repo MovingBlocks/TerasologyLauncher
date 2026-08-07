@@ -376,7 +376,7 @@ public class SettingsController {
                 .collect(Collectors.toList());
     }
 
-    private static class LanguageIconListCell extends ListCell<Locale> {
+    private static final class LanguageIconListCell extends ListCell<Locale> {
         @Override
         protected void updateItem(Locale item, boolean empty) {
             // Pass along the locale text
@@ -405,7 +405,7 @@ public class SettingsController {
         }
     }
 
-    private static class MemorySizeCell extends ListCell<JavaHeapSize> {
+    private static final class MemorySizeCell extends ListCell<JavaHeapSize> {
         @Override
         protected void updateItem(JavaHeapSize item, boolean empty) {
             super.updateItem(item, empty);

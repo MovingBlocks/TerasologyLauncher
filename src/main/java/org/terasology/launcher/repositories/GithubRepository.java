@@ -101,8 +101,8 @@ public class GithubRepository implements ReleaseRepository {
                 logger.debug("Github rate limit: {}", github.getRateLimit());
                 return releases;
             } catch (HttpException e) {
-                if (e.getResponseCode() == -1) { // NOPMD
-                    // no internet connection, do nothing
+                if (e.getResponseCode() == -1) {
+                    logger.debug("No internet connection, skipping Github releases.");
                 } else {
                     logger.warn("Failed to fetch releases from Github", e);
                 }

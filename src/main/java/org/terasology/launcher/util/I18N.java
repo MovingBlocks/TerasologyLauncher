@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,18 +164,16 @@ public final class I18N {
      * Loads a JavaFX {@code Image} from the image path specified by the key in the image bundle file.
      *
      * @param key the key as specified in the image bundle file
-     * @return the JavaFX image
-     * @throws MissingResourceException if the image cannot be found
+     * @return the JavaFX image, or null if the image cannot be found or loaded
+     * @throws MissingResourceException if {@code key} itself isn't in the image bundle
      */
-    public static Image getFxImage(String key) throws MissingResourceException {
+    public static @Nullable Image getFxImage(String key) throws MissingResourceException {
         final String imagePath = ResourceBundle.getBundle(IMAGE_BUNDLE, getCurrentLocale()).getString(key);
         URL resource = I18N.class.getResource(imagePath);
-        if (resource == null) {
-            // Same reasoning as getURI() above: every caller uses the result unchecked.
-            throw new MissingResourceException("Could not find image for key '" + key + "' at " + imagePath,
-                    I18N.class.getName(), key);
+        if (resource != null) {
+            return new Image(resource.toExternalForm());
         }
-        return new Image(resource.toExternalForm());
+        return null;
     }
 
     public static FXMLLoader getFXMLLoader(String key) {

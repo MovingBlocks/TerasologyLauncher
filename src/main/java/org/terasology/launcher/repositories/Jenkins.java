@@ -17,6 +17,9 @@ public final class Jenkins {
     // (A shared constant, not five repeated literals, to keep PMD's AvoidDuplicateLiterals happy.)
     static final String SUPPRESS_NULLAWAY_INIT = "NullAway.Init";
 
+    private Jenkins() {
+    }
+
     @SuppressWarnings(Jenkins.SUPPRESS_NULLAWAY_INIT)
     public static class ApiResult {
         public Build[] builds;
