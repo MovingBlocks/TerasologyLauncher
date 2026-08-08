@@ -31,8 +31,11 @@ jobs:
         path: build/reports/tests/test/
     - name: Upload Test Report
       uses: check-run-reporter/action@v2.11.1
-      # always run, otherwise you'll only see results for passing builds
-      if: always()
+      # always run, otherwise you'll only see results for passing builds - except on a fork PR,
+      # where CHECK_RUN_REPORTER_TOKEN isn't available (GitHub withholds repo secrets from
+      # pull_request-triggered runs originating from a fork) and the upload would just 403.
+      # See #694.
+      if: always() && secrets.CHECK_RUN_REPORTER_TOKEN != ''
       with:
         label: test
         token: ${{ secrets.CHECK_RUN_REPORTER_TOKEN }}
@@ -41,8 +44,11 @@ jobs:
       run: ./gradlew check -x test
     - name: Upload Checkstyle Report
       uses: check-run-reporter/action@v2.11.1
-      # always run, otherwise you'll only see results for passing builds
-      if: always()
+      # always run, otherwise you'll only see results for passing builds - except on a fork PR,
+      # where CHECK_RUN_REPORTER_TOKEN isn't available (GitHub withholds repo secrets from
+      # pull_request-triggered runs originating from a fork) and the upload would just 403.
+      # See #694.
+      if: always() && secrets.CHECK_RUN_REPORTER_TOKEN != ''
       with:
         label: code-analysis
         token: ${{ secrets.CHECK_RUN_REPORTER_TOKEN }}
