@@ -7,6 +7,7 @@ import ch.qos.logback.classic.pattern.RootCauseFirstThrowableProxyConverter;
 import ch.qos.logback.classic.pattern.ThrowableHandlingConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
+import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -18,6 +19,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class LogViewController extends AppenderBase<ILoggingEvent> {
 
@@ -25,6 +27,14 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
 
     private final StringBuilder buffer;
     private final ThrowableHandlingConverter throwableConverter;
+
+    // Bumped by clearLogAction(). A flush task's captured snapshot can otherwise outlive a clear
+    // that happens between it releasing the buffer lock and its (Platform.runLater'd) append
+    // actually running - snapshotting the generation alongside the snapshot, and only appending
+    // if it's still current by the time the append runs, closes that window. Both the increment
+    // (clearLogAction) and the re-check (inside the runLater callback) happen on the FX
+    // Application Thread, so there's no race between them specifically.
+    private final AtomicLong generation = new AtomicLong();
 
     @FXML
     private TextArea logArea;
@@ -39,12 +49,21 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
                 return new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
+                        final long gen = generation.get();
                         final String drained;
                         synchronized (buffer) {
                             drained = buffer.toString();
                             buffer.setLength(0);
                         }
-                        logArea.appendText(drained);
+                        if (!drained.isEmpty()) {
+                            // appendText() must run on the FX Application Thread - this task's
+                            // call() runs on a background thread, not that one.
+                            Platform.runLater(() -> {
+                                if (gen == generation.get()) {
+                                    logArea.appendText(drained);
+                                }
+                            });
+                        }
                         return null;
                     }
                 };
@@ -62,9 +81,7 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
 
     @FXML
     protected void clearLogAction() {
-        // Clear the buffer first: if a flush races in right after, there's nothing pending
-        // left to re-append and undo the clear. Anything logged after this still shows up
-        // normally on the next flush.
+        generation.incrementAndGet();
         synchronized (buffer) {
             buffer.setLength(0);
         }
