@@ -19,7 +19,7 @@ jobs:
       security-events: write
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         persist-credentials: false
     - name: Set up JDK 17
@@ -32,10 +32,11 @@ jobs:
       uses: github/codeql-action/init@v4
       with:
         languages: java-kotlin
-        # We build via Gradle in a separate step below rather than
-        # autobuild - declaring that explicitly (instead of leaving it
-        # undefined) is what the "overlay database" warning above was
-        # asking for.
+        # We build via Gradle in a separate step below rather than autobuild - "manual" is the
+        # correct declaration for that (matches reality), not "none" (would mean no compilation
+        # at all, weakening the Java/Kotlin analysis). CodeQL logs an "overlay database" info
+        # notice about this every run - that's it opting out of an optimization only "none"
+        # qualifies for, not a problem to fix.
         build-mode: manual
     - name: Build
       run: ./gradlew jar -x test
