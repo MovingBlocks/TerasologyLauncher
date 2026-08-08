@@ -49,7 +49,12 @@ val jrePlatforms = mapOf(
         // Bundling the amd64 JRE unconditionally used to make the game fail to launch on
         // Apple Silicon: running under Rosetta, the launcher's JVM intermittently can't
         // posix_spawn the game's child JVM (posix_spawn failed, error: 0).
-        "Mac" to JrePlatform("mac", "macos-amd64-full.zip"),
+        //
+        // "Mac64" (not bare "Mac") to match the *64/*Arm64 pattern every other platform uses -
+        // otherwise distName (this key, lowercased) and distBase ("mac") collide for this one
+        // platform, which used to make Gradle silently include buildres/mac twice in its dist
+        // archive and now fails outright as a duplicate entry (see the from() calls below).
+        "Mac64" to JrePlatform("mac", "macos-amd64-full.zip"),
         "MacArm64" to JrePlatform("mac", "macos-aarch64-full.zip")
 )
 
@@ -148,7 +153,16 @@ jrePlatforms.forEach { (os, platform) ->
                 }
             }
 
-            from("$projectDir/buildres/$distBase")
+            from("$projectDir/buildres/$distBase") {
+                // Same issue as the jre/bin executable-bit loss above: the dist Zip/Tar tasks
+                // don't carry over the source file's executable bit on their own. TerasologyLauncher.run
+                // (buildres/linux/) needs it restored explicitly or it isn't runnable after extraction.
+                eachFile {
+                    if (relativePath.lastName == "TerasologyLauncher.run") {
+                        permissions { unix("755") }
+                    }
+                }
+            }
             from("$projectDir/buildres/$distName")
 
             if (os == "Windows64") {

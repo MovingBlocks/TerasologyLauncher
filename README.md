@@ -78,8 +78,12 @@ We are present in nearly the complete round-up of social networks. Follow/friend
     <td width="60%"><code>TerasologyLauncher.exe</code> or <code>bin/TerasologyLauncher.bat</code></td>
   </tr>
   <tr>
-    <td width="40%"><b>Unix, Linux, Mac OS X</b></td>
-    <td width="60%"><code>bin/TerasologyLauncher</code></td>
+    <td width="40%"><b>Linux</b></td>
+    <td width="60%"><code>TerasologyLauncher.run</code> or <code>bin/TerasologyLauncher</code></td>
+  </tr>
+  <tr>
+    <td width="40%"><b>Mac OS X</b></td>
+    <td width="60%"><code>TerasologyLauncher.app</code></td>
   </tr>
 </table>
 
@@ -192,7 +196,7 @@ For more information on building and developing the Terasology Launcher, make su
 
 You'll need the following tools:
 
-- Java SE Development Kit (JDK) 11. It should be possible to use a later version of the JDK for local development, please see the definition of [push validation] for the exact CI setup.
+- Java SE Development Kit (JDK) 17. It should be possible to use a later version of the JDK for local development, please see the definition of [push validation] for the exact CI setup.
 - Git to clone the repo and commit changes.
 
 Development is possible on all common platforms (Windows, Linux, MacOS).
@@ -276,7 +280,7 @@ This project uses
 
 - Font Awesome Icon for Webchat (`fa-comments`), CC BY 4.0 License, [Font Awesome Free License](https://fontawesome.com/license/free)
 - [Mark James' Flag Icons Pack](http://www.famfamfam.com/lab/icons/flags/)
-- [Bellsoft Liberica JDK 11](https://bell-sw.com/pages/downloads/#/java-11-lts) is bundled with the launcher
+- [Bellsoft Liberica JDK 17](https://bell-sw.com/pages/downloads/#/java-17-lts) is bundled with the launcher
 
 ## License [![](https://img.shields.io/github/license/MovingBlocks/TerasologyLauncher)][license]
 
