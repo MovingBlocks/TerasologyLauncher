@@ -60,6 +60,17 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
         logArea.setFont(Font.font("monospaced"));
     }
 
+    @FXML
+    protected void clearLogAction() {
+        // Clear the buffer first: if a flush races in right after, there's nothing pending
+        // left to re-append and undo the clear. Anything logged after this still shows up
+        // normally on the next flush.
+        synchronized (buffer) {
+            buffer.setLength(0);
+        }
+        logArea.clear();
+    }
+
     private LocalDateTime timestampFromEvent(ILoggingEvent loggingEvent) {
         return Instant.ofEpochMilli(loggingEvent.getTimeStamp())
                 .atZone(ZoneId.systemDefault())
