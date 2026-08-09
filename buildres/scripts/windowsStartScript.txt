@@ -75,7 +75,13 @@ goto fail
 :execute
 @rem Setup the command line
 
-set CLASSPATH=$classpath
+@rem Use a wildcard instead of Gradle's $classpath (every jar listed individually with its full
+@rem absolute path) - with this many dependencies that line easily exceeds cmd.exe's 8191-character
+@rem line length limit once APP_HOME is substituted in, especially on the "windows-arm64" build,
+@rem which - unlike Windows64 - has no launch4j .exe wrapper (that one already used lib/* via
+@rem `classpath.set(listOf("lib/*"))` in build.gradle.kts) and so relies entirely on this template.
+@rem See: launcher crashes with "The input line is too long." on startup.
+set CLASSPATH=%APP_HOME%/lib/*
 <% if ( mainClassName.startsWith('--module ') ) { %>set MODULE_PATH=$modulePath<% } %>
 
 @rem Execute ${applicationName}
