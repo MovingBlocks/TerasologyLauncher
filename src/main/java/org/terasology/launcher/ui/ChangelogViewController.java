@@ -11,8 +11,11 @@ import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import javafx.fxml.FXML;
+import javafx.scene.control.TextArea;
 import javafx.scene.effect.BlendMode;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
+import org.terasology.launcher.platform.UnsupportedPlatformException;
 import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.UnicodeEmojiImages;
 
@@ -20,8 +23,13 @@ import java.util.Arrays;
 
 public class ChangelogViewController {
 
+    private static final double PREF_HEIGHT = 336.0;
+
     @FXML
-    private WebView changelogView;
+    private AnchorPane changelogPane;
+
+    private WebView webView;
+    private TextArea textArea;
 
     private HtmlRenderer renderer;
     private Parser parser;
@@ -42,14 +50,57 @@ public class ChangelogViewController {
     }
 
     /**
+     * Builds either a {@code WebView} (to render the changelog as HTML) or, on platforms where
+     * OpenJFX doesn't ship a WebKit native library (notably Windows/aarch64 - see
+     * https://bugs.openjdk.org/browse/JDK-8314064, whose javafx.web is still unimplemented there),
+     * a plain-text fallback. Constructing a {@code WebView} at all triggers WebKit's native library
+     * load, so this can't be a static FXML node - it has to be conditional.
+     */
+    @FXML
+    public void initialize() {
+        final javafx.scene.Node view;
+        if (webViewSupported()) {
+            webView = new WebView();
+            webView.setPrefHeight(PREF_HEIGHT);
+            view = webView;
+        } else {
+            textArea = new TextArea();
+            textArea.setEditable(false);
+            textArea.setWrapText(true);
+            textArea.setPrefHeight(PREF_HEIGHT);
+            view = textArea;
+        }
+        AnchorPane.setTopAnchor(view, 8.0);
+        AnchorPane.setBottomAnchor(view, 8.0);
+        AnchorPane.setLeftAnchor(view, 8.0);
+        AnchorPane.setRightAnchor(view, 8.0);
+        changelogPane.getChildren().add(view);
+    }
+
+    private static boolean webViewSupported() {
+        try {
+            return org.terasology.launcher.platform.Platform.getPlatform().supportsWebView();
+        } catch (UnsupportedPlatformException e) {
+            // getPlatform() already succeeded once during launcher startup (see
+            // LauncherInitTask) to get this far, so this is unreachable in practice - but if it
+            // ever isn't, err towards the fallback that's known to work everywhere.
+            return false;
+        }
+    }
+
+    /**
      * Update the displayed changelog based on the selected package.
      *
      * @param changes list of changes
      */
     void update(final String changes) {
-        changelogView.getEngine().loadContent(makeHtml(changes));
-        changelogView.setBlendMode(BlendMode.LIGHTEN);
-        changelogView.getEngine().setUserStyleSheetLocation(I18N.getFXMLUrl("css_webview").toExternalForm());
+        if (webView != null) {
+            webView.getEngine().loadContent(makeHtml(changes));
+            webView.setBlendMode(BlendMode.LIGHTEN);
+            webView.getEngine().setUserStyleSheetLocation(I18N.getFXMLUrl("css_webview").toExternalForm());
+        } else {
+            textArea.setText(changes);
+        }
     }
 
     private String makeHtml(final String changes) {
