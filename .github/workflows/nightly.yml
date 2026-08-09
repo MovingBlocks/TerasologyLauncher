@@ -61,29 +61,46 @@ jobs:
           pattern: dist-*
           path: dist
           merge-multiple: true
-      - name: Remove previous nightly release
+      - name: Move the nightly tag to this commit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # `gh release delete` fails if there's no prior `nightly` release (e.g. first
-        # run ever) - that case is fine to skip. Any other failure means the old
-        # release/tag may still be around, which would make the next step attach the
-        # new release to the stale tag's commit (--target is ignored for existing
-        # tags), so that must stop the job rather than being swallowed.
+        # A release points at whatever commit its tag currently resolves to - it's not a fixed
+        # SHA recorded on the release itself. So retargeting the tag is what actually moves the
+        # release; editing the release object (next step) never touches that. This also means no
+        # new "release published" notification goes out: unlike deleting+recreating the release,
+        # a bare tag move isn't an event GitHub notifies watchers about, and editing an
+        # already-published release in place doesn't re-fire the original publish notification.
         run: |
-          if ! gh release delete nightly --yes --cleanup-tag --repo ${{ github.repository }}; then
-            if gh release view nightly --repo ${{ github.repository }} >/dev/null 2>&1; then
-              echo "::error::Failed to delete the existing nightly release/tag; refusing to publish onto it."
-              exit 1
-            fi
-            echo "No existing nightly release to delete."
+          if gh api "repos/${{ github.repository }}/git/refs/tags/nightly" >/dev/null 2>&1; then
+            gh api --method PATCH "repos/${{ github.repository }}/git/refs/tags/nightly" \
+              -f sha="${{ github.sha }}" -F force=true
+          else
+            gh api --method POST "repos/${{ github.repository }}/git/refs" \
+              -f ref="refs/tags/nightly" -f sha="${{ github.sha }}"
           fi
-      - name: Publish nightly release
+      - name: Compute short commit hash
+        id: short_sha
+        run: echo "sha=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+      - name: Update or create the nightly release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: >
-          gh release create nightly dist/*.zip
-          --repo ${{ github.repository }}
-          --target ${{ github.sha }}
-          --title "Nightly build (${{ github.sha }})"
-          --notes "Automated build from master@${{ github.sha }}. Not a stable release - replaced on every push to master. The launcher's own version display and each asset's filename both embed this same commit hash, so a bug report always maps back to an exact commit."
-          --prerelease
+          TITLE: "Nightly build (${{ steps.short_sha.outputs.sha }})"
+          NOTES: "Automated build from master@${{ github.sha }}. Not a stable release - replaced on every push to master. The launcher's own version display and each asset's filename both embed the full commit hash, so a bug report always maps back to an exact commit."
+        run: |
+          if gh release view nightly --repo ${{ github.repository }} >/dev/null 2>&1; then
+            # `edit` doesn't touch assets - the tag move above already repointed this release at
+            # the right commit, so just refresh its title/notes, then swap the assets: delete
+            # what's there (filenames embed the commit hash, so old ones are never overwritten by
+            # this run's uploads) and upload this run's builds.
+            gh release edit nightly --repo ${{ github.repository }} \
+              --title "$TITLE" --notes "$NOTES" --prerelease
+            gh release view nightly --repo ${{ github.repository }} --json assets --jq '.assets[].name' \
+              | xargs -r -I{} gh release delete-asset nightly {} --repo ${{ github.repository }} --yes
+            gh release upload nightly dist/*.zip --repo ${{ github.repository }}
+          else
+            # First run ever: nothing to edit yet. --target is ignored for an existing tag
+            # (which the previous step already created pointing at the right commit), so this
+            # still lands correctly.
+            gh release create nightly dist/*.zip --repo ${{ github.repository }} \
+              --title "$TITLE" --notes "$NOTES" --prerelease
+          fi
