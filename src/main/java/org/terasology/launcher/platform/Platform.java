@@ -11,6 +11,7 @@ import java.util.Locale;
 public enum Platform {
 
     WINDOWS_X64(OS.WINDOWS, Arch.X64),
+    WINDOWS_ARM64(OS.WINDOWS, Arch.ARM64),
     LINUX_X64(OS.LINUX, Arch.X64),
     MACOS_X64(OS.MAC, Arch.X64),
     MACOS_ARM64(OS.MAC, Arch.ARM64);
@@ -39,6 +40,22 @@ public enum Platform {
 
     public boolean isWindows() {
         return os == OS.WINDOWS;
+    }
+
+    /**
+     * Whether OpenJFX ships a working WebKit native library ({@code javafx.web}, backing
+     * {@link javafx.scene.web.WebView}) for this platform.
+     * <p>
+     * {@code javafx.application.Platform.isSupported(ConditionalFeature.WEB)} can't be trusted for
+     * this: it only reports whether the javafx.web module was compiled in, not whether its native
+     * library actually works on this OS/arch. Vendor JREs for platforms upstream OpenJFX doesn't
+     * support - like Windows/aarch64, see https://bugs.openjdk.org/browse/JDK-8314064, whose PR
+     * explicitly excludes javafx.web - still bundle a javafx.web module (for API compatibility)
+     * that reports itself as supported and then crashes with an UnsatisfiedLinkError the moment a
+     * WebView is constructed.
+     */
+    public boolean supportsWebView() {
+        return this != WINDOWS_ARM64;
     }
 
     @Override
@@ -83,6 +100,8 @@ public enum Platform {
     public static Platform fromOsAndArch(OS os, Arch arch) throws UnsupportedPlatformException {
         if (os.equals(OS.WINDOWS) && arch.equals(Arch.X64)) {
             return WINDOWS_X64;
+        } else if (os.equals(OS.WINDOWS) && arch.equals(Arch.ARM64)) {
+            return WINDOWS_ARM64;
         } else if (os.equals(OS.LINUX) && arch.equals(Arch.X64)) {
             return LINUX_X64;
         } else if (os.equals(OS.MAC) && arch.equals(Arch.X64)) {
