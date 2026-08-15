@@ -13,11 +13,14 @@ import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.launcher.platform.Platform;
 import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.UnicodeEmojiImages;
 
@@ -38,6 +41,12 @@ import java.util.stream.Stream;
  * Controller for the <b>About</b> section in the tab view.
  * <p>
  * Presents static content which is compiled from Markdown and HTML documents.
+ * <p>
+ * Rendered as HTML in a {@code WebView} where {@link org.terasology.launcher.platform.Platform#supportsWebView()}
+ * says it's available; on platforms without a working WebKit native library (notably
+ * Windows/aarch64 - see https://bugs.openjdk.org/browse/JDK-8314064, whose javafx.web is still
+ * unimplemented there) this falls back to a plain-text view instead (HTML documents have their
+ * tags stripped via Jsoup so they're still readable).
  */
 public class AboutViewController {
 
@@ -49,6 +58,8 @@ public class AboutViewController {
     private static final String ABOUT = "about";
 
     private static final Charset UTF_8 = Charset.forName("UTF-8");
+
+    private static final boolean WEB_SUPPORTED = Platform.currentSupportsWebView();
 
     @FXML
     private Accordion aboutInfoAccordion;
@@ -100,14 +111,11 @@ public class AboutViewController {
     private Optional<TitledPane> createPaneFor(URL url) {
         return createViewFor(url)
                 .map(view -> {
-                    view.getStylesheets().add(I18N.getFXMLUrl("css_webview").toExternalForm());
-                    view.setContextMenuEnabled(false);
-                    return view;
-                })
-                .map(view -> {
                     final AnchorPane pane = new AnchorPane();
                     AnchorPane.setBottomAnchor(view, 0.0);
                     AnchorPane.setTopAnchor(view, 0.0);
+                    AnchorPane.setLeftAnchor(view, 0.0);
+                    AnchorPane.setRightAnchor(view, 0.0);
                     pane.getChildren().add(view);
                     return pane;
                 })
@@ -119,15 +127,24 @@ public class AboutViewController {
                 });
     }
 
-    private Optional<WebView> createViewFor(URL url) {
-        return switch (Files.getFileExtension(url.getFile().toLowerCase(Locale.ROOT))) {
-            case "md", "markdown" -> renderMarkdown(url);
-            case "htm", "html" -> renderHtml(url);
-            default -> renderUnknown(url);
+    private Optional<javafx.scene.Node> createViewFor(URL url) {
+        String extension = Files.getFileExtension(url.getFile().toLowerCase(Locale.ROOT));
+        if (WEB_SUPPORTED) {
+            return switch (extension) {
+                case "md", "markdown" -> renderMarkdown(url);
+                case "htm", "html" -> renderHtml(url);
+                default -> renderUnknown(url);
+            };
+        }
+        return switch (extension) {
+            case "htm", "html" -> renderHtmlAsText(url);
+            default -> renderPlainText(url);
         };
     }
 
-    private Optional<WebView> renderMarkdown(URL url) {
+    // -- WebView-based rendering (default, where javafx.web is supported) --
+
+    private Optional<javafx.scene.Node> renderMarkdown(URL url) {
         WebView view = null;
         try (InputStream input = url.openStream()) {
             view = new WebView();
@@ -141,16 +158,16 @@ public class AboutViewController {
         } catch (IOException e) {
             logger.warn("Could not render markdown file: {}", url);
         }
-        return Optional.ofNullable(view);
+        return finishWebView(view);
     }
 
-    private Optional<WebView> renderHtml(URL url) {
+    private Optional<javafx.scene.Node> renderHtml(URL url) {
         final WebView view = new WebView();
         view.getEngine().load(url.toExternalForm());
-        return Optional.of(view);
+        return finishWebView(view);
     }
 
-    private Optional<WebView> renderUnknown(URL url) {
+    private Optional<javafx.scene.Node> renderUnknown(URL url) {
         WebView view = null;
         try (Reader isr = new InputStreamReader(url.openStream(), UTF_8);
              BufferedReader br = new BufferedReader(isr)) {
@@ -168,6 +185,43 @@ public class AboutViewController {
         } catch (IOException e) {
             logger.warn("Could not render file: {}", url);
         }
-        return Optional.ofNullable(view);
+        return finishWebView(view);
+    }
+
+    private Optional<javafx.scene.Node> finishWebView(WebView view) {
+        if (view == null) {
+            return Optional.empty();
+        }
+        view.getStylesheets().add(I18N.getFXMLUrl("css_webview").toExternalForm());
+        view.setContextMenuEnabled(false);
+        return Optional.of(view);
+    }
+
+    // -- Plain-text fallback (platforms without javafx.web, e.g. Windows/aarch64) --
+
+    private Optional<javafx.scene.Node> renderHtmlAsText(URL url) {
+        try (InputStream input = url.openStream()) {
+            String html = new String(input.readAllBytes(), UTF_8);
+            return Optional.of(makeTextArea(Jsoup.parse(html).text()));
+        } catch (IOException e) {
+            logger.warn("Could not render file: {}", url);
+            return Optional.empty();
+        }
+    }
+
+    private Optional<javafx.scene.Node> renderPlainText(URL url) {
+        try (InputStream input = url.openStream()) {
+            return Optional.of(makeTextArea(new String(input.readAllBytes(), UTF_8)));
+        } catch (IOException e) {
+            logger.warn("Could not render file: {}", url);
+            return Optional.empty();
+        }
+    }
+
+    private TextArea makeTextArea(String content) {
+        final TextArea textArea = new TextArea(content);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        return textArea;
     }
 }

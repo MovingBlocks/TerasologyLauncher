@@ -128,6 +128,13 @@ dependencies {
     // instead of rendering. 0.64.8 has the fix - see vsch/flexmark-java@0.64.6..0.64.8.
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
 
+    implementation("org.jsoup:jsoup:1.15.4") {
+        because("AboutViewController strips HTML tags for the plain-text fallback on platforms "
+                + "without a working javafx.web. Already on the classpath transitively via "
+                + "flexmark-all's html2md converter - pinned to that same version so the resolved "
+                + "graph is unchanged, but declared because we now use it directly.")
+    }
+
     implementation("org.hildan.fxgson:fx-gson:5.0.0") {
         because("de-/serialization of launcher properties to JSON")
     }
