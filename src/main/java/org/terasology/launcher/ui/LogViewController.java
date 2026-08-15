@@ -11,9 +11,11 @@ import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
+import org.terasology.launcher.util.I18N;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -30,14 +32,21 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
 
     // Bumped by clearLogAction(). A flush task's captured snapshot can otherwise outlive a clear
     // that happens between it releasing the buffer lock and its (Platform.runLater'd) append
-    // actually running - snapshotting the generation alongside the snapshot, and only appending
-    // if it's still current by the time the append runs, closes that window. Both the increment
-    // (clearLogAction) and the re-check (inside the runLater callback) happen on the FX
-    // Application Thread, so there's no race between them specifically.
+    // actually running - tagging the snapshot with the generation, and only appending if it's
+    // still current by the time the append runs, closes that window.
+    //
+    // Both the read (flush) and the bump (clear) happen under the buffer lock, so the tag and the
+    // text it describes always agree. Reading the generation outside that lock would leave a
+    // window where a clear lands after the read but before the drain: the flush would then tag
+    // text drained *after* the clear with the pre-clear generation, and the append would discard
+    // log lines that belong on screen.
     private final AtomicLong generation = new AtomicLong();
 
     @FXML
     private TextArea logArea;
+
+    @FXML
+    private Button clearLogButton;
 
     public LogViewController() {
         buffer = new StringBuilder();
@@ -49,9 +58,10 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
                 return new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        final long gen = generation.get();
+                        final long gen;
                         final String drained;
                         synchronized (buffer) {
+                            gen = generation.get();
                             drained = buffer.toString();
                             buffer.setLength(0);
                         }
@@ -77,12 +87,15 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
     public void initialize() {
         logArea.setEditable(false);
         logArea.setFont(Font.font("monospaced"));
+        // Bound, not set: labelBinding tracks the locale property, so the button re-translates
+        // when the language is changed in Settings - same as the surrounding tabs.
+        clearLogButton.textProperty().bind(I18N.labelBinding("tab_log_clear"));
     }
 
     @FXML
     protected void clearLogAction() {
-        generation.incrementAndGet();
         synchronized (buffer) {
+            generation.incrementAndGet();
             buffer.setLength(0);
         }
         logArea.clear();
