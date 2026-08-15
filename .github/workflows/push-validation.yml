@@ -10,6 +10,13 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # Hoisted to a job-level env var so the steps below can test it in an `if:`. The `secrets`
+    # context is not available to `if:` (GitHub exposes it to `with:` and `env:` only), and naming
+    # it there is not a no-op that skips the step - it fails validation of the whole workflow file,
+    # so nothing runs at all. `env` is available to `if:`, so this indirection is the usual fix.
+    env:
+      CHECK_RUN_REPORTER_TOKEN: ${{ secrets.CHECK_RUN_REPORTER_TOKEN }}
+
     steps:
     - uses: actions/checkout@v7
     - name: Set up JDK 17
@@ -35,7 +42,7 @@ jobs:
       # where CHECK_RUN_REPORTER_TOKEN isn't available (GitHub withholds repo secrets from
       # pull_request-triggered runs originating from a fork) and the upload would just 403.
       # See #694.
-      if: always() && secrets.CHECK_RUN_REPORTER_TOKEN != ''
+      if: always() && env.CHECK_RUN_REPORTER_TOKEN != ''
       with:
         label: test
         token: ${{ secrets.CHECK_RUN_REPORTER_TOKEN }}
@@ -48,7 +55,7 @@ jobs:
       # where CHECK_RUN_REPORTER_TOKEN isn't available (GitHub withholds repo secrets from
       # pull_request-triggered runs originating from a fork) and the upload would just 403.
       # See #694.
-      if: always() && secrets.CHECK_RUN_REPORTER_TOKEN != ''
+      if: always() && env.CHECK_RUN_REPORTER_TOKEN != ''
       with:
         label: code-analysis
         token: ${{ secrets.CHECK_RUN_REPORTER_TOKEN }}
