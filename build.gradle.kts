@@ -132,7 +132,12 @@ dependencies {
     }
 
     implementation("com.google.code.gson:gson:[2.14.0,)")
-    implementation("com.google.guava:guava:[33.6.0-jre,)")
+    // Bounded below 34, unlike the other ranges: guava publishes a "-jre" and an "-android" build
+    // of every release, and Gradle compares the numeric parts first - so "34.0.0-android" ranks
+    // above "33.6.0-jre" and an open range would let a --write-locks run silently swap us onto the
+    // Android flavour, which targets an older Java and a reduced API surface. The -jre/-android
+    // suffix only decides the ordering between two builds of the *same* version.
+    implementation("com.google.guava:guava:[33.6.0-jre,34)")
     implementation("com.github.everit-org.json-schema:org.everit.json.schema:[1.14.6,)")
 
     // Pinned exactly, not a range: avoid the 2.0-rc pre-release line. Gradle's dynamic-version
@@ -145,9 +150,16 @@ dependencies {
     // GHSA-j3rv-43j4-c7qm, GHSA-rmj7-2vxq-3g9f). Importing the BOM as a platform constraint (rather
     // than declaring jackson-core/-databind/-annotations directly) lets Jackson's own release
     // keep every jackson-* module's version aligned, without us tracking that by hand.
-    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
-    implementation("org.semver4j:semver4j:[6.0.0,)") {
-        because("6.0.0 itself requires JDK 17 minimum - matches our pin")
+    // A range like everything else, deliberately: this constraint exists to keep Jackson off
+    // vulnerable versions, so pinning it exactly would mean the next Jackson CVE needs a hand-edit
+    // here - reintroducing exactly the staleness the ranges are meant to avoid. The lockfile still
+    // decides the actual version; --write-locks is what moves it.
+    implementation(platform("com.fasterxml.jackson:jackson-bom:[2.22.1,)"))
+    implementation("org.semver4j:semver4j:[6.0.0,7)") {
+        because("6.0.0 itself requires JDK 17 minimum - matches our pin. Capped below 7 because "
+                + "that guarantee is about this major line only: a future major is free to raise "
+                + "its own JDK floor past the 17 we compile against, same reasoning as the "
+                + "error-prone bound below.")
     }
     // 0.64.0's bundled EmojiReference.txt predates flexmark's 2023 data overhaul and is missing
     // shortcut aliases for many emoji (e.g. :toolbox:), so they fell through to literal text
@@ -172,11 +184,13 @@ dependencies {
     // These dependencies are only needed for running tests
 
     testImplementation("org.hamcrest:hamcrest:[3.0,)")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:[6.1.2,)") {
-        because("6.1.2 itself requires JDK 17 minimum - matches our pin")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:[6.1.2,7)") {
+        because("6.1.2 itself requires JDK 17 minimum - matches our pin. Capped below 7 for the "
+                + "same reason as semver4j above: the JDK floor is a property of this major line, "
+                + "not of every future one.")
     }
-    testImplementation("org.junit.jupiter:junit-jupiter-params:[6.1.2,)")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:[6.1.2,)")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:[6.1.2,7)")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:[6.1.2,7)")
     // Gradle 9 no longer resolves this transitively - without it, `test` fails before running
     // anything: "Failed to load JUnit Platform... including the JUnit Platform launcher."
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
