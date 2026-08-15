@@ -20,7 +20,7 @@ import javafx.scene.web.WebView;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.launcher.platform.UnsupportedPlatformException;
+import org.terasology.launcher.platform.Platform;
 import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.UnicodeEmojiImages;
 
@@ -59,15 +59,7 @@ public class AboutViewController {
 
     private static final Charset UTF_8 = Charset.forName("UTF-8");
 
-    private static final boolean WEB_SUPPORTED = webViewSupported();
-
-    private static boolean webViewSupported() {
-        try {
-            return org.terasology.launcher.platform.Platform.getPlatform().supportsWebView();
-        } catch (UnsupportedPlatformException e) {
-            return false;
-        }
-    }
+    private static final boolean WEB_SUPPORTED = Platform.currentSupportsWebView();
 
     @FXML
     private Accordion aboutInfoAccordion;

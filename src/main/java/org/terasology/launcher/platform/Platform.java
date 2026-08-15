@@ -58,6 +58,22 @@ public enum Platform {
         return this != WINDOWS_ARM64;
     }
 
+    /**
+     * {@link #supportsWebView()} for the platform this JVM is currently running on.
+     * <p>
+     * Falls back to {@code false} when the platform can't be identified at all: the plain-text view
+     * renders everywhere, so an unrecognized platform is better served by it than by a WebView that
+     * may not load. In practice this is unreachable - startup (see {@code LauncherInitTask}) already
+     * resolves the platform before any view is built.
+     */
+    public static boolean currentSupportsWebView() {
+        try {
+            return getPlatform().supportsWebView();
+        } catch (UnsupportedPlatformException e) {
+            return false;
+        }
+    }
+
     @Override
     public String toString() {
         return "OS '" + os + "', arch '" + arch + "'";

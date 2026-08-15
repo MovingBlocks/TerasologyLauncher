@@ -15,7 +15,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
-import org.terasology.launcher.platform.UnsupportedPlatformException;
+import org.terasology.launcher.platform.Platform;
 import org.terasology.launcher.util.I18N;
 import org.terasology.launcher.util.UnicodeEmojiImages;
 
@@ -59,7 +59,7 @@ public class ChangelogViewController {
     @FXML
     public void initialize() {
         final javafx.scene.Node view;
-        if (webViewSupported()) {
+        if (Platform.currentSupportsWebView()) {
             webView = new WebView();
             webView.setPrefHeight(PREF_HEIGHT);
             view = webView;
@@ -75,17 +75,6 @@ public class ChangelogViewController {
         AnchorPane.setLeftAnchor(view, 8.0);
         AnchorPane.setRightAnchor(view, 8.0);
         changelogPane.getChildren().add(view);
-    }
-
-    private static boolean webViewSupported() {
-        try {
-            return org.terasology.launcher.platform.Platform.getPlatform().supportsWebView();
-        } catch (UnsupportedPlatformException e) {
-            // getPlatform() already succeeded once during launcher startup (see
-            // LauncherInitTask) to get this far, so this is unreachable in practice - but if it
-            // ever isn't, err towards the fallback that's known to work everywhere.
-            return false;
-        }
     }
 
     /**
