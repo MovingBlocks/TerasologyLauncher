@@ -19,6 +19,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v7
+      with:
+        # This job runs no authenticated git commands, so there is nothing to gain from leaving the
+        # checkout token readable to the build, test and static-analysis steps that follow - and
+        # those steps run Gradle against dependency ranges, so the less that is reachable from them
+        # the better. checkout defaults this to true.
+        persist-credentials: false
     - name: Set up JDK 17
       uses: actions/setup-java@v5
       with:
