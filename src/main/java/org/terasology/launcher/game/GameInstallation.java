@@ -158,11 +158,12 @@ public class GameInstallation implements Installation<GameIdentifier> {
             final var libPaths = Set.of(Path.of("lib"), Path.of("libs"));
 
             var parent = path.getParent();
-            var file = path.getFileName().toString();
+            var fileName = path.getFileName();
             return parent != null
+                    && fileName != null
                     && Files.isDirectory(parent)
                     && libPaths.contains(parent.getFileName())
-                    && predicate.test(file);
+                    && predicate.test(fileName.toString());
         };
     }
 
