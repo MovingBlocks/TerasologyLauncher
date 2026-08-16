@@ -10,10 +10,23 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # Hoisted to a job-level env var so the steps below can test it in an `if:`. The `secrets`
+    # context is not available to `if:` (GitHub exposes it to `with:` and `env:` only), and naming
+    # it there is not a no-op that skips the step - it fails validation of the whole workflow file,
+    # so nothing runs at all. `env` is available to `if:`, so this indirection is the usual fix.
+    env:
+      CHECK_RUN_REPORTER_TOKEN: ${{ secrets.CHECK_RUN_REPORTER_TOKEN }}
+
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
+      with:
+        # This job runs no authenticated git commands, so there is nothing to gain from leaving the
+        # checkout token readable to the build, test and static-analysis steps that follow - and
+        # those steps run Gradle against dependency ranges, so the less that is reachable from them
+        # the better. checkout defaults this to true.
+        persist-credentials: false
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         distribution: 'liberica'
         java-version: '17'
@@ -31,8 +44,11 @@ jobs:
         path: build/reports/tests/test/
     - name: Upload Test Report
       uses: check-run-reporter/action@v2.11.1
-      # always run, otherwise you'll only see results for passing builds
-      if: always()
+      # always run, otherwise you'll only see results for passing builds - except on a fork PR,
+      # where CHECK_RUN_REPORTER_TOKEN isn't available (GitHub withholds repo secrets from
+      # pull_request-triggered runs originating from a fork) and the upload would just 403.
+      # See #694.
+      if: always() && env.CHECK_RUN_REPORTER_TOKEN != ''
       with:
         label: test
         token: ${{ secrets.CHECK_RUN_REPORTER_TOKEN }}
@@ -41,8 +57,11 @@ jobs:
       run: ./gradlew check -x test
     - name: Upload Checkstyle Report
       uses: check-run-reporter/action@v2.11.1
-      # always run, otherwise you'll only see results for passing builds
-      if: always()
+      # always run, otherwise you'll only see results for passing builds - except on a fork PR,
+      # where CHECK_RUN_REPORTER_TOKEN isn't available (GitHub withholds repo secrets from
+      # pull_request-triggered runs originating from a fork) and the upload would just 403.
+      # See #694.
+      if: always() && env.CHECK_RUN_REPORTER_TOKEN != ''
       with:
         label: code-analysis
         token: ${{ secrets.CHECK_RUN_REPORTER_TOKEN }}

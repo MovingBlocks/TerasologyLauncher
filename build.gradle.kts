@@ -69,10 +69,24 @@ assert(JavaVersion.current() >= JavaVersion.VERSION_17)
 val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
 
-configurations {
-    compileClasspath {
-        resolutionStrategy.activateDependencyLocking()
+// Pass -PnoLock to resolve every dependency range fresh against whatever version satisfies it in
+// Gradle's already-cached repository metadata (which is itself refreshed at most once per 24h for a
+// dynamic version - add --refresh-dependencies too if you need to force a check past that), ignoring
+// gradle.lockfile entirely for that one build - useful for locally trying out an update before
+// committing to it. Since locking isn't activated at all in that case, nothing gets checked against
+// or written to the lockfile either.
+//
+// Locks every resolvable configuration (compileClasspath, runtimeClasspath, the test and
+// annotationProcessor classpaths, etc.), not just compileClasspath - otherwise dependencies unique
+// to those other configurations could still silently float to a newer version picked up from their
+// declared range, undermining the "everyone's build uses the same versions" guarantee this is for.
+if (!project.hasProperty("noLock")) {
+    dependencyLocking {
+        lockAllConfigurations()
     }
+}
+
+configurations {
     create("codeMetrics")
 }
 
@@ -110,23 +124,47 @@ repositories {
 
 // Primary dependencies definition
 dependencies {
-    implementation("org.slf4j:slf4j-api:[1.7.+, 2.0.0-alpha7]") {
+    implementation("org.slf4j:slf4j-api:[1.7.+,)") {
         because("influenced by app or test loggers as needed")
     }
-    implementation("ch.qos.logback:logback-classic:1.3.0-alpha16") {
-        because("1.3 series uses ServiceLoader (more packaging friendly?)")
+    implementation("ch.qos.logback:logback-classic:[1.6.1,)") {
+        because("1.3+ series uses ServiceLoader (more packaging friendly?)")
     }
 
-    implementation("com.google.code.gson:gson:2.8.5")
-    implementation("com.google.guava:guava:31.1-jre")
-    implementation("com.github.everit-org.json-schema:org.everit.json.schema:1.14.1")
+    implementation("com.google.code.gson:gson:[2.14.0,)")
+    // Bounded below 34, unlike the other ranges: guava publishes a "-jre" and an "-android" build
+    // of every release, and Gradle compares the numeric parts first - so "34.0.0-android" ranks
+    // above "33.6.0-jre" and an open range would let a --write-locks run silently swap us onto the
+    // Android flavour, which targets an older Java and a reduced API surface. The -jre/-android
+    // suffix only decides the ordering between two builds of the *same* version.
+    implementation("com.google.guava:guava:[33.6.0-jre,34)")
+    implementation("com.github.everit-org.json-schema:org.everit.json.schema:[1.14.6,)")
 
-    implementation("org.kohsuke:github-api:1.318")
-    implementation("org.semver4j:semver4j:5.2.2")
+    // Pinned exactly, not a range: avoid the 2.0-rc pre-release line. Gradle's dynamic-version
+    // comparator isn't guaranteed to sort "2.0-rc.x" the way a "<2.0" bound would assume, so an
+    // open range risks silently picking up a release candidate on some future --write-locks run.
+    implementation("org.kohsuke:github-api:1.330")
+    // github-api above transitively pulls in Jackson, which without this floats down to whatever
+    // it declares (last seen: 2.20.0, vulnerable to several 2026 CVEs - GHSA-72hv-8253-57qq,
+    // GHSA-r7wm-3cxj-wff9, GHSA-3pjw-73gf-8qr5, GHSA-5jmj-h7xm-6q6v, GHSA-hgj6-7826-r7m5,
+    // GHSA-j3rv-43j4-c7qm, GHSA-rmj7-2vxq-3g9f). Importing the BOM as a platform constraint (rather
+    // than declaring jackson-core/-databind/-annotations directly) lets Jackson's own release
+    // keep every jackson-* module's version aligned, without us tracking that by hand.
+    // A range like everything else, deliberately: this constraint exists to keep Jackson off
+    // vulnerable versions, so pinning it exactly would mean the next Jackson CVE needs a hand-edit
+    // here - reintroducing exactly the staleness the ranges are meant to avoid. The lockfile still
+    // decides the actual version; --write-locks is what moves it.
+    implementation(platform("com.fasterxml.jackson:jackson-bom:[2.22.1,)"))
+    implementation("org.semver4j:semver4j:[6.0.0,7)") {
+        because("6.0.0 itself requires JDK 17 minimum - matches our pin. Capped below 7 because "
+                + "that guarantee is about this major line only: a future major is free to raise "
+                + "its own JDK floor past the 17 we compile against, same reasoning as the "
+                + "error-prone bound below.")
+    }
     // 0.64.0's bundled EmojiReference.txt predates flexmark's 2023 data overhaul and is missing
     // shortcut aliases for many emoji (e.g. :toolbox:), so they fell through to literal text
     // instead of rendering. 0.64.8 has the fix - see vsch/flexmark-java@0.64.6..0.64.8.
-    implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
+    implementation("com.vladsch.flexmark:flexmark-all:[0.64.8,)")
 
     implementation("org.jsoup:jsoup:1.15.4") {
         because("AboutViewController strips HTML tags for the plain-text fallback on platforms "
@@ -135,59 +173,71 @@ dependencies {
                 + "graph is unchanged, but declared because we now use it directly.")
     }
 
-    implementation("org.hildan.fxgson:fx-gson:5.0.0") {
+    implementation("org.hildan.fxgson:fx-gson:[5.0.0,)") {
         because("de-/serialization of launcher properties to JSON")
     }
 
-    implementation("com.squareup.okhttp3:okhttp:4.12.0") {
+    implementation("com.squareup.okhttp3:okhttp:[5.4.0,)") {
         because("built-in caching of HTTP requests")
     }
 
     // These dependencies are only needed for running tests
 
-    testImplementation("org.hamcrest:hamcrest:2.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    testImplementation("org.hamcrest:hamcrest:[3.0,)")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:[6.1.2,7)") {
+        because("6.1.2 itself requires JDK 17 minimum - matches our pin. Capped below 7 for the "
+                + "same reason as semver4j above: the JDK floor is a property of this major line, "
+                + "not of every future one.")
+    }
+    testImplementation("org.junit.jupiter:junit-jupiter-params:[6.1.2,7)")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:[6.1.2,7)")
     // Gradle 9 no longer resolves this transitively - without it, `test` fails before running
     // anything: "Failed to load JUnit Platform... including the JUnit Platform launcher."
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("org.mockito:mockito-core:5.18.0") {
+    testImplementation("org.mockito:mockito-core:[5.23.0,)") {
         because("mockito-inline (used previously) was discontinued after 5.2.0 - inline mock making " +
                 "(mocking final classes) is the default in mockito-core since Mockito 5. Also, 5.2.0's " +
                 "bundled Byte Buddy predates Java 25/26 class file support.")
     }
-    testImplementation("org.mockito:mockito-junit-jupiter:5.18.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:[5.23.0,)")
 
-    testImplementation("org.spf4j:spf4j-slf4j-test:8.10.0") {
+    testImplementation("org.spf4j:spf4j-slf4j-test:[8.10.0,)") {
         because("testable logging")
     }
-    testImplementation("org.slf4j:slf4j-api:2.0.13")
+    testImplementation("org.slf4j:slf4j-api:[2.0.18,)")
 
-    testImplementation("org.testfx:testfx-core:4.0.18") {
+    testImplementation("org.testfx:testfx-core:[4.0.18,)") {
         because("to test JavaFX Application")
     }
-    testImplementation("org.testfx:testfx-junit5:4.0.18")
+    testImplementation("org.testfx:testfx-junit5:[4.0.18,)")
 
-    testImplementation("org.testfx:openjfx-monocle:17.0.10") {
+    // Not a "pick newest" range: openjfx-monocle publishes one build per target JDK line
+    // (11.0.2, 17.0.10, 21.0.2, ...) rather than a sequential version history, so this is bounded
+    // to the 17.x line specifically - an open range here could silently jump to a build meant for
+    // a different JDK entirely.
+    testImplementation("org.testfx:openjfx-monocle:[17.0,18.0)") {
         because("CI builders are headless environments")
     }
 
-    testImplementation("com.github.gmazzo.okhttp.mock:mock-client:2.0.0") {
+    testImplementation("com.github.gmazzo.okhttp.mock:mock-client:[2.1.0,)") {
         because("to easily write OkHttpClient interceptors for testing")
     }
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.10.0") {
+    testImplementation("com.squareup.okhttp3:mockwebserver:[5.4.0,)") {
         because("to control server responses for testing")
     }
 
     // Config for our code analytics from: https://github.com/MovingBlocks/TeraConfig
     "codeMetrics"("org.terasology.config:codemetrics:1.7.1@zip")
 
-    // 2.43.0 bumped error-prone's own minimum runtime to JDK 21 - pinned to the last version that
-    // still runs as a javac plugin on JDK 17, which is what we compile with (see PR #719 review).
-    errorprone("com.google.errorprone:error_prone_core:2.42.0")
-    compileOnly("com.google.errorprone:error_prone_annotations:2.42.0")
+    // 2.43.0 bumped error-prone's own minimum runtime to JDK 21 - bounded below that so this can
+    // only resolve to a version that still runs as a javac plugin on JDK 17, which is what we
+    // compile with (see PR #719 review). error_prone_annotations is just marker-annotation
+    // definitions, not code that runs as a plugin, so it has no such ceiling of its own - and
+    // guava has its own strict transitive requirement on a newer one, which a matching upper
+    // bound here would conflict with unsatisfiably.
+    errorprone("com.google.errorprone:error_prone_core:[2.42.0,2.43)")
+    compileOnly("com.google.errorprone:error_prone_annotations:[2.42.0,)")
 }
 
 val testClasspathNamePattern = Regex("test(Runtime|Compile|Implementation|PmdAux)Classpath")
