@@ -18,6 +18,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import org.hildan.fxgson.FxGson;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -118,7 +119,7 @@ public final class  Settings {
      * @return the launcher settings if present and readable, or {@code null} otherwise
      */
     //TODO: change contract to handle missing file and IO errors better
-    public static Settings load(final Path path) {
+    public static @Nullable Settings load(final Path path) {
         Path json = path.resolve(JSON_FILE_NAME);
         if (Files.exists(json)) {
             logger.debug("Loading launcher settings from '{}'.", json);

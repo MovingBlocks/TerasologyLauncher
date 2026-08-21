@@ -23,6 +23,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicLong;
 
+// logArea is injected by FXMLLoader after construction, before initialize() runs.
+@SuppressWarnings("NullAway.Init")
 public class LogViewController extends AppenderBase<ILoggingEvent> {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");

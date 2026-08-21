@@ -32,6 +32,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+// The @FXML fields are injected by FXMLLoader after construction, before initialize() runs. The
+// plain fields alongside them are set by the (differently-signatured) initialize(Path, Settings, ...)
+// below, called once by ApplicationController right after FXML loading - same two-phase pattern.
+@SuppressWarnings("NullAway.Init")
 public class SettingsController {
 
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
@@ -372,7 +376,7 @@ public class SettingsController {
                 .collect(Collectors.toList());
     }
 
-    private static class LanguageIconListCell extends ListCell<Locale> {
+    private static final class LanguageIconListCell extends ListCell<Locale> {
         @Override
         protected void updateItem(Locale item, boolean empty) {
             // Pass along the locale text
@@ -401,7 +405,7 @@ public class SettingsController {
         }
     }
 
-    private static class MemorySizeCell extends ListCell<JavaHeapSize> {
+    private static final class MemorySizeCell extends ListCell<JavaHeapSize> {
         @Override
         protected void updateItem(JavaHeapSize item, boolean empty) {
             super.updateItem(item, empty);

@@ -16,6 +16,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -32,6 +33,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherConfiguration;
@@ -64,6 +66,11 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+// The @FXML fields are injected by FXMLLoader after construction, before initialize() runs. The
+// plain fields alongside them (launcherDirectory, launcherSettings, gameManager, stage; downloadTask
+// is separately @Nullable below, it's genuinely optional) follow the same two-phase pattern - they're
+// set by update(), called once by TerasologyLauncher right after construction, not by the constructor.
+@SuppressWarnings("NullAway.Init")
 public class ApplicationController {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
@@ -78,7 +85,7 @@ public class ApplicationController {
 
     private final GameService gameService;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private DownloadTask downloadTask;
+    private @Nullable DownloadTask downloadTask;
 
     private Stage stage;
 
@@ -449,26 +456,38 @@ public class ApplicationController {
 
     @FXML
     protected void downloadAction() {
-        downloadTask = new DownloadTask(gameManager, selectedRelease.getValue());
-        downloading.bind(downloadTask.runningProperty());
+        final DownloadTask task = new DownloadTask(gameManager, selectedRelease.getValue());
+        downloadTask = task;
+        downloading.bind(task.runningProperty());
 
-        gameReleaseComboBox.disableProperty().bind(downloadTask.runningProperty());
-        progressBar.visibleProperty().bind(downloadTask.runningProperty());
+        gameReleaseComboBox.disableProperty().bind(task.runningProperty());
+        progressBar.visibleProperty().bind(task.runningProperty());
 
-        progressBar.progressProperty().bind(downloadTask.progressProperty());
+        progressBar.progressProperty().bind(task.progressProperty());
 
-        downloadTask.setOnSucceeded(workerStateEvent -> {
-            downloadTask = null;
-        });
+        // Every terminal state (succeeded, failed, cancelled) needs to clear downloadTask - not
+        // just success - otherwise handleRunStarted()/cancelDownloadAction() keep treating the
+        // launcher as still downloading once a failed or cancelled task is done. Guarded by
+        // identity so a stale callback from a superseded task can't clobber a newer one.
+        final EventHandler<WorkerStateEvent> clearIfCurrent = workerStateEvent -> {
+            if (task.equals(downloadTask)) {
+                downloadTask = null;
+            }
+        };
+        task.setOnSucceeded(clearIfCurrent);
+        task.setOnFailed(clearIfCurrent);
+        task.setOnCancelled(clearIfCurrent);
 
-        var unused = executor.submit(downloadTask);
+        var unused = executor.submit(task);
 
     }
 
     @FXML
     protected void cancelDownloadAction() {
         logger.info("Cancel game download!");
-        downloadTask.cancel(false);
+        if (downloadTask != null) {
+            downloadTask.cancel(false);
+        }
     }
 
     @FXML

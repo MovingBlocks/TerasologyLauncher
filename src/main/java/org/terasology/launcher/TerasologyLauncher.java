@@ -38,6 +38,9 @@ import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+// These fields are set by the JavaFX Application lifecycle (init()/start()), which the JavaFX
+// runtime guarantees run before any other method here - not by the (implicit, no-arg) constructor.
+@SuppressWarnings("NullAway.Init")
 public final class TerasologyLauncher extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncher.class);

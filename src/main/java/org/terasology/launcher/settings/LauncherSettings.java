@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -280,7 +281,7 @@ public class LauncherSettings {
         return Level.valueOf(properties.getProperty(PROPERTY_LOG_LEVEL));
     }
 
-    public synchronized Path getGameDirectory() {
+    public synchronized @Nullable Path getGameDirectory() {
         final String gameDirectoryStr = properties.getProperty(PROPERTY_GAME_DIRECTORY);
         if (gameDirectoryStr != null && gameDirectoryStr.trim().length() > 0) {
             try {
@@ -292,7 +293,7 @@ public class LauncherSettings {
         return null;
     }
 
-    public synchronized Path getGameDataDirectory() {
+    public synchronized @Nullable Path getGameDataDirectory() {
         final String gameDataDirectoryStr = properties.getProperty(PROPERTY_GAME_DATA_DIRECTORY);
         if (gameDataDirectoryStr != null && gameDataDirectoryStr.trim().length() > 0) {
             try {

@@ -17,6 +17,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
+import org.jspecify.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,8 @@ import java.util.stream.Stream;
  * unimplemented there) this falls back to a plain-text view instead (HTML documents have their
  * tags stripped via Jsoup so they're still readable).
  */
+// aboutInfoAccordion is injected by FXMLLoader after construction, before initialize() runs.
+@SuppressWarnings("NullAway.Init")
 public class AboutViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(AboutViewController.class);
@@ -188,7 +191,7 @@ public class AboutViewController {
         return finishWebView(view);
     }
 
-    private Optional<javafx.scene.Node> finishWebView(WebView view) {
+    private Optional<javafx.scene.Node> finishWebView(@Nullable WebView view) {
         if (view == null) {
             return Optional.empty();
         }

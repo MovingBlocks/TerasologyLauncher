@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.updater;
 
+import org.jspecify.annotations.Nullable;
 import org.semver4j.Semver;
 import javafx.application.Platform;
 import javafx.scene.Parent;
@@ -27,7 +28,7 @@ public final class LauncherUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherUpdater.class);
 
-    private final Semver currentVersion;
+    private final @Nullable Semver currentVersion;
 
     public LauncherUpdater(LauncherVersion currentVersionInfo) {
         //TODO: might not be valid semver, thus can be null
@@ -47,7 +48,7 @@ public final class LauncherUpdater {
      * @return a {@link GHRelease} if an update is available, null otherwise
      */
     //TODO: return Option<GitHubRelease>
-    public GHRelease updateAvailable() {
+    public @Nullable GHRelease updateAvailable() {
         //TODO: only check of both version are defined and valid semver?
         try {
             final GitHub github = GitHub.connectAnonymously();
@@ -55,6 +56,12 @@ public final class LauncherUpdater {
             final GHRelease latestRelease = repository.getLatestRelease();
             final Semver latestVersion = versionOf(latestRelease);
 
+            if (currentVersion == null) {
+                // Local version string didn't parse as semver - we can't tell whether an update
+                // is needed, so err towards offering one rather than silently never notifying.
+                logger.warn("Current launcher version is not a valid semver; assuming an update is available.");
+                return latestRelease;
+            }
             if (latestVersion.isGreaterThan(currentVersion)) {
                 return latestRelease;
             }
@@ -78,10 +85,11 @@ public final class LauncherUpdater {
     }
 
     private FutureTask<Boolean> getUpdateDialog(Stage parentStage, GHRelease release) {
+        final String currentVersionDisplay = currentVersion != null ? currentVersion.getVersion() : "n/a";
         final String infoText = "  " +
                 I18N.getLabel("message_update_current") +
                 "  " +
-                currentVersion.getVersion() +
+                currentVersionDisplay +
                 "  \n" +
                 "  " +
                 I18N.getLabel("message_update_latest") +

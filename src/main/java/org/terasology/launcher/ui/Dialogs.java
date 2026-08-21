@@ -8,6 +8,7 @@ import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.util.I18N;
@@ -31,7 +32,7 @@ public final class Dialogs {
     private Dialogs() {
     }
 
-    private static <T> T runOnEventThread(Supplier<T> producer) {
+    private static <T> @Nullable T runOnEventThread(Supplier<T> producer) {
         T result = null;
         if (Platform.isFxApplicationThread()) {
             result = producer.get();
@@ -76,7 +77,7 @@ public final class Dialogs {
         showMessageDialog(Alert.AlertType.INFORMATION, I18N.getLabel("message_information_title"), message, owner);
     }
 
-    public static Path chooseDirectory(Stage owner, final Path defaultDirectory, final String title) {
+    public static @Nullable Path chooseDirectory(Stage owner, final Path defaultDirectory, final String title) {
         try {
             FileUtils.ensureWritableDir(defaultDirectory);
         } catch (IOException e) {
@@ -102,7 +103,7 @@ public final class Dialogs {
         return selected;
     }
 
-    private static boolean deleteProposedDirectoryIfUnused(Path proposed, Path selected) throws IOException {
+    private static boolean deleteProposedDirectoryIfUnused(Path proposed, @Nullable Path selected) throws IOException {
         return selected != null
                 && !Files.isSameFile(proposed, selected)
                 && !LauncherDirectoryUtils.containsFiles(proposed)

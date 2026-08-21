@@ -4,6 +4,7 @@
 package org.terasology.launcher.model;
 
 import com.google.common.base.MoreObjects;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -44,7 +45,7 @@ public class GameIdentifier {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

@@ -1,0 +1,46 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  schedule:
+    # Monthly scan catches new query/advisory coverage even without a code change.
+    - cron: '30 4 1 * *'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up JDK 17
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'liberica'
+        java-version: '17'
+        cache: 'gradle'
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v4
+      with:
+        languages: java-kotlin
+        # We build via Gradle in a separate step below rather than autobuild - "manual" is the
+        # correct declaration for that (matches reality), not "none" (would mean no compilation
+        # at all, weakening the Java/Kotlin analysis). CodeQL logs an "overlay database" info
+        # notice about this every run - that's it opting out of an optimization only "none"
+        # qualifies for, not a problem to fix.
+        build-mode: manual
+    - name: Build
+      run: ./gradlew jar -x test
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4
+      with:
+        category: "/language:java-kotlin"

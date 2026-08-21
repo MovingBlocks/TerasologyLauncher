@@ -4,6 +4,7 @@
 package org.terasology.launcher.game;
 
 import com.google.common.base.MoreObjects;
+import org.jspecify.annotations.Nullable;
 import org.semver4j.Semver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,10 +158,12 @@ public class GameInstallation implements Installation<GameIdentifier> {
             final var libPaths = Set.of(Path.of("lib"), Path.of("libs"));
 
             var parent = path.getParent();
-            var file = path.getFileName().toString();
-            return Files.isDirectory(parent)
+            var fileName = path.getFileName();
+            return parent != null
+                    && fileName != null
+                    && Files.isDirectory(parent)
                     && libPaths.contains(parent.getFileName())
-                    && predicate.test(file);
+                    && predicate.test(fileName.toString());
         };
     }
 
@@ -216,7 +219,7 @@ public class GameInstallation implements Installation<GameIdentifier> {
     }
 
     @Override
-    public GameIdentifier getInfo() {
+    public @Nullable GameIdentifier getInfo() {
         //TODO: compute this information on instance creation (and fail creation in case it is not a valid installation)
         Profile profile;
         Build build;
