@@ -139,15 +139,23 @@ public final class LauncherDirectoryUtils {
 
     public static Path getInstallationDirectory() {
         final URL location = LauncherDirectoryUtils.class.getProtectionDomain().getCodeSource().getLocation();
-        Path installationDirectory = null;
+        final Path launcherLocation;
         try {
-            final Path launcherLocation = Paths.get(location.toURI());
-            logger.trace("Launcher location: {}", launcherLocation);
-            installationDirectory = launcherLocation.getParent().getParent();
-            logger.trace("Launcher installation directory: {}", installationDirectory);
+            launcherLocation = Paths.get(location.toURI());
         } catch (URISyntaxException e) {
-            logger.error("Could not determine launcher installation directory.", e);
+            // Fail here with context instead of a confusing NPE downstream.
+            throw new IllegalStateException("Could not determine launcher installation directory from " + location, e);
         }
+        logger.trace("Launcher location: {}", launcherLocation);
+        Path parent = launcherLocation.getParent();
+        if (parent == null) {
+            throw new IllegalStateException("Launcher location has no parent directory: " + launcherLocation);
+        }
+        Path installationDirectory = parent.getParent();
+        if (installationDirectory == null) {
+            throw new IllegalStateException("Launcher location's parent has no parent directory: " + parent);
+        }
+        logger.trace("Launcher installation directory: {}", installationDirectory);
         return installationDirectory;
     }
 }

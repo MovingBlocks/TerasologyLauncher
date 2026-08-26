@@ -32,6 +32,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.LauncherConfiguration;
@@ -64,6 +65,10 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+// @FXML fields: injected by FXMLLoader after construction. Plain fields (launcherDirectory,
+// launcherSettings, gameManager, stage; downloadTask is separately @Nullable) same deal, set by
+// update() right after construction, not the constructor.
+@SuppressWarnings("NullAway.Init")
 public class ApplicationController {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
@@ -78,7 +83,7 @@ public class ApplicationController {
 
     private final GameService gameService;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private DownloadTask downloadTask;
+    private @Nullable DownloadTask downloadTask;
 
     private Stage stage;
 
@@ -468,7 +473,9 @@ public class ApplicationController {
     @FXML
     protected void cancelDownloadAction() {
         logger.info("Cancel game download!");
-        downloadTask.cancel(false);
+        if (downloadTask != null) {
+            downloadTask.cancel(false);
+        }
     }
 
     @FXML

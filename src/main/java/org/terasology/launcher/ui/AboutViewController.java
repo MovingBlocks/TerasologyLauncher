@@ -48,6 +48,8 @@ import java.util.stream.Stream;
  * unimplemented there) this falls back to a plain-text view instead (HTML documents have their
  * tags stripped via Jsoup so they're still readable).
  */
+// aboutInfoAccordion is injected by FXMLLoader after construction, before initialize() runs.
+@SuppressWarnings("NullAway.Init")
 public class AboutViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(AboutViewController.class);

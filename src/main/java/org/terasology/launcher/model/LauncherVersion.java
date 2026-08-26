@@ -4,6 +4,7 @@
 package org.terasology.launcher.model;
 
 import com.google.common.io.Resources;
+import org.jspecify.annotations.Nullable;
 import org.semver4j.Semver;
 import org.semver4j.SemverException;
 import org.slf4j.Logger;
@@ -17,11 +18,12 @@ public final class LauncherVersion {
 
     private static final Logger logger = LoggerFactory.getLogger(LauncherVersion.class);
     private static final String VERSION_INFO_FILE = "/org/terasology/launcher/version.txt";
-    private static LauncherVersion instance;
+    private static @Nullable LauncherVersion instance;
 
-    private final Semver semver;
+    // Null when version.txt is missing or not valid semver - see getInstance()'s catch blocks below.
+    private final @Nullable Semver semver;
 
-    private LauncherVersion(Semver semver) {
+    private LauncherVersion(@Nullable Semver semver) {
         this.semver = semver;
     }
 
@@ -47,7 +49,7 @@ public final class LauncherVersion {
         return Optional.ofNullable(semver).map(Semver::getVersion).orElse("n/a");
     }
 
-    public Semver getSemver() {
+    public @Nullable Semver getSemver() {
         return semver;
     }
 

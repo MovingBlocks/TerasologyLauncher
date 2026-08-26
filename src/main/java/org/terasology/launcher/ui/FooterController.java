@@ -25,6 +25,8 @@ import org.terasology.launcher.util.I18N;
 
 import java.util.Optional;
 
+// @FXML fields: injected post-construction. hostServices: set by setHostServices(), same deal.
+@SuppressWarnings("NullAway.Init")
 public class FooterController {
 
     private static final Logger logger = LoggerFactory.getLogger(FooterController.class);

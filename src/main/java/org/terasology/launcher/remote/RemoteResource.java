@@ -3,11 +3,13 @@
 
 package org.terasology.launcher.remote;
 
+import org.jspecify.annotations.Nullable;
+
 import java.net.URL;
 
 public interface RemoteResource<T> {
 
-    URL getUrl();
+    @Nullable URL getUrl();
 
     String getFilename();
 

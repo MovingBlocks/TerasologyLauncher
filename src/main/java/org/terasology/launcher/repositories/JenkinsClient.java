@@ -63,6 +63,7 @@ class JenkinsClient {
                 .build();
     }
 
+    @Nullable
     Jenkins.ApiResult request(URL url) throws InterruptedException {
         Preconditions.checkNotNull(url);
 
