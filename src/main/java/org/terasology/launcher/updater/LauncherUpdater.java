@@ -56,6 +56,11 @@ public final class LauncherUpdater {
             final GHRelease latestRelease = repository.getLatestRelease();
             final Semver latestVersion = versionOf(latestRelease);
 
+            if (currentVersion == null) {
+                // Current version didn't parse as semver - can't compare, so err towards offering an update.
+                logger.warn("Current launcher version is not a valid semver; assuming an update is available.");
+                return latestRelease;
+            }
             if (latestVersion.isGreaterThan(currentVersion)) {
                 return latestRelease;
             }

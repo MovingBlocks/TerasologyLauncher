@@ -17,6 +17,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
+import org.jspecify.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,7 +191,7 @@ public class AboutViewController {
         return finishWebView(view);
     }
 
-    private Optional<javafx.scene.Node> finishWebView(WebView view) {
+    private Optional<javafx.scene.Node> finishWebView(@Nullable WebView view) {
         if (view == null) {
             return Optional.empty();
         }

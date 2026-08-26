@@ -39,11 +39,11 @@ public final class DownloadUtils {
             throw new DownloadException("Resource has no download URL: " + resource.getInfo());
         }
 
-        final long contentLength = DownloadUtils.getContentLength(downloadUrl);
         final Path parent = path.getParent();
         if (parent == null) {
             throw new DownloadException("Download destination has no parent directory: " + path);
         }
+        final long contentLength = DownloadUtils.getContentLength(downloadUrl);
         final long availableSpace = parent.toFile().getUsableSpace();
 
         if (availableSpace >= contentLength) {

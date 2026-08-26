@@ -16,6 +16,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -454,19 +455,27 @@ public class ApplicationController {
 
     @FXML
     protected void downloadAction() {
-        downloadTask = new DownloadTask(gameManager, selectedRelease.getValue());
-        downloading.bind(downloadTask.runningProperty());
+        final DownloadTask task = new DownloadTask(gameManager, selectedRelease.getValue());
+        downloadTask = task;
+        downloading.bind(task.runningProperty());
 
-        gameReleaseComboBox.disableProperty().bind(downloadTask.runningProperty());
-        progressBar.visibleProperty().bind(downloadTask.runningProperty());
+        gameReleaseComboBox.disableProperty().bind(task.runningProperty());
+        progressBar.visibleProperty().bind(task.runningProperty());
 
-        progressBar.progressProperty().bind(downloadTask.progressProperty());
+        progressBar.progressProperty().bind(task.progressProperty());
 
-        downloadTask.setOnSucceeded(workerStateEvent -> {
-            downloadTask = null;
-        });
+        // Clear downloadTask on every terminal state, not just success, or the launcher keeps
+        // thinking a download is running. Identity-guarded so a stale callback can't clobber a newer task.
+        final EventHandler<WorkerStateEvent> clearIfCurrent = workerStateEvent -> {
+            if (task.equals(downloadTask)) {
+                downloadTask = null;
+            }
+        };
+        task.setOnSucceeded(clearIfCurrent);
+        task.setOnFailed(clearIfCurrent);
+        task.setOnCancelled(clearIfCurrent);
 
-        var unused = executor.submit(downloadTask);
+        var unused = executor.submit(task);
 
     }
 

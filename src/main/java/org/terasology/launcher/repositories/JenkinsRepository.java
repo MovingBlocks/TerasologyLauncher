@@ -134,10 +134,11 @@ class JenkinsRepository implements ReleaseRepository {
         return new ReleaseMetadata(changelog, timestamp);
     }
 
-    private String computeChangelogFrom(Jenkins.ChangeSet changeSet) {
+    private String computeChangelogFrom(Jenkins.@Nullable ChangeSet changeSet) {
         return Optional.ofNullable(changeSet)
-                .map(changes ->
-                        Arrays.stream(changes.items)
+                .map(changes -> changes.items)
+                .map(items ->
+                        Arrays.stream(items)
                                 .map(change -> "- " + change.msg)
                                 .collect(Collectors.joining("\n"))
                 ).orElse("");

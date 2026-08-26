@@ -114,7 +114,7 @@ class JenkinsClient {
             return null;
         }
         Optional<String> url = Arrays.stream(build.artifacts)
-                .filter(artifact -> artifact.fileName.matches(regex))
+                .filter(artifact -> artifact.fileName != null && artifact.fileName.matches(regex))
                 .findFirst()
                 .map(artifact -> build.url + ARTIFACT + artifact.relativePath);
 
