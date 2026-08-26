@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import edu.sc.seis.launch4j.tasks.Launch4jLibraryTask
+import net.ltgt.gradle.errorprone.errorprone
 import org.apache.tools.ant.filters.FixCrLfFilter
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.gradle.ext.delegateActions
@@ -238,6 +239,13 @@ dependencies {
     // bound here would conflict with unsatisfiably.
     errorprone("com.google.errorprone:error_prone_core:[2.42.0,2.43)")
     compileOnly("com.google.errorprone:error_prone_annotations:[2.42.0,)")
+
+    // NullAway (needs error-prone 2.36.0+, JDK 17+). Left at default WARN, not ERROR: near-zero
+    // @Nullable coverage yet, so ERROR would mean fixing/suppressing a wave of findings sight-unseen.
+    errorprone("com.uber.nullaway:nullaway:0.13.8")
+    implementation("org.jspecify:jspecify:1.0.0") {
+        because("provides the @Nullable annotation NullAway checks against")
+    }
 }
 
 val testClasspathNamePattern = Regex("test(Runtime|Compile|Implementation|PmdAux)Classpath")
@@ -263,9 +271,12 @@ java {
 
 tasks.named<JavaCompile>("compileJava") {
     options.encoding = "UTF-8"
+    options.errorprone.option("NullAway:AnnotatedPackages", "org.terasology.launcher")
 }
 tasks.named<JavaCompile>("compileTestJava") {
     options.encoding = "UTF-8"
+    // Test code lacks main's @Nullable discipline - skip NullAway here to avoid noise.
+    options.errorprone.disable("NullAway")
 }
 
 configure<org.openjfx.gradle.JavaFXOptions> {
