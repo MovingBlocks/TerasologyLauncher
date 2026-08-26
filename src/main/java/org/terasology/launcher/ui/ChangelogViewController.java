@@ -52,11 +52,9 @@ public class ChangelogViewController {
     }
 
     /**
-     * Builds either a {@code WebView} (to render the changelog as HTML) or, on platforms where
-     * OpenJFX doesn't ship a WebKit native library (notably Windows/aarch64 - see
-     * https://bugs.openjdk.org/browse/JDK-8314064, whose javafx.web is still unimplemented there),
-     * a plain-text fallback. Constructing a {@code WebView} at all triggers WebKit's native library
-     * load, so this can't be a static FXML node - it has to be conditional.
+     * Builds a {@code WebView}, or a plain-text fallback on platforms without WebKit (notably
+     * Windows/aarch64 - see JDK-8314064). Can't be a static FXML node since constructing a WebView
+     * at all triggers its native library load.
      */
     @FXML
     public void initialize() {

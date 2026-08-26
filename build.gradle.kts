@@ -38,14 +38,9 @@ plugins {
 
 apply(plugin = "org.terasology.gradlegoo")
 
-// A second, independent exe: launches the game directly (org.terasology.launcher.Terasology),
-// skipping the GUI entirely - see DirectPlay's javadoc for why it avoids javafx.graphics. The
-// launch4j{} extension below only wires up one exe (the plugin's fixed "createExe" task), so this
-// is a second task of the same underlying type with its own config. Deliberately no bundledJrePath:
-// unlike TerasologyLauncher.exe, this one has no JavaFX dependency, so it only needs a plain Java
-// 17 runtime - callers are expected to provide their own (e.g. a winget PackageDependencies entry).
-// Registered here, before jre.gradle.kts is applied, since that script references this task by name
-// and (unlike the plugin's own "createExe") its registration doesn't exist until this line runs.
+// Second exe: launches the game directly (Terasology.java), skipping the GUI - see DirectPlay's
+// javadoc. Own task since launch4j{} below only wires up one exe. No bundledJrePath: no JavaFX here,
+// so callers bring their own JDK 17. Registered before jre.gradle.kts, which references it by name.
 tasks.register<Launch4jLibraryTask>("createTerasologyExe") {
     outfile.set("Terasology.exe")
     mainClassName.set("org.terasology.launcher.Terasology")
@@ -59,12 +54,9 @@ tasks.register<Launch4jLibraryTask>("createTerasologyExe") {
 
 apply(from = "./config/gradle/jre.gradle.kts")
 
-// Test for right version of Java in use for running this script - compiling for
-// sourceCompatibility 17 below requires the JDK actually running Gradle to be >= 17 too.
-// Pinned to 17, matching what Terasology (the engine) itself targets, so the launcher can be
-// developed with the same JDK - see review discussion on PR #719. This also means the game's
-// module sandbox SecurityManager (see terasology#5357) works with no opt-in flag needed at all;
-// it's only disabled-by-default starting with JDK 18, and removed entirely (JEP 486) on 24+.
+// Gradle's own JDK must be >= 17 to compile sourceCompatibility 17 below.
+// Pinned to 17 to match the engine (PR #719) - also keeps its sandbox SecurityManager working
+// with no opt-in flag (disabled-by-default from JDK 18, removed on 24+ per JEP 486).
 assert(JavaVersion.current() >= JavaVersion.VERSION_17)
 
 val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
@@ -133,11 +125,8 @@ dependencies {
     }
 
     implementation("com.google.code.gson:gson:[2.14.0,)")
-    // Bounded below 34, unlike the other ranges: guava publishes a "-jre" and an "-android" build
-    // of every release, and Gradle compares the numeric parts first - so "34.0.0-android" ranks
-    // above "33.6.0-jre" and an open range would let a --write-locks run silently swap us onto the
-    // Android flavour, which targets an older Java and a reduced API surface. The -jre/-android
-    // suffix only decides the ordering between two builds of the *same* version.
+    // Bounded below 34: guava's "-android" build outranks "-jre" numerically, so an open range
+    // risks --write-locks silently swapping us onto the Android flavour (older Java, smaller API).
     implementation("com.google.guava:guava:[33.6.0-jre,34)")
     implementation("com.github.everit-org.json-schema:org.everit.json.schema:[1.14.6,)")
 
@@ -157,14 +146,10 @@ dependencies {
     // decides the actual version; --write-locks is what moves it.
     implementation(platform("com.fasterxml.jackson:jackson-bom:[2.22.1,)"))
     implementation("org.semver4j:semver4j:[6.0.0,7)") {
-        because("6.0.0 itself requires JDK 17 minimum - matches our pin. Capped below 7 because "
-                + "that guarantee is about this major line only: a future major is free to raise "
-                + "its own JDK floor past the 17 we compile against, same reasoning as the "
-                + "error-prone bound below.")
+        because("6.0.0 needs JDK 17+, matching our pin. Capped below 7: a future major could raise its own floor.")
     }
-    // 0.64.0's bundled EmojiReference.txt predates flexmark's 2023 data overhaul and is missing
-    // shortcut aliases for many emoji (e.g. :toolbox:), so they fell through to literal text
-    // instead of rendering. 0.64.8 has the fix - see vsch/flexmark-java@0.64.6..0.64.8.
+    // 0.64.0's EmojiReference.txt predates flexmark's 2023 data overhaul, missing shortcuts like
+    // :toolbox:. Fixed in 0.64.8.
     implementation("com.vladsch.flexmark:flexmark-all:[0.64.8,)")
 
     implementation("org.jsoup:jsoup:1.15.4") {
@@ -186,9 +171,7 @@ dependencies {
 
     testImplementation("org.hamcrest:hamcrest:[3.0,)")
     testImplementation("org.junit.jupiter:junit-jupiter-api:[6.1.2,7)") {
-        because("6.1.2 itself requires JDK 17 minimum - matches our pin. Capped below 7 for the "
-                + "same reason as semver4j above: the JDK floor is a property of this major line, "
-                + "not of every future one.")
+        because("6.1.2 needs JDK 17+; capped below 7 for the same reason as semver4j above.")
     }
     testImplementation("org.junit.jupiter:junit-jupiter-params:[6.1.2,7)")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:[6.1.2,7)")
@@ -197,9 +180,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("org.mockito:mockito-core:[5.23.0,)") {
-        because("mockito-inline (used previously) was discontinued after 5.2.0 - inline mock making " +
-                "(mocking final classes) is the default in mockito-core since Mockito 5. Also, 5.2.0's " +
-                "bundled Byte Buddy predates Java 25/26 class file support.")
+        because("mockito-inline discontinued after 5.2.0, folded into core; 5.2.0's Byte Buddy also predates Java 25/26.")
     }
     testImplementation("org.mockito:mockito-junit-jupiter:[5.23.0,)")
 
@@ -280,10 +261,7 @@ tasks.named<JavaCompile>("compileTestJava") {
 }
 
 configure<org.openjfx.gradle.JavaFXOptions> {
-    // Pinned to the 17.x line to match the JDK 17 we compile/bundle for - JavaFX's own artifacts
-    // are compiled targeting roughly their own major version's bytecode (a newer JavaFX version
-    // needs a newer JDK runtime just to load its classes), independent of our sourceCompatibility
-    // setting.
+    // Pinned to 17.x to match our JDK - a newer JavaFX needs a newer runtime just to load its classes.
     version = "17.0.20"
     modules = listOf(
             "javafx.graphics",

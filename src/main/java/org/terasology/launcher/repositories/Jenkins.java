@@ -8,8 +8,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Data model for parsing build information from Jenkins.
  *
- * Instances of this class will be created by JSON parsers (e.g., GSON) and are usually not instantiated by hand.
- * GSON populates these fields via reflection, so a missing JSON key just leaves a field null - every
+ * Populated by GSON via reflection, so a missing JSON key just leaves a field null - every
  * reference-type field here is genuinely @Nullable; consumers must null-check.
  */
 @SuppressWarnings("PMD.MissingStaticMethodInNonInstantiatableClass")

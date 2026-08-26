@@ -43,11 +43,8 @@ import java.util.stream.Stream;
  * <p>
  * Presents static content which is compiled from Markdown and HTML documents.
  * <p>
- * Rendered as HTML in a {@code WebView} where {@link org.terasology.launcher.platform.Platform#supportsWebView()}
- * says it's available; on platforms without a working WebKit native library (notably
- * Windows/aarch64 - see https://bugs.openjdk.org/browse/JDK-8314064, whose javafx.web is still
- * unimplemented there) this falls back to a plain-text view instead (HTML documents have their
- * tags stripped via Jsoup so they're still readable).
+ * Rendered as HTML in a {@code WebView} where available; falls back to plain text (Jsoup-stripped
+ * for HTML) on platforms without WebKit, notably Windows/aarch64 - see JDK-8314064.
  */
 // aboutInfoAccordion is injected by FXMLLoader after construction, before initialize() runs.
 @SuppressWarnings("NullAway.Init")

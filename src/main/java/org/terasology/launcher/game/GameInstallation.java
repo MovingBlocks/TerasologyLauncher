@@ -127,12 +127,8 @@ public class GameInstallation implements Installation<GameIdentifier> {
             Properties versionInfo = getVersionPropertiesFromJar(engineJar);
             return new Semver(versionInfo.getProperty("engineVersion"));
         } catch (FileNotFoundException e) {
-            // Not every build embeds versionInfo.properties - some release artifacts simply don't
-            // have it, even though the game itself runs fine regardless (verified directly: running
-            // such a build's Terasology.jar works completely normally). Refusing to even attempt a
-            // launch over a missing metadata file the engine itself doesn't need is worse than a
-            // best-effort fallback, so parse the version out of the jar's own filename instead
-            // (matchEngineJar guarantees it's "engine*.jar", typically "engine-5.4.0-SNAPSHOT.jar").
+            // Some release artifacts lack versionInfo.properties even though the game runs fine -
+            // parse the version from the jar filename instead (matchEngineJar guarantees "engine*.jar").
             String filename = engineJar.getFileName().toString();
             String fallbackVersion = filename.replaceFirst("^engine-?", "").replaceFirst("\\.jar$", "");
             logger.warn("No versionInfo.properties in {} - falling back to version parsed from filename: {}",

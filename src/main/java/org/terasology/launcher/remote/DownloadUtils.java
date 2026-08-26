@@ -88,11 +88,8 @@ public final class DownloadUtils {
             } catch (IOException e) {
                 throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
             } finally {
-                // HttpClient only gained close()/shutdown() in JDK 21 (we target 17) - before that,
-                // it relies on being kept strongly reachable for as long as a request is in flight,
-                // since an unreachable client's underlying connection can be torn down prematurely.
-                // This keeps it reachable through the whole body read above, immune to the JIT
-                // otherwise treating the reference as dead once its last real use has passed.
+                // JDK 17 HttpClient has no close(); keep it reachable through the read above so the
+                // JIT can't tear down its connection early by treating the reference as dead.
                 Reference.reachabilityFence(connection.client());
             }
 
