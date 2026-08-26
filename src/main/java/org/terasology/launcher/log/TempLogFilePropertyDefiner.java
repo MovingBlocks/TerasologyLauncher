@@ -4,6 +4,7 @@
 package org.terasology.launcher.log;
 
 import ch.qos.logback.core.PropertyDefinerBase;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,12 +15,13 @@ import java.nio.file.Path;
  */
 public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
 
-    private static TempLogFilePropertyDefiner instance;
+    // Null until Logback constructs this via <define>; getInstance() before that returns null.
+    private static @Nullable TempLogFilePropertyDefiner instance;
 
-    private Path logFile;
+    private @Nullable Path logFile;
 
-    private String prefix;
-    private String suffix;
+    private @Nullable String prefix;
+    private @Nullable String suffix;
 
     private boolean failed;
 
@@ -34,22 +36,23 @@ public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
         instance = this;    //NOPMD(AssignmentToNonFinalStatic)
     }
 
-    public static TempLogFilePropertyDefiner getInstance() {
+    public static @Nullable TempLogFilePropertyDefiner getInstance() {
         return instance;
     }
 
     @Override
-    public String getPropertyValue() {
+    public @Nullable String getPropertyValue() {
 
         // Don't try again, if it failed before
         if (failed) {
             return null;
         }
 
-        return getLogFile().toString();
+        Path file = getLogFile();
+        return file != null ? file.toString() : null;
     }
 
-    public String getPrefix() {
+    public @Nullable String getPrefix() {
         return prefix;
     }
 
@@ -58,11 +61,11 @@ public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
      *
      * @param prefix the prefix string to be used in generating the file's name; may be null
      */
-    public void setPrefix(String prefix) {
+    public void setPrefix(@Nullable String prefix) {
         this.prefix = prefix;
     }
 
-    public String getSuffix() {
+    public @Nullable String getSuffix() {
         return suffix;
     }
 
@@ -71,16 +74,16 @@ public class TempLogFilePropertyDefiner extends PropertyDefinerBase {
      *
      * @param suffix the suffix string to be used in generating the file's name; may be null, in which case ".tmp" is used
      */
-    public void setSuffix(String suffix) {
+    public void setSuffix(@Nullable String suffix) {
         this.suffix = suffix;
     }
 
     /**
      * Returns the temporary log file.
      *
-     * @return the log file
+     * @return the log file, or {@code null} if it could not be created
      */
-    public Path getLogFile() {
+    public @Nullable Path getLogFile() {
         if (logFile == null) {
             try {
                 logFile = Files.createTempFile(prefix, suffix);

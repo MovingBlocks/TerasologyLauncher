@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.game;
 
+import org.jspecify.annotations.Nullable;
 import org.semver4j.Semver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +68,7 @@ public final class DirectPlay {
      * Versions that aren't valid semver (shouldn't happen for Omega releases, but directories can be
      * hand-placed) sort last rather than failing the whole comparison.
      */
-    public static GameIdentifier latestInstalled(Set<GameIdentifier> installed) {
+    public static @Nullable GameIdentifier latestInstalled(Set<GameIdentifier> installed) {
         return installed.stream()
                 .filter(id -> id.getProfile() == Profile.OMEGA)
                 .max(Comparator.comparing(DirectPlay::parseVersionOrMin))
@@ -82,7 +83,7 @@ public final class DirectPlay {
     /**
      * The newest available stable Omega release from a repository, for auto-install when nothing is installed yet.
      */
-    public static GameRelease latestStableRelease(ReleaseRepository releases) {
+    public static @Nullable GameRelease latestStableRelease(ReleaseRepository releases) {
         return releases.fetchReleases().stream()
                 .filter(release -> release.getId().getProfile() == Profile.OMEGA)
                 .filter(release -> release.getId().getBuild() == Build.STABLE)

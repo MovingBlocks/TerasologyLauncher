@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.repositories;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.launcher.model.Build;
@@ -50,7 +51,8 @@ class JenkinsRepository implements ReleaseRepository {
     private final Build buildProfile;
     private final Profile profile;
 
-    private final URL apiUrl;
+    // @Nullable because unsafeToUrl() below can fail to parse it - see its TODO.
+    private final @Nullable URL apiUrl;
 
     JenkinsRepository(Profile profile, Build buildProfile, JenkinsClient client) {
         this.client = client;
@@ -64,6 +66,11 @@ class JenkinsRepository implements ReleaseRepository {
         final List<GameRelease> pkgList = new ArrayList<>();
 
         logger.debug("fetching releases from '{}'", apiUrl);
+
+        if (apiUrl == null) {
+            logger.warn("No valid Jenkins API URL for {}/{}, skipping.", profile, buildProfile);
+            return pkgList;
+        }
 
         final Jenkins.ApiResult result;
         try {
@@ -127,10 +134,11 @@ class JenkinsRepository implements ReleaseRepository {
         return new ReleaseMetadata(changelog, timestamp);
     }
 
-    private String computeChangelogFrom(Jenkins.ChangeSet changeSet) {
+    private String computeChangelogFrom(Jenkins.@Nullable ChangeSet changeSet) {
         return Optional.ofNullable(changeSet)
-                .map(changes ->
-                        Arrays.stream(changes.items)
+                .map(changes -> changes.items)
+                .map(items ->
+                        Arrays.stream(items)
                                 .map(change -> "- " + change.msg)
                                 .collect(Collectors.joining("\n"))
                 ).orElse("");
@@ -138,7 +146,7 @@ class JenkinsRepository implements ReleaseRepository {
 
     // utility IO
 
-    private static URL unsafeToUrl(String url) {
+    private static @Nullable URL unsafeToUrl(String url) {
         try {
             return new URL(url);
         } catch (MalformedURLException e) { //NOPMD

@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+// Set by the JavaFX lifecycle (init()/start()), guaranteed to run first - not by the constructor.
+@SuppressWarnings("NullAway.Init")
 public final class TerasologyLauncher extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(TerasologyLauncher.class);

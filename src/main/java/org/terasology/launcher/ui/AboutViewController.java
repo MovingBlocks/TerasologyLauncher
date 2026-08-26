@@ -17,6 +17,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
+import org.jspecify.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +43,11 @@ import java.util.stream.Stream;
  * <p>
  * Presents static content which is compiled from Markdown and HTML documents.
  * <p>
- * Rendered as HTML in a {@code WebView} where {@link org.terasology.launcher.platform.Platform#supportsWebView()}
- * says it's available; on platforms without a working WebKit native library (notably
- * Windows/aarch64 - see https://bugs.openjdk.org/browse/JDK-8314064, whose javafx.web is still
- * unimplemented there) this falls back to a plain-text view instead (HTML documents have their
- * tags stripped via Jsoup so they're still readable).
+ * Rendered as HTML in a {@code WebView} where available; falls back to plain text (Jsoup-stripped
+ * for HTML) on platforms without WebKit, notably Windows/aarch64 - see JDK-8314064.
  */
+// aboutInfoAccordion is injected by FXMLLoader after construction, before initialize() runs.
+@SuppressWarnings("NullAway.Init")
 public class AboutViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(AboutViewController.class);
@@ -188,7 +188,7 @@ public class AboutViewController {
         return finishWebView(view);
     }
 
-    private Optional<javafx.scene.Node> finishWebView(WebView view) {
+    private Optional<javafx.scene.Node> finishWebView(@Nullable WebView view) {
         if (view == null) {
             return Optional.empty();
         }

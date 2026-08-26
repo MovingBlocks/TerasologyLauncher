@@ -35,9 +35,16 @@ public final class DownloadUtils {
     public <T> CompletableFuture<Path> download(RemoteResource<T> resource, Path path, ProgressListener listener)
             throws DownloadException, IOException, InterruptedException {
         final URL downloadUrl = resource.getUrl();
+        if (downloadUrl == null) {
+            throw new DownloadException("Resource has no download URL: " + resource.getInfo());
+        }
 
+        final Path parent = path.getParent();
+        if (parent == null) {
+            throw new DownloadException("Download destination has no parent directory: " + path);
+        }
         final long contentLength = DownloadUtils.getContentLength(downloadUrl);
-        final long availableSpace = path.getParent().toFile().getUsableSpace();
+        final long availableSpace = parent.toFile().getUsableSpace();
 
         if (availableSpace >= contentLength) {
             final Path cacheZipPart = path.resolveSibling(path.getFileName().toString() + ".part");
@@ -81,11 +88,8 @@ public final class DownloadUtils {
             } catch (IOException e) {
                 throw new DownloadException("Could not download file from URL! URL=" + downloadURL + ", file=" + file, e);
             } finally {
-                // HttpClient only gained close()/shutdown() in JDK 21 (we target 17) - before that,
-                // it relies on being kept strongly reachable for as long as a request is in flight,
-                // since an unreachable client's underlying connection can be torn down prematurely.
-                // This keeps it reachable through the whole body read above, immune to the JIT
-                // otherwise treating the reference as dead once its last real use has passed.
+                // JDK 17 HttpClient has no close(); keep it reachable through the read above so the
+                // JIT can't tear down its connection early by treating the reference as dead.
                 Reference.reachabilityFence(connection.client());
             }
 
