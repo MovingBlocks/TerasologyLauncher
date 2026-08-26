@@ -94,7 +94,7 @@
             </AnchorPane>
           </center>
           <top>
-            <HBox alignment="CENTER_LEFT" blendMode="SRC_OVER" prefHeight="96.0" prefWidth="969.0" style="-fx-background-color:  rgba(10,10,10,0.7);&#10;-fx-background-radius: 0 0 10 10;">
+            <HBox alignment="CENTER_LEFT" blendMode="SRC_OVER" prefHeight="96.0" prefWidth="969.0" style="-fx-background-color: rgba(104, 159, 56, 1);">
               <children>
                 <ImageView fitHeight="96.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true">
                   <image>
