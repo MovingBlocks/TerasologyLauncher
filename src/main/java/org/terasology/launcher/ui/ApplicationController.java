@@ -363,7 +363,11 @@ public class ApplicationController {
     protected void openSettingsAction() {
         try {
             logger.info("Current Locale: {}", I18N.getCurrentLocale());
-            Stage settingsStage = new Stage(StageStyle.UNDECORATED);
+            // UTILITY, not UNDECORATED: a native title bar is what makes the OS window manager let
+            // the user drag it - without one, this dialog was stuck wherever it opened (issue #468),
+            // which on a multi-monitor setup means always the primary display.
+            Stage settingsStage = new Stage(StageStyle.UTILITY);
+            settingsStage.setTitle(I18N.getLabel("settings_title"));
             settingsStage.initModality(Modality.APPLICATION_MODAL);
 
             FXMLLoader fxmlLoader;
