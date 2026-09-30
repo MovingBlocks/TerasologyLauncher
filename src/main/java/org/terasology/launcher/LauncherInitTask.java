@@ -7,6 +7,7 @@ import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
+import org.jspecify.annotations.Nullable;
 import org.kohsuke.github.GHRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
      * @return a complete launcher configuration or {@code null} if the initialization failed
      */
     @Override
-    protected LauncherConfiguration call() {
+    protected @Nullable LauncherConfiguration call() {
         // TODO: Use idiomatic JavaFX error handling.
 
         try {
@@ -230,9 +231,12 @@ public class LauncherInitTask extends Task<LauncherConfiguration> {
             updateMessage(I18N.getLabel("splash_chooseGameDataDirectory"));
             gameDataDirectory = Dialogs.chooseDirectory(owner, LauncherDirectoryUtils.getGameDataDirectory(os),
                     I18N.getLabel("message_dialog_title_chooseGameDataDirectory"));
-            if (Files.notExists(gameDataDirectory)) {
+            if (gameDataDirectory == null || Files.notExists(gameDataDirectory)) {
+                // Platform.exit() is asynchronous - without the throw, execution used to fall through
+                // to ensureWritableDir()/return below with a null or nonexistent directory.
                 logger.info("The new game data directory is not approved. The TerasologyLauncher is terminated.");
                 javafx.application.Platform.exit();
+                throw new LauncherStartFailedException();
             }
         }
         try {

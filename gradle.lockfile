@@ -2,8 +2,10 @@
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
 # To regenerate this file, run: ./gradlew :dependencies --write-locks
-ch.qos.logback:logback-classic:1.6.1=compileClasspath,mainPmdAuxClasspath,runtimeClasspath
-ch.qos.logback:logback-core:1.6.1=compileClasspath,mainPmdAuxClasspath,runtimeClasspath
+ch.qos.logback:logback-classic:1.6.1=mainPmdAuxClasspath
+ch.qos.logback:logback-classic:1.6.3=compileClasspath,runtimeClasspath
+ch.qos.logback:logback-core:1.6.1=mainPmdAuxClasspath
+ch.qos.logback:logback-core:1.6.3=compileClasspath,runtimeClasspath
 com.damnhandy:handy-uri-templates:2.1.8=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-annotations:2.22=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-core:2.22.1=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
@@ -51,6 +53,7 @@ com.squareup.okhttp3:okhttp-jvm:5.4.0=compileClasspath,mainPmdAuxClasspath,runti
 com.squareup.okhttp3:okhttp:5.4.0=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
 com.squareup.okio:okio-jvm:3.17.0=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
 com.squareup.okio:okio:3.17.0=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+com.uber.nullaway:nullaway:0.13.8=annotationProcessor,testAnnotationProcessor
 com.vladsch.flexmark:flexmark-all:0.64.8=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
 com.vladsch.flexmark:flexmark-ext-abbreviation:0.64.8=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
 com.vladsch.flexmark:flexmark-ext-admonition:0.64.8=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
@@ -146,9 +149,10 @@ org.apache.pdfbox:xmpbox:2.0.24=compileClasspath,mainPmdAuxClasspath,runtimeClas
 org.apache.xbean:xbean-reflect:3.7=checkstyle
 org.apiguardian:apiguardian-api:1.1.2=testCompileClasspath
 org.assertj:assertj-core:3.13.2=testPmdAuxClasspath,testRuntimeClasspath
-org.checkerframework:checker-qual:3.43.0=annotationProcessor,testAnnotationProcessor
 org.checkerframework:checker-qual:3.47.0=checkstyle
 org.checkerframework:checker-qual:3.49.2=pmd
+org.checkerframework:checker-qual:4.0.0=annotationProcessor,testAnnotationProcessor
+org.checkerframework:dataflow-nullaway:4.0.0=annotationProcessor,testAnnotationProcessor
 org.codehaus.plexus:plexus-classworlds:2.6.0=checkstyle
 org.codehaus.plexus:plexus-component-annotations:2.1.0=checkstyle
 org.codehaus.plexus:plexus-container-default:2.1.0=checkstyle

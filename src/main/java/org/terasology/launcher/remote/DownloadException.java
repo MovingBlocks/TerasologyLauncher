@@ -3,6 +3,7 @@
 
 package org.terasology.launcher.remote;
 
+import org.jspecify.annotations.Nullable;
 
 public final class DownloadException extends RuntimeException {
 
@@ -16,11 +17,12 @@ public final class DownloadException extends RuntimeException {
         super(message);
     }
 
-    public DownloadException(String message, Throwable cause) {
+    // cause is @Nullable since Throwable.getCause() is - Throwable(String, Throwable) treats null as "none" anyway.
+    public DownloadException(String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
-    public DownloadException(Throwable cause) {
+    public DownloadException(@Nullable Throwable cause) {
         super(cause);
     }
 }

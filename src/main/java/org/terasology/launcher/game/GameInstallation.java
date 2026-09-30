@@ -4,6 +4,7 @@
 package org.terasology.launcher.game;
 
 import com.google.common.base.MoreObjects;
+import org.jspecify.annotations.Nullable;
 import org.semver4j.Semver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,12 +127,8 @@ public class GameInstallation implements Installation<GameIdentifier> {
             Properties versionInfo = getVersionPropertiesFromJar(engineJar);
             return new Semver(versionInfo.getProperty("engineVersion"));
         } catch (FileNotFoundException e) {
-            // Not every build embeds versionInfo.properties - some release artifacts simply don't
-            // have it, even though the game itself runs fine regardless (verified directly: running
-            // such a build's Terasology.jar works completely normally). Refusing to even attempt a
-            // launch over a missing metadata file the engine itself doesn't need is worse than a
-            // best-effort fallback, so parse the version out of the jar's own filename instead
-            // (matchEngineJar guarantees it's "engine*.jar", typically "engine-5.4.0-SNAPSHOT.jar").
+            // Some release artifacts lack versionInfo.properties even though the game runs fine -
+            // parse the version from the jar filename instead (matchEngineJar guarantees "engine*.jar").
             String filename = engineJar.getFileName().toString();
             String fallbackVersion = filename.replaceFirst("^engine-?", "").replaceFirst("\\.jar$", "");
             logger.warn("No versionInfo.properties in {} - falling back to version parsed from filename: {}",
@@ -157,10 +154,12 @@ public class GameInstallation implements Installation<GameIdentifier> {
             final var libPaths = Set.of(Path.of("lib"), Path.of("libs"));
 
             var parent = path.getParent();
-            var file = path.getFileName().toString();
-            return Files.isDirectory(parent)
+            var fileName = path.getFileName();
+            return parent != null
+                    && fileName != null
+                    && Files.isDirectory(parent)
                     && libPaths.contains(parent.getFileName())
-                    && predicate.test(file);
+                    && predicate.test(fileName.toString());
         };
     }
 
@@ -216,7 +215,7 @@ public class GameInstallation implements Installation<GameIdentifier> {
     }
 
     @Override
-    public GameIdentifier getInfo() {
+    public @Nullable GameIdentifier getInfo() {
         //TODO: compute this information on instance creation (and fail creation in case it is not a valid installation)
         Profile profile;
         Build build;

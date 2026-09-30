@@ -43,6 +43,9 @@ import static com.google.common.base.Verify.verifyNotNull;
  *   <li>For details on how output from the game process is treated, see {@link RunGameTask}.
  * </ul>
  */
+// gamePath/settings set post-construction via start(), not the constructor (see javadoc).
+// createTask() guards with verifyNotNull since bare start() can still be called unconfigured.
+@SuppressWarnings("NullAway.Init")
 public class GameService extends Service<Boolean> {
     private static final Logger logger = LoggerFactory.getLogger(GameService.class);
 

@@ -3,22 +3,29 @@
 
 package org.terasology.launcher.repositories;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Data model for parsing build information from Jenkins.
  *
- * Instances of this class will be created by JSON parsers (e.g., GSON) and are usually not instantiated by hand.
+ * Populated by GSON via reflection, so a missing JSON key just leaves a field null - every
+ * reference-type field here is genuinely @Nullable; consumers must null-check.
  */
+@SuppressWarnings("PMD.MissingStaticMethodInNonInstantiatableClass")
 public final class Jenkins {
+    private Jenkins() {
+    }
+
     public static class ApiResult {
-        public Build[] builds;
+        public Build @Nullable [] builds;
     }
 
     public static class Build {
-        public String number;
-        public Result result;
-        public Artifact[] artifacts;
-        public String url;
-        public ChangeSet changeSet;
+        public @Nullable String number;
+        public @Nullable Result result;
+        public Artifact @Nullable [] artifacts;
+        public @Nullable String url;
+        public @Nullable ChangeSet changeSet;
         public long timestamp;
 
         public enum Result {
@@ -27,15 +34,15 @@ public final class Jenkins {
     }
 
     public static class Artifact {
-        public String fileName;
-        public String relativePath;
+        public @Nullable String fileName;
+        public @Nullable String relativePath;
     }
 
     public static class ChangeSet {
-        public Change[] items;
+        public Change @Nullable [] items;
     }
 
     public static class Change {
-        public String msg;
+        public @Nullable String msg;
     }
 }

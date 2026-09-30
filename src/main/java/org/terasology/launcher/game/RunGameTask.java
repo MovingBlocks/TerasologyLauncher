@@ -5,6 +5,7 @@ package org.terasology.launcher.game;
 
 import com.google.common.base.MoreObjects;
 import javafx.concurrent.Task;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -69,6 +70,7 @@ class RunGameTask extends Task<Boolean> {
      */
     private boolean valueSet;
 
+    @Nullable
     private FxTimer successTimer;
 
     /**

@@ -23,6 +23,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicLong;
 
+// logArea is injected by FXMLLoader after construction, before initialize() runs.
+@SuppressWarnings("NullAway.Init")
 public class LogViewController extends AppenderBase<ILoggingEvent> {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
@@ -51,7 +53,18 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
     public LogViewController() {
         buffer = new StringBuilder();
         throwableConverter = new RootCauseFirstThrowableProxyConverter();
+    }
 
+    @FXML
+    public void initialize() {
+        logArea.setEditable(false);
+        logArea.setFont(Font.font("monospaced"));
+        // Bound, not set: labelBinding tracks the locale property, so the button re-translates
+        // when the language is changed in Settings - same as the surrounding tabs.
+        clearLogButton.textProperty().bind(I18N.labelBinding("tab_log_clear"));
+
+        // Started here rather than the constructor: logArea isn't injected until after
+        // construction, and this is the first point that's guaranteed to run after that.
         ScheduledService<Void> schedule = new ScheduledService<Void>() {
             @Override
             protected Task<Void> createTask() {
@@ -81,15 +94,6 @@ public class LogViewController extends AppenderBase<ILoggingEvent> {
         };
         schedule.setPeriod(Duration.seconds(2));
         schedule.start();
-    }
-
-    @FXML
-    public void initialize() {
-        logArea.setEditable(false);
-        logArea.setFont(Font.font("monospaced"));
-        // Bound, not set: labelBinding tracks the locale property, so the button re-translates
-        // when the language is changed in Settings - same as the surrounding tabs.
-        clearLogButton.textProperty().bind(I18N.labelBinding("tab_log_clear"));
     }
 
     @FXML

@@ -6,6 +6,7 @@ package org.terasology.launcher.ui;
 import javafx.scene.control.ListCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import org.jspecify.annotations.Nullable;
 import org.terasology.launcher.model.Build;
 import org.terasology.launcher.model.GameIdentifier;
 import org.terasology.launcher.model.GameRelease;
@@ -19,7 +20,7 @@ import java.util.Set;
  * Custom {@link ListCell} used to display a {@link GameRelease} along with its installation status.
  */
 final class GameReleaseCell extends ListCell<GameRelease> {
-    private static final Image ICON_CHECK = I18N.getFxImage("icon_check");
+    private static final @Nullable Image ICON_CHECK = I18N.getFxImage("icon_check");
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd").withZone(ZoneId.systemDefault());
 
     private final ImageView iconStatus;
