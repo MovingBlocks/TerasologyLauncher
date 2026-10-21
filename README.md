@@ -285,7 +285,7 @@ If you want to contribute by translating the Terasology Launcher to a new langua
 Tutorials and further information on Git:
 
 - http://www.vogella.de/articles/Git/article.html
-- http://gitref.org/
+- https://coddy.tech/git-commands
 - http://progit.org/
 
 Developer setup tutorials for our main project, [**Terasology**][github terasology]:
